@@ -13,7 +13,7 @@ filter to parse mongodb log files.
 	  -h, --help            show this help message and exit
 	  --from [FROM]         output starting at FROM
 	  --to [TO]             output up to TO
-	  --tags [TAGS]         only output lines matching any of [TAG]
+	  --tags [TAGS]         only output lines matching any of "[TAG]" (including brackets)
 	  --slow                only output lines with query times longer than 1000 ms
 
 
