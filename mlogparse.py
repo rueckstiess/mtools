@@ -4,7 +4,7 @@ import argparse, re
 from filters import WordFilter, SlowFilter, DateTimeFilter
 
 
-class MongoLogParser:
+class MongoLogParser(object):
 
     def __init__(self):
         self.filters = []        
@@ -29,7 +29,8 @@ class MongoLogParser:
         # create parser object
         parser = argparse.ArgumentParser(description='mongod/mongos log file parser.')
         parser.add_argument('logfile', action='store', help='logfile to parse')
-        
+        parser.add_argument('--verbose', action='store_true', help='outputs information about the filters')
+
         # add arguments from filter classes
         for f in self.filters:
             for fa in f.filterArgs:
@@ -46,6 +47,11 @@ class MongoLogParser:
 
         # open logfile
         logfile = open(args['logfile'], 'r')
+
+        if args['verbose']:
+            print "molofo> command line arguments"
+            for a in args:
+                print "molofo> %8s: %s" % (a, args[a])
 
         # go through each line and ask each filter if it accepts
         for line in logfile:
@@ -68,15 +74,15 @@ class MongoLogParser:
 if __name__ == '__main__':
 
     # create MongoLogParser instance
-    molopa = MongoLogParser()
+    mlogparse = MongoLogParser()
 
     # add filters
-    molopa.addFilter(SlowFilter)
-    molopa.addFilter(WordFilter)
-    molopa.addFilter(DateTimeFilter)
+    mlogparse.addFilter(SlowFilter)
+    mlogparse.addFilter(WordFilter)
+    mlogparse.addFilter(DateTimeFilter)
     
     # start parsing
-    molopa.parse()
+    mlogparse.parse()
 
 
 
