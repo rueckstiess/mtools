@@ -1,9 +1,6 @@
-#!/usr/bin/python
-
-import argparse, re
 from collections import OrderedDict
 from datetime import date, time, datetime, timedelta, MINYEAR, MAXYEAR
-
+import re
 
 class BaseFilter:
     """ Base Filter class. All filters need to derive from it and implement
@@ -37,6 +34,50 @@ class BaseFilter:
             from here to the end of the file should be rejected (no output).
         """
         return False
+
+
+
+class WordFilter(BaseFilter):
+    """ accepts only if line contains any of the words specified by --word 
+    """
+
+    filterArgs = [
+        ('--word', {'action':'store', 'nargs':'*', 'help':'only output lines matching any of WORD'}),
+    ]
+
+    def __init__(self, commandLineArgs):
+        BaseFilter.__init__(self, commandLineArgs)
+
+        # extract all arguments passed into 'word'
+        if 'word' in self.commandLineArgs and self.commandLineArgs['word']:
+            self.words = self.commandLineArgs['word'].split()
+            self.active = True
+        else:
+            self.active = False
+
+    def accept(self, line):
+        for word in self.words:
+            if re.search(word, line):
+                return True
+        return False
+
+
+
+class SlowFilter(BaseFilter):
+    """ accepts only if the line contains a string described by the regular
+        expression '[0-9]{4,}ms'. These are queries taking longer than 1sec.
+    """
+    filterArgs = [
+        ('--slow', {'action':'store_true', 'help':'only output lines with query times longer than 1000 ms'})
+    ]
+
+    def __init__(self, commandLineArgs):
+        BaseFilter.__init__(self, commandLineArgs)
+        if 'slow' in self.commandLineArgs:
+            self.active = self.commandLineArgs['slow']
+
+    def accept(self, line):
+        return re.search(r'\d{4,}ms', line)
 
 
 
@@ -115,6 +156,7 @@ class DateTimeFilter(BaseFilter):
     def __init__(self, commandLineArgs):
         BaseFilter.__init__(self, commandLineArgs)
 
+        self.fromReached = False
         self.toReached = False
 
         self.fromDateTime = None
@@ -130,17 +172,17 @@ class DateTimeFilter(BaseFilter):
     def accept(self, line):
         tokens = line.split()
         if len(tokens) < 4:
-            # if there aren't enough tokens for date+time, accept
-            return True
+            # if there aren't enough tokens for date+time, print if in between --from and --to
+            return self.fromReached
 
         # log file structure: Wed Sep 05 23:02:26 ...
         _, month, day, time = tokens[:4]
         
-        # check if it actually is a date+time, else accept
+        # check if it actually is a date+time, else accept if between --from and --to
         if not (month in self.months and
                 re.match(r'\d{1,2}', day) and
                 re.match(r'\d{2}:\d{2}:\d{2}', time)):
-            return True
+            return self.fromReached
 
         month = self.months.index(month)+1
         h, m, s = time.split(':')
@@ -150,6 +192,7 @@ class DateTimeFilter(BaseFilter):
         
         if self.fromDateTime <= dt <= self.toDateTime:
             self.toReached = False
+            self.fromReached = True
             return True
 
         elif dt > self.toDateTime:
@@ -298,134 +341,3 @@ class DateTimeFilter(BaseFilter):
 
 
 
-
-class WordFilter(BaseFilter):
-    """ accepts only if line contains any of the words specified by --word 
-    """
-
-    filterArgs = [
-        ('--word', {'action':'store', 'nargs':'*', 'help':'only output lines matching any of WORD'}),
-    ]
-
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
-
-        # extract all arguments passed into 'word'
-        if 'word' in self.commandLineArgs and self.commandLineArgs['word']:
-            self.words = self.commandLineArgs['word'].split()
-            self.active = True
-        else:
-            self.active = False
-
-    def accept(self, line):
-        for word in self.words:
-            if re.search(word, line):
-                return True
-        return False
-
-
-
-class SlowFilter(BaseFilter):
-    """ accepts only if the line contains a string described by the regular
-        expression '[0-9]{4,}ms'. These are queries taking longer than 1sec.
-    """
-    filterArgs = [
-        ('--slow', {'action':'store_true', 'help':'only output lines with query times longer than 1000 ms'})
-    ]
-
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
-        if 'slow' in self.commandLineArgs:
-            self.active = self.commandLineArgs['slow']
-
-    def accept(self, line):
-        return re.search(r'\d{4,}ms', line)
-
-
-
-class MongoLogParser:
-
-    def __init__(self):
-        self.filters = []        
-
-    def addFilter(self, filterClass):
-        """ adds a filter class to the parser. """
-        if not filterClass in self.filters:
-            self.filters.append(filterClass)
-
-    def _arrayToString(self, arr):
-        """ if arr is of type list, join elements with space delimiter. """
-        if isinstance(arr, list):
-            return " ".join(arr)
-        else:
-            return arr
-
-    def parse(self):
-        """ parses the logfile and asks each filter if it accepts the line.
-            it will only be printed if all filters accept the line.
-        """
-
-        # create parser object
-        parser = argparse.ArgumentParser(description='mongod/mongos log file parser.')
-        parser.add_argument('logfile', action='store', help='logfile to parse')
-        
-        # add arguments from filter classes
-        for f in self.filters:
-            for fa in f.filterArgs:
-                parser.add_argument(fa[0], **fa[1])
-
-        args = vars(parser.parse_args())
-        args = dict((k, self._arrayToString(args[k])) for k in args)
-        
-        # create filter objects from classes and pass args
-        self.filters = [f(args) for f in self.filters]
-
-        # remove non-active filter objects
-        self.filters = [f for f in self.filters if f.active]
-
-        # open logfile
-        logfile = open(args['logfile'], 'r')
-        
-        print args
-
-        # go through each line and ask each filter if it accepts
-        for line in logfile:
-
-            # special case: if line starts with ***, always print (server restart)
-            if line.startswith('***'):
-                print line,
-                continue
-
-            # only print line if all filters agree
-            if all([f.accept(line) for f in self.filters]):
-                print line,
-
-            # if at least one filter refuses to print remaining lines, stop
-            if any([f.skipRemaining() for f in self.filters]):
-                print 'skip remaining lines'
-                break
-
-
-
-if __name__ == '__main__':
-
-    # create MongoLogParser instance
-    mlogparser = MongoLogParser()
-
-    # add filters
-    mlogparser.addFilter(SlowFilter)
-    mlogparser.addFilter(WordFilter)
-    mlogparser.addFilter(DateTimeFilter)
-    
-    # start parsing
-    mlogparser.parse()
-
-
-
-
-
-
-
-
-
-    
