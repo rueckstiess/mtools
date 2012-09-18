@@ -46,8 +46,6 @@ class MongoLogParser:
 
         # open logfile
         logfile = open(args['logfile'], 'r')
-        
-        print args
 
         # go through each line and ask each filter if it accepts
         for line in logfile:
@@ -63,7 +61,6 @@ class MongoLogParser:
 
             # if at least one filter refuses to print remaining lines, stop
             if any([f.skipRemaining() for f in self.filters]):
-                print 'skip remaining lines'
                 break
 
 
