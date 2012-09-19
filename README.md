@@ -1,7 +1,11 @@
-mlogfilter
+mlogtools
 ==========
 
-filter to parse mongodb log files.
+
+mlogparse
+---------
+
+filter to parse mongodb log files. 
 
 
 	usage: mlogfilter logfile [-h] [--from [FROM]] [--to [TO]] [--tags [TAGS]] [--slow]

@@ -28,8 +28,8 @@ class MongoLogParser(object):
 
         # create parser object
         parser = argparse.ArgumentParser(description='mongod/mongos log file parser.')
-        parser.add_argument('logfile', action='store', help='logfile to parse')
-        parser.add_argument('--verbose', action='store_true', help='outputs information about the filters')
+        parser.add_argument('logfile', action='store', help='logfile to parse.')
+        parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
 
         # add arguments from filter classes
         for f in self.filters:
