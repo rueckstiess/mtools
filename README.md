@@ -1,11 +1,15 @@
 mlogtools
 ==========
 
+A collection of little scripts to parse MongoDB log files (mongod, mongos).
+
 
 mlogparse
 ---------
 
-filter to parse mongodb log files. 
+A filter script to reduce the amount of information from MongoDB log files.  Currently, the script supports
+filtering by time (from - to), to only show slow queries, to filter by arbitrary keywords, or any combination
+of these filters.
 
 
 	usage: mlogfilter logfile [-h] [--from [FROM]] [--to [TO]] [--tags [TAGS]] [--slow]
