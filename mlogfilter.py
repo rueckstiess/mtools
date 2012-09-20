@@ -4,8 +4,7 @@ import argparse, re
 from filters import WordFilter, SlowFilter, DateTimeFilter
 
 
-class MongoLogParser(object):
-
+class MongoLogFilter(object):
     def __init__(self):
         self.filters = []        
 
@@ -74,15 +73,15 @@ class MongoLogParser(object):
 if __name__ == '__main__':
 
     # create MongoLogParser instance
-    mlogparse = MongoLogParser()
+    mlogfilter = MongoLogFilter()
 
     # add filters
-    mlogparse.addFilter(SlowFilter)
-    mlogparse.addFilter(WordFilter)
-    mlogparse.addFilter(DateTimeFilter)
+    mlogfilter.addFilter(SlowFilter)
+    mlogfilter.addFilter(WordFilter)
+    mlogfilter.addFilter(DateTimeFilter)
     
     # start parsing
-    mlogparse.parse()
+    mlogfilter.parse()
 
 
 
