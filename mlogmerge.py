@@ -9,13 +9,13 @@ class MongoLogMerger(object):
 		currently implemented options:
 			logfiles          list of logfiles to merge
             -l, --labels      can be any of 'enum', 'alpha', 'none', 'filename', or a list of labels (must be same length as number of files)
+            -p, --pos         position of label (default: 0, beginning of line). Another good choice is 5, putting the label behind the [] token, or 'eol'
 
         planned options:
             logfiles          can be any pattern, like "*.log"
             -r                scan recursive in subfolders for pattern 
             -v, --verbose     more output on top (e.g. which file has which label)
             -c, --color       outputs different files in different colors
-            -p, --pos         position of label (default: 0, beginning of line). Another good choice is 5, putting the label behind the [...] token
 
     """
 
@@ -25,6 +25,7 @@ class MongoLogMerger(object):
 		parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
 		# parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
 		parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to put in front of line')
+		parser.add_argument('--pos', action='store', default=0, help="position of label (0 = front of line, other options are # or 'eol'")
 
 		args = vars(parser.parse_args())
 
@@ -35,7 +36,7 @@ class MongoLogMerger(object):
 		if len(args['labels']) == 1:
 			label = args['labels'][0]
 			if label == 'enum':
-				labels = ['{%i}'%i for i in range(len(logfiles))]
+				labels = ['{%i}'%(i+1) for i in range(len(logfiles))]
 			elif label == 'alpha':
 				labels = ['{%s}'%chr(97+i) for i in range(len(logfiles))]
 			elif label == 'none':
@@ -46,8 +47,11 @@ class MongoLogMerger(object):
 			labels = args['labels']
 		else:
 			raise SystemExit('Error: Number of labels not the same as number of files.')
-		print labels
 
+		# handle position parameter
+		position = args['pos']
+		if position != 'eol':
+			position = int(position)
 
 		# define minimum and maximum datetime object
 		mindate = datetime(MINYEAR, 1, 1, 0, 0, 0)
@@ -66,21 +70,30 @@ class MongoLogMerger(object):
 			condDates = ([d if lines[i] != '' else maxdate for i,d in enumerate(dates)])
 			minIndex = condDates.index(min(condDates))
 
+			# print out current line
+			currLine = lines[minIndex].rstrip()
+
 			if labels[minIndex]:
-				print labels[minIndex], lines[minIndex],
+				if position == 0:
+					print labels[minIndex], currLine
+				elif position == 'eol':
+					print currLine, labels[minIndex]
+				else:
+					tokens = currLine.split()
+					print " ".join(tokens[:position]), labels[minIndex], " ".join(tokens[position:])
+
 			else:
-				print lines[minIndex],
+				print currLine
 
-			# print '{%i}'%minIndex+1 + lines[minIndex],
-
+			# update lines and dates for that line
 			lines[minIndex] = openFiles[minIndex].readline()
 			dates[minIndex] = extractDateTime(lines[minIndex])
 			if not dates[minIndex]:
 				dates[minIndex] = mindate 
 
 			# end of file reached, print newline
-			if lines[minIndex] == '':
-				print
+			# if position != 'eol' and lines[minIndex] == '':
+			# 	print
 
 		# close files
 		for f in openFiles:

@@ -48,9 +48,9 @@ class MongoLogFilter(object):
         logfile = open(args['logfile'], 'r')
 
         if args['verbose']:
-            print "molofo> command line arguments"
+            print "mlogfilter> command line arguments"
             for a in args:
-                print "molofo> %8s: %s" % (a, args[a])
+                print "mlogfilter> %8s: %s" % (a, args[a])
 
         # go through each line and ask each filter if it accepts
         for line in logfile:
