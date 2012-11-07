@@ -7,6 +7,7 @@ import subprocess
 import argparse
 import threading
 import os, time
+import socket
 
 
 def pingMongoD(host, interval=1, timeout=30):
@@ -25,8 +26,11 @@ def pingMongoD(host, interval=1, timeout=30):
 class MongoLauncher(object):
 
 	def __init__(self):
+
 		self.parseArgs()
+		self.hostname = socket.gethostname()
 		self.launch()
+
 
 	def parseArgs(self):
 		# create parser object
@@ -116,7 +120,7 @@ class MongoLauncher(object):
 			
 		for name in config_names:
 			self._launchConfig(self.args['dir'], nextport, name, verbose=self.args['verbose'])
-			config_string.append('127.0.0.1:%i'%nextport)
+			config_string.append('%s:%i'%(self.hostname, nextport))
 			nextport += 1
 		
 		# start up mongos
@@ -134,7 +138,7 @@ class MongoLauncher(object):
 			datapath = self._createPaths(basedir, '%s/rs%i'%(name, i+1), verbose)
 			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, verbose=verbose)
 		
-			host = '127.0.0.1:%i'%(portstart+i)
+			host = '%s:%i'%(self.hostname, portstart+i)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
 			threads.append(threading.Thread(target=pingMongoD, args=(host, 1, 30)))
 			if verbose:
@@ -145,7 +149,7 @@ class MongoLauncher(object):
 			datapath = self._createPaths(basedir, '%s/arb'%(name), verbose)
 			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+numdata, replset=name, verbose=verbose)
 			
-			host = '127.0.0.1:%i'%(portstart+numdata)
+			host = '%s:%i'%(self.hostname, portstart+numdata)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
 			threads.append(threading.Thread(target=pingMongoD, args=(host, 1, 30)))
 			if verbose:
@@ -161,7 +165,7 @@ class MongoLauncher(object):
 			print "all mongod processes running."
 
 		# initiate replica set
-		con = Connection('127.0.0.1:%i'%portstart)
+		con = Connection('%s:%i'%(self.hostname, portstart))
 		try:
 			rs_status = con['admin'].command({'replSetGetStatus': 1})
 		except OperationFailure, e:
@@ -175,7 +179,7 @@ class MongoLauncher(object):
 		datapath = self._createPaths(basedir, name, verbose)
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, extra='--configsvr')
 
-		host = '127.0.0.1:%i'%port
+		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
 		t.start()
 		if verbose:
@@ -189,7 +193,7 @@ class MongoLauncher(object):
 		datapath = self._createPaths(basedir, name, verbose)
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose)
 
-		host = '127.0.0.1:%i'%port
+		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
 		t.start()
 		if verbose:
@@ -214,7 +218,7 @@ class MongoLauncher(object):
 		if verbose:
 			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)
 		
-		host = '127.0.0.1:%i'%port
+		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
 		t.start()
 		if verbose:
