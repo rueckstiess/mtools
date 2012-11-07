@@ -1,5 +1,5 @@
 mtools
-==========
+======
 
 A collection of helper scripts to set up MongoDB test environments and
 parse MongoDB log files (mongod, mongos). 
