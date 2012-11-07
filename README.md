@@ -4,6 +4,8 @@ mtools
 A collection of helper scripts to set up MongoDB test environments and
 parse MongoDB log files (mongod, mongos). 
 
+
+
 mlaunch
 -------
 
@@ -13,7 +15,7 @@ replica sets and sharded clusters.
 
     usage: mlaunch [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
                    [--name NAME] [--sharded [NAME [NAME ...]]] [--config NUM]
-                   [--port PORT] [--mongo] [--verbose]
+                   [--port PORT] [--verbose]
                    [dir]
 
     script to launch MongoDB stand-alone servers, replica sets, and shards
@@ -36,8 +38,6 @@ replica sets and sharded clusters.
                             1 or 3, requires --sharded)
       --port PORT           port for mongod, start of port range in case of
                             replica set or shards
-      --mongo               start mongo shell and connect to mongod (--single),
-                            primary mongod (--replicaset), or mongos (--sharded)
       --verbose             outputs information about the launch
 
 

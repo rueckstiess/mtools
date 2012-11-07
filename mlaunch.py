@@ -50,7 +50,7 @@ class MongoLauncher(object):
 
 		# verbose, port, mongo
 		parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards')
-		parser.add_argument('--mongo', action='store_true', default=False, help='start mongo shell and connect to mongod (--single), primary mongod (--replicaset), or mongos (--sharded)')
+		# parser.add_argument('--mongo', action='store_true', default=False, help='start mongo shell and connect to mongod (--single), primary mongod (--replicaset), or mongos (--sharded)')
 		parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
 
 		self.args = vars(parser.parse_args())
