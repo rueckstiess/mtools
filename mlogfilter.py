@@ -2,6 +2,7 @@
 
 import argparse, re
 from filters import WordFilter, SlowFilter, DateTimeFilter
+import sys
 
 
 class MongoLogFilter(object):
@@ -27,7 +28,11 @@ class MongoLogFilter(object):
 
         # create parser object
         parser = argparse.ArgumentParser(description='mongod/mongos log file parser.')
-        parser.add_argument('logfile', action='store', help='logfile to parse.')
+        
+        # only create default argument if not using stdin
+        if sys.stdin.isatty():
+            parser.add_argument('logfile', action='store', nargs='?', help='logfile to parse.')
+        
         parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
 
         # add arguments from filter classes
@@ -45,7 +50,11 @@ class MongoLogFilter(object):
         self.filters = [f for f in self.filters if f.active]
 
         # open logfile
-        logfile = open(args['logfile'], 'r')
+        if sys.stdin.isatty():
+            logfile = open(args['logfile'], 'r')
+        else:
+            logfile = sys.stdin
+
 
         if args['verbose']:
             print "mlogfilter> command line arguments"
