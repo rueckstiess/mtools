@@ -62,10 +62,10 @@ A script that takes log files as input and merges them by date/time.
 
 
 
-mplotqueries  (requires numpy and matplotlib modules)
------------------------------------------------------
+mplotqueries
+------------
 
-A script to plot query durations in a logfile.
+A script to plot query durations in a logfile (requires numpy and matplotlib modules).
 	
     usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
                
