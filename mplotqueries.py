@@ -1,8 +1,12 @@
+#!/usr/bin/python
+
 import matplotlib.pyplot as plt
+from matplotlib.dates import date2num, DateFormatter
 import numpy as np
 import argparse
 import re
 from util import extractDateTime
+from collections import defaultdict
 
 
 class Query(object):
@@ -40,6 +44,7 @@ class Query(object):
 		if items[-1].endswith('ms'):
 			self.duration = int(items[-1][:-2])
 
+
 	def __str__(self):
 		output = ''
 		labels = ['time', 'connection', 'namespace', 'nscanned', 'ntoreturn', 'nreturned', 'duration']
@@ -58,12 +63,24 @@ class MongoPlotQueries(object):
 
 	def __init__(self):
 		self.queries = []
-		self.args = {'filename':'/Users/tr/Documents/tickets/CS-5088/long_queries.txt'}
+		self.parseArgs()
+
+	def parseArgs(self):
+		# create parser object
+		parser = argparse.ArgumentParser(description='script to plot query times from a logfile')
+		
+		# positional argument
+		parser.add_argument('filename', action='store', help='logfile to parse')
+		parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
+		parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
+
+		self.args = vars(parser.parse_args())
+		print self.args
 
 
 	def plot(self):
-		durations = []
-		labels = []
+		durations = defaultdict(list)
+		dates = defaultdict(list)
 
 		f = open(self.args['filename'], 'r')
 		for line in f:
@@ -72,18 +89,25 @@ class MongoPlotQueries(object):
 			else:
 				continue
 
-			durations.append(query.duration)
-			labels.append(query.time)
+			if self.args['ns'] == None or query.namespace in self.args['ns']:
+				if self.args['exclude_ns'] == None or (not query.namespace in self.args['exclude_ns']):
+					durations[query.namespace].append(query.duration)
+					dates[query.namespace].append(query.time)
 
-		labels = np.array(labels)
-		durations = np.array(durations)
+		for ns in dates:
+			durations_arr = np.array(durations[ns])
+			d = date2num(dates[ns])
+			plt.plot_date(d, durations_arr, '.', alpha=0.5, markersize=10, label=ns)
 
-		plt.plot(durations, '.')
+		plt.ylabel('query duration in ms')
+		plt.xlabel('time')
 
-		grid = [int(g) for g in np.mgrid[:len(labels):30j]]
-		grid[-1] -= 1
+		plt.gca().xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
 
-		plt.xticks(grid, labels[grid], rotation=90, fontsize=10)
+		plt.xticks(rotation=90, fontsize=10)
+
+
+		plt.legend()
 		plt.show()
 
 
@@ -92,7 +116,7 @@ if __name__ == '__main__':
 	mplotqueries.plot()
 
 """
-mplotqueries LOGFILE [-ns COLL COLL ...] [--slow TIME]
+mplotqueries LOGFILE [-ns COLL COLL ...]
 
 
 
