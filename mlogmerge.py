@@ -25,7 +25,7 @@ class MongoLogMerger(object):
 		parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
 		# parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
 		parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to put in front of line')
-		parser.add_argument('--pos', action='store', default=0, help="position of label (0 = front of line, other options are # or 'eol'")
+		parser.add_argument('--pos', action='store', default=4, help="position of label (0 = front of line, other options are # or 'eol'")
 
 		args = vars(parser.parse_args())
 
@@ -81,6 +81,7 @@ class MongoLogMerger(object):
 				else:
 					tokens = currLine.split()
 					print " ".join(tokens[:position]), labels[minIndex], " ".join(tokens[position:])
+
 
 			else:
 				print currLine
