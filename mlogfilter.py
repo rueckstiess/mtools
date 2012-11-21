@@ -7,7 +7,7 @@ import sys
 
 class MongoLogFilter(object):
     def __init__(self):
-        self.filters = []        
+        self.filters = [] 
 
     def addFilter(self, filterClass):
         """ adds a filter class to the parser. """
@@ -75,7 +75,9 @@ class MongoLogFilter(object):
 
             # if at least one filter refuses to print remaining lines, stop
             if any([f.skipRemaining() for f in self.filters]):
-                break
+                # if called from shell, break
+                if sys.stdin.isatty():
+                    break
 
 
 
