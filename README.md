@@ -61,6 +61,23 @@ A script that takes log files as input and merges them by date/time.
 							either a number (default: 0) or 'eol'
 
 
+
+mplotqueries  (requires numpy and matplotlib modules)
+-----------------------------------------------------
+
+A script to plot query durations in a logfile.
+	
+    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
+               
+	positional arguments: 
+	  filename              log file to plot
+
+	optional arguments:
+	  -h, --help                   show this help message and exit
+      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
+      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
+
+
 mlogfilter
 ----------
 
