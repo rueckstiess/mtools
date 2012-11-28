@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 from pymongo import Connection
-from pymongo.connection import AutoReconnect
-from pymongo.errors import OperationFailure
+from pymongo.errors import AutoReconnect, OperationFailure
 import subprocess
 import argparse
 import threading
