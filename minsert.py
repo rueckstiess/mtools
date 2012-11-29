@@ -112,8 +112,8 @@ if __name__ == '__main__':
 	parser.add_argument('-j', '--jsonfile', action='store', metavar='FILE', default='sample-small.json', help='filename for json document to insert')
 	parser.add_argument('-s', '--safe', action='store_true', default=False, help='enable safe writes (w=1)')
 
-	parser.add_argument('--delay', action='store', default=None, type=int, metavar='N', help='delay insertion per packet (batch / single doc) by N ms.')
-	parser.add_argument('--namespace', action='store', default='test.minsert', help='namespace (database.collection) to insert docs')
+	parser.add_argument('--delay', action='store', default=None, type=int, metavar='N', help='delay insertion per packet (batch/single doc) by N ms.')
+	parser.add_argument('--namespace', action='store', default='test.minsert', metavar='NS', help='namespace (database.collection) to insert docs')
 	parser.add_argument('--keep-db', action='store_true', default=False, help="keep old database, don't drop it before insertion")
 	parser.add_argument('--uuid-shardkey', action='store_true', default=False, help='create random shard key for each document if enabled (default is ObjectId)')
 	
