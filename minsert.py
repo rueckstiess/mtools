@@ -90,7 +90,7 @@ def run_test(args):
 	
 	# insert the last batch of remaining documents
 	results.append(pool.apply(insert_thread, (args['jsonfile'], args['number']/args['processes'] + args['number']%args['processes'], \
-		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay']) ))
+		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay']/1000.) ))
 
 	pool.close()
 	pool.join()
