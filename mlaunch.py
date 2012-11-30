@@ -9,7 +9,7 @@ import os, time
 import socket
 
 
-def pingMongoD(host, interval=1, timeout=30):
+def pingMongoDS(host, interval=1, timeout=30):
 	con = None
 	startTime = time.time()
 	while not con:
@@ -98,13 +98,15 @@ class MongoLauncher(object):
 		else:
 			shard_names = self.args['sharded']
 
+
+		# create shards as stand-alones or replica sets
 		nextport = self.args['port']
 		for p, shard in enumerate(shard_names):
 			if self.args['single']:
-				self._launchSingle(self.args['dir'], nextport, name=shard, verbose=self.args['verbose'])
+				shard_names[p] = self._launchSingle(self.args['dir'], nextport, name=shard, verbose=self.args['verbose'])
 				nextport += 1
 			elif self.args['replicaset']:
-				self._launchReplSet(self.args['dir'], nextport, shard, self.args['nodes'], self.args['arbiter'], self.args['verbose'])
+				shard_names[p] = self._launchReplSet(self.args['dir'], nextport, shard, self.args['nodes'], self.args['arbiter'], self.args['verbose'])
 				nextport += self.args['nodes']
 				if self.args['arbiter']:
 					nextport += 1
@@ -122,11 +124,29 @@ class MongoLauncher(object):
 			config_string.append('%s:%i'%(self.hostname, nextport))
 			nextport += 1
 		
-		# start up mongos
+		# start up mongos and wait until running
 		self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string), verbose=self.args['verbose'])
+		mongos_host = '%s:%i'%(self.hostname, nextport)
+		mongos_thread = threading.Thread(target=pingMongoDS, args=(mongos_host, 1, 30))
+		mongos_thread.start()
+		mongos_thread.join()
 
-		# TODO: configure shards
+		time.sleep(3)
 
+		# add shards
+		print "adding shards..."
+		con = Connection(mongos_host)
+		shards_added = 0
+		while (shards_added < len(shard_names)):
+			time.sleep(1)
+			for shard in shard_names:
+				try:
+					res = con['admin'].command({'addShard':shard})
+					if res['ok']:
+						shards_added += 1
+
+				except OperationFailure:
+					pass
 
 
 	def _launchReplSet(self, basedir, portstart, name, numdata, arbiter, verbose=False):
@@ -139,7 +159,7 @@ class MongoLauncher(object):
 		
 			host = '%s:%i'%(self.hostname, portstart+i)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
-			threads.append(threading.Thread(target=pingMongoD, args=(host, 1, 30)))
+			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1, 30)))
 			if verbose:
 				print "waiting for mongod at %s to start up..."%host
 
@@ -150,7 +170,7 @@ class MongoLauncher(object):
 			
 			host = '%s:%i'%(self.hostname, portstart+numdata)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
-			threads.append(threading.Thread(target=pingMongoD, args=(host, 1, 30)))
+			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1, 30)))
 			if verbose:
 				print "waiting for mongod at %s to start up..."%host
 
@@ -172,6 +192,7 @@ class MongoLauncher(object):
 			if verbose:
 				print "replica set configured."
 
+		return name + '/' + ','.join([c['host'] for c in configDoc['members']])
 
 
 	def _launchConfig(self, basedir, port, name=None, verbose=False):
@@ -179,7 +200,7 @@ class MongoLauncher(object):
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, extra='--configsvr')
 
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
 		t.start()
 		if verbose:
 			print "waiting for mongod at %s to start up..."%host
@@ -193,13 +214,15 @@ class MongoLauncher(object):
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose)
 
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
 		t.start()
 		if verbose:
 			print "waiting for mongod at %s to start up..."%host
 		t.join()
 		if verbose: 
 			print "running."
+
+		return host
 
 	def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, extra=''):
 		if replset:
@@ -218,14 +241,13 @@ class MongoLauncher(object):
 			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)
 		
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoD, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
 		t.start()
 		if verbose:
 			print "waiting for mongos at %s to start up..."%host
 		t.join()
 		if verbose:
 			print "running."
-
 
 
 
