@@ -10,7 +10,7 @@ mlaunch
 -------
 
 This script lets you quickly spin up MongoDB environments on your local
-machine. It supports various configuations of stand-alone servers, 
+machine. It supports various configurations of stand-alone servers, 
 replica sets and sharded clusters.
 
     usage: mlaunch [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
