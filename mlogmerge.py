@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from util import extractDateTime
+from mutil import extractDateTime
 from datetime import datetime, MINYEAR, MAXYEAR
 import argparse, re
 

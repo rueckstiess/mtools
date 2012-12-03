@@ -5,7 +5,7 @@ from matplotlib.dates import date2num, DateFormatter
 import numpy as np
 import argparse
 import re
-from util import extractDateTime
+from mutil import extractDateTime
 from collections import defaultdict
 
 
