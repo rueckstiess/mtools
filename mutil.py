@@ -1,7 +1,9 @@
 from datetime import datetime
-import re
 from pymongo import Connection
-from bson.min_key import MinKey
+from pymongo.errors import OperationFailure
+from bson.son import SON
+import re
+import time
 
 weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -40,42 +42,45 @@ def presplit(host, database, collection, shardkey, disableBalancer=True):
     con = Connection(host)
     namespace = '%s.%s'%(database, collection)
 
+    # disable balancer
+    con['config']['settings'].update({'_id':"balancer"}, {'$set':{'stopped': True}}, upsert=True)
+
     # enable sharding on database if not enabled yet
     db_info = con['config']['databases'].find_one({'_id':database})
     if not db_info or db_info['partitioned'] == False:
-        con['admin'].command({'enableSharding': database})
+        con['admin'].command(SON({'enableSharding': database}))
 
     # shard collection
     coll_info = con['config']['collections'].find_one({'_id':namespace})
-    if coll_info:
+    if coll_info and not coll_info['dropped']:
         print "collection already sharded."
         return
     else:
         con[database][collection].ensure_index(shardkey)
-        con['admin'].command({'shardCollection': namespace, 'key': {shardkey:1}})
+        con['admin'].command(SON({'shardCollection': namespace, 'key': {shardkey:1}}))
 
     # pre-split
     shards = list(con['config']['shards'].find())
     shard_names = [s['_id'] for s in shards]
 
     split_interval = 16 / len(shards)
-    split_points = range(split_interval, len(shards)*split_interval, split_interval) 
+    split_points = [hex(s).lstrip('0x') for s in range(split_interval, len(shards)*split_interval, split_interval)]
     
     for s in split_points:
-        # print {'split': namespace, 'middle': {shardkey: hex(s).lstrip('0x')} }
-        con['admin'].command({'split': namespace, 'middle': {shardkey: hex(s).lstrip('0x')} })
+        con['admin'].command(SON([('split',namespace), ('middle', {shardkey: s})]))
     
-    split_points = [MinKey] + split_points
-    
+    split_points = ['MinKey'] + split_points
+    print split_points
+
     for i,s in enumerate(split_points):
-        # print {'moveChunk': namespace, 'find': {shardkey: s}, 'to': shard_names[i] }
-        con['admin'].command({'moveChunk': namespace, 'find': {shardkey: s, 'to': shard_names[i] }})
-
-
-    # disable balancer
-    con['config']['settings'].update({'_id':"balancer"}, {'$set':{'stopped': True}})
+        try:
+            print [('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]
+            res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]))
+            print res
+        except OperationFailure, e:
+            print e
 
 
 if __name__ == '__main__':
-    presplit('capslock.local:27023', 'test', 'mycol', 'shardkey')
+    presplit('capslock.local:27024', 'test', 'mycol', 'my_id')
 
