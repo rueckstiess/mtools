@@ -66,6 +66,11 @@ def presplit(host, database, collection, shardkey):
 
     # get shard number and names and calculate split points
     shards = list(con['config']['shards'].find())
+
+    if len(shards) == 1:
+        print "only one shard found. no pre-splitting required."
+        return
+
     shard_names = [s['_id'] for s in shards]
     split_interval = 16 / len(shards)
     split_points = [hex(s).lstrip('0x') for s in range(split_interval, len(shards)*split_interval, split_interval)]
