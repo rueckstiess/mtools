@@ -22,7 +22,7 @@ def insert_thread(filename, n, namespace, batch=False, safe=False, uuid_shardkey
 	# create connection to mongod
 	con = Connection()
 
-	verbose = True
+	verbose = False
 
 	# load document
 	f = open(filename, 'r')
@@ -79,6 +79,9 @@ def run_test(args):
 	if not args['keep_db']:
 		con.drop_database(db)
 
+	if args['delay'] != None:
+		args['delay'] /= 1000.
+
 	# create process pool
 	pool = multiprocessing.Pool(args['processes'])
 
@@ -90,7 +93,7 @@ def run_test(args):
 	
 	# insert the last batch of remaining documents
 	results.append(pool.apply(insert_thread, (args['jsonfile'], args['number']/args['processes'] + args['number']%args['processes'], \
-		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay']/1000.) ))
+		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay']) ))
 
 	pool.close()
 	pool.join()
@@ -106,7 +109,7 @@ if __name__ == '__main__':
 	# create parser object
 	parser = argparse.ArgumentParser(description='mongod/s load testing tool.')
 	parser.add_argument('host', action='store', nargs='?', default='localhost:27017', help='HOST:PORT of mongos or mongod process')
-	parser.add_argument('-p', '--processes', action='store', default=1, metavar='N', type=int, help='number of simultaneous processes')
+	parser.add_argument('-p', '--processes', action='store', default=multiprocessing.cpu_count(), metavar='N', type=int, help='number of simultaneous processes (default = #cores')
 	parser.add_argument('-b', '--batch', action='store', metavar='N', default=False, type=int, help='insert documents in batches of N')
 	parser.add_argument('-n', '--number', action='store', metavar='N', default=10000, type=int, help='insert N documents total')
 	parser.add_argument('-j', '--jsonfile', action='store', metavar='FILE', default='sample-small.json', help='filename for json document to insert')
@@ -118,7 +121,7 @@ if __name__ == '__main__':
 	parser.add_argument('--uuid-shardkey', action='store_true', default=False, help='create random shard key for each document if enabled (default is ObjectId)')
 	
 	args = vars(parser.parse_args())
-
+	print args
 	sum_res, dps_res = run_test(args)
 
 	# output result
