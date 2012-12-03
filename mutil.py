@@ -37,8 +37,11 @@ def extractDateTime(line):
 
 
 
-def presplit(host, database, collection, shardkey, disableBalancer=True):
-    """ get information about the number of shards, then split chunks and distribute over shards. Currently assumes shardkey to be ObjectId/uuid (hex). """
+def presplit(host, database, collection, shardkey):
+    """ get information about the number of shards, then split chunks and 
+        distribute over shards. Currently assumes shardkey to be hex string,
+        for example ObjectId or UUID. 
+    """
     
     con = Connection(host)
     namespace = '%s.%s'%(database, collection)
