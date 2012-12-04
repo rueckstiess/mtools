@@ -1,6 +1,9 @@
 from bson import BSON
 from pymongo import Connection
+from itertools import chain
+
 import time
+import datetime
 import multiprocessing
 import argparse
 import uuid
@@ -18,11 +21,9 @@ def add_uuid_shardkey(packet):
 	return packet
 
 
-def insert_thread(filename, n, namespace, batch=False, safe=False, uuid_shardkey=False, delay=None):
+def insert_thread(thread_id, filename, n, namespace, batch=False, safe=False, uuid_shardkey=False, delay=None, verbose=False):
 	# create connection to mongod
 	con = Connection()
-
-	verbose = False
 
 	# load document
 	f = open(filename, 'r')
@@ -43,30 +44,56 @@ def insert_thread(filename, n, namespace, batch=False, safe=False, uuid_shardkey
 		packet = doc
 
 	# start execution loop
-	t = time.time()
+	total_time = time.time()
+	batch_durs = []
+	batch_sizes = []
 
 	for i in xrange(n):
 		if uuid_shardkey:
 			packet = add_uuid_shardkey(packet)			
 
-		if verbose:
-			print packet
+		if batch: 
+			batch_time = time.time()
+
 		con[database][collection].insert(packet, manipulate=False, safe=safe)
+		
 		if delay:
 			time.sleep(delay)
+
+		if batch:
+			bd = time.time() - batch_time
+			bs = len(packet)
+			batch_durs.append(bd)
+			batch_sizes.append(bs)
+		
+			if verbose:
+				print 'thread_id %i    batchsize %i    duration %f    docs_per_sec %.2f'%(thread_id, bs, bd, bs/bd) 
+
 
 	if rest > 0:
 		if batch and uuid_shardkey:
 			last_packet = add_uuid_shardkey(last_packet)
 		
-		if verbose:
-			print last_packet
+		if batch:
+			batch_time = time.time()
 		con[database][collection].insert(last_packet, manipulate=False, safe=safe)
+
 		if delay: 
 			time.sleep(delay)
 
-	dur = time.time() - t
-	return dur
+		if batch:
+			bd = time.time() - batch_time
+			bs = len(last_packet)
+			batch_durs.append(bd)
+			batch_sizes.append(bs)
+
+			if verbose:
+				print 'thread_id %i    batchsize %i    duration %f    docs_per_sec %.2f'%(thread_id, bs, bd, bs/bd) 
+
+
+	total_dur = time.time() - total_time
+	
+	return (total_dur, batch_durs, batch_sizes)
 
 
 def run_test(args):
@@ -82,26 +109,56 @@ def run_test(args):
 	if args['delay'] != None:
 		args['delay'] /= 1000.
 
+	if args['processes'] > multiprocessing.cpu_count():
+		print "warning: more processes than cpus. reducing processes to %i"%multiprocessing.cpu_count()
+		args['processes'] = multiprocessing.cpu_count()
+
 	# create process pool
 	pool = multiprocessing.Pool(args['processes'])
 
 	# call function for each processor
 	results = []
 	for p in xrange(args['processes']-1):
-		results.append(pool.apply(insert_thread, (args['jsonfile'], args['number']/args['processes'], \
-			args['namespace'], args['batch'], args['safe'], args['uuid_shardkey']) ))
+		results.append(pool.apply_async(insert_thread, (p, args['jsonfile'], args['number']/args['processes'], \
+			args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay'], args['verbose']) ))
 	
 	# insert the last batch of remaining documents
-	results.append(pool.apply(insert_thread, (args['jsonfile'], args['number']/args['processes'] + args['number']%args['processes'], \
-		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay']) ))
+	results.append(pool.apply_async(insert_thread, (args['processes']-1, args['jsonfile'], args['number']/args['processes'] + args['number']%args['processes'], \
+		args['namespace'], args['batch'], args['safe'], args['uuid_shardkey'], args['delay'], args['verbose']) ))
 
 	pool.close()
-	pool.join()
 
-	sum_res = sum(results)
-	dps_res = sum_res / len(results)
+	results = [r.get() for r in results]
+	total_durs, batch_durs, batch_sizes = zip(*results)
 
-	return (sum_res, dps_res) 
+	return (total_durs, batch_durs, batch_sizes) 
+
+
+def interpret_results(args, total_durs, batch_durs, batch_sizes):
+	results = {}
+
+	# number of processes ran
+	results['n_process'] = len(total_durs)
+
+	# average total duration over all processes
+	results['avg_process_dur'] = sum(total_durs) / results['n_process']
+
+	# total docs per sec
+	results['docs_per_sec'] = args['number'] / results['avg_process_dur']
+
+	if args['batch']:
+		batch_durs = list(chain(*batch_durs))
+		batch_sizes = list(chain(*batch_sizes))
+
+		batch_dps = [s/d for (d, s) in zip(batch_durs, batch_sizes)]
+
+		# average duration per batch (over all batches in all processes)
+		results['avg_batch_dur'] = sum(batch_durs) / len(batch_durs)
+		results['avg_batch_dps'] = sum(batch_dps) / len(batch_dps)
+
+	return results
+
+
 
 
 if __name__ == '__main__':
@@ -119,10 +176,40 @@ if __name__ == '__main__':
 	parser.add_argument('--namespace', action='store', default='test.minsert', metavar='NS', help='namespace (database.collection) to insert docs')
 	parser.add_argument('--keep-db', action='store_true', default=False, help="keep old database, don't drop it before insertion")
 	parser.add_argument('--uuid-shardkey', action='store_true', default=False, help='create random shard key for each document if enabled (default is ObjectId)')
-	
+	parser.add_argument('--verbose', action='store_true', default=False, help='print verbose information for each insert (only in batch mode)')
+
 	args = vars(parser.parse_args())
-	print args
-	sum_res, dps_res = run_test(args)
+	
+	if args['verbose']:
+		print "minsert.py test with parameters:"
+		print
+		for a in args:
+			print "%15s: %s"%(a, args[a])
+		print
+
+
+	print "start timestamp:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	print
+
+	total_durs, batch_durs, batch_sizes = run_test(args)
+	results = interpret_results(args, total_durs, batch_durs, batch_sizes)
 
 	# output result
-	print sum_res, dps_res
+	print
+	print "     total time elapsed: %.2f sec (avg. over %i processes)"%(results['avg_process_dur'], results['n_process'])
+	print "     total docs per sec: %.2f"%results['docs_per_sec']
+
+	if args['batch']:
+		print "        avg. batch time: %.4f sec"%results['avg_batch_dur']
+		print "avg. batch docs per sec: %.4f sec"%results['avg_batch_dps']
+
+	print
+	print "end timestamp:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+	
+
+
+
+
+
+
