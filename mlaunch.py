@@ -236,15 +236,16 @@ class MongoLauncher(object):
 		else:
 			rs_param = ''
 
-		out = subprocess.PIPE
-		if verbose:
-			out = None
-		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)], stderr=subprocess.STDOUT, stdout=out, shell=True)
+		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
 			print 'launching: mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)
 
 
 	def _launchMongoS(self, logpath, port, configdb, verbose=False):
+		out = subprocess.PIPE
+		if verbose:
+			out = None
+
 		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
 			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)
