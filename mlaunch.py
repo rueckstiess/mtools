@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from pymongo import Connection
-from pymongo.errors import AutoReconnect, OperationFailure
+from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
 import subprocess
 import argparse
 import threading
@@ -18,8 +18,8 @@ def pingMongoDS(host, interval=1, timeout=30):
 		try:
 			con = Connection(host)
 			return True
-		except AutoReconnect, e:
-			time.sleep(1)
+		except (ConnectionFailure, AutoReconnect) as e:
+			time.sleep(interval)
 
 
 class MongoLauncher(object):
@@ -53,11 +53,12 @@ class MongoLauncher(object):
 
 		# verbose, port, mongo
 		parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards')
-		# parser.add_argument('--mongo', action='store_true', default=False, help='start mongo shell and connect to mongod (--single), primary mongod (--replicaset), or mongos (--sharded)')
+		# TODO parser.add_argument('--mongo', action='store_true', default=False, help='start mongo shell and connect to mongod (--single), primary mongod (--replicaset), or mongos (--sharded)')
 		parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
 
 		self.args = vars(parser.parse_args())
-		print self.args
+		if self.args['verbose']:
+			print "parameters:", self.args
 
 
 
@@ -89,7 +90,7 @@ class MongoLauncher(object):
 		# start up shards
 		if len(self.args['sharded']) == 1:
 			try:
-				# --sharded was a number, name shards shard01, shard02, ...
+				# --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
 				n_shards = int(self.args['sharded'][0])
 				shard_names = ['shard%.2i'%(i+1) for i in range(n_shards)]
 			except ValueError, e:
@@ -124,29 +125,36 @@ class MongoLauncher(object):
 			config_string.append('%s:%i'%(self.hostname, nextport))
 			nextport += 1
 		
-		# start up mongos and wait until running
+		# start up mongos
 		self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string), verbose=self.args['verbose'])
 		mongos_host = '%s:%i'%(self.hostname, nextport)
-		mongos_thread = threading.Thread(target=pingMongoDS, args=(mongos_host, 1, 30))
-		mongos_thread.start()
-		mongos_thread.join()
-
-		time.sleep(3)
 
 		# add shards
-		print "adding shards..."
+		print "adding shards (can take a few seconds) ..."
+
 		con = Connection(mongos_host)
-		shards_added = 0
-		while (shards_added < len(shard_names)):
-			time.sleep(1)
+
+		shards_to_add = len(shard_names)
+
+		while (con['config']['shards'].count() < shards_to_add):
 			for shard in shard_names:
 				try:
 					res = con['admin'].command({'addShard':shard})
-					if res['ok']:
-						shards_added += 1
+				except Exception as e:
+					if self.args['verbose']:
+						print e, '- will retry.'
+					continue
 
-				except OperationFailure:
-					pass
+				if res['ok']:
+					if self.args['verbose']:
+						print "shard %s added successfully"%shard
+						shard_names.remove(shard)
+						break
+				else:
+					if self.args['verbose']:
+						print res, '- will retry.'
+
+			time.sleep(1)
 
 
 	def _launchReplSet(self, basedir, portstart, name, numdata, arbiter, verbose=False):
@@ -159,7 +167,7 @@ class MongoLauncher(object):
 		
 			host = '%s:%i'%(self.hostname, portstart+i)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
-			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1, 30)))
+			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
 			if verbose:
 				print "waiting for mongod at %s to start up..."%host
 
@@ -170,7 +178,7 @@ class MongoLauncher(object):
 			
 			host = '%s:%i'%(self.hostname, portstart+numdata)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
-			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1, 30)))
+			threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
 			if verbose:
 				print "waiting for mongod at %s to start up..."%host
 
@@ -180,8 +188,7 @@ class MongoLauncher(object):
 		for thread in threads:
 			thread.join()
 
-		if verbose:
-			print "all mongod processes running."
+		print "all mongod processes for replica set '%s' running."%name
 
 		# initiate replica set
 		con = Connection('%s:%i'%(self.hostname, portstart))
@@ -200,13 +207,12 @@ class MongoLauncher(object):
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, extra='--configsvr')
 
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
 		t.start()
 		if verbose:
-			print "waiting for mongod at %s to start up..."%host
+			print "waiting for mongod config server to start up..."
 		t.join()
-		if verbose:
-			print "running."
+		print "mongod config server at %s running."%host
 
 
 	def _launchSingle(self, basedir, port, name=None, verbose=False):
@@ -214,15 +220,15 @@ class MongoLauncher(object):
 		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose)
 
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
 		t.start()
 		if verbose:
-			print "waiting for mongod at %s to start up..."%host
+			print "waiting for mongod to start up..."
 		t.join()
-		if verbose: 
-			print "running."
+		print "mongod at %s running."%host
 
 		return host
+
 
 	def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, extra=''):
 		if replset:
@@ -230,24 +236,26 @@ class MongoLauncher(object):
 		else:
 			rs_param = ''
 
-		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)], shell=True)
+		out = subprocess.PIPE
+		if verbose:
+			out = None
+		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)], stderr=subprocess.STDOUT, stdout=out, shell=True)
 		if verbose:
 			print 'launching: mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)
 
 
 	def _launchMongoS(self, logpath, port, configdb, verbose=False):
-		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)], shell=True)
+		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
 			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)
 		
 		host = '%s:%i'%(self.hostname, port)
-		t = threading.Thread(target=pingMongoDS, args=(host, 1, 30))
+		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
 		t.start()
 		if verbose:
-			print "waiting for mongos at %s to start up..."%host
+			print "waiting for mongos to start up..."
 		t.join()
-		if verbose:
-			print "running."
+		print "mongos at %s running."%host
 
 
 
@@ -257,6 +265,8 @@ if __name__ == '__main__':
 
 
 """
+Usage:
+
 mongolaunch --single name --port 30000 --mongo .
 
 	* creates
@@ -266,14 +276,12 @@ mongolaunch --single name --port 30000 --mongo .
 	* checks when mongod is ready
 	* starts mongo
 
-mongolaunch --replicaset --nodes 3 --arbiter --port 20000 --mongo .
+mongolaunch --replicaset --nodes 3 --arbiter --port 20000  .
 
 	* creates for each member
 		./data/name/rs<x>/db
         ./data/name/rs<x>/logs/mongod.log
 	* starts all mongod
 	* checks when all mongod are ready
-	* starts mongo and connects to primary
 
-mongolaunch --sharded name1 name2 ...
 """
