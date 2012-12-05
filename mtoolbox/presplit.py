@@ -1,46 +1,20 @@
-from datetime import datetime
 from pymongo import Connection
 from pymongo.errors import OperationFailure
 from bson.son import SON
-import re
-import time
-
-weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 
-def extractDateTime(line):
-    tokens = line.split()
-    if len(tokens) < 4:
-        # check if there are enough tokens for datetime
-        return None
-
-    # log file structure: Wed Sep 05 23:02:26 ...
-    weekday, month, day, time = tokens[:4]
-    
-    # check if it is a valid datetime
-    if not (weekday in weekdays and
-    	    month in months and
-            re.match(r'\d{1,2}', day) and
-            re.match(r'\d{2}:\d{2}:\d{2}', time)):
-        return None
-
-    month = months.index(month)+1
-    h, m, s = time.split(':')
-
-    # TODO: special case if year rolls over but logfile is from old year
-    year = datetime.now().year
-
-    dt = datetime(int(year), int(month), int(day), int(h), int(m), int(s))
-
-    return dt
-
-
-
-def presplit(host, database, collection, shardkey):
+def presplit(host, database, collection, shardkey, shardnumber=None):
     """ get information about the number of shards, then split chunks and 
         distribute over shards. Currently assumes shardkey to be hex string,
         for example ObjectId or UUID. 
+
+        host: host and port to connect to, e.g. "192.168.0.1:27017", "localhost:30000"
+        database: database name to enable sharding
+        collection: collection name to shard 
+        shardkey: shardkey to pre-split on (must be hex string, e.g. ObjectId or UUID)
+        shardnumber: if None, automatically presplit over all available shards. 
+            if integer, only presplit over the given number of shards (maximum is 
+            the number of actual shards)
     """
     
     con = Connection(host)
@@ -71,6 +45,10 @@ def presplit(host, database, collection, shardkey):
         print "only one shard found. no pre-splitting required."
         return
 
+    # limit number of shards if shardnumber given
+    if shardnumber and shardnumber <= len(shards):
+        shards = shards[:shardnumber]
+
     shard_names = [s['_id'] for s in shards]
     split_interval = 16 / len(shards)
     split_points = [hex(s).lstrip('0x') for s in range(split_interval, len(shards)*split_interval, split_interval)]
@@ -93,5 +71,5 @@ def presplit(host, database, collection, shardkey):
 
 if __name__ == '__main__':
     # test presplitting function
-    presplit('capslock.local:27024', 'test', 'mycol', 'my_id')
+    presplit('capslock.local:27022', 'test', 'mycol', 'my_id', 3)
 

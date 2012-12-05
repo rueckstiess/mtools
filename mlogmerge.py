@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from mtoolbox import extractDateTime
+from mtoolbox.extractdate import extractDateTime
 from datetime import datetime, MINYEAR, MAXYEAR
 import argparse, re
 
