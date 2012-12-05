@@ -11,7 +11,7 @@ The mtools collection is written in Python, and most of the tools only make
 use the standard packages shipped with Python, and should run out of the box.
 
 Some of the tools have additional dependencies, which are listed under the 
-specific tool's section. See the [INSTALL.md](INSTALL.md) file for installation 
+specific tool's section. See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation 
 instructions for these modules.
 
 #### Python
@@ -70,7 +70,7 @@ mlaunch
 ##### Additional dependencies
 - pymongo 
 
-See the [INSTALL.md](INSTALL.md) file for installation instructions of these dependencies.
+See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation instructions of these dependencies.
 
 #### Description
 
@@ -138,7 +138,7 @@ mplotqueries
 - NumPy
 - matplotlib
 
-See the [INSTALL.md](INSTALL.md) file for installation instructions of these dependencies.
+See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation instructions of these dependencies.
 
 #### Description
 
