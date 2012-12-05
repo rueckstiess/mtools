@@ -1,3 +1,16 @@
+Installation Instructions for mtools and its dependencies
+=========================================================
+
+
+#### Python
+You will need to have a version of Python installed for all the scripts
+below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
+module separately (you can use `pip` to install it, see below). To check your
+Python version, run `python --version` on the command line.
+
+Python 3.x is currently not supported.
+
+
 #### mtools installation
 
 Clone the [mtools github repository](https://github.com/rueckstiess/mtools) into a 
@@ -8,14 +21,6 @@ directory of your choice:
 
 This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
 and check out the code there.
-
-#### Python
-You will need to have a version of Python installed for all the scripts
-below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
-module separately (you can use `pip` to install it, see below). To check your
-Python version, run `python --version` on the command line.
-
-Python 3.x is currently not supported.
 
 #### Command style usage
 If you want to execute the scripts in "command style", i.e. typing 
@@ -51,6 +56,17 @@ package installer. To install `pip`, follow the instructions provided on the
 [pip installation page](http://www.pip-installer.org/en/latest/installing.html#using-the-installer).
 
 
+#### argparse
+
+If you run Python version 2.6.x, the `argparse` module is not included in the standard library and
+you need to install it manually. You can do so with
+
+    pip install argparse
+
+Depending on your user rights, it may complain about not having permissions to install the module. 
+In that case, you need to precede the command with a `sudo`.
+
+
 #### pymongo
 
 (_required for mlaunch_)
@@ -59,17 +75,6 @@ pymongo is MongoDB's official Python driver. Once you have installed `pip`, you 
 pymongo easily by running
 
     pip install pymongo
-
-Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
-
-
-#### argparse
-
-If you run Python version 2.6.x, the `argparse` module is not included in the standard library and
-you need to install it manually. You can do so with
-
-    pip install argparse
 
 Depending on your user rights, it may complain about not having permissions to install the module. 
 In that case, you need to precede the command with a `sudo`.
