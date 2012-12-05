@@ -59,7 +59,8 @@ e.g. `-rwxr--r--`. If this isn't the case, you can set it with
     chmod u+x mlaunch.py
 
 You should now be able to use the mlaunch.py script from any directory by just 
-typing `mlaunch` (and any additional parameters).
+typing `mlaunch` (and any additional parameters). Repeat with the other scripts you
+want to execute "command style".
 
 
 <hr>
