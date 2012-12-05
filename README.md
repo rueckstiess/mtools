@@ -1,13 +1,78 @@
-mtools
-======
+# mtools
 
 A collection of helper scripts to set up MongoDB test environments and
 parse MongoDB log files (mongod, mongos). 
 
 
+Requirements and Installation Instructions
+------------------------------------------
+
+The mtools collection is written in Python, and most of the tools only make
+use the standard packages shipped with Python, and should run out of the box.
+
+Some of the tools have additional dependencies, which are listed under the 
+specific tool's section. See the [INSTALL.md](INSTALL.md) file for installation 
+instructions for these modules.
+
+#### Python
+You will need to have a version of Python installed for all the scripts
+below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
+module separately (you can use `pip` to install it, see below). To check your
+Python version, run `python --version` on the command line.
+
+Python 3.x is currently not supported.
+
+
+#### mtools installation
+
+Clone the [mtools github repository](https://github.com/rueckstiess/mtools) into a 
+directory of your choice:
+
+	cd /path/to/github/repos
+    git clone git://github.com/rueckstiess/mtools.git
+
+This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
+and check out the code there.
+
+
+#### Command style usage
+
+If you want to execute the scripts in "command style", i.e. typing 
+`script --parameter` instead of `python script.py --parameter`, you need to create 
+simlinks in a directory that is in your PATH environment variable:
+
+Let's assume `/path/in/env` is a path that is part of your PATH environment 
+(check with `echo $PATH` from your command line prompt). To add a simlink to the
+`mlaunch.py` script, run:
+
+    cd /path/in/env
+    ln -s /path/to/github/repos/mtools/mlaunch.py mlaunch
+
+Also check that the _executable_ flag is set on mlaunch.py, with
+
+    cd /path/to/github/repos/mtools
+    ls -la
+
+The tools you want to execute directly should have the `x` flag set for at least "user", 
+e.g. `-rwxr--r--`. If this isn't the case, you can set it with
+
+    chmod u+x mlaunch.py
+
+You should now be able to use the mlaunch.py script from any directory by just 
+typing `mlaunch` (and any additional parameters).
+
+
+<hr>
 
 mlaunch
 -------
+
+##### Additional dependencies
+- pymongo 
+
+See the [INSTALL.md](INSTALL.md) file for installation instructions of these dependencies.
+
+#### Description
 
 This script lets you quickly spin up MongoDB environments on your local
 machine. It supports various configurations of stand-alone servers, 
@@ -41,9 +106,12 @@ replica sets and sharded clusters.
       --verbose             outputs information about the launch
 
 
+<hr>
 
 mlogmerge
 ---------
+
+#### Description
 
 A script that takes log files as input and merges them by date/time. 
 	
@@ -61,9 +129,18 @@ A script that takes log files as input and merges them by date/time.
 							either a number (default: 0) or 'eol'
 
 
+<hr>
 
 mplotqueries
 ------------
+
+#### Additional dependencies
+- NumPy
+- matplotlib
+
+See the [INSTALL.md](INSTALL.md) file for installation instructions of these dependencies.
+
+#### Description
 
 A script to plot query durations in a logfile (requires numpy and matplotlib modules).
 	
@@ -78,8 +155,12 @@ A script to plot query durations in a logfile (requires numpy and matplotlib mod
       --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
 
 
+<hr> 
+
 mlogfilter
 ----------
+
+#### Description
 
 A filter script to reduce the amount of information from MongoDB log files.  
 Currently, the script supports filtering by time (from - to), to only show 
