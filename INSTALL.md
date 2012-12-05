@@ -69,7 +69,7 @@ In that case, you need to precede the command with a `sudo`.
 
 #### pymongo
 
-(_required for mlaunch_)
+*required for mlaunch*
 
 pymongo is MongoDB's official Python driver. Once you have installed `pip`, you can install 
 pymongo easily by running
@@ -82,7 +82,7 @@ In that case, you need to precede the command with a `sudo`.
 
 #### NumPy
 
-(_required for mplotqueries_)
+*required for mplotqueries*
 
 [NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations.
 Try installing NumPy with pip, by doing:
@@ -98,7 +98,7 @@ installation instructions on the [NumPy](http://numpy.scipy.org/) page.
 
 #### Matplotlib
 
-(_required for mplotqueries_)
+*required for mplotqueries*
 
 [matplotlib](http://matplotlib.org/) is a python 2D plotting library which produces  
 figures and graphs in a variety of formats and interactive environments across platforms.
