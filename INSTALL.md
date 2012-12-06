@@ -23,11 +23,26 @@ This will create a sub-folder `mtools` under the `/path/to/github/repos` folder
 and check out the code there.
 
 #### Command style usage
+
+While you can execute each of the scripts with `python script.py` ("script.py" being a
+placeholder for the real script name), it is convenient to use the symbolic links
+that are located in the `mtools/scripts/` subfolder.
+
+Add the `mtools/scripts/` subfolder to your PATH environment variable, if you 
+want to use the scripts from anywhere in the shell. If you use the _bash_ shell, 
+you can do so by adding a line
+    
+    export PATH=$PATH:/path/to/github/repos/mtools/scripts
+
+to your `.bashrc` script. Other shells may have a different syntax.
+
+
+<!-- OLD
 If you want to execute the scripts in "command style", i.e. typing 
 `script --parameter` instead of `python script.py --parameter`, you need to create 
 simlinks in a directory that is in your PATH environment variable:
 
-Let's assume `/path/in/env` is a path that is part of your PATH environment 
+Let's assume `/path/in/env` is a path that is part of your PATH envir onment 
 (check with `echo $PATH` from your command line prompt). To add a simlink to the
 `mlaunch.py` script, run:
 
@@ -45,8 +60,8 @@ e.g. `-rwxr--r--`. If this isn't the case, you can set it with
     chmod u+x mlaunch.py
 
 You should now be able to use the mlaunch.py script from any directory by just 
-typing `mlaunch` (and any additional parameters).
-
+typing `mlaunch` (and any additional parameters). 
+-->
 
 
 #### pip
@@ -100,7 +115,7 @@ installation instructions on the [NumPy](http://numpy.scipy.org/) page.
 
 *required for mplotqueries*
 
-[matplotlib](http://matplotlib.org/) is a python 2D plotting library which produces  
+[matplotlib](http://matplotlib.org/) is a python 2D plotting library which produces 
 figures and graphs in a variety of formats and interactive environments across platforms.
 
 Try installing matplotlib with `pip`, by doing:
