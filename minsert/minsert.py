@@ -82,7 +82,7 @@ def insert_thread(thread_id, filename, n, namespace, batch=False, safe=False, uu
 		
 		if batch:
 			batch_time = time.time()
-		con[database][collection].insert(last_packet, manipulate=False, safe=safe)
+		con[database][collection].insert(last_packet, manipulate=False)
 
 		if delay: 
 			time.sleep(delay)
