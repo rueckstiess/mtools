@@ -24,12 +24,9 @@ def add_uuid_shardkey(packet):
 
 
 def insert_thread(thread_id, filename, n, namespace, batch=False, safe=False, uuid_shardkey=False, delay=None, verbose=False):
-	# create connection to mongod
+	# create connection to mongod and enable/disable safe writes
 	con = Connection()
-	if safe:
-		con.write_concern['w'] = 1
-	else:
-		con.write_concern['w'] = 0
+	con.write_concern['w'] = int(safe)
 
 	# load document
 	f = open(filename, 'r')
