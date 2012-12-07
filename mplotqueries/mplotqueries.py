@@ -29,7 +29,10 @@ class Query(object):
 				break
 
 		# extract namespace
-		self.namespace = items[items.index('query')+1]
+		if 'query' in items:
+			self.namespace = items[items.index('query')+1]
+		else:
+			self.namespace = None
 
 		# extract nscanned, ntoreturn, nreturned (if present)
 		labels = ['nscanned', 'ntoreturn', 'nreturned']
@@ -87,7 +90,8 @@ class MongoPlotQueries(object):
 			if 'query' in line.split():
 				query = Query(line)
 			else:
-				continue
+				# continue
+				query = Query(line)
 
 			if self.args['ns'] == None or query.namespace in self.args['ns']:
 				if self.args['exclude_ns'] == None or (not query.namespace in self.args['exclude_ns']):
