@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from bson import BSON
 from pymongo import Connection
 from itertools import chain

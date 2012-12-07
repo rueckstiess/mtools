@@ -2,7 +2,6 @@ from pymongo import Connection
 from pymongo.errors import OperationFailure
 from bson.son import SON
 
-
 def presplit(host, database, collection, shardkey, shardnumber=None):
     """ get information about the number of shards, then split chunks and 
         distribute over shards. Currently assumes shardkey to be hex string,
@@ -62,9 +61,8 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
     # move chunks to shards (catch the one error where the chunk resides on that shard already)
     for i,s in enumerate(split_points):
         try:
-            print [('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]
+            print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i])
             res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]))
-            print res
         except OperationFailure, e:
             print e
 
