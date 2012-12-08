@@ -106,7 +106,7 @@ def run_test(args):
 	db, coll = args['namespace'].split('.')
 
 	# drop db if requested
-	if not args['keep_db']:
+	if args['drop_db']:
 		con.drop_database(db)
 
 	if args['delay'] != None:
@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
 	parser.add_argument('--delay', action='store', default=None, type=int, metavar='N', help='delay insertion per packet (batch/single doc) by N ms.')
 	parser.add_argument('--namespace', action='store', default='test.minsert', metavar='NS', help='namespace (database.collection) to insert docs')
-	parser.add_argument('--keep-db', action='store_true', default=False, help="keep old database, don't drop it before insertion")
+	parser.add_argument('--drop-db', action='store_true', default=False, help="drop old database before insertion (default False)")
 	parser.add_argument('--uuid-shardkey', action='store_true', default=False, help='create random shard key for each document if enabled (default is ObjectId)')
 	parser.add_argument('--verbose', action='store_true', default=False, help='print verbose information for each insert (only in batch mode)')
 
