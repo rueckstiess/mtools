@@ -1,6 +1,7 @@
 from pymongo import Connection
 from pymongo.errors import OperationFailure
 from bson.son import SON
+import argparse
 
 def presplit(host, database, collection, shardkey, shardnumber=None):
     """ get information about the number of shards, then split chunks and 
@@ -68,6 +69,18 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
 
 
 if __name__ == '__main__':
+
     # test presplitting function
-    presplit('capslock.local:27022', 'test', 'mycol', 'my_id', 3)
+    parser = argparse.ArgumentParser(description='MongoDB pre-splitting tool')
+
+    parser.add_argument('host', action='store', nargs='?', default='localhost:27017', metavar='host:port', help='host:port of mongos or mongod process (default localhost:27017)')
+    parser.add_argument('namespace', action='store', help='namespace to shard, in form "database.collection"')
+    parser.add_argument('shardkey', action='store', help='shard key to split on, e.g. "_id"')
+    parser.add_argument('-n', '--number', action='store', metavar='N', type=int, default=None, help='max. number of shards to use (default is all)')
+
+    parser.add_argument('--verbose', action='store_true', default=False, help='print verbose information')
+    args = vars(parser.parse_args())
+
+    args['database'], args['collection'] = args['namespace'].split('.')
+    presplit(args['host'], args['database'], args['collection'], args['shardkey'], args['number'])
 
