@@ -1,6 +1,7 @@
 from pymongo import Connection
 from pymongo.errors import OperationFailure
 from bson.son import SON
+from bson.min_key import MinKey
 import argparse
 
 def presplit(host, database, collection, shardkey, shardnumber=None):
@@ -57,7 +58,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
     for s in split_points:
         con['admin'].command(SON([('split',namespace), ('middle', {shardkey: s})]))
     
-    split_points = ['MinKey'] + split_points
+    split_points = [MinKey()] + split_points
 
     # move chunks to shards (catch the one error where the chunk resides on that shard already)
     for i,s in enumerate(split_points):
