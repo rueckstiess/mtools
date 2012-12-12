@@ -4,7 +4,7 @@ from bson.son import SON
 from bson.min_key import MinKey
 import argparse
 
-def presplit(host, database, collection, shardkey, shardnumber=None):
+def presplit(host, database, collection, shardkey, shardnumber=None, verbose=False):
     """ get information about the number of shards, then split chunks and 
         distribute over shards. Currently assumes shardkey to be hex string,
         for example ObjectId or UUID. 
@@ -33,7 +33,8 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
     coll_info = con['config']['collections'].find_one({'_id':namespace})
     if coll_info and not coll_info['dropped']:
         # if it is sharded already, quit. something is not right.
-        print "collection already sharded."
+        if verbose:
+            print "collection already sharded."
         return
     else:
         con[database][collection].ensure_index(shardkey)
@@ -43,7 +44,8 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
     shards = list(con['config']['shards'].find())
 
     if len(shards) == 1:
-        print "only one shard found. no pre-splitting required."
+        if verbose:
+            print "only one shard found. no pre-splitting required."
         return
 
     # limit number of shards if shardnumber given
@@ -63,11 +65,17 @@ def presplit(host, database, collection, shardkey, shardnumber=None):
     # move chunks to shards (catch the one error where the chunk resides on that shard already)
     for i,s in enumerate(split_points):
         try:
-            print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i])
+            if verbose:
+                print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i])
             res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]))
         except OperationFailure, e:
-            print e
+            if verbose:
+                print e
 
+    if verbose:
+        print 'chunk distribution:',
+        chunk_group = con['config']['chunks'].group(key={'shard': 1}, condition={'ns': namespace}, initial={'nChunks':0}, reduce=""" function (doc, out) { out.nChunks++; } """)
+        print ', '.join(["%s: %i"%(ch['shard'], ch['nChunks']) for ch in chunk_group])
 
 if __name__ == '__main__':
 
@@ -83,5 +91,5 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     args['database'], args['collection'] = args['namespace'].split('.')
-    presplit(args['host'], args['database'], args['collection'], args['shardkey'], args['number'])
+    presplit(args['host'], args['database'], args['collection'], args['shardkey'], args['number'], args['verbose'])
 
