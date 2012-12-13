@@ -53,7 +53,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None, verbose=Fal
         shards = shards[:shardnumber]
 
     shard_names = [s['_id'] for s in shards]
-    split_interval = 16 / len(shards)
+    split_interval = 16*16*16*16 / len(shards)
     split_points = [hex(s).lstrip('0x') for s in range(split_interval, len(shards)*split_interval, split_interval)]
     
     # pre-splitting commands
