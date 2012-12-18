@@ -4,7 +4,7 @@ from bson.son import SON
 from bson.min_key import MinKey
 import argparse
 
-def presplit(host, database, collection, shardkey, shardnumber=None, verbose=False):
+def presplit(host, database, collection, shardkey, shardnumber=None, chunkspershard=1, verbose=False):
     """ get information about the number of shards, then split chunks and 
         distribute over shards. Currently assumes shardkey to be hex string,
         for example ObjectId or UUID. 
@@ -53,8 +53,9 @@ def presplit(host, database, collection, shardkey, shardnumber=None, verbose=Fal
         shards = shards[:shardnumber]
 
     shard_names = [s['_id'] for s in shards]
-    split_interval = 16*16*16*16 / len(shards)
-    split_points = [hex(s).lstrip('0x') for s in range(split_interval, len(shards)*split_interval, split_interval)]
+    splits_total = len(shards) * chunkspershard
+    split_interval = 16**4 / splits_total
+    split_points = ["%0.4x"%s for s in range(split_interval, splits_total*split_interval, split_interval)]
     
     # pre-splitting commands
     for s in split_points:
@@ -66,8 +67,8 @@ def presplit(host, database, collection, shardkey, shardnumber=None, verbose=Fal
     for i,s in enumerate(split_points):
         try:
             if verbose:
-                print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i])
-            res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i])]))
+                print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i % len(shards)])
+            res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i % len(shards)])]))
         except OperationFailure, e:
             if verbose:
                 print e
@@ -86,10 +87,11 @@ if __name__ == '__main__':
     parser.add_argument('namespace', action='store', help='namespace to shard, in form "database.collection"')
     parser.add_argument('shardkey', action='store', help='shard key to split on, e.g. "_id"')
     parser.add_argument('-n', '--number', action='store', metavar='N', type=int, default=None, help='max. number of shards to use (default is all)')
+    parser.add_argument('-c', '--chunks', action='store', metavar='N', type=int, default=1, help='number of chunks per shard (default is 1)')
 
     parser.add_argument('--verbose', action='store_true', default=False, help='print verbose information')
     args = vars(parser.parse_args())
 
     args['database'], args['collection'] = args['namespace'].split('.')
-    presplit(args['host'], args['database'], args['collection'], args['shardkey'], args['number'], args['verbose'])
+    presplit(args['host'], args['database'], args['collection'], args['shardkey'], args['number'], args['chunks'], args['verbose'])
 
