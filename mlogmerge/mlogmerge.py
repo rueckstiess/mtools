@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from mtools.mtoolbox.extractdate import extractDateTime
-from datetime import datetime, MINYEAR, MAXYEAR
+from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 import argparse, re
 
 class MongoLogMerger(object):
@@ -24,8 +24,9 @@ class MongoLogMerger(object):
 		parser = argparse.ArgumentParser(description='mongod/mongos log file merger.')
 		parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
 		# parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
-		parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to put in front of line')
+		parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files')
 		parser.add_argument('--pos', action='store', default=4, help="position of label (0 = front of line, other options are # or 'eol'")
+		parser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
 
 		args = vars(parser.parse_args())
 
@@ -48,6 +49,19 @@ class MongoLogMerger(object):
 		else:
 			raise SystemExit('Error: Number of labels not the same as number of files.')
 
+		# handle timezone parameter
+		if len(args['timezone']) == 1:
+			args['timezone'] = args['timezone'] * len(logfiles)
+
+		elif len(args['timezone']) == len(logfiles):
+			pass
+
+		elif len(args['timezone']) == 0:
+			args['timezone'] = [0] * len(logfiles)
+
+		else:
+			raise SystemExit('Error: Invalid number of timezone parameters. Use either 1 (for global adjustment) or the number of logfiles (for individual adjustments).')
+
 		# handle position parameter
 		position = args['pos']
 		if position != 'eol':
@@ -61,20 +75,27 @@ class MongoLogMerger(object):
 		openFiles = [open(f, 'r') for f in args['logfiles']]
 		lines = [f.readline() for f in openFiles]
 		dates = [extractDateTime(l) for l in lines]
-
+		
 		# replace all non-dates with mindate
 		dates = [d if d else mindate for d in dates]
+
+		dates = [d + timedelta(hours=args['timezone'][i]) for i,d in enumerate(dates) if d]
+
 
 		while any([l != '' for l in lines]):
 			# pick smallest date of all non-empty lines
 			condDates = ([d if lines[i] != '' else maxdate for i,d in enumerate(dates)])
-			minIndex = condDates.index(min(condDates))
+			minCondDate = min(condDates)
+			minIndex = condDates.index(minCondDate)
 
 			# print out current line
 			currLine = lines[minIndex].rstrip()
+			oldDate = minCondDate - timedelta(hours=args['timezone'][minIndex])
+			if minCondDate != mindate:
+				currLine = currLine.replace(oldDate.strftime('%a %b %d %H:%M:%S'), minCondDate.strftime('%a %b %d %H:%M:%S'))
 
 			if labels[minIndex]:
-				if position == 0:
+				if position == 0 or minCondDate == mindate:
 					print labels[minIndex], currLine
 				elif position == 'eol':
 					print currLine, labels[minIndex]
@@ -89,8 +110,12 @@ class MongoLogMerger(object):
 			# update lines and dates for that line
 			lines[minIndex] = openFiles[minIndex].readline()
 			dates[minIndex] = extractDateTime(lines[minIndex])
+
+
 			if not dates[minIndex]:
 				dates[minIndex] = mindate 
+			else:
+				dates[minIndex] += timedelta(hours=args['timezone'][minIndex])
 
 			# end of file reached, print newline
 			# if position != 'eol' and lines[minIndex] == '':
