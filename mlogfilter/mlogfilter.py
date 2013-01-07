@@ -43,6 +43,9 @@ class MongoLogFilter(object):
         args = vars(parser.parse_args())
         args = dict((k, self._arrayToString(args[k])) for k in args)
         
+        if args['verbose']:
+            print args
+
         # create filter objects from classes and pass args
         self.filters = [f(args) for f in self.filters]
 
