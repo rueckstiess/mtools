@@ -312,26 +312,3 @@ class MongoLauncher(object):
 if __name__ == '__main__':
 	mongoLauncher = MongoLauncher()
 
-
-
-"""
-Usage:
-
-mongolaunch --single name --port 30000 --mongo .
-
-	* creates
-		./data/name/db
-        ./data/name/logs/mongod.log
-	* starts mongod
-	* checks when mongod is ready
-	* starts mongo
-
-mongolaunch --replicaset --nodes 3 --arbiter --port 20000  .
-
-	* creates for each member
-		./data/name/rs<x>/db
-        ./data/name/rs<x>/logs/mongod.log
-	* starts all mongod
-	* checks when all mongod are ready
-
-"""
