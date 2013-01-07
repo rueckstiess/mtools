@@ -45,16 +45,17 @@ class MongoLauncher(object):
 		
 		parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset)')
 		parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
-		parser.add_argument('--name', action='store', metavar='NAME', default='default', help='name for replica set')
+		parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (replset default)')
 		
 		# sharded or not
 		parser.add_argument('--sharded', action='store', nargs='*', metavar='NAME', help='creates a sharded setup consisting of several singles or replica sets')
 		parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (NUM must be 1 or 3, requires --sharded)')
 
-		# verbose, port, mongo
-		parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards')
-		# TODO parser.add_argument('--mongo', action='store_true', default=False, help='start mongo shell and connect to mongod (--single), primary mongod (--replicaset), or mongos (--sharded)')
+		# verbose, port, auth, loglevel
 		parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
+		parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards')
+		parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+		parser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (0 default)')
 
 		self.args = vars(parser.parse_args())
 		if self.args['verbose']:
@@ -63,6 +64,14 @@ class MongoLauncher(object):
 
 
 	def launch(self):
+		# check if authentication is enabled
+		if self.args['authentication']:
+			datapath = os.path.join(self.args['dir'], 'data')
+			if not os.path.exists(datapath):
+				os.makedirs(datapath)
+			os.system('openssl rand -base64 753 > %s/keyfile'%datapath)
+			os.system('chmod 600 %s/keyfile'%datapath)
+
 		if self.args['sharded']:
 			self._launchSharded()
 		elif self.args['single']:
@@ -70,6 +79,17 @@ class MongoLauncher(object):
 		elif self.args['replicaset']:
 			self._launchReplSet(self.args['dir'], self.args['port'], self.args['name'], self.args['nodes'], self.args['arbiter'], self.args['verbose'])
 
+		# # create admin user
+		# if self.args['authentication']:
+		# 	if self.args['sharded']:
+		# 		port = self.mongos_port
+		# 	else:
+		# 		port = self.args['port']
+		# 	con = Connection('localhost:%i'%port)
+
+		# 	while con['admin']['users'].count() == 0:
+		# 		try:
+		# 	con['admin'].add_user('admin', 'mypassword')
 
 	def _createPaths(self, basedir, name=None, verbose=False):
 		if name:
@@ -126,17 +146,24 @@ class MongoLauncher(object):
 			nextport += 1
 		
 		# start up mongos
-		self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string), verbose=self.args['verbose'])
-		mongos_host = '%s:%i'%(self.hostname, nextport)
+		self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string), auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=self.args['verbose'])
+		self.mongos_host = '%s:%i'%(self.hostname, nextport)
 
 		# add shards
 		print "adding shards (can take a few seconds) ..."
 
-		con = Connection(mongos_host)
+		con = Connection(self.mongos_host)
 
 		shards_to_add = len(shard_names)
 
-		while (con['config']['shards'].count() < shards_to_add):
+		while True:
+			try:
+				nshards = con['config']['shards'].count()
+			except:
+				nshards = 0
+			if nshards >= shards_to_add:
+				break
+
 			for shard in shard_names:
 				try:
 					res = con['admin'].command({'addShard':shard})
@@ -157,13 +184,15 @@ class MongoLauncher(object):
 			time.sleep(1)
 
 
+
+
 	def _launchReplSet(self, basedir, portstart, name, numdata, arbiter, verbose=False):
 		threads = []
 		configDoc = {'_id':name, 'members':[]}
 
 		for i in range(numdata):
 			datapath = self._createPaths(basedir, '%s/rs%i'%(name, i+1), verbose)
-			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, verbose=verbose)
+			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
 		
 			host = '%s:%i'%(self.hostname, portstart+i)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
@@ -174,7 +203,7 @@ class MongoLauncher(object):
 		# launch arbiter if True
 		if arbiter:
 			datapath = self._createPaths(basedir, '%s/arb'%(name), verbose)
-			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+numdata, replset=name, verbose=verbose)
+			self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+numdata, replset=name, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
 			
 			host = '%s:%i'%(self.hostname, portstart+numdata)
 			configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
@@ -191,7 +220,8 @@ class MongoLauncher(object):
 		print "all mongod processes for replica set '%s' running."%name
 
 		# initiate replica set
-		con = Connection('%s:%i'%(self.hostname, portstart))
+		con = Connection('localhost:%i'%portstart)
+
 		try:
 			rs_status = con['admin'].command({'replSetGetStatus': 1})
 		except OperationFailure, e:
@@ -204,7 +234,7 @@ class MongoLauncher(object):
 
 	def _launchConfig(self, basedir, port, name=None, verbose=False):
 		datapath = self._createPaths(basedir, name, verbose)
-		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, extra='--configsvr')
+		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, auth=self.args['authentication'], loglevel=self.args['loglevel'], extra='--configsvr')
 
 		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
@@ -217,7 +247,7 @@ class MongoLauncher(object):
 
 	def _launchSingle(self, basedir, port, name=None, verbose=False):
 		datapath = self._createPaths(basedir, name, verbose)
-		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose)
+		self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
 
 		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
@@ -230,25 +260,44 @@ class MongoLauncher(object):
 		return host
 
 
-	def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, extra=''):
+	def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, auth=False, loglevel=False, extra=''):
+		rs_param = ''
 		if replset:
 			rs_param = '--replSet %s'%replset
-		else:
-			rs_param = ''
 
-		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+		auth_param = ''
+		if auth:
+			key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+			auth_param = '--keyFile %s'%key_path
+
+		log_param = ''
+		if loglevel:
+			log_param = '-' + ''.join(['v']*loglevel)
+
+		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(rs_param, dbpath, logpath, port, auth_param, log_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
-			print 'launching: mongod %s --dbpath %s --logpath %s --port %i --logappend %s --fork'%(rs_param, dbpath, logpath, port, extra)
+			print 'launching: mongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(rs_param, dbpath, logpath, port, auth_param, log_param, extra)
+
+		return ret
 
 
-	def _launchMongoS(self, logpath, port, configdb, verbose=False):
+	def _launchMongoS(self, logpath, port, configdb, auth=False, loglevel=False, verbose=False):
 		out = subprocess.PIPE
 		if verbose:
 			out = None
 
-		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+		auth_param = ''
+		if auth:
+			key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+			auth_param = '--keyFile %s'%key_path
+
+		log_param = ''
+		if loglevel:
+			log_param = '-' + ''.join(['v']*loglevel)
+
+		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(logpath, port, configdb, auth_param, log_param)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
-			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend --fork'%(logpath, port, configdb)
+			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(logpath, port, configdb, auth_param, log_param)
 		
 		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
