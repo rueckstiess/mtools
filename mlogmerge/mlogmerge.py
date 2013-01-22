@@ -60,7 +60,7 @@ class MongoLogMerger(object):
 			args['timezone'] = [0] * len(logfiles)
 
 		else:
-			raise SystemExit('Error: Invalid number of timezone parameters. Use either 1 (for global adjustment) or the number of logfiles (for individual adjustments).')
+			raise SystemExit('Error: Invalid number of timezone parameters. Use either one parameter (for global adjustment) or the number of log files (for individual adjustments).')
 
 		# handle position parameter
 		position = args['pos']
