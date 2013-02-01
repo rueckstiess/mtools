@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import argparse, re
-from filters import WordFilter, SlowFilter, DateTimeFilter
+from filters import WordFilter, SlowFilter, TableScanFilter, DateTimeFilter
 import sys
 
 
@@ -92,6 +92,7 @@ if __name__ == '__main__':
     # add filters
     mlogfilter.addFilter(SlowFilter)
     mlogfilter.addFilter(WordFilter)
+    mlogfilter.addFilter(TableScanFilter)
     mlogfilter.addFilter(DateTimeFilter)
     
     # start parsing

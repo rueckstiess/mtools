@@ -62,7 +62,6 @@ class WordFilter(BaseFilter):
         return False
 
 
-
 class SlowFilter(BaseFilter):
     """ accepts only if the line contains a string described by the regular
         expression '[0-9]{4,}ms'. These are queries taking longer than 1sec.
@@ -78,6 +77,30 @@ class SlowFilter(BaseFilter):
 
     def accept(self, line):
         return re.search(r'\d{4,}ms', line)
+
+
+
+class TableScanFilter(BaseFilter):
+    """ accepts only if the line contains a nscanned:[0-9] nreturned:[0-9] where the ratio of nscanned:nreturned is > 100 and nscanned > 10000
+    """
+    filterArgs = [
+        ('--scan', {'action':'store_true', 'help':'only output lines which appear to be table scans (ratio of nscanned to nreturned > 100)'})
+    ]
+
+    def __init__(self, commandLineArgs):
+        BaseFilter.__init__(self, commandLineArgs)
+        if 'scan' in self.commandLineArgs:
+            self.active = self.commandLineArgs['scan']
+
+    def accept(self, line):
+
+        match = re.search(r'nscanned:([0-9]+)\s+nreturned:([0-9]+)', line)
+        if match:
+            ns = int(match.group(1))
+            nr = int(match.group(2))
+            return (ns > 10000 and ns/nr > 100)
+
+        return False
 
 
 
