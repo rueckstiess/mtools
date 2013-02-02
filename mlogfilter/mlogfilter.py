@@ -33,14 +33,14 @@ class MongoLogFilter(object):
         """
 
         # create parser object
-        parser = argparse.ArgumentParser(description='mongod/mongos log file parser.')
+        parser = argparse.ArgumentParser(description='mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.')
         
         # only create default argument if not using stdin
         if sys.stdin.isatty():
             parser.add_argument('logfile', action='store', help='logfile to parse.')
         
         parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
-        parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH.')
+        parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
 
         # add arguments from filter classes
         for f in self.filters:
