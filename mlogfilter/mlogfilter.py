@@ -21,6 +21,12 @@ class MongoLogFilter(object):
         else:
             return arr
 
+    def _outputLine(self, line, length=None):
+        if length:
+            if len(line) > length:
+                line = line[:length/2-2] + '...' + line[-length/2:]
+        print line, 
+
     def parse(self):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
@@ -34,47 +40,51 @@ class MongoLogFilter(object):
             parser.add_argument('logfile', action='store', help='logfile to parse.')
         
         parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
+        parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH.')
 
         # add arguments from filter classes
         for f in self.filters:
             for fa in f.filterArgs:
                 parser.add_argument(fa[0], **fa[1])
 
-        args = vars(parser.parse_args())
-        args = dict((k, self._arrayToString(args[k])) for k in args)
+        self.args = vars(parser.parse_args())
+        self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
         
-        if args['verbose']:
-            print args
+        # if self.args['verbose']:
+        #     print self.args
 
         # create filter objects from classes and pass args
-        self.filters = [f(args) for f in self.filters]
+        self.filters = [f(self.args) for f in self.filters]
 
         # remove non-active filter objects
         self.filters = [f for f in self.filters if f.active]
 
         # open logfile
         if sys.stdin.isatty():
-            logfile = open(args['logfile'], 'r')
+            logfile = open(self.args['logfile'], 'r')
         else:
             logfile = sys.stdin
 
+        if self.args['shorten'] != False:
+            if self.args['shorten'] == None:
+                self.args['shorten'] = 200        
 
-        if args['verbose']:
+        if self.args['verbose']:
             print "mlogfilter> command line arguments"
-            for a in args:
-                print "mlogfilter> %8s: %s" % (a, args[a])
+            for a in self.args:
+                print "mlogfilter> %8s: %s" % (a, self.args[a])
 
         # go through each line and ask each filter if it accepts
         for line in logfile:
 
             # special case: if line starts with ***, always print (server restart)
             if line.startswith('***'):
-                print line,
+                self._outputLine(line, self.args['shorten'])
                 continue
 
             # only print line if all filters agree
             if all([f.accept(line) for f in self.filters]):
-                print line,
+                self._outputLine(line, self.args['shorten'])
 
             # if at least one filter refuses to print remaining lines, stop
             if any([f.skipRemaining() for f in self.filters]):
