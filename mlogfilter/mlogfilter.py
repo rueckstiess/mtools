@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import argparse, re
-from filters import WordFilter, SlowFilter, TableScanFilter, DateTimeFilter
+from filters import *
 import sys
 
 
@@ -31,7 +31,7 @@ class MongoLogFilter(object):
         
         # only create default argument if not using stdin
         if sys.stdin.isatty():
-            parser.add_argument('logfile', action='store', nargs='?', help='logfile to parse.')
+            parser.add_argument('logfile', action='store', help='logfile to parse.')
         
         parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
 

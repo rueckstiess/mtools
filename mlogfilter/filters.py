@@ -63,21 +63,25 @@ class WordFilter(BaseFilter):
 
 
 class SlowFilter(BaseFilter):
-    """ accepts only if the line contains a string described by the regular
-        expression '[0-9]{4,}ms'. These are queries taking longer than 1sec.
+    """ accepts only lines that have a duration ([0-9]+ms) at the end of the line and where the
+        duration is longer than the specified parameter in ms (default 1000).
     """
     filterArgs = [
-        ('--slow', {'action':'store_true', 'help':'only output lines with query times longer than 1000 ms'})
+        ('--slow', {'action':'store', 'nargs':'?', 'default':1000, 'type':int, 'help':'only output lines with query times longer than SLOW ms (default 1000)'})
     ]
 
     def __init__(self, commandLineArgs):
         BaseFilter.__init__(self, commandLineArgs)
         if 'slow' in self.commandLineArgs:
-            self.active = self.commandLineArgs['slow']
+            self.active = True
+            self.slowms = self.commandLineArgs['slow']
 
     def accept(self, line):
-        return re.search(r'\d{4,}ms', line)
-
+        match = re.search(r'(\d+)ms$', line)
+        if match:
+            ms = int(match.group(1))
+            return ms >= self.slowms
+        return False
 
 
 class TableScanFilter(BaseFilter):
