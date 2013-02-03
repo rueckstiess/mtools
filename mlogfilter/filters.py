@@ -101,11 +101,15 @@ class TableScanFilter(BaseFilter):
             self.active = self.commandLineArgs['scan']
 
     def accept(self, line):
+        match_s = re.search(r'nscanned:([0-9]+)', line)
+        match_r = re.search(r'nreturned:([0-9]+)', line)
 
-        match = re.search(r'nscanned:([0-9]+)\s+nreturned:([0-9]+)', line)
-        if match:
-            ns = int(match.group(1))
-            nr = int(match.group(2))
+        if match_s and match_r:
+            ns = int(match_s.group(1))
+            nr = int(match_r.group(1))
+            if nr == 0:
+                # avoid division by 0 errors
+                nr = 1
             return (ns > 10000 and ns/nr > 100)
 
         return False
