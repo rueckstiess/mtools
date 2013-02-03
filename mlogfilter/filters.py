@@ -78,7 +78,6 @@ class SlowFilter(BaseFilter):
                 self.slowms = 1000
             else:
                 self.slowms = self.commandLineArgs['slow']
-            print self.slowms
 
     def accept(self, line):
         match = re.search(r'(\d+)ms$', line)
