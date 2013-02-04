@@ -89,6 +89,7 @@ class MongoPlotQueries(object):
             parser.add_argument('filename', action='store', help='logfile to parse')
         
         parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
+        parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
 
         self.args = vars(parser.parse_args())
@@ -128,12 +129,17 @@ class MongoPlotQueries(object):
             d = date2num(dates[ns])
             plt.plot_date(d, durations_arr, self.markers[(i/7) % len(self.markers)], alpha=0.5, markersize=7, label=ns)
 
-        plt.ylabel('query duration in ms')
         plt.xlabel('time')
 
         plt.gca().xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
-
         plt.xticks(rotation=90, fontsize=10)
+
+        # log y axis
+        if self.args['log']:
+            plt.gca().set_yscale('log')
+            plt.ylabel('query duration in ms (log scale)')
+        else:
+            plt.ylabel('query duration in ms')
 
         plt.legend(loc='upper left', frameon=False, fontsize=9)
         plt.show()
