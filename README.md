@@ -254,3 +254,26 @@ excess characters from the middle and replacing them with "...".
 
             --from 20:15 --to +3m  
                 goes from today's date at 20:15:00 to today's date at 20:18:00
+
+
+
+<hr> 
+
+
+mtools combined
+---------------
+
+The scripts in the mtools collection can be used with the shell pipe syntax and can be easily 
+combined to quickly create complex analytical queries.
+
+Example:
+
+    mlogmerge mongod_prim.log mongod_sec.log mongod_arb.log --label [pri] [sec] [arb] | 
+        grep -v writebacklisten | 
+        mlogfilter --slow --from Jan 30 20:16 --to +1h | 
+        mplotqueries --log
+
+This combination of commands merges the log files of a primary, secondary, and arbiter node, 
+removes the 300 second writebacklisten commands, filters out only the slow queries from Jan 30 
+at 20:16pm for 1 hour, and then plots the results.    
+
