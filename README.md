@@ -137,7 +137,10 @@ A script that takes log files as input and merges them by date/time.
                             'filename', 'none' or a list of labels (must
                             match number of logfiles)
       --pos POS             position where label is printed in line. 
-                            either a number (default: 0) or 'eol'
+                            either a number (default: 4) or 'eol'
+      --timezone [N [N ..]] timezone adjustments: add N hours to 
+                            corresponding log file. If only one number
+                            is given, adjust globally
 
 
 <hr>
@@ -164,6 +167,8 @@ A script to plot query durations in a logfile (requires numpy and matplotlib mod
       -h, --help                   show this help message and exit
       --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
       --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
+      --log                        plot y-axis in logarithmic scale (default=off)
+
 
 
 <hr> 
@@ -175,8 +180,10 @@ mlogfilter
 
 A filter script to reduce the amount of information from MongoDB log files.  
 Currently, the script supports filtering by time (from - to), to only show 
-slow queries, to filter by arbitrary keywords, or any combination
-of these filters.
+slow queries, to filter by arbitrary keywords, to detect table scans (heuristic)
+or any combination of these filters. Additionally, the --shorten option can 
+shorten log lines to the given value (default is 200 characters), cutting out
+excess characters from the middle and replacing them with "...".
 
 
     usage: mlogfilter logfile [-h] [--from FROM] [--to TO] [--word WORDS] [--slow]
@@ -188,6 +195,10 @@ of these filters.
       -h, --help            show this help message and exit
       --from FROM           output starting at FROM
       --to TO               output up to TO
+      --shorten [LENGTH]    shortens long lines by cutting characters out of the
+                            middle until the length is <= LENGTH (default 200)
+      --scan                only output lines which appear to be table scans (if
+                            nscanned>10000 and ratio of nscanned to nreturned>100)
       --word WORDS          only output lines matching any of WORDS
       --slow                only output lines with query times longer than 1000 ms
 
