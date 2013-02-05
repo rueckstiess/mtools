@@ -124,7 +124,9 @@ mlogmerge
 
 #### Description
 
-A script that takes log files as input and merges them by date/time. 
+A script that takes log files as input and merges them by date/time. Each line receives an additional "tag", which
+indicates the original file name. Tags can be generated automatically, different styles (enum, alpha, filename) are
+available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
     
     usage: mlogmerge logfiles [-h | --help] [--label LABELS] [--pos POS]
 
