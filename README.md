@@ -105,17 +105,18 @@ Launch single mongod instance
 
     mlaunch --single
 
-Launch replica set with 2 data nodes and 1 arbiter
+Launch replica set with 2 data nodes and 1 arbiter, use authentication
 
-    mlaunch --replicaset --nodes 2 --arbiter
+    mlaunch --replicaset --nodes 2 --arbiter --authentication
 
-Launch sharded cluster with 3 shards, each consisting of a replicaset with 3 nodes, increase loglevel to 3
+Launch sharded cluster with 2 shards, each consisting of a replicaset with 3 nodes, increase loglevel to 3
 
-    mlaunch --sharded 3 --replicaset --loglevel 3
+    mlaunch --sharded 2 --replicaset --loglevel 3
 
-Launch sharded cluster with 1 shard, single mongod, with authentication, use port 30000, and print mongod command used
+Launch sharded cluster with 3 shards called tic, tac and toe, each of them a single mongod, add 3 config servers 
+start from port 30000, and print mongod commands used
 
-    mlaunch --sharded --single --port 30000 --verbose
+    mlaunch --sharded tic tac toe --single --config 3 --port 30000 --verbose
 
 <hr>
 
