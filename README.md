@@ -32,7 +32,13 @@ directory of your choice:
     git clone git://github.com/rueckstiess/mtools.git
 
 This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
-and check out the code there.
+and check out the code there. Make sure that the parent directory of mtools is set in 
+your PYTHONPATH environment variable. If you use the _bash_ shell, you can do so by 
+adding a line
+
+    export PYTHONPATH=$PYTHONPATH:/parent/directory/of/mtools
+
+to your `.bashrc` script. Other shells may have a different syntax.
 
 
 #### Command style usage
