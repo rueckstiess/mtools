@@ -20,7 +20,14 @@ directory of your choice:
     git clone git://github.com/rueckstiess/mtools.git
 
 This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
-and check out the code there.
+and check out the code there. Make sure that the parent directory of mtools is set in 
+your PYTHONPATH environment variable. If you use the _bash_ shell, you can do so by 
+adding a line
+
+    export PYTHONPATH=$PYTHONPATH:/parent/directory/of/mtools
+
+to your `.bashrc` script. Other shells may have a different syntax.
+
 
 #### Command style usage
 
@@ -95,22 +102,6 @@ Depending on your user rights, it may complain about not having permissions to i
 In that case, you need to precede the command with a `sudo`.
 
 
-#### NumPy
-
-*required for mplotqueries*
-
-[NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations.
-Try installing NumPy with pip, by doing:
-
-    pip install numpy
-
-Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
-
-If this doesn't work for you, you can install a binary or install from source code. Refer to the 
-installation instructions on the [NumPy](http://numpy.scipy.org/) page.
-
-
 #### Matplotlib
 
 *required for mplotqueries*
@@ -128,4 +119,21 @@ In that case, you need to precede the command with a `sudo`.
 If this doesn't work for you, there are a number of alternative ways to install matplotlib. Refer
 to the [matplotlib installation page](http://matplotlib.org/users/installing.html) for additional
 information.
+
+
+#### NumPy
+
+*required for matplotlib (in mplotqueries)*
+
+[NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations.
+Try installing NumPy with pip, by doing:
+
+    pip install numpy
+
+Depending on your user rights, it may complain about not having permissions to install the module. 
+In that case, you need to precede the command with a `sudo`.
+
+If this doesn't work for you, you can install a binary or install from source code. Refer to the 
+installation instructions on the [NumPy](http://numpy.scipy.org/) page.
+
 

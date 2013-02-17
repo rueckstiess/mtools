@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-from mtools.mtoolbox.extractdate import extractDateTime
+from mtools.mtoolbox.logline import LogLine
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 import argparse, re
 
 class MongoLogMerger(object):
-	""" Merges several MongoDB log files by their date and time. 
-		currently implemented options:
-			logfiles          list of logfiles to merge
+    """ Merges several MongoDB log files by their date and time. 
+        currently implemented options:
+            logfiles          list of logfiles to merge
             -l, --labels      can be any of 'enum', 'alpha', 'none', 'filename', or a list of labels (must be same length as number of files)
             -p, --pos         position of label (default: 0, beginning of line). Another good choice is 5, putting the label behind the [] token, or 'eol'
 
@@ -19,113 +19,120 @@ class MongoLogMerger(object):
 
     """
 
-	def merge(self):
-		# create parser object
-		parser = argparse.ArgumentParser(description='mongod/mongos log file merger.')
-		parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
-		# parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
-		parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files')
-		parser.add_argument('--pos', action='store', default=4, help="position of label (0 = front of line, other options are # or 'eol'")
-		parser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
-
-		args = vars(parser.parse_args())
-
-		# handle logfiles parameter
-		logfiles = args['logfiles']
-
-		# handle labels parameter
-		if len(args['labels']) == 1:
-			label = args['labels'][0]
-			if label == 'enum':
-				labels = ['{%i}'%(i+1) for i in range(len(logfiles))]
-			elif label == 'alpha':
-				labels = ['{%s}'%chr(97+i) for i in range(len(logfiles))]
-			elif label == 'none':
-				labels = [None for _ in logfiles]
-			elif label == 'filename':
-				labels = ['{%s}'%fn for fn in logfiles]
-		elif len(args['labels']) == len(logfiles):
-			labels = args['labels']
-		else:
-			raise SystemExit('Error: Number of labels not the same as number of files.')
-
-		# handle timezone parameter
-		if len(args['timezone']) == 1:
-			args['timezone'] = args['timezone'] * len(logfiles)
-
-		elif len(args['timezone']) == len(logfiles):
-			pass
-
-		elif len(args['timezone']) == 0:
-			args['timezone'] = [0] * len(logfiles)
-
-		else:
-			raise SystemExit('Error: Invalid number of timezone parameters. Use either one parameter (for global adjustment) or the number of log files (for individual adjustments).')
-
-		# handle position parameter
-		position = args['pos']
-		if position != 'eol':
-			position = int(position)
-
-		# define minimum and maximum datetime object
-		mindate = datetime(MINYEAR, 1, 1, 0, 0, 0)
-		maxdate = datetime(MAXYEAR, 12, 31, 23, 59, 59)
-
-		# open files, read first lines, extract first dates
-		openFiles = [open(f, 'r') for f in args['logfiles']]
-		lines = [f.readline() for f in openFiles]
-		dates = [extractDateTime(l) for l in lines]
-		
-		# replace all non-dates with mindate
-		dates = [d if d else mindate for d in dates]
-
-		dates = [d + timedelta(hours=args['timezone'][i]) for i,d in enumerate(dates) if d]
+    def _extract_datetime(self, line):
+        """ Wrapper for LogLine._extract_datetime(). Use auto_parse=False to only parse the datetime and nothing else for speed improvement. """
+        logline = LogLine(line, auto_parse=False)
+        logline._extract_datetime()
+        return logline.datetime
 
 
-		while any([l != '' for l in lines]):
-			# pick smallest date of all non-empty lines
-			condDates = ([d if lines[i] != '' else maxdate for i,d in enumerate(dates)])
-			minCondDate = min(condDates)
-			minIndex = condDates.index(minCondDate)
+    def merge(self):
+        # create parser object
+        parser = argparse.ArgumentParser(description='mongod/mongos log file merger.')
+        parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
+        # parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
+        parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files')
+        parser.add_argument('--pos', action='store', default=4, help="position of label (0 = front of line, other options are # or 'eol'")
+        parser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
 
-			# print out current line
-			currLine = lines[minIndex].rstrip()
-			oldDate = minCondDate - timedelta(hours=args['timezone'][minIndex])
-			if minCondDate != mindate:
-				currLine = currLine.replace(oldDate.strftime('%a %b %d %H:%M:%S'), minCondDate.strftime('%a %b %d %H:%M:%S'))
+        args = vars(parser.parse_args())
 
-			if labels[minIndex]:
-				if position == 0 or minCondDate == mindate:
-					print labels[minIndex], currLine
-				elif position == 'eol':
-					print currLine, labels[minIndex]
-				else:
-					tokens = currLine.split()
-					print " ".join(tokens[:position]), labels[minIndex], " ".join(tokens[position:])
+        # handle logfiles parameter
+        logfiles = args['logfiles']
+
+        # handle labels parameter
+        if len(args['labels']) == 1:
+            label = args['labels'][0]
+            if label == 'enum':
+                labels = ['{%i}'%(i+1) for i in range(len(logfiles))]
+            elif label == 'alpha':
+                labels = ['{%s}'%chr(97+i) for i in range(len(logfiles))]
+            elif label == 'none':
+                labels = [None for _ in logfiles]
+            elif label == 'filename':
+                labels = ['{%s}'%fn for fn in logfiles]
+        elif len(args['labels']) == len(logfiles):
+            labels = args['labels']
+        else:
+            raise SystemExit('Error: Number of labels not the same as number of files.')
+
+        # handle timezone parameter
+        if len(args['timezone']) == 1:
+            args['timezone'] = args['timezone'] * len(logfiles)
+
+        elif len(args['timezone']) == len(logfiles):
+            pass
+
+        elif len(args['timezone']) == 0:
+            args['timezone'] = [0] * len(logfiles)
+
+        else:
+            raise SystemExit('Error: Invalid number of timezone parameters. Use either one parameter (for global adjustment) or the number of log files (for individual adjustments).')
+
+        # handle position parameter
+        position = args['pos']
+        if position != 'eol':
+            position = int(position)
+
+        # define minimum and maximum datetime object
+        mindate = datetime(MINYEAR, 1, 1, 0, 0, 0)
+        maxdate = datetime(MAXYEAR, 12, 31, 23, 59, 59)
+
+        # open files, read first lines, extract first dates
+        openFiles = [open(f, 'r') for f in args['logfiles']]
+        lines = [f.readline() for f in openFiles]
+        dates = [self._extract_datetime(l) for l in lines]
+        
+        # replace all non-dates with mindate
+        dates = [d if d else mindate for d in dates]
+
+        dates = [d + timedelta(hours=args['timezone'][i]) for i,d in enumerate(dates) if d]
 
 
-			else:
-				print currLine
+        while any([l != '' for l in lines]):
+            # pick smallest date of all non-empty lines
+            condDates = ([d if lines[i] != '' else maxdate for i,d in enumerate(dates)])
+            minCondDate = min(condDates)
+            minIndex = condDates.index(minCondDate)
 
-			# update lines and dates for that line
-			lines[minIndex] = openFiles[minIndex].readline()
-			dates[minIndex] = extractDateTime(lines[minIndex])
+            # print out current line
+            currLine = lines[minIndex].rstrip()
+            oldDate = minCondDate - timedelta(hours=args['timezone'][minIndex])
+            if minCondDate != mindate:
+                currLine = currLine.replace(oldDate.strftime('%a %b %d %H:%M:%S'), minCondDate.strftime('%a %b %d %H:%M:%S'))
+
+            if labels[minIndex]:
+                if position == 0 or minCondDate == mindate:
+                    print labels[minIndex], currLine
+                elif position == 'eol':
+                    print currLine, labels[minIndex]
+                else:
+                    tokens = currLine.split()
+                    print " ".join(tokens[:position]), labels[minIndex], " ".join(tokens[position:])
 
 
-			if not dates[minIndex]:
-				dates[minIndex] = mindate 
-			else:
-				dates[minIndex] += timedelta(hours=args['timezone'][minIndex])
+            else:
+                print currLine
 
-			# end of file reached, print newline
-			# if position != 'eol' and lines[minIndex] == '':
-			# 	print
+            # update lines and dates for that line
+            lines[minIndex] = openFiles[minIndex].readline()
+            dates[minIndex] = self._extract_datetime(lines[minIndex])
 
-		# close files
-		for f in openFiles:
-			f.close()
+
+            if not dates[minIndex]:
+                dates[minIndex] = mindate 
+            else:
+                dates[minIndex] += timedelta(hours=args['timezone'][minIndex])
+
+            # end of file reached, print newline
+            # if position != 'eol' and lines[minIndex] == '':
+            #   print
+
+        # close files
+        for f in openFiles:
+            f.close()
 
 
 if __name__ == '__main__':
-	mlogmerge = MongoLogMerger()
-	mlogmerge.merge()
+    mlogmerge = MongoLogMerger()
+    mlogmerge.merge()

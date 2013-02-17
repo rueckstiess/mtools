@@ -159,7 +159,7 @@ See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.m
 
 #### Description
 
-A script to plot query durations in a logfile (requires numpy and matplotlib modules).
+A script to plot query durations in a logfile (requires numpy and matplotlib packages).
     
     usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
                
@@ -173,6 +173,32 @@ A script to plot query durations in a logfile (requires numpy and matplotlib mod
       --log                        plot y-axis in logarithmic scale (default=off)
 
 
+
+<hr>
+
+mlog2json
+---------
+
+#### Description
+
+A script to convert mongod/mongos log files to JSON. The script extracts information
+from each line of the log file and outputs a JSON document for each line.  
+    
+    usage: mlog2json logfile [-h]
+               
+    positional arguments: 
+      logfile              log file to convert
+
+    optional arguments:
+      -h, --help                   show this help message and exit
+
+
+A common usecase for this tool is to import the JSON documents back into mongodb for
+further processing. This can easily be done with `mongoimport`. The usage is:
+
+    mlog2json logfile | mongoimport -d DATABASE -c COLLECTION
+
+You need a running mongod/mongos process to import the data.
 
 <hr> 
 
