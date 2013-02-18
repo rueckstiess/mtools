@@ -4,6 +4,18 @@ A collection of helper scripts to set up MongoDB test environments and
 parse MongoDB log files (mongod, mongos). 
 
 
+What's in the box?
+------------------
+
+The following tools are currently in the mtools collection:
+
+* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
+* mlogmerge -- merge several logfiles by time, includes time zone adjustments
+* mlogfilter -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* mlog2json -- convert each line of a log file to a JSON document and pipe to mongoimport
+* mplotqueries -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
+
+
 Requirements and Installation Instructions
 ------------------------------------------
 
@@ -11,7 +23,7 @@ The mtools collection is written in Python, and most of the tools only make
 use the standard packages shipped with Python, and should run out of the box.
 
 Some of the tools have additional dependencies, which are listed under the 
-specific tool's section. See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation 
+specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation 
 instructions for these modules.
 
 #### Python
@@ -25,7 +37,7 @@ Python 3.x is currently not supported.
 
 #### mtools installation
 
-Clone the [mtools github repository](https://github.com/rueckstiess/mtools) into a 
+Clone the [mtools github repository](.) into a 
 directory of your choice:
 
     cd /path/to/github/repos
@@ -64,7 +76,7 @@ mlaunch
 ##### Additional dependencies
 - pymongo 
 
-See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation instructions of these dependencies.
+See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
 
 #### Description
 
@@ -161,7 +173,7 @@ mplotqueries
 - NumPy
 - matplotlib
 
-See the [INSTALL.md](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md) file for installation instructions of these dependencies.
+See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
 
 #### Description
 
