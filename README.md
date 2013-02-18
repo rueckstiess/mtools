@@ -7,13 +7,15 @@ parse MongoDB log files (mongod, mongos).
 What's in the box?
 ------------------
 
-The following tools are currently in the mtools collection:
+The following tools are in the mtools collection:
 
 * [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
-* mlogmerge -- merge several logfiles by time, includes time zone adjustments
-* mlogfilter -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* mlog2json -- convert each line of a log file to a JSON document and pipe to mongoimport
-* mplotqueries -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
+* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
+* [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document and pipe to mongoimport
+* [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
+
+Watch this spot, new tools will be added soon.
 
 
 Requirements and Installation Instructions
@@ -26,7 +28,7 @@ Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation 
 instructions for these modules.
 
-#### Python
+#### Python\
 You will need to have a version of Python installed for all the scripts
 below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
 module separately (you can use `pip` to install it, see below). To check your
