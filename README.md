@@ -9,14 +9,15 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
-* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
+* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
+* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
+* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
 
 Watch this spot, new tools will be added soon.
 
+<hr>
 
 Requirements and Installation Instructions
 ------------------------------------------
@@ -69,158 +70,6 @@ you can do so by adding a line
 
 to your `.bashrc` script. Other shells may have a different syntax.
 
-
-<hr>
-
-mlaunch
--------
-
-##### Additional dependencies
-- pymongo 
-
-See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
-
-#### Description
-
-This script lets you quickly spin up MongoDB environments on your local
-machine. It supports various configurations of stand-alone servers, 
-replica sets and sharded clusters.
-
-    usage: mlaunch [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
-                   [--name NAME] [--sharded [N [N ...]]] [--config NUM]
-                   [--verbose] [--port PORT] [--authentication]
-                   [--loglevel LOGLEVEL]
-                   [dir]
-
-    script to launch MongoDB stand-alone servers, replica sets, and shards
-
-    positional arguments:
-      dir                   base directory to create db and log paths
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --single              creates a single stand-alone mongod instance
-      --replicaset          creates replica set with several mongod instances
-      --nodes NUM           adds NUM data nodes to replica set (requires
-                            --replicaset, default: 3)
-      --arbiter             adds arbiter to replica set (requires --replicaset)
-      --name NAME           name for replica set (default: replset)
-      --sharded [N [N ...]]
-                            creates a sharded setup consisting of several singles
-                            or replica sets. Provide either list of shard names or
-                            number of shards (default: 1)
-      --config NUM          adds NUM config servers to sharded setup (requires
-                            --sharded, NUM must be 1 or 3, default: 1)
-      --verbose             outputs information about the launch
-      --port PORT           port for mongod, start of port range in case of
-                            replica set or shards (default: 27017)
-      --authentication      enable authentication and create a key file and admin
-                            user (admin/mypassword)
-      --loglevel LOGLEVEL   increase loglevel to LOGLEVEL (default: 0)
-
-
-#### Examples
-
-Launch single mongod instance
-
-    mlaunch --single
-
-Launch replica set with 2 data nodes and 1 arbiter, use authentication
-
-    mlaunch --replicaset --nodes 2 --arbiter --authentication
-
-Launch sharded cluster with 2 shards, each consisting of a replicaset with 3 nodes, increase loglevel to 3
-
-    mlaunch --sharded 2 --replicaset --loglevel 3
-
-Launch sharded cluster with 3 shards called tic, tac and toe, each of them a single mongod, add 3 config servers 
-start from port 30000, and print mongod commands used
-
-    mlaunch --sharded tic tac toe --single --config 3 --port 30000 --verbose
-
-<hr>
-
-mlogmerge
----------
-
-#### Description
-
-A script that takes log files as input and merges them by date/time. Each line receives an additional "tag", which
-indicates the original file name. Tags can be generated automatically, different styles (enum, alpha, filename) are
-available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
-    
-    usage: mlogmerge logfiles [-h | --help] [--label LABELS] [--pos POS]
-
-    positional arguments: 
-      logfiles              list of logfiles to merge
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --labels LABELS       either one of 'enum' (default), 'alpha', 
-                            'filename', 'none' or a list of labels (must
-                            match number of logfiles)
-      --pos POS             position where label is printed in line. 
-                            either a number (default: 4) or 'eol'
-      --timezone [N [N ..]] timezone adjustments: add N hours to 
-                            corresponding log file. If only one number
-                            is given, adjust globally
-
-
-<hr>
-
-mplotqueries
-------------
-
-#### Additional dependencies
-- NumPy
-- matplotlib
-
-See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
-
-#### Description
-
-A script to plot query durations in a logfile (requires numpy and matplotlib packages).
-    
-    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
-               
-    positional arguments: 
-      filename              log file to plot
-
-    optional arguments:
-      -h, --help                   show this help message and exit
-      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
-      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
-      --log                        plot y-axis in logarithmic scale (default=off)
-
-
-
-<hr>
-
-mlog2json
----------
-
-#### Description
-
-A script to convert mongod/mongos log files to JSON. The script extracts information
-from each line of the log file and outputs a JSON document for each line.  
-    
-    usage: mlog2json logfile [-h]
-               
-    positional arguments: 
-      logfile              log file to convert
-
-    optional arguments:
-      -h, --help                   show this help message and exit
-
-
-A common usecase for this tool is to import the JSON documents back into mongodb for
-further processing. This can easily be done with `mongoimport`. The usage is:
-
-    mlog2json logfile | mongoimport -d DATABASE -c COLLECTION
-
-You need a running mongod/mongos process to import the data.
-
-<hr> 
 
 mlogfilter
 ----------
@@ -306,6 +155,156 @@ excess characters from the middle and replacing them with "...".
 
 <hr> 
 
+
+mlogmerge
+---------
+
+#### Description
+
+A script that takes log files as input and merges them by date/time. Each line receives an additional "tag", which
+indicates the original file name. Tags can be generated automatically, different styles (enum, alpha, filename) are
+available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
+    
+    usage: mlogmerge logfiles [-h | --help] [--label LABELS] [--pos POS]
+
+    positional arguments: 
+      logfiles              list of logfiles to merge
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --labels LABELS       either one of 'enum' (default), 'alpha', 
+                            'filename', 'none' or a list of labels (must
+                            match number of logfiles)
+      --pos POS             position where label is printed in line. 
+                            either a number (default: 4) or 'eol'
+      --timezone [N [N ..]] timezone adjustments: add N hours to 
+                            corresponding log file. If only one number
+                            is given, adjust globally
+
+
+<hr>
+
+mplotqueries
+------------
+
+#### Additional dependencies
+- NumPy
+- matplotlib
+
+See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
+
+#### Description
+
+A script to plot query durations in a logfile (requires numpy and matplotlib packages).
+    
+    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
+               
+    positional arguments: 
+      filename              log file to plot
+
+    optional arguments:
+      -h, --help                   show this help message and exit
+      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
+      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
+      --log                        plot y-axis in logarithmic scale (default=off)
+
+
+
+<hr>
+
+mlog2json
+---------
+
+#### Description
+
+A script to convert mongod/mongos log files to JSON. The script extracts information
+from each line of the log file and outputs a JSON document for each line.  
+    
+    usage: mlog2json logfile [-h]
+               
+    positional arguments: 
+      logfile              log file to convert
+
+    optional arguments:
+      -h, --help           show this help message and exit
+
+
+A common usecase for this tool is to import the JSON documents back into mongodb for
+further processing. This can easily be done with `mongoimport`. The usage is:
+
+    mlog2json logfile | mongoimport -d DATABASE -c COLLECTION
+
+You need a running mongod/mongos process to import the data.
+
+<hr> 
+
+mlaunch
+-------
+
+##### Additional dependencies
+- pymongo 
+
+See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
+
+#### Description
+
+This script lets you quickly spin up MongoDB environments on your local
+machine. It supports various configurations of stand-alone servers, 
+replica sets and sharded clusters.
+
+    usage: mlaunch [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
+                   [--name NAME] [--sharded [N [N ...]]] [--config NUM]
+                   [--verbose] [--port PORT] [--authentication]
+                   [--loglevel LOGLEVEL]
+                   [dir]
+
+    script to launch MongoDB stand-alone servers, replica sets, and shards
+
+    positional arguments:
+      dir                   base directory to create db and log paths
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --single              creates a single stand-alone mongod instance
+      --replicaset          creates replica set with several mongod instances
+      --nodes NUM           adds NUM data nodes to replica set (requires
+                            --replicaset, default: 3)
+      --arbiter             adds arbiter to replica set (requires --replicaset)
+      --name NAME           name for replica set (default: replset)
+      --sharded [N [N ...]]
+                            creates a sharded setup consisting of several singles
+                            or replica sets. Provide either list of shard names or
+                            number of shards (default: 1)
+      --config NUM          adds NUM config servers to sharded setup (requires
+                            --sharded, NUM must be 1 or 3, default: 1)
+      --verbose             outputs information about the launch
+      --port PORT           port for mongod, start of port range in case of
+                            replica set or shards (default: 27017)
+      --authentication      enable authentication and create a key file and admin
+                            user (admin/mypassword)
+      --loglevel LOGLEVEL   increase loglevel to LOGLEVEL (default: 0)
+
+
+#### Examples
+
+Launch single mongod instance
+
+    mlaunch --single
+
+Launch replica set with 2 data nodes and 1 arbiter, use authentication
+
+    mlaunch --replicaset --nodes 2 --arbiter --authentication
+
+Launch sharded cluster with 2 shards, each consisting of a replicaset with 3 nodes, increase loglevel to 3
+
+    mlaunch --sharded 2 --replicaset --loglevel 3
+
+Launch sharded cluster with 3 shards called tic, tac and toe, each of them a single mongod, add 3 config servers 
+start from port 30000, and print mongod commands used
+
+    mlaunch --sharded tic tac toe --single --config 3 --port 30000 --verbose
+
+<hr>
 
 mtools combined
 ---------------
