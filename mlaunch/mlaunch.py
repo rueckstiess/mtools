@@ -56,7 +56,7 @@ class MongoLauncher(object):
 		parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default: 27017)')
 		parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
 		parser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default: 0)')
-
+		parser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
 		self.args = vars(parser.parse_args())
 		if self.args['verbose']:
 			print "parameters:", self.args
@@ -273,6 +273,9 @@ class MongoLauncher(object):
 		log_param = ''
 		if loglevel:
 			log_param = '-' + ''.join(['v']*loglevel)
+
+		if self.args['rest']:
+			extra = '--rest ' + extra
 
 		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(rs_param, dbpath, logpath, port, auth_param, log_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
