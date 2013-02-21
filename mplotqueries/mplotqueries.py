@@ -50,6 +50,8 @@ class MongoPlotQueries(object):
         for line in logfile:
             if re.search(r'[0-9]ms$', line.rstrip()):
                 logline = LogLine(line)
+                if logline.namespace == None:
+                    logline.namespace = "None"
             else:
                 continue
 
