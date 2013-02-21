@@ -196,6 +196,8 @@ See the [INSTALL.md](./INSTALL.md) file for installation instructions of these d
 #### Description
 
 A script to plot query durations in a logfile (requires numpy and matplotlib packages).
+Clicking on any of the plot points will print the corresponding log line to stdout. Clicking on
+the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter.
     
     usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
                
