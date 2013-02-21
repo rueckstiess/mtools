@@ -27,7 +27,8 @@ class LogLine(object):
     """
 
     def __init__(self, line_str, auto_parse=True):
-        self.line_str = line_str
+        # remove line breaks at end of line_str
+        self.line_str = line_str.rstrip('\n')
 
         # datetime handler for json encoding
         self.dthandler = lambda obj: obj.isoformat() if isinstance(obj, \
