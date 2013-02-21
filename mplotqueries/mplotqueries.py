@@ -25,8 +25,13 @@ class MongoPlotQueries(object):
 
     def parseArgs(self):
         # create parser object
-        parser = argparse.ArgumentParser(description='script to plot query times from a logfile')
+        parser = argparse.ArgumentParser(description='A script to plot query durations in a logfile' \
+            ' (requires numpy and matplotlib packages). Clicking on any of the plot points will print' \
+            ' the corresponding log line to stdout. Clicking on the x-axis labels will output an ' \
+            ' "mlogfilter" string with the matching "--from" parameter.')
         
+        parser.usage = "mplotqueries [-h] filename\n                    [--ns [NS [NS ...]]] [--log]\n                    [--exclude-ns [NS [NS ...]]]\n"
+
         # positional argument
         if sys.stdin.isatty():
             parser.add_argument('filename', action='store', help='logfile to parse')
@@ -51,7 +56,7 @@ class MongoPlotQueries(object):
             # output mlogfilter output
             time_str = text.get_text().replace('\n', ' ')
             file_name = self.args['filename'] if 'filename' in self.args else ''
-            print "mlogfilter «%s --from %s"%(file_name, time_str)
+            print "mlogfilter %s --from %s"%(file_name, time_str)
 
     def plot(self):
         durations = defaultdict(list)
