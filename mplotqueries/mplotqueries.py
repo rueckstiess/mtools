@@ -39,6 +39,7 @@ class MongoPlotQueries(object):
         parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
+        parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
 
         self.args = vars(parser.parse_args())
         # print self.args
@@ -106,7 +107,8 @@ class MongoPlotQueries(object):
         else:
             plt.ylabel('query duration in ms')
 
-        plt.legend(loc='upper left', frameon=False, fontsize=9)
+        if not self.args['no_legend']:
+            plt.legend(loc='upper left', frameon=False, fontsize=9)
 
         plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
         plt.show()
