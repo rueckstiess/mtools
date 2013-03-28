@@ -57,6 +57,7 @@ class MongoLauncher(object):
 		parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
 		parser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default: 0)')
 		parser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
+		parser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
 		self.args = vars(parser.parse_args())
 		if self.args['verbose']:
 			print "parameters:", self.args
@@ -277,9 +278,13 @@ class MongoLauncher(object):
 		if self.args['rest']:
 			extra = '--rest ' + extra
 
-		ret = subprocess.call(['mongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(rs_param, dbpath, logpath, port, auth_param, log_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+		local = ''
+		if self.args['local']:
+			local = "./"
+
+		ret = subprocess.call(['%smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, log_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
-			print 'launching: mongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(rs_param, dbpath, logpath, port, auth_param, log_param, extra)
+			print 'launching: %smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, log_param, extra)
 
 		return ret
 
@@ -298,9 +303,13 @@ class MongoLauncher(object):
 		if loglevel:
 			log_param = '-' + ''.join(['v']*loglevel)
 
-		ret = subprocess.call(['mongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(logpath, port, configdb, auth_param, log_param)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+		local = ''
+		if self.args['local']:
+			local = "./"
+
+		ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, log_param)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 		if verbose:
-			print 'launching: mongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(logpath, port, configdb, auth_param, log_param)
+			print 'launching: %smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, log_param)
 		
 		host = '%s:%i'%(self.hostname, port)
 		t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
