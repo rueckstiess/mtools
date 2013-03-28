@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
-import datetime
 import argparse
 import re
 import sys
-import time
 import matplotlib.pyplot as plt
-import numpy as np
 
 from mtools.mtoolbox.logline import LogLine
 from matplotlib.lines import Line2D
