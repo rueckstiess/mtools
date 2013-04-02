@@ -19,13 +19,6 @@ class MongoLogMerger(object):
 
     """
 
-    def _extract_datetime(self, line):
-        """ Wrapper for LogLine._extract_datetime(). Use auto_parse=False to only parse the datetime and nothing else for speed improvement. """
-        logline = LogLine(line, auto_parse=False)
-        logline._extract_datetime()
-        return logline.datetime
-
-
     def merge(self):
         # create parser object
         parser = argparse.ArgumentParser(description='mongod/mongos log file merger.')
@@ -81,7 +74,7 @@ class MongoLogMerger(object):
         # open files, read first lines, extract first dates
         openFiles = [open(f, 'r') for f in args['logfiles']]
         lines = [f.readline() for f in openFiles]
-        dates = [self._extract_datetime(l) for l in lines]
+        dates = [LogLine(l).datetime for l in lines]
         
         # replace all non-dates with mindate
         dates = [d if d else mindate for d in dates]
@@ -110,13 +103,12 @@ class MongoLogMerger(object):
                     tokens = currLine.split()
                     print " ".join(tokens[:position]), labels[minIndex], " ".join(tokens[position:])
 
-
             else:
                 print currLine
 
             # update lines and dates for that line
             lines[minIndex] = openFiles[minIndex].readline()
-            dates[minIndex] = self._extract_datetime(lines[minIndex])
+            dates[minIndex] = LogLine(lines[minIndex]).datetime
 
 
             if not dates[minIndex]:
