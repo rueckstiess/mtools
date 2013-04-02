@@ -64,6 +64,25 @@ class MongoPlotQueries(object):
             print "mlogfilter %s --from %s"%(file_name, time_str)
 
 
+    def _onpress(self, event):
+        if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            idx = int(event.key)-1
+            try:
+                visible = self.artists[idx].get_visible()
+                self.artists[idx].set_visible(not visible)
+                plt.gcf().canvas.draw()
+            except IndexError:
+                pass
+
+        if event.key == '0':
+
+            visible = any([a.get_visible() for a in self.artists])
+            for artist in self.artists:
+                artist.set_visible(not visible)
+            
+            plt.gcf().canvas.draw()
+
+
     def _parse_loglines(self):
         # open logfile
         if sys.stdin.isatty():
@@ -110,16 +129,18 @@ class MongoPlotQueries(object):
 
     def plot(self):
         group_keys = self.groups.keys()
+        self.artists = []
+
         print "%3s %9s  %s"%("id", " #points", "group")
         for idx,key in enumerate(group_keys):
-            print "%3s %9s  %s"%(idx, len(self.groups[key]), key)
+            print "%3s %9s  %s"%(idx+1, len(self.groups[key]), key)
 
             x = date2num( [self.loglines[i].datetime for i in self.groups[key]] )
             y = [ self.loglines[i].duration for i in self.groups[key] ]
 
-            plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
+            self.artists.append( plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
                 marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
-                markersize=7, picker=5, label=key)
+                markersize=7, picker=5, label=key)[0] )
         print
 
         plt.xlabel('time')
@@ -137,9 +158,11 @@ class MongoPlotQueries(object):
             plt.ylabel('query duration in ms')
 
         if not self.args['no_legend']:
-            plt.legend(loc='upper left', frameon=False, fontsize=9)
+            self.legend = plt.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
         plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
+        plt.gcf().canvas.mpl_connect('key_press_event', self._onpress)
+
         plt.show()
 
 
