@@ -20,7 +20,7 @@ class LogLine(object):
         datetime: a datetime object for the logline. For logfiles created with 
                   version 2.4+, it also contains micro-seconds
         duration: the duration of a timed operation in ms
-        connection: the connection id (e.g. "conn1234") as string
+        thread: the thread name (e.g. "conn1234") as string
         operation: insert, update, remove, query, command, getmore, None
         namespace: the namespace of the operation, or None
         
@@ -55,9 +55,9 @@ class LogLine(object):
         self._datetime = None
         self._datetime_offset = None
 
-        self._connection_calculated = False
-        self._connection = None
-        self._connection_offset = None
+        self._thread_calculated = False
+        self._thread = None
+        self._thread_offset = None
 
         self._operation_calculated = False
         self._operation = None
@@ -163,22 +163,22 @@ class LogLine(object):
 
 
     @property
-    def connection(self):
-        """ extract connection if available (lazy) """
+    def thread(self):
+        """ extract thread if available (lazy) """
 
-        if not self._connection_calculated:
-            self._connection_calculated = True
+        if not self._thread_calculated:
+            self._thread_calculated = True
 
             split_tokens = self.split_tokens
 
             for offs, item in enumerate(split_tokens):
                 match = re.match(r'^\[(conn[^\]]*)\]$', item)
                 if match:
-                    self._connection = match.group(1)
-                    self._connection_offset = offs
+                    self._thread = match.group(1)
+                    self._thread_offset = offs
                     break
   
-        return self._connection
+        return self._thread
 
 
     @property
@@ -212,13 +212,13 @@ class LogLine(object):
 
         split_tokens = self.split_tokens
 
-        # trigger connection evaluation to get access to offset
-        if self.connection:
-            op = split_tokens[self._connection_offset + 1]
+        # trigger thread evaluation to get access to offset
+        if self.thread:
+            op = split_tokens[self._thread_offset + 1]
 
             if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
                 self._operation = op
-                self._namespace = split_tokens[self._connection_offset + 2]
+                self._namespace = split_tokens[self._thread_offset + 2]
 
 
 
@@ -287,9 +287,9 @@ class LogLine(object):
 
         split_tokens = self.split_tokens
 
-        # trigger connection evaluation to get access to offset
-        if self.connection:
-            for token in split_tokens[self._connection_offset+2:]:
+        # trigger thread evaluation to get access to offset
+        if self.thread:
+            for token in split_tokens[self._thread_offset+2:]:
                 for counter in counters:
                     if token.startswith('%s:'%counter):
                         vars(self)['_'+counter] = int(token.split(':')[-1])
@@ -303,7 +303,7 @@ class LogLine(object):
         tokens = self.split_tokens
         duration = self.duration
         datetime = self.datetime
-        connection = self.connection
+        thread = self.thread
         operation = self.operation
         namespace = self.namespace
         nscanned = self.nscanned
@@ -317,7 +317,7 @@ class LogLine(object):
         """ default string conversion for a LogLine object. """
         output = ''
         labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                  'connection', 'namespace', 'nscanned', 'ntoreturn',  \
+                  'thread', 'namespace', 'nscanned', 'ntoreturn',  \
                   'nreturned', 'ninserted', 'nupdated', 'duration']
 
         for label in labels:
@@ -334,7 +334,7 @@ class LogLine(object):
         """ converts LogLine object to valid JSON. """
         output = {}
         labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                  'connection', 'namespace', 'nscanned', 'ntoreturn',  \
+                  'thread', 'namespace', 'nscanned', 'ntoreturn',  \
                   'nreturned', 'ninserted', 'nupdated', 'duration']
 
         for label in labels:
