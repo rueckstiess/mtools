@@ -9,16 +9,22 @@ from mtools.mtoolbox.logline import LogLine
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
 from matplotlib.dates import date2num, DateFormatter
-from collections import defaultdict
+from collections import OrderedDict
 
 
 class MongoPlotQueries(object):
 
     def __init__(self):
-        self.queries = []
+        self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         self.markers = ['o', 's', '<', 'D']
-        self.loglines = defaultdict(list)
+        self.loglines = []
         self.parseArgs()
+
+        self._parse_loglines()
+        self._group(self.args['color'])
+
+        self.plot()
+
 
     def parseArgs(self):
         # create parser object
@@ -37,17 +43,18 @@ class MongoPlotQueries(object):
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
+        parser.add_argument('--color', action='store', default='namespace', choices=['namespace', 'operation', 'thread'])
 
         self.args = vars(parser.parse_args())
         # print self.args
 
+
     def _onpick(self, event):
         if isinstance(event.artist, Line2D):
-            namespace = event.artist.get_label()
-            ind = event.ind
-            # print 'onpick line:', zip(np.take(xdata, ind), np.take(ydata, ind))
-            for i in ind:
-                print self.loglines[namespace][i].line_str
+            group = event.artist.get_label()
+            indices = event.ind
+            for i in indices:
+                print self.loglines[self.groups[group][i]].line_str
 
         elif isinstance(event.artist, Text):
             text = event.artist
@@ -56,10 +63,8 @@ class MongoPlotQueries(object):
             file_name = self.args['filename'] if 'filename' in self.args else ''
             print "mlogfilter %s --from %s"%(file_name, time_str)
 
-    def plot(self):
-        durations = defaultdict(list)
-        dates = defaultdict(list)
 
+    def _parse_loglines(self):
         # open logfile
         if sys.stdin.isatty():
             logfile = open(self.args['filename'], 'r')
@@ -67,6 +72,7 @@ class MongoPlotQueries(object):
             logfile = sys.stdin
 
         for line in logfile:
+            # fast filtering for timed lines before creating logline objects
             if re.search(r'[0-9]ms$', line.rstrip()):
                 logline = LogLine(line)
                 if logline.namespace == None:
@@ -80,17 +86,43 @@ class MongoPlotQueries(object):
             if self.args['ns'] == None or logline.namespace in self.args['ns']:
                 if self.args['exclude_ns'] == None or (not logline.namespace in self.args['exclude_ns']):
                     if logline.datetime != None:
-                        durations[logline.namespace].append(logline.duration)
-                        dates[logline.namespace].append(logline.datetime)
-                        self.loglines[logline.namespace].append(logline)
+                        self.loglines.append(logline)
 
-        for i,ns in enumerate(dates):
-            print i, ns, len(dates[ns])
-            d = date2num(dates[ns])
-            plt.plot_date(d, durations[ns], self.markers[(i/7) % len(self.markers)], alpha=0.5, markersize=7, label=ns, picker=5)
+
+    def _group(self, group_by):
+        if not group_by in ['namespace', 'operation', 'thread']:
+            return
+
+        self.groups = OrderedDict()
+        for i, logline in enumerate(self.loglines):
+            key = getattr(logline, group_by)
+            
+            # convert None to string
+            if key == None:
+                key = "None"
+
+            # special case: group together all connections
+            if group_by == "thread" and key.startswith("conn"):
+                key = "conn####"
+
+            self.groups.setdefault(key, list()).append(i)
+
+
+    def plot(self):
+        group_keys = self.groups.keys()
+        print "%3s %9s  %s"%("id", " #points", "group")
+        for idx,key in enumerate(group_keys):
+            print "%3s %9s  %s"%(idx, len(self.groups[key]), key)
+
+            x = date2num( [self.loglines[i].datetime for i in self.groups[key]] )
+            y = [ self.loglines[i].duration for i in self.groups[key] ]
+
+            plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
+                marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
+                markersize=7, picker=5, label=key)
+        print
 
         plt.xlabel('time')
-
         plt.gca().xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
         plt.xticks(rotation=90, fontsize=10)
 
@@ -113,7 +145,6 @@ class MongoPlotQueries(object):
 
 if __name__ == '__main__':
     mplotqueries = MongoPlotQueries()
-    mplotqueries.plot()
 
 """
 mplotqueries LOGFILE [-ns COLL COLL ...]
