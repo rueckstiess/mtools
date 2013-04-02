@@ -21,7 +21,7 @@ class MongoPlotQueries(object):
         self.parseArgs()
 
         self._parse_loglines()
-        self._group(self.args['color'])
+        self._group(self.args['group'])
 
         self.plot()
 
@@ -43,8 +43,8 @@ class MongoPlotQueries(object):
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
-        parser.add_argument('--color', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
-            help="color by namespace (default), operation or thread.")
+        parser.add_argument('--group', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
+            help="group by namespace (default), operation or thread.")
 
         self.args = vars(parser.parse_args())
         # print self.args
