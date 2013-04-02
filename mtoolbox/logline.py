@@ -164,19 +164,20 @@ class LogLine(object):
 
     @property
     def thread(self):
-        """ extract thread if available (lazy) """
+        """ extract thread name if available (lazy) """
 
         if not self._thread_calculated:
             self._thread_calculated = True
 
             split_tokens = self.split_tokens
 
-            for offs, item in enumerate(split_tokens):
-                match = re.match(r'^\[(conn[^\]]*)\]$', item)
+            # force evaluation of datetime to get access to datetime_offset
+            if self.datetime:
+                connection_token = split_tokens[self._datetime_offset + 4]
+                match = re.match(r'^\[([^\]]*)\]$', connection_token)
                 if match:
                     self._thread = match.group(1)
-                    self._thread_offset = offs
-                    break
+                    self._thread_offset = self._datetime_offset + 4
   
         return self._thread
 
@@ -212,13 +213,13 @@ class LogLine(object):
 
         split_tokens = self.split_tokens
 
-        # trigger thread evaluation to get access to offset
-        if self.thread:
-            op = split_tokens[self._thread_offset + 1]
+        # trigger datetime evaluation to get access to offset
+        if self.datetime:
+            op = split_tokens[self._datetime_offset + 5]
 
             if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
                 self._operation = op
-                self._namespace = split_tokens[self._thread_offset + 2]
+                self._namespace = split_tokens[self._datetime_offset + 6]
 
 
 
