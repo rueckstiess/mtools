@@ -70,7 +70,7 @@ class MongoPlotQueries(object):
             if re.search(r'[0-9]ms$', line.rstrip()):
                 logline = LogLine(line)
                 if logline.namespace == None:
-                    logline.namespace = "None"
+                    logline._namespace = "None"
             else:
                 continue
 
