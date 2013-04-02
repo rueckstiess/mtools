@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse, re
+from mtools.mtoolbox.logline import LogLine
 from filters import *
 import sys
 
@@ -25,7 +26,7 @@ class MongoLogFilter(object):
         if length:
             if len(line) > length:
                 line = line[:length/2-2] + '...' + line[-length/2:]
-        print line, 
+        print line
 
     def parse(self):
         """ parses the logfile and asks each filter if it accepts the line.
@@ -76,22 +77,17 @@ class MongoLogFilter(object):
 
         # go through each line and ask each filter if it accepts
         for line in logfile:
-
-            # special case: if line starts with ***, always print (server restart)
-            if line.startswith('***'):
-                self._outputLine(line, self.args['shorten'])
-                continue
+            logline = LogLine(line)
 
             # only print line if all filters agree
-            if all([f.accept(line) for f in self.filters]):
-                self._outputLine(line, self.args['shorten'])
+            if all([f.accept(logline) for f in self.filters]):
+                self._outputLine(logline.line_str, self.args['shorten'])
 
-            # if at least one filter refuses to print remaining lines, stop
+            # if at least one filter refuses to accept remaining lines, stop
             if any([f.skipRemaining() for f in self.filters]):
                 # if called from shell, break
                 if sys.stdin.isatty():
                     break
-
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from mtools.mtoolbox.logline import LogLine
 from datetime import date, time, datetime, timedelta, MINYEAR, MAXYEAR
 import re
 
@@ -23,9 +24,9 @@ class BaseFilter:
         # filters need to actively set this flag to true
         self.active = False
 
-    def accept(self, line):
+    def accept(self, logline):
         """ overwrite this method in subclass and return True if the provided 
-            line should be accepted (causing output), or False if not.
+            logline should be accepted (causing output), or False if not.
         """
         return True
 
@@ -55,16 +56,16 @@ class WordFilter(BaseFilter):
         else:
             self.active = False
 
-    def accept(self, line):
+    def accept(self, logline):
         for word in self.words:
-            if re.search(word, line):
+            if re.search(word, logline.line_str):
                 return True
         return False
 
 
 class SlowFilter(BaseFilter):
-    """ accepts only lines that have a duration ([0-9]+ms) at the end of the line and where the
-        duration is longer than the specified parameter in ms (default 1000).
+    """ accepts only lines that have a duration that is longer than the specified 
+        parameter in ms (default 1000).
     """
     filterArgs = [
         ('--slow', {'action':'store', 'nargs':'?', 'default':False, 'type':int, 'help':'only output lines with query times longer than SLOW ms (default 1000)'})
@@ -79,11 +80,9 @@ class SlowFilter(BaseFilter):
             else:
                 self.slowms = self.commandLineArgs['slow']
 
-    def accept(self, line):
-        match = re.search(r'(\d+)ms$', line)
-        if match:
-            ms = int(match.group(1))
-            return ms >= self.slowms
+    def accept(self, logline):
+        if logline.duration:
+            return logline.duration >= self.slowms
         return False
 
 
@@ -99,13 +98,12 @@ class TableScanFilter(BaseFilter):
         if 'scan' in self.commandLineArgs:
             self.active = self.commandLineArgs['scan']
 
-    def accept(self, line):
-        match_s = re.search(r'nscanned:([0-9]+)', line)
-        match_r = re.search(r'nreturned:([0-9]+)', line)
+    def accept(self, logline):
 
-        if match_s and match_r:
-            ns = int(match_s.group(1))
-            nr = int(match_r.group(1))
+        ns = logline.nscanned
+        nr = logline.nreturned
+
+        if ns != None and nr != None:
             if nr == 0:
                 # avoid division by 0 errors
                 nr = 1
@@ -179,13 +177,12 @@ class DateTimeFilter(BaseFilter):
 
     dtRegexes = OrderedDict([         
         ('weekday', r'|'.join(weekdays)),                         # weekdays: see above
-        ('date',    '('+ '|'.join(months) +')' + r'\s+\d{1,2}'),  # month + date:  Jan 5, Oct 13, Sep 03, ...
+        ('date',    '('+ '|'.join(months) +')' + r'\s+\d{1,2}'),  # month + day:  Jan 5, Oct 13, Sep 03, ...
         ('word',    r'now|start|end|today|from'),
         ('time2',   r'\d{1,2}:\d{2,2}'),                          # 11:59, 1:13, 00:00, ...
         ('time3',   r'\d{1,2}:\d{2,2}:\d{2,2}'),                  # 11:59:00, 1:13:12, 00:00:59, ...
         ('offset',  r'[\+-]\d+(' + '|'.join(timeunits) + ')'),    # offsets: +3min, -20s, +7days, ...                    
     ])
-
 
     def __init__(self, commandLineArgs):
         BaseFilter.__init__(self, commandLineArgs)
@@ -203,27 +200,13 @@ class DateTimeFilter(BaseFilter):
             self.active = True
 
 
-    def accept(self, line):
-        tokens = line.split()
-        if len(tokens) < 4:
-            # if there aren't enough tokens for date+time, print if in between --from and --to
+    def accept(self, logline):
+        dt = logline.datetime
+
+        # if logline has no datetime, accept if between --from and --to
+        if dt == None:
             return self.fromReached
 
-        # log file structure: Wed Sep 05 23:02:26 ...
-        _, month, day, time = tokens[:4]
-        
-        # check if it actually is a date+time, else accept if between --from and --to
-        if not (month in self.months and
-                re.match(r'\d{1,2}', day) and
-                re.match(r'\d{2}:\d{2}:\d{2}', time)):
-            return self.fromReached
-
-        month = self.months.index(month)+1
-        h, m, s = time.split(':')
-        year = datetime.now().year
-
-        dt = datetime(int(year), int(month), int(day), int(h), int(m), int(s))
-        
         if self.fromDateTime <= dt <= self.toDateTime:
             self.toReached = False
             self.fromReached = True
