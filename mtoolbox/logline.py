@@ -12,17 +12,15 @@ class DateTimeEncoder(json.JSONEncoder):
 
 class LogLine(object):
     """ LogLine extracts information from a mongod/mongos log file line and 
-        stores the following member variables:
+        stores the following properties/variables:
 
         line_str: the original line string
         split_tokens: a list of string tokens after splitting line_str using 
                       whitespace as split points
         datetime: a datetime object for the logline. For logfiles created with 
                   version 2.4+, it also contains micro-seconds
-        datetime_offset: the token position of the weekday field
         duration: the duration of a timed operation in ms
         connection: the connection id (e.g. "conn1234") as string
-        connection_offset: the token position of the connection
         operation: insert, update, remove, query, command, getmore, None
         namespace: the namespace of the operation, or None
         
@@ -115,6 +113,10 @@ class LogLine(object):
                 if dt:
                     self._datetime = dt
                     self._datetime_offset = offs
+
+                # if no datetime after 10 tokens, break to avoid parsing very long lines
+                if offs > 10:
+                    break
 
         return self._datetime
 
