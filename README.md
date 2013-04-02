@@ -47,11 +47,14 @@ directory of your choice:
     git clone git://github.com/rueckstiess/mtools.git
 
 This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
-and check out the code there. Make sure that the parent directory of mtools is set in 
-your PYTHONPATH environment variable. If you use the _bash_ shell, you can do so by 
-adding a line
+and check out the code there. Make sure that the **parent directory** of mtools is set in 
+your PYTHONPATH environment variable. 
 
-    export PYTHONPATH=$PYTHONPATH:/parent/directory/of/mtools
+For example, if you clone all your github repositories to `~/Documents/code/` then you 
+need to add that directory to your PYTHONPATH. If you use the _bash_ shell, you can do 
+so by adding a line
+
+    export PYTHONPATH=$PYTHONPATH:~/Documents/code
 
 to your `.bashrc` script. Other shells may have a different syntax.
 
