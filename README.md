@@ -195,9 +195,15 @@ See the [INSTALL.md](./INSTALL.md) file for installation instructions of these d
 
 #### Description
 
-A script to plot query durations in a logfile (requires numpy and matplotlib packages).
+A script to plot query durations from a logfile (requires numpy and matplotlib packages).
+The operations can be grouped (colored) differently, by namespace (default), type of operation (query,
+insert, update, remove, getmore, command) or by thread/connection. 
+
 Clicking on any of the plot points will print the corresponding log line to stdout. Clicking on
 the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter.
+
+The first 9 groups can be individually toggled to hide/show with the keys 1-9. Pressing 0 hides/shows
+all groups.
     
     usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
                
@@ -209,7 +215,9 @@ the x-axis labels will output an "mlogfilter" string with the matching "--from" 
       --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
       --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
       --log                        plot y-axis in logarithmic scale (default=off)
-
+      --no-legend                  turn off legend (default=on)
+      --group {namespace,operation,thread}
+                                   group by namespace (default), operation or thread.
 
 
 <hr>
