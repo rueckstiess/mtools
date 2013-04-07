@@ -9,9 +9,9 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
+* [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
 * [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
 * [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
-* [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
 * [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
 
@@ -72,6 +72,47 @@ you can do so by adding a line
     export PATH=$PATH:/path/to/github/repos/mtools/scripts
 
 to your `.bashrc` script. Other shells may have a different syntax.
+
+
+mplotqueries
+------------
+
+#### Additional dependencies
+- NumPy
+- matplotlib
+
+See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
+
+#### Description
+
+<img src="https://www.dropbox.com/s/3f4brfwm6xotgkc/mplotqueries_screenshot.jpg?dl=1" border=0>
+
+A script to plot query durations from a logfile (requires numpy and matplotlib packages).
+The operations can be grouped (colored) differently, by namespace (default), type of operation (query,
+insert, update, remove, getmore, command) or by thread/connection. 
+
+Clicking on any of the plot points will print the corresponding log line to stdout. Clicking on
+the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter.
+
+The first 9 groups can be individually toggled to hide/show with the keys 1-9. Pressing 0 hides/shows
+all groups.
+    
+    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
+               
+    positional arguments: 
+      filename              log file to plot
+
+    optional arguments:
+      -h, --help                   show this help message and exit
+      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
+      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
+      --log                        plot y-axis in logarithmic scale (default=off)
+      --no-legend                  turn off legend (default=on)
+      --group {namespace,operation,thread}
+                                   group by namespace (default), operation or thread.
+
+
+<hr>
 
 
 mlogfilter
@@ -187,43 +228,6 @@ available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
 
 <hr>
 
-mplotqueries
-------------
-
-#### Additional dependencies
-- NumPy
-- matplotlib
-
-See the [INSTALL.md](./INSTALL.md) file for installation instructions of these dependencies.
-
-#### Description
-
-A script to plot query durations from a logfile (requires numpy and matplotlib packages).
-The operations can be grouped (colored) differently, by namespace (default), type of operation (query,
-insert, update, remove, getmore, command) or by thread/connection. 
-
-Clicking on any of the plot points will print the corresponding log line to stdout. Clicking on
-the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter.
-
-The first 9 groups can be individually toggled to hide/show with the keys 1-9. Pressing 0 hides/shows
-all groups.
-    
-    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
-               
-    positional arguments: 
-      filename              log file to plot
-
-    optional arguments:
-      -h, --help                   show this help message and exit
-      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
-      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
-      --log                        plot y-axis in logarithmic scale (default=off)
-      --no-legend                  turn off legend (default=on)
-      --group {namespace,operation,thread}
-                                   group by namespace (default), operation or thread.
-
-
-<hr>
 
 mlog2json
 ---------
