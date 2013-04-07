@@ -80,7 +80,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None, chunkspersh
 
 if __name__ == '__main__':
 
-    # test presplitting function
+    # presplitting function
     parser = argparse.ArgumentParser(description='MongoDB pre-splitting tool')
 
     parser.add_argument('host', action='store', nargs='?', default='localhost:27017', metavar='host:port', help='host:port of mongos or mongod process (default localhost:27017)')
