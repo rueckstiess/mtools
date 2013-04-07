@@ -6,21 +6,7 @@ import subprocess
 import cPickle
 
 from collections import defaultdict, OrderedDict
-
-class LogCodeLine(object):
-    def __init__(self, pattern):
-        self.pattern = pattern
-        self.occurences = []
-
-    def addOccurence(self, version, filename, lineno, loglevel):
-        self.occurences.append((version, filename, lineno, loglevel))
-
-    def __str__(self):
-        s = "%s\n"%(" <var> ".join(self.pattern))
-        for version, filename, lineno, loglevel in self.occurences:
-            s += "{:>10}: in {}:{}, loglevel {}\n".format(version, filename, lineno, loglevel)
-        s += '\n'
-        return s
+from mlog2code import LogCodeLine
 
 mongodb_directory = "/Users/tr/Documents/code/mongo/"
 
@@ -73,12 +59,14 @@ def switch_version(version):
 
 def extract_logs(log_code_lines, current_version):
     log_templates = set()
+    log_triggers = ["log(", "LOG(", "warning()", "error()", "out()", "problem()"]
 
     for filename in source_files(mongodb_directory):
         f = open(filename, 'r')
         for lineno, line in enumerate(f):
-            if "log()" in line or "LOG(" in line or "warning()" in line or "error()" in line:
-                line = line.strip()
+            trigger = next((t for t in log_triggers if t in line), None)
+            if trigger:
+                line = line[line.find(trigger)+len(trigger):].strip()
                 matches = re.findall(r"\"(.+?)\"", line)
                 matches = [re.sub(r'(\\t)|(\\n)', '', m).strip() for m in matches]
 
@@ -142,9 +130,8 @@ if __name__ == '__main__':
     for lbw in logs_by_word:
         logs_by_word[lbw] = sorted(logs_by_word[lbw], key=lambda x: len(x), reverse=True)
 
-    cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('logs_versions.pickle', 'wb'), -1)
+    cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('logdb.pickle', 'wb'), -1)
 
-    for lcl in log_code_lines:
-        print log_code_lines[lcl]
+    print "%i unique log messages imported and written to logdb.pickle"%len(log_code_lines)
 
 
