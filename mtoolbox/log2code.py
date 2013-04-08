@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import cPickle
+import os
 import re
 import sys
 import argparse
@@ -9,30 +10,61 @@ from itertools import chain
 from matplotlib import pyplot as plt
 
 
+def import_logdb():
+    """ static import helper function, checks if the logdb exists first, otherwise
+        raises ImportError. 
+    """
+    path = os.path.dirname(os.path.realpath(__file__))
+    if os.path.exists(os.path.join(path, 'logdb.pickle')):
+        av, lv, lbw, lcl = cPickle.load(open(os.path.join(path, 'logdb.pickle'), 'rb'))
+        return av, lv, lbw, lcl
+    else:
+        raise ImportError('logdb.pickle not found in %s.'%path)
+
+
 class LogCodeLine(object):
+    """ LogCodeLine represents a logline pattern extracted from the source code.
+        The pattern is a tuple of constant strings, variables are cut out.
+        LogCodeLine stores "occurences" of the same log pattern from different
+        source files and different versions of the code. 
+
+        An occurence is a tuple of (filename, line number, loglevel). Occurences
+        are stored in a dictionary with the git tag version as they key, e.g. 
+        "r2.2.3".
+
+        The import_logdb.py tool extracts all such patterns and creates LogCodeLines 
+        for each pattern.
+    """
+
     def __init__(self, pattern):
+        """ constructor takes a pattern, which is a tuple of strings. """
         self.pattern = pattern
         self.versions = set()
         self.occurences = defaultdict(list)
 
     def addOccurence(self, version, filename, lineno, loglevel):
+        """ adding an occurence to the LogCodeLine, including the version, filename
+            of the source file, the line number, and the loglevel. 
+        """
         self.versions.add(version)
         self.occurences[version].append((filename, lineno, loglevel))
 
     def __str__(self):
+        """ String representation of a LogCodeLine, outputs all occurences of 
+            the pattern.
+        """
         s = "%s\n"%(" <var> ".join(self.pattern))
-        for version in self.versions:
+        for version in sorted(self.versions):
             for filename, lineno, loglevel in self.occurences[version]:
                 s += "{:>10}: in {}:{}, loglevel {}\n".format(version, filename, lineno, loglevel)
-            s += '\n'
         return s
 
 
 class Log2CodeConverter(object):
 
-    all_versions, log_version, logs_by_word, log_code_lines = \
-        cPickle.load(open('./logdb.pickle', 'rb'))
-
+    # static import of logdb data structures
+    all_versions, log_version, logs_by_word, log_code_lines = import_logdb()
+        
     def _log2code(self, line):
         tokens = line.split()
 
@@ -134,9 +166,10 @@ class Log2CodeConverter(object):
 
 
 
-if __name__ == '__main__':
-        log2code = Log2CodeConverter()
-        print log2code("""Sun Mar 24 00:44:16.295 [conn7815] moveChunk migrate commit accepted by TO-shard: { active: true, ns: "metrics2_hours.hours", from: "mtx2-1/mtx2-md1a.wdc.sl:27017", min: { i: ObjectId('4b7730748156791f310b03a3'), m: "ioStats", t: new Date(1348272000000) }, max: { i: ObjectId('4b8f826192f9e2154d05dda7'), m: "mongo", t: new Date(1345680000000) }, shardKeyPattern: { i: 1.0, m: 1.0, t: 1.0 }, state: "done", counts: { cloned: 3115, clonedBytes: 35915282, catchup: 0, steady: 0 }, ok: 1.0 }""")
+# if __name__ == '__main__':
+#         l2cc = Log2CodeConverter()
+#         lcl = l2cc("""Sun Mar 24 00:44:16.295 [conn7815] moveChunk migrate commit accepted by TO-shard: { active: true, ns: "db.coll", from: "shard001:27017", min: { i: ObjectId('4b7730748156791f310b03a3'), m: "stats", t: new Date(1348272000000) }, max: { i: ObjectId('4b8f826192f9e2154d05dda7'), m: "mongo", t: new Date(1345680000000) }, shardKeyPattern: { i: 1.0, m: 1.0, t: 1.0 }, state: "done", counts: { cloned: 3115, clonedBytes: 35915282, catchup: 0, steady: 0 }, ok: 1.0 }""")
+#         print lcl.versions
 
         #possible_versions = possible_versions & set(logs_versions[best_match])
 

@@ -6,9 +6,10 @@ import subprocess
 import cPickle
 
 from collections import defaultdict, OrderedDict
-from mlog2code import LogCodeLine
+from mtools.mtoolbox.log2code import LogCodeLine
 
 mongodb_directory = "/Users/tr/Documents/code/mongo/"
+
 
 def source_files(mongodb_directory):
     for root, dirs, files in os.walk(mongodb_directory):
@@ -54,7 +55,7 @@ def switch_version(version):
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
-    print error
+    # print error
 
 
 def extract_logs(log_code_lines, current_version):
@@ -63,11 +64,30 @@ def extract_logs(log_code_lines, current_version):
 
     for filename in source_files(mongodb_directory):
         f = open(filename, 'r')
-        for lineno, line in enumerate(f):
+        lines = f.read().split(';')
+        for lineno, line in enumerate(lines):
             trigger = next((t for t in log_triggers if t in line), None)
+            
             if trigger:
+                # exclude triggers in comments (both // and /* */)
+                trigger_pos = line.find(trigger)
+                newline_pos = line.rfind("\n", 0, trigger_pos)
+                if line.find("//", newline_pos+1, trigger_pos) != -1:
+                    continue
+                comment_pos = line.find("/*", 0, trigger_pos)
+                if comment_pos != -1:
+                    if line.find("*/", comment_pos+2, trigger_pos) == -1:
+                        continue
+
                 line = line[line.find(trigger)+len(trigger):].strip()
-                matches = re.findall(r"\"(.+?)\"", line)
+
+                # filtering out conditional strings with tertiary operator: ( ... ? ... : ... )
+                line = re.sub(r'\(.*?\?.*?\:.*?\)', '', line)
+
+                # get all double-quoted strings surrounded by <<
+                matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", line, re.DOTALL)
+
+                # remove tabs, newlines and strip whitespace
                 matches = [re.sub(r'(\\t)|(\\n)', '', m).strip() for m in matches]
 
                 # remove empty tokens
@@ -76,15 +96,15 @@ def extract_logs(log_code_lines, current_version):
                 if len(matches) == 0:
                     continue
 
+                # special case that causes trouble because of query operation lines
+                if matches[0] == "query:":
+                    continue
+
                 loglevel = re.match(r'LOG\(([0-9])\)', line)
                 if loglevel:
                     loglevel = int(loglevel.group(1))
                 else:
                     loglevel = 0
-
-
-                # # special case: remove "query:"
-                # matches = [m for m in matches if "query:" not in m]
 
                 matches = tuple(matches)
 
@@ -109,7 +129,7 @@ if __name__ == '__main__':
 
     log_code_lines = {}
     logs_versions = defaultdict(list)
-
+    print "parsing..."
     for v in versions:
         switch_version(v)
         logs = extract_logs(log_code_lines, v)
@@ -129,6 +149,10 @@ if __name__ == '__main__':
     # now sort by number of tokens
     for lbw in logs_by_word:
         logs_by_word[lbw] = sorted(logs_by_word[lbw], key=lambda x: len(x), reverse=True)
+
+    # for l in sorted(logs_versions):
+    #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
+
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('logdb.pickle', 'wb'), -1)
 
