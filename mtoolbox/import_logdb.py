@@ -60,7 +60,7 @@ def switch_version(version):
 
 def extract_logs(log_code_lines, current_version):
     log_templates = set()
-    log_triggers = ["log(", "LOG(", "warning()", "error()", "out()", "problem()"]
+    log_triggers = ["log(", "LOG(", "LOGSOME", "warning()", "error()", "out()", "problem()"]
 
     for filename in source_files(mongodb_directory):
         f = open(filename, 'r')
