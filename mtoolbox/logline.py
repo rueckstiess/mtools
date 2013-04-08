@@ -215,6 +215,8 @@ class LogLine(object):
 
         # trigger datetime evaluation to get access to offset
         if self.datetime:
+            if len(split_tokens) < self._datetime_offset + 6:
+                return
             op = split_tokens[self._datetime_offset + 5]
 
             if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
