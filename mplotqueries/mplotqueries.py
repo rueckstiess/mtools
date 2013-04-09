@@ -37,7 +37,7 @@ class MongoPlotQueries(object):
 
         # positional argument
         if sys.stdin.isatty():
-            parser.add_argument('filename', action='store', help='logfile to parse')
+            parser.add_argument('filename', action='store', nargs="+", help='logfile(s) to parse')
         
         parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
@@ -93,28 +93,35 @@ class MongoPlotQueries(object):
 
 
     def _parse_loglines(self):
-        # open logfile
+        # open logfile(s)
         if sys.stdin.isatty():
-            logfile = open(self.args['filename'], 'r')
+            logfiles = ( open(f, 'r') for f in self.args['filename'] )
         else:
-            logfile = sys.stdin
+            logfiles = [sys.stdin]
 
-        for line in logfile:
-            # fast filtering for timed lines before creating logline objects
-            if re.search(r'[0-9]ms$', line.rstrip()):
-                logline = LogLine(line)
-                if logline.namespace == None:
-                    logline._namespace = "None"
-            else:
-                continue
+        for logfile in logfiles:
+            for line in logfile:
+                # fast filtering for timed lines before creating logline objects
+                if re.search(r'[0-9]ms$', line.rstrip()):
+                    logline = LogLine(line)
+                    if logline.namespace == None:
+                        logline._namespace = "None"
+                else:
+                    continue
 
-            if not logline.duration:
-                continue
+                if not logline.duration:
+                    continue
 
-            if self.args['ns'] == None or logline.namespace in self.args['ns']:
-                if self.args['exclude_ns'] == None or (not logline.namespace in self.args['exclude_ns']):
-                    if logline.datetime != None:
-                        self.loglines.append(logline)
+                if self.args['ns'] == None or logline.namespace in self.args['ns']:
+                    if self.args['exclude_ns'] == None or (not logline.namespace in self.args['exclude_ns']):
+                        if logline.datetime != None:
+                            self.loglines.append(logline)
+
+        # close files after parsing
+        if sys.stdin.isatty():
+            for f in logfiles:
+                f.close()
+
 
 
     def _group(self, group_by):
