@@ -85,22 +85,48 @@ See the [INSTALL.md](./INSTALL.md) file for installation instructions of these d
 
 #### Description
 
-<img src="https://www.dropbox.com/s/3f4brfwm6xotgkc/mplotqueries_screenshot.jpg?dl=1" border=0>
+<img src="https://www.dropbox.com/s/obff0srk45rzmum/mplotqueries_screenshot.png?dl=1" border=0>
 
 A script to plot query durations from a logfile (requires numpy and matplotlib packages).
-The operations can be grouped (colored) differently, by namespace (default), type of operation (query,
-insert, update, remove, getmore, command) or by thread/connection. 
 
-Clicking on any of the plot points will print the corresponding log line to stdout. Clicking on
-the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter.
+###### Groups
+The operations can be grouped (colored) differently, by namespace (default, or with `--group namespace`), 
+type of operation, like query, insert, update, remove, getmore, command (with `--group operation`) or by 
+thread/connection (with `--group thread`).
 
 The first 9 groups can be individually toggled to hide/show with the keys 1-9. Pressing 0 hides/shows
 all groups.
-    
-    usage: mplotqueries filename [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
+
+###### Clickable
+Clicking on any of the plot points or lines will print the corresponding log line to stdout. Clicking on
+the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter, for easy
+copy&paste.
+
+###### Overlays
+Overlays allow you to create several different plots (each with a call to mplotqueries) and
+overlay them all to create a single plot. One way to achieve this is to specify several filenames
+instead of just one. The files are combined and visualized in a single plot.
+
+Sometimes, this isn't possible or practical, for example if the output you want to plot comes from
+a preprocessing pipe, for example created with grep or mlogfilter. Or you want to use different
+parameters (`--group` or `--no-duration`) for different plots. In these cases, you can create overlays with
+the `--overlay` option. A plot will be temporarily stored on disk (under `~/.mtools/mplotqueries/overlays)`, 
+instead of plotted. You can add as many overlays as you like. The first call without the `--overlay`
+option will additionally plot all existing overlays. To remove overlays, run mplotqueries with `--reset`.
+
+###### Events Without Duration
+Normal usage would plot the duration of each logline as a point in a 2D coordinate system, where the
+x-axis is the time of the event, and the y-axis is the duration it took. If the flag `--no-duration` is
+given, mplotqueries plots all events as vertical lines at their respective time, ignoring the duration
+of the event. This is most useful together with overlays, to not only plot the timed events in a logfile
+but also events without duration like replica set status changes (PRIMARY, SECONDARY, etc) or assertions or
+other noticable events. Use mlogfilter or grep to narrow down the number of lines before using `--no-duration`.
+  
+###### Usage  
+    mplotqueries filename [filename ...] [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
                
     positional arguments: 
-      filename              log file to plot
+      filename              log file(s) to plot
 
     optional arguments:
       -h, --help                   show this help message and exit
@@ -110,6 +136,14 @@ all groups.
       --no-legend                  turn off legend (default=on)
       --group {namespace,operation,thread}
                                    group by namespace (default), operation or thread.
+      --reset                      removes all stored overlays. See --overlay for more
+                                   information.
+      --overlay                    plots with this option will be stored as 'overlays'
+                                   but not plotted. They are all drawn with the first
+                                   call without --overlay. Use --reset to remove all
+                                   overlays.
+      --no_duration                    plots vertical lines for each log line, ignoring the
+                                   duration of the operation.
 
 
 <hr>
