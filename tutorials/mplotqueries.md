@@ -77,5 +77,5 @@ This is a call to [mlogfilter](https://github.com/rueckstiess/mtools#mlogfilter)
 
 ## To Be Continued...
 
-This concludes part I of the mplotqueries tutorial. Next time, we will talk about groups in more detail, about overlay plots, and how you can plot events that don't have a duration. Watch this space for part II.
+This concludes part I of the mplotqueries tutorial. Next time, we will talk about groups in more detail, about overlay plots, and how you can plot events that don't have a duration. Watch this page for part II.
 
