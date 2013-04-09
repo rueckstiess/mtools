@@ -73,23 +73,29 @@ class MongoPlotQueries(object):
             print "mlogfilter %s --from %s"%(file_name, time_str)
 
 
+    def _toggle_artist(self, idx):
+        try:
+            visible = self.artists[idx].get_visible()
+            self.artists[idx].set_visible(not visible)
+            plt.gcf().canvas.draw()
+        except IndexError:
+            pass
+
+
     def _onpress(self, event):
         if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
             idx = int(event.key)-1
-            try:
-                visible = self.artists[idx].get_visible()
-                self.artists[idx].set_visible(not visible)
-                plt.gcf().canvas.draw()
-            except IndexError:
-                pass
+            self._toggle_artist(idx)
 
         if event.key == '0':
-
             visible = any([a.get_visible() for a in self.artists])
             for artist in self.artists:
                 artist.set_visible(not visible)
             
             plt.gcf().canvas.draw()
+
+        if event.key == 'q':
+            raise SystemExit('quitting.')
 
 
     def _parse_loglines(self):
@@ -143,6 +149,13 @@ class MongoPlotQueries(object):
             self.groups.setdefault(key, list()).append(i)
 
 
+    def _print_shortcuts(self):
+        print "keyboard shortcuts (focus must be on figure window):"
+        print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
+        print "%5s  %s" % ("0", "toggle visibility of all plots")
+        print "%5s  %s" % ("q", "quit mplotqueries")
+
+
     def plot(self):
         group_keys = self.groups.keys()
         self.artists = []
@@ -158,6 +171,8 @@ class MongoPlotQueries(object):
                 marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
                 markersize=7, picker=5, label=key)[0] )
         print
+        
+        self._print_shortcuts()
 
         plt.xlabel('time')
         plt.gca().xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
