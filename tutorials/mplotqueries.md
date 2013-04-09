@@ -22,9 +22,24 @@ After parsing the logfile, you should see a window pop up that displays the quer
 
 <img src="https://www.dropbox.com/s/g2yo84gevif9z12/mplotqueries-tutorial-1.png?dl=1">
 
-On the x-axis we see the date and time of the events. This particular logfile seems to go from February 20-21. On the y-axis, we can see the axis represents the duration of events in milliseconds.
+On the x-axis we see the date and time of the events. This particular logfile seems to go from February 20-21. The y-axis represents the duration of events in milliseconds.
 
-And already run into our first problem. Most of the operations in MongoDB have sub-second duration, and we can see points on the bottom of the plot, but they are all squashed together. Unfortunately, the logfile also contains these writebacklisten messages, that are known to run for (comparatively) long times, 5 minutes. We can savely ignore those and focus on the "real" events.
+And we already run into our first problem. Most of the operations in MongoDB have sub-second duration, and we can see points on the bottom of the plot, but they are all squashed together. Unfortunately, the logfile also contains these writebacklisten messages, that are known to run for (comparatively) long times, 5 minutes. We can savely ignore those and focus on the "real" events.
+
 
 ### Navigating the Main Window
+
+To navigate within a mplotqueries plot (which, by the way, uses [matplotlib](http://matplotlib.org/) to create the plots), you can use the tool palette at the bottom of the plot:
+
+<img src="https://www.dropbox.com/s/6y8bxqq157chpz9/mplotqueries-tutorial-2.png?dl=1">
+
+The first symbol, the house, takes you back to the initial view, the one you see when the plot first opens. The two arrows on its side are like back and forward buttons in a browser. They let you navigate step by step backward or forward in the history of views. The crossed arrows next to it let you pan around in the plot, by click-dragging the mouse anywhere in the plot area. This lets you move the plot to a different position. The magnifying glass lets you draw a rectangle, that you want to zoom into. This is probably the most useful feature, as you can zoom into very small regions to see what happens close up. The button next to it is for subplot and margin configuration and not very useful in mplotqueries. Finally, the rightmost button, the floppy disk, lets you export your plot into a number of formats. A file dialog will pop up, and depending how you choose your file ending (e.g. `.pdf`, `.png`, `.jpg`), the exporter will write the correct format.
+
+Another thing you will have noticed by now is the legend in the top left corner. This shows the different "groups", that your plot contains. By default, the plot is grouped into namespaces, showing each namespace (database and collection, spearated by a period) in a different color. If you run out of colors, mplotqueries will also use different symbols (squares, diamonds, etc.) to help you distinguish your groups. We will talk about groups again further down in this tutorial, but for now let's just mention that you can change the grouping by using the parameter `--group <option>`, where `<option>` can be one of the following: `namespace`, `operation`, `thread`.
+
+
+
+
+
+
 
