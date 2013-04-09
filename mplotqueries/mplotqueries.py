@@ -2,8 +2,12 @@
 
 import argparse
 import re
+import os
 import sys
+import uuid
+import glob
 import matplotlib.pyplot as plt
+import cPickle
 
 from mtools.mtoolbox.logline import LogLine
 from matplotlib.lines import Line2D
@@ -14,6 +18,10 @@ from collections import OrderedDict
 
 class MongoPlotQueries(object):
 
+    home_path = os.path.expanduser("~")
+    mtools_path = '.mtools'
+    overlay_path = 'mplotqueries/overlays/'
+
     def __init__(self):
         self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         self.markers = ['o', 's', '<', 'D']
@@ -23,7 +31,28 @@ class MongoPlotQueries(object):
         self._parse_loglines()
         self._group(self.args['group'])
 
-        self.plot()
+        if self.args['reset']:
+            self._remove_overlays()
+
+        # if --overlay is set, save groups in a file, else load groups and plot
+        if self.args['overlay']:
+            self._save_overlay()
+            raise SystemExit
+
+        plot_specified = not sys.stdin.isatty() or len(self.args['filename']) > 0
+
+        # if no plot is specified (either pipe or filename(s)) and reset, quit now
+        if not plot_specified and self.args['reset']:
+            raise SystemExit
+
+        # else plot (with potential overlays) if there is something to plot
+        groups_loaded = self._load_overlays()
+        if plot_specified or groups_loaded:
+            self.plot()
+        else:
+            print "Nothing to plot."
+        
+
 
 
     def parseArgs(self):
@@ -37,7 +66,7 @@ class MongoPlotQueries(object):
 
         # positional argument
         if sys.stdin.isatty():
-            parser.add_argument('filename', action='store', nargs="+", help='logfile(s) to parse')
+            parser.add_argument('filename', action='store', nargs="*", help='logfile(s) to parse')
         
         parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
@@ -45,6 +74,8 @@ class MongoPlotQueries(object):
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
         parser.add_argument('--group', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
             help="group by namespace (default), operation or thread.")
+        parser.add_argument('--reset', action='store_true', default=False, help="Removes all stored overlays. See --overlay for more information.")
+        parser.add_argument('--overlay', action='store_true', default=False, help="plots with this option will be stored as 'overlays' but not plotted. They are all drawn with the first call without --overlay. Use --reset to remove all overlays.")
 
         self.args = vars(parser.parse_args())
         # print self.args
@@ -63,7 +94,7 @@ class MongoPlotQueries(object):
 
             indices = event.ind
             for i in indices:
-                print self.loglines[self.groups[group][i]].line_str
+                print self.groups[group][i].line_str
 
         elif isinstance(event.artist, Text):
             text = event.artist
@@ -129,6 +160,74 @@ class MongoPlotQueries(object):
                 f.close()
 
 
+    def _save_overlay(self):
+        # make directory if not present
+        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+        if not os.path.exists(group_path):
+            try:
+                os.makedirs(group_path)
+            except OSError:
+                SystemExit("Couldn't create directory %s, quitting. Check permissions, or run without --overlay to display directly." % group_path)
+
+        # create unique filename
+        while True:
+            uid = str(uuid.uuid4())[:8]
+            group_file = os.path.join(group_path, uid)
+            if not os.path.exists(group_file):
+                break
+
+        # dump groups and handle exceptions
+        try:
+            cPickle.dump(self.groups, open(group_file, 'wb'), -1)
+            print "Created overlay: %s" % uid
+        except Exception as e:
+            print "Error: %s" % e
+            SystemExit("Couldn't write to %s, quitting. Check permissions, or run without --overlay to display directly." % group_file)
+
+
+    def _load_overlays(self):
+        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+        if not os.path.exists(group_path):
+            return False
+
+        # load groups and merge
+        group_files = glob.glob(os.path.join(group_path, '*'))
+        for f in group_files:
+            try:
+                group_dict = cPickle.load(open(f, 'rb'))
+            except Exception as e:
+                print "Couldn't read overlay %s, skipping." % f
+                continue
+
+            # extend each list according to its key
+            for key in group_dict:
+                self.groups.setdefault(key, list()).extend(group_dict[key])
+            
+            print "Loaded overlay: %s" % os.path.basename(f)
+        
+        if len(group_files) > 0:
+            print
+            
+        return len(group_files) > 0
+
+
+    def _remove_overlays(self):
+        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+        if not os.path.exists(group_path):
+            return 0
+
+        group_files = glob.glob(os.path.join(group_path, '*'))
+        # remove all group files
+        for f in group_files:
+            try:
+                os.remove(f)
+            except OSError as e:
+                print "Error occured when deleting %s, skipping."
+                continue
+
+        if len(group_files) > 0:
+            print "Deleted overlays."          
+
 
     def _group(self, group_by):
         if not group_by in ['namespace', 'operation', 'thread']:
@@ -146,7 +245,9 @@ class MongoPlotQueries(object):
             if group_by == "thread" and key.startswith("conn"):
                 key = "conn####"
 
-            self.groups.setdefault(key, list()).append(i)
+            self.groups.setdefault(key, list()).append(self.loglines[i])
+
+        del self.loglines
 
 
     def _print_shortcuts(self):
@@ -157,19 +258,18 @@ class MongoPlotQueries(object):
 
 
     def plot(self):
-        group_keys = self.groups.keys()
         self.artists = []
 
         print "%3s %9s  %s"%("id", " #points", "group")
-        for idx,key in enumerate(group_keys):
-            print "%3s %9s  %s"%(idx+1, len(self.groups[key]), key)
+        for idx,group in enumerate(self.groups):
+            print "%3s %9s  %s"%(idx+1, len(self.groups[group]), group)
 
-            x = date2num( [self.loglines[i].datetime for i in self.groups[key]] )
-            y = [ self.loglines[i].duration for i in self.groups[key] ]
+            x = date2num( [logline.datetime for logline in self.groups[group]] )
+            y = [ logline.duration for logline in self.groups[group] ]
 
             self.artists.append( plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
                 marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
-                markersize=7, picker=5, label=key)[0] )
+                markersize=7, picker=5, label=group)[0] )
         print
         
         self._print_shortcuts()
