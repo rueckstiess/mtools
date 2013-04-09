@@ -64,3 +64,18 @@ Now we can actually click on individual points. Go ahead and click on one of the
 
 <img src="https://www.dropbox.com/s/i2l9vbx0dldhcxb/mplotqueries-tutorial-4.png?dl=1">
 
+The first two blocks were already there before we even clicked in the plot. The first block shows you an overview of the groups and the number of points that each contains. The second block is just a remainder that you can use the numeric keys to toggle individual plots on and off. Go and try it out: The keys [1-9] toggle the first 9 groups of a plot from visible to invisible and vice versa. The 0 key toggles all plots. Make sure that the focus is on the plot window, and not on the shell, or this won't work.
+
+The line that appeared after we clicked on one of the outliers is the one below that. mplotqueries outputs the exact log line that matches the point in the graph. Here we can see that this particular event was a "getmore" that returned close to 140,000 documents and took about 70 seconds. 
+
+Speaking of clicking: you can also click on the x-axis labels, where the date and time are displayed. If you do, mplotqueries will output something like this to the shell:
+
+    mlogfilter mongod.log --from Feb 21 03:25:00
+    
+This is a call to [mlogfilter](https://github.com/rueckstiess/mtools#mlogfilter), that you can copy&paste to the shell to extract only the events starting from the given date and time. You can amend it with a `--to` parameter, for example `--to +10min` to get 10 minutes of the log file, starting at Feb 21 03:25:00, and ending at Feb 21 03:35:00.
+
+
+## To Be Continued...
+
+This concludes part I of the mplotqueries tutorial. Next time, we will talk about groups in more detail, about overlay plots, and how you can plot events that don't have a duration. Watch this space for part II.
+
