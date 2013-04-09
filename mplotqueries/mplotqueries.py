@@ -29,7 +29,11 @@ class MongoPlotQueries(object):
         self.parseArgs()
 
         self._parse_loglines()
-        self._group(self.args['group'])
+
+        if self.args['untimed']:
+            self._group_untimed()
+        else:
+            self._group(self.args['group'])
 
         if self.args['reset']:
             self._remove_overlays()
@@ -51,8 +55,7 @@ class MongoPlotQueries(object):
             self.plot()
         else:
             print "Nothing to plot."
-        
-
+            raise SystemExit
 
 
     def parseArgs(self):
@@ -76,6 +79,7 @@ class MongoPlotQueries(object):
             help="group by namespace (default), operation or thread.")
         parser.add_argument('--reset', action='store_true', default=False, help="Removes all stored overlays. See --overlay for more information.")
         parser.add_argument('--overlay', action='store_true', default=False, help="plots with this option will be stored as 'overlays' but not plotted. They are all drawn with the first call without --overlay. Use --reset to remove all overlays.")
+        parser.add_argument('--untimed', action='store_true', default=False, help="plots vertical lines for each log line, ignoring the duration of the operation.")
 
         self.args = vars(parser.parse_args())
         # print self.args
@@ -87,6 +91,11 @@ class MongoPlotQueries(object):
         """
         if isinstance(event.artist, Line2D):
             group = event.artist.get_label()
+
+            if not group in self.groups:
+                # untimed line picked
+                print self.groups['untimed'][event.artist._line_id].line_str
+                return
             
             # only print loglines of visible points
             if not event.artist.get_visible():
@@ -139,14 +148,14 @@ class MongoPlotQueries(object):
         for logfile in logfiles:
             for line in logfile:
                 # fast filtering for timed lines before creating logline objects
-                if re.search(r'[0-9]ms$', line.rstrip()):
+                if self.args['untimed'] or re.search(r'[0-9]ms$', line.rstrip()):
                     logline = LogLine(line)
                     if logline.namespace == None:
                         logline._namespace = "None"
                 else:
                     continue
 
-                if not logline.duration:
+                if not (self.args['untimed'] or logline.duration):
                     continue
 
                 if self.args['ns'] == None or logline.namespace in self.args['ns']:
@@ -207,7 +216,7 @@ class MongoPlotQueries(object):
         
         if len(group_files) > 0:
             print
-            
+
         return len(group_files) > 0
 
 
@@ -227,6 +236,16 @@ class MongoPlotQueries(object):
 
         if len(group_files) > 0:
             print "Deleted overlays."          
+
+
+    def _group_untimed(self):
+
+        self.groups = OrderedDict()
+        for i, logline in enumerate(self.loglines):
+            key = "untimed"
+            self.groups.setdefault(key, list()).append(self.loglines[i])
+
+        del self.loglines
 
 
     def _group(self, group_by):
@@ -257,19 +276,41 @@ class MongoPlotQueries(object):
         print "%5s  %s" % ("q", "quit mplotqueries")
 
 
+    def _plot_group(self, group, idx):
+        x = date2num( [logline.datetime for logline in self.groups[group]] )
+
+        if group != "untimed":
+            # timed plots require y coordinate and use plot_date
+            y = [ logline.duration for logline in self.groups[group] ]
+            artist = plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
+                marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
+                markersize=7, picker=5, label=group)[0]
+            print artist
+
+        else:
+            # untimed plots plot with axvline
+            for i, xcoord in enumerate(x):
+                artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
+                artist._line_id = i
+
+
+        return artist
+
+
     def plot(self):
         self.artists = []
 
         print "%3s %9s  %s"%("id", " #points", "group")
-        for idx,group in enumerate(self.groups):
+        
+        # plot untimed first if present
+        if "untimed" in self.groups:
+            self.artists.append( self._plot_group("untimed", 0) )
+ 
+        # then plot all other groups
+        for idx, group in enumerate([g for g in self.groups if g != "untimed"]):
             print "%3s %9s  %s"%(idx+1, len(self.groups[group]), group)
+            self.artists.append( self._plot_group(group, idx) )
 
-            x = date2num( [logline.datetime for logline in self.groups[group]] )
-            y = [ logline.duration for logline in self.groups[group] ]
-
-            self.artists.append( plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
-                marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
-                markersize=7, picker=5, label=group)[0] )
         print
         
         self._print_shortcuts()
@@ -300,7 +341,3 @@ class MongoPlotQueries(object):
 if __name__ == '__main__':
     mplotqueries = MongoPlotQueries()
 
-"""
-mplotqueries LOGFILE [-ns COLL COLL ...]
-
-"""
