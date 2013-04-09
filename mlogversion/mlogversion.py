@@ -25,7 +25,9 @@ if __name__ == '__main__':
     else:
         logfile = sys.stdin
 
-    re_version = re.compile(r'db version v(\d\.\d\.\d), pdfile version')
+    re_versiond = re.compile(r'db version v(\d\.\d\.\d), pdfile version')
+    re_versions = re.compile(r'MongoS version (\d\.\d\.\d) starting:')
+
     re_brackets = re.compile(r'\[\w+\]')
     for i, line in enumerate(logfile): 
         match = re_brackets.search(line)
@@ -35,11 +37,13 @@ if __name__ == '__main__':
         start = match.end()
 
         # check for explicit version string
-        match = re_version.search(line[start:])
+        match = re_versiond.search(line[start:]) or re_versions.search(line[start:])
+
         if match:
             version = match.group(1)
-            print "restart detected in line %i, previous possible versions: %s" % (i+1, ", ".join([pv[1:] for pv in sorted(possible_versions)]))
-            print "version after restart is:", version
+            print "%32s %s" % ("restart detected in log line %i:"%(i+1), line.rstrip())
+            print "%32s %s" % ("previous possible versions:", ", ".join([pv[1:] for pv in sorted(possible_versions)]))
+            print "%32s %s" % ("version after restart is:", version)
             print
             possible_versions = set(["r"+version])
             
@@ -57,10 +61,10 @@ if __name__ == '__main__':
             old_len = len(possible_versions)
             possible_versions = possible_versions & set(lcl.versions)
             if len(possible_versions) != old_len:
-                print "%25s %s" % ("log line %i >"%i, line.rstrip())
-                print "%25s %s" % ("matched pattern >", " <var> ".join(lcl.pattern))
-                print "%25s %s" % ("only present in >", ", ".join(sorted(lcl.versions)))
-                print "%25s %s" % ("possible versions now >", ", ".join(sorted(possible_versions)))
+                print "%32s %s" % ("log line %i:"%i+1, line.rstrip())
+                print "%32s %s" % ("matched pattern:", " <var> ".join(lcl.pattern))
+                print "%32s %s" % ("only present in:", ", ".join(sorted(lcl.versions)))
+                print "%32s %s" % ("possible versions now:", ", ".join(sorted(possible_versions)))
                 print
 
         if len(possible_versions) == 0:
