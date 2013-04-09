@@ -45,14 +45,22 @@ This is where the `--log` option to plot the y-axis on a logarithmic scale reall
 
     grep -v "writebacklisten" mongod.log | mplotqueries
 
-to filter out all lines that contain the word "writebacklisten" and send the remaining ones to mplotqueries. As you see, mplotqueries doesn't just accept logfiles, you can also pipe a stream of loglines to it. However, here there is a simpler alternative. We know that those writebacklisten commands are all admin commands, and their namespace in the logfile is therefore `admin.$cmd`. mplotqueries supports to in- or exclude namespaces directly. Inclusion (`--ns`) means that only the specified namespaces are plotted, and exclusion (`--exclude-ns`) means that __all but__ the specified namespaces are plotted. Let's test this:
+to filter out all lines that contain the word "writebacklisten" and send the remaining ones to mplotqueries. As you see, mplotqueries doesn't just accept logfiles, you can also pipe a stream of loglines to it. However, for our case there is a simpler alternative. We know that those writebacklisten commands are all admin commands, and their namespace in the logfile is therefore `admin.$cmd`. mplotqueries supports to in- or exclude namespaces directly. Inclusion (`--ns`) means that only the specified namespaces are plotted, and exclusion (`--exclude-ns`) means that __all but__ the specified namespaces are plotted. Let's test this:
 
     mplotqueries mongod.log --exclude-ns "admin.\$cmd" --log
     
-Notice that we have to escape the `$` sign, because the shell would otherwise interpret $cmd as a shell variable. The result looks like this:
+The result looks like this:
 
 <img src="https://www.dropbox.com/s/rrhgxcw5ghnd50d/mplotqueries-tutorial-3.png?dl=1">
 
+Two things of notice: we have to escape the `$` sign, because the shell would otherwise interpret $cmd as a shell variable. And the colors have changed now, because mplotqueries plots the groups in the same order of colors. Since we just removed the first group "admin.$cmd", all groups move one step up in the order of colors.
 
 
+### Interactive Mode
+
+Now we see the outliers, but also get more detail on the bottom, thanks to the logarithmic scale. But we still don't know what these outliers are. In order to find that out we can use the interactive mode of mplotqueries. First, make sure that you're not in "zoom" or "pan" mode anymore. Check that the buttons at the bottom are not pushed in. If one of them is, click it again to toggle.
+
+Now we can actually click on individual points. Go ahead and click on one of the outlier points. The result will be displayed at the command line from where you started mplotqueries. You will likely see something similar to:
+
+<img src="https://www.dropbox.com/s/i2l9vbx0dldhcxb/mplotqueries-tutorial-4.png?dl=1">
 
