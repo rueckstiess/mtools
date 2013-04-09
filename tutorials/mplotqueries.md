@@ -37,6 +37,22 @@ The first symbol, the house, takes you back to the initial view, the one you see
 
 Another thing you will have noticed by now is the legend in the top left corner. This shows the different "groups", that your plot contains. By default, the plot is grouped into namespaces, showing each namespace (database and collection, spearated by a period) in a different color. If you run out of colors, mplotqueries will also use different symbols (squares, diamonds, etc.) to help you distinguish your groups. We will talk about groups again further down in this tutorial, but for now let's just mention that you can change the grouping by using the parameter `--group <option>`, where `<option>` can be one of the following: `namespace`, `operation`, `thread`.
 
-Back to the problem from above. Since we are only interested in the short events, let's use the zoom function to get a closer look. I'd like to include all points that are not at the 5 minute mark, and choose to zoom in on the y-axis to have 1300 seconds at the top. This includes my two outliers (red)
+Back to the problem from above. Since we are only interested in the short events, let's use the zoom function to get a closer look. I'd like to include all points that are not at the 5 minute mark, and choose to zoom in on the y-axis to have 130 seconds at the top. This cuts of the blue writebacklisteners but still includes my two outliers (in red). The view is a little better, but without cutting off the outliers there's still not much to see at the bottom of the plot.
+
+### More Command Line Parameters: `--log`, `--exclude-ns` and pipes
+
+This is where the `--log` option to plot the y-axis on a logarithmic scale really helps. mplotquery's default is a linear axis, but `--log` forces it to use a log scale. Perfect for outliers. Let's close this plot window and start a new one with this option. And while we're at it, we may as well get rid of these writebacklisten points for good. We could use 
+
+    grep -v "writebacklisten" mongod.log | mplotqueries
+
+to filter out all lines that contain the word "writebacklisten" and send the remaining ones to mplotqueries. As you see, mplotqueries doesn't just accept logfiles, you can also pipe a stream of loglines to it. However, here there is a simpler alternative. We know that those writebacklisten commands are all admin commands, and their namespace in the logfile is therefore `admin.$cmd`. mplotqueries supports to in- or exclude namespaces directly. Inclusion (`--ns`) means that only the specified namespaces are plotted, and exclusion (`--exclude-ns`) means that __all but__ the specified namespaces are plotted. Let's test this:
+
+    mplotqueries mongod.log --exclude-ns "admin.\$cmd" --log
+    
+Notice that we have to escape the `$` sign, because the shell would otherwise interpret $cmd as a shell variable. The result looks like this:
+
+<img src="https://www.dropbox.com/s/rrhgxcw5ghnd50d/mplotqueries-tutorial-3.png?dl=1">
+
+
 
 
