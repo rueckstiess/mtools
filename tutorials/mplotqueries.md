@@ -1,4 +1,4 @@
-# mplotqueries tutorial
+# Tutorial for mplotqueries
 
 ### Introduction
 
