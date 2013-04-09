@@ -3,7 +3,8 @@
 ### Introduction
 
 mplotqueries is a tool to visualize operations in MongoDB logfiles. It is part of the [mtools](README.mk) collection.
-Before you 
+Before you can use mplotqueries, make sure you have [installed mtools](../INSTALL.md) as well as numpy and matplotlib. 
+These dependencies are necessary in order for mplotqueries to work. You can find detailed instructions on the [install](../INSTALL.md) page.
 
 ### Basic Usage
 
@@ -16,4 +17,14 @@ These "writebacklisten" commands are an essential part of a sharded setup, and t
 To plot a mongod or mongos logfile with mplotqueries, you can simply run:
 
     mplotqueries mongod.log
+
+After parsing the logfile, you should see a window pop up that displays the queries, similar to this:
+
+<img src="https://www.dropbox.com/s/g2yo84gevif9z12/mplotqueries-tutorial-1.png?dl=1">
+
+On the x-axis we see the date and time of the events. This particular logfile seems to go from February 20-21. On the y-axis, we can see the axis represents the duration of events in milliseconds.
+
+And already run into our first problem. Most of the operations in MongoDB have sub-second duration, and we can see points on the bottom of the plot, but they are all squashed together. Unfortunately, the logfile also contains these writebacklisten messages, that are known to run for (comparatively) long times, 5 minutes. We can savely ignore those and focus on the "real" events.
+
+### Navigating the Main Window
 
