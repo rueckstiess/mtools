@@ -51,8 +51,16 @@ class MongoPlotQueries(object):
 
 
     def _onpick(self, event):
+        """ this method is called per artist (group), with possibly
+            a list of indices.
+        """
         if isinstance(event.artist, Line2D):
             group = event.artist.get_label()
+            
+            # only print loglines of visible points
+            if not event.artist.get_visible():
+                return
+
             indices = event.ind
             for i in indices:
                 print self.loglines[self.groups[group][i]].line_str
