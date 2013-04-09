@@ -82,7 +82,6 @@ class MongoPlotQueries(object):
         parser.add_argument('--untimed', action='store_true', default=False, help="plots vertical lines for each log line, ignoring the duration of the operation.")
 
         self.args = vars(parser.parse_args())
-        # print self.args
 
 
     def _onpick(self, event):
@@ -285,14 +284,12 @@ class MongoPlotQueries(object):
             artist = plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
                 marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
                 markersize=7, picker=5, label=group)[0]
-            print artist
 
         else:
             # untimed plots plot with axvline
             for i, xcoord in enumerate(x):
                 artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
                 artist._line_id = i
-
 
         return artist
 
