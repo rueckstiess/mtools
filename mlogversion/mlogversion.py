@@ -61,7 +61,7 @@ if __name__ == '__main__':
             old_len = len(possible_versions)
             possible_versions = possible_versions & set(lcl.versions)
             if len(possible_versions) != old_len:
-                print "%32s %s" % ("log line %i:"%i+1, line.rstrip())
+                print "%32s %s" % ("log line %i:"%(i+1), line.rstrip())
                 print "%32s %s" % ("matched pattern:", " <var> ".join(lcl.pattern))
                 print "%32s %s" % ("only present in:", ", ".join(sorted(lcl.versions)))
                 print "%32s %s" % ("possible versions now:", ", ".join(sorted(possible_versions)))
