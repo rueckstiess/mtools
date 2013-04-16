@@ -142,7 +142,7 @@ other noticable events. Use mlogfilter or grep to narrow down the number of line
                                    but not plotted. They are all drawn with the first
                                    call without --overlay. Use --reset to remove all
                                    overlays.
-      --no_duration                    plots vertical lines for each log line, ignoring the
+      --no-duration                plots vertical lines for each log line, ignoring the
                                    duration of the operation.
 
 
