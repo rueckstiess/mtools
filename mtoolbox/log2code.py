@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import cPickle
 import os
 import re
@@ -8,7 +6,7 @@ import argparse
 from collections import defaultdict, OrderedDict
 from itertools import chain
 from matplotlib import pyplot as plt
-
+from mtools.mtoolbox.logcodeline import LogCodeLine
 
 def import_logdb():
     """ static import helper function, checks if the logdb exists first, otherwise
@@ -22,44 +20,6 @@ def import_logdb():
         raise ImportError('logdb.pickle not found in %s.'%path)
 
 
-class LogCodeLine(object):
-    """ LogCodeLine represents a logline pattern extracted from the source code.
-        The pattern is a tuple of constant strings, variables are cut out.
-        LogCodeLine stores "occurences" of the same log pattern from different
-        source files and different versions of the code. 
-
-        An occurence is a tuple of (filename, line number, loglevel). Occurences
-        are stored in a dictionary with the git tag version as they key, e.g. 
-        "r2.2.3".
-
-        The import_logdb.py tool extracts all such patterns and creates LogCodeLines 
-        for each pattern.
-    """
-
-    def __init__(self, pattern):
-        """ constructor takes a pattern, which is a tuple of strings. """
-        self.pattern = pattern
-        self.versions = set()
-        self.occurences = defaultdict(list)
-
-    def addOccurence(self, version, filename, lineno, loglevel):
-        """ adding an occurence to the LogCodeLine, including the version, filename
-            of the source file, the line number, and the loglevel. 
-        """
-        self.versions.add(version)
-        self.occurences[version].append((filename, lineno, loglevel))
-
-    def __str__(self):
-        """ String representation of a LogCodeLine, outputs all occurences of 
-            the pattern.
-        """
-        s = "%s\n"%(" <var> ".join(self.pattern))
-        for version in sorted(self.versions):
-            for filename, lineno, loglevel in self.occurences[version]:
-                s += "{:>10}: in {}:{}, loglevel {}\n".format(version, filename, lineno, loglevel)
-        return s
-
-
 class Log2CodeConverter(object):
 
     # static import of logdb data structures
@@ -69,27 +29,30 @@ class Log2CodeConverter(object):
         tokens = line.split()
 
         # find first word in line that has a corresponding log message stored
-        word = next((w for w in tokens if w in self.logs_by_word), None)
-        if not word:
-            return None
+        for word in (w for w in tokens if w in self.logs_by_word):
+            # word = next((w for w in tokens if w in self.logs_by_word), None)
 
-        # go through all error messages starting with this word
-        coverage = []
-        for log in self.logs_by_word[word]:
+            # go through all error messages starting with this word
+            coverage = []
+            for log in self.logs_by_word[word]:
 
-            if all([line.find(token) >= 0 for token in log]):
-                # all tokens match, calculate coverage
-                cov = sum([len(token) for token in log])
-                coverage.append(cov)
-            else:
-                coverage.append(0)
+                if all([line.find(token) >= 0 for token in log]):
+                    # all tokens match, calculate coverage
+                    cov = sum([len(token) for token in log])
+                    coverage.append(cov)
+                else:
+                    coverage.append(0)
+            
+            best_cov = max(coverage)
+            if not best_cov:
+                # no match found, may have been a named log level. try next word
+                if word in ["warning:", "ERROR:", "SEVERE:", "UNKNOWN:"]:
+                    continue
+                else:
+                    return None
         
-        best_cov = max(coverage)
-        if not best_cov:
-            return None
-        
-        best_match = self.logs_by_word[word][coverage.index(best_cov)]
-        return self.log_code_lines[best_match]
+            best_match = self.logs_by_word[word][coverage.index(best_cov)]
+            return self.log_code_lines[best_match]
 
     def __call__(self, line):
         return self._log2code(line)

@@ -6,27 +6,30 @@ import subprocess
 import cPickle
 
 from collections import defaultdict, OrderedDict
-from mtools.mtoolbox.log2code import LogCodeLine
+from mtools.mtoolbox.logcodeline import LogCodeLine
 
-mongodb_directory = "/Users/tr/Documents/code/mongo/"
+mongodb_path = "/Users/tr/Documents/code/mongo/"
+git_path = "/usr/local/bin/git"
 
-
-def source_files(mongodb_directory):
-    for root, dirs, files in os.walk(mongodb_directory):
+def source_files(mongodb_path):
+    for root, dirs, files in os.walk(mongodb_path):
         for filename in files:
+            # skip files in dbtests folder
+            if 'dbtests' in root:
+                continue
             if filename.endswith(('.cpp', '.c', '.h')):
                 yield os.path.join(root, filename)
 
 def get_all_versions():
-    pr = subprocess.Popen("/usr/local/bin/git checkout master", 
-                          cwd = mongodb_directory, 
+    pr = subprocess.Popen(git_path + " checkout master", 
+                          cwd = mongodb_path, 
                           shell = True, 
                           stdout = subprocess.PIPE, 
                           stderr = subprocess.PIPE)
     pr.communicate()
 
-    pr = subprocess.Popen("/usr/local/bin/git tag", 
-                          cwd = mongodb_directory, 
+    pr = subprocess.Popen(git_path + " tag", 
+                          cwd = mongodb_path, 
                           shell = True, 
                           stdout = subprocess.PIPE, 
                           stderr = subprocess.PIPE)
@@ -48,44 +51,66 @@ def get_all_versions():
 
 
 def switch_version(version):
-    pr = subprocess.Popen("/usr/local/bin/git checkout %s"%version, 
-                          cwd = os.path.dirname( mongodb_directory ), 
+    pr = subprocess.Popen(git_path + " checkout %s"%version, 
+                          cwd = os.path.dirname( mongodb_path ), 
                           shell = True, 
                           stdout = subprocess.PIPE, 
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
-    # print error
+    print error
+
+
+
+def parse_statement(self, statement, trigger):
+    pass
+
 
 
 def extract_logs(log_code_lines, current_version):
     log_templates = set()
     log_triggers = ["log(", "LOG(", "LOGSOME", "warning()", "error()", "out()", "problem()"]
 
-    for filename in source_files(mongodb_directory):
+    for filename in source_files(mongodb_path):
         f = open(filename, 'r')
-        lines = f.read().split(';')
+        lines = f.readlines()
         for lineno, line in enumerate(lines):
             trigger = next((t for t in log_triggers if t in line), None)
             
             if trigger:
+                # extend line to wrap over line breaks until ; is encountered
+                statement = line
+                current_lineno = lineno
+                statement_end_found = False
+
+                while not ';' in statement:
+                    current_lineno += 1
+                    if current_lineno >= len(lines):
+                        break
+                    statement += lines[current_lineno]
+
+                # cut statement off at semicolon position
+                semicolon_pos = statement.find(";")
+                if semicolon_pos != -1:
+                    statement = statement[:semicolon_pos]
+
                 # exclude triggers in comments (both // and /* */)
-                trigger_pos = line.find(trigger)
-                newline_pos = line.rfind("\n", 0, trigger_pos)
-                if line.find("//", newline_pos+1, trigger_pos) != -1:
+                trigger_pos = statement.find(trigger)
+                newline_pos = statement.rfind("\n", 0, trigger_pos)
+                if statement.find("//", newline_pos+1, trigger_pos) != -1:
                     continue
-                comment_pos = line.find("/*", 0, trigger_pos)
+                comment_pos = statement.find("/*", 0, trigger_pos)
                 if comment_pos != -1:
-                    if line.find("*/", comment_pos+2, trigger_pos) == -1:
+                    if statement.find("*/", comment_pos+2, trigger_pos) == -1:
                         continue
 
-                line = line[line.find(trigger)+len(trigger):].strip()
+                statement = statement[statement.find(trigger)+len(trigger):].strip()
 
                 # filtering out conditional strings with tertiary operator: ( ... ? ... : ... )
-                line = re.sub(r'\(.*?\?.*?\:.*?\)', '', line)
+                statement = re.sub(r'\(.*?\?.*?\:.*?\)', '', statement)
 
                 # get all double-quoted strings surrounded by <<
-                matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", line, re.DOTALL)
+                matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", statement, re.DOTALL)
 
                 # remove tabs, newlines and strip whitespace
                 matches = [re.sub(r'(\\t)|(\\n)', '', m).strip() for m in matches]
@@ -100,7 +125,16 @@ def extract_logs(log_code_lines, current_version):
                 if matches[0] == "query:":
                     continue
 
-                loglevel = re.match(r'LOG\(([0-9])\)', line)
+                # don't match lines that start with a single number (threadedtests.cpp)
+                # if re.match(r'^\d+$', matches[0]):
+                #     print "line", line
+                #     print "statement", statement
+                #     print "matches", matches
+                #     print "trigger", trigger
+                #     print "---------------------"
+                #     continue
+
+                loglevel = re.match(r'LOG\(([0-9])\)', statement)
                 if loglevel:
                     loglevel = int(loglevel.group(1))
                 else:
@@ -112,10 +146,17 @@ def extract_logs(log_code_lines, current_version):
                 if not matches in log_code_lines:
                     log_code_lines[matches] = LogCodeLine(matches)
 
-                log_code_lines[matches].addOccurence(current_version, filename, lineno, loglevel)
+                log_code_lines[matches].addOccurence(current_version, filename, lineno, loglevel, trigger)
                 log_templates.add(matches)
 
+                # print "line", line
+                # print "statement", statement
+                # print "matches", matches
+                # print "trigger", trigger
+                # print "---------------------"
+
         f.close()
+
 
     return log_templates
 
@@ -133,7 +174,7 @@ if __name__ == '__main__':
     for v in versions:
         switch_version(v)
         logs = extract_logs(log_code_lines, v)
-        print v
+        print "version %s, %i lines extracted" %(v[1:], len(logs))
         for l in logs:
             logs_versions[l].append(v)
 

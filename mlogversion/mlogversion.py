@@ -8,7 +8,7 @@ from mtools.mtoolbox.logline import LogLine
 
 if __name__ == '__main__':
     # create parser object
-    parser = argparse.ArgumentParser(description='mongod/mongos log file version detector (BETA)')
+    parser = argparse.ArgumentParser(description='mongod/mongos log file version detector (BETA).\n Parses a log file and matches each line to its original source code version. Each line that limits the remaining possible set of versions is printed. If a mongos/d restart is detected, the definitive version is printed instead.')
     log2code = Log2CodeConverter()
 
     possible_versions = set(Log2CodeConverter.all_versions)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
             possible_versions = possible_versions & set(lcl.versions)
             if len(possible_versions) != old_len:
                 print "%32s %s" % ("log line %i:"%(i+1), line.rstrip())
-                print "%32s %s" % ("matched pattern:", " <var> ".join(lcl.pattern))
+                print "%32s %s" % ("matched pattern:", " ... ".join(lcl.pattern))
                 print "%32s %s" % ("only present in:", ", ".join(sorted(lcl.versions)))
                 print "%32s %s" % ("possible versions now:", ", ".join(sorted(possible_versions)))
                 print
@@ -71,4 +71,4 @@ if __name__ == '__main__':
             print "empty version set. exiting."
             raise SystemExit
 
-    print "possible versions:", ", ".join([pv[1:] for pv in possible_versions])
+    print "possible versions:", ", ".join([pv[1:] for pv in sorted(possible_versions)])
