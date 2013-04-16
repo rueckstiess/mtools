@@ -239,7 +239,7 @@ mlogversion (BETA)
 
 #### Description
 
-This tool takes a logfile and tries to detect the version of the mongos/mongod process that wrote this file. It does so by matching each line of the logfile to its originating line in the source code. For each line, it keeps track of the version that the matching code line came from. 
+Takes a logfile and tries to detect the version of the mongos/mongod process that wrote this file. It does so by matching each line of the logfile to its originating line in the source code. For each line, it keeps track of the version that the matching code line came from. 
 
 Whenever the tool encounters a line that limits the set of possible versions further, it will output this particular line and state the remaining possible versions.
 
@@ -256,11 +256,11 @@ mlogdistinct (BETA)
 
 #### Description
 
+Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of occurences in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
 
+This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page. It would also be helpful to get any log lines that you think should have been matched. Use `--verbose` to output the lines that couldn't be matched.
 
-This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page.
-
-    usage: mlogdistinct [-h] [--verbose] logfile
+    usage: mlogdistinct logfile [-h | --help] [--verbose]
 
 
 
