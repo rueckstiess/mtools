@@ -35,18 +35,21 @@ class MongoPlotQueries(object):
         else:
             self._group(self.args['group'])
 
-        if self.args['reset']:
+        if self.args['overlay'] == 'reset':
             self._remove_overlays()
 
         # if --overlay is set, save groups in a file, else load groups and plot
-        if self.args['overlay']:
+        if self.args['overlay'] == "list":
+            self._list_overlays()
+            raise SystemExit
+        elif self.args['overlay'] == "" or self.args['overlay'] == "add":
             self._save_overlay()
             raise SystemExit
 
         plot_specified = not sys.stdin.isatty() or len(self.args['filename']) > 0
 
         # if no plot is specified (either pipe or filename(s)) and reset, quit now
-        if not plot_specified and self.args['reset']:
+        if not plot_specified and self.args['overlay'] == 'reset':
             raise SystemExit
 
         # else plot (with potential overlays) if there is something to plot
@@ -77,8 +80,7 @@ class MongoPlotQueries(object):
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
         parser.add_argument('--group', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
             help="group by namespace (default), operation or thread.")
-        parser.add_argument('--reset', action='store_true', default=False, help="Removes all stored overlays. See --overlay for more information.")
-        parser.add_argument('--overlay', action='store_true', default=False, help="plots with this option will be stored as 'overlays' but not plotted. They are all drawn with the first call without --overlay. Use --reset to remove all overlays.")
+        parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
         parser.add_argument('--no-duration', action='store_true', default=False, help="plots vertical lines for each log line, ignoring the duration of the operation.")
 
         self.args = vars(parser.parse_args())
@@ -166,6 +168,18 @@ class MongoPlotQueries(object):
         if sys.stdin.isatty():
             for f in logfiles:
                 f.close()
+
+    
+    def _list_overlays(self):
+        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+        if not os.path.exists(group_path):
+            return
+
+        # load groups and merge
+        group_files = glob.glob(os.path.join(group_path, '*'))
+        print "Existing overlays:"
+        for f in group_files:
+            print "  ", os.path.basename(f)
 
 
     def _save_overlay(self):
