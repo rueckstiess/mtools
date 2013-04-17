@@ -4,12 +4,12 @@ While most mtools scripts only require Python, mplotqueries has some more depend
 
 Here are some walk-through instructions to install all the necessary dependencies for Mac OS X Mountain Lion. For completeness, the instructions include installation of pymongo, which is only necessary for mlaunch.
 
-### Install Command Line Tools
+### Install Mac OS X Command Line Tools
 
 
 * Website: http://connect.apple.com
 * Login with Apple Developer ID
-* Download Command Line Tools for Mac OS X Mountain Lion and install
+* Download _Command Line Tools for Mac OS X Mountain Lion_ and install
 
 
 ### Install pip
@@ -21,6 +21,8 @@ Here are some walk-through instructions to install all the necessary dependencie
 ### Install SciPySuperpack 
 
 See also: http://sergeykarayev.com/work/2012-08-08/setting-up-mountain-lion/
+
+The cloning may take a while.
 
     mkdir ~/local && cd ~/local
     git clone git://github.com/fonnesbeck/ScipySuperpack.git
@@ -43,8 +45,11 @@ Website: https://github.com/rueckstiess/mtools
     cd /path/to/github/repos
     git clone git://github.com/rueckstiess/mtools.git
 
-add to ~/.bashrc:
+add these lines to your `~/.bashrc` file:
 
     export PYTHONPATH=$PYTHONPATH:/path/to/github/repos      (the parent dir of mtools)
     export PATH=$PATH:/path/to/github/repos/mtools/scripts
 
+Then reload by running `source ~/.bashrc`.
+
+Now you should be able to tab-autocomplete any of the mtools scripts from any directory. Test this by typing `mplotq<tab>` and see if it works.
