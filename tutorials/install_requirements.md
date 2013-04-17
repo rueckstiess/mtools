@@ -6,10 +6,11 @@ Here are some walk-through instructions to install all the necessary dependencie
 
 ### Install Mac OS X Command Line Tools
 
-
 * Website: http://connect.apple.com
-* Login with Apple Developer ID
+* Login with Apple ID
 * Download _Command Line Tools for Mac OS X Mountain Lion_ and install
+
+Alternatively, you can install XCode from the Mac App Store.
 
 
 ### Install pip
