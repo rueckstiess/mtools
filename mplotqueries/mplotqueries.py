@@ -29,11 +29,8 @@ class MongoPlotQueries(object):
         self.parseArgs()
 
         self._parse_loglines()
-
-        if self.args['no_duration']:
-            self._group_no_duration()
-        else:
-            self._group(self.args['group'])
+        
+        self._group(self.args['group'])
 
         if self.args['overlay'] == 'reset':
             self._remove_overlays()
@@ -80,8 +77,8 @@ class MongoPlotQueries(object):
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
         parser.add_argument('--group', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
             help="group by namespace (default), operation or thread.")
-        parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
-        parser.add_argument('--no-duration', action='store_true', default=False, help="plots vertical lines for each log line, ignoring the duration of the operation.")
+        parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="overlays allow for several plots to be combined. Use --overlay (or --overlay add) to add a new overlay. Use --overlay list to show existing overlays. Use --overlay reset to delete all overlays. A call without --overlay will add all overlays to the current plot.")
+        parser.add_argument('--no-duration', action='store_true', default=False, help="plots vertical lines for log lines that don't have a duration. By default, log lines without a duration are skipped.")
 
         self.args = vars(parser.parse_args())
 
@@ -251,14 +248,14 @@ class MongoPlotQueries(object):
             print "Deleted overlays."          
 
 
-    def _group_no_duration(self):
+    # def _group_no_duration(self):
 
-        self.groups = OrderedDict()
-        for i, logline in enumerate(self.loglines):
-            key = "no_duration"
-            self.groups.setdefault(key, list()).append(self.loglines[i])
+    #     self.groups = OrderedDict()
+    #     for i, logline in enumerate(self.loglines):
+    #         key = "no_duration"
+    #         self.groups.setdefault(key, list()).append(self.loglines[i])
 
-        del self.loglines
+    #     del self.loglines
 
 
     def _group(self, group_by):
@@ -267,7 +264,10 @@ class MongoPlotQueries(object):
 
         self.groups = OrderedDict()
         for i, logline in enumerate(self.loglines):
-            key = getattr(logline, group_by)
+            if logline.duration:
+                key = getattr(logline, group_by)
+            else:
+                key = "no_duration"
             
             # convert None to string
             if key == None:
@@ -300,9 +300,10 @@ class MongoPlotQueries(object):
                 markersize=7, picker=5, label=group)[0]
 
         else:
-            # no_duration plots plot with axvline
+            # no_duration plots plot use axvline
             for i, xcoord in enumerate(x):
                 artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
+                # add meta-data for picking
                 artist._line_id = i
 
         return artist
@@ -313,7 +314,7 @@ class MongoPlotQueries(object):
 
         print "%3s %9s  %s"%("id", " #points", "group")
         
-        # plot no_duration first if present
+        # plot no_duration first if present, to make lines appear behind points
         if "no_duration" in self.groups:
             self.artists.append( self._plot_group("no_duration", 0) )
  
@@ -341,7 +342,9 @@ class MongoPlotQueries(object):
             plt.ylabel('query duration in ms')
 
         if not self.args['no_legend']:
-            self.legend = plt.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+            handles, labels = plt.gca().get_legend_handles_labels()
+            if len(labels) > 0:
+                self.legend = plt.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
         plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self._onpress)
