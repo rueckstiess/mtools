@@ -11,11 +11,11 @@ The following tools are in the mtools collection:
 
 * [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
 * [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlogversion](README.md#mlogversion-beta) -- auto-detect the version number of a mongos/mongod log file (BETA)
+* [mlogdistinct](README.md#mlogdistinct-beta) -- groups all similar log messages together and displays their counts (BETA)
 * [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
-
-Watch this spot, new tools will be added soon.
 
 <hr>
 
@@ -142,7 +142,7 @@ other noticable events. Use mlogfilter or grep to narrow down the number of line
                                    but not plotted. They are all drawn with the first
                                    call without --overlay. Use --reset to remove all
                                    overlays.
-      --no_duration                    plots vertical lines for each log line, ignoring the
+      --no-duration                plots vertical lines for each log line, ignoring the
                                    duration of the operation.
 
 
@@ -232,6 +232,36 @@ excess characters from the middle and replacing them with "...".
 
 
 <hr> 
+
+
+mlogversion (BETA)
+------------------
+
+#### Description
+
+Takes a logfile and tries to detect the version of the mongos/mongod process that wrote this file. It does so by matching each line of the logfile to its originating line in the source code. For each line, it keeps track of the version that the matching code line came from. 
+
+Whenever the tool encounters a line that limits the set of possible versions further, it will output this particular line and state the remaining possible versions.
+
+If a server restart is detected, and thus the real version of the logfile is revealed, it will state this also.
+
+This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page.
+
+    usage: mlogversion logfile [-h | --help]
+    
+
+
+mlogdistinct (BETA)
+-------------------
+
+#### Description
+
+Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of occurences in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
+
+This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page. It would also be helpful to get any log lines that you think should have been matched. Use `--verbose` to output the lines that couldn't be matched.
+
+    usage: mlogdistinct logfile [-h | --help] [--verbose]
+
 
 
 mlogmerge
