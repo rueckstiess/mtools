@@ -78,21 +78,21 @@ def extract_logs(log_code_lines, current_version):
             trigger = next((t for t in log_triggers if t in line), None)
             
             if trigger:
-                # extend line to wrap over line breaks until ; is encountered
+                # extend line to wrap over line breaks until ; at end of line is encountered
                 statement = line
                 current_lineno = lineno
-                statement_end_found = False
 
-                while not ';' in statement:
+                semicolon_match = None
+                while not semicolon_match:
                     current_lineno += 1
                     if current_lineno >= len(lines):
                         break
                     statement += lines[current_lineno]
-
-                # cut statement off at semicolon position
-                semicolon_pos = statement.find(";")
-                if semicolon_pos != -1:
-                    statement = statement[:semicolon_pos]
+                    # match semicolon at end of line (potentially with whitespace between)
+                    semicolon_match = re.search(';\s*$', statement, flags=re.MULTILINE)
+                    if semicolon_match:
+                        statement = statement[:semicolon_match.start()]
+                        break
 
                 # exclude triggers in comments (both // and /* */)
                 trigger_pos = statement.find(trigger)
