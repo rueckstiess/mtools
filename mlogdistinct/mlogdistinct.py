@@ -56,6 +56,7 @@ if __name__ == '__main__':
         print "%8i"%codelines[cl], "  ", " ... ".join(cl)
 
     print
-    print "couldn't match %i lines"%non_matches
-    if not args['verbose']:
-        print "to show those lines, run with --verbose."
+    if non_matches > 0:
+        print "couldn't match %i lines"%non_matches
+        if not args['verbose']:
+            print "to show those lines, run with --verbose."
