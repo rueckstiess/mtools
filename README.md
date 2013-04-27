@@ -46,32 +46,32 @@ directory of your choice:
     cd /path/to/github/repos
     git clone git://github.com/rueckstiess/mtools.git
 
-This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
+This will create a directory `mtools` under the `/path/to/github/repos/` folder 
 and check out the code there. Make sure that the **parent directory** of mtools is set in 
 your PYTHONPATH environment variable. 
 
-For example, if you clone all your github repositories to `~/Documents/code/` then you 
+For example, if you clone all your github repositories to `/path/to/github/repos/` then you 
 need to add that directory to your PYTHONPATH. If you use the _bash_ shell, you can do 
-so by adding a line
+so by adding a line -
 
-    export PYTHONPATH=$PYTHONPATH:~/Documents/code
+    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos/
 
-to your `.bashrc` script. Other shells may have a different syntax.
+to your `.bashrc` or `.bash_profile` file (in your HOME directory). Other shells may have a different syntax.
 
 
 #### Command style usage
 
 While you can execute each of the scripts with `python script.py` ("script.py" being a
 placeholder for the real script name), it is convenient to use the symbolic links
-that are located in the `mtools/scripts/` subfolder.
+that are located in the `mtools/scripts/` directory.
 
-Add the `mtools/scripts/` subfolder to your PATH environment variable, if you 
+Add the `mtools/scripts/` directory to your PATH environment variable, if you 
 want to use the scripts from anywhere in the shell. If you use the _bash_ shell, 
-you can do so by adding a line
+you can do so by adding a line -
     
     export PATH=$PATH:/path/to/github/repos/mtools/scripts
 
-to your `.bashrc` script. Other shells may have a different syntax.
+to your `.bashrc` or `.bash_profile` file (in your HOME directory). Other shells may have a different syntax.
 
 
 mplotqueries
