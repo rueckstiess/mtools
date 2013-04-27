@@ -26,11 +26,10 @@ class Log2CodeConverter(object):
     all_versions, log_version, logs_by_word, log_code_lines = import_logdb()
         
     def _log2code(self, line):
-        tokens = line.split()
+        tokens = re.split(r'[\s"]', line)
 
-        # find first word in line that has a corresponding log message stored
-        for word in (w for w in tokens if w in self.logs_by_word):
-            # word = next((w for w in tokens if w in self.logs_by_word), None)
+        # find first word in first 20 tokens that has a corresponding log message stored
+        for word_no, word in enumerate(w for w in tokens if w in self.logs_by_word):
 
             # go through all error messages starting with this word
             coverage = []
@@ -45,11 +44,20 @@ class Log2CodeConverter(object):
             
             best_cov = max(coverage)
             if not best_cov:
-                # no match found, may have been a named log level. try next word
-                if word in ["warning:", "ERROR:", "SEVERE:", "UNKNOWN:"]:
-                    continue
-                else:
-                    return None
+                continue
+
+            if word_no > 20:
+                # avoid parsing really long lines. If the log message didn't start within the
+                # first 20 words, it's probably not a known message
+                return None
+
+                # # no match found, may have been a named log level. try next word
+                # if word in ["warning:", "ERROR:", "SEVERE:", "UNKNOWN:"]:
+                #     continue
+                # else:
+                #     # duration = time.time() - start_time
+                #     # print duration
+                #     continue
         
             best_match = self.logs_by_word[word][coverage.index(best_cov)]
             return self.log_code_lines[best_match]

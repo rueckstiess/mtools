@@ -106,6 +106,9 @@ def extract_logs(log_code_lines, current_version):
 
                 statement = statement[statement.find(trigger)+len(trigger):].strip()
 
+                # unescape strings
+                statement = statement.decode("string-escape")
+
                 # remove compiler #ifdef .. #endif directives
                 statement = re.sub(r'#ifdef.*?#endif', '', statement, flags=re.DOTALL)
 
@@ -115,8 +118,8 @@ def extract_logs(log_code_lines, current_version):
                 # get all double-quoted strings surrounded by <<
                 matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", statement, re.DOTALL)
 
-                # remove tabs, newlines and strip whitespace from matches
-                matches = [re.sub(r'(\\t)|(\\n)', '', m).strip() for m in matches]
+                # remove tabs, double quotes and newlines and strip whitespace from matches
+                matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip() for m in matches]
 
                 # remove empty tokens
                 matches = [m for m in matches if m]
@@ -152,6 +155,7 @@ def extract_logs(log_code_lines, current_version):
                 log_code_lines[matches].addOccurence(current_version, filename, lineno, loglevel, trigger)
                 log_templates.add(matches)
 
+                # if 'sock.cpp' in filename and current_version == 'r2.4.2' and 'getaddrinfo' in line:
                 # print "line", line
                 # print "statement", statement
                 # print "matches", matches
