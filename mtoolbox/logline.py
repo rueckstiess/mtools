@@ -173,6 +173,9 @@ class LogLine(object):
 
             # force evaluation of datetime to get access to datetime_offset
             if self.datetime:
+                if len(split_tokens) <= self._datetime_offset + 4:
+                    return None
+
                 connection_token = split_tokens[self._datetime_offset + 4]
                 match = re.match(r'^\[([^\]]*)\]$', connection_token)
                 if match:
@@ -215,7 +218,7 @@ class LogLine(object):
 
         # trigger datetime evaluation to get access to offset
         if self.datetime:
-            if len(split_tokens) < self._datetime_offset + 6:
+            if len(split_tokens) <= self._datetime_offset + 6:
                 return
             op = split_tokens[self._datetime_offset + 5]
 
