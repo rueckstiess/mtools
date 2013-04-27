@@ -106,13 +106,16 @@ def extract_logs(log_code_lines, current_version):
 
                 statement = statement[statement.find(trigger)+len(trigger):].strip()
 
+                # remove compiler #ifdef .. #endif directives
+                statement = re.sub(r'#ifdef.*?#endif', '', statement, flags=re.DOTALL)
+
                 # filtering out conditional strings with tertiary operator: ( ... ? ... : ... )
                 statement = re.sub(r'\(.*?\?.*?\:.*?\)', '', statement)
 
                 # get all double-quoted strings surrounded by <<
                 matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", statement, re.DOTALL)
 
-                # remove tabs, newlines and strip whitespace
+                # remove tabs, newlines and strip whitespace from matches
                 matches = [re.sub(r'(\\t)|(\\n)', '', m).strip() for m in matches]
 
                 # remove empty tokens
@@ -167,6 +170,9 @@ def extract_logs(log_code_lines, current_version):
 if __name__ == '__main__':
 
     versions = get_all_versions()
+
+    if len(sys.argv) > 1:
+        versions = [sys.argv[1]]
 
     log_code_lines = {}
     logs_versions = defaultdict(list)
