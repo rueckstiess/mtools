@@ -16,6 +16,113 @@ from matplotlib.dates import date2num, DateFormatter
 from collections import OrderedDict
 
 
+
+class BasePlotType(object):
+
+    can_group_by = [None]
+
+    def __init__(self):
+        self.groups = OrderedDict()
+
+    def accept_line(self, logline):
+        """ return True if this PlotType can plot this line. """
+        return True
+
+    def add_line(self, logline):
+        """ append log line to this plot type. """
+        key = 'ungrouped'
+        self.groups.setdefault(key, list()).append(self.loglines[i])
+
+    @property 
+    def loglines(self):
+        """ iterator yielding all loglines from groups dictionary. """
+        for key in self.groups:
+            for logline in self.groups[key]:
+                yield logline
+
+    def group_by(self, group_by):
+        """ (re-)group all loglines by the given group. """
+
+        # check if this PlotType can group by given group 
+        if group not in self.can_group_by:
+            return False
+
+        groups = OrderedDict()
+
+        for logline in self.loglines:
+            key = getattr(logline, group_by)
+            
+            # convert None to string
+            if key == None:
+                key = "None"
+
+            # special case: group together all connections
+            # if group_by == "thread" and key.startswith("conn"):
+            #     key = "conn####"
+
+            groups.setdefault(key, list()).append(logline)
+        
+        self.groups = groups
+
+    def plot_group(self, group, idx, axis):
+        pass
+
+    def plot(self, axis):
+        artists = []
+        for idx, group in enumerate(self.groups):
+            group_artists = self.plot_group(group, idx, axis)
+            if isinstance(group_artists, list):
+                artists.extend(group_artists)
+            else:
+                artists.append(group_artists)
+
+        return artists
+
+
+
+class DurationPlotType(BasePlotType):
+
+    can_group_by = ['namespace', 'operation', 'thread', 'none']
+
+    def accept_line(self, logline):
+        """ return True if the log line has a duration. """
+        return logline.duration
+
+    def plot_group(self, group, idx, axis):
+        # create x-coordinates for all log lines in this group
+        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+
+        # duration plots require y coordinate and use plot_date
+        y = [ logline.duration for logline in self.groups[group] ]
+        artist = plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
+            marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
+            markersize=7, picker=5, label=group)[0]
+
+        return artist
+
+
+class EventPlotType(BasePlotType):
+
+    can_group_by = ['none']
+
+    def accept_line(self, logline):
+        """ return True if the log line does not have a duration. """
+        return not logline.duration
+
+    def plot_group(self, group, idx, axis):
+        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+
+        # event plots use axvline
+        artists = []
+        for i, xcoord in enumerate(x):
+            artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
+            # add meta-data for picking
+            artist._line_id = i
+            artists.append(artist)
+
+        return artists
+
+
 class MongoPlotQueries(object):
 
     home_path = os.path.expanduser("~")
@@ -25,8 +132,12 @@ class MongoPlotQueries(object):
     def __init__(self):
         self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         self.markers = ['o', 's', '<', 'D']
-        self.loglines = []
+        self.plot_types = {'duration': DurationPlotType, 'event': EventPlotType}
+
         self.parseArgs()
+
+        # create PlotType instances
+        self.plot_instances = [self.plot_types[t]() for t in set(self.args['type'])]
 
         self._parse_loglines()
         
@@ -78,7 +189,8 @@ class MongoPlotQueries(object):
         parser.add_argument('--group', action='store', default='namespace', choices=['namespace', 'operation', 'thread'], 
             help="group by namespace (default), operation or thread.")
         parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="overlays allow for several plots to be combined. Use --overlay (or --overlay add) to add a new overlay. Use --overlay list to show existing overlays. Use --overlay reset to delete all overlays. A call without --overlay will add all overlays to the current plot.")
-        parser.add_argument('--no-duration', action='store_true', default=False, help="plots vertical lines for log lines that don't have a duration. By default, log lines without a duration are skipped.")
+        parser.add_argument('--type', action='store', default=['duration'], nargs='+', choices=['duration', 'event', 'range'])
+        # parser.add_argument('--no-duration', action='store_true', default=False, help="plots vertical lines for log lines that don't have a duration. By default, log lines without a duration are skipped.")
 
         self.args = vars(parser.parse_args())
 
@@ -145,26 +257,40 @@ class MongoPlotQueries(object):
 
         for logfile in logfiles:
             for line in logfile:
-                # fast filtering for timed lines before creating logline objects
-                if self.args['no_duration'] or re.search(r'[0-9]ms$', line.rstrip()):
-                    logline = LogLine(line)
-                    if logline.namespace == None:
-                        logline._namespace = "None"
-                else:
+
+                # create LogLine object
+                logline = LogLine(line)
+
+                # only add if namespace is not excluded
+                if logline.namespace == None:
+                    logline._namespace = "None"
+
+                if self.args['ns'] != None and logline.namespace not in self.args['ns']:
                     continue
 
-                if not (self.args['no_duration'] or logline.duration):
+                if self.args['exclude_ns'] != None and (logline.namespace in self.args['exclude_ns']):
                     continue
 
-                if self.args['ns'] == None or logline.namespace in self.args['ns']:
-                    if self.args['exclude_ns'] == None or (not logline.namespace in self.args['exclude_ns']):
-                        if logline.datetime != None:
-                            self.loglines.append(logline)
+                # if logline doesn't have datetime, skip
+                if logline.datetime == None:
+                    continue
+
+                # offer to each PlotType and see if it can plot it
+                line_accepted = False
+                for plot_inst in self.plot_instances:
+                    if plot_inst.accept_line(logline):
+                        line_accepted = True
+                        plot_inst.add_line(logline)
 
         # close files after parsing
         if sys.stdin.isatty():
             for f in logfiles:
                 f.close()
+
+
+    def _group(self):
+        for plot_inst in self.plot_instances:
+            plot_inst.group_by(self.args['group'])
 
     
     def _list_overlays(self):
@@ -258,30 +384,6 @@ class MongoPlotQueries(object):
     #     del self.loglines
 
 
-    def _group(self, group_by):
-        if not group_by in ['namespace', 'operation', 'thread']:
-            return
-
-        self.groups = OrderedDict()
-        for i, logline in enumerate(self.loglines):
-            if logline.duration:
-                key = getattr(logline, group_by)
-            else:
-                key = "no_duration"
-            
-            # convert None to string
-            if key == None:
-                key = "None"
-
-            # special case: group together all connections
-            if group_by == "thread" and key.startswith("conn"):
-                key = "conn####"
-
-            self.groups.setdefault(key, list()).append(self.loglines[i])
-
-        del self.loglines
-
-
     def _print_shortcuts(self):
         print "keyboard shortcuts (focus must be on figure window):"
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
@@ -289,65 +391,52 @@ class MongoPlotQueries(object):
         print "%5s  %s" % ("q", "quit mplotqueries")
 
 
-    def _plot_group(self, group, idx):
-        x = date2num( [logline.datetime for logline in self.groups[group]] )
-
-        if group != "no_duration":
-            # timed plots require y coordinate and use plot_date
-            y = [ logline.duration for logline in self.groups[group] ]
-            artist = plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
-                marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
-                markersize=7, picker=5, label=group)[0]
-
-        else:
-            # no_duration plots plot use axvline
-            for i, xcoord in enumerate(x):
-                artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
-                # add meta-data for picking
-                artist._line_id = i
-
-        return artist
-
 
     def plot(self):
         self.artists = []
 
-        print "%3s %9s  %s"%("id", " #points", "group")
-        
-        # plot no_duration first if present, to make lines appear behind points
-        if "no_duration" in self.groups:
-            self.artists.append( self._plot_group("no_duration", 0) )
- 
-        # then plot all other groups
-        for idx, group in enumerate([g for g in self.groups if g != "no_duration"]):
-            print "%3s %9s  %s"%(idx+1, len(self.groups[group]), group)
-            self.artists.append( self._plot_group(group, idx) )
+        figure = plt.figure()
+        axis = plt.subplot(111)
 
-        print
-        
+        print "%3s %9s  %s"%("id", " #points", "group")
+
+        for plot_inst in self.plot_instances:
+            self.artists.extend(plot_inst.plot(axis))
+
+            # # plot event plots first if present, to make lines appear behind points
+            # if "no_duration" in self.groups:
+            #     self.artists.append( self._plot_group("no_duration", 0) )
+     
+            # # then plot all other groups
+            # for idx, group in enumerate([g for g in self.groups if g != "no_duration"]):
+            #     print "%3s %9s  %s"%(idx+1, len(self.groups[group]), group)
+            #     self.artists.append( self._plot_group(group, idx) )
+
+            # print
+            
         self._print_shortcuts()
 
-        plt.xlabel('time')
-        plt.gca().xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
-        plt.xticks(rotation=90, fontsize=10)
+        axis.set_xlabel('time')
+        axis.xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
+        axis.set_xticks(rotation=90, fontsize=10)
 
-        for label in plt.gca().get_xticklabels():  # make the xtick labels pickable
+        for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
 
         # log y axis
         if self.args['log']:
-            plt.gca().set_yscale('log')
-            plt.ylabel('query duration in ms (log scale)')
+            axis.set_yscale('log')
+            axis.set_ylabel('query duration in ms (log scale)')
         else:
-            plt.ylabel('query duration in ms')
+            axis.set_ylabel('query duration in ms')
 
         if not self.args['no_legend']:
-            handles, labels = plt.gca().get_legend_handles_labels()
+            handles, labels = axis.get_legend_handles_labels()
             if len(labels) > 0:
-                self.legend = plt.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
-        plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
-        plt.gcf().canvas.mpl_connect('key_press_event', self._onpress)
+        figure.canvas.mpl_connect('pick_event', self._onpick)
+        figure.canvas.mpl_connect('key_press_event', self._onpress)
 
         plt.show()
 
