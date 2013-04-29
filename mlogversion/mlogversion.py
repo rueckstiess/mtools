@@ -71,4 +71,7 @@ if __name__ == '__main__':
             print "empty version set. exiting."
             raise SystemExit
 
-    print "possible versions:", ", ".join([pv[1:] for pv in sorted(possible_versions)])
+    if len(possible_versions) > 1:
+        print "possible versions at end of file:", ", ".join([pv[1:] for pv in sorted(possible_versions)])
+    else:
+        print "version at end of file: ", possible_versions.pop()[1:]
