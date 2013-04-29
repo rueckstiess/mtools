@@ -61,15 +61,20 @@ def switch_version(version):
     print error
 
 
-
-def parse_statement(self, statement, trigger):
-    pass
-
+def output_verbose(version, filename, lineno, line, statement, matches, accepted, why):
+    print "%10s %s %s:%s" % ("location:", version, filename, lineno)
+    print "%10s %s"       % ("line:", line)
+    print "%10s %s"       % ("statement:", statement)
+    print "%10s %s"       % ("matches:", matches)
+    print "%10s %s"       % ("accepted:", accepted)
+    print "%10s %s"       % ("reason:", why)
+    print "----------------------------"
+    print 
 
 
 def extract_logs(log_code_lines, current_version):
     log_templates = set()
-    log_triggers = ["log(", "LOG(", "LOGSOME", "warning()", "error()", "out()", "problem()"]
+    log_triggers = [" log(", " LOG(", " LOGSOME", " warning()", " error()", " out()", " problem()"]
 
     for filename in source_files(mongodb_path):
         f = open(filename, 'r')
@@ -98,16 +103,19 @@ def extract_logs(log_code_lines, current_version):
                 trigger_pos = statement.find(trigger)
                 newline_pos = statement.rfind("\n", 0, trigger_pos)
                 if statement.find("//", newline_pos+1, trigger_pos) != -1:
+                    # output_verbose(current_version, filename, lineno, line, statement, "comment //")
                     continue
                 comment_pos = statement.find("/*", 0, trigger_pos)
                 if comment_pos != -1:
                     if statement.find("*/", comment_pos+2, trigger_pos) == -1:
+                        # output_verbose(current_version, filename, lineno, line, statement, "comment /* */")
                         continue
 
                 statement = statement[statement.find(trigger)+len(trigger):].strip()
 
                 # unescape strings
-                statement = statement.decode("string-escape")
+                # statement = statement.decode("string-escape")
+                # print statement
 
                 # remove compiler #ifdef .. #endif directives
                 statement = re.sub(r'#ifdef.*?#endif', '', statement, flags=re.DOTALL)
@@ -115,30 +123,45 @@ def extract_logs(log_code_lines, current_version):
                 # filtering out conditional strings with tertiary operator: ( ... ? ... : ... )
                 statement = re.sub(r'\(.*?\?.*?\:.*?\)', '', statement)
 
-                # get all double-quoted strings surrounded by <<
-                matches = re.findall(r"<<\s*\"(.*?)\"\s*<<", statement, re.DOTALL)
+                # split into stream tokens
+                stream_tokens = statement.split("<<")
 
-                # remove tabs, double quotes and newlines and strip whitespace from matches
-                matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip() for m in matches]
+                # remove newlines from stream tokens
+                stream_tokens = [re.sub('\n', '', s).strip() for s in stream_tokens]
+
+                matches = []
+                for s in stream_tokens:
+                    match = re.match(r'"(.+?)"', s)
+                    if match:
+                        match = re.sub(r'(\\t)|(\\n)|"', '', match.group(1)).strip()
+                        matches.append(match)
+
+
+                # # get all double-quoted strings surrounded by << or ending in ;
+                # print "s:::", statement
+                # matches = re.findall(r"<\s*\"(.*?)\"\s*(?:<|;)", statement, flags=re.DOTALL)
+                # print matches
+
+                # # remove tabs, double quotes and newlines and strip whitespace from matches
+                # matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip() for m in matches]    
+                # print matches
 
                 # remove empty tokens
                 matches = [m for m in matches if m]
 
+                # skip empty matches
                 if len(matches) == 0:
+                    # output_verbose(current_version, filename, lineno, line, statement, matches, False, "zero matches")
+                    continue
+
+                # skip matches with total length < 3
+                if len(''.join(matches)) < 3:
                     continue
 
                 # special case that causes trouble because of query operation lines
                 if matches[0] == "query:":
+                    # output_verbose(current_version, filename, lineno, line, statement, matches, False, "contains 'query:'")
                     continue
-
-                # don't match lines that start with a single number (threadedtests.cpp)
-                # if re.match(r'^\d+$', matches[0]):
-                #     print "line", line
-                #     print "statement", statement
-                #     print "matches", matches
-                #     print "trigger", trigger
-                #     print "---------------------"
-                #     continue
 
                 loglevel = re.match(r'LOG\(([0-9])\)', statement)
                 if loglevel:
@@ -155,12 +178,7 @@ def extract_logs(log_code_lines, current_version):
                 log_code_lines[matches].addOccurence(current_version, filename, lineno, loglevel, trigger)
                 log_templates.add(matches)
 
-                # if 'sock.cpp' in filename and current_version == 'r2.4.2' and 'getaddrinfo' in line:
-                # print "line", line
-                # print "statement", statement
-                # print "matches", matches
-                # print "trigger", trigger
-                # print "---------------------"
+                # output_verbose(current_version, filename, lineno, line, statement, matches, True, "OK")
 
         f.close()
 
