@@ -20,6 +20,10 @@ from collections import OrderedDict
 class BasePlotType(object):
 
     can_group_by = [None]
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+    markers = ['o', 's', '<', 'D']
+
+    plot_type_str = 'base'
 
     def __init__(self):
         self.groups = OrderedDict()
@@ -31,7 +35,7 @@ class BasePlotType(object):
     def add_line(self, logline):
         """ append log line to this plot type. """
         key = 'ungrouped'
-        self.groups.setdefault(key, list()).append(self.loglines[i])
+        self.groups.setdefault(key, list()).append(logline)
 
     @property 
     def loglines(self):
@@ -44,7 +48,7 @@ class BasePlotType(object):
         """ (re-)group all loglines by the given group. """
 
         # check if this PlotType can group by given group 
-        if group not in self.can_group_by:
+        if group_by not in self.can_group_by:
             return False
 
         groups = OrderedDict()
@@ -57,8 +61,8 @@ class BasePlotType(object):
                 key = "None"
 
             # special case: group together all connections
-            # if group_by == "thread" and key.startswith("conn"):
-            #     key = "conn####"
+            if group_by == "thread" and key.startswith("conn"):
+                key = "conn####"
 
             groups.setdefault(key, list()).append(logline)
         
@@ -69,12 +73,18 @@ class BasePlotType(object):
 
     def plot(self, axis):
         artists = []
+        print self.plot_type_str.upper()
+        print "%5s %9s  %s"%("id", " #points", "group")
+
         for idx, group in enumerate(self.groups):
+            print "%5s %9s  %s"%(idx+1, len(self.groups[group]), group)
             group_artists = self.plot_group(group, idx, axis)
             if isinstance(group_artists, list):
                 artists.extend(group_artists)
             else:
                 artists.append(group_artists)
+
+        print
 
         return artists
 
@@ -83,6 +93,7 @@ class BasePlotType(object):
 class DurationPlotType(BasePlotType):
 
     can_group_by = ['namespace', 'operation', 'thread', 'none']
+    plot_type_str = 'duration'
 
     def accept_line(self, logline):
         """ return True if the log line has a duration. """
@@ -97,13 +108,23 @@ class DurationPlotType(BasePlotType):
         artist = plt.plot_date(x, y, color=self.colors[idx%len(self.colors)], \
             marker=self.markers[(idx / 7) % len(self.markers)], alpha=0.5, \
             markersize=7, picker=5, label=group)[0]
+        # add meta-data for picking
+        artist._mt_plot_type = self
+        artist._mt_group = group 
 
         return artist
+
+    def print_line(self, event):
+        group = event.artist._mt_group
+        indices = event.ind
+        for i in indices:
+            print self.groups[group][i].line_str
 
 
 class EventPlotType(BasePlotType):
 
     can_group_by = ['none']
+    plot_type_str = 'event'
 
     def accept_line(self, logline):
         """ return True if the log line does not have a duration. """
@@ -117,10 +138,18 @@ class EventPlotType(BasePlotType):
         for i, xcoord in enumerate(x):
             artist = plt.gca().axvline(xcoord, linewidth=1, picker=5, color=[0.8, 0.8, 0.8])
             # add meta-data for picking
-            artist._line_id = i
+            artist._mt_plot_type = self
+            artist._mt_group = group
+            artist._mt_line_id = i
             artists.append(artist)
 
         return artists
+
+    def print_line(self, event):
+        group = event.artist._mt_group
+        line_id = event.artist._mt_line_id
+        print self.groups[group][line_id].line_str
+
 
 
 class MongoPlotQueries(object):
@@ -130,8 +159,6 @@ class MongoPlotQueries(object):
     overlay_path = 'mplotqueries/overlays/'
 
     def __init__(self):
-        self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-        self.markers = ['o', 's', '<', 'D']
         self.plot_types = {'duration': DurationPlotType, 'event': EventPlotType}
 
         self.parseArgs()
@@ -141,7 +168,7 @@ class MongoPlotQueries(object):
 
         self._parse_loglines()
         
-        self._group(self.args['group'])
+        self._group()
 
         if self.args['overlay'] == 'reset':
             self._remove_overlays()
@@ -200,20 +227,13 @@ class MongoPlotQueries(object):
             a list of indices.
         """
         if isinstance(event.artist, Line2D):
-            group = event.artist.get_label()
-
-            if not group in self.groups:
-                # no_duration line picked
-                print self.groups['no_duration'][event.artist._line_id].line_str
-                return
-            
             # only print loglines of visible points
             if not event.artist.get_visible():
                 return
 
-            indices = event.ind
-            for i in indices:
-                print self.groups[group][i].line_str
+            # get PlotType and let it print that event
+            plot_type = event.artist._mt_plot_type
+            plot_type.print_line(event)
 
         elif isinstance(event.artist, Text):
             text = event.artist
@@ -305,55 +325,56 @@ class MongoPlotQueries(object):
             print "  ", os.path.basename(f)
 
 
-    def _save_overlay(self):
-        # make directory if not present
-        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
-        if not os.path.exists(group_path):
-            try:
-                os.makedirs(group_path)
-            except OSError:
-                SystemExit("Couldn't create directory %s, quitting. Check permissions, or run without --overlay to display directly." % group_path)
+    # def _save_overlay(self):
+    #     # make directory if not present
+    #     group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+    #     if not os.path.exists(group_path):
+    #         try:
+    #             os.makedirs(group_path)
+    #         except OSError:
+    #             SystemExit("Couldn't create directory %s, quitting. Check permissions, or run without --overlay to display directly." % group_path)
 
-        # create unique filename
-        while True:
-            uid = str(uuid.uuid4())[:8]
-            group_file = os.path.join(group_path, uid)
-            if not os.path.exists(group_file):
-                break
+    #     # create unique filename
+    #     while True:
+    #         uid = str(uuid.uuid4())[:8]
+    #         group_file = os.path.join(group_path, uid)
+    #         if not os.path.exists(group_file):
+    #             break
 
-        # dump groups and handle exceptions
-        try:
-            cPickle.dump(self.groups, open(group_file, 'wb'), -1)
-            print "Created overlay: %s" % uid
-        except Exception as e:
-            print "Error: %s" % e
-            SystemExit("Couldn't write to %s, quitting. Check permissions, or run without --overlay to display directly." % group_file)
+    #     # dump groups and handle exceptions
+    #     try:
+    #         cPickle.dump(self.groups, open(group_file, 'wb'), -1)
+    #         print "Created overlay: %s" % uid
+    #     except Exception as e:
+    #         print "Error: %s" % e
+    #         SystemExit("Couldn't write to %s, quitting. Check permissions, or run without --overlay to display directly." % group_file)
 
 
     def _load_overlays(self):
-        group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
-        if not os.path.exists(group_path):
-            return False
+        pass
+    #     group_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
+    #     if not os.path.exists(group_path):
+    #         return False
 
-        # load groups and merge
-        group_files = glob.glob(os.path.join(group_path, '*'))
-        for f in group_files:
-            try:
-                group_dict = cPickle.load(open(f, 'rb'))
-            except Exception as e:
-                print "Couldn't read overlay %s, skipping." % f
-                continue
+    #     # load groups and merge
+    #     group_files = glob.glob(os.path.join(group_path, '*'))
+    #     for f in group_files:
+    #         try:
+    #             group_dict = cPickle.load(open(f, 'rb'))
+    #         except Exception as e:
+    #             print "Couldn't read overlay %s, skipping." % f
+    #             continue
 
-            # extend each list according to its key
-            for key in group_dict:
-                self.groups.setdefault(key, list()).extend(group_dict[key])
+    #         # extend each list according to its key
+    #         for key in group_dict:
+    #             self.groups.setdefault(key, list()).extend(group_dict[key])
             
-            print "Loaded overlay: %s" % os.path.basename(f)
+    #         print "Loaded overlay: %s" % os.path.basename(f)
         
-        if len(group_files) > 0:
-            print
+    #     if len(group_files) > 0:
+    #         print
 
-        return len(group_files) > 0
+    #     return len(group_files) > 0
 
 
     def _remove_overlays(self):
@@ -374,16 +395,6 @@ class MongoPlotQueries(object):
             print "Deleted overlays."          
 
 
-    # def _group_no_duration(self):
-
-    #     self.groups = OrderedDict()
-    #     for i, logline in enumerate(self.loglines):
-    #         key = "no_duration"
-    #         self.groups.setdefault(key, list()).append(self.loglines[i])
-
-    #     del self.loglines
-
-
     def _print_shortcuts(self):
         print "keyboard shortcuts (focus must be on figure window):"
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
@@ -394,31 +405,16 @@ class MongoPlotQueries(object):
 
     def plot(self):
         self.artists = []
-
-        figure = plt.figure()
         axis = plt.subplot(111)
-
-        print "%3s %9s  %s"%("id", " #points", "group")
 
         for plot_inst in self.plot_instances:
             self.artists.extend(plot_inst.plot(axis))
-
-            # # plot event plots first if present, to make lines appear behind points
-            # if "no_duration" in self.groups:
-            #     self.artists.append( self._plot_group("no_duration", 0) )
-     
-            # # then plot all other groups
-            # for idx, group in enumerate([g for g in self.groups if g != "no_duration"]):
-            #     print "%3s %9s  %s"%(idx+1, len(self.groups[group]), group)
-            #     self.artists.append( self._plot_group(group, idx) )
-
-            # print
             
         self._print_shortcuts()
 
         axis.set_xlabel('time')
+        axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=10)
         axis.xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
-        axis.set_xticks(rotation=90, fontsize=10)
 
         for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
@@ -435,8 +431,8 @@ class MongoPlotQueries(object):
             if len(labels) > 0:
                 self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
-        figure.canvas.mpl_connect('pick_event', self._onpick)
-        figure.canvas.mpl_connect('key_press_event', self._onpress)
+        plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
+        plt.gcf().canvas.mpl_connect('key_press_event', self._onpress)
 
         plt.show()
 
