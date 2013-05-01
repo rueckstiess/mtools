@@ -82,8 +82,8 @@ class MongoPlotQueries(object):
         parser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
         
         mutex = parser.add_mutually_exclusive_group()
-        mutex.add_argument('--group')
-        mutex.add_argument('--label')
+        mutex.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range plots can additionally group on 'log2code'.")
+        mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
 
         # separate parser for --plot arguments (multiple times possible)
         self.args = vars(parser.parse_args())
