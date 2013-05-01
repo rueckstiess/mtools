@@ -105,17 +105,15 @@ class LogLine(object):
         if not self._datetime_calculated:
             self._datetime_calculated = True
 
-            split_tokens = self.split_tokens
+            # if no datetime after 10 tokens, break to avoid parsing very long lines
+            split_tokens = self.split_tokens[:10]
 
             match_found = False
-            for offs in range(len(split_tokens)):
-                dt = self._match_datetime_pattern(split_tokens[offs:])
+            for offs in xrange(len(split_tokens)):
+                dt = self._match_datetime_pattern(split_tokens[offs:offs+4])
                 if dt:
                     self._datetime = dt
                     self._datetime_offset = offs
-
-                # if no datetime after 10 tokens, break to avoid parsing very long lines
-                if offs > 10:
                     break
 
         return self._datetime
@@ -126,17 +124,20 @@ class LogLine(object):
             datetime pattern at the beginning of the token list, i.e. the first
             few tokens need to match [weekday], [month], [day], HH:MM:SS  
             (potentially with milliseconds for mongodb version 2.4+). """
+        
         if len(tokens) < 4:
             return None
 
+        # return None
         weekday, month, day, time = tokens[:4]
-        time_match = re.match(r'(\d{2}):(\d{2}):(\d{2})(\.\d{3})?', time)
 
         # check if it is a valid datetime
-        if not (weekday in self.weekdays and
-                month in self.months and
-                re.match(r'\d{1,2}', day) and
-                time_match):
+        if (weekday not in self.weekdays) or \
+           (month not in self.months) or not day.isdigit():
+            return None
+
+        time_match = re.match(r'(\d{2}):(\d{2}):(\d{2})(\.\d{3})?', time)
+        if not time_match:
             return None
 
         month = self.months.index(month)+1
@@ -156,8 +157,7 @@ class LogLine(object):
         # assume this year. TODO: special case if logfile is not from current year
         year = datetime.now().year
 
-        dt = datetime(int(year), int(month), int(day), int(h), int(m), \
-                      int(s), ms)
+        dt = datetime(int(year), int(month), int(day), int(h), int(m), int(s), ms)
 
         return dt
 
