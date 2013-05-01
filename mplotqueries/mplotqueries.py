@@ -7,6 +7,7 @@ import sys
 import uuid
 import glob
 import cPickle
+from copy import copy
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
@@ -14,7 +15,7 @@ from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
 from mtools.mtoolbox.logline import LogLine
-from plottypes import DurationPlotType, EventPlotType, RangePlotType
+from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
 
 class MongoPlotQueries(object):
 
@@ -23,25 +24,27 @@ class MongoPlotQueries(object):
     overlay_path = 'mplotqueries/overlays/'
 
     def __init__(self):
-        self.plot_types = {'duration': DurationPlotType, 'event': EventPlotType, 'range': RangePlotType}
+        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType]
+
+        self.plot_types = {pt.plot_type_str: pt for pt in self.plot_types}
         self.plot_instances = []
 
         # parse arguments
         self.parse_args()
 
-        self._parse_loglines()
+        self.parse_loglines()
         
-        self._group()
+        self.group()
 
         if self.args['overlay'] == 'reset':
-            self._remove_overlays()
+            self.remove_overlays()
 
         # if --overlay is set, save groups in a file, else load groups and plot
         if self.args['overlay'] == "list":
-            self._list_overlays()
+            self.list_overlays()
             raise SystemExit
         elif self.args['overlay'] == "" or self.args['overlay'] == "add":
-            self._save_overlay()
+            self.save_overlay()
             raise SystemExit
 
         plot_specified = not sys.stdin.isatty() or len(self.args['filename']) > 0
@@ -51,27 +54,12 @@ class MongoPlotQueries(object):
             raise SystemExit
 
         # else plot (with potential overlays) if there is something to plot
-        overlay_loaded = self._load_overlays()
+        overlay_loaded = self.load_overlays()
         if plot_specified or overlay_loaded:
             self.plot()
         else:
             print "Nothing to plot."
             raise SystemExit
-
-
-    def split_plot_args(self, args):
-        """ iterator that splits ['--plot', 'a', '--group', 'b', '--plot', 'c', '--label', 'd']
-            into separate lists [['a', '--group', 'b'], ['c', '--label', 'd']], removing all '--plot'
-        """
-        result = []
-        for a in args:
-            if a == "--plot":
-                if len(result) > 0:
-                    yield result
-                    result = []
-            else:
-                result.append(a)
-        yield result
 
 
     def parse_args(self):
@@ -81,8 +69,6 @@ class MongoPlotQueries(object):
             ' the corresponding log line to stdout. Clicking on the x-axis labels will output an ' \
             ' "mlogfilter" string with the matching "--from" parameter.')
         
-        parser.usage = "mplotqueries [-h] filename\n                    [--ns [NS [NS ...]]] [--log]\n                    [--exclude-ns [NS [NS ...]]]\n"
-
         # positional argument
         if sys.stdin.isatty():
             parser.add_argument('filename', action='store', nargs="*", help='logfile(s) to parse')
@@ -93,76 +79,37 @@ class MongoPlotQueries(object):
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
         parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
-
-        # separate parser for --plot arguments (multiple times possible)
-        plotparser = argparse.ArgumentParser()
-        plotparser.add_argument('type', choices=self.plot_types.keys())
-        mutex = plotparser.add_mutually_exclusive_group()
+        parser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
+        
+        mutex = parser.add_mutually_exclusive_group()
         mutex.add_argument('--group')
         mutex.add_argument('--label')
 
-        self.args, rest = parser.parse_known_args()
-        self.args = vars(self.args)
-        self.plot_args = [vars(plotparser.parse_args(r)) for r in self.split_plot_args(rest)]
+        # separate parser for --plot arguments (multiple times possible)
+        self.args = vars(parser.parse_args())
+
+        print self.args
 
 
-    def _onpick(self, event):
-        """ this method is called per artist (group), with possibly
-            a list of indices.
-        """        
-        # only print loglines of visible points
-        if not event.artist.get_visible():
-            return
+    def parse_loglines(self):
+        multiple_files = False
 
-        # get PlotType and let it print that event
-        plot_type = event.artist._mt_plot_type
-        plot_type.print_line(event)
-
-    def _toggle_artist(self, idx):
-        try:
-            visible = self.artists[idx].get_visible()
-            self.artists[idx].set_visible(not visible)
-            plt.gcf().canvas.draw()
-        except IndexError:
-            pass
-
-
-    def _onpress(self, event):
-        if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
-            idx = int(event.key)-1
-            self._toggle_artist(idx)
-
-        if event.key == '0':
-            visible = any([a.get_visible() for a in self.artists])
-            for artist in self.artists:
-                artist.set_visible(not visible)
-            
-            plt.gcf().canvas.draw()
-
-        if event.key == 'q':
-            raise SystemExit('quitting.')
-
-
-    def _parse_loglines(self):
-        # open logfile(s)
+        # create generator for logfile(s) handles
         if sys.stdin.isatty():
             logfiles = ( open(f, 'r') for f in self.args['filename'] )
+            if len(self.args['filename']) > 1:
+                multiple_files = True
+
         else:
             logfiles = [sys.stdin]
-
+        
         for logfile in logfiles:
-            plot_instances = []
-
-            # create plot instances (one per --plot per file)
-            for pa in self.plot_args:
-                args = dict(self.args.items() + pa.items())
-
-                # special case: for multiple files, set label to filename if undefined
-                if 'filename' in self.args and len(self.args['filename']) > 1 and args['label'] == None:
-                    args['label'] = logfile.name
-
-                plot_instances.append( self.plot_types[pa['type']](args=args) )
-                self.plot_instances.extend(plot_instances)
+            args = copy(self.args)
+            plot_instance = self.plot_types[args['type']](args=args)
+            
+            if multiple_files:
+                args['label'] = logfile.name
+                args['group'] = 'off'
 
             for line in logfile:
                 # create LogLine object
@@ -182,12 +129,13 @@ class MongoPlotQueries(object):
                 if logline.datetime == None:
                     continue
 
-                # offer to each PlotType and see if it can plot it
+                # offer plot_instance and see if it can plot it
                 line_accepted = False
-                for plot_inst in plot_instances:
-                    if plot_inst.accept_line(logline):
-                        line_accepted = True
-                        plot_inst.add_line(logline)
+                if plot_instance.accept_line(logline):
+                    line_accepted = True
+                    plot_instance.add_line(logline)
+
+            self.plot_instances.append(plot_instance)
 
         # close files after parsing
         if sys.stdin.isatty():
@@ -195,13 +143,13 @@ class MongoPlotQueries(object):
                 f.close()
 
 
-    def _group(self):
+    def group(self):
         self.plot_instances = [pi for pi in self.plot_instances if not pi.empty]
         for plot_inst in self.plot_instances:
-            plot_inst.group_by()
+            plot_inst.group()
 
     
-    def _list_overlays(self):
+    def list_overlays(self):
         target_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
         if not os.path.exists(target_path):
             return
@@ -213,7 +161,7 @@ class MongoPlotQueries(object):
             print "  ", os.path.basename(f)
 
 
-    def _save_overlay(self):
+    def save_overlay(self):
         # make directory if not present
         target_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
         if not os.path.exists(target_path):
@@ -238,7 +186,7 @@ class MongoPlotQueries(object):
             SystemExit("Couldn't write to %s, quitting. Check permissions, or run without --overlay to display directly." % target_file)
 
 
-    def _load_overlays(self):
+    def load_overlays(self):
         target_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
         if not os.path.exists(target_path):
             return False
@@ -265,7 +213,7 @@ class MongoPlotQueries(object):
         return len(target_files) > 0
 
 
-    def _remove_overlays(self):
+    def remove_overlays(self):
         target_path = os.path.join(self.home_path, self.mtools_path, self.overlay_path)
         if not os.path.exists(target_path):
             return 0
@@ -283,12 +231,49 @@ class MongoPlotQueries(object):
             print "Deleted overlays."          
 
 
-    def _print_shortcuts(self):
+    def print_shortcuts(self):
         print "keyboard shortcuts (focus must be on figure window):"
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
         print "%5s  %s" % ("0", "toggle visibility of all plots")
         print "%5s  %s" % ("q", "quit mplotqueries")
         print
+
+
+    def onpick(self, event):
+        """ this method is called per artist (group), with possibly
+            a list of indices.
+        """        
+        # only print loglines of visible points
+        if not event.artist.get_visible():
+            return
+
+        # get PlotType and let it print that event
+        plot_type = event.artist._mt_plot_type
+        plot_type.print_line(event)
+
+    def toggle_artist(self, idx):
+        try:
+            visible = self.artists[idx].get_visible()
+            self.artists[idx].set_visible(not visible)
+            plt.gcf().canvas.draw()
+        except IndexError:
+            pass
+
+
+    def onpress(self, event):
+        if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            idx = int(event.key)-1
+            self._toggle_artist(idx)
+
+        if event.key == '0':
+            visible = any([a.get_visible() for a in self.artists])
+            for artist in self.artists:
+                artist.set_visible(not visible)
+            
+            plt.gcf().canvas.draw()
+
+        if event.key == 'q':
+            raise SystemExit('quitting.')
 
 
     def plot(self):
@@ -298,7 +283,7 @@ class MongoPlotQueries(object):
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
             self.artists.extend(plot_inst.plot(axis, i))
             
-        self._print_shortcuts()
+        self.print_shortcuts()
 
         axis.set_xlabel('time')
         axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=10)
@@ -319,8 +304,8 @@ class MongoPlotQueries(object):
             if len(labels) > 0:
                 self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
-        plt.gcf().canvas.mpl_connect('pick_event', self._onpick)
-        plt.gcf().canvas.mpl_connect('key_press_event', self._onpress)
+        plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
+        plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
 
         plt.show()
 
