@@ -158,7 +158,7 @@ class MongoPlotQueries(object):
                 args = dict(self.args.items() + pa.items())
 
                 # special case: for multiple files, set label to filename if undefined
-                if len(self.args['filename']) > 1 and args['label'] == None:
+                if 'filename' in self.args and len(self.args['filename']) > 1 and args['label'] == None:
                     args['label'] = logfile.name
 
                 plot_instances.append( self.plot_types[pa['type']](args=args) )
