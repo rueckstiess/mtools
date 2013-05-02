@@ -115,23 +115,24 @@ class MongoPlotQueries(object):
                 # create LogLine object
                 logline = LogLine(line)
 
-                # only add if namespace is not excluded
-                if logline.namespace == None:
-                    logline._namespace = "None"
-
-                if self.args['ns'] != None and logline.namespace not in self.args['ns']:
-                    continue
-
-                if self.args['exclude_ns'] != None and (logline.namespace in self.args['exclude_ns']):
-                    continue
-
-                # if logline doesn't have datetime, skip
-                if logline.datetime == None:
-                    continue
-
                 # offer plot_instance and see if it can plot it
                 line_accepted = False
                 if plot_instance.accept_line(logline):
+                    
+                    # only add if it doesn't conflict with namespace restrictions
+                    if self.args['ns'] != None and logline.namespace not in self.args['ns']:
+                        continue
+
+                    if self.args['exclude_ns'] != None and (logline.namespace in self.args['exclude_ns']):
+                        continue
+
+                    # if logline doesn't have datetime, skip
+                    if logline.datetime == None:
+                        continue
+                    
+                    if logline.namespace == None:
+                        logline._namespace = "None"
+
                     line_accepted = True
                     plot_instance.add_line(logline)
 
