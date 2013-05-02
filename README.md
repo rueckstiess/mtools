@@ -98,9 +98,8 @@ The first 9 groups can be individually toggled to hide/show with the keys 1-9. P
 all groups.
 
 ###### Clickable
-Clicking on any of the plot points or lines will print the corresponding log line to stdout. Clicking on
-the x-axis labels will output an "mlogfilter" string with the matching "--from" parameter, for easy
-copy&paste.
+Clicking on any of the plot points or lines will print the corresponding log line to stdout. Make sure that
+you're not in zoom mode anymore or the click won't get registered.
 
 ###### Overlays
 Overlays allow you to create several different plots (each with a call to mplotqueries) and
@@ -109,18 +108,20 @@ instead of just one. The files are combined and visualized in a single plot.
 
 Sometimes, this isn't possible or practical, for example if the output you want to plot comes from
 a preprocessing pipe, for example created with grep or mlogfilter. Or you want to use different
-parameters (`--group` or `--no-duration`) for different plots. In these cases, you can create overlays with
+parameters (`--group` or `--type`) for different plots. In these cases, you can create overlays with
 the `--overlay` option. A plot will be temporarily stored on disk (under `~/.mtools/mplotqueries/overlays)`, 
 instead of plotted. You can add as many overlays as you like. The first call without the `--overlay`
 option will additionally plot all existing overlays. To remove overlays, run mplotqueries with `--reset`.
 
-###### Events Without Duration
-Normal usage would plot the duration of each logline as a point in a 2D coordinate system, where the
-x-axis is the time of the event, and the y-axis is the duration it took. If the flag `--no-duration` is
-given, mplotqueries plots all events as vertical lines at their respective time, ignoring the duration
-of the event. This is most useful together with overlays, to not only plot the timed events in a logfile
-but also events without duration like replica set status changes (PRIMARY, SECONDARY, etc) or assertions or
-other noticable events. Use mlogfilter or grep to narrow down the number of lines before using `--no-duration`.
+###### Different types of plots
+By default, mplotqueries uses a "duration" plot, that plots the duration of each logline as a point in a 
+2D coordinate system, where the x-axis is the time of the event, and the y-axis is the duration it took. 
+With the parameter `--type`, a different plot type can be chosen. Currently, there are 3 basic types:
+"duration", "event" and "range". The "event" plot will plot each log line as a vertical line on the
+x-axis. Use `mlogfilter` or `grep` to extract the events from the log file that are of interest. Range plots
+will plot a horizontal bar from the datetime of the first line to the datetime of the last line. This plot type is useful to show time periods or ranges. As an example, you could compare the coverage and overlap of several log files.
+
+Apart from these three basic plot types, it is easy to create new plot types that derive from any of the basic ones. Currently, there is one derived plot type, called `rsstate`. This plot type is a special type of event plot, that specifically looks at the replica set state changes (PRIMARY, SECONDARY, ...) and plots them as vertical lines.
   
 ###### Usage  
     mplotqueries filename [filename ...] [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
@@ -134,17 +135,17 @@ other noticable events. Use mlogfilter or grep to narrow down the number of line
       --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
       --log                        plot y-axis in logarithmic scale (default=off)
       --no-legend                  turn off legend (default=on)
-      --group {namespace,operation,thread}
-                                   group by namespace (default), operation or thread.
       --reset                      removes all stored overlays. See --overlay for more
                                    information.
       --overlay                    plots with this option will be stored as 'overlays'
                                    but not plotted. They are all drawn with the first
                                    call without --overlay. Use --reset to remove all
                                    overlays.
-      --no-duration                plots vertical lines for each log line, ignoring the
-                                   duration of the operation.
-
+      --type TYPE                  choose the type of plot. Currently, the types are
+                                   duration, event, range, rsstate.
+      --group GROUP                each plot type has different supported groups. Most
+                                   plot types support grouping by namespace (default), 
+                                   operation or thread.
 
 <hr>
 
