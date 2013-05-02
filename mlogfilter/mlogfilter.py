@@ -42,6 +42,7 @@ class MongoLogFilter(object):
         
         parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
+        parser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
 
         # add arguments from filter classes
         for f in self.filters:
@@ -79,15 +80,21 @@ class MongoLogFilter(object):
         for line in logfile:
             logline = LogLine(line)
 
-            # only print line if all filters agree
-            if all([f.accept(logline) for f in self.filters]):
-                self._outputLine(logline.line_str, self.args['shorten'])
+            if self.args['exclude']:
+                # print line if any filter disagrees
+                if any([not f.accept(logline) for f in self.filters]):
+                    self._outputLine(logline.line_str, self.args['shorten'])
 
-            # if at least one filter refuses to accept remaining lines, stop
-            if any([f.skipRemaining() for f in self.filters]):
-                # if called from shell, break
-                if sys.stdin.isatty():
-                    break
+            else:
+                # only print line if all filters agree
+                if all([f.accept(logline) for f in self.filters]):
+                    self._outputLine(logline.line_str, self.args['shorten'])
+
+                # if at least one filter refuses to accept remaining lines, stop
+                if any([f.skipRemaining() for f in self.filters]):
+                    # if called from shell, break
+                    if sys.stdin.isatty():
+                        break
 
 
 if __name__ == '__main__':
@@ -96,6 +103,7 @@ if __name__ == '__main__':
     mlogfilter = MongoLogFilter()
 
     # add filters
+    mlogfilter.addFilter(LogLineFilter)
     mlogfilter.addFilter(SlowFilter)
     mlogfilter.addFilter(WordFilter)
     mlogfilter.addFilter(TableScanFilter)
