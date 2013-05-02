@@ -262,6 +262,17 @@ This tool builds on top of the code2line module within mtools and is currently i
 
     usage: mlogdistinct logfile [-h | --help] [--verbose]
 
+Example output:
+
+    776367    connection accepted from ... # ... ( ... now open)
+    776316    end connection ... ( ... now open)
+     25526    info DFM::findAll(): extent ... was empty, skipping ahead. ns:
+      9402    ERROR: key too large len: ... max:
+        93    Btree::insert: key too large to index, skipping
+         6    unindex failed (key too big?) ... key:
+         5    old journal file will be removed:
+         1    ClientCursor::yield can't unlock b/c of recursive lock ... ns: ... top:
+         1    key seems to have moved in the index, refinding.
 
 
 mlogmerge
