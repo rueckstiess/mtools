@@ -15,9 +15,9 @@ class EventPlotType(BasePlotType):
 
         for i, xcoord in enumerate(x):
             if i == 0:
-                artist = axis.axvline(xcoord, linewidth=2, picker=5, color=color, alpha=0.3, label=group)
+                artist = axis.axvline(xcoord, linewidth=2, picker=5, color=color, alpha=0.6, label=group)
             else:
-                artist = axis.axvline(xcoord, linewidth=2, picker=5, color=color, alpha=0.3)
+                artist = axis.axvline(xcoord, linewidth=2, picker=5, color=color, alpha=0.6)
             # add meta-data for picking
             artist._mt_plot_type = self
             artist._mt_group = group
