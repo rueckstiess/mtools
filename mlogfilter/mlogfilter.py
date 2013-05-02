@@ -96,6 +96,7 @@ if __name__ == '__main__':
     mlogfilter = MongoLogFilter()
 
     # add filters
+    mlogfilter.addFilter(LogLineFilter)
     mlogfilter.addFilter(SlowFilter)
     mlogfilter.addFilter(WordFilter)
     mlogfilter.addFilter(TableScanFilter)
