@@ -6,13 +6,16 @@ mplotqueries is a tool to visualize operations in MongoDB logfiles. It is part o
 Before you can use mplotqueries, make sure you have [installed mtools](../INSTALL.md) as well as numpy and matplotlib. 
 These dependencies are necessary in order for mplotqueries to work. You can find detailed instructions on the [install](../INSTALL.md) page.
 
-### Basic Usage
+## Basic Usage
 
 mplotqueries is a command line tool that takes a logfile or several logfiles and visualizes the log lines in a 2D plot, where the x-axis is the date and time of an event, and the y-axis is the duration of an event. By default, mplotqueries only visualizes timed loglines, i.e. those that have a duration at the end, specified in milliseconds. A typical log line that is a timed event could look like this:
 
     Thu Feb 21 03:25:44 [conn5] command admin.$cmd command: { writebacklisten: ObjectId('5124bdb43bd5f630b542ff68') } ntoreturn:1 keyUpdates:0  reslen:44 300000ms
     
 These "writebacklisten" commands are an essential part of a sharded setup, and their duration is often "300000ms", or 5 minutes. (If you don't see where the number 300000ms comes from, scroll to the far right of the line.) Their purpose is described on MongoDB's manual page on [sharding](http://docs.mongodb.org/manual/faq/sharding/#what-does-writebacklisten-in-the-log-mean).
+
+
+### Plotting Duration of Operations in the Logfile
 
 To plot a mongod or mongos logfile with mplotqueries, you can simply run:
 
@@ -39,7 +42,7 @@ Another thing you will have noticed by now is the legend in the top left corner.
 
 Back to the problem from above. Since we are only interested in the short events, let's use the zoom function to get a closer look. I'd like to include all points that are not at the 5 minute mark, and choose to zoom in on the y-axis to have 130 seconds at the top. This cuts of the blue writebacklisteners but still includes my two outliers (in red). The view is a little better, but without cutting off the outliers there's still not much to see at the bottom of the plot.
 
-### More Command Line Parameters: `--log`, `--exclude-ns` and pipes
+### More Tricks: `--log`, pipes and combinations with mlogfilter
 
 This is where the `--log` option to plot the y-axis on a logarithmic scale really helps. mplotquery's default is a linear axis, but `--log` forces it to use a log scale, which is very useful to find outliers. Let's close this plot window and start a new one with this option. And while we're at it, we may as well get rid of these writebacklisten points for good. We could use 
 
@@ -67,6 +70,15 @@ Now we can actually click on individual points. Go ahead and click on one of the
 The first two blocks were already there before we even clicked in the plot. The first block shows you an overview of the groups and the number of points that each contains. The second block is just a remainder that you can use the numeric keys to toggle individual plots on and off. Go and try it out: The keys [1-9] toggle the first 9 groups of a plot from visible to invisible and vice versa. The 0 key toggles all plots. Make sure that the focus is on the plot window, and not on the shell, or this won't work.
 
 The line that appeared after we clicked on one of the outliers is the one below that. mplotqueries outputs the exact log line that matches the point in the graph. Here we can see that this particular event was a "getmore" that returned close to 140,000 documents and took about 70 seconds. 
+
+## Advanced features
+
+The earlier versions of `mplotqueries` only had one type of plot: the one we used above, called a "duration" plot, because it plots the durations of log lines. Since then, mplotqueries has grown and now supports a number of different plot types as well as some other features, like grouping and multi-file plotting. When making the tool more general and adding more features, it was always a focus to keep the basic usage as easy as it was at the beginning. The idea was to develop a more abstract, general model, but keep the existing behavior as a "special case", which would plot a simple "duration" plot by default if no other options were specified. Since you are now quite familiar with the basic usage of `mplotqueries`, it's time to move to the more advanced features.
+
+### Plot Types
+
+`mplotqueries` can plot a number of different plot types, which can be selected by the `--type` command line parameter. If no type is specified, a `duration` plot is selected by default. This is why we didn't have to worry about it in the examples above. Currently, there are 3 basic plot types: `duration`, `event`, and `range`. Those three types represent different styles of plotting information. The `duration` plot prints dots on a 2D graph, where the x-axis is the date and time and the y-axis is the duration of the plotted line. This implies that a `duration` plot can only plot timed operations that have a duration. The `event` plot doesn't have that requirement. It can plot any event in the log file, with or without duration, and it does so with a vertical line at the respective time the event happened. Plotting a whole log file as an `event` plot doesn't make much sense, you probably wouldn't be able to see individual lines anymore because there are so many. The idea behind the `event` plot is to filter out certain events, with `grep` or `mlogfilter`, and to only plot these few events. Let's look at an example:
+
 
 
 ## To Be Continued...
