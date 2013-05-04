@@ -96,7 +96,7 @@ Sometimes the information we'd like to visualize is spread over several log file
 <img src="https://www.dropbox.com/s/0k7dz29zvcx4gic/mplotqueries-tutorial-7.png?dl=1">
 
 
-### Plot Types
+### Three Basic Plot Types: `duration`, `event`, `range`
 
 `mplotqueries` can plot a number of different plot types, which can be selected by the `--type` command line parameter. If no type is specified, a `duration` plot is selected by default. This is why we didn't have to worry about it in the examples above. Currently, there are 3 basic plot types: `duration`, `event`, and `range`. Those three types represent different styles of plotting information. The `duration` plot prints dots on a 2D graph, where the x-axis is the date and time and the y-axis is the duration of the plotted line. This implies that a `duration` plot can only plot timed operations that have a duration (i.e. something like `1563ms` at the end of the line). 
 
@@ -116,13 +116,23 @@ This results in some sort of barcode style plot that shows when exactly those sl
 
 Of course this works with all kinds of different events. One could grep for assertions, replica set state changes, server restarts, etc and pipe the remaining log lines into `mplotqueries --type event`. And just as with the markers of duration plots, the lines of event plots are clickable and output the log line to each event to stdout.
 
-The third basic plot type is the `range` plot. A range plot displays time periods, or ranges, as horizontal bars. This is useful to see how long certain events took, or when their first and last appearance in the log occurred. Let's see what happens if we use the same log file and plot it as a range plot instead:
+The third basic plot type is the `range` plot. A range plot displays time periods, or ranges, as horizontal bars. This is useful to see how long certain events took, or when their first and last appearance in the log occurred. One example how this plot type can be quite useful is to see how several log files overlap. In this example, I have 3 logfiles, called
+  * mongod_primary.log
+  * mongod_secondary1.log
+  * mongod_secondary2.log
 
-    mplotqueries mongod.log --type range
+I could specify all three filenames as parameters to `mplotqueries`, but it is easier to do something like this:
+
+    mplotqueries `ls mongod_*` --type range
     
-    
+The result is a plot that looks like the one below:
 
-## To Be Continued...
+<img src="https://www.dropbox.com/s/9l0raiutjnez3q0/mplotqueries-tutorial-8.png?dl=1">
 
-This concludes part I of the mplotqueries tutorial. Next time, we will talk about groups in more detail, about overlay plots, and how you can plot events that don't have a duration. Watch this page for part II.
+And it shows that I really only have a few hours at the end of Feb 20, where I have overlapping information from all 3 logfiles.
+
+
+## To Be Continued
+
+The last part of this tutorial is going to explain to use overlays to combine different plots in one. 
 
