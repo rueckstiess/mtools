@@ -84,12 +84,16 @@ Most of the time, we find a root cause for an unknown problem by comparing certa
     
 <img src="https://www.dropbox.com/s/j266bo6v9lgi9ai/mplotqueries-tutorial-6.png?dl=1">
 
-Now we can see different aspects of the same logfile, for example that most of the operations on Feb 20 were queries, while they were getmores, inserts, removes and very few updates on Feb 21.
+Now we can see different aspects of the same logfile, for example that most of the operations on Feb 20 were queries, while they were getmores, inserts, removes and very few updates on Feb 21. It's easy to spot what different groups there are in a plot by looking at the legend, which lists them all and assigns a color to them.
 
 Another attribute that can be used for grouping is `thread`. This creates an individual group for each thread, for example `[LockPinger]`,`[rsSync]`, etc. and one combined group for all regular connections `[conn####]`, where #### is a number. Future plot types may have additional attributes that they can group by. 
 
 
 ### Multiple files
+
+Sometimes the information we'd like to visualize is spread over several log files. `mplotqueries` lets you specify any number of files at the command line, not just a single one. If you specify more than one log file, then the plot is automatically grouped by a special group attribute, the _filename_. This makes it easy to compare different log files without plotting them all individually.
+
+<img src="https://www.dropbox.com/s/0k7dz29zvcx4gic/mplotqueries-tutorial-7.png?dl=1">
 
 
 ### Plot Types
