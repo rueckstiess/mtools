@@ -24,7 +24,7 @@ After parsing the logfile, you should see a window pop up that displays the quer
 
 On the x-axis we see the date and time of the events. This particular logfile seems to go from February 20-21. The y-axis represents the duration of events in milliseconds.
 
-And we already run into our first problem. Most of the operations in MongoDB have sub-second duration, and we can see points on the bottom of the plot, but they are all squashed together. Unfortunately, the logfile also contains these writebacklisten messages, that are known to run for (comparatively) long times, 5 minutes. We can savely ignore those and focus on the "real" events.
+Here we already run into our first problem. Most of the operations in MongoDB have sub-second duration, and we can see points on the bottom of the plot, but they are all squashed together. Unfortunately, the logfile also contains these writebacklisten messages, that are known to run for (comparatively) long times, 5 minutes. We can savely ignore those and focus on the "real" events.
 
 
 ### Navigating the Main Window
@@ -35,19 +35,19 @@ To navigate within a mplotqueries plot (which, by the way, uses [matplotlib](htt
 
 The first symbol, the house, takes you back to the initial view, the one you see when the plot first opens. The two arrows on its side are like back and forward buttons in a browser. They let you navigate step by step backward or forward in the history of views. The crossed arrows next to it let you pan around in the plot, by click-dragging the mouse anywhere in the plot area. This lets you move the plot to a different position. The magnifying glass lets you draw a rectangle, that you want to zoom into. This is probably the most useful feature, as you can zoom into very small regions to see what happens close up. The button next to it is for subplot and margin configuration and not very useful in mplotqueries. Finally, the rightmost button, the floppy disk, lets you export your plot into a number of formats. A file dialog will pop up, and depending how you choose your file ending (e.g. `.pdf`, `.png`, `.jpg`), the exporter will write the correct format. Feel free to play around with each of these actions now to get a feel for navigating within a plot.
 
-Another thing you will have noticed by now is the legend in the top left corner. This shows the different "groups", that your plot contains. By default, the plot is grouped into namespaces, showing each namespace (database and collection, spearated by a period) in a different color. If you run out of colors, mplotqueries will also use different symbols (squares, diamonds, etc.) to help you distinguish your groups. We will talk about groups again further down in this tutorial, but for now let's just mention that you can change the grouping by using the parameter `--group <option>`, where `<option>` can be one of the following: `namespace`, `operation`, `thread`.
+Another thing you will have noticed by now is the legend in the top left corner. This shows the different "groups", that your plot contains. By default, the plot is grouped into namespaces, showing each namespace (database and collection, spearated by a period) in a different color. If you run out of colors, mplotqueries will also use different symbols (squares, diamonds, etc.) to help you distinguish your groups. We will talk about groups again further down in this tutorial, but for now let's just mention that you can change the grouping by using the parameter `--group <option>`, where `<option>` can for example be `namespace`, `operation`, `thread`, and some others.
 
 Back to the problem from above. Since we are only interested in the short events, let's use the zoom function to get a closer look. I'd like to include all points that are not at the 5 minute mark, and choose to zoom in on the y-axis to have 130 seconds at the top. This cuts of the blue writebacklisteners but still includes my two outliers (in red). The view is a little better, but without cutting off the outliers there's still not much to see at the bottom of the plot.
 
 ### More Command Line Parameters: `--log`, `--exclude-ns` and pipes
 
-This is where the `--log` option to plot the y-axis on a logarithmic scale really helps. mplotquery's default is a linear axis, but `--log` forces it to use a log scale. Perfect for outliers. Let's close this plot window and start a new one with this option. And while we're at it, we may as well get rid of these writebacklisten points for good. We could use 
+This is where the `--log` option to plot the y-axis on a logarithmic scale really helps. mplotquery's default is a linear axis, but `--log` forces it to use a log scale, which is very useful to find outliers. Let's close this plot window and start a new one with this option. And while we're at it, we may as well get rid of these writebacklisten points for good. We could use 
 
     grep -v "writebacklisten" mongod.log | mplotqueries
 
-to filter out all lines that contain the word "writebacklisten" and send the remaining ones to mplotqueries. As you see, mplotqueries doesn't just accept logfiles, you can also pipe a stream of loglines to it. However, for our case there is a simpler alternative. We know that those writebacklisten commands are all admin commands, and their namespace in the logfile is therefore `admin.$cmd`. mplotqueries supports to in- or exclude namespaces directly. Inclusion (`--ns`) means that only the specified namespaces are plotted, and exclusion (`--exclude-ns`) means that __all but__ the specified namespaces are plotted. Let's test this:
+to filter out all lines that contain the word "writebacklisten" and send the remaining ones to mplotqueries. As you see, mplotqueries doesn't just accept logfiles, you can also pipe a stream of loglines to it. There is a also another alternative. We know that those writebacklisten commands are all admin commands, and their namespace in the logfile is therefore `admin.$cmd`. `mlogfilter` has an option to exclude certain namespaces, so we could run 
 
-    mplotqueries mongod.log --exclude-ns "admin.\$cmd" --log
+    mlogfilter mongod.log --namespace "admin.\$cmd" --exclude | mplotqueries
     
 The result looks like this:
 
@@ -67,12 +67,6 @@ Now we can actually click on individual points. Go ahead and click on one of the
 The first two blocks were already there before we even clicked in the plot. The first block shows you an overview of the groups and the number of points that each contains. The second block is just a remainder that you can use the numeric keys to toggle individual plots on and off. Go and try it out: The keys [1-9] toggle the first 9 groups of a plot from visible to invisible and vice versa. The 0 key toggles all plots. Make sure that the focus is on the plot window, and not on the shell, or this won't work.
 
 The line that appeared after we clicked on one of the outliers is the one below that. mplotqueries outputs the exact log line that matches the point in the graph. Here we can see that this particular event was a "getmore" that returned close to 140,000 documents and took about 70 seconds. 
-
-Speaking of clicking: you can also click on the x-axis labels, where the date and time are displayed. If you do, mplotqueries will output something like this to the shell:
-
-    mlogfilter mongod.log --from Feb 21 03:25:00
-    
-This is a call to [mlogfilter](https://github.com/rueckstiess/mtools#mlogfilter), that you can copy&paste to the shell to extract only the events starting from the given date and time. You can amend it with a `--to` parameter, for example `--to +10min` to get 10 minutes of the log file, starting at Feb 21 03:25:00, and ending at Feb 21 03:35:00.
 
 
 ## To Be Continued...
