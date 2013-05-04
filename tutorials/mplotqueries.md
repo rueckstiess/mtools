@@ -75,6 +75,23 @@ The line that appeared after we clicked on one of the outliers is the one below 
 
 The earlier versions of `mplotqueries` only had one type of plot: the one we used above, called a "duration" plot, because it plots the durations of log lines. Since then, mplotqueries has grown and now supports a number of different plot types as well as some other features, like grouping and multi-file plotting. When making the tool more general and adding more features, it was always a focus to keep the basic usage as easy as it was at the beginning. The idea was to develop a more abstract, general model, but keep the existing behavior as a "special case", which would plot a simple "duration" plot by default if no other options were specified. Since you are now quite familiar with the basic usage of `mplotqueries`, it's time to move to the more advanced features.
 
+
+### Group By Different Attributes
+
+Most of the time, we find a root cause for an unknown problem by comparing certain things to each other, with the goal of finding outliers. Very generally speaking, we do that by grouping items together, based on similarities in one attribute, and we contrast them with items that are different in the selected attribute. In `mplotqueries`, we call these attributes `groups`, and we can group by different attributes with the `--group` parameter. By default, the group attribute is on `namespace`. If you go back to the first screenshots at the beginning of this tutorial, you will see in the legend that the different colors (groups) are on `namespace`. In this specific case, we're dealing with a GridFS instance, therefore we have namespaces "a.fs.chunks" and "a.fs.files", as well as "local.oplog.rs" and a pseudo-namespace called "admin.$cmd". Each group contains all log lines that have the same namespace, and each group is displayed in a different color. If we want to use a different group, we can do something like this:
+
+    mplotqueries mongod.log --group operation
+    
+<img src="https://www.dropbox.com/s/j266bo6v9lgi9ai/mplotqueries-tutorial-6.png?dl=1">
+
+Now we can see different aspects of the same logfile, for example that most of the operations on Feb 20 were queries, while they were getmores, inserts, removes and very few updates on Feb 21.
+
+Another attribute that can be used for grouping is `thread`. This creates an individual group for each thread, for example `[LockPinger]`,`[rsSync]`, etc. and one combined group for all regular connections `[conn####]`, where #### is a number. Future plot types may have additional attributes that they can group by. 
+
+
+### Multiple files
+
+
 ### Plot Types
 
 `mplotqueries` can plot a number of different plot types, which can be selected by the `--type` command line parameter. If no type is specified, a `duration` plot is selected by default. This is why we didn't have to worry about it in the examples above. Currently, there are 3 basic plot types: `duration`, `event`, and `range`. Those three types represent different styles of plotting information. The `duration` plot prints dots on a 2D graph, where the x-axis is the date and time and the y-axis is the duration of the plotted line. This implies that a `duration` plot can only plot timed operations that have a duration (i.e. something like `1563ms` at the end of the line). 
@@ -93,7 +110,13 @@ This results in some sort of barcode style plot that shows when exactly those sl
 
 <img src="https://www.dropbox.com/s/wjo0tc67rbtljd4/mplotqueries-tutorial-5.png?dl=1">
 
-Of course this works with all kinds of different events. One could grep for assertions, replica set state changes, server restarts, etc and pipe the remaining log lines into `mplotqueries --type event`.
+Of course this works with all kinds of different events. One could grep for assertions, replica set state changes, server restarts, etc and pipe the remaining log lines into `mplotqueries --type event`. And just as with the markers of duration plots, the lines of event plots are clickable and output the log line to each event to stdout.
+
+The third basic plot type is the `range` plot. A range plot displays time periods, or ranges, as horizontal bars. This is useful to see how long certain events took, or when their first and last appearance in the log occurred. Let's see what happens if we use the same log file and plot it as a range plot instead:
+
+    mplotqueries mongod.log --type range
+    
+    
 
 ## To Be Continued...
 
