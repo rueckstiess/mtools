@@ -28,13 +28,13 @@ class RangePlotType(BasePlotType):
             axis.set_ylim(0.0, 1.0)
 
         height = (y_max - y_min) / 50.
-        y_bottom = y_min + 0.9 * (y_max-y_min) - idx * 1.5 * height
+        y_bottom = y_min + 0.90 * (y_max-y_min) - idx * 1.5 * height
 
         x_left = date2num( self.groups[group][0].datetime )
         x_right = date2num( self.groups[group][-1].datetime )
 
         color=self.colors[idx%len(self.colors)]
-        artist = axis.barh(y_bottom, x_right-x_left, height=height, left=x_left, color=color, alpha=0.4, edgecolor=color, picker=5, linewidth=1)[0]
+        artist = axis.barh(y_bottom, x_right-x_left, height=height, left=x_left, color=color, alpha=0.4, edgecolor=color, picker=5, linewidth=1, label=group)[0]
         if group:
             axis.text(x_right, y_bottom+0.6*height, group + ' ', verticalalignment='center', horizontalalignment='right', color='black', fontsize=9)
 
@@ -44,6 +44,7 @@ class RangePlotType(BasePlotType):
 
     def print_line(self, event):
         group = event.artist._mt_group
-        print "%s: %s - %s" % (group, self.groups[group][0].datetime, self.groups[group][-1].datetime)
+        print self.groups[group][0].line_str
+        print self.groups[group][-1].line_str
 
 
