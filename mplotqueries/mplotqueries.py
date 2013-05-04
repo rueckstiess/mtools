@@ -88,8 +88,6 @@ class MongoPlotQueries(object):
         # separate parser for --plot arguments (multiple times possible)
         self.args = vars(parser.parse_args())
 
-        print self.args
-
 
     def parse_loglines(self):
         multiple_files = False
@@ -99,21 +97,22 @@ class MongoPlotQueries(object):
             logfiles = ( open(f, 'r') for f in self.args['filename'] )
             if len(self.args['filename']) > 1:
                 multiple_files = True
+                self.args['group'] = 'filename'
 
         else:
             logfiles = [sys.stdin]
         
+        plot_instance = self.plot_types[self.args['type']](args=self.args)
+        
         for logfile in logfiles:
-            args = copy(self.args)
-            plot_instance = self.plot_types[args['type']](args=args)
-            
-            if multiple_files:
-                args['label'] = logfile.name
-                args['group'] = 'off'
 
             for line in logfile:
                 # create LogLine object
                 logline = LogLine(line)
+
+                if multiple_files:
+                    # amend logline object with filename for group by filename
+                    logline.filename = logfile.name
 
                 # offer plot_instance and see if it can plot it
                 line_accepted = False
@@ -136,7 +135,7 @@ class MongoPlotQueries(object):
                     line_accepted = True
                     plot_instance.add_line(logline)
 
-            self.plot_instances.append(plot_instance)
+        self.plot_instances.append(plot_instance)
 
         # close files after parsing
         if sys.stdin.isatty():
