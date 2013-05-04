@@ -77,9 +77,23 @@ The earlier versions of `mplotqueries` only had one type of plot: the one we use
 
 ### Plot Types
 
-`mplotqueries` can plot a number of different plot types, which can be selected by the `--type` command line parameter. If no type is specified, a `duration` plot is selected by default. This is why we didn't have to worry about it in the examples above. Currently, there are 3 basic plot types: `duration`, `event`, and `range`. Those three types represent different styles of plotting information. The `duration` plot prints dots on a 2D graph, where the x-axis is the date and time and the y-axis is the duration of the plotted line. This implies that a `duration` plot can only plot timed operations that have a duration. The `event` plot doesn't have that requirement. It can plot any event in the log file, with or without duration, and it does so with a vertical line at the respective time the event happened. Plotting a whole log file as an `event` plot doesn't make much sense, you probably wouldn't be able to see individual lines anymore because there are so many. The idea behind the `event` plot is to filter out certain events, with `grep` or `mlogfilter`, and to only plot these few events. Let's look at an example:
+`mplotqueries` can plot a number of different plot types, which can be selected by the `--type` command line parameter. If no type is specified, a `duration` plot is selected by default. This is why we didn't have to worry about it in the examples above. Currently, there are 3 basic plot types: `duration`, `event`, and `range`. Those three types represent different styles of plotting information. The `duration` plot prints dots on a 2D graph, where the x-axis is the date and time and the y-axis is the duration of the plotted line. This implies that a `duration` plot can only plot timed operations that have a duration (i.e. something like `1563ms` at the end of the line). 
 
+The `event` plot doesn't have that requirement. It can plot any event in the log file, with or without duration, and it does so with a vertical line at the respective time the event happened. Plotting a whole log file as an `event` plot doesn't make much sense, you probably wouldn't be able to see individual lines anymore because there are so many. The idea behind the `event` plot is to filter out certain events, with `grep` or `mlogfilter`, and to only plot these few events. Let's look at an example:
 
+Assume we know that there were some slow `serverStatus` messages in the logfile, and we want to know when those happened. Slow `serverStatus` warnings look like this:
+
+    Thu Feb 21 08:44:18 [conn2283] serverStatus was very slow: { after basic: 0, middle of mem: 650, after mem: 650, after connections: 650, after extra info: 650, after counters: 650, after repl: 650, after asserts: 650, after dur: 1080, at end: 1080 }
+
+They all say "serverStatus was very slow" and then list a number of values for how long different sections of the server status command took. Let's grep all those and make an `event` plot out of them.
+
+    grep "serverStatus was very slow" mongod.log | mplotqueries --type event
+    
+This results in some sort of barcode style plot that shows when exactly those slow serverStatus events occured. We can quickly see that there were more than usual just at the end of Feb 20. 
+
+<img src="https://www.dropbox.com/s/wjo0tc67rbtljd4/mplotqueries-tutorial-5.png?dl=1">
+
+Of course this works with all kinds of different events. One could grep for assertions, replica set state changes, server restarts, etc and pipe the remaining log lines into `mplotqueries --type event`.
 
 ## To Be Continued...
 
