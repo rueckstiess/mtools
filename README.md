@@ -77,6 +77,10 @@ to your `.bashrc` or `.bash_profile` file (in your HOME directory). Other shells
 mplotqueries
 ------------
 
+#### See also 
+
+A [tutorial for mplotqueries](./tutorials/mplotqueries.md) is available in the tutorials subfolder. It will walk you through all the features that mplotqueries currently contains.
+
 #### Additional dependencies
 - NumPy
 - matplotlib
