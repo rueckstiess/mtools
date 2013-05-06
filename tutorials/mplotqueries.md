@@ -147,7 +147,7 @@ While the different plot types are useful, sometimes it would be great if severa
 Go ahead and try it out. Use:
 
     mplotqueries mongod.log --group operation --overlay
-    mplotqueries mongod.log --type rsstate --log
+    mplotqueries mongod.log --type rsstate
 
 and you will get a combined duration / rsstate plot:
 
