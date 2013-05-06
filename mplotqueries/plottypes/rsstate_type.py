@@ -27,5 +27,11 @@ class RSStatePlotType(EventPlotType):
 
     def accept_line(self, logline):
         """ only match log lines containing 'is now in state'. """
-        return  "is now in state" in logline.line_str
+        if "is now in state" in logline.line_str:
+            return True
+
+        if "replSet" in logline.line_str and logline.thread == "rsMgr" and logline.split_tokens[-1] in self.states:
+            return True
+
+        return False
 
