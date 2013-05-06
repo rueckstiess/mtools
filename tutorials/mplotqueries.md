@@ -86,7 +86,7 @@ Most of the time, we find a root cause for an unknown problem by comparing certa
 
 Now we can see different aspects of the same logfile, for example that most of the operations on Feb 20 were queries, while they were getmores, inserts, removes and very few updates on Feb 21. It's easy to spot what different groups there are in a plot by looking at the legend, which lists them all and assigns a color to them.
 
-Another attribute that can be used for grouping is `thread`. This creates an individual group for each thread, for example `[LockPinger]`,`[rsSync]`, etc. and one combined group for all regular connections `[conn####]`, where #### is a number. Future plot types may have additional attributes that they can group by. 
+Another attribute that can be used for grouping is `thread`. This creates an individual group for each thread, for example `[LockPinger]`,`[rsMgr]`, etc. and one combined group for all regular connections `[conn####]`, where #### is a number. Future plot types may have additional attributes that they can group by. 
 
 
 ### Multiple files
