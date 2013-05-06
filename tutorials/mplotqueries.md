@@ -133,7 +133,7 @@ And it shows that I really only have a few hours at the end of Feb 20, where I h
 
 ### More Plot Types
 
-It is fairly easy to create customized plot types that derive from one of the basic plot types above. One plot type that is already included with mplotqueries is the type `rsstate`. It derives from an event plot and visualizes state changes of replica set members. The colors are similar to the ones used in MMS: purple/magenta is used for a primary, yellow for secondary, red for state DOWN. 
+It is fairly easy to create customized plot types that derive from one of the basic plot types above. One extended plot type that is already included with mplotqueries is `rsstate`. It derives from an event plot and visualizes state changes of replica set members. The colors are similar to the ones used in MMS: purple/magenta is used for a primary, yellow for secondary, red for state DOWN. If you are interested in writing your own plot types, have a look at the [implementation of the rsstate plot](../mplotqueries/plottypes/rsstate_type.py), it's straight forward and self-explanatory.
 
 Here is a graphical overview of the basic plot types and the first derived plot type:
 
