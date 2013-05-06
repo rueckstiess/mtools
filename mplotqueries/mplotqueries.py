@@ -29,6 +29,8 @@ class MongoPlotQueries(object):
         self.plot_types = {pt.plot_type_str: pt for pt in self.plot_types}
         self.plot_instances = []
 
+        self.legend = None
+
         # parse arguments
         self.parse_args()
 
@@ -77,7 +79,6 @@ class MongoPlotQueries(object):
         parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
         parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
         parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
-        parser.add_argument('--no-legend', action='store_true', default=False, help='turn off legend (default=on)')
         parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
         parser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
         
@@ -235,6 +236,9 @@ class MongoPlotQueries(object):
         print "keyboard shortcuts (focus must be on figure window):"
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
         print "%5s  %s" % ("0", "toggle visibility of all plots")
+        print "%5s  %s" % ("-", "toggle visibility of legend")
+        print "%5s  %s" % ("g", "toggle grid")
+        print "%5s  %s" % ("l", "toggle log/linear y-axis")
         print "%5s  %s" % ("q", "quit mplotqueries")
         print
 
@@ -251,29 +255,37 @@ class MongoPlotQueries(object):
         plot_type = event.artist._mt_plot_type
         plot_type.print_line(event)
 
-    def toggle_artist(self, idx):
+
+    def toggle_artist(self, artist):
         try:
-            visible = self.artists[idx].get_visible()
-            self.artists[idx].set_visible(not visible)
+            visible = artist.get_visible()
+            artist.set_visible(not visible)
             plt.gcf().canvas.draw()
-        except IndexError:
+        except Exception:
             pass
 
 
     def onpress(self, event):
         if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
             idx = int(event.key)-1
-            self._toggle_artist(idx)
+            try:
+                self.toggle_artist(self.artists[idx])
+            except IndexError:
+                pass
 
         if event.key == '0':
             visible = any([a.get_visible() for a in self.artists])
             for artist in self.artists:
                 artist.set_visible(not visible)
-            
             plt.gcf().canvas.draw()
 
         if event.key == 'q':
             raise SystemExit('quitting.')
+
+        if event.key == '-':
+            if self.legend:
+                self.toggle_artist(self.legend)
+                plt.gcf().canvas.draw()
 
 
     def plot(self):
@@ -299,10 +311,9 @@ class MongoPlotQueries(object):
         else:
             axis.set_ylabel('query duration in ms')
 
-        if not self.args['no_legend']:
-            handles, labels = axis.get_legend_handles_labels()
-            if len(labels) > 0:
-                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+        handles, labels = axis.get_legend_handles_labels()
+        if len(labels) > 0:
+            self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
