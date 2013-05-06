@@ -3,7 +3,7 @@ from event_type import EventPlotType
 class RSStatePlotType(EventPlotType):
     plot_type_str = 'rsstate'
 
-    # force group_by to always use lastword
+    # force group() to always use lastword method to groupy by
     group_by = 'lastword'
 
     colors = ['m', 'y', 'r', 'g', 'g', 'k', 'b', 'c']
@@ -26,7 +26,7 @@ class RSStatePlotType(EventPlotType):
 
 
     def accept_line(self, logline):
-        """ only match log lines containing 'is now in state'. """
+        """ only match log lines containing 'is now in state' (others' state changes) or from rsMgr task (own state changes). """
         if "is now in state" in logline.line_str:
             return True
 
