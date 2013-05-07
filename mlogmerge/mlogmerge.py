@@ -25,7 +25,7 @@ class MongoLogMerger(object):
         parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
         # parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files')
-        parser.add_argument('--pos', action='store', default=4, help="position of label (0 = front of line, other options are # or 'eol'")
+        parser.add_argument('--pos', action='store', default=0, help="position of label (0 = front of line, other options are # or 'eol'")
         parser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
 
         args = vars(parser.parse_args())
