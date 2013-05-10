@@ -5,7 +5,6 @@ import sys
 import argparse
 from collections import defaultdict, OrderedDict
 from itertools import chain
-from matplotlib import pyplot as plt
 from mtools.mtoolbox.logcodeline import LogCodeLine
 
 def import_logdb():
