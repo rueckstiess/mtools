@@ -66,10 +66,8 @@ class MongoPlotQueries(object):
 
     def parse_args(self):
         # create parser object
-        parser = argparse.ArgumentParser(description='A script to plot query durations in a logfile' \
-            ' (requires numpy and matplotlib packages). Clicking on any of the plot points will print' \
-            ' the corresponding log line to stdout. Clicking on the x-axis labels will output an ' \
-            ' "mlogfilter" string with the matching "--from" parameter.')
+        parser = argparse.ArgumentParser(description='A script to plot various information from logfiles.' \
+            'Clicking on any of the plot points will print the corresponding log line to stdout.')
         
         # positional argument
         if sys.stdin.isatty():
