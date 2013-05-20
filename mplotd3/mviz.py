@@ -37,7 +37,7 @@ if __name__ == '__main__':
         if logline.datetime and logline.duration:
             if logline.thread and logline.thread.startswith("conn"):
                 logline._thread = "conn####"
-                print logline.thread
+            # write log line out as json
             outf.write(logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration']) + ",\n")
     outf.write('{}]')
     outf.close()

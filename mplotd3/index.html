@@ -33,7 +33,7 @@
     rect.zoom {
       stroke: steelblue;
       fill: lightsteelblue;
-      fill-opacity: 0.3;
+      fill-opacity: 0.2;
     }
 
     div#controls {
@@ -51,6 +51,7 @@
       <label for="zoom-check"><input type="checkbox" id="zoom-check">zoom</label>
       <button id="reset">reset</button><br>
       <label for="log-check"><input type="checkbox" id="log-check">log scale</label>
+      <p>
       <fieldset>
         <legend>group by</legend>
         <label for="namespace"><input id="namespace" type="radio" name="group" checked>namespace</label><br>
@@ -208,6 +209,13 @@
 
         draw_circles();
         draw_legend();
+
+        // register click on circles
+        svg.selectAll("circle")
+          .on("click", function(d) {
+            console.log(d.line_str);
+          });
+
 
         function draw_circles() {
           var circles = svg.selectAll('circle')
