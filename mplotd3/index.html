@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <style>
+
+    body {
+      position: relative;
+      width: 960px;
+    }
+
+    svg {
+      font: 10px sans-serif;
+    }
+
+    rect {
+      fill: #fff;
+    }
+
+    circle {
+      fill: steelblue;
+      opacity: 0.5;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #ddd;
+    }
+
+    button {
+      position: absolute;
+      right: 30px;
+      top: 30px;
+    }
+
+    </style>
+  </head>
+
+  <body>
+    <button id="reset">Reset</button>
+
+  	<script>
+
+  		d3.json('events.json', function (error, events) {
+
+        // add custom date interpolator
+        d3.interpolators.push( function(a, b) {
+          if ((a instanceof Date) && (b instanceof Date)) {
+            var a_ts = a.getTime();
+            var b_ts = b.getTime();
+            return function(t) {
+              return new Date(a_ts * (1-t) + b_ts * t);
+            };
+          }
+        });
+
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        events = events.filter(function(d) { return d.duration && d.datetime});
+
+        // calculate min and max dates
+        var events_lim_x = d3.extent(events, function(d, i) { return new Date(d.datetime) });
+        var events_lim_y = d3.extent(events, function(d, i) { return d.duration });            
+
+        // create x scale, from [events_min, events_max] to [0, width]
+        var x = d3.time.scale.utc()
+          .domain(events_lim_x)
+          .range([0, width]);
+
+        // create y scale, from [0, 100] to [0, height]
+        var y = d3.scale.linear()
+          .domain(events_lim_y)
+          .range([height, 0]);
+
+        // var color scale (10 colors)
+        var c = d3.scale.category10()
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+            .ticks(15)
+            .tickSize(-height);
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .ticks(5)
+            .tickSize(-width);
+
+        var zoom = d3.behavior.zoom()
+            .x(x)
+            .y(y)
+            .scaleExtent([1, 100])
+            .on("zoom", zoomed);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(zoom);
+
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        d3.select("button#reset").on("click", reset);
+      
+        draw_circles()
+
+        function draw_circles() {
+          var circles = svg.selectAll('circle')
+            .data(events);
+
+          circles
+            .enter()
+              .append('circle')
+              .attr('r', 4)
+              .style('fill', function(d) { return c(d['namespace']) })
+
+          circles
+            .attr('cx', function(d) { return x(new Date(d['datetime'])) })
+            .attr('cy', function(d) { return y(d['duration']) });
+
+          circles.exit().remove();
+        }
+
+        function zoomed() {
+          var zoom_tr = zoom.translate();
+          zoom.translate( [zoom_tr[0], Math.min(0, zoom_tr[1])] );
+          svg.select(".x.axis").call(xAxis);
+          svg.select(".y.axis").call(yAxis);
+          draw_circles();
+        }
+
+        function reset() {
+          d3.transition().duration(500).tween("zoom", function() {
+            var ix = d3.interpolate(x.domain(), events_lim_x);
+            var iy = d3.interpolate(y.domain(), events_lim_y);
+            return function(t) {
+              zoom
+                .x(x.domain(ix(t)))
+                .y(y.domain(iy(t)));
+              zoomed();
+            };
+          });
+        }
+      });
+
+  	</script>
+  </body>
+</html>
