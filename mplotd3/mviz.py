@@ -33,7 +33,11 @@ if __name__ == '__main__':
     outf.write('[')
     for line in logfile:
         logline = LogLine(line)
+        # group regular connections together
         if logline.datetime and logline.duration:
+            if logline.thread and logline.thread.startswith("conn"):
+                logline._thread = "conn####"
+                print logline.thread
             outf.write(logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration']) + ",\n")
     outf.write('{}]')
     outf.close()

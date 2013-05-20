@@ -7,6 +7,8 @@
     body {
       position: relative;
       width: 960px;
+      font-size: 11px;
+      font-family: verdana;
     }
 
     svg {
@@ -17,7 +19,7 @@
       fill: #fff;
     }
 
-    circle {
+    circle.event {
       fill: steelblue;
       opacity: 0.5;
     }
@@ -36,7 +38,8 @@
 
     div#controls {
       position: absolute;
-      right: 30px;
+      width: 250px;
+      right: -250px;
       top: 30px;
     }
 
@@ -53,7 +56,8 @@
         <label for="namespace"><input id="namespace" type="radio" name="group" checked>namespace</label><br>
         <label for="operation"><input id="operation" type="radio" name="group">operation</label><br>
         <label for="thread"><input id="thread" type="radio" name="group">thread</label>
-      </fieldset>
+      </fieldset><br>
+      <div id="legend"></div>
     </div>
 
   	<script>
@@ -71,8 +75,8 @@
           }
         });
 
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-            width = 960 - margin.left - margin.right,
+        var margin = {top: 20, right: 50, bottom: 50, left: 50},
+            width = 980 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
         // filter out all documents that don't have duration or datetime
@@ -105,18 +109,8 @@
         var log_scale = false;
         d3.select("#log-check").on("change", function() {
           log_scale = this.checked;
-          if (log_scale) {
-            var y_scale = d3.scale.log()
-              .domain(y.domain())
-              .range(y.range());
-            y = y_scale;
-          } else {
-            var y_scale = d3.scale.linear()
-              .domain(y.domain())
-              .range(y.range());
-            y = y_scale;
-          }
-          change_scale();
+          var y_scale = log_scale ? d3.scale.log() : d3.scale.linear();
+          change_scale(y_scale);
         });
 
 
@@ -128,14 +122,15 @@
             // re-create the color scale
             c = d3.scale.category10();
             draw_circles();
-            console.log(c.domain());
+            draw_legend();
           }
         });
 
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom")
-            .ticks(15)
+            .ticks(10)
+            .tickPadding(20)
             .tickSize(-height);
 
         var yAxis = d3.svg.axis()
@@ -147,7 +142,7 @@
         var zoom = d3.behavior.zoom()
             .x(x)
             .y(y)
-            .scaleExtent([1, 100])
+            .scaleExtent([1, 200])
             .on("zoom", zoomed);
 
         var svg = d3.select("body").append("svg")
@@ -206,8 +201,13 @@
             .call(yAxis);
 
         d3.select("button#reset").on("click", reset);
-      
-        draw_circles()
+
+        var legend_svg = d3.select("div#legend").append("svg")
+          .attr("width", 250)
+          .attr("height", 400);
+
+        draw_circles();
+        draw_legend();
 
         function draw_circles() {
           var circles = svg.selectAll('circle')
@@ -216,7 +216,8 @@
           circles
             .enter()
               .append('circle')
-              .attr('r', 4);
+              .attr('r', 4)
+              .attr("class", "event");
 
           circles
             .style('fill', function(d) { return c(d[color_field]) })
@@ -226,7 +227,55 @@
           circles.exit().remove();
         }
 
-        function change_scale() {
+
+        function draw_legend() {
+          var items = legend_svg.selectAll("g")
+            .data(c.domain());
+
+          items.enter()
+            .append("g")
+              .attr("transform", function (d,i) { return "translate(0, " + i*15 + ")" })
+              .each(function () {
+                var g = d3.select(this);
+                g.append("circle")
+                  .attr("cx", 5)
+                  .attr("cy", 5)
+                  .attr("r", 5)
+                  .style("fill", function (d,i) { return c(d); });
+
+                g.append("text")
+                  .attr("dy", function(d,i) {return (i)*1.5+0.8 + "em"; })
+                  .attr("dx", "15px")
+                  .attr("fill", "black")
+                  .text(function (d) { return d; });
+              });
+
+          items
+            .each(function () {
+              var g = d3.select(this);
+              g.select("text")
+                .attr("dy", function(d,i) {return (i)*1.5+0.8 + "em"; })
+                .text(function (d) { return d; });
+              g.select("circle")
+                .style("fill", function (d,i) { return c(d); });
+            });
+
+          items.exit()
+            .each(function () {
+              var g = d3.select(this);
+              g.select("circle").remove();
+              g.select("text").remove();
+              g.remove();
+            });
+        }
+
+        function change_scale(y_scale) {
+          y_scale
+            .domain(y.domain())
+            .range(y.range());
+
+          y = y_scale;
+          zoom.y(y);
           yAxis.scale(y);
           svg.select(".y.axis").call(yAxis);
 
