@@ -28,7 +28,13 @@
       stroke: #ddd;
     }
 
-    button {
+    rect.zoom {
+      stroke: steelblue;
+      fill: lightsteelblue;
+      fill-opacity: 0.3;
+    }
+
+    div#controls {
       position: absolute;
       right: 30px;
       top: 30px;
@@ -38,11 +44,21 @@
   </head>
 
   <body>
-    <button id="reset">Reset</button>
+    <div id="controls">
+      <label for="zoom-check"><input type="checkbox" id="zoom-check">zoom</label>
+      <button id="reset">reset</button><br>
+      <label for="log-check"><input type="checkbox" id="log-check">log scale</label>
+      <fieldset>
+        <legend>group by</legend>
+        <label for="namespace"><input id="namespace" type="radio" name="group" checked>namespace</label><br>
+        <label for="operation"><input id="operation" type="radio" name="group">operation</label><br>
+        <label for="thread"><input id="thread" type="radio" name="group">thread</label>
+      </fieldset>
+    </div>
 
   	<script>
 
-  		d3.json('events.json', function (error, events) {
+  		d3.json('mviz_events.json', function (error, events) {
 
         // add custom date interpolator
         d3.interpolators.push( function(a, b) {
@@ -59,6 +75,7 @@
             width = 960 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
+        // filter out all documents that don't have duration or datetime
         events = events.filter(function(d) { return d.duration && d.datetime});
 
         // calculate min and max dates
@@ -76,7 +93,44 @@
           .range([height, 0]);
 
         // var color scale (10 colors)
-        var c = d3.scale.category10()
+        var c = d3.scale.category10();
+
+        // prepare zoom rectangle
+        var zoom_rect = false;
+        d3.select("#zoom-check").on("change", function() {
+          zoom_rect = this.checked;
+        });
+
+        // handle log scale checkbox
+        var log_scale = false;
+        d3.select("#log-check").on("change", function() {
+          log_scale = this.checked;
+          if (log_scale) {
+            var y_scale = d3.scale.log()
+              .domain(y.domain())
+              .range(y.range());
+            y = y_scale;
+          } else {
+            var y_scale = d3.scale.linear()
+              .domain(y.domain())
+              .range(y.range());
+            y = y_scale;
+          }
+          change_scale();
+        });
+
+
+        // handle color grouping
+        var color_field = 'namespace';
+        d3.selectAll("input[type=radio]").on("change", function() {
+          if (this.checked) {
+            color_field = d3.select(this).property("id");
+            // re-create the color scale
+            c = d3.scale.category10();
+            draw_circles();
+            console.log(c.domain());
+          }
+        });
 
         var xAxis = d3.svg.axis()
             .scale(x)
@@ -101,7 +155,42 @@
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .call(zoom);
+            .call(zoom)
+          .append("g")
+            .on("mousedown", function() {
+              if (!zoom_rect) return;
+              var e = this,
+                  origin = d3.mouse(e),
+                  rect = svg.append("rect").attr("class", "zoom");
+              d3.select("body").classed("noselect", true);
+              origin[0] = Math.max(0, Math.min(width, origin[0]));
+              origin[1] = Math.max(0, Math.min(height, origin[1]));
+              d3.select(window)
+                .on("mousemove.zoom_rect", function() {
+                  var m = d3.mouse(e);
+                  m[0] = Math.max(0, Math.min(width, m[0]));
+                  m[1] = Math.max(0, Math.min(height, m[1]));
+                  rect.attr("x", Math.min(origin[0], m[0]))
+                    .attr("y", Math.min(origin[1], m[1]))
+                    .attr("width", Math.abs(m[0] - origin[0]))
+                    .attr("height", Math.abs(m[1] - origin[1]));
+                })
+            
+              .on("mouseup.zoom_rect", function() {
+                d3.select(window).on("mousemove.zoom_rect", null).on("mouseup.zoom_rect", null);
+                d3.select("body").classed("noselect", false);
+                var m = d3.mouse(e);
+                m[0] = Math.max(0, Math.min(width, m[0]));
+                m[1] = Math.max(0, Math.min(height, m[1]));
+                if (m[0] !== origin[0] && m[1] !== origin[1]) {
+                  zoom.x(x.domain([origin[0], m[0]].map(x.invert).sort()))
+                      .y(y.domain([origin[1], m[1]].map(y.invert).sort()));
+                }
+                rect.remove();
+                zoomed();
+              }, true);
+              d3.event.stopPropagation();
+            });
 
         svg.append("rect")
             .attr("width", width)
@@ -127,14 +216,25 @@
           circles
             .enter()
               .append('circle')
-              .attr('r', 4)
-              .style('fill', function(d) { return c(d['namespace']) })
+              .attr('r', 4);
 
           circles
+            .style('fill', function(d) { return c(d[color_field]) })
             .attr('cx', function(d) { return x(new Date(d['datetime'])) })
             .attr('cy', function(d) { return y(d['duration']) });
 
           circles.exit().remove();
+        }
+
+        function change_scale() {
+          yAxis.scale(y);
+          svg.select(".y.axis").call(yAxis);
+
+          svg.selectAll('circle')
+            .data(events)
+            .transition()
+              .duration(500)
+              .attr('cy', function(d) { return y(d['duration']) });
         }
 
         function zoomed() {

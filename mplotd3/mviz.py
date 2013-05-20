@@ -29,7 +29,7 @@ if __name__ == '__main__':
     else:
         logfile = sys.stdin
 
-    outf = open('events.json', 'w')
+    outf = open('mviz_events.json', 'w')
     outf.write('[')
     for line in logfile:
         logline = LogLine(line)
