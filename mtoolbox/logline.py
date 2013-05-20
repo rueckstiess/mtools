@@ -336,12 +336,13 @@ class LogLine(object):
         return output
 
 
-    def to_json(self):
+    def to_json(self, labels=None):
         """ converts LogLine object to valid JSON. """
         output = {}
-        labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                  'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                  'nreturned', 'ninserted', 'nupdated', 'duration']
+        if labels == None:
+            labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
+                'thread', 'namespace', 'nscanned', 'ntoreturn',  \
+                'nreturned', 'ninserted', 'nupdated', 'duration']
 
         for label in labels:
             value = getattr(self, label, None)
