@@ -18,7 +18,6 @@ The following tools are in the mtools collection:
 * [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
-<hr>
 
 Requirements and Installation Instructions
 ------------------------------------------
@@ -29,6 +28,11 @@ use the standard packages shipped with Python, and should run out of the box.
 Some of the tools have additional dependencies, which are listed under the 
 specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation 
 instructions for these modules.
+
+Recent Changes
+--------------
+
+See [CHANGES.md](./CHANGES.md) for a list of changes for each version of `mtools`.
 
 
 mplotqueries
