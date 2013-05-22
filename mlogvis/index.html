@@ -80,6 +80,9 @@
 
   		d3.json('events.json', function (error, events) {
 
+        events = events['data'];
+        console.log(events);
+
         // add custom date interpolator
         d3.interpolators.push( function(a, b) {
           if ((a instanceof Date) && (b instanceof Date)) {

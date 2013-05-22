@@ -17,8 +17,8 @@ PORT = 8888
 if __name__ == '__main__':
     # create parser object
     parser = argparse.ArgumentParser(description='mongod/mongos log file visualizer (browser edition). \
-        Extracts information from each line of the log file and outputs a json document per line. \
-        Then spins up an HTTP server and opens a page in the browser to view the data.')
+        Extracts information from each line of the log file and outputs a json document per line, stored \
+        in a sub-folder .mlogvis/. Then spins up an HTTP server and opens a page in the browser to view the data.')
     
     # only create default argument if not using stdin
     if sys.stdin.isatty():
@@ -40,7 +40,8 @@ if __name__ == '__main__':
     os.chdir(mlogvis_dir)
 
     outf = open('events.json', 'w')
-    outf.write('[')
+    outf.write('{"type": "duration", "data":[')
+    first_row = True
     for line in logfile:
         logline = LogLine(line)
         # group regular connections together
@@ -48,8 +49,13 @@ if __name__ == '__main__':
             if logline.thread and logline.thread.startswith("conn"):
                 logline._thread = "conn####"
             # write log line out as json
-            outf.write(logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration']) + ",\n")
-    outf.write('{}]')
+            if not first_row:
+                # prepend comma and newline
+                outf.write(',\n')
+            else:
+                first_row = False
+            outf.write(logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration']))
+    outf.write(']}')
     outf.close()
 
     src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'index.html')
