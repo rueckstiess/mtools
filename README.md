@@ -32,7 +32,7 @@ instructions for these modules.
 Recent Changes
 --------------
 
-See [CHANGES.md](./CHANGES.md) for a list of changes for each version of `mtools`.
+See [CHANGES.md](./CHANGES.md) for a list of changes for each version of mtools.
 
 
 mplotqueries
