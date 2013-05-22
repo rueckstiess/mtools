@@ -9,7 +9,7 @@ This is the first version of mtools that has a version number.
   * `mlogvis` tool added: a simplified version of `mplotqueries` that doesn't require `matplotlib` dependency. Instead, it will run in a browser window, using [d3.js](http://www.d3js.org/) for visualization. `mlogvis` is currently in BETA state.
   * introduced versioning: The version can be accessed programmatically from a Python shell with
 
-    import mtools
-    mtools.__version__
+        import mtools
+        mtools.__version__
 
 
