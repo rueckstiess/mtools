@@ -30,6 +30,16 @@
       stroke: #ddd;
     }
 
+    .axis text {
+      -webkit-user-select: none; /* Chrome/Safari */        
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE10+ */
+
+      /* Rules below not implemented in browsers yet */
+      -o-user-select: none;
+      user-select: none;
+    }
+
     rect.zoom {
       stroke: steelblue;
       fill: lightsteelblue;
@@ -43,16 +53,21 @@
       top: 30px;
     }
 
+    #controls .fieldset {
+      border-color: #eee;
+      border-style: solid;
+    }
+
     </style>
   </head>
 
   <body>
     <div id="controls">
-      <label for="zoom-check"><input type="checkbox" id="zoom-check">zoom</label>
+      <label for="zoom-check"><input type="checkbox" id="zoom-check"><u>z</u>oom</label>
       <button id="reset">reset</button><br>
-      <label for="log-check"><input type="checkbox" id="log-check">log scale</label>
+      <label for="log-check"><input type="checkbox" id="log-check"><u>l</u>og scale</label>
       <p>
-      <fieldset>
+      <fieldset class="fieldset">
         <legend>group by</legend>
         <label for="namespace"><input id="namespace" type="radio" name="group" checked>namespace</label><br>
         <label for="operation"><input id="operation" type="radio" name="group">operation</label><br>
@@ -63,7 +78,7 @@
 
   	<script>
 
-  		d3.json('mviz_events.json', function (error, events) {
+  		d3.json('events.json', function (error, events) {
 
         // add custom date interpolator
         d3.interpolators.push( function(a, b) {
@@ -122,17 +137,39 @@
             color_field = d3.select(this).property("id");
             // re-create the color scale
             c = d3.scale.category10();
+            
+            // enable visibility on all groups initially
+            visible_groups = {};
+  
             draw_circles();
             draw_legend();
           }
         });
+
+        // multi-scale time axis
+        var customTimeFormat = timeFormat([
+          [d3.time.format("%b %d"), function(d) { return true}],
+          [d3.time.format("%H:%M"), function(d) { return d.getHours(); }],
+          [d3.time.format("%H:%M:%S"), function(d) { return d.getSeconds(); }],
+          [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }],
+          [d3.time.format("%b %d"), function(d, i) { return i%10 == 0; }]
+        ]);
+
+        function timeFormat(formats) {
+          return function(date, idx) {
+            var i = formats.length - 1, f = formats[i];
+            while (!f[1](date, idx)) f = formats[--i];
+            return f[0](date, idx);
+          };
+        }
 
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom")
             .ticks(10)
             .tickPadding(20)
-            .tickSize(-height);
+            .tickSize(-height)
+            .tickFormat(customTimeFormat);
 
         var yAxis = d3.svg.axis()
             .scale(y)
@@ -143,7 +180,7 @@
         var zoom = d3.behavior.zoom()
             .x(x)
             .y(y)
-            .scaleExtent([1, 200])
+            .scaleExtent([1, 100000])
             .on("zoom", zoomed);
 
         var svg = d3.select("body").append("svg")
@@ -179,8 +216,8 @@
                 m[0] = Math.max(0, Math.min(width, m[0]));
                 m[1] = Math.max(0, Math.min(height, m[1]));
                 if (m[0] !== origin[0] && m[1] !== origin[1]) {
-                  zoom.x(x.domain([origin[0], m[0]].map(x.invert).sort()))
-                      .y(y.domain([origin[1], m[1]].map(y.invert).sort()));
+                  zoom.x(x.domain([origin[0], m[0]].map(x.invert).sort(d3.ascending)))
+                      .y(y.domain([origin[1], m[1]].map(y.invert).sort(d3.ascending)));
                 }
                 rect.remove();
                 zoomed();
@@ -207,6 +244,8 @@
           .attr("width", 250)
           .attr("height", 400);
 
+        var visible_groups = {};
+
         draw_circles();
         draw_legend();
 
@@ -216,6 +255,27 @@
             console.log(d.line_str);
           });
 
+
+        // register key event handler
+        d3.select("body")
+          .on("keydown", function() {
+            if (d3.event.keyCode == 90) { // z
+              // select zoom checkbox
+              zoom_rect = false;
+              var checkbox = d3.select("#zoom-check");
+              var checked = checkbox.property("checked");
+              checkbox.property("checked", !checked);
+              zoom_rect = !checked;
+            } else if (d3.event.keyCode == 76) {  // l
+              // select log checkbox and change scale
+              var checkbox = d3.select("#log-check");
+              var checked = checkbox.property("checked");
+              checkbox.property("checked", !checked);
+              log_scale = !checked;
+              var y_scale = log_scale ? d3.scale.log() : d3.scale.linear();
+              change_scale(y_scale);
+            }
+          });
 
         function draw_circles() {
           var circles = svg.selectAll('circle')
@@ -229,12 +289,16 @@
 
           circles
             .style('fill', function(d) { return c(d[color_field]) })
+            .style('display', function (d) { return is_visible(d[color_field]) ? "block" : "none" })
             .attr('cx', function(d) { return x(new Date(d['datetime'])) })
             .attr('cy', function(d) { return y(d['duration']) });
 
           circles.exit().remove();
         }
 
+        function is_visible(group) {
+          return !(group in visible_groups) || visible_groups[group];
+        }
 
         function draw_legend() {
           var items = legend_svg.selectAll("g")
@@ -243,13 +307,20 @@
           items.enter()
             .append("g")
               .attr("transform", function (d,i) { return "translate(0, " + i*15 + ")" })
+              .on("click", function(d) { 
+                var g = d3.select(this);
+                visible_groups[d] = !is_visible(d);
+                draw_circles();
+                draw_legend();
+              })
               .each(function () {
                 var g = d3.select(this);
                 g.append("circle")
                   .attr("cx", 5)
                   .attr("cy", 5)
-                  .attr("r", 5)
-                  .style("fill", function (d,i) { return c(d); });
+                  .attr("r", 4)
+                  .style("stroke", function (d) { return c(d); })
+                  .style("stroke-width", 2)
 
                 g.append("text")
                   .attr("dy", function(d,i) {return (i)*1.5+0.8 + "em"; })
@@ -265,7 +336,7 @@
                 .attr("dy", function(d,i) {return (i)*1.5+0.8 + "em"; })
                 .text(function (d) { return d; });
               g.select("circle")
-                .style("fill", function (d,i) { return c(d); });
+                .style("fill", function (d) { return is_visible(d) ? c(d) : "white"; })                  
             });
 
           items.exit()
@@ -303,6 +374,9 @@
         }
 
         function reset() {
+          // make all groups visible again
+          visible_groups = {};
+          // transition to original view frame
           d3.transition().duration(500).tween("zoom", function() {
             var ix = d3.interpolate(x.domain(), events_lim_x);
             var iy = d3.interpolate(y.domain(), events_lim_y);
@@ -313,6 +387,7 @@
               zoomed();
             };
           });
+          draw_legend();
         }
       });
 
