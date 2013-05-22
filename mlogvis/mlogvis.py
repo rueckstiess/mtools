@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from mtools.mtoolbox.logline import LogLine
-import webbrowser
+
 import argparse
 import sys, os
 import shutil
@@ -10,6 +10,7 @@ import time
 import socket
 import SimpleHTTPServer
 import SocketServer
+import webbrowser
 
 PORT = 8888
 
