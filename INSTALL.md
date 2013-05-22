@@ -1,5 +1,5 @@
-Installation Instructions for mtools and its dependencies
-=========================================================
+Installation Instructions for mtools
+====================================
 
 
 #### Python
@@ -19,12 +19,12 @@ directory of your choice:
 	cd /path/to/github/repos
     git clone git://github.com/rueckstiess/mtools.git
 
-This will create a sub-folder `mtools` under the `/path/to/github/repos` folder 
-and check out the code there. Make sure that the parent directory of mtools is set in 
-your PYTHONPATH environment variable. If you use the _bash_ shell, you can do so by 
+This will create a sub-folder `mtools` under the `/path/to/github/repos/` folder 
+and check out the code there. You need to add the `/path/to/github/repos/mtools` folder to
+your `PYTHONPATH` environment variable. If you use the _bash_ shell, you can do so by 
 adding a line
 
-    export PYTHONPATH=$PYTHONPATH:/parent/directory/of/mtools
+    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos/mtools/
 
 to your `.bashrc` script. Other shells may have a different syntax.
 
@@ -35,40 +35,13 @@ While you can execute each of the scripts with `python script.py` ("script.py" b
 placeholder for the real script name), it is convenient to use the symbolic links
 that are located in the `mtools/scripts/` subfolder.
 
-Add the `mtools/scripts/` subfolder to your PATH environment variable, if you 
+Add the `mtools/scripts/` subfolder to your `PATH` environment variable, if you 
 want to use the scripts from anywhere in the shell. If you use the _bash_ shell, 
 you can do so by adding a line
     
     export PATH=$PATH:/path/to/github/repos/mtools/scripts
 
 to your `.bashrc` script. Other shells may have a different syntax.
-
-
-<!-- OLD
-If you want to execute the scripts in "command style", i.e. typing 
-`script --parameter` instead of `python script.py --parameter`, you need to create 
-simlinks in a directory that is in your PATH environment variable:
-
-Let's assume `/path/in/env` is a path that is part of your PATH envir onment 
-(check with `echo $PATH` from your command line prompt). To add a simlink to the
-`mlaunch.py` script, run:
-
-    cd /path/in/env
-    ln -s /path/to/github/repos/mtools/mlaunch.py mlaunch
-
-Also check that the _executable_ flag is set on mlaunch.py, with
-
-    cd /path/to/github/repos/mtools
-    ls -la
-
-The tools you want to execute directly should have the `x` flag set for at least "user", 
-e.g. `-rwxr--r--`. If this isn't the case, you can set it with
-
-    chmod u+x mlaunch.py
-
-You should now be able to use the mlaunch.py script from any directory by just 
-typing `mlaunch` (and any additional parameters). 
--->
 
 
 #### pip

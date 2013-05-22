@@ -48,7 +48,7 @@ Website: https://github.com/rueckstiess/mtools
 
 add these lines to your `~/.bashrc` file:
 
-    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos      (the parent dir of mtools)
+    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos/mtools
     export PATH=$PATH:/path/to/github/repos/mtools/scripts
 
 Then reload by running `source ~/.bashrc`.

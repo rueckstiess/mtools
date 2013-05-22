@@ -9,13 +9,14 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mplotqueries](README.md#mplotqueries) -- visualize timed operations in the logfile, in/exclude namespaces, log scale optional
+* [mplotqueries](README.md#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
+* [mlogvis](README.md#mlogvis) -- a simplified version of mplotqueries, that runs in a web browser and doesn't require matplotlib (BETA)
 * [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* [mlogversion](README.md#mlogversion-beta) -- auto-detect the version number of a mongos/mongod log file (BETA)
-* [mlogdistinct](README.md#mlogdistinct-beta) -- groups all similar log messages together and displays their counts (BETA)
+* [mlogversion](README.md#mlogversion) -- auto-detect the version number of a mongos/mongod log file
+* [mlogdistinct](README.md#mlogdistinct) -- groups all similar log messages together and displays their counts
 * [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
-* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments
+* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
 <hr>
 
@@ -28,50 +29,6 @@ use the standard packages shipped with Python, and should run out of the box.
 Some of the tools have additional dependencies, which are listed under the 
 specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation 
 instructions for these modules.
-
-#### Python
-You will need to have a version of Python installed for all the scripts
-below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
-module separately (you can use `pip` to install it, see below). To check your
-Python version, run `python --version` on the command line.
-
-Python 3.x is currently not supported.
-
-
-#### mtools installation
-
-Clone the [mtools github repository](.) into a 
-directory of your choice:
-
-    cd /path/to/github/repos
-    git clone git://github.com/rueckstiess/mtools.git
-
-This will create a directory `mtools` under the `/path/to/github/repos/` folder 
-and check out the code there. Make sure that the **parent directory** of mtools is set in 
-your PYTHONPATH environment variable. 
-
-For example, if you clone all your github repositories to `/path/to/github/repos/` then you 
-need to add that directory to your PYTHONPATH. If you use the _bash_ shell, you can do 
-so by adding a line -
-
-    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos/
-
-to your `.bashrc` or `.bash_profile` file (in your HOME directory). Other shells may have a different syntax.
-
-
-#### Command style usage
-
-While you can execute each of the scripts with `python script.py` ("script.py" being a
-placeholder for the real script name), it is convenient to use the symbolic links
-that are located in the `mtools/scripts/` directory.
-
-Add the `mtools/scripts/` directory to your PATH environment variable, if you 
-want to use the scripts from anywhere in the shell. If you use the _bash_ shell, 
-you can do so by adding a line -
-    
-    export PATH=$PATH:/path/to/github/repos/mtools/scripts
-
-to your `.bashrc` or `.bash_profile` file (in your HOME directory). Other shells may have a different syntax.
 
 
 mplotqueries
@@ -123,9 +80,14 @@ By default, mplotqueries uses a "duration" plot, that plots the duration of each
 With the parameter `--type`, a different plot type can be chosen. Currently, there are 3 basic types:
 "duration", "event" and "range". The "event" plot will plot each log line as a vertical line on the
 x-axis. Use `mlogfilter` or `grep` to extract the events from the log file that are of interest. Range plots
-will plot a horizontal bar from the datetime of the first line to the datetime of the last line. This plot type is useful to show time periods or ranges. As an example, you could compare the coverage and overlap of several log files.
+will plot a horizontal bar from the datetime of the first line to the datetime of the last line. This plot 
+type is useful to show time periods or ranges. As an example, you could compare the coverage and overlap of 
+several log files.
 
-Apart from these three basic plot types, it is easy to create new plot types that derive from any of the basic ones. Currently, there is one derived plot type, called `rsstate`. This plot type is a special type of event plot, that specifically looks at the replica set state changes (PRIMARY, SECONDARY, ...) and plots them as vertical lines.
+Apart from these three basic plot types, it is easy to create new plot types that derive from any of the 
+basic ones. Currently, there is one derived plot type, called `rsstate`. This plot type is a special type 
+of event plot, that specifically looks at the replica set state changes (PRIMARY, SECONDARY, ...) and 
+plots them as vertical lines.
   
 ###### Usage  
     mplotqueries filename [filename ...] [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
@@ -152,6 +114,35 @@ Apart from these three basic plot types, it is easy to create new plot types tha
                                    operation or thread.
 
 <hr>
+
+mlogvis (BETA)
+--------------
+
+#### Description
+
+A script to visualize logfiles in the browser, using the d3.js javascript visualization engine.
+`mlogvis` is a prototype that implements a sub-set of features of mplotqueries without the 
+matplotlib dependency. Eventually, the two scripts will merge into one. 
+
+The script will read a logfile, process the data and store a .json file in a subfolder .mlogvis/ 
+of the current working directory. It will then start up a web server on port 8888 (or higher, if
+that port is already taken) and open a browser tab to display the information.
+
+
+###### Usage  
+
+usage: mlogvis [-h] logfile
+
+    mongod/mongos log file visualizer (browser edition). Extracts information from
+    each line of the log file and outputs a json document per line, stored in a
+    sub-folder .mlogvis/. Then spins up an HTTP server and opens a page in the
+    browser to view the data.
+
+    positional arguments:
+      logfile     logfile to visualize.
+
+    optional arguments:
+      -h, --help  show this help message and exit
 
 
 mlogfilter
@@ -239,8 +230,8 @@ excess characters from the middle and replacing them with "...".
 <hr> 
 
 
-mlogversion (BETA)
-------------------
+mlogversion
+-----------
 
 #### Description
 
@@ -255,9 +246,10 @@ This tool builds on top of the code2line module within mtools and is currently i
     usage: mlogversion logfile [-h | --help]
     
 
+<hr>
 
-mlogdistinct (BETA)
--------------------
+mlogdistinct
+------------
 
 #### Description
 
@@ -279,6 +271,8 @@ Example output:
          1    ClientCursor::yield can't unlock b/c of recursive lock ... ns: ... top:
          1    key seems to have moved in the index, refinding.
 
+
+<hr>
 
 mlogmerge
 ---------
