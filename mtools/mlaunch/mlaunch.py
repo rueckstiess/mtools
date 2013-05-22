@@ -1,13 +1,18 @@
 #!/usr/bin/python
 
-from pymongo import Connection
-from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
 import subprocess
 import argparse
 import threading
 import os, time
 import socket
 import json
+
+try:
+    from pymongo import Connection
+    from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
+except ImportError:
+    raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
+
 
 def pingMongoDS(host, interval=1, timeout=30):
     con = None
