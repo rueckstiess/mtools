@@ -9,13 +9,17 @@ import glob
 import cPickle
 from copy import copy
 
-import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
-from matplotlib.lines import Line2D
-from matplotlib.text import Text
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.dates import DateFormatter
+    from matplotlib.lines import Line2D
+    from matplotlib.text import Text
+    from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
+except ImportError:
+    raise ImportError("Can't import matplotlib. Try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
+
 
 from mtools.util.logline import LogLine
-from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
 
 class MongoPlotQueries(object):
 

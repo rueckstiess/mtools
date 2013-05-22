@@ -1,6 +1,9 @@
 from base_type import BasePlotType
-from matplotlib import pyplot as plt
-from matplotlib.dates import date2num
+
+try:
+    from matplotlib.dates import date2num
+except ImportError:
+    raise ImportError("Can't import matplotlib. Try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
 from mtools.util.log2code import Log2CodeConverter
 

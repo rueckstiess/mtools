@@ -1,8 +1,5 @@
 from collections import OrderedDict
 
-import matplotlib.pyplot as plt
-from matplotlib.dates import date2num
-
 from mtools.util.log2code import Log2CodeConverter
 
 class BasePlotType(object):
