@@ -14,7 +14,7 @@ from matplotlib.dates import DateFormatter
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
-from mtools.mtoolbox.logline import LogLine
+from mtools.util.logline import LogLine
 from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
 
 class MongoPlotQueries(object):

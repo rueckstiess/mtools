@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from mtools.mtoolbox.logline import LogLine
+from mtools.util.logline import LogLine
 from datetime import date, time, datetime, timedelta, MINYEAR, MAXYEAR
 import re
 

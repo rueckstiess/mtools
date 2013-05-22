@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import argparse, re
-from mtools.mtoolbox.logline import LogLine
+from mtools.util.logline import LogLine
 from filters import *
 import sys
 

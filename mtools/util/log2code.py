@@ -5,7 +5,7 @@ import sys
 import argparse
 from collections import defaultdict, OrderedDict
 from itertools import chain
-from mtools.mtoolbox.logcodeline import LogCodeLine
+from mtools.util.logcodeline import LogCodeLine
 
 def import_logdb():
     """ static import helper function, checks if the logdb exists first, otherwise

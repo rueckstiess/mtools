@@ -2,7 +2,7 @@ from base_type import BasePlotType
 from matplotlib import pyplot as plt
 from matplotlib.dates import date2num
 
-from mtools.mtoolbox.log2code import Log2CodeConverter
+from mtools.util.log2code import Log2CodeConverter
 
 class RangePlotType(BasePlotType):
 

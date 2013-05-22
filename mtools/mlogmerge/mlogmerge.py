@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from mtools.mtoolbox.logline import LogLine
+from mtools.util.logline import LogLine
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 import argparse, re
 

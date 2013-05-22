@@ -6,7 +6,7 @@ import subprocess
 import cPickle
 
 from collections import defaultdict, OrderedDict
-from mtools.mtoolbox.logcodeline import LogCodeLine
+from mtools.util.logcodeline import LogCodeLine
 
 mongodb_path = "/Users/tr/Documents/code/mongo/"
 git_path = "/usr/local/bin/git"
