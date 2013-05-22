@@ -3,8 +3,10 @@ from base_type import BasePlotType
 try:
     from matplotlib.dates import date2num
 except ImportError:
-    raise ImportError("Can't import matplotlib. Try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
-
+    raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
+        instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
+        that visualizes the logfile in a web browser.")
+    
 from mtools.util.log2code import Log2CodeConverter
 
 class RangePlotType(BasePlotType):
