@@ -23,7 +23,7 @@ To plot a mongod or mongos logfile with mplotqueries, you can simply run:
 
 After parsing the logfile, you should see a window pop up that displays the queries, similar to this:
 
-<img src="mplotqueries-tutorial-1.png">
+<img src="img/mplotqueries-tutorial-1.png">
 
 On the x-axis we see the date and time of the events. This particular logfile seems to go from February 20-21. The y-axis represents the duration of events in milliseconds.
 
@@ -34,7 +34,7 @@ Here we already run into our first problem. Most of the operations in MongoDB ha
 
 To navigate within a mplotqueries plot (which, by the way, uses [matplotlib](http://matplotlib.org/) to create the plots), you can use the tool palette at the bottom of the plot:
 
-<img src="mplotqueries-tutorial-2.png">
+<img src="img/mplotqueries-tutorial-2.png">
 
 The first symbol, the house, takes you back to the initial view, the one you see when the plot first opens. The two arrows on its side are like back and forward buttons in a browser. They let you navigate step by step backward or forward in the history of views. The crossed arrows next to it let you pan around in the plot, by click-dragging the mouse anywhere in the plot area. This lets you move the plot to a different position. The magnifying glass lets you draw a rectangle, that you want to zoom into. This is probably the most useful feature, as you can zoom into very small regions to see what happens close up. The button next to it is for subplot and margin configuration and not very useful in mplotqueries. Finally, the rightmost button, the floppy disk, lets you export your plot into a number of formats. A file dialog will pop up, and depending how you choose your file ending (e.g. `.pdf`, `.png`, `.jpg`), the exporter will write the correct format. Feel free to play around with each of these actions now to get a feel for navigating within a plot.
 
@@ -54,7 +54,7 @@ to filter out all lines that contain the word "writebacklisten" and send the rem
     
 The result looks like this:
 
-<img src="mplotqueries-tutorial-3.png">
+<img src="img/mplotqueries-tutorial-3.png">
 
 Two things of notice: we have to escape the `$` sign, because the shell would otherwise interpret $cmd as a shell variable. And the colors have changed now, because mplotqueries plots the groups in the same order of colors. Since we just removed the first group "admin.$cmd", all groups move one step up in the order of colors.
 
@@ -65,7 +65,7 @@ Now we see the outliers, but also get more detail on the bottom, thanks to the l
 
 Now we can actually click on individual points. Go ahead and click on one of the outlier points. The result will be displayed at the command line from where you started mplotqueries. You will likely see something similar to:
 
-<img src="mplotqueries-tutorial-4.png">
+<img src="img/mplotqueries-tutorial-4.png">
 
 The first two blocks were already there before we even clicked in the plot. The first block shows you an overview of the groups and the number of points that each contains. The second block is just a remainder that you can use the numeric keys to toggle individual plots on and off. Go and try it out: The keys [1-9] toggle the first 9 groups of a plot from visible to invisible and vice versa. The 0 key toggles all plots. Make sure that the focus is on the plot window, and not on the shell, or this won't work.
 
@@ -82,7 +82,7 @@ Most of the time, we find a root cause for an unknown problem by comparing certa
 
     mplotqueries mongod.log --group operation
     
-<img src="mplotqueries-tutorial-6.png">
+<img src="img/mplotqueries-tutorial-6.png">
 
 Now we can see different aspects of the same logfile, for example that most of the operations on Feb 20 were queries, while they were getmores, inserts, removes and very few updates on Feb 21. It's easy to spot what different groups there are in a plot by looking at the legend, which lists them all and assigns a color to them.
 
@@ -93,7 +93,7 @@ Another attribute that can be used for grouping is `thread`. This creates an ind
 
 Sometimes the information we'd like to visualize is spread over several log files. `mplotqueries` lets you specify any number of files at the command line, not just a single one. If you specify more than one log file, then the plot is automatically grouped by a special group attribute, the _filename_. This makes it easy to compare different log files without plotting them all individually.
 
-<img src="mplotqueries-tutorial-7.png">
+<img src="img/mplotqueries-tutorial-7.png">
 
 
 ### Three Basic Plot Types: `duration`, `event`, `range`
@@ -112,7 +112,7 @@ They all say "serverStatus was very slow" and then list a number of values for h
     
 This results in some sort of barcode style plot that shows when exactly those slow serverStatus events occured. We can quickly see that there were more than usual just at the end of Feb 20. 
 
-<img src="mplotqueries-tutorial-5.png">
+<img src="img/mplotqueries-tutorial-5.png">
 
 Of course this works with all kinds of different events. One could grep for assertions, replica set state changes, server restarts, etc and pipe the remaining log lines into `mplotqueries --type event`. And just as with the markers of duration plots, the lines of event plots are clickable and output the log line to each event to stdout.
 
@@ -127,7 +127,7 @@ I could specify all three filenames as parameters to `mplotqueries`, but it is e
     
 The result is a plot that looks like the one below:
 
-<img src="mplotqueries-tutorial-8.png">
+<img src="img/mplotqueries-tutorial-8.png">
 
 And it shows that I really only have a few hours at the end of Feb 20, where I have overlapping information from all 3 logfiles.
 
@@ -137,7 +137,7 @@ It is fairly easy to create customized plot types that derive from one of the ba
 
 Here is a graphical overview of the basic plot types and the first derived plot type:
 
-<img src="mplotqueries-tutorial-9.png" width="80%">
+<img src="img/mplotqueries-tutorial-9.png" width="80%">
 
 
 ### Plot Overlays
@@ -151,7 +151,7 @@ Go ahead and try it out. Use:
 
 and you will get a combined duration / rsstate plot:
 
-<img src="mplotqueries-tutorial-10.png">
+<img src="img/mplotqueries-tutorial-10.png">
 
 
     
