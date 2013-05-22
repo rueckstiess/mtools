@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     # only create default argument if not using stdin
     if sys.stdin.isatty():
-        parser.add_argument('logfile', action='store', help='logfile to convert')
+        parser.add_argument('logfile', action='store', help='logfile to visualize.')
 
     args = vars(parser.parse_args())
 
