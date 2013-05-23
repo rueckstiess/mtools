@@ -4,8 +4,8 @@ import sys
 import commands
 import subprocess
 import cPickle
-
 from collections import defaultdict, OrderedDict
+
 from mtools.util.logcodeline import LogCodeLine
 
 mongodb_path = "/Users/tr/Documents/code/mongo/"

@@ -2,6 +2,7 @@ from pymongo import Connection
 from pymongo.errors import OperationFailure
 from bson.son import SON
 from bson.min_key import MinKey
+
 import argparse
 
 def presplit(host, database, collection, shardkey, shardnumber=None, chunkspershard=1, verbose=False):

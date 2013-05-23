@@ -5,6 +5,7 @@ import sys
 import argparse
 from collections import defaultdict, OrderedDict
 from itertools import chain
+
 from mtools.util.logcodeline import LogCodeLine
 
 def import_logdb():

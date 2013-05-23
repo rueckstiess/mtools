@@ -3,6 +3,7 @@
 import sys
 import re
 import argparse
+
 from mtools.util.log2code import Log2CodeConverter
 from mtools.util.logline import LogLine
 

@@ -1,4 +1,5 @@
-from event_type import EventPlotType
+from mtools.mplotqueries.plottypes.base_type import BasePlotType
+
 
 class RSStatePlotType(EventPlotType):
     """ This plot type derives from the event plot type (vertical lines), but instead of

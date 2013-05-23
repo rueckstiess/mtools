@@ -1,4 +1,5 @@
-from base_type import BasePlotType
+from mtools.mplotqueries.plottypes.base_type import BasePlotType
+
 
 try:
     from matplotlib.dates import date2num

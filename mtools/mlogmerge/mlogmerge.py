@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-from mtools.util.logline import LogLine
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 import argparse, re
+
+from mtools.util.logline import LogLine
 
 class MongoLogMerger(object):
     """ Merges several MongoDB log files by their date and time. 

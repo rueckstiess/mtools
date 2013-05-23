@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
 import argparse, re
-from mtools.util.logline import LogLine
-from filters import *
 import sys
+
+from mtools.util.logline import LogLine
+from mtools.mlogfilter.filters import *
+
 
 
 class MongoLogFilter(object):
