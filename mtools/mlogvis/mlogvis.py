@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from mtools.util.logline import LogLine
+import mtools
 
 import argparse
 import sys, os
@@ -13,8 +14,6 @@ import SocketServer
 import webbrowser
 
 PORT = 8888
-here = os.path.dirname(__file__)
-
 
 if __name__ == '__main__':
     # create parser object
@@ -60,8 +59,10 @@ if __name__ == '__main__':
     outf.write(']}')
     outf.close()
 
-    src = os.path.join(os.path.dirname(here, 'index.html')
+    data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
+    src = os.path.join(data_path, 'index.html')
     dst = os.path.join(os.getcwd(), 'index.html')
+    
     print "trying to copy %s to %s" % (src, dst)
     shutil.copyfile(src, dst)
 

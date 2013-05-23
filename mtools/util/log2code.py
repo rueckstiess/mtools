@@ -7,14 +7,15 @@ from collections import defaultdict, OrderedDict
 from itertools import chain
 
 from mtools.util.logcodeline import LogCodeLine
+import mtools
 
 def import_logdb():
     """ static import helper function, checks if the logdb exists first, otherwise
         raises ImportError. 
     """
-    path = os.path.dirname(os.path.realpath(__file__))
-    if os.path.exists(os.path.join(path, 'logdb.pickle')):
-        av, lv, lbw, lcl = cPickle.load(open(os.path.join(path, 'logdb.pickle'), 'rb'))
+    data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
+    if os.path.exists(os.path.join(data_path, 'logdb.pickle')):
+        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'logdb.pickle'), 'rb'))
         return av, lv, lbw, lcl
     else:
         raise ImportError('logdb.pickle not found in %s.'%path)
