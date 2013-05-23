@@ -13,6 +13,8 @@ import SocketServer
 import webbrowser
 
 PORT = 8888
+here = os.path.dirname(__file__)
+
 
 if __name__ == '__main__':
     # create parser object
@@ -58,8 +60,9 @@ if __name__ == '__main__':
     outf.write(']}')
     outf.close()
 
-    src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'index.html')
+    src = os.path.join(os.path.dirname(here, 'index.html')
     dst = os.path.join(os.getcwd(), 'index.html')
+    print "trying to copy %s to %s" % (src, dst)
     shutil.copyfile(src, dst)
 
     Handler = SimpleHTTPServer.SimpleHTTPRequestHandler

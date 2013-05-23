@@ -16,9 +16,7 @@ try:
     from matplotlib.text import Text
     from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
 except ImportError:
-    raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
-        instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
-        that visualizes the logfile in a web browser.")
+    raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
 
 from mtools.util.logline import LogLine
