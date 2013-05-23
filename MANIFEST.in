@@ -1,0 +1,4 @@
+include *.md
+recursive-include tutorials *
+recursive-include scripts *
+recursive-include mtools *.py *.html
