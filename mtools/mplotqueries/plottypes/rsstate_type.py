@@ -1,4 +1,4 @@
-from mtools.mplotqueries.plottypes.base_type import BasePlotType
+from mtools.mplotqueries.plottypes.event_type import EventPlotType
 
 
 class RSStatePlotType(EventPlotType):
