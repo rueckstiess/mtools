@@ -30,7 +30,7 @@ class MongoPlotQueries(object):
     def __init__(self):
         self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType]
 
-        self.plot_types = {pt.plot_type_str: pt for pt in self.plot_types}
+        self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
         self.plot_instances = []
 
         self.legend = None
