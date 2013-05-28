@@ -3,7 +3,8 @@ import os
 import re
 import sys
 import argparse
-from collections import defaultdict, OrderedDict
+from mtools.util import OrderedDict
+from collections import defaultdict
 from itertools import chain
 
 from mtools.util.logcodeline import LogCodeLine

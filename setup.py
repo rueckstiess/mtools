@@ -2,12 +2,16 @@
 try:
     from setuptools import setup, find_packages
 
+    # test for 2.7 included packages, add to requirements if not available
     install_requires = []
-    # test for argparse existence, add to requirements
     try:
         import argparse
     except ImportError:
         install_requires.append('argparse')
+
+    try:
+        from collections import OrderedDict
+    except ImportError:
         install_requires.append('ordereddict')
 
     kws = {'install_requires': install_requires}

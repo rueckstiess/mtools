@@ -4,7 +4,8 @@ import sys
 import commands
 import subprocess
 import cPickle
-from collections import defaultdict, OrderedDict
+from mtools.util import OrderedDict
+from collections import defaultdict
 
 from mtools.util.logcodeline import LogCodeLine
 

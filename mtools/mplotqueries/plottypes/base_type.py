@@ -1,5 +1,4 @@
-from collections import OrderedDict
-
+from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
 
 class BasePlotType(object):
