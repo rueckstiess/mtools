@@ -1,1 +1,3 @@
-__version__ = "1.0.0"
+__author__ = 'thomas@rueckstiess.net'
+
+from mtools.version import __version__

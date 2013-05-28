@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+# import version from mtools/version.py
+exec(open('mtools/version.py').read())
+
 setup(
     name='mtools', 
-    version='1.0.0',
+    version=__version__,
     packages=find_packages(),
     package_data = {
         'mtools': ['data/logdb.pickle', 'data/index.html'],
