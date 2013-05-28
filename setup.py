@@ -3,6 +3,10 @@ from setuptools import setup, find_packages
 # import version from mtools/version.py
 exec(open('mtools/version.py').read())
 
+# read README.md for long_description content
+with open('README.md') as f:
+    long_description = f.read()
+
 setup(
     name='mtools', 
     version=__version__,
@@ -17,4 +21,5 @@ setup(
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files.',
+    long_description=long_description,
 )
