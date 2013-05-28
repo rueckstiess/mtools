@@ -1,66 +1,54 @@
 Installation Instructions for mtools
 ====================================
 
-
 #### Python
-You will need to have a version of Python installed for all the scripts
-below, 2.7.x is recommended. 2.6.x will work but you need to install the `argparse` 
-module separately (you can use `pip` to install it, see below). To check your
-Python version, run `python --version` on the command line.
+
+You need to have a version of Python installed in order to use mtools. Python
+2.6.x and Python 2.7.x are currently supported. To check your Python version, 
+run `python --version` on the command line.
 
 Python 3.x is currently not supported.
 
+#### mtools Installation
 
-#### mtools installation
+##### Installation with `pip`
 
-Clone the [mtools github repository](https://github.com/rueckstiess/mtools) into a 
-directory of your choice:
+The easiest way to install mtools is via `pip`. From the command line, run:
 
-	cd /path/to/github/repos
-    git clone git://github.com/rueckstiess/mtools.git
+    pip install mtools
 
-This will create a sub-folder `mtools` under the `/path/to/github/repos/` folder 
-and check out the code there. You need to add the `/path/to/github/repos/mtools` folder to
-your `PYTHONPATH` environment variable. If you use the _bash_ shell, you can do so by 
-adding a line
-
-    export PYTHONPATH=$PYTHONPATH:/path/to/github/repos/mtools/
-
-to your `.bashrc` script. Other shells may have a different syntax.
-
-
-#### Command style usage
-
-While you can execute each of the scripts with `python script.py` ("script.py" being a
-placeholder for the real script name), it is convenient to use the symbolic links
-that are located in the `mtools/scripts/` subfolder.
-
-Add the `mtools/scripts/` subfolder to your `PATH` environment variable, if you 
-want to use the scripts from anywhere in the shell. If you use the _bash_ shell, 
-you can do so by adding a line
-    
-    export PATH=$PATH:/path/to/github/repos/mtools/scripts
-
-to your `.bashrc` script. Other shells may have a different syntax.
-
-
-#### pip
-
-Some of the additional requirements can be installed easily with the `pip` tool, Python's
-package installer. To install `pip`, follow the instructions provided on the 
+You need to have `pip` installed for this to work. If you don't have `pip` installed yet,
+try `sudo easy_install pip` from the command line first, or follow the instructions provided on the 
 [pip installation page](http://www.pip-installer.org/en/latest/installing.html#using-the-installer).
 
-
-#### argparse
-
-If you run Python version 2.6.x, the `argparse` module is not included in the standard library and
-you need to install it manually. You can do so with
-
-    pip install argparse
-
 Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
+In that case, you need to add `sudo` in front of the command.
 
+
+#### Installation From Source
+
+If pip is not available and you want to install mtools from source, you can get the source code 
+by cloning the [mtools github repository](https://github.com/rueckstiess/mtools):
+
+    git clone git://github.com/rueckstiess/mtools.git
+
+Or download the tarball from <https://pypi.python.org/pypi/mtools> and extract it with
+
+    tar xzvf mtools-<version>.tar.gz
+
+Then `cd` into the mtools directory and run
+
+    sudo python setup.py install
+
+This will install mtools into your Python's site-packages folder, create links to the 
+scripts and set everything up. You should now be able to use all the scripts directly
+from the command line. 
+
+Except for external dependencies like pymongo (required for mlaunch) or matplotlib (required
+for mplotqueries), mtools is now setup and ready to be used.
+
+
+### Additional Dependencies
 
 #### pymongo
 
@@ -72,7 +60,7 @@ pymongo easily by running
     pip install pymongo
 
 Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
+In that case, you need to add `sudo` in front of the command.
 
 
 #### Matplotlib
@@ -87,7 +75,7 @@ Try installing matplotlib with `pip`, by doing:
     pip install matplotlib
 
 Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
+In that case, you need to add `sudo` in front of the command.
 
 If this doesn't work for you, there are a number of alternative ways to install matplotlib. Refer
 to the [matplotlib installation page](http://matplotlib.org/users/installing.html) for additional
@@ -104,7 +92,7 @@ Try installing NumPy with pip, by doing:
     pip install numpy
 
 Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to precede the command with a `sudo`.
+In that case, you need to add `sudo` in front of the command.
 
 If this doesn't work for you, you can install a binary or install from source code. Refer to the 
 installation instructions on the [NumPy](http://numpy.scipy.org/) page.
