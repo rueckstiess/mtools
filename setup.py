@@ -2,7 +2,7 @@
 try:
     from setuptools import setup, find_packages
 
-    # test for 2.7 included packages, add to requirements if not available
+    # test for 2.7-included packages, add to requirements if not available
     install_requires = []
     try:
         import argparse
