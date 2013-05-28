@@ -1,17 +1,15 @@
 Installation Instructions for mtools
 ====================================
 
-#### Python
+### Python
 
 You need to have a version of Python installed in order to use mtools. Python
 2.6.x and Python 2.7.x are currently supported. To check your Python version, 
-run `python --version` on the command line.
+run `python --version` on the command line. Python 3.x is currently not supported.
 
-Python 3.x is currently not supported.
+### mtools Installation
 
-#### mtools Installation
-
-##### Installation with `pip`
+#### Installation with `pip`
 
 The easiest way to install mtools is via `pip`. From the command line, run:
 
