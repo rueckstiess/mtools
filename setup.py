@@ -8,6 +8,7 @@ try:
         import argparse
     except ImportError:
         install_requires.append('argparse')
+        install_requires.append('ordereddict')
 
     kws = {'install_requires': install_requires}
 
