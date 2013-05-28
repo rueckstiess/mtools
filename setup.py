@@ -1,4 +1,19 @@
-from setuptools import setup, find_packages
+# try importing from setuptools, if unavailable use distutils.core
+try:
+    from setuptools import setup, find_packages
+
+    install_requires = []
+    # test for argparse existence, add to requirements
+    try:
+        import argparse
+    except ImportError:
+        install_requires.append('argparse')
+
+    kws = {'install_requires': install_requires}
+
+except ImportError:
+    from distutils.core import setup
+    kws = {}
 
 # import version from mtools/version.py
 exec(open('mtools/version.py').read())
@@ -22,4 +37,5 @@ setup(
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files.',
     long_description=long_description,
+    **kws
 )
