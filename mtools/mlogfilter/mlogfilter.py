@@ -107,6 +107,7 @@ if __name__ == '__main__':
     # add filters
     mlogfilter.addFilter(LogLineFilter)
     mlogfilter.addFilter(SlowFilter)
+    mlogfilter.addFilter(FastFilter)
     mlogfilter.addFilter(WordFilter)
     mlogfilter.addFilter(TableScanFilter)
     mlogfilter.addFilter(DateTimeFilter)
