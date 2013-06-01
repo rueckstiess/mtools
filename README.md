@@ -49,8 +49,8 @@ shorten log lines to the given value (default is 200 characters), cutting out
 excess characters from the middle and replacing them with "...".
 
 
-    usage: mlogfilter logfile [-h] [--from FROM] [--to TO] [--word WORDS] [--slow] [--fast FAST]
-                         
+    usage: mlogfilter logfile [options]
+
     positional arguments:
       logfile               logfile to parse
 
@@ -63,7 +63,8 @@ excess characters from the middle and replacing them with "...".
       --scan                only output lines which appear to be table scans (if
                             nscanned>10000 and ratio of nscanned to nreturned>100)
       --word WORDS          only output lines matching any of WORDS
-      --slow                only output lines with query times longer than 1000 ms
+      --slow [SLOW]         only output lines with query times longer than SLOW ms
+                            (default is 1000)
       --fast FAST           only output lines with query times shorter than FAST ms
 
 
