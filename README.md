@@ -43,14 +43,14 @@ mlogfilter
 
 A filter script to reduce the amount of information from MongoDB log files.  
 Currently, the script supports filtering by time (from - to), to only show 
-slow queries, to filter by arbitrary keywords, to detect table scans (heuristic)
+slow/fast queries, to filter by arbitrary keywords, to detect table scans (heuristic)
 or any combination of these filters. Additionally, the --shorten option can 
 shorten log lines to the given value (default is 200 characters), cutting out
 excess characters from the middle and replacing them with "...".
 
 
-    usage: mlogfilter logfile [-h] [--from FROM] [--to TO] [--word WORDS] [--slow]
-                         
+    usage: mlogfilter logfile [options]
+
     positional arguments:
       logfile               logfile to parse
 
@@ -63,7 +63,9 @@ excess characters from the middle and replacing them with "...".
       --scan                only output lines which appear to be table scans (if
                             nscanned>10000 and ratio of nscanned to nreturned>100)
       --word WORDS          only output lines matching any of WORDS
-      --slow                only output lines with query times longer than 1000 ms
+      --slow [SLOW]         only output lines with query times longer than SLOW ms
+                            (default is 1000)
+      --fast FAST           only output lines with query times shorter than FAST ms
 
 
     FROM and TO can be any combination of [DATE] [TIME] [OFFSET] in that order,
