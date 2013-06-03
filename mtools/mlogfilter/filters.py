@@ -130,14 +130,16 @@ class FastFilter(BaseFilter):
         parameter in ms.
     """
     filterArgs = [
-        ('--fast', {'action':'store', 'nargs':'?', 'default':False, 'type':int, 'help':'only output lines with query times shorter than FAST ms'})
+        ('--fast', {'action':'store', 'nargs':'?', 'default':False, 'type':int, 'help':'only output lines with query times shorter than FAST ms (default 1000)'})
     ]
 
     def __init__(self, commandLineArgs):
         BaseFilter.__init__(self, commandLineArgs)
         if 'fast' in self.commandLineArgs and self.commandLineArgs['fast'] != False:
-            if self.commandLineArgs['fast'] != None:
-                self.active = True
+            self.active = True
+            if self.commandLineArgs['fast'] == None:
+                self.fastms = 1000
+            else:
                 self.fastms = self.commandLineArgs['fast']
 
     def accept(self, logline):
