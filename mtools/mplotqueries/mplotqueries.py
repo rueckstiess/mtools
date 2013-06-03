@@ -7,6 +7,7 @@ import sys
 import uuid
 import glob
 import cPickle
+import types
 from copy import copy
 
 try:
@@ -20,26 +21,41 @@ except ImportError:
 
 
 from mtools.util.logline import LogLine
+from mtools.util.cmdlinetool import LogFileTool
 
-class MongoPlotQueries(object):
+class MPlotQueriesTool(LogFileTool):
 
     home_path = os.path.expanduser("~")
     mtools_path = '.mtools'
     overlay_path = 'mplotqueries/overlays/'
 
     def __init__(self):
-        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType]
+        LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=True)
 
+        self.argparser.description='A script to plot various information from logfiles. ' \
+            'Clicking on any of the plot points will print the corresponding log line to stdout.'
+
+        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType]
         self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
         self.plot_instances = []
 
+        # main parser arguments
+        self.argparser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
+        self.argparser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
+        self.argparser.add_argument('--logscale', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
+        self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
+        self.argparser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
+        
+        mutex = self.argparser.add_mutually_exclusive_group()
+        mutex.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range plots can additionally group on 'log2code'.")
+        mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
+
         self.legend = None
 
-        # parse arguments
-        self.parse_args()
+    def run(self):
+        LogFileTool.run(self)
 
         self.parse_loglines()
-        
         self.group()
 
         if self.args['overlay'] == 'reset':
@@ -53,7 +69,7 @@ class MongoPlotQueries(object):
             self.save_overlay()
             raise SystemExit
 
-        plot_specified = not sys.stdin.isatty() or len(self.args['filename']) > 0
+        plot_specified = not sys.stdin.isatty() or len(self.args['logfile']) > 0
 
         # if no plot is specified (either pipe or filename(s)) and reset, quit now
         if not plot_specified and self.args['overlay'] == 'reset':
@@ -68,42 +84,18 @@ class MongoPlotQueries(object):
             raise SystemExit
 
 
-    def parse_args(self):
-        # create parser object
-        parser = argparse.ArgumentParser(description='A script to plot various information from logfiles.' \
-            'Clicking on any of the plot points will print the corresponding log line to stdout.')
-        
-        # positional argument
-        if sys.stdin.isatty():
-            parser.add_argument('filename', action='store', nargs="*", help='logfile(s) to parse')
-        
-        # main parser arguments
-        parser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
-        parser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
-        parser.add_argument('--log', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
-        parser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
-        parser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
-        
-        mutex = parser.add_mutually_exclusive_group()
-        mutex.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range plots can additionally group on 'log2code'.")
-        mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
-
-        # separate parser for --plot arguments (multiple times possible)
-        self.args = vars(parser.parse_args())
-
-
     def parse_loglines(self):
         multiple_files = False
 
         # create generator for logfile(s) handles
-        if sys.stdin.isatty():
-            logfiles = ( open(f, 'r') for f in self.args['filename'] )
-            if len(self.args['filename']) > 1:
-                multiple_files = True
-                self.args['group'] = 'filename'
-
+        if type(self.args['logfile']) != types.ListType:
+            logfiles = [self.args['logfile']]
         else:
-            logfiles = [sys.stdin]
+            logfiles = self.args['logfile']
+            
+        if len(logfiles) > 1:
+            multiple_files = True
+            self.args['group'] = 'filename'
         
         plot_instance = self.plot_types[self.args['type']](args=self.args)
         
@@ -307,7 +299,7 @@ class MongoPlotQueries(object):
             label.set_picker(True)
 
         # log y axis
-        if self.args['log']:
+        if self.args['logscale']:
             axis.set_yscale('log')
             axis.set_ylabel('query duration in ms (log scale)')
         else:
@@ -324,6 +316,7 @@ class MongoPlotQueries(object):
 
 
 if __name__ == '__main__':
-    mplotqueries = MongoPlotQueries()
+    tool = MPlotQueriesTool()
+    tool.run()
 
 

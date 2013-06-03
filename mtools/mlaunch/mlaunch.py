@@ -7,6 +7,8 @@ import os, time
 import socket
 import json
 
+from mtools.util.cmdlinetool import BaseCmdLineTool
+
 try:
     from pymongo import Connection
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
@@ -27,54 +29,49 @@ def pingMongoDS(host, interval=1, timeout=30):
             time.sleep(interval)
 
 
-class MongoLauncher(object):
+class MLaunchTool(BaseCmdLineTool):
 
     def __init__(self):
+        BaseCmdLineTool.__init__(self)
+        self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards'
 
-        self.parseArgs()
+        # positional argument
+        self.argparser.add_argument('dir', action='store', nargs='?', const='.', default='.', help='base directory to create db and log paths (default=.)')
+
+        # either single or replica set
+        me_group = self.argparser.add_mutually_exclusive_group(required=True)
+        me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
+        me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
+        me_group.add_argument('--restore', action='store_true', help='restores a previously launched existing configuration from the data directory.')
+
+        self.argparser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
+        self.argparser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
+        self.argparser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
+        
+        # sharded or not
+        self.argparser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
+        self.argparser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
+
+        # verbose, port, auth, loglevel
+        self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
+        self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
+        self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        self.argparser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default=0)')
+        self.argparser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
+        self.argparser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
+
         self.hostname = socket.gethostname()
 
+
+    def run(self):
+        BaseCmdLineTool.run(self)
+
+        # load or store parameters
         if self.args['restore']:
             self.load_parameters()
         else:
             self.store_parameters()
 
-        self.launch()
-
-    def parseArgs(self):
-        # create parser object
-        parser = argparse.ArgumentParser(description='script to launch MongoDB stand-alone servers, replica sets, and shards')
-        
-        # positional argument
-        parser.add_argument('dir', action='store', nargs='?', const='.', default='.', help='base directory to create db and log paths')
-
-        # either single or replica set
-        me_group = parser.add_mutually_exclusive_group(required=True)
-        me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
-        me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
-        me_group.add_argument('--restore', action='store_true', help='restores a previously launched existing configuration from the data directory.')
-
-        parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default: 3)')
-        parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
-        parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default: replset)')
-        
-        # sharded or not
-        parser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default: 1)')
-        parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default: 1)')
-
-        # verbose, port, auth, loglevel
-        parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
-        parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default: 27017)')
-        parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        parser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default: 0)')
-        parser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
-        parser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
-        self.args = vars(parser.parse_args())
-        if self.args['verbose']:
-            print "parameters:", self.args
-
-
-    def launch(self):
         datapath = os.path.join(self.args['dir'], 'data')
         
         # check if authentication is enabled        
@@ -121,6 +118,7 @@ class MongoLauncher(object):
         except Exception:
             pass
 
+    
     def _createPaths(self, basedir, name=None, verbose=False):
         if name:
             datapath = os.path.join(basedir, 'data', name)
@@ -180,7 +178,7 @@ class MongoLauncher(object):
         self.mongos_host = '%s:%i'%(self.hostname, nextport)
 
         # add shards
-        print "adding shards (can take a few seconds) ..."
+        print "adding shards (can take a few seconds, grab a snickers) ..."
 
         con = Connection(self.mongos_host)
 
@@ -212,8 +210,6 @@ class MongoLauncher(object):
                         print res, '- will retry.'
 
             time.sleep(1)
-
-
 
 
     def _launchReplSet(self, basedir, portstart, name, numdata, arbiter, verbose=False):
@@ -351,5 +347,6 @@ class MongoLauncher(object):
 
 
 if __name__ == '__main__':
-    mongoLauncher = MongoLauncher()
+    tool = MLaunchTool()
+    tool.run()
 
