@@ -92,7 +92,8 @@ class LogLine(object):
 
             split_tokens = self.split_tokens
 
-            if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
+            # if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
+            if len(split_tokens) > 0 and re.match(r'[0-9]{1,}ms$', split_tokens[-1]):
                 self._duration = int(split_tokens[-1][:-2])
 
         return self._duration
