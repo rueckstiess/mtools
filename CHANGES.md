@@ -1,7 +1,17 @@
 Changes to mtools
 =================
 
-#### Version 1.0.0
+#### version 1.0.1
+
+  * added `--fast` option to mlogfilter
+  * fixed timezone bug (#24) in mlogmerge
+  * fixed bug in logline parsing when detecting duration at the end of a line
+  * changed `--log` to `--logscale` argument for mplotqueries to avoid confusion with "log" files
+  * restructured tools to derive from base class BaseCmdLineTool or LogFileTool
+  * all scripts now have -v / --version flag (inherited from BaseCmdLineTool)
+
+
+#### version 1.0.0
 
 This is the first version of mtools that has a version number. Some significant changes to its unnumbered predecessor are:
 
