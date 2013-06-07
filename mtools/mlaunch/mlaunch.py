@@ -121,6 +121,16 @@ class MongoLauncher(object):
         except Exception:
             pass
 
+    def check_port_availability(self, port, binary):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(('', port))
+            s.close()
+        except:
+            # exit("Can't start " + binary + ", port " + str(port) + " is already being used")
+            print("Can't start " + binary + ", port " + str(port) + " is already being used")
+            pass
+
     def _createPaths(self, basedir, name=None, verbose=False):
         if name:
             datapath = os.path.join(basedir, 'data', name)
@@ -293,6 +303,8 @@ class MongoLauncher(object):
 
 
     def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, auth=False, loglevel=False, extra=''):
+        self.check_port_availability(port, "mongod")
+
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
@@ -321,6 +333,8 @@ class MongoLauncher(object):
 
 
     def _launchMongoS(self, logpath, port, configdb, auth=False, loglevel=False, verbose=False):
+        self.check_port_availability(port, "mongos")
+
         out = subprocess.PIPE
         if verbose:
             out = None
