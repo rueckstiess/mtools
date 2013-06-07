@@ -230,6 +230,8 @@ class MongoLauncher(object):
             if verbose:
                 print "waiting for mongod at %s to start up..."%host
 
+            print "mongod at %s running." % host
+
         # launch arbiter if True
         if arbiter:
             datapath = self._createPaths(basedir, '%s/arb'%(name), verbose)
@@ -241,13 +243,13 @@ class MongoLauncher(object):
             if verbose:
                 print "waiting for mongod at %s to start up..."%host
 
+            print "arbiter at %s running." % host
+
         for thread in threads:
             thread.start()
 
         for thread in threads:
             thread.join()
-
-        print "all mongod processes for replica set '%s' running."%name
 
         # initiate replica set
         con = Connection('localhost:%i'%portstart)
