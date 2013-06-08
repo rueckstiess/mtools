@@ -127,9 +127,7 @@ class MongoLauncher(object):
             s.bind(('', port))
             s.close()
         except:
-            # exit("Can't start " + binary + ", port " + str(port) + " is already being used")
-            print("Can't start " + binary + ", port " + str(port) + " is already being used")
-            pass
+            exit("Can't start " + binary + ", port " + str(port) + " is already being used")
 
     def _createPaths(self, basedir, name=None, verbose=False):
         if name:
