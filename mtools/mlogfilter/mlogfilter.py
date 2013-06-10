@@ -65,18 +65,22 @@ class MLogFilterTool(LogFileTool):
         return new_string
 
     def _formatNumbers(self, line):
-        end = line[(line.rindex('}') + 1):]
-        splitted= re.split("(\d+)", end)
-        for i, s in enumerate(splitted):
-            converted = 0
-            try:
-                converted = int(s)
-            except ValueError, e:
-                pass
-            else:
-                if converted > 1000:
-                    splitted[i] = format(converted, ",d")
-        return ("").join(splitted)
+        try:
+            end = line[(line.rindex('}') + 1):]
+        except ValueError, e:
+            return line
+        else:
+            splitted= re.split("(\d+)", end)
+            for i, s in enumerate(splitted):
+                converted = 0
+                try:
+                    converted = int(s)
+                except ValueError, e:
+                    pass
+                else:
+                    if converted > 1000:
+                        splitted[i] = format(converted, ",d")
+            return line[:(line.rindex('}') + 1)] + ("").join(splitted)
 
 
     def run(self):
