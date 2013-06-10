@@ -50,7 +50,7 @@ class MLogFilterTool(LogFileTool):
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
         seconds = float(ms)/1000
-        return "%i:%02i:%06.3f"%(hr,mins,seconds)
+        return "%ihr%02imin%06.3fsecs"%(hr,mins,seconds)
 
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
