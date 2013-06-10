@@ -42,11 +42,12 @@ class MLogFilterTool(LogFileTool):
                 line = line[:length/2-2] + '...' + line[-length/2:]
         if human:
             line = self._changeMs(line)
+            line = self._formatNumbers(line)
         print line
 
 
     def _msToString(self, ms):
-        """ changes milliseconds to hr:min:sec.ms format """ 
+        """ changes milliseconds to hr min sec ms format """ 
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
         secs,mill = divmod(ms,1000)
@@ -62,6 +63,20 @@ class MLogFilterTool(LogFileTool):
             new_string = " ".join(splitted[:-1])
             new_string = new_string + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
         return new_string
+
+    def _formatNumbers(self, line):
+        end = line[(line.rindex('}') + 1):]
+        splitted= re.split("(\d+)", end)
+        for i, s in enumerate(splitted):
+            converted = 0
+            try:
+                converted = int(s)
+            except ValueError, e:
+                pass
+            else:
+                if converted > 1000:
+                    splitted[i] = format(converted, ",d")
+        return ("").join(splitted)
 
 
     def run(self):
