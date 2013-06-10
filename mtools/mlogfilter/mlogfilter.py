@@ -59,7 +59,7 @@ class MLogFilterTool(LogFileTool):
         new_string = line
 
         if (splitted[-1])[-2:] == 'ms' and int(splitted[-1][:-2]) > 1000:
-            ms = int(re.split('ms', splitted[-1])[0])
+            ms = int(splitted[-1].split('ms')[0])
             new_string = " ".join(splitted[:-1])
             new_string = new_string + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
         return new_string
@@ -97,7 +97,7 @@ class MLogFilterTool(LogFileTool):
         LogFileTool.run(self)
         self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
 
-        # create filter objects from classes and pass args
+        # create filter objects from classes and pass argso
         self.filters = [f(self.args) for f in self.filters]
 
         # remove non-active filter objects
