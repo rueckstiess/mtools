@@ -20,6 +20,8 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
+        self.argparser.add_argument('--human', action='store_true', help='outputs information in human readable form')
+
 
 
     def addFilter(self, filterClass):
