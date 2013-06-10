@@ -63,7 +63,7 @@ class MLogFilterTool(LogFileTool):
 
 
 
-    def parse(self):
+    def run(self):
 
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
@@ -75,10 +75,6 @@ class MLogFilterTool(LogFileTool):
         # only create default argument if not using stdin
         if sys.stdin.isatty():
             parser.add_argument('logfile', action='store', help='logfile to parse.')
-        parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
-        parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
-        parser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        parser.add_argument('--human', action='store_true', help='outputs information in human readable form')
         # add arguments from filter classes
 
         for f in self.filters:
