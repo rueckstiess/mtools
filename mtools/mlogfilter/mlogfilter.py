@@ -49,18 +49,19 @@ class MLogFilterTool(LogFileTool):
         """ changes milliseconds to hr:min:sec.ms format """ 
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
-        seconds = float(ms)/1000
-        return "%ihr%02imin%06.3fsecs"%(hr,mins,seconds)
+        secs,mill = divmod(ms,1000)
+        return "%ihr %imin %isecs %ims"%(hr,mins,secs, mill) 
 
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
-        splitted = re.split('\s', line)
-        if (splitted[-1])[-2:] == 'ms':
+        splitted = line.split(' ')
+        new_string = line
+
+        if (splitted[-1])[-2:] == 'ms' and int(splitted[-1][:-2]) > 1000:
             ms = int(re.split('ms', splitted[-1])[0])
             new_string = " ".join(splitted[:-1])
-            new_string = new_string + ' ' +  self._msToString(ms)
+            new_string = new_string + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
         return new_string
-
 
 
     def run(self):
