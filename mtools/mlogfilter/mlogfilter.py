@@ -34,20 +34,51 @@ class MLogFilterTool(LogFileTool):
         else:
             return arr
 
-    
-    def _outputLine(self, line, length=None):
+    def _outputLine(self, line, length=None, human = False):
         if length:
             if len(line) > length:
                 line = line[:length/2-2] + '...' + line[-length/2:]
+        if human:
+            line = self._changeMs(line)
         print line
 
-    
-    def run(self):
+
+    def _msToString(self, ms):
+        """ changes milliseconds to hr:min:sec.ms format """ 
+        hr, ms = divmod(ms, 3600000)
+        mins, ms = divmod(ms, 60000)
+        seconds = float(ms)/1000
+        return "%i:%02i:%06.3f"%(hr,mins,seconds)
+
+    def _changeMs(self, line):
+        """ changes the ms part in the string if needed """ 
+        splitted = re.split('\s', line)
+        if (splitted[-1])[-2:] == 'ms':
+            ms = int(re.split('ms', splitted[-1])[0])
+            new_string = " ".join(splitted[:-1])
+            new_string = new_string + ' ' +  self._msToString(ms)
+        return new_string
+
+
+
+    def parse(self):
+
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
         """
 
-        # add arguments from filter classes before calling superclass run
+        # create parser object
+        parser = argparse.ArgumentParser(description='mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.')
+        
+        # only create default argument if not using stdin
+        if sys.stdin.isatty():
+            parser.add_argument('logfile', action='store', help='logfile to parse.')
+        parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
+        parser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
+        parser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
+        parser.add_argument('--human', action='store_true', help='outputs information in human readable form')
+        # add arguments from filter classes
+
         for f in self.filters:
             for fa in f.filterArgs:
                 self.argparser.add_argument(fa[0], **fa[1])
@@ -75,16 +106,15 @@ class MLogFilterTool(LogFileTool):
         # go through each line and ask each filter if it accepts
         for line in self.args['logfile']:
             logline = LogLine(line)
-
             if self.args['exclude']:
                 # print line if any filter disagrees
                 if any([not f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'])
+                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
 
             else:
                 # only print line if all filters agree
                 if all([f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'])
+                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
 
                 # if at least one filter refuses to accept any remaining lines, stop
                 if any([f.skipRemaining() for f in self.filters]):
