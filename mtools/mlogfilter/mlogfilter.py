@@ -69,14 +69,6 @@ class MLogFilterTool(LogFileTool):
             it will only be printed if all filters accept the line.
         """
 
-        # create parser object
-        parser = argparse.ArgumentParser(description='mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.')
-        
-        # only create default argument if not using stdin
-        if sys.stdin.isatty():
-            parser.add_argument('logfile', action='store', help='logfile to parse.')
-        # add arguments from filter classes
-
         for f in self.filters:
             for fa in f.filterArgs:
                 self.argparser.add_argument(fa[0], **fa[1])
