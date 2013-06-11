@@ -78,7 +78,5 @@ if __name__ == '__main__':
     print "serving visualization on http://localhost:%s/"%PORT
     webbrowser.open("http://localhost:%i/"%PORT)
 
-    httpd.serve_forever()
-
-
-
+    httpd.handle_request()
+    httpd.handle_request()
