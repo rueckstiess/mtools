@@ -76,6 +76,9 @@ class LogLine(object):
         self._ninserted = None
 
     def _modify_linestr(self):
+        '''modifies the line str so that there are no commas in it anymore regarding numbers, 
+        but needs to go through all the tokens to do so '''
+
         recalc = False
         if not self._split_tokens_calculated:
             self.split_tokens
@@ -83,7 +86,7 @@ class LogLine(object):
         for i, t in enumerate(self._split_tokens):
             if ''.join(re.split(mod_re, t)) == '':
                 self._split_tokens[i] = t.replace(',', '')
-                recalc= True 
+                recalc = True 
         if recalc:
             self.line_str = " ".join(self._split_tokens)
 
