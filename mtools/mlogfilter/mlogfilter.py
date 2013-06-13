@@ -36,7 +36,7 @@ class MLogFilterTool(LogFileTool):
         else:
             return arr
 
-    def _outputLine(self, line, length=None, human = False):
+    def _outputLine(self, line, length=None, human=False):
         if length:
             if len(line) > length:
                 line = line[:length/2-2] + '...' + line[-length/2:]
@@ -50,8 +50,8 @@ class MLogFilterTool(LogFileTool):
         """ changes milliseconds to hr min sec ms format """ 
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
-        secs,mill = divmod(ms,1000)
-        return "%ihr %imin %isecs %ims"%(hr,mins,secs, mill) 
+        secs, mill = divmod(ms, 1000)
+        return "%ihr %imin %isecs %ims"%(hr, mins, secs, mill) 
 
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
