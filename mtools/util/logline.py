@@ -41,12 +41,13 @@ class LogLine(object):
         'Oct', 'Nov', 'Dec']
 
 
+
     def __init__(self, line_str, auto_parse=True):
         # remove line breaks at end of line_str
         self.line_str = line_str.rstrip('\n')
 
-        self._split_tokens_calculated = False
-        self._split_tokens = None
+        self.split_tokens()
+        self._modify_linestr()
 
         self._duration_calculated = False
         self._duration = None
@@ -69,6 +70,20 @@ class LogLine(object):
         self._nupdated = None
         self._nreturned = None
         self._ninserted = None
+
+    def _modify_linestr(self):
+        recalc = False
+        if not self._split_tokens_calculated:
+            self.split_tokens
+        mod_re = '^[0-9,]+$'
+        for i, t in enumerate(self._split_tokens):
+            if ''.join(re.split(mod_re)) == '':
+                self._split_tokens(i) = t.replace(',', '')
+                recalc= True 
+        if recalc:
+            self.line_str = " ".join(self._split_tokens)
+
+
 
 
     @property
