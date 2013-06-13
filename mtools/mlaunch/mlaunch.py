@@ -52,12 +52,12 @@ class MLaunchTool(BaseCmdLineTool):
         # sharded or not
         self.argparser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
         self.argparser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
+        self.argparser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
         # verbose, port, auth, loglevel
         self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
         self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        # self.argparser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default=0)')
         self.argparser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
         self.argparser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
 
@@ -68,7 +68,6 @@ class MLaunchTool(BaseCmdLineTool):
         # don't call BaseCmdLineTool.run(), we pass args ourselves
         self.args, self.unknown_args = self.argparser.parse_known_args()
         self.args = vars(self.args)
-        print self.unknown_args
 
         # load or store parameters
         if self.args['restore']:
@@ -177,9 +176,13 @@ class MLaunchTool(BaseCmdLineTool):
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
-        # start up mongos
-        self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string))
-        self.mongos_host = '%s:%i'%(self.hostname, nextport)
+        # start up mongos (at least 1)
+        for i in range(max(1, self.args['mongos'])):
+            self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string))
+            if i == 0: 
+                # store host/port of first mongos
+                self.mongos_host = '%s:%i'%(self.hostname, nextport)
+            nextport += 1
 
         # add shards
         print "adding shards (can take a few seconds, grab a snickers) ..."
