@@ -17,6 +17,7 @@ except ImportError:
 
 
 def pingMongoDS(host, interval=1, timeout=30):
+    """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. """
     con = None
     startTime = time.time()
     while not con:
@@ -56,7 +57,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
         self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        self.argparser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default=0)')
+        # self.argparser.add_argument('--loglevel', action='store', default=False, type=int, help='increase loglevel to LOGLEVEL (default=0)')
         self.argparser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
         self.argparser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
 
@@ -64,7 +65,10 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def run(self):
-        BaseCmdLineTool.run(self)
+        # don't call BaseCmdLineTool.run(), we pass args ourselves
+        self.args, self.unknown_args = self.argparser.parse_known_args()
+        self.args = vars(self.args)
+        print self.unknown_args
 
         # load or store parameters
         if self.args['restore']:
@@ -84,9 +88,9 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['sharded']:
             self._launchSharded()
         elif self.args['single']:
-            self._launchSingle(self.args['dir'], self.args['port'], verbose=self.args['verbose'])
+            self._launchSingle(self.args['dir'], self.args['port'])
         elif self.args['replicaset']:
-            self._launchReplSet(self.args['dir'], self.args['port'], self.args['name'], self.args['nodes'], self.args['arbiter'], self.args['verbose'])
+            self._launchReplSet(self.args['dir'], self.args['port'], self.args['name'])
 
 
     def convert_u2b(self, obj):
@@ -119,7 +123,7 @@ class MLaunchTool(BaseCmdLineTool):
             pass
 
     
-    def _createPaths(self, basedir, name=None, verbose=False):
+    def _createPaths(self, basedir, name=None):
         if name:
             datapath = os.path.join(basedir, 'data', name)
         else:
@@ -128,7 +132,7 @@ class MLaunchTool(BaseCmdLineTool):
         dbpath = os.path.join(datapath, 'db')
         if not os.path.exists(dbpath):
             os.makedirs(dbpath)
-        if verbose:
+        if self.args['verbose']:
             print 'creating directory: %s'%dbpath
         
         return datapath
@@ -152,10 +156,10 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port']
         for p, shard in enumerate(shard_names):
             if self.args['single']:
-                shard_names[p] = self._launchSingle(self.args['dir'], nextport, name=shard, verbose=self.args['verbose'])
+                shard_names[p] = self._launchSingle(self.args['dir'], nextport, name=shard)
                 nextport += 1
             elif self.args['replicaset']:
-                shard_names[p] = self._launchReplSet(self.args['dir'], nextport, shard, self.args['nodes'], self.args['arbiter'], self.args['verbose'])
+                shard_names[p] = self._launchReplSet(self.args['dir'], nextport, shard)
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -169,12 +173,12 @@ class MLaunchTool(BaseCmdLineTool):
             config_names = ['config1', 'config2', 'config3']
             
         for name in config_names:
-            self._launchConfig(self.args['dir'], nextport, name, verbose=self.args['verbose'])
+            self._launchConfig(self.args['dir'], nextport, name)
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
         # start up mongos
-        self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string), auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=self.args['verbose'])
+        self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string))
         self.mongos_host = '%s:%i'%(self.hostname, nextport)
 
         # add shards
@@ -212,29 +216,29 @@ class MLaunchTool(BaseCmdLineTool):
             time.sleep(1)
 
 
-    def _launchReplSet(self, basedir, portstart, name, numdata, arbiter, verbose=False):
+    def _launchReplSet(self, basedir, portstart, name):
         threads = []
         configDoc = {'_id':name, 'members':[]}
 
-        for i in range(numdata):
-            datapath = self._createPaths(basedir, '%s/rs%i'%(name, i+1), verbose)
-            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
+        for i in range(self.args['nodes']):
+            datapath = self._createPaths(basedir, '%s/rs%i'%(name, i+1))
+            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
             host = '%s:%i'%(self.hostname, portstart+i)
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
             threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
-            if verbose:
+            if self.args['verbose']:
                 print "waiting for mongod at %s to start up..."%host
 
         # launch arbiter if True
-        if arbiter:
-            datapath = self._createPaths(basedir, '%s/arb'%(name), verbose)
-            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+numdata, replset=name, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
+        if self.args['arbiter']:
+            datapath = self._createPaths(basedir, '%s/arb'%(name))
+            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
             
-            host = '%s:%i'%(self.hostname, portstart+numdata)
+            host = '%s:%i'%(self.hostname, portstart+self.args['nodes'])
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
             threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
-            if verbose:
+            if self.args['verbose']:
                 print "waiting for mongod at %s to start up..."%host
 
         for thread in threads:
@@ -252,33 +256,33 @@ class MLaunchTool(BaseCmdLineTool):
             rs_status = con['admin'].command({'replSetGetStatus': 1})
         except OperationFailure, e:
             con['admin'].command({'replSetInitiate':configDoc})
-            if verbose:
+            if self.args['verbose']:
                 print "replica set configured."
 
         return name + '/' + ','.join([c['host'] for c in configDoc['members']])
 
 
-    def _launchConfig(self, basedir, port, name=None, verbose=False):
-        datapath = self._createPaths(basedir, name, verbose)
-        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, verbose=verbose, auth=self.args['authentication'], loglevel=self.args['loglevel'], extra='--configsvr')
+    def _launchConfig(self, basedir, port, name=None):
+        datapath = self._createPaths(basedir, name)
+        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
         t.start()
-        if verbose:
+        if self.args['verbose']:
             print "waiting for mongod config server to start up..."
         t.join()
         print "mongod config server at %s running."%host
 
 
-    def _launchSingle(self, basedir, port, name=None, verbose=False):
-        datapath = self._createPaths(basedir, name, verbose)
-        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, auth=self.args['authentication'], loglevel=self.args['loglevel'], verbose=verbose)
+    def _launchSingle(self, basedir, port, name=None):
+        datapath = self._createPaths(basedir, name)
+        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
         t.start()
-        if verbose:
+        if self.args['verbose']:
             print "waiting for mongod to start up..."
         t.join()
         print "mongod at %s running."%host
@@ -286,60 +290,60 @@ class MLaunchTool(BaseCmdLineTool):
         return host
 
 
-    def _launchMongoD(self, dbpath, logpath, port, replset=None, verbose=False, auth=False, loglevel=False, extra=''):
+    def _launchMongoD(self, dbpath, logpath, port, replset=None, extra=''):
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
 
         auth_param = ''
-        if auth:
+        if self.args['authentication']:
             key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
             auth_param = '--keyFile %s'%key_path
-
-        log_param = ''
-        if loglevel:
-            log_param = '-' + ''.join(['v']*loglevel)
 
         if self.args['rest']:
             extra = '--rest ' + extra
 
+        if self.unknown_args:
+            extra = ' '.join(self.unknown_args) + ' ' + extra
+
         local = ''
         if self.args['local']:
             local = "./"
 
-        ret = subprocess.call(['%smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, log_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        if verbose:
-            print 'launching: %smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, log_param, extra)
+        ret = subprocess.call(['%smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        if self.args['verbose']:
+            print 'launching: %smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, extra)
 
         return ret
 
 
-    def _launchMongoS(self, logpath, port, configdb, auth=False, loglevel=False, verbose=False):
+    def _launchMongoS(self, logpath, port, configdb):
+        extra = ''
+
         out = subprocess.PIPE
-        if verbose:
+        if self.args['verbose']:
             out = None
 
         auth_param = ''
-        if auth:
+        if self.args['authentication']:
             key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
             auth_param = '--keyFile %s'%key_path
-
-        log_param = ''
-        if loglevel:
-            log_param = '-' + ''.join(['v']*loglevel)
 
         local = ''
         if self.args['local']:
             local = "./"
 
-        ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, log_param)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        if verbose:
-            print 'launching: %smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, log_param)
+        if self.unknown_args:
+            extra = ' '.join(self.unknown_args) + extra
+
+        ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        if self.args['verbose']:
+            print 'launching: %smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)
         
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
         t.start()
-        if verbose:
+        if self.args['verbose']:
             print "waiting for mongos to start up..."
         t.join()
         print "mongos at %s running."%host
