@@ -8,7 +8,8 @@ Changes to mtools
   * fixed bug in logline parsing when detecting duration at the end of a line
   * changed `--log` to `--logscale` argument for mplotqueries to avoid confusion with "log" files
   * restructured tools to derive from base class BaseCmdLineTool or LogFileTool
-  * all scripts now have -v / --version flag (inherited from BaseCmdLineTool)
+  * all scripts now have --version flag (inherited from BaseCmdLineTool)
+  * mlaunch can now take any additional arguments (like -vvv) and pass it on to the mongod/s instances.
 
 
 #### version 1.0.0
