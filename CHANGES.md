@@ -3,13 +3,14 @@ Changes to mtools
 
 #### version 1.0.1
 
-  * added `--fast` option to mlogfilter
-  * fixed timezone bug (#24) in mlogmerge
+  * fixed timezone bug in mlogmerge (#24)
+  * allow for multiple mongos in mlaunch with `--mongos` NUM parameter (#30)
+  * mlaunch can now take any additional arguments (like `-vvv`) and pass it on to the mongod/s instances (#31)
+  * all scripts now have --version flag (inherited from BaseCmdLineTool) (#34)
+  * added `--fast` option to mlogfilter (#37)
   * fixed bug in logline parsing when detecting duration at the end of a line
   * changed `--log` to `--logscale` argument for mplotqueries to avoid confusion with "log" files
-  * restructured tools to derive from base class BaseCmdLineTool or LogFileTool
-  * all scripts now have --version flag (inherited from BaseCmdLineTool)
-  * mlaunch can now take any additional arguments (like -vvv) and pass it on to the mongod/s instances.
+  * restructured tools to derive from base class `BaseCmdLineTool` or LogFileTool
 
 
 #### version 1.0.0
