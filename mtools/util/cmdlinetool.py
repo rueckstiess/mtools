@@ -12,7 +12,7 @@ class BaseCmdLineTool(object):
         """
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
-        self.argparser.add_argument('-v', '--version', action='version', version="mtools version %s" % __version__)
+        self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
 
     def run(self):
         """ Init point to execute the script. Will evaluate the argparser arguments. Any inheriting
