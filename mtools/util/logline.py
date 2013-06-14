@@ -75,8 +75,10 @@ class LogLine(object):
         self._ninserted = None
 
     def _modify_linestr(self):
-        '''modifies the line str so that there are no commas in numbers anymore
-        but needs to go through all the tokens to do so '''
+        '''needed when combining human readable with other commands:
+        modifies the line str so that there are no commas in numbers anymore 
+        so that they can still be parsed. Because of this, the line string cannot be tokenized
+        in a lazy manner'''
 
         recalc = False
         if not self._split_tokens_calculated:
