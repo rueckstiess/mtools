@@ -88,6 +88,7 @@ class LogLine(object):
         for ind, toks in enumerate(split_tokens):
             #split on numbers and commas - if there are only numbers and commas, then the commas need to be taken out
             if ''.join(re.split(mod_re, toks)) == '':
+                #need to modify the actual tokens.
                 self._split_tokens[ind] = toks.replace(',', '')
                 recalc = True 
         if recalc:
