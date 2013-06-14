@@ -47,7 +47,7 @@ class MLogFilterTool(LogFileTool):
 
 
     def _msToString(self, ms):
-        """ changes milliseconds to hr min sec ms format """ 
+        """ changes milliseconds to hours min sec ms format """ 
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
         secs, mill = divmod(ms, 1000)
@@ -65,22 +65,29 @@ class MLogFilterTool(LogFileTool):
         return new_string
 
     def _formatNumbers(self, line):
+        '''formats the numbers so that there are commas inserted 
+        ie. 1200300 becomes 1,200,300 '''
+        last_index = 0
         try:
-            end = line[(line.rindex('}') + 1):]
+            #find the index of the last } character
+            last_index = (line.rindex('}') + 1)
+            end = line[last_index:]
         except ValueError, e:
             return line
         else:
-            splitted= re.split("(\d+)", end)
-            for i, s in enumerate(splitted):
+            #split the string on numbers to isolate them
+            splitted = re.split("(\d+)", end)
+            for index, val in enumerate(splitted):
                 converted = 0
                 try:
-                    converted = int(s)
+                    converted = int(val)
+                #if it's not an int pass and don't change the string
                 except ValueError, e:
                     pass
                 else:
                     if converted > 1000:
-                        splitted[i] = format(converted, ",d")
-            return line[:(line.rindex('}') + 1)] + ("").join(splitted)
+                        splitted[index] = format(converted, ",d")
+            return line[:last_index] + ("").join(splitted)
 
 
     def run(self):
@@ -88,6 +95,8 @@ class MLogFilterTool(LogFileTool):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
         """
+
+        #add arguments from filter classes before calling superclass run
 
         for f in self.filters:
             for fa in f.filterArgs:
@@ -97,7 +106,7 @@ class MLogFilterTool(LogFileTool):
         LogFileTool.run(self)
         self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
 
-        # create filter objects from classes and pass argso
+        # create filter objects from classes and pass args
         self.filters = [f(self.args) for f in self.filters]
 
         # remove non-active filter objects

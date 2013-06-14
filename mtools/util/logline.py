@@ -41,7 +41,6 @@ class LogLine(object):
         'Oct', 'Nov', 'Dec']
 
 
-
     def __init__(self, line_str, auto_parse=True):
         # remove line breaks at end of line_str
         self.line_str = line_str.rstrip('\n')
@@ -76,16 +75,18 @@ class LogLine(object):
         self._ninserted = None
 
     def _modify_linestr(self):
-        '''modifies the line str so that there are no commas in it anymore regarding numbers, 
+        '''modifies the line str so that there are no commas in numbers anymore
         but needs to go through all the tokens to do so '''
 
         recalc = False
         if not self._split_tokens_calculated:
-            self.split_tokens
+            split_tokens = self.split_tokens
+        #regular expression for numbers and commas only
         mod_re = '^[0-9,]+$'
-        for i, t in enumerate(self._split_tokens):
-            if ''.join(re.split(mod_re, t)) == '':
-                self._split_tokens[i] = t.replace(',', '')
+        for ind, toks in enumerate(split_tokens):
+            #split on numbers and commas - if there are only numbers and commas, then the commas need to be taken out
+            if ''.join(re.split(mod_re, toks)) == '':
+                self._split_tokens[ind] = toks.replace(',', '')
                 recalc = True 
         if recalc:
             self.line_str = " ".join(self._split_tokens)
