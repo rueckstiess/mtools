@@ -64,11 +64,11 @@ class MLogFilterTool(LogFileTool):
         else:
             end_str = line[last_space_pos:]
             new_string = line
-            if end_str[-2:] == 'ms' and int(end_str[:-2]) > 1000:
+            if end_str[-2:] == 'ms' and int(end_str[:-2]) >= 1000:
                 #isolate the number of milliseconds 
                 ms = int(end_str[:-2])
                 #create the new string with the beginning part of the log with the new ms part added in
-                new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
+                new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + line[last_space_pos:]
             return new_string
 
     def _formatNumbers(self, line):

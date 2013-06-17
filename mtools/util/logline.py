@@ -72,11 +72,6 @@ class LogLine(object):
         self._ninserted = None
 
 
-    def _no_commas(self, line):
-        return line.replace(',', '')
-
-
-
     @property
     def split_tokens(self):
         """ splits string into tokens (lazy) """
@@ -100,7 +95,7 @@ class LogLine(object):
 
             # if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
             if len(split_tokens) > 0 and re.match(r'[0-9]{1,}ms$', split_tokens[-1]):
-                self._duration = int(self._no_commas(split_tokens[-1][:-2]))
+                self._duration = int((split_tokens[-1][:-2]).replace(',',''))
 
         return self._duration
 
@@ -305,9 +300,7 @@ class LogLine(object):
             for token in split_tokens[self._thread_offset+2:]:
                 for counter in counters:
                     if token.startswith('%s:'%counter):
-                        end_number = token.split(':')[-1]
-                        num = int(self._no_commas(end_number))
-                        vars(self)['_'+counter] = num
+                        vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',',''))
                         break
 
 
