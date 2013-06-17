@@ -11,7 +11,7 @@ Changes to mtools
   * fixed bug in logline parsing when detecting duration at the end of a line
   * changed `--log` to `--logscale` argument for mplotqueries to avoid confusion with "log" files
   * restructured tools to derive from base class `BaseCmdLineTool` or LogFileTool
-
+  * added Contributing page under tutorials
 
 #### version 1.0.0
 
