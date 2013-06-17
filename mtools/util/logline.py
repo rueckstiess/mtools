@@ -49,8 +49,6 @@ class LogLine(object):
         self._split_tokens = None
 
 
-
-
         self._duration_calculated = False
         self._duration = None
 
@@ -73,26 +71,6 @@ class LogLine(object):
         self._nreturned = None
         self._ninserted = None
 
-    def _modify_linestr(self, line):
-        '''needed when combining human readable with other commands:
-        modifies the line str so that there are no commas in numbers anymore 
-        so that they can still be parsed. Because of this, the line string cannot be tokenized
-        in a lazy manner'''
-
-        recalc = False
-        if not self._split_tokens_calculated:
-            split_tokens = self.split_tokens
-        #regular expression for numbers and commas only
-        mod_re = re.compile('^[0-9,]+$')
-
-        for ind, toks in enumerate(split_tokens):
-            #split on numbers and commas - if there are only numbers and commas, then the commas need to be taken out
-            if ''.join(re.split(mod_re, toks)) == '':
-                #need to modify the actual tokens.
-                self._split_tokens[ind] = self.no_commas(toks)
-                recalc = True 
-        if recalc:
-            self.line_str = " ".join(self._split_tokens)
 
     def _no_commas(self, line):
         return line.replace(',', '')

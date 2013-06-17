@@ -57,15 +57,19 @@ class MLogFilterTool(LogFileTool):
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
         #use the the position of the last space instead
-        last_space_pos = line.rindex(' ')
-        end_str = line[last_space_pos + 1]
-
-        if end_str[-2:] == 'ms' and int(end_str[:-2]) > 1000:
-            #isolate the number of milliseconds 
-            ms = int(end_str[:-2])
-            #create the new string with the beginning part of the log with the new ms part added in
-            new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
-        return new_string
+        try:
+            last_space_pos = line.rindex(' ')
+        except ValueError, s:
+            return line
+        else:
+            end_str = line[last_space_pos:]
+            new_string = line
+            if end_str[-2:] == 'ms' and int(end_str[:-2]) > 1000:
+                #isolate the number of milliseconds 
+                ms = int(end_str[:-2])
+                #create the new string with the beginning part of the log with the new ms part added in
+                new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
+            return new_string
 
     def _formatNumbers(self, line):
         '''formats the numbers so that there are commas inserted 
