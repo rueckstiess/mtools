@@ -48,7 +48,6 @@ class LogLine(object):
         self._split_tokens_calculated = False
         self._split_tokens = None
 
-        self._modify_linestr()
 
 
 
@@ -74,7 +73,7 @@ class LogLine(object):
         self._nreturned = None
         self._ninserted = None
 
-    def _modify_linestr(self):
+    def _modify_linestr(self, line):
         '''needed when combining human readable with other commands:
         modifies the line str so that there are no commas in numbers anymore 
         so that they can still be parsed. Because of this, the line string cannot be tokenized
@@ -84,16 +83,19 @@ class LogLine(object):
         if not self._split_tokens_calculated:
             split_tokens = self.split_tokens
         #regular expression for numbers and commas only
-        mod_re = '^[0-9,]+$'
+        mod_re = re.compile('^[0-9,]+$')
+
         for ind, toks in enumerate(split_tokens):
             #split on numbers and commas - if there are only numbers and commas, then the commas need to be taken out
             if ''.join(re.split(mod_re, toks)) == '':
                 #need to modify the actual tokens.
-                self._split_tokens[ind] = toks.replace(',', '')
+                self._split_tokens[ind] = self.no_commas(toks)
                 recalc = True 
         if recalc:
             self.line_str = " ".join(self._split_tokens)
 
+    def _no_commas(self, line):
+        return line.replace(',', '')
 
 
 
@@ -120,7 +122,7 @@ class LogLine(object):
 
             # if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
             if len(split_tokens) > 0 and re.match(r'[0-9]{1,}ms$', split_tokens[-1]):
-                self._duration = int(split_tokens[-1][:-2])
+                self._duration = int(self._no_commas(split_tokens[-1][:-2]))
 
         return self._duration
 
@@ -325,7 +327,9 @@ class LogLine(object):
             for token in split_tokens[self._thread_offset+2:]:
                 for counter in counters:
                     if token.startswith('%s:'%counter):
-                        vars(self)['_'+counter] = int(token.split(':')[-1])
+                        end_number = token.split(':')[-1]
+                        num = int(self._no_commas(end_number))
+                        vars(self)['_'+counter] = num
                         break
 
 
