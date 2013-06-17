@@ -2,12 +2,12 @@
 
 Contributions to mtools are very welcome. Please check if the particular bug / issue has already been
 reported on the [mtools issues](https://github.com/rueckstiess/mtools/issues?state=open) page and create
-a new issue if it is not.
+a new issue if it doesn't exist yet.
 
 ### Development Installation
 
-You can install mtools in "development" version, which will not move it into the Python `site-packages` 
-directory but keeps it in your local development directory instead. It will still install the script 
+You can install mtools in "development" mode, which will not move it into the Python `site-packages` 
+directory but keeps it in your local development directory instead. It will still install the necessary 
 hooks so you will be able to use it like normal, both from Python and the command line. In addition,
 you can modify the files directly in your local directory and test the changes right away.
 
@@ -40,13 +40,15 @@ branch you need to check out and track the remote `develop` branch:
 
     git checkout -b develop origin/develop
 
-If you work on a bug or feature implementation you should create a feature/bugfix branch that forks off the develop branch:
+If you work on a bug or feature implementation you should create a feature/bugfix branch that forks off the `develop` branch:
 
     git -b bugfix-31 develop
     git -b feature-my-cool-thing develop
 
 The naming is not that relevant, but it's good practice to start with `feature-` or `bugfix-` and include the issue number
 in the branch name (if available).
+
+Please use meaningful, descriptive git commit messages. A git commit with `asdf` or `changed stuff` will not go into the repository.
 
 When you're happy with your changes, raise a pull request against the upstream `develop` branch. Once the code is merged into 
 the `develop` branch, you can delete your local feature/bugfix branch.
