@@ -311,8 +311,6 @@ class MLaunchTool(BaseCmdLineTool):
             extra = '--rest ' + extra
 
         if self.unknown_args:
-            print "mongod args:"
-            print self.unknown_args
             extra = ' '.join(self.unknown_args) + ' ' + extra
 
         local = ''
@@ -343,9 +341,7 @@ class MLaunchTool(BaseCmdLineTool):
             local = "./"
 
         if self.unknown_args:
-            print "mongos args:"
             mongos_args = [arg for arg in self.unknown_args if arg in self.mongos_arguments]
-            print mongos_args
             extra = ' '.join(mongos_args) + extra
 
         ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
