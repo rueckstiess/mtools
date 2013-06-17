@@ -20,7 +20,7 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        self.argparser.add_argument('--human', action='store_true', help='outputs information in human readable form')
+        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability ')
 
 
 
@@ -53,15 +53,18 @@ class MLogFilterTool(LogFileTool):
         secs, mill = divmod(ms, 1000)
         return "%ihr %imin %isecs %ims"%(hr, mins, secs, mill) 
 
+
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
-        splitted = line.split(' ')
-        new_string = line
+        #use the the position of the last space instead
+        last_space_pos = line.rindex(' ')
+        end_str = line[last_space_pos + 1]
 
-        if (splitted[-1])[-2:] == 'ms' and int(splitted[-1][:-2]) > 1000:
-            ms = int(splitted[-1].split('ms')[0])
-            new_string = " ".join(splitted[:-1])
-            new_string = new_string + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
+        if end_str[-2:] == 'ms' and int(end_str[:-2]) > 1000:
+            #isolate the number of milliseconds 
+            ms = int(end_str[:-2])
+            #create the new string with the beginning part of the log with the new ms part added in
+            new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + `ms` + 'ms'
         return new_string
 
     def _formatNumbers(self, line):
