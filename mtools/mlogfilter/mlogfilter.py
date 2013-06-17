@@ -62,6 +62,9 @@ class MLogFilterTool(LogFileTool):
         # remove non-active filter objects
         self.filters = [f for f in self.filters if f.active]
 
+        # call setup for each active filter
+        for f in self.filters:
+            f.setup()
 
         if self.args['shorten'] != False:
             if self.args['shorten'] == None:
@@ -73,6 +76,10 @@ class MLogFilterTool(LogFileTool):
                 print "mlogfilter> %8s: %s" % (a, self.args[a])
 
         # go through each line and ask each filter if it accepts
+        if not 'logfile' in self.args or not self.args['logfile']:
+            exit()
+
+
         for line in self.args['logfile']:
             logline = LogLine(line)
 

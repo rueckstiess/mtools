@@ -1,6 +1,6 @@
 from mtools.util import OrderedDict
 from mtools.util.logline import LogLine
-from datetime import date, time, datetime, timedelta, MINYEAR, MAXYEAR
+from mtools.util.hci import DateTimeBoundaries
 import re
 
 class BaseFilter:
@@ -23,6 +23,12 @@ class BaseFilter:
 
         # filters need to actively set this flag to true
         self.active = False
+
+    def setup(self):
+        """ hook to setup anything necessary for the filter before actually
+            going through loglines. overwrite in subclass if setup is required.
+        """
+        pass
 
     def accept(self, logline):
         """ overwrite this method in subclass and return True if the provided 
@@ -175,6 +181,16 @@ class TableScanFilter(BaseFilter):
 
 
 
+def custom_parse_dt(value):
+    return value
+#     if value.startswith('-'):
+
+#     values = value.split()
+#     if len(values) != 2:
+#         raise argparse.ArgumentError
+#     values = map(float, values)
+#     return values
+
 class DateTimeFilter(BaseFilter):
     """ This filter has two parser arguments: --from and --to, both are 
         optional. All possible values for --from and --to can be described as:
@@ -229,8 +245,8 @@ class DateTimeFilter(BaseFilter):
     """
 
     filterArgs = [
-       ('--from', {'action':'store', 'nargs':'*', 'default':'start', 'help':'output starting at FROM', 'dest':'from'}), 
-       ('--to',   {'action':'store', 'nargs':'*', 'default':'end',   'help':'output up to TO',         'dest':'to'})
+       ('--from', {'action':'store',  'type':custom_parse_dt, 'nargs':'*', 'default':'start', 'help':'output starting at FROM', 'dest':'from'}), 
+       ('--to',   {'action':'store',  'type':custom_parse_dt, 'nargs':'*', 'default':'end',   'help':'output up to TO',         'dest':'to'})
     ]
 
     timeunits = ['s', 'sec', 'm', 'min', 'h', 'hours', 'd', 'days', 'w', 'weeks', 'mo', 'months', 'y', 'years']
@@ -240,7 +256,7 @@ class DateTimeFilter(BaseFilter):
     dtRegexes = OrderedDict([         
         ('weekday', r'|'.join(weekdays)),                         # weekdays: see above
         ('date',    '('+ '|'.join(months) +')' + r'\s+\d{1,2}'),  # month + day:  Jan 5, Oct 13, Sep 03, ...
-        ('word',    r'now|start|end|today|from'),
+        ('word',    r'now|start|end|today'),
         ('time2',   r'\d{1,2}:\d{2,2}'),                          # 11:59, 1:13, 00:00, ...
         ('time3',   r'\d{1,2}:\d{2,2}:\d{2,2}'),                  # 11:59:00, 1:13:12, 00:00:59, ...
         ('offset',  r'[\+-]\d+(' + '|'.join(timeunits) + ')'),    # offsets: +3min, -20s, +7days, ...                    
@@ -252,14 +268,53 @@ class DateTimeFilter(BaseFilter):
         self.fromReached = False
         self.toReached = False
 
-        self.fromDateTime = None
-        if 'from' in self.commandLineArgs:
-            self.fromDateTime = self._interpretDateTime(self.commandLineArgs['from'])
+        if 'from' in self.commandLineArgs or 'to' in self.commandLineArgs:
             self.active = True
 
-        if 'to' in self.commandLineArgs:
-            self.toDateTime = self._interpretDateTime(self.commandLineArgs['to'], self.fromDateTime)
-            self.active = True
+
+    def setup(self):
+        """ get start end end date of logfile before starting to parse. """
+        logfile = self.commandLineArgs['logfile']
+        seekable = False
+        if logfile:
+            seekable = logfile.name != "<stdin>"
+
+        if not seekable:
+            self.startDateTime = None
+            self.endDateTime = None
+            return
+
+        # get start datetime 
+        for line in logfile:
+            logline = LogLine(line)
+            date = logline.datetime
+            if date:
+                break
+        self.startDateTime = date
+
+        # get end datetime (lines are at most 10k, go back 15k at most to make sure)
+        logfile.seek(0, 2)
+        file_size = logfile.tell()
+        logfile.seek(-min(file_size, 15000), 2)
+
+        for line in reversed(logfile.readlines()):
+            logline = LogLine(line)
+            date = logline.datetime
+            if date:
+                break
+        self.endDateTime = date
+
+        # if there was a roll-over, subtract 1 year from start time
+        if self.endDateTime < self.startDateTime:
+            self.startDateTime = self.startDateTime.replace(year=self.startDateTime.year-1)
+
+        # reset logfile
+        logfile.seek(0)
+
+        # now parse for further changes to from and to datetimes
+        dtbound = DateTimeBoundaries(self.startDateTime, self.endDateTime)
+        self.fromDateTime, self.toDateTime = dtbound(self.commandLineArgs['from'] or None, 
+                                                     self.commandLineArgs['to'] or None)
 
 
     def accept(self, logline):
@@ -284,139 +339,5 @@ class DateTimeFilter(BaseFilter):
         
     def skipRemaining(self):
         return self.toReached
-
-
-    def _interpretDateTime(self, timemark, fromTime=None):
-        dtdict = {}
-        # go through all regexes in order and see which ones match
-        for idx in self.dtRegexes:
-            tmrx = self.dtRegexes[idx]
-            mo = re.match('('+tmrx+')($|\s+)', timemark)
-            if mo:
-                dtdict[idx] = mo.group(0).rstrip()
-                timemark = timemark[len(mo.group(0)):]
-
-        if timemark:
-            # still some string left after all filters applied. quitting.
-            raise SystemExit("parsing error: don't understand '%s'" % timemark)
-
-
-        skiptime = False
-        notime = False
-        nodate = False
-
-        # current year
-        now = datetime.now()
-        dtdict['year'] = now.year
-
-        # month and day
-        if 'date' in dtdict:
-            m, d = dtdict['date'].split()
-            dtdict['month'] = self.months.index(m)+1
-            dtdict['day'] = int(d)
-
-            del dtdict['date']
-            if 'weekday' in dtdict:
-                # if we have fixed date, we don't need the weekday
-                del dtdict['weekday']
-
-        elif 'weekday' in dtdict:
-            # assume most-recently occured weekday
-            today = date.today()
-            offset = (today.weekday() - self.weekdays.index(dtdict['weekday'])) % 7
-            d = today - timedelta(days=offset)
-            dtdict['month'] = d.month
-            dtdict['day'] = d.day
-            
-            del dtdict['weekday']
-
-        elif 'word' in dtdict:
-            # handle special case of now, start, end
-            if dtdict['word'] == 'now':
-                dtdict['month'], dtdict['day'] = now.month, now.day
-                dtdict['hour'], dtdict['minute'], dtdict['second'] = now.hour, now.minute, now.second
-                skiptime = True
-            elif dtdict['word'] == 'today':
-                dtdict['month'], dtdict['day'] = now.month, now.day            
-            elif dtdict['word'] == 'start':
-                dtdict['year'], dtdict['month'], dtdict['day'] = MINYEAR, 1 , 1
-                skiptime = True
-            elif dtdict['word'] == 'end':
-                dtdict['year'], dtdict['month'], dtdict['day'] = MAXYEAR, 12, 31
-                skiptime = True
-
-            del dtdict['word']
-
-        elif 'time2' in dtdict or 'time3' in dtdict:
-            # just time given, use today
-            dtdict['month'], dtdict['day'] = now.month, now.day
-
-        else:
-            # nothing given, use same as start
-            dtdict['year'], dtdict['month'], dtdict['day'] = MINYEAR, 1 , 1
-            nodate = True
-
-
-        if not skiptime:
-            if 'time2' in dtdict:
-                h, m = dtdict['time2'].split(':')
-                dtdict['hour'] = int(h)
-                dtdict['minute'] = int(m)
-                dtdict['second'] = 0
-                del dtdict['time2']
-
-            elif 'time3' in dtdict:
-                h, m, s = dtdict['time3'].split(':')
-                dtdict['hour'] = int(h)
-                dtdict['minute'] = int(m)
-                dtdict['second'] = int(s)
-                del dtdict['time3']
-
-            else:
-                dtdict['hour'] = dtdict['minute'] = dtdict['second'] = 0
-                notime = True
-
-        
-        if 'offset' in dtdict:
-
-            if notime and nodate and fromTime != None:
-                dtdict['year'], dtdict['month'], dtdict['day'] = fromTime.year, fromTime.month, fromTime.day
-                dtdict['hour'], dtdict['minute'], dtdict['second'] = fromTime.hour, fromTime.minute, fromTime.second
-
-            offset = dtdict['offset']
-            del dtdict['offset']
-
-            # create datetime object
-            dt = datetime(**dtdict)
-        
-            matches = re.match(r'([+-])(\d+)([a-z]+)', offset)
-            operator, value, unit = matches.groups()
-            
-            if unit in ['s', 'sec']:
-                unit = 'seconds'
-            elif unit in ['m', 'min']:
-                unit = 'minutes'
-            elif unit in ['h', 'hours']:
-                unit = 'hours'
-            elif unit in ['d', 'days']:
-                unit = 'days'
-            elif unit in ['w', 'weeks']:
-                unit = 'weeks'
-            elif unit in ['mo', 'months']:
-                unit = 'months'
-            elif unit in ['y', 'years']:
-                unit = 'years'
-
-            mult = 1
-            if operator == '-':
-                mult = -1
-
-            dt = dt + eval('timedelta(%s=%i)'%(unit, mult*int(value)))
-        
-        else:
-            dt = datetime(**dtdict)
-
-        return dt    
-
 
 
