@@ -70,7 +70,7 @@ class LogLineFilter(BaseFilter):
     filterArgs = [
         ('--namespace', {'action':'store', 'metavar':'NS', 'help':'only output log lines matching operations on NS.'}),
         ('--operation', {'action':'store', 'metavar':'OP', 'help':'only output log lines matching operations of type OP.'}),
-        ('--thread', {'action':'store', 'help':'only output log lines of thread THREAD.'})
+        ('--thread',    {'action':'store', 'help':'only output log lines of thread THREAD.'})
     ]
 
     def __init__(self, commandLineArgs):

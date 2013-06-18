@@ -4,39 +4,28 @@ from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 import argparse, re
 
 from mtools.util.logline import LogLine
+from mtools.util.cmdlinetool import LogFileTool
 
-class MongoLogMerger(object):
+class MLogMergeTool(LogFileTool):
     """ Merges several MongoDB log files by their date and time. 
-        currently implemented options:
-            logfiles          list of logfiles to merge
-            -l, --labels      can be any of 'enum', 'alpha', 'none', 'filename', or a list of labels (must be same length as number of files)
-            -p, --pos         position of label (default: 0, beginning of line). Another good choice is 5, putting the label behind the [] token, or 'eol'
-
-        planned options:
-            logfiles          can be any pattern, like "*.log"
-            -r                scan recursive in subfolders for pattern 
-            -v, --verbose     more output on top (e.g. which file has which label)
-            -c, --color       outputs different files in different colors
-
     """
 
-    def merge(self):
-        # create parser object
-        parser = argparse.ArgumentParser(description='mongod/mongos log file merger.')
-        parser.add_argument('logfiles', action='store', nargs='*', help='logfiles to merge.')
-        # parser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
-        parser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files')
-        parser.add_argument('--pos', action='store', default=0, help="position of label (0 = front of line, other options are # or 'eol'")
-        parser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
+    def __init__(self):
+        LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=False)
 
-        args = vars(parser.parse_args())
+        self.argparser.add_argument('--labels', action='store', nargs='*', default=['enum'], help='labels to distinguish original files. Choose from none, enum, alpha, filename, or provide list.')
+        self.argparser.add_argument('--pos', action='store', default=0, help="position of label (default=0, front of line, other options are 'eol' or the position as int.")
+        self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
 
-        # handle logfiles parameter
-        logfiles = args['logfiles']
+
+    def run(self):
+        LogFileTool.run(self)
+
+        logfiles = self.args['logfile']
 
         # handle labels parameter
-        if len(args['labels']) == 1:
-            label = args['labels'][0]
+        if len(self.args['labels']) == 1:
+            label = self.args['labels'][0]
             if label == 'enum':
                 labels = ['{%i}'%(i+1) for i in range(len(logfiles))]
             elif label == 'alpha':
@@ -44,27 +33,27 @@ class MongoLogMerger(object):
             elif label == 'none':
                 labels = [None for _ in logfiles]
             elif label == 'filename':
-                labels = ['{%s}'%fn for fn in logfiles]
+                labels = ['{%s}'%fn.name for fn in logfiles]
         elif len(args['labels']) == len(logfiles):
-            labels = args['labels']
+            labels = self.args['labels']
         else:
             raise SystemExit('Error: Number of labels not the same as number of files.')
 
         # handle timezone parameter
-        if len(args['timezone']) == 1:
-            args['timezone'] = args['timezone'] * len(logfiles)
+        if len(self.args['timezone']) == 1:
+            self.args['timezone'] = self.args['timezone'] * len(logfiles)
 
-        elif len(args['timezone']) == len(logfiles):
+        elif len(self.args['timezone']) == len(logfiles):
             pass
 
-        elif len(args['timezone']) == 0:
-            args['timezone'] = [0] * len(logfiles)
+        elif len(self.args['timezone']) == 0:
+            self.args['timezone'] = [0] * len(logfiles)
 
         else:
             raise SystemExit('Error: Invalid number of timezone parameters. Use either one parameter (for global adjustment) or the number of log files (for individual adjustments).')
 
         # handle position parameter
-        position = args['pos']
+        position = self.args['pos']
         if position != 'eol':
             position = int(position)
 
@@ -73,15 +62,12 @@ class MongoLogMerger(object):
         maxdate = datetime(MAXYEAR, 12, 31, 23, 59, 59)
 
         # open files, read first lines, extract first dates
-        openFiles = [open(f, 'r') for f in args['logfiles']]
-        lines = [f.readline() for f in openFiles]
+        lines = [f.readline() for f in logfiles]
         dates = [LogLine(l).datetime for l in lines]
         
         # replace all non-dates with mindate
         dates = [d if d else mindate for d in dates]
-
-        dates = [d + timedelta(hours=args['timezone'][i]) for i,d in enumerate(dates) if d]
-
+        dates = [d + timedelta(hours=self.args['timezone'][i]) for i,d in enumerate(dates) if d]
 
         while any([l != '' for l in lines]):
             # pick smallest date of all non-empty lines
@@ -91,7 +77,11 @@ class MongoLogMerger(object):
 
             # print out current line
             currLine = lines[minIndex].rstrip()
-            oldDate = minCondDate - timedelta(hours=args['timezone'][minIndex])
+            try:
+                oldDate = minCondDate - timedelta(hours=self.args['timezone'][minIndex])
+            except OverflowError:
+                oldDate = minCondDate
+                
             if minCondDate != mindate:
                 currLine = currLine.replace(oldDate.strftime('%a %b %d %H:%M:%S'), minCondDate.strftime('%a %b %d %H:%M:%S'))
 
@@ -108,24 +98,17 @@ class MongoLogMerger(object):
                 print currLine
 
             # update lines and dates for that line
-            lines[minIndex] = openFiles[minIndex].readline()
+            lines[minIndex] = logfiles[minIndex].readline()
             dates[minIndex] = LogLine(lines[minIndex]).datetime
 
 
             if not dates[minIndex]:
                 dates[minIndex] = mindate 
             else:
-                dates[minIndex] += timedelta(hours=args['timezone'][minIndex])
+                dates[minIndex] += timedelta(hours=self.args['timezone'][minIndex])
 
-            # end of file reached, print newline
-            # if position != 'eol' and lines[minIndex] == '':
-            #   print
-
-        # close files
-        for f in openFiles:
-            f.close()
 
 
 if __name__ == '__main__':
-    mlogmerge = MongoLogMerger()
-    mlogmerge.merge()
+    tool = MLogMergeTool()
+    tool.run()
