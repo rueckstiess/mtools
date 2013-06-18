@@ -243,13 +243,16 @@
         d3.select("button#reset").on("click", reset);
 
         var legend_svg = d3.select("div#legend").append("svg")
-          .attr("width", 250)
-          .attr("height", 400);
+          .attr("width", 250);
+          // .attr("height", 400);
 
         var visible_groups = {};
 
         draw_circles();
         draw_legend();
+        var namespaces_count = legend_svg.selectAll("g").data(c.domain()).enter()[0].length;
+        var legend_height = (namespaces_count * 15) + 15;
+        legend_svg.attr("height", legend_height);
 
         // register click on circles
         svg.selectAll("circle")
