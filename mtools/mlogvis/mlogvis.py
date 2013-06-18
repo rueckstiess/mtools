@@ -41,7 +41,7 @@ if __name__ == '__main__':
     os.chdir(mlogvis_dir)
 
     outf = open('events.json', 'w')
-    outf.write('{"type": "duration", "data":[')
+    outf.write('{"type": "duration", "logfilename": "' + args['logfile'] + '", "data":[')
     first_row = True
     for line in logfile:
         logline = LogLine(line)
