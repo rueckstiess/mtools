@@ -126,6 +126,15 @@ class MLaunchTool(BaseCmdLineTool):
             pass
 
     
+    def check_port_availability(self, port, binary):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(('', port))
+            s.close()
+        except:
+            exit("Can't start " + binary + ", port " + str(port) + " is already being used")
+
+    
     def _createPaths(self, basedir, name=None):
         if name:
             datapath = os.path.join(basedir, 'data', name)
@@ -237,6 +246,8 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['verbose']:
                 print "waiting for mongod at %s to start up..."%host
 
+            print "mongod at %s running." % host
+
         # launch arbiter if True
         if self.args['arbiter']:
             datapath = self._createPaths(basedir, '%s/arb'%(name))
@@ -248,13 +259,13 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['verbose']:
                 print "waiting for mongod at %s to start up..."%host
 
+            print "arbiter at %s running." % host
+
         for thread in threads:
             thread.start()
 
         for thread in threads:
             thread.join()
-
-        print "all mongod processes for replica set '%s' running."%name
 
         # initiate replica set
         con = Connection('localhost:%i'%portstart)
@@ -298,6 +309,8 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchMongoD(self, dbpath, logpath, port, replset=None, extra=''):
+        self.check_port_availability(port, "mongod")
+
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
@@ -326,6 +339,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _launchMongoS(self, logpath, port, configdb):
         extra = ''
+        self.check_port_availability(port, "mongos")
 
         out = subprocess.PIPE
         if self.args['verbose']:
