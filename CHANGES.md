@@ -1,6 +1,11 @@
 Changes to mtools
 =================
 
+#### version 1.0.2
+
+  * mlogvis: webserver only serves the page then quits, instead of running forever.
+
+
 #### version 1.0.1
 
   * fixed timezone bug in mlogmerge (#24)
