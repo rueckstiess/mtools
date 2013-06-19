@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-  <style>
+    <title></title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style>
 
-    body {
-      position: relative;
-      width: 960px;
-      font-size: 11px;
-      font-family: verdana;
-    }
+      body {
+        position: relative;
+        width: 960px;
+        font-size: 11px;
+        font-family: verdana;
+      }
 
-    svg {
-      font: 10px sans-serif;
-    }
+      svg {
+        font: 10px sans-serif;
+      }
 
-    rect {
-      fill: #fff;
-    }
+      rect {
+        fill: #fff;
+      }
 
-    circle.event {
-      fill: steelblue;
-      opacity: 0.5;
-    }
+      circle.event {
+        fill: steelblue;
+        opacity: 0.5;
+      }
 
-    .axis path,
-    .axis line {
-      fill: none;
-      stroke: #ddd;
-    }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #ddd;
+      }
 
-    .axis text {
-      -webkit-user-select: none; /* Chrome/Safari */        
-      -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* IE10+ */
+      .axis text {
+        -webkit-user-select: none; /* Chrome/Safari */        
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+ */
 
-      /* Rules below not implemented in browsers yet */
-      -o-user-select: none;
-      user-select: none;
-    }
+        /* Rules below not implemented in browsers yet */
+        -o-user-select: none;
+        user-select: none;
+      }
 
-    rect.zoom {
-      stroke: steelblue;
-      fill: lightsteelblue;
-      fill-opacity: 0.2;
-    }
+      rect.zoom {
+        stroke: steelblue;
+        fill: lightsteelblue;
+        fill-opacity: 0.2;
+      }
 
-    div#controls {
-      position: absolute;
-      width: 250px;
-      right: -250px;
-      top: 30px;
-    }
+      div#controls {
+        position: absolute;
+        width: 250px;
+        right: -250px;
+        top: 30px;
+      }
 
-    #controls .fieldset {
-      border-color: #eee;
-      border-style: solid;
-    }
+      #controls .fieldset {
+        border-color: #eee;
+        border-style: solid;
+      }
 
     </style>
   </head>
@@ -76,10 +77,11 @@
       <div id="legend"></div>
     </div>
 
-  	<script>
+    <script>
 
-  		d3.json('events.json', function (error, events) {
+      d3.json('events.json', function (error, events) {
 
+        document.title = "mlogvis - " + events.logfilename;
         events = events['data'];
 
         // add custom date interpolator
@@ -243,13 +245,16 @@
         d3.select("button#reset").on("click", reset);
 
         var legend_svg = d3.select("div#legend").append("svg")
-          .attr("width", 250)
-          .attr("height", 400);
+          .attr("width", 250);
+          // .attr("height", 400);
 
         var visible_groups = {};
 
         draw_circles();
         draw_legend();
+        var namespaces_count = legend_svg.selectAll("g").data(c.domain()).enter()[0].length;
+        var legend_height = (namespaces_count * 15) + 15;
+        legend_svg.attr("height", legend_height);
 
         // register click on circles
         svg.selectAll("circle")
@@ -393,6 +398,6 @@
         }
       });
 
-  	</script>
+    </script>
   </body>
 </html>
