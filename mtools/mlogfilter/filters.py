@@ -1,6 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.logline import LogLine
 from mtools.util.hci import DateTimeBoundaries
+from datetime import datetime, MINYEAR, MAXYEAR
 import re
 
 class BaseFilter:
@@ -282,6 +283,8 @@ class DateTimeFilter(BaseFilter):
         if not seekable:
             self.startDateTime = None
             self.endDateTime = None
+            self.fromDateTime = datetime(MINYEAR, 1, 1)
+            self.toDateTime = datetime(MAXYEAR, 12, 31)
             return
 
         # get start datetime 

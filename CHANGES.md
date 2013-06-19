@@ -12,8 +12,8 @@ Changes to mtools
   * changed `--log` to `--logscale` argument for mplotqueries to avoid confusion with "log" files
   * restructured tools to derive from base class `BaseCmdLineTool` or LogFileTool
   * added Contributing page under tutorials
-  * improved `--from` / `--to` parsing, now supports sole relative arguments (even for `--from`), millisecond parsing, month-only.
-   
+  * improved mlogfilter `--from` / `--to` parsing, now supports sole relative arguments (even for `--from`), millisecond parsing, month-only.
+
 
 #### version 1.0.0
 
