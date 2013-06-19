@@ -71,6 +71,6 @@ The development version has the suffix `dev` attached. For example `1.0.1dev` is
 Minor and major releases might have release candidates leading up to the final release. Those are marked with the suffix `rcX` where `X` 
 is a number starting at 0. For example, version `1.2rc2` is the 3rd release candidate for upcoming release version `1.2`.
 
-Github milestones are named with a prefix `v`, for example `v1.0.1`.
+Github milestones and git tags are named with a prefix `v`, for example `v1.0.1`.
 
 
