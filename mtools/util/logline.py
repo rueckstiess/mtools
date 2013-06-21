@@ -337,8 +337,8 @@ class LogLine(object):
         return output
 
 
-    def to_json(self, labels=None):
-        """ converts LogLine object to valid JSON. """
+    def to_dict(self, labels=None):
+        """ converts LogLine object to a dictionary. """
         output = {}
         if labels == None:
             labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
@@ -350,6 +350,12 @@ class LogLine(object):
             if value != None:
                 output[label] = value
 
+        return output     
+
+    
+    def to_json(self, labels=None):
+        """ converts LogLine object to valid JSON. """
+        output = self.to_dict(labels)
         return json.dumps(output, cls=DateTimeEncoder)
 
 

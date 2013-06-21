@@ -75,7 +75,9 @@ class MLogVisTool(LogFileTool):
         print "serving visualization on http://localhost:%s/"%self.port
         webbrowser.open("http://localhost:%i/"%self.port)
 
-        httpd.serve_forever()
+        # serve two requests (html file and events.json)
+        httpd.handle_request()
+        httpd.handle_request()
 
 
 if __name__ == '__main__':
