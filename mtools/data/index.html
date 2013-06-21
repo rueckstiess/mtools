@@ -78,11 +78,12 @@
     </div>
 
     <script>
+      // data goes here
+      var data = ##REPLACE##;
+      var events = data.data;
 
-      d3.json('events.json', function (error, events) {
+      document.title = "mlogvis - " + data.logfilename;
 
-        document.title = "mlogvis - " + events.logfilename;
-        events = events['data'];
 
         // add custom date interpolator
         d3.interpolators.push( function(a, b) {
@@ -396,7 +397,7 @@
           });
           draw_legend();
         }
-      });
+      // });
 
     </script>
   </body>
