@@ -27,8 +27,8 @@ class MLogVisTool(LogFileTool):
 
         self.port = 8888
 
-    def run(self):
-        LogFileTool.run(self)
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments)
 
         # make sub-folder .mlogvis and change to it
         mlogvis_dir = '.mlogvis'

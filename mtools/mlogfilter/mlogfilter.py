@@ -42,7 +42,7 @@ class MLogFilterTool(LogFileTool):
         print line
 
     
-    def run(self):
+    def run(self, arguments=None):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
         """
@@ -53,7 +53,7 @@ class MLogFilterTool(LogFileTool):
                 self.argparser.add_argument(fa[0], **fa[1])
 
         # now parse arguments and post-process
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
         self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
 
         # create filter objects from classes and pass args

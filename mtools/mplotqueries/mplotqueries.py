@@ -52,8 +52,8 @@ class MPlotQueriesTool(LogFileTool):
 
         self.legend = None
 
-    def run(self):
-        LogFileTool.run(self)
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments)
 
         self.parse_loglines()
         self.group()

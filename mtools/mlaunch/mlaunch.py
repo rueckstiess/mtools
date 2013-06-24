@@ -68,9 +68,12 @@ class MLaunchTool(BaseCmdLineTool):
         self.hostname = socket.gethostname()
 
 
-    def run(self):
-        # don't call BaseCmdLineTool.run(), we pass args ourselves
-        self.args, self.unknown_args = self.argparser.parse_known_args()
+    def run(self, arguments=None):
+        # don't call BaseCmdLineTool.run(), we pass args ourselves, we want unknown arguments too
+        if arguments:
+            self.args, self.unknown_args = self.argparser.parse_known_args(args=arguments.split())
+        else:
+            self.args, self.unknown_args = self.argparser.parse_known_args()
         self.args = vars(self.args)
 
         # load or store parameters
