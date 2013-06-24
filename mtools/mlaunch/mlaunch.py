@@ -132,7 +132,7 @@ class MLaunchTool(BaseCmdLineTool):
             s.bind(('', port))
             s.close()
         except:
-            exit("Can't start " + binary + ", port " + str(port) + " is already being used")
+            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already being used")
 
     
     def _createPaths(self, basedir, name=None):
