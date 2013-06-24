@@ -15,7 +15,7 @@ class TestMLaunch(object):
     data_dir = 'test_mlaunch_data'
 
     def _port_available(self, port):
-        """ check if `port` is available. """
+        """ check if `port` is available and returns True or False. """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.bind(('', port))
@@ -31,13 +31,14 @@ class TestMLaunch(object):
         return True
 
 
-    def _find_mongosd_processes(self):
-        pnames = ["mongod", "mongos", "mongod.exe", "mongos.exe"]
-        processes = [proc for proc in psutil.process_iter() if proc.name in pnames]
-        return processes
+    # def _find_mongosd_processes(self):
+    #     pnames = ["mongod", "mongos", "mongod.exe", "mongos.exe"]
+    #     processes = [proc for proc in psutil.process_iter() if proc.name in pnames]
+    #     return processes
 
 
     def _shutdown_mongosd(self, port):
+        """ send the shutdown command to a mongod or mongos on given port. """
         mc = MongoClient('localhost:%i' % port)
         try:
             mc.admin.command({'shutdown':1})
@@ -47,6 +48,7 @@ class TestMLaunch(object):
 
 
     def _find_free_port(self):
+        """ iterate over ports opening a socket on that port until a free port is found, which is returned. """
         port = self.default_port
         # cycle through `max_port_range` ports until a free one is found
         while not self._port_available(port):
@@ -73,6 +75,7 @@ class TestMLaunch(object):
 
         # remove data directory
         shutil.rmtree(self.data_dir)
+    
 
         
 
