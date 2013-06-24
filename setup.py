@@ -46,7 +46,7 @@ setup(
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files.',
     long_description=long_description,
-    tests_require=['nose>=1.0', 'psutil'],
+    tests_require=['nose>=1.0', 'psutil', 'pymongo>=2.4'],
     test_suite = 'nose.collector',
     **kws
 )

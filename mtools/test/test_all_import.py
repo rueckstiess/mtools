@@ -1,4 +1,4 @@
-from nose.tools import nottest
+from nose.tools import nottest, make_decorator
 from functools import wraps
 
 # tools without any external dependencies
