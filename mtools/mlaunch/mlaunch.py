@@ -288,7 +288,7 @@ class MLaunchTool(BaseCmdLineTool):
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
         t.start()
         if self.args['verbose']:
-            print "waiting for mongod config server to start up..."
+            print "waiting for mongod config server at %s to start up..."%host
         t.join()
         print "mongod config server at %s running."%host
 
@@ -301,7 +301,7 @@ class MLaunchTool(BaseCmdLineTool):
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
         t.start()
         if self.args['verbose']:
-            print "waiting for mongod to start up..."
+            print "waiting for mongod at %s to start up..."%host
         t.join()
         print "mongod at %s running."%host
 
