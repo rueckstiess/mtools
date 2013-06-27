@@ -78,156 +78,156 @@
     </div>
 
     <script>
+      // data goes here
+      var data = ##REPLACE##;
+      var events = data.data;
 
-      d3.json('events.json', function (error, events) {
+      document.title = "mlogvis - " + data.logfilename;
 
-        document.title = "mlogvis - " + events.logfilename;
-        events = events['data'];
-
-        // add custom date interpolator
-        d3.interpolators.push( function(a, b) {
-          if ((a instanceof Date) && (b instanceof Date)) {
-            var a_ts = a.getTime();
-            var b_ts = b.getTime();
-            return function(t) {
-              return new Date(a_ts * (1-t) + b_ts * t);
-            };
-          }
-        });
-
-        var margin = {top: 20, right: 50, bottom: 50, left: 50},
-            width = 980 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-
-        // filter out all documents that don't have duration or datetime
-        events = events.filter(function(d) { return d.duration && d.datetime});
-
-        // calculate min and max dates
-        var events_lim_x = d3.extent(events, function(d, i) { return new Date(d.datetime) });
-        var events_lim_y = d3.extent(events, function(d, i) { return d.duration });            
-
-        // create x scale, from [events_min, events_max] to [0, width]
-        var x = d3.time.scale.utc()
-          .domain(events_lim_x)
-          .range([0, width]);
-
-        // create y scale, from [0, 100] to [0, height]
-        var y = d3.scale.linear()
-          .domain(events_lim_y)
-          .range([height, 0]);
-
-        // var color scale (10 colors)
-        var c = d3.scale.category10();
-
-        // prepare zoom rectangle
-        var zoom_rect = false;
-        d3.select("#zoom-check").on("change", function() {
-          zoom_rect = this.checked;
-        });
-
-        // handle log scale checkbox
-        var log_scale = false;
-        d3.select("#log-check").on("change", function() {
-          log_scale = this.checked;
-          var y_scale = log_scale ? d3.scale.log() : d3.scale.linear();
-          change_scale(y_scale);
-        });
-
-
-        // handle color grouping
-        var color_field = 'namespace';
-        d3.selectAll("input[type=radio]").on("change", function() {
-          if (this.checked) {
-            color_field = d3.select(this).property("id");
-            // re-create the color scale
-            c = d3.scale.category10();
-            
-            // enable visibility on all groups initially
-            visible_groups = {};
-  
-            draw_circles();
-            draw_legend();
-          }
-        });
-
-        // multi-scale time axis
-        var customTimeFormat = timeFormat([
-          [d3.time.format("%b %d"), function(d) { return true}],
-          [d3.time.format("%H:%M"), function(d) { return d.getHours(); }],
-          [d3.time.format("%H:%M:%S"), function(d) { return d.getSeconds(); }],
-          [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }],
-          [d3.time.format("%b %d"), function(d, i) { return i%10 == 0; }]
-        ]);
-
-        function timeFormat(formats) {
-          return function(date, idx) {
-            var i = formats.length - 1, f = formats[i];
-            while (!f[1](date, idx)) f = formats[--i];
-            return f[0](date, idx);
+      // add custom date interpolator
+      d3.interpolators.push( function(a, b) {
+        if ((a instanceof Date) && (b instanceof Date)) {
+          var a_ts = a.getTime();
+          var b_ts = b.getTime();
+          return function(t) {
+            return new Date(a_ts * (1-t) + b_ts * t);
           };
         }
+      });
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom")
-            .ticks(10)
-            .tickPadding(20)
-            .tickSize(-height)
-            .tickFormat(customTimeFormat);
+      var margin = {top: 20, right: 50, bottom: 50, left: 50},
+          width = 980 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
 
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left")
-            .ticks(5)
-            .tickSize(-width);
+      // filter out all documents that don't have duration or datetime
+      events = events.filter(function(d) { return d.duration && d.datetime});
 
-        var zoom = d3.behavior.zoom()
-            .x(x)
-            .y(y)
-            .scaleExtent([1, 100000])
-            .on("zoom", zoomed);
+      // calculate min and max dates
+      var events_lim_x = d3.extent(events, function(d, i) { return new Date(d.datetime) });
+      var events_lim_y = d3.extent(events, function(d, i) { return d.duration });            
 
-        var svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .call(zoom)
-          .append("g")
-            .on("mousedown", function() {
-              if (!zoom_rect) return;
-              var e = this,
-                  origin = d3.mouse(e),
-                  rect = svg.append("rect").attr("class", "zoom");
-              d3.select("body").classed("noselect", true);
-              origin[0] = Math.max(0, Math.min(width, origin[0]));
-              origin[1] = Math.max(0, Math.min(height, origin[1]));
-              d3.select(window)
-                .on("mousemove.zoom_rect", function() {
-                  var m = d3.mouse(e);
-                  m[0] = Math.max(0, Math.min(width, m[0]));
-                  m[1] = Math.max(0, Math.min(height, m[1]));
-                  rect.attr("x", Math.min(origin[0], m[0]))
-                    .attr("y", Math.min(origin[1], m[1]))
-                    .attr("width", Math.abs(m[0] - origin[0]))
-                    .attr("height", Math.abs(m[1] - origin[1]));
-                })
-            
-              .on("mouseup.zoom_rect", function() {
-                d3.select(window).on("mousemove.zoom_rect", null).on("mouseup.zoom_rect", null);
-                d3.select("body").classed("noselect", false);
+      // create x scale, from [events_min, events_max] to [0, width]
+      var x = d3.time.scale.utc()
+        .domain(events_lim_x)
+        .range([0, width]);
+
+      // create y scale, from [0, 100] to [0, height]
+      var y = d3.scale.linear()
+        .domain(events_lim_y)
+        .range([height, 0]);
+
+      // var color scale (10 colors)
+      var c = d3.scale.category10();
+
+      // prepare zoom rectangle
+      var zoom_rect = false;
+      d3.select("#zoom-check").on("change", function() {
+        zoom_rect = this.checked;
+      });
+
+      // handle log scale checkbox
+      var log_scale = false;
+      d3.select("#log-check").on("change", function() {
+        log_scale = this.checked;
+        var y_scale = log_scale ? d3.scale.log() : d3.scale.linear();
+        change_scale(y_scale);
+      });
+
+
+      // handle color grouping
+      var color_field = 'namespace';
+      d3.selectAll("input[type=radio]").on("change", function() {
+        if (this.checked) {
+          color_field = d3.select(this).property("id");
+          // re-create the color scale
+          c = d3.scale.category10();
+          
+          // enable visibility on all groups initially
+          visible_groups = {};
+
+          draw_circles();
+          draw_legend();
+        }
+      });
+
+      // multi-scale time axis
+      var customTimeFormat = timeFormat([
+        [d3.time.format("%b %d"), function(d) { return true}],
+        [d3.time.format("%H:%M"), function(d) { return d.getHours(); }],
+        [d3.time.format("%H:%M:%S"), function(d) { return d.getSeconds(); }],
+        [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }],
+        [d3.time.format("%b %d"), function(d, i) { return i%10 == 0; }]
+      ]);
+
+      function timeFormat(formats) {
+        return function(date, idx) {
+          var i = formats.length - 1, f = formats[i];
+          while (!f[1](date, idx)) f = formats[--i];
+          return f[0](date, idx);
+        };
+      }
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom")
+          .ticks(10)
+          .tickPadding(20)
+          .tickSize(-height)
+          .tickFormat(customTimeFormat);
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left")
+          .ticks(5)
+          .tickSize(-width);
+
+      var zoom = d3.behavior.zoom()
+          .x(x)
+          .y(y)
+          .scaleExtent([1, 100000])
+          .on("zoom", zoomed);
+
+      var svg = d3.select("body").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+          .call(zoom)
+        .append("g")
+          .on("mousedown", function() {
+            if (!zoom_rect) return;
+            var e = this,
+                origin = d3.mouse(e),
+                rect = svg.append("rect").attr("class", "zoom");
+            d3.select("body").classed("noselect", true);
+            origin[0] = Math.max(0, Math.min(width, origin[0]));
+            origin[1] = Math.max(0, Math.min(height, origin[1]));
+            d3.select(window)
+              .on("mousemove.zoom_rect", function() {
                 var m = d3.mouse(e);
                 m[0] = Math.max(0, Math.min(width, m[0]));
                 m[1] = Math.max(0, Math.min(height, m[1]));
-                if (m[0] !== origin[0] && m[1] !== origin[1]) {
-                  zoom.x(x.domain([origin[0], m[0]].map(x.invert).sort(d3.ascending)))
-                      .y(y.domain([origin[1], m[1]].map(y.invert).sort(d3.ascending)));
-                }
-                rect.remove();
-                zoomed();
-              }, true);
-              d3.event.stopPropagation();
-            });
+                rect.attr("x", Math.min(origin[0], m[0]))
+                  .attr("y", Math.min(origin[1], m[1]))
+                  .attr("width", Math.abs(m[0] - origin[0]))
+                  .attr("height", Math.abs(m[1] - origin[1]));
+              })
+          
+            .on("mouseup.zoom_rect", function() {
+              d3.select(window).on("mousemove.zoom_rect", null).on("mouseup.zoom_rect", null);
+              d3.select("body").classed("noselect", false);
+              var m = d3.mouse(e);
+              m[0] = Math.max(0, Math.min(width, m[0]));
+              m[1] = Math.max(0, Math.min(height, m[1]));
+              if (m[0] !== origin[0] && m[1] !== origin[1]) {
+                zoom.x(x.domain([origin[0], m[0]].map(x.invert).sort(d3.ascending)))
+                    .y(y.domain([origin[1], m[1]].map(y.invert).sort(d3.ascending)));
+              }
+              rect.remove();
+              zoomed();
+            }, true);
+            d3.event.stopPropagation();
+          });
 
         svg.append("rect")
             .attr("width", width)
@@ -396,7 +396,7 @@
           });
           draw_legend();
         }
-      });
+      // });
 
     </script>
   </body>
