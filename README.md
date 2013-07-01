@@ -1,5 +1,7 @@
 # mtools
 
+[![PyPI version](https://badge.fury.io/py/mtools.png)](http://badge.fury.io/py/mtools)
+
 A collection of helper scripts to set up MongoDB test environments and
 parse MongoDB log files (mongod, mongos). 
 
