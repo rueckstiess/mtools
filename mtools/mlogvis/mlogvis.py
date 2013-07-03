@@ -13,12 +13,9 @@ class MLogVisTool(LogFileTool):
     def __init__(self):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
 
-        self.argparser.description = 'mongod/mongos log file visualizer (browser edition). \
-            Extracts information from each line of the log file and outputs a json document \
-            per line, stored in a sub-folder .mlogvis/. Then spins up an HTTP server and \
-            opens a page in the browser to view the data.'
-
-        self.port = 8888
+        self.argparser.description = 'mongod/mongos log file visualizer (browser edition). Extracts \
+            information from each line of the log file and outputs a html file that can be viewed in \
+            a browser. Automatically opens a browser tab and shows the file.'
 
     def run(self):
         LogFileTool.run(self)
