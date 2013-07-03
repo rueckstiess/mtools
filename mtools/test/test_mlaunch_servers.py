@@ -10,6 +10,10 @@ from nose.tools import *
 
 
 class TestMLaunch(object):
+    """ This class tests functionality around the mlaunch tool. It has some
+        additional methods that are helpful for the tests, as well as a setUp
+        and tearDown method for all tests.
+    """
 
     default_port = 33333
     max_port_range = 100
@@ -85,14 +89,13 @@ class TestMLaunch(object):
         self._shutdown_mongosd(self.port)
 
 
-    @timed(60)
     def test_mlaunch_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter, compare rs.conf(). """
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
-        # check if data directory and logfile exist
+        # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs1'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs2'))
@@ -120,7 +123,7 @@ class TestMLaunch(object):
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
-        # create mongo client for the next tests
+        # create mongo client
         mc = MongoClient('localhost:%i' % self.port)
 
         # test if first node becomes primary after some time
@@ -133,6 +136,31 @@ class TestMLaunch(object):
         # shutdown again
         for p in range(self.port, self.port+3):
             self._shutdown_mongosd(p)
+
+
+    def test_mlaunch_sharded_status(self):
+        """ mlaunch: start cluster with 2 shards of single nodes, 1 config server. """
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if data directories and logfile exist
+        assert os.path.exists(os.path.join(self.data_dir, 'shard01/db'))
+        assert os.path.exists(os.path.join(self.data_dir, 'shard02/db'))
+        assert os.path.exists(os.path.join(self.data_dir, 'config/db'))
+        assert os.path.isfile(os.path.join(self.data_dir, 'mongos.log'))
+
+        # create mongo client
+        mc = MongoClient('localhost:%i' % (self.port+3))
+
+        # check for 2 shards and 1 mongos
+        assert mc['config']['shards'].count() == 2
+        assert mc['config']['mongos'].count() == 1
+
+        # shutdown again
+        for p in range(self.port, self.port+4):
+            self._shutdown_mongosd(p)
+
 
         
     # mark slow tests
