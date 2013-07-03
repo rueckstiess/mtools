@@ -3,12 +3,12 @@ Changes to mtools
 
 #### version 1.0.2
 
-  * mlogvis: doesn't require webserver anymore. Data is directly stored in html file (#57).
+  * mlogvis: doesn't require webserver anymore. Data is directly stored in self-contained html file (#57).
   * mlogvis: when clicking reset, keep group selection, only reset zoom window (#56).
-  * mlaunch: positional argument for directory name removed. directory name now requires `--dir`. default is `./data`.
   * mlaunch: different directory name will no longer create a nested `data` folder (#54).
   * mlaunch: arguments unknown to mlaunch are checked against mongod and mongos and only passed on if they are accepted (#55).
   * mlaunch: now you can specify a path for the mongod and mongos binaries with --binarypath PATH (#46).
+  * mlaunch: positional argument for directory name removed. directory name now requires `--dir`. default is `./data`.
 
 #### version 1.0.1
 
