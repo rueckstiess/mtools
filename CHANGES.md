@@ -4,6 +4,7 @@ Changes to mtools
 #### version 1.0.2
 
   * mlogvis: webserver only serves the page, then quits, instead of running forever.
+  * mlogvis: when clicking reset, keep group selection, only reset zoom window (#56).
   * mlaunch: positional argument for directory name removed. directory name now requires `--dir`. default is `./data`.
   * mlaunch: different directory name will no longer create a nested `data` folder (#54).
   * mlaunch: arguments unknown to mlaunch are checked against mongod and mongos and only passed on if they are accepted (#55).
