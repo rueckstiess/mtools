@@ -2,6 +2,7 @@ import shutil
 import socket
 import time
 import os
+import json
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 from pymongo import MongoClient
@@ -20,14 +21,31 @@ class TestMLaunch(object):
     data_dir = 'test_mlaunch_data'
 
 
+    def __init__(self):
+        """ Constructor. """
+        self.n_processes_started = 0
+        self.port = self.default_port
+
+
     def setUp(self):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLaunchTool()
-        self.port = self._find_free_port()
+        self.port = self._find_free_port(self.port + self.n_processes_started)
+        self.n_processes_started = 0
+
+        # if the test data path exists, remove it
+        if os.path.exists(self.data_dir):
+            shutil.rmtree(self.data_dir)
+
 
 
     def tearDown(self):
         """ tear down method after each test, removes data directory. """
+
+        # shutdown as many processes as the test required
+        for p in range(self.n_processes_started):
+            self._shutdown_mongosd(self.port + p)
+
         shutil.rmtree(self.data_dir)
 
 
@@ -64,9 +82,9 @@ class TestMLaunch(object):
         mc.close()
 
 
-    def _find_free_port(self):
+    def _find_free_port(self, start_at):
         """ iterate over ports opening a socket on that port until a free port is found, which is returned. """
-        port = self.default_port
+        port = start_at
         # cycle through `max_port_range` ports until a free one is found
         while not self._port_available(port):
             port += 1
@@ -75,8 +93,11 @@ class TestMLaunch(object):
         return port
 
 
-    def test_mlaunch_single(self):
+    def test_single(self):
         """ mlaunch: start stand-alone server and tear down again. """
+
+        # shutdown 1 process at teardown
+        self.n_processes_started = 1
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -85,12 +106,13 @@ class TestMLaunch(object):
         assert os.path.exists(os.path.join(self.data_dir, 'db'))
         assert os.path.isfile(os.path.join(self.data_dir, 'mongod.log'))
 
-        # shutdown again
-        self._shutdown_mongosd(self.port)
 
 
-    def test_mlaunch_replicaset_conf(self):
+    def test_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter, compare rs.conf(). """
+
+        # shutdown 3 processes at teardown
+        self.n_processes_started = 3
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -109,16 +131,15 @@ class TestMLaunch(object):
         assert len(conf['members']) == 3
         assert conf['members'][2]['arbiterOnly'] == True
 
-        # shutdown again
-        for p in range(self.port, self.port+3):
-            self._shutdown_mongosd(p)
-
 
     @timed(60)
-    def test_mlaunch_replicaset_ismaster(self):
-        """ mlaunch: start replica set and verify that first node becomes primary. 
+    def test_replicaset_ismaster(self):
+        """ mlaunch: start replica set and verify that first node becomes primary (slow). 
             Test must complete in 60 seconds.
         """
+
+        # shutdown 3 processes at teardown
+        self.n_processes_started = 3
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -133,17 +154,16 @@ class TestMLaunch(object):
                 break
             time.sleep(1)
 
-        # shutdown again
-        for p in range(self.port, self.port+3):
-            self._shutdown_mongosd(p)
 
-
-    def test_mlaunch_sharded_status(self):
+    def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server. """
+
+        # shutdown 4 processes at teardown
+        self.n_processes_started = 4
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
-
+    
         # check if data directories and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'shard01/db'))
         assert os.path.exists(os.path.join(self.data_dir, 'shard02/db'))
@@ -157,13 +177,44 @@ class TestMLaunch(object):
         assert mc['config']['shards'].count() == 2
         assert mc['config']['mongos'].count() == 1
 
-        # shutdown again
-        for p in range(self.port, self.port+4):
-            self._shutdown_mongosd(p)
+
+
+    def test_startup_file(self):
+        """ mlaunch: create .mlaunch_startup file in data path.
+            Also tests utf-8 to byte conversion and json import.
+        """
+        # shutdown 1 process at teardown
+        self.n_processes_started = 1
+
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if the startup file exists
+        startup_file = os.path.join(self.data_dir, '.mlaunch_startup')
+        assert os.path.isfile(startup_file)
+
+        # compare content of startup file with tool.args
+        file_args = self.tool.convert_u2b(json.load(open(startup_file, 'r')))
+        assert file_args == self.tool.args
+
+
+
+    @raises(SystemExit)
+    def test_check_port_availability(self):
+        """ mlaunch: test check_port_availability() method. """
+        
+        # shutdown 1 process at teardown
+        self.n_processes_started = 1
+
+        # start mongod
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # make sure port is not available for another launch on that port
+        self.tool.check_port_availability(self.port, "mongod")
 
 
         
     # mark slow tests
-    test_mlaunch_replicaset_ismaster.slow = 1
+    test_replicaset_ismaster.slow = 1
+    test_sharded_status.slow = 1
 
 
