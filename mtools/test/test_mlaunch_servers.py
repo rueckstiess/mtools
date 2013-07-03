@@ -6,7 +6,7 @@ import json
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 from pymongo import MongoClient
-from pymongo.errors import AutoReconnect
+from pymongo.errors import AutoReconnect, ConnectionFailure
 from nose.tools import *
 
 
@@ -27,7 +27,7 @@ class TestMLaunch(object):
         self.port = self.default_port
 
 
-    def setUp(self):
+    def setup(self):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLaunchTool()
         self.port = self._find_free_port(self.port + self.n_processes_started)
@@ -39,14 +39,16 @@ class TestMLaunch(object):
 
 
 
-    def tearDown(self):
+    def teardown(self):
         """ tear down method after each test, removes data directory. """
 
         # shutdown as many processes as the test required
         for p in range(self.n_processes_started):
             self._shutdown_mongosd(self.port + p)
 
-        shutil.rmtree(self.data_dir)
+        # if the test data path exists, remove it
+        if os.path.exists(self.data_dir):
+            shutil.rmtree(self.data_dir)
 
 
     def _port_available(self, port):
@@ -93,8 +95,37 @@ class TestMLaunch(object):
         return port
 
 
+    @raises(ConnectionFailure)
+    def test_test(self):
+        """ TestMLaunch setup and teardown test """
+
+        # test that variable is reset
+        assert self.n_processes_started == 0
+
+        # test that data dir does not exist
+        assert not os.path.exists(self.data_dir)
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # shutdown 1 process at teardown
+        self.n_processes_started = 1
+
+        # call teardown method within this test
+        self.teardown()
+
+        # test that data dir does not exist anymore
+        assert not os.path.exists(self.data_dir)
+
+        # no processes need to be killed anymore for the real teardown
+        self.n_processes_started = 0
+
+        # test that mongod is not running on this port anymore (raises ConnectionFailure)
+        mc = MongoClient('localhost:%i' % self.port)
+
+
     def test_single(self):
-        """ mlaunch: start stand-alone server and tear down again. """
+        """ mlaunch: start stand-alone server and tear down again """
 
         # shutdown 1 process at teardown
         self.n_processes_started = 1
@@ -109,7 +140,7 @@ class TestMLaunch(object):
 
 
     def test_replicaset_conf(self):
-        """ mlaunch: start replica set of 2 nodes + arbiter, compare rs.conf(). """
+        """ mlaunch: start replica set of 2 nodes + arbiter and compare rs.conf() """
 
         # shutdown 3 processes at teardown
         self.n_processes_started = 3
@@ -134,7 +165,7 @@ class TestMLaunch(object):
 
     @timed(60)
     def test_replicaset_ismaster(self):
-        """ mlaunch: start replica set and verify that first node becomes primary (slow). 
+        """ mlaunch: start replica set and verify that first node becomes primary (slow)
             Test must complete in 60 seconds.
         """
 
@@ -156,7 +187,7 @@ class TestMLaunch(object):
 
 
     def test_sharded_status(self):
-        """ mlaunch: start cluster with 2 shards of single nodes, 1 config server. """
+        """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
         # shutdown 4 processes at teardown
         self.n_processes_started = 4
@@ -180,7 +211,7 @@ class TestMLaunch(object):
 
 
     def test_startup_file(self):
-        """ mlaunch: create .mlaunch_startup file in data path.
+        """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
         """
         # shutdown 1 process at teardown
@@ -200,7 +231,7 @@ class TestMLaunch(object):
 
     @raises(SystemExit)
     def test_check_port_availability(self):
-        """ mlaunch: test check_port_availability() method. """
+        """ mlaunch: test check_port_availability() method """
         
         # shutdown 1 process at teardown
         self.n_processes_started = 1
