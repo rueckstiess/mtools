@@ -58,13 +58,12 @@ class MLaunchTool(BaseCmdLineTool):
         self.argparser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         self.argparser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
-        # dir, verbose, port, auth, rest interface, loglevel
+        # dir, verbose, port, auth
         self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
         self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
         self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        self.argparser.add_argument('--rest', action='store_true', default=False, help='enable REST interface on mongod processes')
-        self.argparser.add_argument('--local', action='store_true', default=False, help='run mongod/s process from local directory, i.e. "./mongod"')
+        self.argparser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
         self.hostname = socket.gethostname()
 
@@ -353,19 +352,21 @@ class MLaunchTool(BaseCmdLineTool):
             key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
             auth_param = '--keyFile %s'%key_path
 
-        if self.args['rest']:
-            extra = '--rest ' + extra
-
         if self.unknown_args:
             extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' ' + extra
 
-        local = ''
-        if self.args['local']:
-            local = "./"
+        path = self.args['binarypath'] or ''
 
-        ret = subprocess.call(['%smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+
+        ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        if ret > 0:
+            print "can't start mongod, return code %i."%ret
+            print "tried to start: %s"%command_str
+            raise SystemExit
+
         if self.args['verbose']:
-            print 'launching: %smongod %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork'%(local, rs_param, dbpath, logpath, port, auth_param, extra)
+            print 'launching: %s'%command_str
 
         return ret
 
@@ -383,16 +384,22 @@ class MLaunchTool(BaseCmdLineTool):
             key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
             auth_param = '--keyFile %s'%key_path
 
-        local = ''
-        if self.args['local']:
-            local = "./"
-
         if self.unknown_args:
             extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
 
-        ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        path = self.args['binarypath'] or ''
+
+        command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+
+        ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+
+        if ret > 0:
+            print "can't start mongos, return code %i."%ret
+            print "tried to start: %s"%command_str
+            raise SystemExit
+
         if self.args['verbose']:
-            print 'launching: %smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)
+            print 'launching: %s'%command_str
         
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))

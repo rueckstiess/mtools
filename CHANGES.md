@@ -7,6 +7,7 @@ Changes to mtools
   * mlaunch: positional argument for directory name removed. directory name now requires `--dir`. default is `./data`.
   * mlaunch: different directory name will no longer create a nested `data` folder (#54).
   * mlaunch: arguments unknown to mlaunch are checked against mongod and mongos and only passed on if they are accepted (#55).
+  * mlaunch: now you can specify a path for the mongod and mongos binaries with --binarypath PATH (#46).
 
 #### version 1.0.1
 
