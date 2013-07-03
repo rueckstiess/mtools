@@ -6,6 +6,7 @@ import threading
 import os, time
 import socket
 import json
+import re
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
 
@@ -38,27 +39,27 @@ class MLaunchTool(BaseCmdLineTool):
 
     def __init__(self):
         BaseCmdLineTool.__init__(self)
-        self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards'
-
-        # positional argument
-        self.argparser.add_argument('dir', action='store', nargs='?', const='.', default='.', help='base directory to create db and log paths (default=.)')
+        self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards. You must specify either --single or --replicaset. \
+            In addition to the optional arguments below, you can specify any mongos and mongod argument, which will be passed on, if the process accepts it.'
 
         # either single or replica set
         me_group = self.argparser.add_mutually_exclusive_group(required=True)
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
-        me_group.add_argument('--restore', action='store_true', help='restores a previously launched existing configuration from the data directory.')
+        me_group.add_argument('--restart', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
 
+        # replica set arguments
         self.argparser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
         self.argparser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
         self.argparser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
         
-        # sharded or not
+        # sharded clusters
         self.argparser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
         self.argparser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         self.argparser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
-        # verbose, port, auth, loglevel
+        # dir, verbose, port, auth, rest interface, loglevel
+        self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
         self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
         self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
@@ -74,19 +75,18 @@ class MLaunchTool(BaseCmdLineTool):
         self.args = vars(self.args)
 
         # load or store parameters
-        if self.args['restore']:
+        if self.args['restart']:
             self.load_parameters()
         else:
             self.store_parameters()
 
-        datapath = os.path.join(self.args['dir'], 'data')
         
         # check if authentication is enabled        
         if self.args['authentication']:
-            if not os.path.exists(datapath):
-                os.makedirs(datapath)
-            os.system('openssl rand -base64 753 > %s/keyfile'%datapath)
-            os.system('chmod 600 %s/keyfile'%datapath)
+            if not os.path.exists(self.args['dir']):
+                os.makedirs(self.args['dir'])
+            os.system('openssl rand -base64 753 > %s/keyfile'%self.args['dir'])
+            os.system('chmod 600 %s/keyfile'%self.args['dir'])
 
         if self.args['sharded']:
             self._launchSharded()
@@ -108,7 +108,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def load_parameters(self):
-        datapath = os.path.join(self.args['dir'], 'data')
+        datapath = self.args['dir']
 
         startup_file = os.path.join(datapath, '.mlaunch_startup')
         if os.path.exists(startup_file):
@@ -116,7 +116,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def store_parameters(self):
-        datapath = os.path.join(self.args['dir'], 'data')
+        datapath = self.args['dir']
 
         if not os.path.exists(datapath):
             os.makedirs(datapath)
@@ -137,9 +137,9 @@ class MLaunchTool(BaseCmdLineTool):
     
     def _createPaths(self, basedir, name=None):
         if name:
-            datapath = os.path.join(basedir, 'data', name)
+            datapath = os.path.join(basedir, name)
         else:
-            datapath = os.path.join(basedir, 'data')
+            datapath = basedir
 
         dbpath = os.path.join(datapath, 'db')
         if not os.path.exists(dbpath):
@@ -148,6 +148,39 @@ class MLaunchTool(BaseCmdLineTool):
             print 'creating directory: %s'%dbpath
         
         return datapath
+
+
+    def _filter_valid_arguments(self, arguments, binary="mongod"):
+        """ check which of the list of arguments is accepted by the specified binary (mongod, mongos). 
+            returns a list of accepted arguments. If an argument does not start with '-' but its preceding
+            argument was accepted, then it is accepted as well. Example ['--slowms', '1000'] both arguments
+            would be accepted for a mongod.
+        """
+        # get the help list of the binary
+        ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        out, err = ret.communicate()
+
+        accepted_arguments = []
+
+        # extract all arguments starting with a '-'
+        for line in [option for option in out.split('\n')]:
+            line = line.lstrip()
+            if line.startswith('-'):
+                accepted_arguments.append(line.split()[0])
+
+        # filter valid arguments
+        result = []
+        for i, arg in enumerate(arguments):
+            if arg.startswith('-'):
+                # check if the binary accepts this argument or special case -vvv for any number of v
+                if arg in accepted_arguments or re.match(r'-v+', arg):
+                    result.append(arg)
+            elif i > 0 and arguments[i-1] in result:
+                # if it doesn't start with a '-', it could be the value of the last argument, e.g. `--slowms 1000`
+                result.append(arg)
+
+        # return valid arguments as joined string
+        return ' '.join(result)
 
 
     def _launchSharded(self):
@@ -191,7 +224,7 @@ class MLaunchTool(BaseCmdLineTool):
         
         # start up mongos (at least 1)
         for i in range(max(1, self.args['mongos'])):
-            self._launchMongoS(os.path.join(self.args['dir'], 'data', 'mongos.log'), nextport, ','.join(config_string))
+            self._launchMongoS(os.path.join(self.args['dir'], 'mongos.log'), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos
                 self.mongos_host = '%s:%i'%(self.hostname, nextport)
@@ -324,7 +357,7 @@ class MLaunchTool(BaseCmdLineTool):
             extra = '--rest ' + extra
 
         if self.unknown_args:
-            extra = ' '.join(self.unknown_args) + ' ' + extra
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' ' + extra
 
         local = ''
         if self.args['local']:
@@ -355,8 +388,7 @@ class MLaunchTool(BaseCmdLineTool):
             local = "./"
 
         if self.unknown_args:
-            mongos_args = [arg for arg in self.unknown_args if arg in self.mongos_arguments]
-            extra = ' '.join(mongos_args) + extra
+            extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
 
         ret = subprocess.call(['%smongos --logpath %s --port %i --configdb %s --logappend %s %s --fork'%(local, logpath, port, configdb, auth_param, extra)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         if self.args['verbose']:
