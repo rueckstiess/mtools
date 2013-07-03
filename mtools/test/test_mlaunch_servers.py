@@ -30,13 +30,12 @@ class TestMLaunch(object):
     def setup(self):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLaunchTool()
-        self.port = self._find_free_port(self.port + self.n_processes_started)
+        # self.port = self._find_free_port(self.port)
         self.n_processes_started = 0
 
         # if the test data path exists, remove it
         if os.path.exists(self.data_dir):
             shutil.rmtree(self.data_dir)
-
 
 
     def teardown(self):
@@ -45,6 +44,8 @@ class TestMLaunch(object):
         # shutdown as many processes as the test required
         for p in range(self.n_processes_started):
             self._shutdown_mongosd(self.port + p)
+
+        self.port += self.n_processes_started
 
         # if the test data path exists, remove it
         if os.path.exists(self.data_dir):
@@ -68,24 +69,24 @@ class TestMLaunch(object):
         return True
 
 
-    # def _find_mongosd_processes(self):
-    #     pnames = ["mongod", "mongos", "mongod.exe", "mongos.exe"]
-    #     processes = [proc for proc in psutil.process_iter() if proc.name in pnames]
-    #     return processes
-
-
     def _shutdown_mongosd(self, port):
         """ send the shutdown command to a mongod or mongos on given port. """
-        mc = MongoClient('localhost:%i' % port)
         try:
-            mc.admin.command({'shutdown':1})
-        except AutoReconnect: 
+            mc = MongoClient('localhost:%i' % port)
+            try:
+                mc.admin.command({'shutdown':1})
+            except AutoReconnect: 
+                pass
+        except ConnectionFailure:
             pass
-        mc.close()
+        else:
+            mc.close()
 
 
-    def _find_free_port(self, start_at):
-        """ iterate over ports opening a socket on that port until a free port is found, which is returned. """
+    def _find_free_ports(self, number):
+        """ iterate over ports opening a socket on that port until a block of `number` free ports
+            is found, which is returned. 
+        """
         port = start_at
         # cycle through `max_port_range` ports until a free one is found
         while not self._port_available(port):
@@ -136,7 +137,6 @@ class TestMLaunch(object):
         # check if data directory and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'db'))
         assert os.path.isfile(os.path.join(self.data_dir, 'mongod.log'))
-
 
 
     def test_replicaset_conf(self):
@@ -209,7 +209,6 @@ class TestMLaunch(object):
         assert mc['config']['mongos'].count() == 1
 
 
-
     def test_startup_file(self):
         """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
@@ -228,7 +227,6 @@ class TestMLaunch(object):
         assert file_args == self.tool.args
 
 
-
     @raises(SystemExit)
     def test_check_port_availability(self):
         """ mlaunch: test check_port_availability() method """
@@ -243,7 +241,21 @@ class TestMLaunch(object):
         self.tool.check_port_availability(self.port, "mongod")
 
 
-        
+    def test_filter_valid_arguments(self):
+        """ mlaunch: check arguments unknown to mlaunch against mongos and mongod """
+
+        # filter against mongod
+        result = self.tool._filter_valid_arguments("--slowms 500 -vvv --configdb localhost:27017 --foobar".split(), "mongod")
+        assert result == "--slowms 500 -vvv"
+
+        # filter against mongos
+        result = self.tool._filter_valid_arguments("--slowms 500 -vvv --configdb localhost:27017 --foobar".split(), "mongos")
+        assert result == "-vvv --configdb localhost:27017"
+
+
+    # TODO: --binarypath, --authentication, --verbose, --mongos, --name, --restart
+
+
     # mark slow tests
     test_replicaset_ismaster.slow = 1
     test_sharded_status.slow = 1
