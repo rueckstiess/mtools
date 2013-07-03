@@ -1,5 +1,6 @@
 import shutil
 import socket
+import time
 import os
 
 from mtools.mlaunch.mlaunch import MLaunchTool
@@ -13,6 +14,18 @@ class TestMLaunch(object):
     default_port = 33333
     max_port_range = 100
     data_dir = 'test_mlaunch_data'
+
+
+    def setUp(self):
+        """ start up method to create mlaunch tool and find free port. """
+        self.tool = MLaunchTool()
+        self.port = self._find_free_port()
+
+
+    def tearDown(self):
+        """ tear down method after each test, removes data directory. """
+        shutil.rmtree(self.data_dir)
+
 
     def _port_available(self, port):
         """ check if `port` is available and returns True or False. """
@@ -59,25 +72,70 @@ class TestMLaunch(object):
 
 
     def test_mlaunch_single(self):
-        """ Test mlaunching single stand-alone server and tearing down again. """
-        tool = MLaunchTool()
-        port = self._find_free_port()
+        """ mlaunch: start stand-alone server and tear down again. """
 
         # start mongo process on free test port (don't need journal for this test)
-        tool.run("--single --port %i --nojournal %s" % (port, self.data_dir))
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if data directory and logfile exist
-        assert os.path.exists(os.path.join(self.data_dir, 'data/db'))
-        assert os.path.isfile(os.path.join(self.data_dir, 'data/mongod.log'))
+        assert os.path.exists(os.path.join(self.data_dir, 'db'))
+        assert os.path.isfile(os.path.join(self.data_dir, 'mongod.log'))
 
         # shutdown again
-        self._shutdown_mongosd(port)
+        self._shutdown_mongosd(self.port)
 
-        # remove data directory
-        shutil.rmtree(self.data_dir)
-    
+
+    @timed(60)
+    def test_mlaunch_replicaset_conf(self):
+        """ mlaunch: start replica set of 2 nodes + arbiter, compare rs.conf(). """
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if data directory and logfile exist
+        assert os.path.exists(os.path.join(self.data_dir, 'replset'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs1'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs2'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/arb'))
+
+        # create mongo client for the next tests
+        mc = MongoClient('localhost:%i' % self.port)
+
+        # get rs.conf() and check for 3 members, last one is arbiter        
+        conf = mc['local']['system.replset'].find_one()
+        assert len(conf['members']) == 3
+        assert conf['members'][2]['arbiterOnly'] == True
+
+        # shutdown again
+        for p in range(self.port, self.port+3):
+            self._shutdown_mongosd(p)
+
+
+    @timed(60)
+    def test_mlaunch_replicaset_ismaster(self):
+        """ mlaunch: start replica set and verify that first node becomes primary. 
+            Test must complete in 60 seconds.
+        """
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # create mongo client for the next tests
+        mc = MongoClient('localhost:%i' % self.port)
+
+        # test if first node becomes primary after some time
+        while True:
+            ismaster = mc.admin.command({'ismaster': 1})
+            if ismaster['ismaster']:
+                break
+            time.sleep(1)
+
+        # shutdown again
+        for p in range(self.port, self.port+3):
+            self._shutdown_mongosd(p)
 
         
-
+    # mark slow tests
+    test_mlaunch_replicaset_ismaster.slow = 1
 
 

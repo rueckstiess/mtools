@@ -5,7 +5,7 @@ import time
 
 @all_tools
 def test_help(tool_cls):
-    """ This tests if all command line tools have a `--help` option that explains the usage.
+    """ Check that all command line tools have a --help option that explains the usage.
         As per argparse default, this help text always starts with `usage:`.
     """
     tool = tool_cls()
