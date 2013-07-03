@@ -23,16 +23,19 @@ class MLogVisTool(LogFileTool):
     def run(self):
         LogFileTool.run(self)
 
-        # make sub-folder .mlogvis and change to it
-        mlogvis_dir = '.mlogvis'
+        # store in current local folder
+        mlogvis_dir = '.'
 
-        if not os.path.exists(mlogvis_dir):
-            os.makedirs(mlogvis_dir)
+        # change stdin logfile name and remove the < >
+        logname = self.args['logfile'].name
+        if logname == '<stdin>':
+            logname = 'stdin'
+
         os.chdir(mlogvis_dir)
 
         data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
         srcfilelocation = os.path.join(data_path, 'index.html')
-        outf = '{"type": "duration", "logfilename": "' + self.args['logfile'].name + '", "data":['
+        outf = '{"type": "duration", "logfilename": "' + logname + '", "data":['
 
         first_row = True
         for line in self.args['logfile']:
@@ -50,9 +53,9 @@ class MLogVisTool(LogFileTool):
                 outf += logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration'])
         outf += ']}'
 
-        dstfilelocation = os.path.join(os.getcwd(), 'index.html')
+        dstfilelocation = os.path.join(os.getcwd(), '%s.html'%logname)
 
-        print "trying to copy %s to %s" % (srcfilelocation, dstfilelocation)
+        print "copying %s to %s" % (srcfilelocation, dstfilelocation)
 
         srcfile = open(srcfilelocation)
         contents = srcfile.read()

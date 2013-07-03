@@ -3,7 +3,7 @@ Changes to mtools
 
 #### version 1.0.2
 
-  * mlogvis: webserver only serves the page, then quits, instead of running forever.
+  * mlogvis: doesn't require webserver anymore. Data is directly stored in html file (#57).
   * mlogvis: when clicking reset, keep group selection, only reset zoom window (#56).
   * mlaunch: positional argument for directory name removed. directory name now requires `--dir`. default is `./data`.
   * mlaunch: different directory name will no longer create a nested `data` folder (#54).
@@ -36,4 +36,3 @@ This is the first version of mtools that has a version number. Some significant 
 
         import mtools
         mtools.__version__
-
