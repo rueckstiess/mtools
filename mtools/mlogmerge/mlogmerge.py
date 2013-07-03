@@ -34,7 +34,7 @@ class MLogMergeTool(LogFileTool):
                 labels = [None for _ in logfiles]
             elif label == 'filename':
                 labels = ['{%s}'%fn.name for fn in logfiles]
-        elif len(args['labels']) == len(logfiles):
+        elif len(self.args['labels']) == len(logfiles):
             labels = self.args['labels']
         else:
             raise SystemExit('Error: Number of labels not the same as number of files.')

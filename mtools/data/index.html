@@ -381,9 +381,7 @@
         }
 
         function reset() {
-          // make all groups visible again
-          visible_groups = {};
-          // transition to original view frame
+          // transition to original view frame but keep group selection
           d3.transition().duration(500).tween("zoom", function() {
             var ix = d3.interpolate(x.domain(), events_lim_x);
             var iy = d3.interpolate(y.domain(), events_lim_y);
