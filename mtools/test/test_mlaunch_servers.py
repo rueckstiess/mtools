@@ -16,7 +16,7 @@ class TestMLaunch(object):
         and tearDown method for all tests.
     """
 
-    default_port = 33333
+    static_port = 33333
     max_port_range = 100
     data_dir = 'test_mlaunch_data'
 
@@ -24,8 +24,14 @@ class TestMLaunch(object):
     def __init__(self):
         """ Constructor. """
         self.n_processes_started = 0
-        self.port = self.default_port
+        self.port = TestMLaunch.static_port
 
+
+    def _reserve_ports(self, number):
+        self.n_processes_started = number
+        self.port = TestMLaunch.static_port
+        TestMLaunch.static_port += number
+        
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port. """
@@ -45,28 +51,9 @@ class TestMLaunch(object):
         for p in range(self.n_processes_started):
             self._shutdown_mongosd(self.port + p)
 
-        self.port += self.n_processes_started
-
         # if the test data path exists, remove it
         if os.path.exists(self.data_dir):
             shutil.rmtree(self.data_dir)
-
-
-    def _port_available(self, port):
-        """ check if `port` is available and returns True or False. """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.bind(('', port))
-            s.close()
-        except socket.error as e:
-            if e.errno == socket.errno.EADDRINUSE:
-                # socket already in use, return False
-                return False
-            else:
-                # different error, raise Exception
-                raise e
-        # port free, return True
-        return True
 
 
     def _shutdown_mongosd(self, port):
@@ -81,19 +68,6 @@ class TestMLaunch(object):
             pass
         else:
             mc.close()
-
-
-    def _find_free_ports(self, number):
-        """ iterate over ports opening a socket on that port until a block of `number` free ports
-            is found, which is returned. 
-        """
-        port = start_at
-        # cycle through `max_port_range` ports until a free one is found
-        while not self._port_available(port):
-            port += 1
-            if port >= self.default_port + self.max_port_range:
-                raise SystemExit('could not find free port between %i and %i.' % (self.default_port, self.default_port + self.max_port_range))
-        return port
 
 
     @raises(ConnectionFailure)
@@ -128,8 +102,8 @@ class TestMLaunch(object):
     def test_single(self):
         """ mlaunch: start stand-alone server and tear down again """
 
-        # shutdown 1 process at teardown
-        self.n_processes_started = 1
+        # get ports for processes during this test
+        self._reserve_ports(1)
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -142,8 +116,8 @@ class TestMLaunch(object):
     def test_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter and compare rs.conf() """
 
-        # shutdown 3 processes at teardown
-        self.n_processes_started = 3
+        # get ports for processes during this test
+        self._reserve_ports(3)
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -169,8 +143,8 @@ class TestMLaunch(object):
             Test must complete in 60 seconds.
         """
 
-        # shutdown 3 processes at teardown
-        self.n_processes_started = 3
+        # get ports for processes during this test
+        self._reserve_ports(3)
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -189,8 +163,8 @@ class TestMLaunch(object):
     def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
-        # shutdown 4 processes at teardown
-        self.n_processes_started = 4
+        # get ports for processes during this test
+        self._reserve_ports(4)
 
         # start mongo process on free test port (don't need journal for this test)
         self.tool.run("--sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
@@ -213,8 +187,8 @@ class TestMLaunch(object):
         """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
         """
-        # shutdown 1 process at teardown
-        self.n_processes_started = 1
+        # get ports for processes during this test
+        self._reserve_ports(1)
 
         self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
@@ -231,8 +205,8 @@ class TestMLaunch(object):
     def test_check_port_availability(self):
         """ mlaunch: test check_port_availability() method """
         
-        # shutdown 1 process at teardown
-        self.n_processes_started = 1
+        # get ports for processes during this test
+        self._reserve_ports(1)
 
         # start mongod
         self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
