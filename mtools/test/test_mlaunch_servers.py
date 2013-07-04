@@ -3,6 +3,7 @@ import socket
 import time
 import os
 import json
+import sys
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 from pymongo import MongoClient
@@ -12,8 +13,8 @@ from nose.tools import *
 
 class TestMLaunch(object):
     """ This class tests functionality around the mlaunch tool. It has some
-        additional methods that are helpful for the tests, as well as a setUp
-        and tearDown method for all tests.
+        additional methods that are helpful for the tests, as well as a setup
+        and teardown method for all tests.
     """
 
     static_port = 33333
@@ -259,7 +260,7 @@ class TestMLaunch(object):
         assert result == "-vvv --configdb localhost:27017"
 
 
-    # TODO: --binarypath, --authentication, --verbose, --mongos, --name, --restart
+    # TODO: test functionality of --binarypath, --authentication, --verbose, --mongos, --name
 
 
     # mark slow tests
