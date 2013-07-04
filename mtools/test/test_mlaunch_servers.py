@@ -80,11 +80,11 @@ class TestMLaunch(object):
         # test that data dir does not exist
         assert not os.path.exists(self.data_dir)
 
-        # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        # get ports for processes during this test
+        self._reserve_ports(1)
 
-        # shutdown 1 process at teardown
-        self.n_processes_started = 1
+        # start mongo process on free test port
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # call teardown method within this test
         self.teardown()
@@ -105,12 +105,26 @@ class TestMLaunch(object):
         # get ports for processes during this test
         self._reserve_ports(1)
 
-        # start mongo process on free test port (don't need journal for this test)
+        # start mongo process on free test port 
         self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if data directory and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'db'))
         assert os.path.isfile(os.path.join(self.data_dir, 'mongod.log'))
+
+
+    @raises(SystemExit)
+    def test_single_on_existing_port(self):
+        """ mlaunch: using already existing port fails """
+
+        # get ports for processes during this test
+        self._reserve_ports(1)
+
+        # start mongo process on free test port
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # start mongo process on same port, should raise SystemExit
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
 
     def test_replicaset_conf(self):
@@ -137,6 +151,24 @@ class TestMLaunch(object):
         assert conf['members'][2]['arbiterOnly'] == True
 
 
+    def test_restart(self):
+        """ mlaunch: --restart brings up the same configuration """
+
+        # get ports for processes during this test
+        self._reserve_ports(3)
+
+        # start mongo process on free test port 
+        self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        self.teardown()
+
+        # start mongo process on free test port 
+        self.tool.run("--restart --dir %s" % self.data_dir)
+
+        # repeat test on replica set with restarted set
+        self.test_replicaset_conf()
+
+
     @timed(60)
     def test_replicaset_ismaster(self):
         """ mlaunch: start replica set and verify that first node becomes primary (slow)
@@ -146,7 +178,7 @@ class TestMLaunch(object):
         # get ports for processes during this test
         self._reserve_ports(3)
 
-        # start mongo process on free test port (don't need journal for this test)
+        # start mongo process on free test port
         self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # create mongo client
@@ -166,7 +198,7 @@ class TestMLaunch(object):
         # get ports for processes during this test
         self._reserve_ports(4)
 
-        # start mongo process on free test port (don't need journal for this test)
+        # start mongo process on free test port 
         self.tool.run("--sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
     
         # check if data directories and logfile exist
