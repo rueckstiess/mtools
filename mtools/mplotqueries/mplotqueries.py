@@ -8,6 +8,7 @@ import uuid
 import glob
 import cPickle
 import types
+import inspect
 from copy import copy
 
 try:
@@ -15,7 +16,7 @@ try:
     from matplotlib.dates import DateFormatter
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
-    from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType, NumericPlotType
+    import mtools.mplotqueries.plottypes as plottypes
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
@@ -35,7 +36,8 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.description='A script to plot various information from logfiles. ' \
             'Clicking on any of the plot points will print the corresponding log line to stdout.'
 
-        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType, NumericPlotType]
+        # import all plot type classes in plottypes module
+        self.plot_types = [c[1] for c in inspect.getmembers(plottypes, inspect.isclass)]
         self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
         self.plot_instances = []
 
@@ -90,17 +92,17 @@ class MPlotQueriesTool(LogFileTool):
 
         # create generator for logfile(s) handles
         if type(self.args['logfile']) != types.ListType:
-            logfiles = [self.args['logfile']]
+            self.logfiles = [self.args['logfile']]
         else:
-            logfiles = self.args['logfile']
+            self.logfiles = self.args['logfile']
             
-        if len(logfiles) > 1:
+        if len(self.logfiles) > 1:
             multiple_files = True
             self.args['group'] = 'filename'
         
         plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
         
-        for logfile in logfiles:
+        for logfile in self.logfiles:
 
             for line in logfile:
                 # create LogLine object
@@ -135,7 +137,7 @@ class MPlotQueriesTool(LogFileTool):
 
         # close files after parsing
         if sys.stdin.isatty():
-            for f in logfiles:
+            for f in self.logfiles:
                 f.close()
 
 
@@ -285,10 +287,14 @@ class MPlotQueriesTool(LogFileTool):
 
     def plot(self):
         self.artists = []
-        axis = plt.subplot(111)
+        plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
+        axis = plt.subplot(111, )
 
+        ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
             self.artists.extend(plot_inst.plot(axis, i))
+            if hasattr(plot_inst, 'ylabel'):
+                ylabel = plot_inst.ylabel
             
         self.print_shortcuts()
 
@@ -299,12 +305,16 @@ class MPlotQueriesTool(LogFileTool):
         for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
 
-        # log y axis
+        # ylabel for y axis
         if self.args['logscale']:
-            axis.set_yscale('log')
-            axis.set_ylabel('query duration in ms (log scale)')
-        else:
-            axis.set_ylabel('query duration in ms')
+            ylabel += ' (log scale)'
+        axis.set_ylabel(ylabel)
+
+        # title and mtools link
+        axis.set_title(', '.join([l.name for l in self.logfiles]))
+        plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
+        plt.annotate('created with mtools: https://github.com/rueckstiess/mtools', (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
+
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
@@ -312,7 +322,6 @@ class MPlotQueriesTool(LogFileTool):
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
-
         plt.show()
 
 
