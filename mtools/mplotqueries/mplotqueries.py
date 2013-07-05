@@ -10,6 +10,7 @@ import cPickle
 import types
 import inspect
 from copy import copy
+from mtools import __version__
 
 try:
     import matplotlib.pyplot as plt
@@ -233,6 +234,7 @@ class MPlotQueriesTool(LogFileTool):
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
         print "%5s  %s" % ("0", "toggle visibility of all plots")
         print "%5s  %s" % ("-", "toggle visibility of legend")
+        print "%5s  %s" % ("f", "toggle visibility of footnote")
         print "%5s  %s" % ("g", "toggle grid")
         print "%5s  %s" % ("l", "toggle log/linear y-axis")
         print "%5s  %s" % ("q", "quit mplotqueries")
@@ -283,6 +285,10 @@ class MPlotQueriesTool(LogFileTool):
                 self.toggle_artist(self.legend)
                 plt.gcf().canvas.draw()
 
+        if event.key == 'f':
+            self.toggle_artist(self.footnote)
+            plt.gcf().canvas.draw()
+
 
     def plot(self):
         self.artists = []
@@ -312,7 +318,7 @@ class MPlotQueriesTool(LogFileTool):
         # title and mtools link
         axis.set_title(', '.join([l.name for l in self.logfiles]))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
-        plt.annotate('created with mtools: https://github.com/rueckstiess/mtools', (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
+        self.footnote = plt.annotate('created with mtools v%s: https://github.com/rueckstiess/mtools' % __version__, (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
 
 
         handles, labels = axis.get_legend_handles_labels()
