@@ -1,6 +1,11 @@
 Changes to mtools
 =================
 
+#### version 1.0.3
+
+  * mplotqueries: New plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries. (#58).
+  
+
 #### version 1.0.2
 
   * mlogvis: doesn't require webserver anymore. Data is directly stored in self-contained html file (#57).
