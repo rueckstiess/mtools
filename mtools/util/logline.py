@@ -69,6 +69,9 @@ class LogLine(object):
         self._nupdated = None
         self._nreturned = None
         self._ninserted = None
+        self._numYields = None
+        self._r = None
+        self._w = None
 
 
     @property
@@ -281,6 +284,35 @@ class LogLine(object):
 
         return self._nupdated
 
+    @property
+    def numYields(self):
+        """ extract numYields counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._numYields
+
+    @property
+    def r(self):
+        """ extract read lock (r) counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._r
+
+    @property
+    def w(self):
+        """ extract write lock (w) counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._w
 
 
     def _extract_counters(self):
@@ -288,18 +320,27 @@ class LogLine(object):
             from the logline. 
         """
 
-        # extract n-values (if present)
+        # extract counters (if present)
         counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated']
+            'nupdated', 'r', 'w', 'numYields']
 
         split_tokens = self.split_tokens
 
         # trigger thread evaluation to get access to offset
         if self.thread:
-            for token in split_tokens[self._thread_offset+2:]:
+            for t, token in enumerate(split_tokens[self._thread_offset+2:]):
                 for counter in counters:
-                    if token.startswith('%s:'%counter):
-                        vars(self)['_'+counter] = int(token.split(':')[-1])
+                    # special case for numYields because of space in between ("numYields: 2")
+                    if counter == 'numYields' and token.startswith('numYields'):
+                        try:
+                            self._numYields = int(split_tokens[t+1+self._thread_offset+2])
+                        except ValueError:
+                            pass
+                    elif token.startswith('%s:'%counter):
+                        try:
+                            vars(self)['_'+counter] = int(token.split(':')[-1])
+                        except ValueError:
+                            pass
                         break
 
 
@@ -318,6 +359,9 @@ class LogLine(object):
         nreturned = self.nreturned
         ninserted = self.ninserted
         nupdated = self.nupdated
+        numYields = self.numYields
+        w = self.w
+        r = self.r
 
 
     def __str__(self):
@@ -325,7 +369,7 @@ class LogLine(object):
         output = ''
         labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
                   'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                  'nreturned', 'ninserted', 'nupdated', 'duration']
+                  'nreturned', 'ninserted', 'nupdated', 'duration', 'r', 'w', 'numYields']
 
         for label in labels:
             value = getattr(self, label, None)
@@ -343,7 +387,7 @@ class LogLine(object):
         if labels == None:
             labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
                 'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                'nreturned', 'ninserted', 'nupdated', 'duration']
+                'nreturned', 'ninserted', 'nupdated', 'duration', 'r', 'w', 'numYields']
 
         for label in labels:
             value = getattr(self, label, None)

@@ -4,14 +4,7 @@ from mtools.util.logline import LogLine
 from mtools.util.cmdlinetool import LogFileTool
 import mtools
 
-import argparse
-import sys, os
-import shutil
-import time
-
-import socket
-import SimpleHTTPServer
-import SocketServer
+import os
 import webbrowser
 
 
@@ -20,25 +13,27 @@ class MLogVisTool(LogFileTool):
     def __init__(self):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
 
-        self.argparser.description = 'mongod/mongos log file visualizer (browser edition). \
-            Extracts information from each line of the log file and outputs a json document \
-            per line, stored in a sub-folder .mlogvis/. Then spins up an HTTP server and \
-            opens a page in the browser to view the data.'
-
-        self.port = 8888
+        self.argparser.description = 'mongod/mongos log file visualizer (browser edition). Extracts \
+            information from each line of the log file and outputs a html file that can be viewed in \
+            a browser. Automatically opens a browser tab and shows the file.'
 
     def run(self, arguments=None):
         LogFileTool.run(self, arguments)
 
-        # make sub-folder .mlogvis and change to it
-        mlogvis_dir = '.mlogvis'
+        # store in current local folder
+        mlogvis_dir = '.'
 
-        if not os.path.exists(mlogvis_dir):
-            os.makedirs(mlogvis_dir)
+        # change stdin logfile name and remove the < >
+        logname = self.args['logfile'].name
+        if logname == '<stdin>':
+            logname = 'stdin'
+
         os.chdir(mlogvis_dir)
 
-        outf = open('events.json', 'w')
-        outf.write('{"type": "duration", "logfilename": "' + self.args['logfile'].name + '", "data":[')
+        data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
+        srcfilelocation = os.path.join(data_path, 'index.html')
+        outf = '{"type": "duration", "logfilename": "' + logname + '", "data":['
+
         first_row = True
         for line in self.args['logfile']:
             logline = LogLine(line)
@@ -49,38 +44,30 @@ class MLogVisTool(LogFileTool):
                 # write log line out as json
                 if not first_row:
                     # prepend comma and newline
-                    outf.write(',\n')
+                    outf += ',\n'
                 else:
                     first_row = False
-                outf.write(logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration']))
-        outf.write(']}')
-        outf.close()
+                outf += logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration'])
+        outf += ']}'
 
-        data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
-        src = os.path.join(data_path, 'index.html')
-        dst = os.path.join(os.getcwd(), 'index.html')
-        
-        print "trying to copy %s to %s" % (src, dst)
-        shutil.copyfile(src, dst)
+        dstfilelocation = os.path.join(os.getcwd(), '%s.html'%logname)
 
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        
-        for i in range(100):
-            try:
-                httpd = SocketServer.TCPServer(("", self.port), Handler)
-                break
-            except socket.error:
-                self.port += 1
+        print "copying %s to %s" % (srcfilelocation, dstfilelocation)
 
-        print "serving visualization on http://localhost:%s/"%self.port
-        webbrowser.open("http://localhost:%i/"%self.port)
+        srcfile = open(srcfilelocation)
+        contents = srcfile.read()
+        srcfile.close()
 
-        # serve two requests (html file and events.json)
-        httpd.handle_request()
-        httpd.handle_request()
+        dstfile = open(dstfilelocation, 'wt')
+        replaced_contents = contents.replace('##REPLACE##', outf)
+        dstfile.write(replaced_contents)
+        dstfile.close()
+
+        print "serving visualization on file://"+dstfilelocation
+
+        webbrowser.open("file://"+dstfilelocation)
 
 
 if __name__ == '__main__':
     tool = MLogVisTool()
     tool.run()
-

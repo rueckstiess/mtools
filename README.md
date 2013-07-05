@@ -17,7 +17,7 @@ The following tools are in the mtools collection:
 * [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mplotqueries](README.md#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
-* [mlogvis](README.md#mlogvis) -- a simplified version of mplotqueries, that runs in a web browser and doesn't require matplotlib (BETA)
+* [mlogvis](README.md#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
 * [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
 
@@ -314,28 +314,27 @@ plots them as vertical lines.
 
 <hr>
 
-mlogvis (BETA)
---------------
+mlogvis
+-------
 
 #### Description
 
-A script to visualize logfiles in the browser, using the d3.js javascript visualization engine.
+A script to visualize logfiles in a browser, using the d3.js javascript visualization engine.
 `mlogvis` is a prototype that implements a sub-set of features of mplotqueries without the 
 matplotlib dependency. Eventually, the two scripts will merge into one. 
 
-The script will read a logfile, process the data and store a .json file in a subfolder .mlogvis/ 
-of the current working directory. It will then start up a web server on port 8888 (or higher, if
-that port is already taken) and open a browser tab to display the information.
-
+The script will read a logfile, process the data and write a self-contained html file 
+to the current working directory. It will then start open a browser tab to display the file.
+The html file can also be sent to somebody and openend by any modern browser. Internet
+connection required for dynamic loading of d3 javascript library.
 
 ###### Usage  
 
 usage: mlogvis [-h] logfile
 
     mongod/mongos log file visualizer (browser edition). Extracts information from
-    each line of the log file and outputs a json document per line, stored in a
-    sub-folder .mlogvis/. Then spins up an HTTP server and opens a page in the
-    browser to view the data.
+    each line of the log file and outputs a html file that can be viewed in a browser.
+    Automatically opens a browser tab and shows the file.
 
     positional arguments:
       logfile     logfile to visualize.

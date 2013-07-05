@@ -69,12 +69,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def run(self, arguments=None):
-        # don't call BaseCmdLineTool.run(), we pass args ourselves, we want unknown arguments too
-        if arguments:
-            self.args, self.unknown_args = self.argparser.parse_known_args(args=arguments.split())
-        else:
-            self.args, self.unknown_args = self.argparser.parse_known_args()
-        self.args = vars(self.args)
+        BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
         # load or store parameters
         if self.args['restart']:

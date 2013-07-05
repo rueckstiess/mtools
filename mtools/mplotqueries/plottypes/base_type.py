@@ -15,8 +15,9 @@ class BasePlotType(object):
     # set group_by in sub-classes to force a group_by as below
     # group_by = 'example'
 
-    def __init__(self, args=None):
+    def __init__(self, args=None, unknown_args=None):
         self.args = args
+        self.unknown_args = unknown_args
         self.groups = OrderedDict()
         self.empty = True
 

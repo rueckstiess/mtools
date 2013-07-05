@@ -14,16 +14,23 @@ class BaseCmdLineTool(object):
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
 
-    def run(self, arguments=None):
+    def run(self, arguments=None, get_unknowns=False):
         """ Init point to execute the script. If `arguments` string is given, will evaluate the 
             arguments, else evaluates sys.argv. Any inheriting class should extend the run method 
             (but first calling BaseCmdLineTool.run(self)).
         """
-        # parse arguments
-        if arguments:
-            self.args = vars(self.argparser.parse_args(args=arguments.split()))
+
+        if get_unknowns:
+            if arguments:
+                self.args, self.unknown_args = self.argparser.parse_known_args(args=arguments.split())
+            else:
+                self.args, self.unknown_args = self.argparser.parse_known_args()
+            self.args = vars(self.args)
         else:
-            self.args = vars(self.argparser.parse_args())
+            if arguments:
+                self.args = vars(self.argparser.parse_args(args=arguments.split()))
+            else:
+                self.args = vars(self.argparser.parse_args())
 
 
 class LogFileTool(BaseCmdLineTool):
