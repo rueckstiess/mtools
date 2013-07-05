@@ -15,7 +15,7 @@ try:
     from matplotlib.dates import DateFormatter
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
-    from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType
+    from mtools.mplotqueries.plottypes import DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType, NumericPlotType
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
@@ -35,7 +35,7 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.description='A script to plot various information from logfiles. ' \
             'Clicking on any of the plot points will print the corresponding log line to stdout.'
 
-        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType]
+        self.plot_types = [DurationPlotType, EventPlotType, RangePlotType, RSStatePlotType, NumericPlotType]
         self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
         self.plot_instances = []
 
@@ -52,8 +52,9 @@ class MPlotQueriesTool(LogFileTool):
 
         self.legend = None
 
-    def run(self):
-        LogFileTool.run(self)
+
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments, get_unknowns=True)
 
         self.parse_loglines()
         self.group()
@@ -97,7 +98,7 @@ class MPlotQueriesTool(LogFileTool):
             multiple_files = True
             self.args['group'] = 'filename'
         
-        plot_instance = self.plot_types[self.args['type']](args=self.args)
+        plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
         
         for logfile in logfiles:
 
