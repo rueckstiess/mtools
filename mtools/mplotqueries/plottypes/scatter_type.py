@@ -91,7 +91,11 @@ class NScannedNPlotType(ScatterPlotType):
         color, marker = self.color_map(group)
 
         # duration plots require y coordinate and use plot_date
-        y = [ float(getattr(logline, 'nscanned')) / float(getattr(logline, 'nreturned')) for logline in self.groups[group] ]
+        nreturned = float(logline.nreturned)
+        if nreturned == 0.0:
+            nreturned = 1.0
+
+        y = [ getattr(logline, 'nscanned') / nreturned for logline in self.groups[group] ]
         artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.5, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
