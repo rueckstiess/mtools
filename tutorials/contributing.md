@@ -37,7 +37,7 @@ pull requests against the master branch.**
 
 Development happens on the [develop branch](https://github.com/rueckstiess/mtools/tree/develop). 
 
-First, fork the [main repository](https://github.com/rueckstiess/mtools) into your own github account (<username>). 
+First, fork the [main repository](https://github.com/rueckstiess/mtools) into your own github account (&lt;username&gt;). 
 Then clone a copy to your local machine:
 
     git clone https://github.com/<username>/mtools
