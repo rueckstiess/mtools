@@ -58,7 +58,7 @@ If you want to work on a bug or feature implementation, first pull in the latest
 
 Then create a feature/bugfix branch that forks off the local `develop` branch:
 
-    git -b feature-37-fast develop
+    git checkout -b feature-37-fast develop
 
 The naming is not that relevant, but it's good practice to start with `feature-` or `bugfix-` and include the issue number
 in the branch name (if available).
