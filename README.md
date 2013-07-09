@@ -11,14 +11,14 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* [mlogversion](README.md#mlogversion) -- auto-detect the version number of a mongos/mongod log file
-* [mlogdistinct](README.md#mlogdistinct) -- groups all similar log messages together and displays their counts
-* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
-* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
-* [mplotqueries](README.md#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
-* [mlogvis](README.md#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
-* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
+* [mlogfilter](#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
+* [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
+* [mlogmerge](#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
+* [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
+* [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
+* [mlogvis](#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
+* [mlaunch](#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
 
 Requirements and Installation Instructions
