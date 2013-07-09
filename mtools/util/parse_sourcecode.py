@@ -132,6 +132,7 @@ def extract_logs(log_code_lines, current_version):
 
                 matches = []
                 for s in stream_tokens:
+                    # match only non-empty strings with single / double quotes
                     match = re.match(r'"(.+?)"', s)
                     if match:
                         match = re.sub(r'(\\t)|(\\n)|"', '', match.group(1)).strip()
@@ -155,8 +156,12 @@ def extract_logs(log_code_lines, current_version):
                     # output_verbose(current_version, filename, lineno, line, statement, matches, False, "zero matches")
                     continue
 
-                # skip matches with total length < 3
+                # skip matches with total character length < 3
                 if len(''.join(matches)) < 3:
+                    continue
+
+                # skip matches consisting of single word, this will discard some valid log lines but overall improves performance
+                if len(matches) == 1 and " " not in matches[0]:
                     continue
 
                 # special case that causes trouble because of query operation lines
@@ -224,8 +229,8 @@ if __name__ == '__main__':
     #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
 
 
-    cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('logdb.pickle', 'wb'), -1)
+    cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 
-    print "%i unique log messages imported and written to logdb.pickle"%len(log_code_lines)
+    print "%i unique log messages imported and written to log2code.pickle"%len(log_code_lines)
 
 

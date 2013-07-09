@@ -11,15 +11,15 @@ from mtools.util.logcodeline import LogCodeLine
 import mtools
 
 def import_logdb():
-    """ static import helper function, checks if the logdb exists first, otherwise
+    """ static import helper function, checks if the log2code.pickle exists first, otherwise
         raises ImportError. 
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
-    if os.path.exists(os.path.join(data_path, 'logdb.pickle')):
-        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'logdb.pickle'), 'rb'))
+    if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
+        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'log2code.pickle'), 'rb'))
         return av, lv, lbw, lcl
     else:
-        raise ImportError('logdb.pickle not found in %s.'%path)
+        raise ImportError('log2code.pickle not found in %s.'%data_path)
 
 
 class Log2CodeConverter(object):

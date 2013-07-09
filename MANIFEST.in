@@ -2,3 +2,4 @@ include *.md
 recursive-include tutorials *
 recursive-include scripts *
 recursive-include mtools *.py
+recursive-include mtools/data *
