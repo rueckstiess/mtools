@@ -9,6 +9,9 @@ from collections import defaultdict
 
 from mtools.util.logcodeline import LogCodeLine
 
+from pymongo import MongoClient
+
+
 mongodb_path = "/Users/tr/Documents/code/mongo/"
 git_path = "/usr/local/bin/git"
 
@@ -79,6 +82,10 @@ def extract_logs(log_code_lines, current_version):
 
     for filename in source_files(mongodb_path):
         f = open(filename, 'r')
+
+        # remove parent path
+        filename = filename[len(mongodb_path):]
+
         lines = f.readlines()
         for lineno, line in enumerate(lines):
             trigger = next((t for t in log_triggers if t in line), None)
@@ -172,8 +179,6 @@ def extract_logs(log_code_lines, current_version):
                 loglevel = re.match(r'LOG\(([0-9])\)', statement)
                 if loglevel:
                     loglevel = int(loglevel.group(1))
-                else:
-                    loglevel = 0
 
                 matches = tuple(matches)
 
@@ -181,7 +186,7 @@ def extract_logs(log_code_lines, current_version):
                 if not matches in log_code_lines:
                     log_code_lines[matches] = LogCodeLine(matches)
 
-                log_code_lines[matches].addOccurence(current_version, filename, lineno, loglevel, trigger)
+                log_code_lines[matches].addMatch(current_version, filename, lineno, loglevel, trigger)
                 log_templates.add(matches)
 
                 # output_verbose(current_version, filename, lineno, line, statement, matches, True, "OK")
@@ -228,6 +233,33 @@ if __name__ == '__main__':
     # for l in sorted(logs_versions):
     #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
 
+    # write out to mongodb
+    mc = MongoClient()
+    for pattern_id, pattern in enumerate(log_code_lines):
+        lcl = log_code_lines[pattern]
+
+        first_token = pattern[0]
+        split_words = first_token.split()
+
+        instance = {
+            '_id': pattern_id,
+            'pattern': list(lcl.pattern),
+            'first_word': split_words[0],
+            'matches': []
+        }
+
+        for version in lcl.matches:
+            matches = lcl.matches[version]
+            for occ in matches:
+                instance['matches'].append({
+                    'version': version,
+                    'file': occ[0],
+                    'lineno': occ[1],
+                    'loglevel': occ[2],
+                    'trigger': occ[3]
+                })
+        
+        mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 

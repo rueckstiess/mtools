@@ -10,7 +10,7 @@ from itertools import chain
 from mtools.util.logcodeline import LogCodeLine
 import mtools
 
-def import_logdb():
+def import_l2c_db():
     """ static import helper function, checks if the log2code.pickle exists first, otherwise
         raises ImportError. 
     """
@@ -25,7 +25,7 @@ def import_logdb():
 class Log2CodeConverter(object):
 
     # static import of logdb data structures
-    all_versions, log_version, logs_by_word, log_code_lines = import_logdb()
+    all_versions, log_version, logs_by_word, log_code_lines = import_l2c_db()
         
     def _log2code(self, line):
         tokens = re.split(r'[\s"]', line)
@@ -77,11 +77,11 @@ class Log2CodeConverter(object):
 # class MLog2Code(object):
 
 #     def __init__(self):
-#         self._import_logdb()
+#         self._import_l2c_db()
 #         self._parse_args()
 #         self.analyse()
 
-#     def _import_logdb(self):
+#     def _import_l2c_db(self):
 #         self.all_versions, self.logs_versions, self.logs_by_word, self.log_code_lines = \
 #             cPickle.load(open('./logdb.pickle', 'rb'))
 
