@@ -309,7 +309,7 @@ class MPlotQueriesTool(LogFileTool):
 
         ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
-            self.artists.extend(plot_inst.plot(axis, i))
+            self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances)))
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
             

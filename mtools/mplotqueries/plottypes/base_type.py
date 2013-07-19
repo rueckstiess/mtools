@@ -92,14 +92,14 @@ class BasePlotType(object):
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("BasePlotType can't plot. Use a derived class instead")
 
-    def plot(self, axis, i):
+    def plot(self, axis, ith_plot, total_plots):
         artists = []
         print self.plot_type_str.upper(), "plot"
         print "%5s %9s  %s"%("id", " #points", "group")
 
         for idx, group in enumerate(self.groups):
             print "%5s %9s  %s"%(idx+1, len(self.groups[group]), group)
-            group_artists = self.plot_group(group, idx+i, axis)
+            group_artists = self.plot_group(group, idx+ith_plot, axis)
             if isinstance(group_artists, list):
                 artists.extend(group_artists)
             else:
