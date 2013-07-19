@@ -11,14 +11,14 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* [mlogversion](README.md#mlogversion) -- auto-detect the version number of a mongos/mongod log file
-* [mlogdistinct](README.md#mlogdistinct) -- groups all similar log messages together and displays their counts
-* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
-* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
-* [mplotqueries](README.md#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
-* [mlogvis](README.md#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
-* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
+* [mlogfilter](#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
+* [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
+* [mlogmerge](#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
+* [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
+* [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
+* [mlogvis](#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
+* [mlaunch](#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
 
 Requirements and Installation Instructions
@@ -34,7 +34,7 @@ instructions for these modules.
 
 Recent Changes
 --------------
-The current version of mtools is 1.0.1. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
+The current version of mtools is 1.0.2. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
 
 
 Contribute to mtools
@@ -154,7 +154,7 @@ mlogdistinct
 
 #### Description
 
-Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of occurences in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
+Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of matches in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
 
 This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page. It would also be helpful to get any log lines that you think should have been matched. Use `--verbose` to output the lines that couldn't be matched.
 

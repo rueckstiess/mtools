@@ -35,25 +35,48 @@ by [@nvie](https://twitter.com/nvie).
 The [master branch](https://github.com/rueckstiess/mtools) should only ever contain versioned releases. **Do not send
 pull requests against the master branch.**
 
-Development happens on the [develop branch](https://github.com/rueckstiess/mtools/tree/develop). To get a local `develop` 
-branch you need to check out and track the remote `develop` branch:
+Development happens on the [develop branch](https://github.com/rueckstiess/mtools/tree/develop). 
+
+First, fork the [main repository](https://github.com/rueckstiess/mtools) into your own github account (&lt;username&gt;). 
+Then clone a copy to your local machine:
+
+    git clone https://github.com/<username>/mtools
+
+Now you need to add the upstream repository to pull in the latest changes.
+
+    git remote add upstream https://github.com/rueckstiess/mtools
+    git fetch upstream
+
+To get a local `develop` branch you need to check out and track your remote `develop` branch:
 
     git checkout -b develop origin/develop
 
-If you work on a bug or feature implementation you should create a feature/bugfix branch that forks off the `develop` branch:
+If you want to work on a bug or feature implementation, first pull in the latest changes from upstream:
 
-    git -b bugfix-31 develop
-    git -b feature-my-cool-thing develop
+    git checkout develop
+    git pull upstream develop
+
+Then create a feature/bugfix branch that forks off the local `develop` branch:
+
+    git checkout -b feature-37-fast develop
 
 The naming is not that relevant, but it's good practice to start with `feature-` or `bugfix-` and include the issue number
 in the branch name (if available).
 
-Please use meaningful, descriptive git commit messages. A git commit with `asdf` or `changed stuff` will not go into the repository.
+Now make your changes to the code. Commit as often as you like. Please use meaningful, descriptive git commit messages. 
+A git commit with `asdf` or `changed stuff` will not go into the repository.
 
-When you're happy with your changes, raise a pull request against the upstream `develop` branch. Once the code is merged into 
-the `develop` branch, you can delete your local feature/bugfix branch.
+When you're happy with your changes, push your feature branch to github: 
 
-For now, mtools is not using hotfix or release branches mentioned in the nvie branching model. 
+    git push origin feature-37-fast
+
+and raise a pull request against the upstream `develop` branch. Once the code is merged into the `develop` branch, 
+you can pull the change from upstream develop and then delete your local and github feature/bugfix branch.
+
+    git checkout develop
+    git pull upstream develop
+    git push origin --delete feature-37-fast
+    git branch -d feature-37-fast
 
 
 ### Version Numbers

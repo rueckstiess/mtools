@@ -36,7 +36,7 @@ setup(
     version=__version__,
     packages=find_packages(),
     package_data = {
-        'mtools': ['data/logdb.pickle', 'data/index.html'],
+        'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
     scripts=['scripts/mlaunch','scripts/mlog2json','scripts/mlogdistinct',
         'scripts/mlogfilter','scripts/mlogmerge','scripts/mlogversion',

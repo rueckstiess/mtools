@@ -14,7 +14,7 @@ from mtools import __version__
 
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.dates import DateFormatter
+    from matplotlib.dates import DateFormatter, date2num
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
     import mtools.mplotqueries.plottypes as plottypes
@@ -54,6 +54,10 @@ class MPlotQueriesTool(LogFileTool):
         mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
 
         self.legend = None
+
+        # store logfile ranges
+        self.logfile_ranges = []
+
 
     def run(self, arguments=None):
         LogFileTool.run(self, arguments, get_unknowns=True)
@@ -103,10 +107,13 @@ class MPlotQueriesTool(LogFileTool):
         plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
         
         for logfile in self.logfiles:
+            start = None
 
             for line in logfile:
                 # create LogLine object
                 logline = LogLine(line)
+                if not start:
+                    start = logline.datetime
 
                 if multiple_files:
                     # amend logline object with filename for group by filename
@@ -132,6 +139,11 @@ class MPlotQueriesTool(LogFileTool):
 
                     line_accepted = True
                     plot_instance.add_line(logline)
+
+            end = logline.datetime
+
+            # store start and end for each logfile
+            self.logfile_ranges.append( (start, end) )
 
         self.plot_instances.append(plot_instance)
 
@@ -297,7 +309,7 @@ class MPlotQueriesTool(LogFileTool):
 
         ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
-            self.artists.extend(plot_inst.plot(axis, i))
+            self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances)))
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
             
@@ -310,6 +322,11 @@ class MPlotQueriesTool(LogFileTool):
         for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
 
+        # set xlim from min to max of logfile ranges
+        xlim_min = min([dt[0] for dt in self.logfile_ranges])
+        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+        axis.set_xlim(date2num([xlim_min, xlim_max]))
+
         # ylabel for y axis
         if self.args['logscale']:
             ylabel += ' (log scale)'
@@ -319,7 +336,6 @@ class MPlotQueriesTool(LogFileTool):
         axis.set_title(', '.join([l.name for l in self.logfiles]))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
         self.footnote = plt.annotate('created with mtools v%s: https://github.com/rueckstiess/mtools' % __version__, (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
-
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
