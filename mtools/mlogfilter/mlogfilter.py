@@ -96,7 +96,7 @@ class MLogFilterTool(LogFileTool):
             return line[:last_index] + ("").join(splitted)
 
 
-    def run(self):
+    def run(self, arguments=None):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
         """
