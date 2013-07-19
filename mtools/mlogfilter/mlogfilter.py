@@ -8,7 +8,6 @@ from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
 
-
 class MLogFilterTool(LogFileTool):
 
     def __init__(self):
@@ -21,7 +20,6 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
         self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability ')
-
 
 
     def addFilter(self, filterClass):
@@ -56,7 +54,7 @@ class MLogFilterTool(LogFileTool):
 
     def _changeMs(self, line):
         """ changes the ms part in the string if needed """ 
-        #use the the position of the last space instead
+        # use the the position of the last space instead
         try:
             last_space_pos = line.rindex(' ')
         except ValueError, s:
@@ -65,24 +63,23 @@ class MLogFilterTool(LogFileTool):
             end_str = line[last_space_pos:]
             new_string = line
             if end_str[-2:] == 'ms' and int(end_str[:-2]) >= 1000:
-                #isolate the number of milliseconds 
+                # isolate the number of milliseconds 
                 ms = int(end_str[:-2])
-                #create the new string with the beginning part of the log with the new ms part added in
-                new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ') ' + line[last_space_pos:]
+                # create the new string with the beginning part of the log with the new ms part added in
+                new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ')' + line[last_space_pos:]
             return new_string
 
     def _formatNumbers(self, line):
-        '''formats the numbers so that there are commas inserted 
-        ie. 1200300 becomes 1,200,300 '''
+        """ formats the numbers so that there are commas inserted, ie. 1200300 becomes 1,200,300 """
         last_index = 0
         try:
-            #find the index of the last } character
+            # find the index of the last } character
             last_index = (line.rindex('}') + 1)
             end = line[last_index:]
         except ValueError, e:
             return line
         else:
-            #split the string on numbers to isolate them
+            # split the string on numbers to isolate them
             splitted = re.split("(\d+)", end)
             for index, val in enumerate(splitted):
                 converted = 0
@@ -98,13 +95,11 @@ class MLogFilterTool(LogFileTool):
 
 
     def run(self):
-
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
         """
 
-        #add arguments from filter classes before calling superclass run
-
+        # add arguments from filter classes before calling superclass run
         for f in self.filters:
             for fa in f.filterArgs:
                 self.argparser.add_argument(fa[0], **fa[1])
@@ -162,13 +157,3 @@ if __name__ == '__main__':
     tool.addFilter(DateTimeFilter)
     
     tool.run()
-
-
-
-
-
-
-
-
-
-    
