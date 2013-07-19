@@ -48,6 +48,7 @@ class LogLine(object):
         self._split_tokens_calculated = False
         self._split_tokens = None
 
+
         self._duration_calculated = False
         self._duration = None
 
@@ -95,9 +96,8 @@ class LogLine(object):
 
             split_tokens = self.split_tokens
 
-            # if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
-            if len(split_tokens) > 0 and re.match(r'[0-9]{1,}ms$', split_tokens[-1]):
-                self._duration = int(split_tokens[-1][:-2])
+            if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
+                self._duration = int((split_tokens[-1][:-2]).replace(',',''))
 
         return self._duration
 
@@ -333,12 +333,12 @@ class LogLine(object):
                     # special case for numYields because of space in between ("numYields: 2")
                     if counter == 'numYields' and token.startswith('numYields'):
                         try:
-                            self._numYields = int(split_tokens[t+1+self._thread_offset+2])
+                            self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
                         except ValueError:
                             pass
                     elif token.startswith('%s:'%counter):
                         try:
-                            vars(self)['_'+counter] = int(token.split(':')[-1])
+                            vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
                             pass
                         break
