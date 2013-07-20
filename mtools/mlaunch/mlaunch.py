@@ -223,8 +223,10 @@ class MLaunchTool(BaseCmdLineTool):
         for i in range(max(1, self.args['mongos'])):
             self._launchMongoS(os.path.join(self.args['dir'], 'mongos.log'), nextport, ','.join(config_string))
             if i == 0: 
-                # store host/port of first mongos
+                # store host/port of first mongos (use localhost)
                 self.mongos_host = '%s:%i'%(self.hostname, nextport)
+                if self.args['authentication']:
+                    self.mongos_host = 'localhost:%i'%(nextport)
             nextport += 1
 
         # add shards
