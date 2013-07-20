@@ -75,8 +75,8 @@ class BasePlotType(object):
                 f = getattr(self, group_by)
                 key = f(logline)
             # if a --label was given, use that as key
-            elif self.args and self.args['label']:
-                key = self.args['label']
+            # elif self.args and self.args['label']:
+            #     key = self.args['label']
             # else key is None
             else:
                 key = None

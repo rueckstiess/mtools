@@ -3,10 +3,11 @@ Changes to mtools
 
 #### version 1.0.3
 
-  * mplotqueries: New plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).
-  * mplotqueries: Added footnote ("created with mtools") including version. Can be toggled on/off with 'f' (#33).
-  * mplotqueries: Added histogram plots (--type histogram) with variable bucket size (#25).
-  * mplotqueries: Always plot full range of logfile on x-axis, even if data points start later or end earlier (#60).
+  * mplotqueries: new plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).
+  * mplotqueries: added footnote ("created with mtools") including version. Can be toggled on/off with 'f' (#33).
+  * mplotqueries: added histogram plots (--type histogram) with variable bucket size (#25).
+  * mplotqueries: always plot full range of logfile on x-axis, even if data points start later or end earlier (#60).
+  * mlogfilter: added human-readable option (--human) that inserts `,` in large numbers and calculates durations in hrs,min,sec. (#8).
   * mlogdistinct: improved log2code matching and cleaned up log2code match database.
 
 #### version 1.0.2
