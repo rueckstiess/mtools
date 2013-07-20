@@ -347,7 +347,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
@@ -379,7 +379,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
