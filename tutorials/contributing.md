@@ -63,8 +63,8 @@ Then create a feature/bugfix branch that forks off the local `develop` branch:
 The naming is not that relevant, but it's good practice to start with `feature-` or `bugfix-` and include the issue number
 in the branch name (if available).
 
-Now make your changes to the code. Commit as often as you like. Please use meaningful, descriptive git commit messages. 
-A git commit with `asdf` or `changed stuff` will not go into the repository.
+Now make your changes to the code. Commit as often as you like. Please use meaningful, descriptive git commit messages and
+avoid `asdf` or `changed stuff` descriptions.
 
 When you're happy with your changes, push your feature branch to github: 
 
