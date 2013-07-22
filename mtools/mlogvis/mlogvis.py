@@ -47,7 +47,7 @@ class MLogVisTool(LogFileTool):
                     outf += ',\n'
                 else:
                     first_row = False
-                outf += logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration'])
+                outf += logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration', 'numYields', 'w', 'r'])
         outf += ']}'
 
         dstfilelocation = os.path.join(os.getcwd(), '%s.html'%logname)

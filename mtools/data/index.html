@@ -71,19 +71,19 @@
             // filter out all documents that don't have yaxis_field or datetime
             // this.data = data.filter((function(d) { return d[this.yaxis_field] && d.datetime }).bind(this));
 
-            // calculate min and max dates
-            this.data_lim_x = d3.extent(this.data, function(d, i) { return new Date(d.datetime) });
-            this.data_lim_y = d3.extent(this.data, (function(d, i) { return d[this.yaxis_field] }).bind(this));            
-
             // create x scale, from [events_min, events_max] to [0, width]
             this.x = d3.time.scale.utc()
-                .domain(this.data_lim_x)
                 .range([0, this.width]);
 
             // create y scale, from [0, 100] to [0, height]
             this.y = d3.scale.linear()
-                .domain(this.data_lim_y)
                 .range([this.height, 0]);
+
+            // calculate min and max dates
+            this._recalc_data_extents();
+
+            this.x.domain(this.data_lim_x);
+            this.y.domain(this.data_lim_y);
 
             // var color scale (10 colors)
             this.c = d3.scale.category10();
@@ -263,6 +263,8 @@
         }
 
         MLogVis.prototype.render_plot = function() {
+          
+          // filter data to plot in case yaxis_field has changed
           var circles = this.svg.selectAll('circle')
             .data(this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) ));
 
@@ -313,6 +315,8 @@
         MLogVis.prototype.enable_logscale = function(flag, time) {
             var y_scale = flag ? d3.scale.log() : d3.scale.linear();
 
+            this._recalc_data_extents();
+
             y_scale
               .domain(this.data_lim_y)
               .range(this.y.range());
@@ -332,7 +336,7 @@
             this.svg.select(".y.axis").call(this.yAxis);
 
             this.svg.selectAll('circle')
-              .data(this.data)
+              .data(this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) ))
               .transition()
                 .duration(time)
                 .attr('cy', (function(d) { return this.y(d[this.yaxis_field]) }).bind(this));
@@ -341,6 +345,8 @@
 
         MLogVis.prototype.set_yaxis_field = function(field) {
             this.yaxis_field = field;
+            this._recalc_data_extents();
+            this.reset(0);
             this.render_plot();
             this.render_legend();
         };
@@ -385,12 +391,20 @@
           this.render_plot();
         };
 
+        MLogVis.prototype._recalc_data_extents = function() {
+          var data = this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) );
+
+          this.data_lim_x = d3.extent(data, function(d, i) { return new Date(d.datetime) });
+          this.data_lim_y = d3.extent(data, (function(d, i) { return d[this.yaxis_field] }).bind(this));
+        }            
 
         MLogVis.prototype.reset = function(time) {
           // transition to original view frame but keep group selection
           if (time === undefined) {
             time = 500;
           }
+
+          this._recalc_data_extents();
 
           var bind_f = function(obj) {
             // wrapper to bind this to obj
