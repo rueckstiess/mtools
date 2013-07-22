@@ -68,9 +68,6 @@
             // bind data
             this.data = data;
 
-            // filter out all documents that don't have yaxis_field or datetime
-            // this.data = data.filter((function(d) { return d[this.yaxis_field] && d.datetime }).bind(this));
-
             // create x scale, from [events_min, events_max] to [0, width]
             this.x = d3.time.scale.utc()
                 .range([0, this.width]);
@@ -214,14 +211,14 @@
                         num_vis_groups ++;
                       }
                   }
-                  if (obj._is_visible(d) && (num_vis_groups == 1)) {
+                  if (obj._is_visible_group(d) && (num_vis_groups == 1)) {
                     obj.set_group_visibility(obj.c.domain(), true);
                   } else {
                     obj.set_group_visibility(obj.c.domain(), false);
                     obj.set_group_visibility(d, true);
                   }
                 } else {
-                  obj.set_group_visibility(d, !obj._is_visible(d));
+                  obj.set_group_visibility(d, !obj._is_visible_group(d));
                 }
                 obj.render_legend();
               })
@@ -250,7 +247,7 @@
                 .attr("dy", function(d,i) {return (i)*1.5+0.8 + "em"; })
                 .text(function (d) { return d; });
               g.select("circle")
-                .style("fill", function (d) { return obj._is_visible(d) ? obj.c(d) : "white" });               
+                .style("fill", function (d) { return obj._is_visible_group(d) ? obj.c(d) : "white" });               
             });
 
           items.exit()
@@ -262,11 +259,24 @@
             });
         }
 
+        MLogVis.prototype._is_visible = function(d) {
+          // only include data point if it has the yaxis_field and a datetime
+          if (!d[this.yaxis_field] || !d.datetime) {
+            return false;
+          }
+          // only bind data that is within the viewport and is visible
+          var group = this._is_visible_group(d[this.group_field]);
+          var xdt = new Date(d['datetime']);
+          var xdomain = this.x.domain();
+          var ydt = d[this.yaxis_field];
+          var ydomain = this.y.domain();
+          return (group && (xdt > xdomain[0]) && (xdt < xdomain[1]) && (ydt > ydomain[0]) && (ydt < ydomain[1]));
+        };
+
         MLogVis.prototype.render_plot = function() {
-          
-          // filter data to plot in case yaxis_field has changed
+          // filter data to plot in case yaxis_field has changed and bind by _id
           var circles = this.svg.selectAll('circle')
-            .data(this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) ));
+            .data(this.data.filter( this._is_visible.bind(this) ));
 
           circles
             .enter()
@@ -281,7 +291,7 @@
 
           circles
             .style('fill', (function(d) { return this.c(d[this.group_field]) }).bind(this))
-            .style('display', (function (d) { return this._is_visible(d[this.group_field]) ? "block" : "none" }).bind(this))
+            // .style('display', (function (d) { return this._is_visible_group(d[this.group_field]) ? "block" : "none" }).bind(this))
             .attr('cx', (function(d) { return this.x(new Date(d['datetime'])) }).bind(this))
             .attr('cy', (function(d) { return this.y(d[this.yaxis_field]) }).bind(this));
 
@@ -289,7 +299,7 @@
         };
 
 
-        MLogVis.prototype._is_visible = function(group) {
+        MLogVis.prototype._is_visible_group = function(group) {
             return !(group in this.visible_groups) || this.visible_groups[group];
         };
 
@@ -333,10 +343,13 @@
             this.zoom.scale(zoom_sc);
 
             this.yAxis.scale(this.y);
-            this.svg.select(".y.axis").call(this.yAxis);
+            this.svg.select(".y.axis")
+              .transition()
+              .duration(time)
+              .call(this.yAxis);
 
             this.svg.selectAll('circle')
-              .data(this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) ))
+              .data(this.data.filter( (function(d) { return d[this.yaxis_field] && d.datetime }).bind(this) ), function(d) { return d['_id'] })
               .transition()
                 .duration(time)
                 .attr('cy', (function(d) { return this.y(d[this.yaxis_field]) }).bind(this));
@@ -398,6 +411,22 @@
           this.data_lim_y = d3.extent(data, (function(d, i) { return d[this.yaxis_field] }).bind(this));
         }            
 
+        MLogVis.prototype.highlight = function(condition) {
+          var circles = this.svg.selectAll('circle')
+            .data(this.data, function(d) { return d['_id'] });
+
+          circles
+            .attr("r", 4)
+            .style("stroke", null);
+
+          circles
+            .filter(condition)
+            .attr("r", 5)
+            .style('stroke', 'yellow')
+            .style('stroke-width', 3)
+            .style('stroke-opacity', 1)
+        };
+
         MLogVis.prototype.reset = function(time) {
           // transition to original view frame but keep group selection
           if (time === undefined) {
@@ -437,6 +466,8 @@
         return mlogvis;
 
       }());
+
+
 
     </script>
 
