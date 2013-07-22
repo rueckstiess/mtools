@@ -588,7 +588,11 @@
         // },                    
         select_callback: function (d, i) {      // callback for click on element, or null
           // example: print log line string to console
-          d3.select("#logline").html(d.line_str);
+          if (d.line_str) {
+            d3.select("#logline").html(d.line_str);
+          } else {
+            d3.select("#logline").html("line string unavailable. line no: " + d['_id'] + " document:" + JSON.stringify(d))
+          }
         },   
       };    
 
