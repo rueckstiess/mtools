@@ -1,7 +1,7 @@
 import argparse
 import sys
 from mtools.version import __version__
-
+import signal
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -20,6 +20,9 @@ class BaseCmdLineTool(object):
             arguments, else evaluates sys.argv. Any inheriting class should extend the run method 
             (but first calling BaseCmdLineTool.run(self)).
         """
+        # redirect PIPE signal to quiet kill script
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
         if get_unknowns:
             if arguments:
                 self.args, self.unknown_args = self.argparser.parse_known_args(args=arguments.split())
