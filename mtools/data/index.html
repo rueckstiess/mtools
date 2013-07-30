@@ -323,8 +323,11 @@
         };
 
         MLogVis.prototype.enable_logscale = function(flag, time) {
+            if (this.logscale_enabled == flag) {
+              return;
+            }
             var y_scale = flag ? d3.scale.log() : d3.scale.linear();
-
+            this.logscale_enabled = flag;
             this._recalc_data_extents();
 
             y_scale
@@ -409,6 +412,14 @@
 
           this.data_lim_x = d3.extent(data, function(d, i) { return new Date(d.datetime) });
           this.data_lim_y = d3.extent(data, (function(d, i) { return d[this.yaxis_field] }).bind(this));
+          // bit of buffer on the top and bottom
+
+          if (!this.logscale_enabled) {
+            this.data_lim_y[0] = 0;
+            this.data_lim_y[1] *= 1.1;
+          } else {       
+            this.data_lim_y[1] *= 1.5;
+          }          
         }            
 
         MLogVis.prototype.highlight = function(condition) {
