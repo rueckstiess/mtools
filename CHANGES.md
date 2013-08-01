@@ -1,6 +1,11 @@
 Changes to mtools
 =================
 
+#### version 1.0.4
+
+  * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).
+
+
 #### version 1.0.3
 
   * mplotqueries: new plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).
