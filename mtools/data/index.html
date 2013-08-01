@@ -46,11 +46,11 @@
 
             // multi-scale time axis (only local var)
             var customTimeFormat = this._time_format([
-                [d3.time.format("%b %d"), function(d) { return true}],
-                [d3.time.format("%H:%M"), function(d) { return d.getHours(); }],
-                [d3.time.format("%H:%M:%S"), function(d) { return d.getSeconds(); }],
-                [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }],
-                [d3.time.format("%b %d"), function(d, i) { return i%10 == 0; }]
+                [d3.time.format.utc("%b %d"), function(d) { return true}],
+                [d3.time.format.utc("%H:%M"), function(d) { return d.getUTCHours(); }],
+                [d3.time.format.utc("%H:%M:%S"), function(d) { return d.getUTCSeconds(); }],
+                [d3.time.format.utc(".%L"), function(d) { return d.getUTCMilliseconds(); }],
+                [d3.time.format.utc("%b %d"), function(d, i) { return i%10 == 0; }]
             ]);
 
             // flag to enable zoom box
