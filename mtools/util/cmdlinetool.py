@@ -1,7 +1,7 @@
 import argparse
 import sys
 from mtools.version import __version__
-
+import signal
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -19,6 +19,8 @@ class BaseCmdLineTool(object):
             arguments, else evaluates sys.argv. Any inheriting class should extend the run method 
             (but first calling BaseCmdLineTool.run(self)).
         """
+        # redirect PIPE signal to quiet kill script
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
         if get_unknowns:
             if arguments:
@@ -46,7 +48,7 @@ class LogFileTool(BaseCmdLineTool):
         arg_opts = {'action':'store', 'type':argparse.FileType('r')}
 
         if self.stdin_allowed:
-            arg_opts['default'] = None if sys.stdin.isatty() else sys.stdin
+            arg_opts['default'] = None
             arg_opts['nargs'] = '?'
 
         if self.multiple_logfiles:
@@ -55,9 +57,15 @@ class LogFileTool(BaseCmdLineTool):
         else:
             arg_opts['help'] = 'logfile to parse'
 
+        if not sys.stdin.isatty():
+            arg_opts['const'] = sys.stdin
+            arg_opts['action'] = 'store_const'
+            del arg_opts['type']
+            del arg_opts['nargs']
+
         self.argparser.add_argument('logfile', **arg_opts)
 
 
 if __name__ == '__main__':
-    tool = LogFileTool(multiple_logfiles=True, stdin_allowed=True)
+    tool = LogFileTool(multiple_logfiles=True, stdin_allowed=False)
     tool.run()

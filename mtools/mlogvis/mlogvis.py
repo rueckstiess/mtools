@@ -17,6 +17,35 @@ class MLogVisTool(LogFileTool):
             information from each line of the log file and outputs a html file that can be viewed in \
             a browser. Automatically opens a browser tab and shows the file.'
 
+    def _export(self, with_line_str=True):
+        fields = ['_id', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration', 'numYields', 'w', 'r']
+        if with_line_str:
+            fields.append('line_str')
+
+        first_row = True
+        result_str = ''
+        out_count = 0
+        for line_no, line in enumerate(self.args['logfile']):
+            logline = LogLine(line)
+            # only export lines that have a datetime and duration
+            if logline.datetime and logline.duration:
+                out_count += 1
+                # if too many lines include a line_str, the page won't load
+                if with_line_str and out_count > 10000:
+                    print "Warning: more than 10,000 data points detected. Skipping actual log line strings for faster plotting."
+                    return False
+                # write log line out as json
+                if not first_row:
+                    # prepend comma and newline
+                    result_str += ',\n'
+                else:
+                    first_row = False
+                # hack to include _id for log lines from file
+                logline._id = line_no
+                result_str += logline.to_json(fields)
+        return result_str
+        
+
     def run(self, arguments=None):
         LogFileTool.run(self, arguments)
 
@@ -32,23 +61,12 @@ class MLogVisTool(LogFileTool):
 
         data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
         srcfilelocation = os.path.join(data_path, 'index.html')
-        outf = '{"type": "duration", "logfilename": "' + logname + '", "data":['
+        
+        json_docs = self._export(True)
+        if not json_docs:
+            json_docs = self._export(False)
 
-        first_row = True
-        for line in self.args['logfile']:
-            logline = LogLine(line)
-            # group regular connections together
-            if logline.datetime and logline.duration:
-                if logline.thread and logline.thread.startswith("conn"):
-                    logline._thread = "conn####"
-                # write log line out as json
-                if not first_row:
-                    # prepend comma and newline
-                    outf += ',\n'
-                else:
-                    first_row = False
-                outf += logline.to_json(['line_str', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration'])
-        outf += ']}'
+        outf = '{"type": "duration", "logfilename": "' + logname + '", "data":[' + json_docs + ']}'
 
         dstfilelocation = os.path.join(os.getcwd(), '%s.html'%logname)
 

@@ -1,6 +1,14 @@
 Changes to mtools
 =================
 
+#### version 1.0.4
+
+  * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).
+  * mplotqueries: fixed bug where a plot's argument sub-parser (e.g. for --bucketsize) couldn't deal with stdin.
+  * mlogfilter: fixed bug that prevented `--from` and `--to` to be used with stdin (#73).
+  * fixed bug parsing durations of log lines that have a float instead of int value (like 123.45ms).
+
+
 #### version 1.0.3
 
   * mplotqueries: new plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).

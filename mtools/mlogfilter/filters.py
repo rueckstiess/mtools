@@ -265,7 +265,6 @@ class DateTimeFilter(BaseFilter):
 
     def __init__(self, commandLineArgs):
         BaseFilter.__init__(self, commandLineArgs)
-
         self.fromReached = False
         self.toReached = False
 
@@ -277,48 +276,50 @@ class DateTimeFilter(BaseFilter):
         """ get start end end date of logfile before starting to parse. """
         logfile = self.commandLineArgs['logfile']
         seekable = False
+
         if logfile:
             seekable = logfile.name != "<stdin>"
 
         if not seekable:
-            self.startDateTime = None
-            self.endDateTime = None
-            self.fromDateTime = datetime(MINYEAR, 1, 1)
-            self.toDateTime = datetime(MAXYEAR, 12, 31)
-            return
+            # assume this year (we have no other info)
+            now = datetime.now()
+            self.startDateTime = datetime(now.year, 1, 1)
+            self.endDateTime = datetime(MAXYEAR, 12, 31)
+            # self.fromDateTime = datetime(MINYEAR, 1, 1)
+            # self.toDateTime = datetime(MAXYEAR, 12, 31)
+        
+        else:
+            # get start datetime 
+            for line in logfile:
+                logline = LogLine(line)
+                date = logline.datetime
+                if date:
+                    break
+            self.startDateTime = date
 
-        # get start datetime 
-        for line in logfile:
-            logline = LogLine(line)
-            date = logline.datetime
-            if date:
-                break
-        self.startDateTime = date
+            # get end datetime (lines are at most 10k, go back 15k at most to make sure)
+            logfile.seek(0, 2)
+            file_size = logfile.tell()
+            logfile.seek(-min(file_size, 15000), 2)
 
-        # get end datetime (lines are at most 10k, go back 15k at most to make sure)
-        logfile.seek(0, 2)
-        file_size = logfile.tell()
-        logfile.seek(-min(file_size, 15000), 2)
+            for line in reversed(logfile.readlines()):
+                logline = LogLine(line)
+                date = logline.datetime
+                if date:
+                    break
+            self.endDateTime = date
 
-        for line in reversed(logfile.readlines()):
-            logline = LogLine(line)
-            date = logline.datetime
-            if date:
-                break
-        self.endDateTime = date
+            # if there was a roll-over, subtract 1 year from start time
+            if self.endDateTime < self.startDateTime:
+                self.startDateTime = self.startDateTime.replace(year=self.startDateTime.year-1)
 
-        # if there was a roll-over, subtract 1 year from start time
-        if self.endDateTime < self.startDateTime:
-            self.startDateTime = self.startDateTime.replace(year=self.startDateTime.year-1)
-
-        # reset logfile
-        logfile.seek(0)
+            # reset logfile
+            logfile.seek(0)
 
         # now parse for further changes to from and to datetimes
         dtbound = DateTimeBoundaries(self.startDateTime, self.endDateTime)
         self.fromDateTime, self.toDateTime = dtbound(self.commandLineArgs['from'] or None, 
                                                      self.commandLineArgs['to'] or None)
-
 
     def accept(self, logline):
         dt = logline.datetime
