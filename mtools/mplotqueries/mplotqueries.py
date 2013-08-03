@@ -325,6 +325,10 @@ class MPlotQueriesTool(LogFileTool):
         # set xlim from min to max of logfile ranges
         xlim_min = min([dt[0] for dt in self.logfile_ranges])
         xlim_max = max([dt[1] for dt in self.logfile_ranges])
+
+        if xlim_min == None or xlim_max == None:
+            raise SystemExit('no data to plot.')
+            
         axis.set_xlim(date2num([xlim_min, xlim_max]))
 
         # ylabel for y axis

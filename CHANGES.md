@@ -5,9 +5,10 @@ Changes to mtools
 
   * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).
   * mplotqueries: fixed bug where a plot's argument sub-parser (e.g. for --bucketsize) couldn't deal with stdin.
+  * mplotqueries: fixed bug that caused crash when there was no data to plot (#68).
   * mlogfilter: fixed bug that prevented `--from` and `--to` to be used with stdin (#73).
   * fixed bug parsing durations of log lines that have a float instead of int value (like 123.45ms).
-
+  * implemented ISO-8601 timestamp format parsing for upcoming change in MongoDB 2.6 (#76).
 
 #### version 1.0.3
 
