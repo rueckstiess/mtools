@@ -1,6 +1,9 @@
 Changes to mtools
 =================
 
+#### version 1.0.5
+
+
 #### version 1.0.4
 
   * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).
