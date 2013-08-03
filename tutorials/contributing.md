@@ -44,6 +44,7 @@ Then clone a copy to your local machine:
 
 Now you need to add the upstream repository to pull in the latest changes.
 
+    cd mtools
     git remote add upstream https://github.com/rueckstiess/mtools
     git fetch upstream
 
