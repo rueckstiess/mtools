@@ -305,11 +305,18 @@ class MPlotQueriesTool(LogFileTool):
     def plot(self):
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
-        axis = plt.subplot(111, )
+        axis = plt.subplot(111)
+
+        # set xlim from min to max of logfile ranges
+        xlim_min = min([dt[0] for dt in self.logfile_ranges])
+        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+
+        if xlim_min == None or xlim_max == None:
+            raise SystemExit('no data to plot.')
 
         ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
-            self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances)))
+            self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances), (xlim_min, xlim_max) ))
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
             
@@ -321,10 +328,7 @@ class MPlotQueriesTool(LogFileTool):
 
         for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
-
-        # set xlim from min to max of logfile ranges
-        xlim_min = min([dt[0] for dt in self.logfile_ranges])
-        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+            
         axis.set_xlim(date2num([xlim_min, xlim_max]))
 
         # ylabel for y axis
