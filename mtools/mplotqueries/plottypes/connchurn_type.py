@@ -1,6 +1,7 @@
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 import argparse
 import types
+import re
 import numpy as np
 
 try:
@@ -66,7 +67,8 @@ class ConnectionChurnPlotType(BasePlotType):
 
         bins = np.linspace(xmin, xmax, n_bins)
 
-        n, bins, artists = axis.hist(x, bins=bins, rwidth=1, align='mid', log=self.logscale, histtype="bar", color=color, edgecolor="white", alpha=0.65, picker=True, label=group)
+        n, bins, artists = axis.hist(x, bins=bins, rwidth=1, align='mid', log=self.logscale, histtype="bar", color=color, 
+            edgecolor="white", alpha=0.65, picker=True, label="# connections %s per bin" % group)
 
         if group == 'closed':
             ymin = 0
@@ -80,11 +82,33 @@ class ConnectionChurnPlotType(BasePlotType):
             axis.set_ylim(bottom = ymin*1.1) 
         
         elif group == 'opened':
-            ymax = max([a.get_height() for a in artists])
-            axis.set_ylim(top = ymax*1.1) 
+            self.ymax = max([a.get_height() for a in artists])
 
         return artists
 
+
+    def plot_total_conns(self, axis):
+        opened = self.groups['opened']
+        closed = self.groups['closed']
+
+        total = sorted(opened+closed, key=lambda ll: ll.datetime)
+        x = date2num( [ logline.datetime for logline in total ] )
+        conns = [int(re.search(r'(\d+) connections? now open', ll.line_str).group(1)) for ll in total]
+
+        axis.plot(x, conns, '-', color='black', linewidth=2, alpha=0.7, label='# open connections total')
+
+        self.ymax = max(self.ymax, max(conns))
+        axis.set_ylim(top = self.ymax*1.1) 
+
+
+    def plot(self, axis, ith_plot, total_plots, limits):
+        artists = BasePlotType.plot(self, axis, ith_plot, total_plots, limits)
+
+        # parse all groups and plot currently open number of connections
+        artist = self.plot_total_conns(axis)
+        artists.append(artist)
+
+        return artists
 
 
     @classmethod
