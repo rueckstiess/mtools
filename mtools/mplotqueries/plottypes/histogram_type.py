@@ -56,7 +56,7 @@ class HistogramPlotType(BasePlotType):
         raise NotImplementedError("Not implemented for histogram plots.")
 
 
-    def plot(self, axis, ith_plot, total_plots):
+    def plot(self, axis, ith_plot, total_plots, limits):
         """ Plots the histogram as a whole over all groups, rather than individual groups like other plot types. """
         
         print self.plot_type_str.upper(), "plot"
