@@ -3,6 +3,8 @@ Changes to mtools
 
 #### version 1.0.5
 
+  * mplotqueries: included a new plot type 'connchurn' shows opened vs. closed connections over time (#77).
+
 
 #### version 1.0.4
 
