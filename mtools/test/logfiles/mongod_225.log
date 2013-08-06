@@ -1,0 +1,497 @@
+Mon Aug  5 20:21:42 [initandlisten] MongoDB starting : pid=98223 port=27017 dbpath=/Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db 64-bit host=capslock.local
+Mon Aug  5 20:21:42 [initandlisten] db version v2.2.5, pdfile version 4.5
+Mon Aug  5 20:21:42 [initandlisten] git version: 14d8c4d1eb320ab10c6956f6e4b52263249bc0b4
+Mon Aug  5 20:21:42 [initandlisten] build info: Darwin bs-osx-106-x86-64-2.10gen.cc 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+Mon Aug  5 20:21:42 [initandlisten] options: { dbpath: "./data/replset/rs1/db", fork: true, logappend: true, logpath: "./data/replset/rs1/mongod.log", port: 27017, replSet: "replset" }
+Mon Aug  5 20:21:42 [initandlisten] journal dir=/Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/journal
+Mon Aug  5 20:21:42 [initandlisten] recover : no journal files present, no recovery needed
+Mon Aug  5 20:21:42 [websvr] admin web console waiting for connections on port 28017
+Mon Aug  5 20:21:42 [initandlisten] waiting for connections on port 27017
+Mon Aug  5 20:21:42 [rsStart] replSet can't get local.system.replset config from self or any seed (EMPTYCONFIG)
+Mon Aug  5 20:21:42 [rsStart] replSet info you may need to run replSetInitiate -- rs.initiate() in the shell -- if that is not already done
+Mon Aug  5 20:21:42 [initandlisten] connection accepted from 10.0.0.12:52076 #1 (1 connection now open)
+Mon Aug  5 20:21:42 [conn1] end connection 10.0.0.12:52076 (0 connections now open)
+Mon Aug  5 20:21:42 [initandlisten] connection accepted from 127.0.0.1:52079 #2 (1 connection now open)
+Mon Aug  5 20:21:42 [conn2] replSet replSetInitiate admin command received from client
+Mon Aug  5 20:21:42 [conn2] replSet replSetInitiate config object parses ok, 3 members specified
+Mon Aug  5 20:21:42 [conn2] replSet replSetInitiate all members seem up
+Mon Aug  5 20:21:42 [conn2] ******
+Mon Aug  5 20:21:42 [conn2] creating replication oplog of size: 183MB...
+Mon Aug  5 20:21:42 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/local.ns, filling with zeroes...
+Mon Aug  5 20:21:42 [FileAllocator] creating directory /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/_tmp
+Mon Aug  5 20:21:42 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/local.ns, size: 16MB,  took 0.08 secs
+Mon Aug  5 20:21:42 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/local.0, filling with zeroes...
+Mon Aug  5 20:21:43 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/local.0, size: 256MB,  took 0.722 secs
+Mon Aug  5 20:21:43 [conn2] ******
+Mon Aug  5 20:21:43 [conn2] replSet info saving a newer config version to local.system.replset
+Mon Aug  5 20:21:43 [conn2] replSet saveConfigLocally done
+Mon Aug  5 20:21:43 [conn2] replSet replSetInitiate config now saved locally.  Should come online in about a minute.
+Mon Aug  5 20:21:43 [conn2] command admin.$cmd command: { replSetInitiate: { _id: "replset", members: [ { host: "capslock.local:27017", _id: 0 }, { host: "capslock.local:27018", _id: 1 }, { host: "capslock.local:27019", _id: 2, arbiterOnly: true } ] } } ntoreturn:1 keyUpdates:0 locks(micros) W:901227 reslen:112 903ms
+Mon Aug  5 20:21:43 [conn2] end connection 127.0.0.1:52079 (0 connections now open)
+Mon Aug  5 20:21:52 [rsStart] replSet I am capslock.local:27017
+Mon Aug  5 20:21:52 [rsStart] replSet STARTUP2
+Mon Aug  5 20:21:52 [rsHealthPoll] replSet member capslock.local:27018 is up
+Mon Aug  5 20:21:52 [initandlisten] connection accepted from 10.0.0.12:52086 #3 (1 connection now open)
+Mon Aug  5 20:21:53 [rsSync] replSet SECONDARY
+Mon Aug  5 20:21:54 [rsHealthPoll] replSet member capslock.local:27019 is up
+Mon Aug  5 20:21:54 [rsHealthPoll] replSet member capslock.local:27018 is now in state STARTUP2
+Mon Aug  5 20:21:54 [rsMgr] not electing self, capslock.local:27018 would veto
+Mon Aug  5 20:21:54 [rsMgr] not electing self, capslock.local:27018 would veto
+Mon Aug  5 20:21:59 [initandlisten] connection accepted from 127.0.0.1:52088 #4 (2 connections now open)
+Mon Aug  5 20:22:00 [rsMgr] replSet not electing self, not all members up and we have been up less than 5 minutes
+Mon Aug  5 20:22:02 [initandlisten] connection accepted from 10.0.0.12:52089 #5 (3 connections now open)
+Mon Aug  5 20:22:04 [rsHealthPoll] replSet member capslock.local:27019 is now in state STARTUP2
+Mon Aug  5 20:22:04 [rsMgr] not electing self, capslock.local:27019 would veto
+Mon Aug  5 20:22:08 [conn3] end connection 10.0.0.12:52086 (2 connections now open)
+Mon Aug  5 20:22:08 [initandlisten] connection accepted from 10.0.0.12:52095 #6 (3 connections now open)
+Mon Aug  5 20:22:09 [initandlisten] connection accepted from 10.0.0.12:52096 #7 (4 connections now open)
+Mon Aug  5 20:22:09 [conn7] end connection 10.0.0.12:52096 (3 connections now open)
+Mon Aug  5 20:22:10 [rsHealthPoll] replSet member capslock.local:27018 is now in state RECOVERING
+Mon Aug  5 20:22:10 [rsMgr] replSet info electSelf 0
+Mon Aug  5 20:22:10 [rsMgr] replSet PRIMARY
+Mon Aug  5 20:22:10 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.ns, filling with zeroes...
+Mon Aug  5 20:22:10 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.ns, size: 16MB,  took 0.074 secs
+Mon Aug  5 20:22:10 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.0, filling with zeroes...
+Mon Aug  5 20:22:10 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.0, size: 64MB,  took 0.169 secs
+Mon Aug  5 20:22:10 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.1, filling with zeroes...
+Mon Aug  5 20:22:10 [conn4] build index test.docs { _id: 1 }
+Mon Aug  5 20:22:10 [conn4] build index done.  scanned 0 total records. 0.013 secs
+Mon Aug  5 20:22:10 [conn4] insert test.docs keyUpdates:0 locks(micros) w:288340 288ms
+Mon Aug  5 20:22:10 [initandlisten] connection accepted from 10.0.0.12:52097 #8 (4 connections now open)
+Mon Aug  5 20:22:10 [initandlisten] connection accepted from 10.0.0.12:52098 #9 (5 connections now open)
+Mon Aug  5 20:22:10 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.1, size: 128MB,  took 0.403 secs
+Mon Aug  5 20:22:12 [rsHealthPoll] replSet member capslock.local:27019 is now in state ARBITER
+Mon Aug  5 20:22:12 [slaveTracking] build index local.slaves { _id: 1 }
+Mon Aug  5 20:22:12 [slaveTracking] build index done.  scanned 0 total records. 0 secs
+Mon Aug  5 20:22:14 [rsHealthPoll] replSet member capslock.local:27018 is now in state SECONDARY
+Mon Aug  5 20:22:18 [conn5] end connection 10.0.0.12:52089 (4 connections now open)
+Mon Aug  5 20:22:18 [initandlisten] connection accepted from 10.0.0.12:52099 #10 (5 connections now open)
+Mon Aug  5 20:22:38 [conn6] end connection 10.0.0.12:52095 (4 connections now open)
+Mon Aug  5 20:22:38 [initandlisten] connection accepted from 10.0.0.12:52108 #11 (5 connections now open)
+Mon Aug  5 20:22:48 [conn10] end connection 10.0.0.12:52099 (4 connections now open)
+Mon Aug  5 20:22:48 [initandlisten] connection accepted from 10.0.0.12:52109 #12 (5 connections now open)
+Mon Aug  5 20:22:52 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.2, filling with zeroes...
+Mon Aug  5 20:22:54 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.2, size: 256MB,  took 1.477 secs
+Mon Aug  5 20:23:08 [conn11] end connection 10.0.0.12:52108 (4 connections now open)
+Mon Aug  5 20:23:08 [initandlisten] connection accepted from 10.0.0.12:52117 #13 (5 connections now open)
+Mon Aug  5 20:23:18 [conn12] end connection 10.0.0.12:52109 (4 connections now open)
+Mon Aug  5 20:23:18 [initandlisten] connection accepted from 10.0.0.12:52119 #14 (5 connections now open)
+Mon Aug  5 20:23:28 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.3, filling with zeroes...
+Mon Aug  5 20:23:31 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.3, size: 512MB,  took 2.774 secs
+Mon Aug  5 20:23:38 [conn13] end connection 10.0.0.12:52117 (4 connections now open)
+Mon Aug  5 20:23:38 [initandlisten] connection accepted from 10.0.0.12:52127 #15 (5 connections now open)
+Mon Aug  5 20:23:48 [conn14] end connection 10.0.0.12:52119 (4 connections now open)
+Mon Aug  5 20:23:48 [initandlisten] connection accepted from 10.0.0.12:52128 #16 (5 connections now open)
+Mon Aug  5 20:24:02 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.4, filling with zeroes...
+Mon Aug  5 20:24:06 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.4, size: 1024MB,  took 4.177 secs
+Mon Aug  5 20:24:08 [conn15] end connection 10.0.0.12:52127 (4 connections now open)
+Mon Aug  5 20:24:08 [initandlisten] connection accepted from 10.0.0.12:52138 #17 (5 connections now open)
+Mon Aug  5 20:24:18 [conn16] end connection 10.0.0.12:52128 (4 connections now open)
+Mon Aug  5 20:24:18 [initandlisten] connection accepted from 10.0.0.12:52139 #18 (5 connections now open)
+Mon Aug  5 20:24:38 [conn17] end connection 10.0.0.12:52138 (4 connections now open)
+Mon Aug  5 20:24:38 [initandlisten] connection accepted from 10.0.0.12:52147 #19 (5 connections now open)
+Mon Aug  5 20:24:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:110798 110ms
+Mon Aug  5 20:24:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:122583 121ms
+Mon Aug  5 20:24:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:113492 112ms
+Mon Aug  5 20:24:44 [conn4] insert test.docs keyUpdates:0 locks(micros) w:123958 123ms
+Mon Aug  5 20:24:48 [conn18] end connection 10.0.0.12:52139 (4 connections now open)
+Mon Aug  5 20:24:48 [initandlisten] connection accepted from 10.0.0.12:52148 #20 (5 connections now open)
+Mon Aug  5 20:25:08 [conn19] end connection 10.0.0.12:52147 (4 connections now open)
+Mon Aug  5 20:25:08 [initandlisten] connection accepted from 10.0.0.12:52155 #21 (5 connections now open)
+Mon Aug  5 20:25:17 [FileAllocator] allocating new datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.5, filling with zeroes...
+Mon Aug  5 20:25:18 [conn4] insert test.docs keyUpdates:0 locks(micros) w:387027 386ms
+Mon Aug  5 20:25:18 [conn20] end connection 10.0.0.12:52148 (4 connections now open)
+Mon Aug  5 20:25:18 [initandlisten] connection accepted from 10.0.0.12:52156 #22 (6 connections now open)
+Mon Aug  5 20:25:20 [slaveTracking] update local.slaves query: { _id: ObjectId('51ff7cd1f3652d07e89236e5'), host: "10.0.0.12", ns: "local.oplog.rs" } update: { $set: { syncedTo: Timestamp 1375698319000|2 } } nscanned:1 nupdated:1 keyUpdates:0 locks(micros) w:201 683ms
+Mon Aug  5 20:25:34 [FileAllocator] done allocating datafile /Users/tr/Documents/code/mtools/mtools/data/logfiles/./data/replset/rs1/db/test.5, size: 2047MB,  took 16.059 secs
+Mon Aug  5 20:25:38 [conn21] end connection 10.0.0.12:52155 (4 connections now open)
+Mon Aug  5 20:25:38 [initandlisten] connection accepted from 10.0.0.12:52163 #23 (5 connections now open)
+Mon Aug  5 20:25:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:110086 109ms
+Mon Aug  5 20:25:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:130236 129ms
+Mon Aug  5 20:25:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:163094 162ms
+Mon Aug  5 20:25:42 [conn4] insert test.docs keyUpdates:0 locks(micros) w:147798 147ms
+Mon Aug  5 20:25:43 [conn4] insert test.docs keyUpdates:0 locks(micros) w:146021 145ms
+Mon Aug  5 20:25:43 [conn4] insert test.docs keyUpdates:0 locks(micros) w:116268 115ms
+Mon Aug  5 20:25:43 [conn4] insert test.docs keyUpdates:0 locks(micros) w:154006 153ms
+Mon Aug  5 20:25:44 [conn4] insert test.docs keyUpdates:0 locks(micros) w:135139 134ms
+Mon Aug  5 20:25:44 [conn4] insert test.docs keyUpdates:0 locks(micros) w:107016 106ms
+Mon Aug  5 20:25:48 [conn22] end connection 10.0.0.12:52156 (4 connections now open)
+Mon Aug  5 20:25:48 [initandlisten] connection accepted from 10.0.0.12:52165 #24 (5 connections now open)
+Mon Aug  5 20:26:06 [conn4] build index test.docs { number: 1.0 }
+Mon Aug  5 20:26:08 [conn23] end connection 10.0.0.12:52163 (4 connections now open)
+Mon Aug  5 20:26:08 [initandlisten] connection accepted from 10.0.0.12:52172 #25 (5 connections now open)
+Mon Aug  5 20:26:08 [conn4] build index done.  scanned 822593 total records. 2.256 secs
+Mon Aug  5 20:26:08 [conn4] insert test.system.indexes keyUpdates:0 locks(micros) w:2260911 2260ms
+Mon Aug  5 20:26:08 [conn4] CMD: dropIndexes test.docs
+Mon Aug  5 20:26:09 [conn4] command test.$cmd command: { deleteIndexes: "docs", index: "*" } ntoreturn:1 keyUpdates:0 locks(micros) w:248553 reslen:106 248ms
+Mon Aug  5 20:26:09 [conn4] build index test.docs { number: 1.0 }
+Mon Aug  5 20:26:11 [conn4] build index done.  scanned 822593 total records. 2.005 secs
+Mon Aug  5 20:26:11 [conn4] insert test.system.indexes keyUpdates:0 locks(micros) w:2005426 2005ms
+Mon Aug  5 20:26:18 [conn24] end connection 10.0.0.12:52165 (4 connections now open)
+Mon Aug  5 20:26:18 [initandlisten] connection accepted from 10.0.0.12:52173 #26 (5 connections now open)
+Mon Aug  5 20:26:32 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 107 locks(micros) r:85093 nreturned:13551 reslen:230387 144ms
+Mon Aug  5 20:26:33 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 45 locks(micros) r:30007 nreturned:5693 reslen:96801 105ms
+Mon Aug  5 20:26:38 [conn25] end connection 10.0.0.12:52172 (4 connections now open)
+Mon Aug  5 20:26:38 [initandlisten] connection accepted from 10.0.0.12:52182 #27 (5 connections now open)
+Mon Aug  5 20:26:40 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 199 locks(micros) r:206465 nreturned:25241 reslen:429117 105ms
+Mon Aug  5 20:26:44 [conn8] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:7776022515301717602 ntoreturn:0 keyUpdates:0 locks(micros) r:311 nreturned:1 reslen:112 1324ms
+Mon Aug  5 20:26:48 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 132 locks(micros) r:97238 nreturned:16757 reslen:284889 143ms
+Mon Aug  5 20:26:48 [conn26] end connection 10.0.0.12:52173 (4 connections now open)
+Mon Aug  5 20:26:48 [initandlisten] connection accepted from 10.0.0.12:52183 #28 (6 connections now open)
+Mon Aug  5 20:26:53 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 66 locks(micros) r:57413 nreturned:8322 reslen:141494 122ms
+Mon Aug  5 20:27:00 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 230 locks(micros) r:190695 nreturned:29256 reslen:497372 208ms
+Mon Aug  5 20:27:08 [conn27] end connection 10.0.0.12:52182 (4 connections now open)
+Mon Aug  5 20:27:08 [initandlisten] connection accepted from 10.0.0.12:52190 #29 (5 connections now open)
+Mon Aug  5 20:27:14 [conn4] remove test.docs keyUpdates:0 numYields: 645 locks(micros) w:100900235 56331ms
+Mon Aug  5 20:27:14 [conn4] dropDatabase test
+Mon Aug  5 20:27:15 [conn4] removeJournalFiles
+Mon Aug  5 20:27:15 [conn4] command test.$cmd command: { dropDatabase: 1.0 } ntoreturn:1 keyUpdates:0 locks(micros) W:1574563 reslen:55 1574ms
+Mon Aug  5 20:27:15 [conn4] replSet info stepping down as primary secs=10
+Mon Aug  5 20:27:16 [conn4] replSet relinquishing primary state
+Mon Aug  5 20:27:16 [conn4] replSet SECONDARY
+Mon Aug  5 20:27:16 [conn4] replSet closing client sockets after relinquishing primary
+Mon Aug  5 20:27:16 [conn4] SocketException handling request, closing client connection: 9001 socket exception [2] server [127.0.0.1:52088] 
+Mon Aug  5 20:27:16 [conn9] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52098] 
+Mon Aug  5 20:27:16 [rsHealthPoll] replSet info capslock.local:27019 is down (or slow to respond): socket exception [SEND_ERROR] for 10.0.0.12:27019
+Mon Aug  5 20:27:16 [rsHealthPoll] replSet info capslock.local:27018 is down (or slow to respond): socket exception [SEND_ERROR] for 10.0.0.12:27018
+Mon Aug  5 20:27:16 [rsHealthPoll] replSet member capslock.local:27019 is now in state DOWN
+Mon Aug  5 20:27:16 [rsHealthPoll] replSet member capslock.local:27018 is now in state DOWN
+Mon Aug  5 20:27:18 [initandlisten] connection accepted from 10.0.0.12:52191 #30 (4 connections now open)
+Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27018 is up
+Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27019 is up
+Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27018 is now in state SECONDARY
+Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27019 is now in state ARBITER
+Mon Aug  5 20:27:18 [conn28] end connection 10.0.0.12:52183 (3 connections now open)
+Mon Aug  5 20:27:18 [initandlisten] connection accepted from 10.0.0.12:52194 #31 (4 connections now open)
+Mon Aug  5 20:27:21 [conn8] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52097] 
+Mon Aug  5 20:27:23 [conn29] replSet info voting yea for capslock.local:27018 (1)
+Mon Aug  5 20:27:24 [rsHealthPoll] replSet member capslock.local:27018 is now in state PRIMARY
+Mon Aug  5 20:27:25 [rsBackgroundSync] replSet syncing to: capslock.local:27018
+Mon Aug  5 20:27:26 [rsSyncNotifier] replset setting oplog notifier to capslock.local:27018
+Mon Aug  5 20:27:26 [rsSyncNotifier] build index local.me { _id: 1 }
+Mon Aug  5 20:27:26 [rsSyncNotifier] build index done.  scanned 0 total records. 0.009 secs
+Mon Aug  5 20:27:39 [conn29] end connection 10.0.0.12:52190 (2 connections now open)
+Mon Aug  5 20:27:39 [initandlisten] connection accepted from 10.0.0.12:52203 #32 (3 connections now open)
+Mon Aug  5 20:27:48 [conn31] end connection 10.0.0.12:52194 (2 connections now open)
+Mon Aug  5 20:27:48 [initandlisten] connection accepted from 10.0.0.12:52204 #33 (3 connections now open)
+Mon Aug  5 20:28:09 [conn32] end connection 10.0.0.12:52203 (2 connections now open)
+Mon Aug  5 20:28:09 [initandlisten] connection accepted from 10.0.0.12:52211 #34 (3 connections now open)
+Mon Aug  5 20:28:18 [conn33] end connection 10.0.0.12:52204 (2 connections now open)
+Mon Aug  5 20:28:18 [initandlisten] connection accepted from 10.0.0.12:52212 #35 (3 connections now open)
+Mon Aug  5 20:28:39 [conn34] end connection 10.0.0.12:52211 (2 connections now open)
+Mon Aug  5 20:28:39 [initandlisten] connection accepted from 10.0.0.12:52219 #36 (3 connections now open)
+Mon Aug  5 20:28:48 [conn35] end connection 10.0.0.12:52212 (2 connections now open)
+Mon Aug  5 20:28:48 [initandlisten] connection accepted from 10.0.0.12:52220 #37 (3 connections now open)
+Mon Aug  5 20:29:09 [conn36] end connection 10.0.0.12:52219 (2 connections now open)
+Mon Aug  5 20:29:09 [initandlisten] connection accepted from 10.0.0.12:52229 #38 (3 connections now open)
+Mon Aug  5 20:29:18 [conn37] end connection 10.0.0.12:52220 (2 connections now open)
+Mon Aug  5 20:29:18 [initandlisten] connection accepted from 10.0.0.12:52230 #39 (3 connections now open)
+Mon Aug  5 20:29:39 [conn38] end connection 10.0.0.12:52229 (2 connections now open)
+Mon Aug  5 20:29:39 [initandlisten] connection accepted from 10.0.0.12:52237 #40 (3 connections now open)
+Mon Aug  5 20:29:48 [conn39] end connection 10.0.0.12:52230 (2 connections now open)
+Mon Aug  5 20:29:48 [initandlisten] connection accepted from 10.0.0.12:52239 #41 (3 connections now open)
+Mon Aug  5 20:30:09 [conn40] end connection 10.0.0.12:52237 (2 connections now open)
+Mon Aug  5 20:30:09 [initandlisten] connection accepted from 10.0.0.12:52247 #42 (3 connections now open)
+Mon Aug  5 20:30:18 [conn41] end connection 10.0.0.12:52239 (2 connections now open)
+Mon Aug  5 20:30:18 [initandlisten] connection accepted from 10.0.0.12:52248 #43 (3 connections now open)
+Mon Aug  5 20:30:39 [conn42] end connection 10.0.0.12:52247 (2 connections now open)
+Mon Aug  5 20:30:39 [initandlisten] connection accepted from 10.0.0.12:52255 #44 (3 connections now open)
+Mon Aug  5 20:30:48 [conn43] end connection 10.0.0.12:52248 (2 connections now open)
+Mon Aug  5 20:30:48 [initandlisten] connection accepted from 10.0.0.12:52256 #45 (3 connections now open)
+Mon Aug  5 20:31:09 [conn44] end connection 10.0.0.12:52255 (2 connections now open)
+Mon Aug  5 20:31:09 [initandlisten] connection accepted from 10.0.0.12:52263 #46 (3 connections now open)
+Mon Aug  5 20:31:18 [conn45] end connection 10.0.0.12:52256 (2 connections now open)
+Mon Aug  5 20:31:18 [initandlisten] connection accepted from 10.0.0.12:52264 #47 (3 connections now open)
+Mon Aug  5 20:31:39 [conn46] end connection 10.0.0.12:52263 (2 connections now open)
+Mon Aug  5 20:31:39 [initandlisten] connection accepted from 10.0.0.12:52272 #48 (3 connections now open)
+Mon Aug  5 20:31:48 [conn47] end connection 10.0.0.12:52264 (2 connections now open)
+Mon Aug  5 20:31:48 [initandlisten] connection accepted from 10.0.0.12:52273 #49 (3 connections now open)
+Mon Aug  5 20:32:09 [conn48] end connection 10.0.0.12:52272 (2 connections now open)
+Mon Aug  5 20:32:09 [initandlisten] connection accepted from 10.0.0.12:52279 #50 (3 connections now open)
+Mon Aug  5 20:32:18 [conn49] end connection 10.0.0.12:52273 (2 connections now open)
+Mon Aug  5 20:32:18 [initandlisten] connection accepted from 10.0.0.12:52282 #51 (3 connections now open)
+Mon Aug  5 20:32:39 [conn50] end connection 10.0.0.12:52279 (2 connections now open)
+Mon Aug  5 20:32:39 [initandlisten] connection accepted from 10.0.0.12:52287 #52 (3 connections now open)
+Mon Aug  5 20:32:48 [conn51] end connection 10.0.0.12:52282 (2 connections now open)
+Mon Aug  5 20:32:48 [initandlisten] connection accepted from 10.0.0.12:52290 #53 (3 connections now open)
+Mon Aug  5 20:33:09 [conn52] end connection 10.0.0.12:52287 (2 connections now open)
+Mon Aug  5 20:33:09 [initandlisten] connection accepted from 10.0.0.12:52299 #54 (3 connections now open)
+Mon Aug  5 20:33:18 [conn53] end connection 10.0.0.12:52290 (2 connections now open)
+Mon Aug  5 20:33:18 [initandlisten] connection accepted from 10.0.0.12:52304 #55 (3 connections now open)
+Mon Aug  5 20:33:39 [conn54] end connection 10.0.0.12:52299 (2 connections now open)
+Mon Aug  5 20:33:39 [initandlisten] connection accepted from 10.0.0.12:52309 #56 (3 connections now open)
+Mon Aug  5 20:33:48 [conn55] end connection 10.0.0.12:52304 (2 connections now open)
+Mon Aug  5 20:33:48 [initandlisten] connection accepted from 10.0.0.12:52313 #57 (3 connections now open)
+Mon Aug  5 20:34:09 [conn56] end connection 10.0.0.12:52309 (2 connections now open)
+Mon Aug  5 20:34:09 [initandlisten] connection accepted from 10.0.0.12:52319 #58 (3 connections now open)
+Mon Aug  5 20:34:18 [conn57] end connection 10.0.0.12:52313 (2 connections now open)
+Mon Aug  5 20:34:18 [initandlisten] connection accepted from 10.0.0.12:52323 #59 (3 connections now open)
+Mon Aug  5 20:34:39 [conn58] end connection 10.0.0.12:52319 (2 connections now open)
+Mon Aug  5 20:34:39 [initandlisten] connection accepted from 10.0.0.12:52329 #60 (3 connections now open)
+Mon Aug  5 20:34:49 [conn59] end connection 10.0.0.12:52323 (2 connections now open)
+Mon Aug  5 20:34:49 [initandlisten] connection accepted from 10.0.0.12:52332 #61 (3 connections now open)
+Mon Aug  5 20:35:10 [conn60] end connection 10.0.0.12:52329 (2 connections now open)
+Mon Aug  5 20:35:10 [initandlisten] connection accepted from 10.0.0.12:52337 #62 (3 connections now open)
+Mon Aug  5 20:35:19 [conn61] end connection 10.0.0.12:52332 (2 connections now open)
+Mon Aug  5 20:35:19 [initandlisten] connection accepted from 10.0.0.12:52340 #63 (3 connections now open)
+Mon Aug  5 20:35:40 [conn62] end connection 10.0.0.12:52337 (2 connections now open)
+Mon Aug  5 20:35:40 [initandlisten] connection accepted from 10.0.0.12:52345 #64 (3 connections now open)
+Mon Aug  5 20:35:49 [conn63] end connection 10.0.0.12:52340 (2 connections now open)
+Mon Aug  5 20:35:49 [initandlisten] connection accepted from 10.0.0.12:52348 #65 (3 connections now open)
+Mon Aug  5 20:36:10 [conn64] end connection 10.0.0.12:52345 (2 connections now open)
+Mon Aug  5 20:36:10 [initandlisten] connection accepted from 10.0.0.12:52353 #66 (3 connections now open)
+Mon Aug  5 20:36:19 [conn65] end connection 10.0.0.12:52348 (2 connections now open)
+Mon Aug  5 20:36:19 [initandlisten] connection accepted from 10.0.0.12:52356 #67 (3 connections now open)
+Mon Aug  5 20:36:40 [conn66] end connection 10.0.0.12:52353 (2 connections now open)
+Mon Aug  5 20:36:40 [initandlisten] connection accepted from 10.0.0.12:52364 #68 (3 connections now open)
+Mon Aug  5 20:36:49 [conn67] end connection 10.0.0.12:52356 (2 connections now open)
+Mon Aug  5 20:36:49 [initandlisten] connection accepted from 10.0.0.12:52366 #69 (3 connections now open)
+Mon Aug  5 20:37:10 [conn68] end connection 10.0.0.12:52364 (2 connections now open)
+Mon Aug  5 20:37:10 [initandlisten] connection accepted from 10.0.0.12:52374 #70 (3 connections now open)
+Mon Aug  5 20:37:19 [conn69] end connection 10.0.0.12:52366 (2 connections now open)
+Mon Aug  5 20:37:19 [initandlisten] connection accepted from 10.0.0.12:52375 #71 (3 connections now open)
+Mon Aug  5 20:37:40 [conn70] end connection 10.0.0.12:52374 (2 connections now open)
+Mon Aug  5 20:37:40 [initandlisten] connection accepted from 10.0.0.12:52383 #72 (3 connections now open)
+Mon Aug  5 20:37:49 [conn71] end connection 10.0.0.12:52375 (2 connections now open)
+Mon Aug  5 20:37:49 [initandlisten] connection accepted from 10.0.0.12:52386 #73 (3 connections now open)
+Mon Aug  5 20:38:10 [conn72] end connection 10.0.0.12:52383 (2 connections now open)
+Mon Aug  5 20:38:10 [initandlisten] connection accepted from 10.0.0.12:52393 #74 (3 connections now open)
+Mon Aug  5 20:38:19 [conn73] end connection 10.0.0.12:52386 (2 connections now open)
+Mon Aug  5 20:38:19 [initandlisten] connection accepted from 10.0.0.12:52394 #75 (3 connections now open)
+Mon Aug  5 20:38:40 [conn74] end connection 10.0.0.12:52393 (2 connections now open)
+Mon Aug  5 20:38:40 [initandlisten] connection accepted from 10.0.0.12:52401 #76 (3 connections now open)
+Mon Aug  5 20:38:49 [conn75] end connection 10.0.0.12:52394 (2 connections now open)
+Mon Aug  5 20:38:49 [initandlisten] connection accepted from 10.0.0.12:52402 #77 (3 connections now open)
+Mon Aug  5 20:39:10 [conn76] end connection 10.0.0.12:52401 (2 connections now open)
+Mon Aug  5 20:39:10 [initandlisten] connection accepted from 10.0.0.12:52411 #78 (3 connections now open)
+Mon Aug  5 20:39:19 [conn77] end connection 10.0.0.12:52402 (2 connections now open)
+Mon Aug  5 20:39:19 [initandlisten] connection accepted from 10.0.0.12:52412 #79 (3 connections now open)
+Mon Aug  5 20:39:40 [conn78] end connection 10.0.0.12:52411 (2 connections now open)
+Mon Aug  5 20:39:40 [initandlisten] connection accepted from 10.0.0.12:52419 #80 (3 connections now open)
+Mon Aug  5 20:39:49 [conn79] end connection 10.0.0.12:52412 (2 connections now open)
+Mon Aug  5 20:39:49 [initandlisten] connection accepted from 10.0.0.12:52420 #81 (3 connections now open)
+Mon Aug  5 20:40:10 [conn80] end connection 10.0.0.12:52419 (2 connections now open)
+Mon Aug  5 20:40:10 [initandlisten] connection accepted from 10.0.0.12:52429 #82 (3 connections now open)
+Mon Aug  5 20:40:19 [conn81] end connection 10.0.0.12:52420 (2 connections now open)
+Mon Aug  5 20:40:19 [initandlisten] connection accepted from 10.0.0.12:52430 #83 (3 connections now open)
+Mon Aug  5 20:40:40 [conn82] end connection 10.0.0.12:52429 (2 connections now open)
+Mon Aug  5 20:40:40 [initandlisten] connection accepted from 10.0.0.12:52437 #84 (3 connections now open)
+Mon Aug  5 20:40:49 [conn83] end connection 10.0.0.12:52430 (2 connections now open)
+Mon Aug  5 20:40:49 [initandlisten] connection accepted from 10.0.0.12:52438 #85 (3 connections now open)
+Mon Aug  5 20:41:10 [conn84] end connection 10.0.0.12:52437 (2 connections now open)
+Mon Aug  5 20:41:10 [initandlisten] connection accepted from 10.0.0.12:52445 #86 (3 connections now open)
+Mon Aug  5 20:41:19 [conn85] end connection 10.0.0.12:52438 (2 connections now open)
+Mon Aug  5 20:41:19 [initandlisten] connection accepted from 10.0.0.12:52446 #87 (3 connections now open)
+Mon Aug  5 20:41:40 [conn86] end connection 10.0.0.12:52445 (2 connections now open)
+Mon Aug  5 20:41:40 [initandlisten] connection accepted from 10.0.0.12:52454 #88 (3 connections now open)
+Mon Aug  5 20:41:49 [conn87] end connection 10.0.0.12:52446 (2 connections now open)
+Mon Aug  5 20:41:49 [initandlisten] connection accepted from 10.0.0.12:52456 #89 (3 connections now open)
+Mon Aug  5 20:42:11 [conn88] end connection 10.0.0.12:52454 (2 connections now open)
+Mon Aug  5 20:42:11 [initandlisten] connection accepted from 10.0.0.12:52463 #90 (3 connections now open)
+Mon Aug  5 20:42:19 [conn89] end connection 10.0.0.12:52456 (2 connections now open)
+Mon Aug  5 20:42:19 [initandlisten] connection accepted from 10.0.0.12:52464 #91 (3 connections now open)
+Mon Aug  5 20:42:41 [conn90] end connection 10.0.0.12:52463 (2 connections now open)
+Mon Aug  5 20:42:41 [initandlisten] connection accepted from 10.0.0.12:52471 #92 (3 connections now open)
+Mon Aug  5 20:42:49 [conn91] end connection 10.0.0.12:52464 (2 connections now open)
+Mon Aug  5 20:42:49 [initandlisten] connection accepted from 10.0.0.12:52473 #93 (3 connections now open)
+Mon Aug  5 20:43:11 [conn92] end connection 10.0.0.12:52471 (2 connections now open)
+Mon Aug  5 20:43:11 [initandlisten] connection accepted from 10.0.0.12:52482 #94 (3 connections now open)
+Mon Aug  5 20:43:19 [conn93] end connection 10.0.0.12:52473 (2 connections now open)
+Mon Aug  5 20:43:19 [initandlisten] connection accepted from 10.0.0.12:52485 #95 (3 connections now open)
+Mon Aug  5 20:43:41 [conn94] end connection 10.0.0.12:52482 (2 connections now open)
+Mon Aug  5 20:43:41 [initandlisten] connection accepted from 10.0.0.12:52494 #96 (3 connections now open)
+Mon Aug  5 20:43:49 [conn95] end connection 10.0.0.12:52485 (2 connections now open)
+Mon Aug  5 20:43:49 [initandlisten] connection accepted from 10.0.0.12:52495 #97 (3 connections now open)
+Mon Aug  5 20:44:11 [conn96] end connection 10.0.0.12:52494 (2 connections now open)
+Mon Aug  5 20:44:11 [initandlisten] connection accepted from 10.0.0.12:52504 #98 (3 connections now open)
+Mon Aug  5 20:44:19 [conn97] end connection 10.0.0.12:52495 (2 connections now open)
+Mon Aug  5 20:44:19 [initandlisten] connection accepted from 10.0.0.12:52505 #99 (3 connections now open)
+Mon Aug  5 20:44:41 [conn98] end connection 10.0.0.12:52504 (2 connections now open)
+Mon Aug  5 20:44:41 [initandlisten] connection accepted from 10.0.0.12:52512 #100 (3 connections now open)
+Mon Aug  5 20:44:49 [conn99] end connection 10.0.0.12:52505 (2 connections now open)
+Mon Aug  5 20:44:49 [initandlisten] connection accepted from 10.0.0.12:52513 #101 (3 connections now open)
+Mon Aug  5 20:45:11 [conn100] end connection 10.0.0.12:52512 (2 connections now open)
+Mon Aug  5 20:45:11 [initandlisten] connection accepted from 10.0.0.12:52519 #102 (3 connections now open)
+Mon Aug  5 20:45:19 [conn101] end connection 10.0.0.12:52513 (2 connections now open)
+Mon Aug  5 20:45:19 [initandlisten] connection accepted from 10.0.0.12:52520 #103 (3 connections now open)
+Mon Aug  5 20:45:41 [conn102] end connection 10.0.0.12:52519 (2 connections now open)
+Mon Aug  5 20:45:41 [initandlisten] connection accepted from 10.0.0.12:52528 #104 (3 connections now open)
+Mon Aug  5 20:45:49 [conn103] end connection 10.0.0.12:52520 (2 connections now open)
+Mon Aug  5 20:45:49 [initandlisten] connection accepted from 10.0.0.12:52531 #105 (3 connections now open)
+Mon Aug  5 20:46:11 [conn104] end connection 10.0.0.12:52528 (2 connections now open)
+Mon Aug  5 20:46:11 [initandlisten] connection accepted from 10.0.0.12:52538 #106 (3 connections now open)
+Mon Aug  5 20:46:19 [conn105] end connection 10.0.0.12:52531 (2 connections now open)
+Mon Aug  5 20:46:19 [initandlisten] connection accepted from 10.0.0.12:52539 #107 (3 connections now open)
+Mon Aug  5 20:46:41 [conn106] end connection 10.0.0.12:52538 (2 connections now open)
+Mon Aug  5 20:46:41 [initandlisten] connection accepted from 10.0.0.12:52547 #108 (3 connections now open)
+Mon Aug  5 20:46:49 [conn107] end connection 10.0.0.12:52539 (2 connections now open)
+Mon Aug  5 20:46:49 [initandlisten] connection accepted from 10.0.0.12:52548 #109 (3 connections now open)
+Mon Aug  5 20:47:11 [conn108] end connection 10.0.0.12:52547 (2 connections now open)
+Mon Aug  5 20:47:11 [initandlisten] connection accepted from 10.0.0.12:52555 #110 (3 connections now open)
+Mon Aug  5 20:47:19 [conn109] end connection 10.0.0.12:52548 (2 connections now open)
+Mon Aug  5 20:47:19 [initandlisten] connection accepted from 10.0.0.12:52556 #111 (3 connections now open)
+Mon Aug  5 20:47:41 [conn110] end connection 10.0.0.12:52555 (2 connections now open)
+Mon Aug  5 20:47:41 [initandlisten] connection accepted from 10.0.0.12:52563 #112 (3 connections now open)
+Mon Aug  5 20:47:49 [conn111] end connection 10.0.0.12:52556 (2 connections now open)
+Mon Aug  5 20:47:49 [initandlisten] connection accepted from 10.0.0.12:52564 #113 (3 connections now open)
+Mon Aug  5 20:48:11 [conn112] end connection 10.0.0.12:52563 (2 connections now open)
+Mon Aug  5 20:48:11 [initandlisten] connection accepted from 10.0.0.12:52569 #114 (3 connections now open)
+Mon Aug  5 20:48:19 [conn113] end connection 10.0.0.12:52564 (2 connections now open)
+Mon Aug  5 20:48:19 [initandlisten] connection accepted from 10.0.0.12:52572 #115 (3 connections now open)
+Mon Aug  5 20:48:41 [conn114] end connection 10.0.0.12:52569 (2 connections now open)
+Mon Aug  5 20:48:42 [initandlisten] connection accepted from 10.0.0.12:52577 #116 (3 connections now open)
+Mon Aug  5 20:48:49 [conn115] end connection 10.0.0.12:52572 (2 connections now open)
+Mon Aug  5 20:48:49 [initandlisten] connection accepted from 10.0.0.12:52580 #117 (3 connections now open)
+Mon Aug  5 20:49:12 [conn116] end connection 10.0.0.12:52577 (2 connections now open)
+Mon Aug  5 20:49:12 [initandlisten] connection accepted from 10.0.0.12:52585 #118 (3 connections now open)
+Mon Aug  5 20:49:19 [conn117] end connection 10.0.0.12:52580 (2 connections now open)
+Mon Aug  5 20:49:19 [initandlisten] connection accepted from 10.0.0.12:52588 #119 (3 connections now open)
+Mon Aug  5 20:49:42 [conn118] end connection 10.0.0.12:52585 (2 connections now open)
+Mon Aug  5 20:49:42 [initandlisten] connection accepted from 10.0.0.12:52593 #120 (3 connections now open)
+Mon Aug  5 20:49:49 [conn119] end connection 10.0.0.12:52588 (2 connections now open)
+Mon Aug  5 20:49:49 [initandlisten] connection accepted from 10.0.0.12:52598 #121 (3 connections now open)
+Mon Aug  5 20:50:12 [conn120] end connection 10.0.0.12:52593 (2 connections now open)
+Mon Aug  5 20:50:12 [initandlisten] connection accepted from 10.0.0.12:52603 #122 (3 connections now open)
+Mon Aug  5 20:50:19 [conn121] end connection 10.0.0.12:52598 (2 connections now open)
+Mon Aug  5 20:50:19 [initandlisten] connection accepted from 10.0.0.12:52606 #123 (3 connections now open)
+Mon Aug  5 20:50:42 [conn122] end connection 10.0.0.12:52603 (2 connections now open)
+Mon Aug  5 20:50:42 [initandlisten] connection accepted from 10.0.0.12:52613 #124 (3 connections now open)
+Mon Aug  5 20:50:49 [conn123] end connection 10.0.0.12:52606 (2 connections now open)
+Mon Aug  5 20:50:49 [initandlisten] connection accepted from 10.0.0.12:52616 #125 (3 connections now open)
+Mon Aug  5 20:51:12 [conn124] end connection 10.0.0.12:52613 (2 connections now open)
+Mon Aug  5 20:51:12 [initandlisten] connection accepted from 10.0.0.12:52622 #126 (3 connections now open)
+Mon Aug  5 20:51:19 [conn125] end connection 10.0.0.12:52616 (2 connections now open)
+Mon Aug  5 20:51:19 [initandlisten] connection accepted from 10.0.0.12:52627 #127 (3 connections now open)
+Mon Aug  5 20:51:42 [conn126] end connection 10.0.0.12:52622 (2 connections now open)
+Mon Aug  5 20:51:42 [initandlisten] connection accepted from 10.0.0.12:52636 #128 (3 connections now open)
+Mon Aug  5 20:51:49 [conn127] end connection 10.0.0.12:52627 (2 connections now open)
+Mon Aug  5 20:51:49 [initandlisten] connection accepted from 10.0.0.12:52638 #129 (3 connections now open)
+Mon Aug  5 20:52:12 [conn128] end connection 10.0.0.12:52636 (2 connections now open)
+Mon Aug  5 20:52:12 [initandlisten] connection accepted from 10.0.0.12:52646 #130 (3 connections now open)
+Mon Aug  5 20:52:20 [conn129] end connection 10.0.0.12:52638 (2 connections now open)
+Mon Aug  5 20:52:20 [initandlisten] connection accepted from 10.0.0.12:52647 #131 (3 connections now open)
+Mon Aug  5 20:52:42 [conn130] end connection 10.0.0.12:52646 (2 connections now open)
+Mon Aug  5 20:52:42 [initandlisten] connection accepted from 10.0.0.12:52654 #132 (3 connections now open)
+Mon Aug  5 20:52:50 [conn131] end connection 10.0.0.12:52647 (2 connections now open)
+Mon Aug  5 20:52:50 [initandlisten] connection accepted from 10.0.0.12:52655 #133 (3 connections now open)
+Mon Aug  5 20:53:12 [conn132] end connection 10.0.0.12:52654 (2 connections now open)
+Mon Aug  5 20:53:12 [initandlisten] connection accepted from 10.0.0.12:52664 #134 (3 connections now open)
+Mon Aug  5 20:53:20 [conn133] end connection 10.0.0.12:52655 (2 connections now open)
+Mon Aug  5 20:53:20 [initandlisten] connection accepted from 10.0.0.12:52665 #135 (3 connections now open)
+Mon Aug  5 20:53:42 [conn134] end connection 10.0.0.12:52664 (2 connections now open)
+Mon Aug  5 20:53:42 [initandlisten] connection accepted from 10.0.0.12:52672 #136 (3 connections now open)
+Mon Aug  5 20:53:50 [conn135] end connection 10.0.0.12:52665 (2 connections now open)
+Mon Aug  5 20:53:50 [initandlisten] connection accepted from 10.0.0.12:52674 #137 (3 connections now open)
+Mon Aug  5 20:54:12 [conn136] end connection 10.0.0.12:52672 (2 connections now open)
+Mon Aug  5 20:54:12 [initandlisten] connection accepted from 10.0.0.12:52686 #138 (3 connections now open)
+Mon Aug  5 20:54:20 [conn137] end connection 10.0.0.12:52674 (2 connections now open)
+Mon Aug  5 20:54:20 [initandlisten] connection accepted from 10.0.0.12:52687 #139 (3 connections now open)
+Mon Aug  5 20:54:42 [conn138] end connection 10.0.0.12:52686 (2 connections now open)
+Mon Aug  5 20:54:42 [initandlisten] connection accepted from 10.0.0.12:52694 #140 (3 connections now open)
+Mon Aug  5 20:54:50 [conn139] end connection 10.0.0.12:52687 (2 connections now open)
+Mon Aug  5 20:54:50 [initandlisten] connection accepted from 10.0.0.12:52695 #141 (3 connections now open)
+Mon Aug  5 20:55:12 [conn140] end connection 10.0.0.12:52694 (2 connections now open)
+Mon Aug  5 20:55:12 [initandlisten] connection accepted from 10.0.0.12:52702 #142 (3 connections now open)
+Mon Aug  5 20:55:20 [conn141] end connection 10.0.0.12:52695 (2 connections now open)
+Mon Aug  5 20:55:20 [initandlisten] connection accepted from 10.0.0.12:52703 #143 (3 connections now open)
+Mon Aug  5 20:55:42 [conn142] end connection 10.0.0.12:52702 (2 connections now open)
+Mon Aug  5 20:55:42 [initandlisten] connection accepted from 10.0.0.12:52710 #144 (4 connections now open)
+Mon Aug  5 20:55:50 [conn143] end connection 10.0.0.12:52703 (2 connections now open)
+Mon Aug  5 20:55:50 [initandlisten] connection accepted from 10.0.0.12:52711 #145 (3 connections now open)
+Mon Aug  5 20:56:12 [conn144] end connection 10.0.0.12:52710 (2 connections now open)
+Mon Aug  5 20:56:12 [initandlisten] connection accepted from 10.0.0.12:52718 #146 (3 connections now open)
+Mon Aug  5 20:56:20 [conn145] end connection 10.0.0.12:52711 (2 connections now open)
+Mon Aug  5 20:56:20 [initandlisten] connection accepted from 10.0.0.12:52719 #147 (3 connections now open)
+Mon Aug  5 20:56:43 [conn146] end connection 10.0.0.12:52718 (2 connections now open)
+Mon Aug  5 20:56:43 [initandlisten] connection accepted from 10.0.0.12:52728 #148 (3 connections now open)
+Mon Aug  5 20:56:50 [conn147] end connection 10.0.0.12:52719 (2 connections now open)
+Mon Aug  5 20:56:50 [initandlisten] connection accepted from 10.0.0.12:52730 #149 (3 connections now open)
+Mon Aug  5 20:57:13 [conn148] end connection 10.0.0.12:52728 (2 connections now open)
+Mon Aug  5 20:57:13 [initandlisten] connection accepted from 10.0.0.12:52738 #150 (3 connections now open)
+Mon Aug  5 20:57:20 [conn149] end connection 10.0.0.12:52730 (2 connections now open)
+Mon Aug  5 20:57:20 [initandlisten] connection accepted from 10.0.0.12:52739 #151 (3 connections now open)
+Mon Aug  5 20:57:43 [conn150] end connection 10.0.0.12:52738 (2 connections now open)
+Mon Aug  5 20:57:43 [initandlisten] connection accepted from 10.0.0.12:52746 #152 (3 connections now open)
+Mon Aug  5 20:57:50 [conn151] end connection 10.0.0.12:52739 (2 connections now open)
+Mon Aug  5 20:57:50 [initandlisten] connection accepted from 10.0.0.12:52748 #153 (3 connections now open)
+Mon Aug  5 20:58:13 [conn152] end connection 10.0.0.12:52746 (2 connections now open)
+Mon Aug  5 20:58:13 [initandlisten] connection accepted from 10.0.0.12:52755 #154 (3 connections now open)
+Mon Aug  5 20:58:20 [conn153] end connection 10.0.0.12:52748 (2 connections now open)
+Mon Aug  5 20:58:20 [initandlisten] connection accepted from 10.0.0.12:52756 #155 (3 connections now open)
+Mon Aug  5 20:58:43 [conn154] end connection 10.0.0.12:52755 (2 connections now open)
+Mon Aug  5 20:58:43 [initandlisten] connection accepted from 10.0.0.12:52763 #156 (3 connections now open)
+Mon Aug  5 20:58:50 [conn155] end connection 10.0.0.12:52756 (2 connections now open)
+Mon Aug  5 20:58:50 [initandlisten] connection accepted from 10.0.0.12:52764 #157 (3 connections now open)
+Mon Aug  5 20:59:13 [conn156] end connection 10.0.0.12:52763 (2 connections now open)
+Mon Aug  5 20:59:13 [initandlisten] connection accepted from 10.0.0.12:52770 #158 (3 connections now open)
+Mon Aug  5 20:59:20 [conn157] end connection 10.0.0.12:52764 (2 connections now open)
+Mon Aug  5 20:59:20 [initandlisten] connection accepted from 10.0.0.12:52771 #159 (3 connections now open)
+Mon Aug  5 20:59:43 [conn158] end connection 10.0.0.12:52770 (2 connections now open)
+Mon Aug  5 20:59:43 [initandlisten] connection accepted from 10.0.0.12:52778 #160 (3 connections now open)
+Mon Aug  5 20:59:50 [conn159] end connection 10.0.0.12:52771 (2 connections now open)
+Mon Aug  5 20:59:50 [initandlisten] connection accepted from 10.0.0.12:52779 #161 (3 connections now open)
+Mon Aug  5 21:00:13 [conn160] end connection 10.0.0.12:52778 (2 connections now open)
+Mon Aug  5 21:00:13 [initandlisten] connection accepted from 10.0.0.12:52786 #162 (3 connections now open)
+Mon Aug  5 21:00:20 [conn161] end connection 10.0.0.12:52779 (2 connections now open)
+Mon Aug  5 21:00:20 [initandlisten] connection accepted from 10.0.0.12:52788 #163 (3 connections now open)
+Mon Aug  5 21:00:43 [conn162] end connection 10.0.0.12:52786 (2 connections now open)
+Mon Aug  5 21:00:43 [initandlisten] connection accepted from 10.0.0.12:52795 #164 (3 connections now open)
+Mon Aug  5 21:00:50 [conn163] end connection 10.0.0.12:52788 (2 connections now open)
+Mon Aug  5 21:00:50 [initandlisten] connection accepted from 10.0.0.12:52796 #165 (3 connections now open)
+Mon Aug  5 21:01:13 [conn164] end connection 10.0.0.12:52795 (2 connections now open)
+Mon Aug  5 21:01:13 [initandlisten] connection accepted from 10.0.0.12:52803 #166 (3 connections now open)
+Mon Aug  5 21:01:20 [conn165] end connection 10.0.0.12:52796 (2 connections now open)
+Mon Aug  5 21:01:20 [initandlisten] connection accepted from 10.0.0.12:52804 #167 (3 connections now open)
+Mon Aug  5 21:01:43 [conn166] end connection 10.0.0.12:52803 (2 connections now open)
+Mon Aug  5 21:01:43 [initandlisten] connection accepted from 10.0.0.12:52812 #168 (3 connections now open)
+Mon Aug  5 21:01:50 [conn167] end connection 10.0.0.12:52804 (2 connections now open)
+Mon Aug  5 21:01:50 [initandlisten] connection accepted from 10.0.0.12:52815 #169 (3 connections now open)
+Mon Aug  5 21:02:13 [conn168] end connection 10.0.0.12:52812 (2 connections now open)
+Mon Aug  5 21:02:13 [initandlisten] connection accepted from 10.0.0.12:52825 #170 (3 connections now open)
+Mon Aug  5 21:02:20 [conn169] end connection 10.0.0.12:52815 (2 connections now open)
+Mon Aug  5 21:02:20 [initandlisten] connection accepted from 10.0.0.12:52826 #171 (3 connections now open)
+Mon Aug  5 21:02:43 [conn170] end connection 10.0.0.12:52825 (2 connections now open)
+Mon Aug  5 21:02:44 [initandlisten] connection accepted from 10.0.0.12:52832 #172 (3 connections now open)
+Mon Aug  5 21:02:50 [conn171] end connection 10.0.0.12:52826 (2 connections now open)
+Mon Aug  5 21:02:50 [initandlisten] connection accepted from 10.0.0.12:52833 #173 (3 connections now open)
+Mon Aug  5 21:03:14 [conn172] end connection 10.0.0.12:52832 (2 connections now open)
+Mon Aug  5 21:03:14 [initandlisten] connection accepted from 10.0.0.12:52842 #174 (3 connections now open)
+Mon Aug  5 21:03:20 [conn173] end connection 10.0.0.12:52833 (2 connections now open)
+Mon Aug  5 21:03:20 [initandlisten] connection accepted from 10.0.0.12:52843 #175 (3 connections now open)
+Mon Aug  5 21:03:44 [conn174] end connection 10.0.0.12:52842 (2 connections now open)
+Mon Aug  5 21:03:44 [initandlisten] connection accepted from 10.0.0.12:52849 #176 (3 connections now open)
+Mon Aug  5 21:03:50 [conn175] end connection 10.0.0.12:52843 (2 connections now open)
+Mon Aug  5 21:03:50 [initandlisten] connection accepted from 10.0.0.12:52850 #177 (3 connections now open)
+Mon Aug  5 21:04:14 [conn176] end connection 10.0.0.12:52849 (2 connections now open)
+Mon Aug  5 21:04:14 [initandlisten] connection accepted from 10.0.0.12:52859 #178 (3 connections now open)
+Mon Aug  5 21:04:20 [conn177] end connection 10.0.0.12:52850 (2 connections now open)
+Mon Aug  5 21:04:20 [initandlisten] connection accepted from 10.0.0.12:52862 #179 (3 connections now open)
+Mon Aug  5 21:04:44 [conn178] end connection 10.0.0.12:52859 (2 connections now open)
+Mon Aug  5 21:04:44 [initandlisten] connection accepted from 10.0.0.12:52871 #180 (3 connections now open)
+Mon Aug  5 21:04:50 [conn179] end connection 10.0.0.12:52862 (2 connections now open)
+Mon Aug  5 21:04:50 [initandlisten] connection accepted from 10.0.0.12:52874 #181 (3 connections now open)
+Mon Aug  5 21:04:52 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+Mon Aug  5 21:04:52 [signalProcessingThread] now exiting
+Mon Aug  5 21:04:52 dbexit: 
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: going to close listening sockets...
+Mon Aug  5 21:04:52 [signalProcessingThread] closing listening socket: 6
+Mon Aug  5 21:04:52 [signalProcessingThread] closing listening socket: 7
+Mon Aug  5 21:04:52 [signalProcessingThread] closing listening socket: 8
+Mon Aug  5 21:04:52 [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: going to flush diaglog...
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: going to close sockets...
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: waiting for fs preallocator...
+Mon Aug  5 21:04:52 [rsBackgroundSync] Socket recv() errno:9 Bad file descriptor 10.0.0.12:27018
+Mon Aug  5 21:04:52 [conn180] end connection 10.0.0.12:52871 (2 connections now open)
+Mon Aug  5 21:04:52 [rsBackgroundSync] SocketException: remote: 10.0.0.12:27018 error: 9001 socket exception [1] server [10.0.0.12:27018] 
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: lock for final commit...
+Mon Aug  5 21:04:52 [conn181] end connection 10.0.0.12:52874 (2 connections now open)
+Mon Aug  5 21:04:52 [conn30] end connection 10.0.0.12:52191 (2 connections now open)
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: final commit...
+Mon Aug  5 21:04:52 [rsBackgroundSync] replSet db exception in producer: 10278 dbclient error communicating with server: capslock.local:27018
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: closing all files...
+Mon Aug  5 21:04:52 [signalProcessingThread] closeAllFiles() finished
+Mon Aug  5 21:04:52 [signalProcessingThread] journalCleanup...
+Mon Aug  5 21:04:52 [signalProcessingThread] removeJournalFiles
+Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: removing fs lock...
+Mon Aug  5 21:04:52 dbexit: really exiting now
