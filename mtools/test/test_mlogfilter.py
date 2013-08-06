@@ -1,9 +1,21 @@
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from nose.tools import *
 from mtools.util.logline import LogLine
+from random import randrange
+from datetime import timedelta
+import dateutil.parser
 import os
 import sys
 import re
+
+
+def random_date(start, end):
+    """ This function will return a random datetime between two datetime objects. """
+    delta = end - start
+    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
+    random_second = randrange(int_delta)
+    return start + timedelta(seconds=random_second)
+
 
 class TestMLogFilter(object):
     """ This class tests functionality around the mlogfilter tool. """
@@ -71,6 +83,11 @@ class TestMLogFilter(object):
             ll = LogLine(line)
             assert(ll.namespace == 'local.oplog.rs')
 
+    def test_word(self):
+        self.tool.run('./logfiles/mongod_225.log --word lock')
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            assert('lock' in line)
 
 
 # output = sys.stdout.getvalue().strip()
