@@ -20,6 +20,7 @@ class BasePlotType(object):
         self.unknown_args = unknown_args
         self.groups = OrderedDict()
         self.empty = True
+        self.limits = None
 
     def accept_line(self, logline):
         """ return True if this PlotType can plot this line. """
@@ -75,8 +76,8 @@ class BasePlotType(object):
                 f = getattr(self, group_by)
                 key = f(logline)
             # if a --label was given, use that as key
-            elif self.args and self.args['label']:
-                key = self.args['label']
+            # elif self.args and self.args['label']:
+            #     key = self.args['label']
             # else key is None
             else:
                 key = None
@@ -92,14 +93,16 @@ class BasePlotType(object):
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("BasePlotType can't plot. Use a derived class instead")
 
-    def plot(self, axis, i):
+    def plot(self, axis, ith_plot, total_plots, limits):
+        self.limits = limits
+
         artists = []
         print self.plot_type_str.upper(), "plot"
         print "%5s %9s  %s"%("id", " #points", "group")
 
         for idx, group in enumerate(self.groups):
             print "%5s %9s  %s"%(idx+1, len(self.groups[group]), group)
-            group_artists = self.plot_group(group, idx+i, axis)
+            group_artists = self.plot_group(group, idx+ith_plot, axis)
             if isinstance(group_artists, list):
                 artists.extend(group_artists)
             else:

@@ -12,14 +12,14 @@ except ImportError:
 class ScatterPlotType(BasePlotType):
 
     plot_type_str = 'scatter'
-    sort_order = 1
+    sort_order = 3
     default_group_by = 'namespace'
 
     def __init__(self, args=None, unknown_args=None):
         BasePlotType.__init__(self, args, unknown_args)
 
         # parse arguments further to get --yaxis argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --numeric")
+        self.argparser = argparse.ArgumentParser("mplotqueries --type scatter")
         self.argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
         args = vars(self.argparser.parse_args(unknown_args))
 
@@ -27,7 +27,7 @@ class ScatterPlotType(BasePlotType):
         self.ylabel = args['yaxis']
 
     def accept_line(self, logline):
-        """ return True if the log line has a duration. """
+        """ return True if the log line has the nominated yaxis field. """
         return getattr(logline, self.field)
 
     def plot_group(self, group, idx, axis):
@@ -56,7 +56,6 @@ class ScatterPlotType(BasePlotType):
 class DurationPlotType(ScatterPlotType):
 
     plot_type_str = 'duration'
-    sort_order = 1
     default_group_by = 'namespace'
 
 
@@ -70,7 +69,6 @@ class DurationPlotType(ScatterPlotType):
 class NScannedNPlotType(ScatterPlotType):
 
     plot_type_str = 'nscanned/n'
-    sort_order = 1
     default_group_by = 'namespace'
 
 

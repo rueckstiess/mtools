@@ -10,22 +10,22 @@ from itertools import chain
 from mtools.util.logcodeline import LogCodeLine
 import mtools
 
-def import_logdb():
-    """ static import helper function, checks if the logdb exists first, otherwise
+def import_l2c_db():
+    """ static import helper function, checks if the log2code.pickle exists first, otherwise
         raises ImportError. 
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
-    if os.path.exists(os.path.join(data_path, 'logdb.pickle')):
-        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'logdb.pickle'), 'rb'))
+    if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
+        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'log2code.pickle'), 'rb'))
         return av, lv, lbw, lcl
     else:
-        raise ImportError('logdb.pickle not found in %s.'%path)
+        raise ImportError('log2code.pickle not found in %s.'%data_path)
 
 
 class Log2CodeConverter(object):
 
     # static import of logdb data structures
-    all_versions, log_version, logs_by_word, log_code_lines = import_logdb()
+    all_versions, log_version, logs_by_word, log_code_lines = import_l2c_db()
         
     def _log2code(self, line):
         tokens = re.split(r'[\s"]', line)
@@ -77,11 +77,11 @@ class Log2CodeConverter(object):
 # class MLog2Code(object):
 
 #     def __init__(self):
-#         self._import_logdb()
+#         self._import_l2c_db()
 #         self._parse_args()
 #         self.analyse()
 
-#     def _import_logdb(self):
+#     def _import_l2c_db(self):
 #         self.all_versions, self.logs_versions, self.logs_by_word, self.log_code_lines = \
 #             cPickle.load(open('./logdb.pickle', 'rb'))
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+import dateutil.parser
 import re
 import json
 
@@ -48,12 +49,14 @@ class LogLine(object):
         self._split_tokens_calculated = False
         self._split_tokens = None
 
+
         self._duration_calculated = False
         self._duration = None
 
         self._datetime_calculated = False
         self._datetime = None
-        self._datetime_offset = None
+        self._datetime_nextpos = None
+        self._datetime_format = None
 
         self._thread_calculated = False
         self._thread = None
@@ -95,9 +98,11 @@ class LogLine(object):
 
             split_tokens = self.split_tokens
 
-            # if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
-            if len(split_tokens) > 0 and re.match(r'[0-9]{1,}ms$', split_tokens[-1]):
-                self._duration = int(split_tokens[-1][:-2])
+            if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
+                try:
+                    self._duration = int((split_tokens[-1][:-2]).replace(',',''))
+                except ValueError:
+                    self._duration = None
 
         return self._duration
 
@@ -117,51 +122,59 @@ class LogLine(object):
                 dt = self._match_datetime_pattern(split_tokens[offs:offs+4])
                 if dt:
                     self._datetime = dt
-                    self._datetime_offset = offs
+                    self._datetime_nextpos = offs
+                    if self._datetime_format.startswith("iso8601"):
+                        self._datetime_nextpos += 1
+                    else:
+                        self._datetime_nextpos += 4
+
                     break
 
         return self._datetime
 
 
     def _match_datetime_pattern(self, tokens):
-        """ Helper method that takes a list of tokens and tries to match the 
-            datetime pattern at the beginning of the token list, i.e. the first
-            few tokens need to match [weekday], [month], [day], HH:MM:SS  
-            (potentially with milliseconds for mongodb version 2.4+). """
-        
-        if len(tokens) < 4:
-            return None
+        """ Helper method that takes a list of tokens and tries to match 
+            the datetime pattern at the beginning of the token list. 
 
-        # return None
-        weekday, month, day, time = tokens[:4]
+            There are several formats that this method needs to understand
+            and distinguish between (see MongoDB's SERVER-7965):
 
-        # check if it is a valid datetime
-        if (weekday not in self.weekdays) or \
-           (month not in self.months) or not day.isdigit():
-            return None
+            ctime-pre2.4:   Wed Dec 31 19:00:00
+            ctime:          Wed Dec 31 19:00:00.000
+            iso8601-utc:    1970-01-01T00:00:00.000Z
+            iso8601-local:  1969-12-31T19:00:00.000+0500
+        """
+        # first check: less than 4 tokens can't be ctime
+        assume_iso8601_format = len(tokens) < 4
 
-        time_match = re.match(r'(\d{2}):(\d{2}):(\d{2})(\.\d{3})?', time)
-        if not time_match:
-            return None
+        # check for ctime-pre-2.4 or ctime format
+        if not assume_iso8601_format:
+            weekday, month, day, time = tokens[:4]
+            if len(tokens) < 4 or (weekday not in self.weekdays) or \
+               (month not in self.months) or not day.isdigit():
+                assume_iso8601_format = True
 
-        month = self.months.index(month)+1
+        if assume_iso8601_format:
+            # sanity check, because the dateutil parser could interpret 
+            # any numbers as a valid date
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}', \
+                            tokens[0]):
+                return None
 
-        # extract hours, min, sec, millisec from time string
-        h, m, s, ms = time_match.groups()
+            # convinced that this is a ISO-8601 format, the dateutil parser 
+            # will do the rest
+            dt = dateutil.parser.parse(tokens[0])
+            self._datetime_format = "iso8601-utc" \
+                if tokens[0].endswith('Z') else "iso8601-local"
 
-        # old format (pre 2.4) has no ms set to 0
-        if ms == None:
-            ms = 0
         else:
-            ms = int(ms[1:])
-
-        # convert to microsec for datetime
-        ms *= 1000
-
-        # assume this year. TODO: special case if logfile is not from current year
-        year = datetime.now().year
-
-        dt = datetime(int(year), int(month), int(day), int(h), int(m), int(s), ms)
+            # assume current year (no other info available)
+            year = datetime.now().year
+            dt = dateutil.parser.parse(' '.join(tokens[:4]), \
+                                       default=datetime(year, 1, 1))
+            self._datetime_format = "ctime" \
+                if '.' in tokens[3] else "ctime-pre2.4"
 
         return dt
 
@@ -177,14 +190,14 @@ class LogLine(object):
 
             # force evaluation of datetime to get access to datetime_offset
             if self.datetime:
-                if len(split_tokens) <= self._datetime_offset + 4:
+                if len(split_tokens) <= self._datetime_nextpos:
                     return None
 
-                connection_token = split_tokens[self._datetime_offset + 4]
+                connection_token = split_tokens[self._datetime_nextpos]
                 match = re.match(r'^\[([^\]]*)\]$', connection_token)
                 if match:
                     self._thread = match.group(1)
-                    self._thread_offset = self._datetime_offset + 4
+                    self._thread_offset = self._datetime_nextpos
   
         return self._thread
 
@@ -222,13 +235,13 @@ class LogLine(object):
 
         # trigger datetime evaluation to get access to offset
         if self.datetime:
-            if len(split_tokens) <= self._datetime_offset + 6:
+            if len(split_tokens) <= self._datetime_nextpos + 2:
                 return
-            op = split_tokens[self._datetime_offset + 5]
+            op = split_tokens[self._datetime_nextpos + 1]
 
             if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
                 self._operation = op
-                self._namespace = split_tokens[self._datetime_offset + 6]
+                self._namespace = split_tokens[self._datetime_nextpos + 2]
 
 
 
@@ -333,12 +346,12 @@ class LogLine(object):
                     # special case for numYields because of space in between ("numYields: 2")
                     if counter == 'numYields' and token.startswith('numYields'):
                         try:
-                            self._numYields = int(split_tokens[t+1+self._thread_offset+2])
+                            self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
                         except ValueError:
                             pass
                     elif token.startswith('%s:'%counter):
                         try:
-                            vars(self)['_'+counter] = int(token.split(':')[-1])
+                            vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
                             pass
                         break

@@ -223,8 +223,10 @@ class MLaunchTool(BaseCmdLineTool):
         for i in range(max(1, self.args['mongos'])):
             self._launchMongoS(os.path.join(self.args['dir'], 'mongos.log'), nextport, ','.join(config_string))
             if i == 0: 
-                # store host/port of first mongos
+                # store host/port of first mongos (use localhost)
                 self.mongos_host = '%s:%i'%(self.hostname, nextport)
+                if self.args['authentication']:
+                    self.mongos_host = 'localhost:%i'%(nextport)
             nextport += 1
 
         # add shards
@@ -347,7 +349,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
@@ -379,7 +381,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'data/keyfile'))
+            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:

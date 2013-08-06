@@ -14,7 +14,7 @@ from mtools import __version__
 
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.dates import DateFormatter
+    from matplotlib.dates import DateFormatter, date2num
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
     import mtools.mplotqueries.plottypes as plottypes
@@ -43,17 +43,20 @@ class MPlotQueriesTool(LogFileTool):
         self.plot_instances = []
 
         # main parser arguments
-        self.argparser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='namespaces to exclude in the plot')
-        self.argparser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='namespaces to include in the plot (default=all)')
+        self.argparser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='(deprecated) use a prior mlogfilter instead.')
+        self.argparser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='(deprecated) use a prior mlogfilter instead. ')
         self.argparser.add_argument('--logscale', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
-        self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'])
-        self.argparser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration)')
-        
-        mutex = self.argparser.add_mutually_exclusive_group()
-        mutex.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range plots can additionally group on 'log2code'.")
-        mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
+        self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="create combinations of several plots. Use '--overlay' to create an overlay (this will not plot anything). The first call without '--overlay' will additionally plot all existing overlays. Use '--overlay reset' to clear all overlays.")
+        self.argparser.add_argument('--type', action='store', default='duration', choices=self.plot_types.keys(), help='type of plot (default=duration).')        
+        self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range and histogram plots can additionally group on 'log2code'.")
+
+        # mutex = self.argparser.add_mutually_exclusive_group()
+        # mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
 
         self.legend = None
+
+        # store logfile ranges
+        self.logfile_ranges = []
 
 
     def run(self, arguments=None):
@@ -104,10 +107,13 @@ class MPlotQueriesTool(LogFileTool):
         plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
         
         for logfile in self.logfiles:
+            start = None
 
             for line in logfile:
                 # create LogLine object
                 logline = LogLine(line)
+                if not start:
+                    start = logline.datetime
 
                 if multiple_files:
                     # amend logline object with filename for group by filename
@@ -133,6 +139,11 @@ class MPlotQueriesTool(LogFileTool):
 
                     line_accepted = True
                     plot_instance.add_line(logline)
+
+            end = logline.datetime
+
+            # store start and end for each logfile
+            self.logfile_ranges.append( (start, end) )
 
         self.plot_instances.append(plot_instance)
 
@@ -294,11 +305,18 @@ class MPlotQueriesTool(LogFileTool):
     def plot(self):
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
-        axis = plt.subplot(111, )
+        axis = plt.subplot(111)
+
+        # set xlim from min to max of logfile ranges
+        xlim_min = min([dt[0] for dt in self.logfile_ranges])
+        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+
+        if xlim_min == None or xlim_max == None:
+            raise SystemExit('no data to plot.')
 
         ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
-            self.artists.extend(plot_inst.plot(axis, i))
+            self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances), (xlim_min, xlim_max) ))
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
             
@@ -310,6 +328,8 @@ class MPlotQueriesTool(LogFileTool):
 
         for label in axis.get_xticklabels():  # make the xtick labels pickable
             label.set_picker(True)
+            
+        axis.set_xlim(date2num([xlim_min, xlim_max]))
 
         # ylabel for y axis
         if self.args['logscale']:
@@ -320,7 +340,6 @@ class MPlotQueriesTool(LogFileTool):
         axis.set_title(', '.join([l.name for l in self.logfiles]))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
         self.footnote = plt.annotate('created with mtools v%s: https://github.com/rueckstiess/mtools' % __version__, (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
-
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:

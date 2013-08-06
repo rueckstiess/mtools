@@ -11,14 +11,14 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mlogfilter](README.md#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
-* [mlogversion](README.md#mlogversion) -- auto-detect the version number of a mongos/mongod log file
-* [mlogdistinct](README.md#mlogdistinct) -- groups all similar log messages together and displays their counts
-* [mlogmerge](README.md#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
-* [mlog2json](README.md#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
-* [mplotqueries](README.md#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
-* [mlogvis](README.md#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
-* [mlaunch](README.md#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
+* [mlogfilter](#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
+* [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
+* [mlogmerge](#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
+* [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
+* [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
+* [mlogvis](#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
+* [mlaunch](#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
 
 
 Requirements and Installation Instructions
@@ -34,7 +34,7 @@ instructions for these modules.
 
 Recent Changes
 --------------
-The current version of mtools is 1.0.1. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
+The current version of mtools is 1.0.4. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
 
 
 Contribute to mtools
@@ -57,76 +57,99 @@ shorten log lines to the given value (default is 200 characters), cutting out
 excess characters from the middle and replacing them with "...".
 
 
-    usage: mlogfilter logfile [options]
+    usage: mlogfilter [-h] [--version] [--verbose] [--shorten [LENGTH]]
+                      [--exclude] [--human] [--namespace NS] [--operation OP]
+                      [--thread THREAD] [--slow [SLOW]] [--fast [FAST]]
+                      [--word [WORD [WORD ...]]] [--scan]
+                      [--from [FROM [FROM ...]]] [--to [TO [TO ...]]]
+                      [logfile]
+
+    mongod/mongos log file parser. Use parameters to enable filters. A line only
+    gets printed if it passes all enabled filters.
 
     positional arguments:
       logfile               logfile to parse
 
     optional arguments:
       -h, --help            show this help message and exit
-      --from FROM           output starting at FROM
-      --to TO               output up to TO
+      --version             show program's version number and exit
+      --verbose             outputs information about the parser and arguments.
       --shorten [LENGTH]    shortens long lines by cutting characters out of the
                             middle until the length is <= LENGTH (default 200)
+      --exclude             if set, excludes the matching lines rather than
+                            includes them.
+      --human               outputs numbers formatted with commas and milliseconds
+                            as hr,min,sec,ms for easier readability
+      --namespace NS        only output log lines matching operations on NS.
+      --operation OP        only output log lines matching operations of type OP.
+      --thread THREAD       only output log lines of thread THREAD.
+      --slow [SLOW]         only output lines with query times longer than SLOW ms
+                            (default 1000)
+      --fast [FAST]         only output lines with query times shorter than FAST
+                            ms (default 1000)
+      --word [WORD [WORD ...]]
+                            only output lines matching any of WORD
       --scan                only output lines which appear to be table scans (if
                             nscanned>10000 and ratio of nscanned to nreturned>100)
-      --word WORDS          only output lines matching any of WORDS
-      --slow [SLOW]         only output lines with query times longer than SLOW ms
-                            (default is 1000)
-      --fast FAST           only output lines with query times shorter than FAST ms
+      --from [FROM [FROM ...]]
+                            output starting at FROM
+      --to [TO [TO ...]]    output up to TO
+
+    
+`FROM` and `TO` can be any combination of `[DATE] [TIME] [OFFSET]` in that order,
+separated by space.
+
+`[DATE]` can be any of
+
+* a 3-letter weekday (Mon, Tue, Wed, ...)
+* a date as 3-letter month, 1-2 digits day (Sep 5, Jan 31, Aug 08)
+* the words: today, now, start, end
+
+`[TIME]` can be any of
+
+* hours and minutes (20:15, 04:00, 3:00)
+* hours, minutes and seconds (13:30:01, 4:55:55)
+
+`[OFFSET]` consists of `[OPERATOR][VALUE][UNIT]` (no spaces in between).
+
+`[OPERATOR]` can be `+` or `-` (note that `-` can only be used if the whole 
+`[DATE] [TIME] [OFFSET]` is in quotation marks, otherwise it would 
+be confused with a separate parameter)
+
+`[VALUE]` can be any number
+
+`[UNIT]` can be any of s, sec, m, min, h, hours, d, days, w, weeks, mo,
+months, y, years
+
+The `[OFFSET]` is added/subtracted to/from the specified `[DATE] [TIME]`.
 
 
-    FROM and TO can be any combination of [DATE] [TIME] [OFFSET] in that order,
-    separated by space.
+#### Examples  
 
-        [DATE] can be any of
-            - a 3-letter weekday (Mon, Tue, Wed, ...)
-            - a date as 3-letter month, 1-2 digits day (Sep 5, Jan 31, Aug 08)
-            - the words: today, now, start, end
+From last Sunday 10:00:00am to the end of the file
 
-        [TIME] can be any of
-            - hours and minutes (20:15, 04:00, 3:00)
-            - hours, minutes and seconds (13:30:01, 4:55:55)
+    mlogfilter <logfile> --from Sun 10:00 
 
-        [OFFSET] consists of [OPERATOR][VALUE][UNIT]   (no spaces in between)
+From Sep 29 00:00:00 to the end of the file
 
-        [OPERATOR] can be + or - (note that - can only be used if the whole 
-            "[DATE] [TIME] [OFFSET]" is in quotation marks, otherwise it would 
-            be confused with a separate parameter)
+    mlogfilter <logfile> --from Sep 29
+        
+From the beginning of the file to today at 15:00:00
 
-        [VALUE] can be any number
+    mlogfilter <logfile> --to today 15:00
+        
+From today's date 00:00:00 to today's date 01:00:00
 
-        [UNIT] can be any of s, sec, m, min, h, hours, d, days, w, weeks, mo,
-            months, y, years
+    mlogfilter <logfile> --from today --to +1h
+       
+From last day in logfile, 20:15:00 to same day 20:18:00
 
-        The [OFFSET] is added/subtracted to/from the specified [DATE] [TIME].
+    mlogfilter <logfile> --from 20:15 --to +3m  
 
-        For the --from parameter, the default is the same as 'start' 
-            (0001-01-01 00:00:00). If _only_ an [OFFSET] is given, it is 
-            added to 'start' (which is not very useful).
+From the last two hours of the log file to the end
 
-        For the --to parameter, the default is the same as 'end' 
-            (9999-31-12 23:59:59). If _only_ an [OFFSET] is given, however, 
-            it is added to [FROM].
-
-
-        Examples:  
-            --from Sun 10:00 
-                goes from last Sunday 10:00:00am to the end of the file
-
-            --from Sep 29
-                goes from Sep 29 00:00:00 to the end of the file
-
-            --to today 15:00
-                goes from the beginning of the file to today at 15:00:00
-
-            --from today --to +1h
-                goes from today's date 00:00:00 to today's date 01:00:00
-
-            --from 20:15 --to +3m  
-                goes from today's date at 20:15:00 to today's date at 20:18:00
-
-
+    mlogfilter <logfile> --from "end -2h"
+        
 
 <hr> 
 
@@ -154,7 +177,7 @@ mlogdistinct
 
 #### Description
 
-Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of occurences in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
+Groups all similar log messages in the logfile together and only displays a distinct set of messages (one for each group) and the number of matches in the logfile. "Similar" here means that all log messages originate from the same code line in the source code, but may have different variable parts.
 
 This tool builds on top of the code2line module within mtools and is currently in BETA state. If you find any problems using this tool, please report it through the github issue tracker on this page. It would also be helpful to get any log lines that you think should have been matched. Use `--verbose` to output the lines that couldn't be matched.
 
@@ -274,44 +297,48 @@ instead of plotted. You can add as many overlays as you like. The first call wit
 option will additionally plot all existing overlays. To remove overlays, run mplotqueries with `--reset`.
 
 ###### Different types of plots
-By default, mplotqueries uses a "duration" plot, that plots the duration of each logline as a point in a 
-2D coordinate system, where the x-axis is the time of the event, and the y-axis is the duration it took. 
-With the parameter `--type`, a different plot type can be chosen. Currently, there are 3 basic types:
-"duration", "event" and "range". The "event" plot will plot each log line as a vertical line on the
+By default, mplotqueries uses a "duration" plot (a special type of scatter plot), that plots the duration 
+of each logline as a point in a 2D coordinate system, where the x-axis is the time of the event, and the 
+y-axis is the duration it took. 
+With the parameter `--type`, a different plot type can be chosen. Currently, there are 4 basic types:
+"scatter", "event", "range" and "histogram". The "event" plot will plot each log line as a vertical line on the
 x-axis. Use `mlogfilter` or `grep` to extract the events from the log file that are of interest. Range plots
 will plot a horizontal bar from the datetime of the first line to the datetime of the last line. This plot 
 type is useful to show time periods or ranges. As an example, you could compare the coverage and overlap of 
-several log files.
+several log files. The histogram plot type aggregates log lines together in variable sized buckets. The
+standard size is 60 seconds, which can be adjusted.
 
 Apart from these three basic plot types, it is easy to create new plot types that derive from any of the 
-basic ones. Currently, there is one derived plot type, called `rsstate`. This plot type is a special type 
-of event plot, that specifically looks at the replica set state changes (PRIMARY, SECONDARY, ...) and 
-plots them as vertical lines.
+basic ones. 
   
 ###### Usage  
-    mplotqueries filename [filename ...] [-h] [--ns [NS [NS ...]]] [--exclude-ns [NS [NS ...]]]
-               
-    positional arguments: 
-      filename              log file(s) to plot
+    usage: mplotqueries [-h] [--version] [--exclude-ns [NS [NS ...]]]
+                        [--ns [NS [NS ...]]] [--logscale]
+                        [--overlay [{add,list,reset}]]
+                        [--type {nscanned/n,rsstate,histogram,range,scatter,duration,event}]
+                        [--group GROUP]
+                        [logfile [logfile ...]]
+
+    A script to plot various information from logfiles. Clicking on any of the
+    plot points will print the corresponding log line to stdout.
+
+    positional arguments:
+      logfile               logfile(s) to parse
 
     optional arguments:
-      -h, --help                   show this help message and exit
-      --ns [NS [NS ...]]           namespaces to include in the plot (default is all)
-      --exclude-ns [NS [NS ...]]   namespaces to exclude from the plot
-      --log                        plot y-axis in logarithmic scale (default=off)
-      --no-legend                  turn off legend (default=on)
-      --reset                      removes all stored overlays. See --overlay for more
-                                   information.
-      --overlay                    plots with this option will be stored as 'overlays'
-                                   but not plotted. They are all drawn with the first
-                                   call without --overlay. Use --reset to remove all
-                                   overlays.
-      --type TYPE                  choose the type of plot. Currently, the types are
-                                   duration, event, range, rsstate.
-      --group GROUP                each plot type has different supported groups. Most
-                                   plot types support grouping by namespace (default), 
-                                   operation or thread.
-
+      -h, --help            show this help message and exit
+      --version             show program's version number and exit
+      --exclude-ns [NS [NS ...]]
+                            namespaces to exclude in the plot
+      --ns [NS [NS ...]]    namespaces to include in the plot (default=all)
+      --logscale            plot y-axis in logarithmic scale (default=off)
+      --overlay [{add,list,reset}]
+      --type {nscanned/n,rsstate,histogram,range,scatter,duration,event}
+                            type of plot (default=duration)
+      --group GROUP         specify value to group on. Possible values depend on
+                            type of plot. All basic plot types can group on
+                            'namespace', 'operation', 'thread', range plots can
+                            additionally group on 'log2code'.
 <hr>
 
 mlogvis
@@ -358,37 +385,43 @@ This script lets you quickly spin up MongoDB environments on your local
 machine. It supports various configurations of stand-alone servers, 
 replica sets and sharded clusters.
 
-    usage: mlaunch [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
-                   [--name NAME] [--sharded [N [N ...]]] [--config NUM]
-                   [--verbose] [--port PORT] [--authentication]
-                   [--loglevel LOGLEVEL]
-                   [dir]
+    usage: mlaunch [-h] [--version] (--single | --replicaset | --restart)
+                   [--nodes NUM] [--arbiter] [--name NAME] [--sharded [N [N ...]]]
+                   [--config NUM] [--mongos NUM] [--dir DIR] [--verbose]
+                   [--port PORT] [--authentication] [--binarypath PATH]
 
-    script to launch MongoDB stand-alone servers, replica sets, and shards
-
-    positional arguments:
-      dir                   base directory to create db and log paths
+    script to launch MongoDB stand-alone servers, replica sets and shards. You
+    must specify either --single or --replicaset. In addition to the optional
+    arguments below, you can specify any mongos and mongod argument, which will be
+    passed on, if the process accepts it.
 
     optional arguments:
       -h, --help            show this help message and exit
+      --version             show program's version number and exit
       --single              creates a single stand-alone mongod instance
       --replicaset          creates replica set with several mongod instances
+      --restart             restarts a previously launched existing configuration
+                            from the data directory.
       --nodes NUM           adds NUM data nodes to replica set (requires
-                            --replicaset, default: 3)
+                            --replicaset, default=3)
       --arbiter             adds arbiter to replica set (requires --replicaset)
-      --name NAME           name for replica set (default: replset)
+      --name NAME           name for replica set (default=replset)
       --sharded [N [N ...]]
                             creates a sharded setup consisting of several singles
                             or replica sets. Provide either list of shard names or
-                            number of shards (default: 1)
+                            number of shards (default=1)
       --config NUM          adds NUM config servers to sharded setup (requires
-                            --sharded, NUM must be 1 or 3, default: 1)
+                            --sharded, NUM must be 1 or 3, default=1)
+      --mongos NUM          starts NUM mongos processes (requires --sharded,
+                            default=1)
+      --dir DIR             base directory to create db and log paths
+                            (default=./data/)
       --verbose             outputs information about the launch
       --port PORT           port for mongod, start of port range in case of
-                            replica set or shards (default: 27017)
+                            replica set or shards (default=27017)
       --authentication      enable authentication and create a key file and admin
                             user (admin/mypassword)
-      --loglevel LOGLEVEL   increase loglevel to LOGLEVEL (default: 0)
+      --binarypath PATH     search for mongod/s binaries in the specified PATH.
 
 
 #### Examples

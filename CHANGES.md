@@ -1,10 +1,28 @@
 Changes to mtools
 =================
 
+#### version 1.0.5
+
+  * mplotqueries: included a new plot type 'connchurn' shows opened vs. closed connections over time (#77).
+
+
+#### version 1.0.4
+
+  * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).
+  * mplotqueries: fixed bug where a plot's argument sub-parser (e.g. for --bucketsize) couldn't deal with stdin.
+  * mplotqueries: fixed bug that caused crash when there was no data to plot (#68).
+  * mlogfilter: fixed bug that prevented `--from` and `--to` to be used with stdin (#73).
+  * fixed bug parsing durations of log lines that have a float instead of int value (like 123.45ms).
+  * implemented ISO-8601 timestamp format parsing for upcoming change in MongoDB 2.6 (#76).
+
 #### version 1.0.3
 
-  * mplotqueries: New plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).
-  * mplotqueries: Added footnote ("created with mtools") including version. Can be toggled on/off with 'f' (#33).
+  * mplotqueries: new plot types: "scatter" can plot various counters on the y-axis, "nscanned/n" plots inefficient queries (#58).
+  * mplotqueries: added footnote ("created with mtools") including version. Can be toggled on/off with 'f' (#33).
+  * mplotqueries: added histogram plots (--type histogram) with variable bucket size (#25).
+  * mplotqueries: always plot full range of logfile on x-axis, even if data points start later or end earlier (#60).
+  * mlogfilter: added human-readable option (--human) that inserts `,` in large numbers and calculates durations in hrs,min,sec. (#8).
+  * mlogdistinct: improved log2code matching and cleaned up log2code match database.
 
 #### version 1.0.2
 

@@ -44,6 +44,7 @@ Then clone a copy to your local machine:
 
 Now you need to add the upstream repository to pull in the latest changes.
 
+    cd mtools
     git remote add upstream https://github.com/rueckstiess/mtools
     git fetch upstream
 
@@ -58,13 +59,13 @@ If you want to work on a bug or feature implementation, first pull in the latest
 
 Then create a feature/bugfix branch that forks off the local `develop` branch:
 
-    git -b feature-37-fast develop
+    git checkout -b feature-37-fast develop
 
 The naming is not that relevant, but it's good practice to start with `feature-` or `bugfix-` and include the issue number
 in the branch name (if available).
 
-Now make your changes to the code. Commit as often as you like. Please use meaningful, descriptive git commit messages. 
-A git commit with `asdf` or `changed stuff` will not go into the repository.
+Now make your changes to the code. Commit as often as you like. Please use meaningful, descriptive git commit messages and
+avoid `asdf` or `changed stuff` descriptions.
 
 When you're happy with your changes, push your feature branch to github: 
 
