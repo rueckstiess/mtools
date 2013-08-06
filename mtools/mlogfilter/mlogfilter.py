@@ -40,7 +40,7 @@ class MLogFilterTool(LogFileTool):
     def _outputLine(self, line, length=None, human=False):
         if length:
             if len(line) > length:
-                line = line[:length/2-2] + '...' + line[-length/2:]
+                line = line[:length/2-2] + '...' + line[-length/2+1:]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
