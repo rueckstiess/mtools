@@ -2,18 +2,21 @@
 
 import argparse, re
 import sys
+import inspect
 
 from mtools.util.logline import LogLine
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
+import mtools.mlogfilter.filters as filters
 
 class MLogFilterTool(LogFileTool):
 
     def __init__(self):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
         
-        self.filters = [] 
+        # add all filter classes from the filters module
+        self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
 
         self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.'
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
@@ -153,14 +156,5 @@ class MLogFilterTool(LogFileTool):
 
 if __name__ == '__main__':
 
-    tool = MLogFilterTool()
-
-    # add filters
-    tool.addFilter(LogLineFilter)
-    tool.addFilter(SlowFilter)
-    tool.addFilter(FastFilter)
-    tool.addFilter(WordFilter)
-    tool.addFilter(TableScanFilter)
-    tool.addFilter(DateTimeFilter)
-    
+    tool = MLogFilterTool()    
     tool.run()
