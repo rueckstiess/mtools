@@ -31,6 +31,23 @@ class LogFile(object):
             self._calculate_bounds()
         return self._end
 
+    @property
+    def num_lines(self):
+        """ lazy evaluation of the number of lines. Returns None for stdin input currently. """
+        if self.from_stdin:
+            return None
+        if not self._num_lines:
+            self._count_lines()
+        return self._num_lines
+
+
+
+    def _count_lines(self):
+        """ count number of lines (can be expensive). """
+        self._num_lines = 0
+        for line in self.logfile:
+            self._num_lines += 1
+
 
     def _calculate_bounds(self):
         """ calculate beginning and end of logfile. """
