@@ -93,7 +93,13 @@ class ConnectionChurnPlotType(BasePlotType):
 
         total = sorted(opened+closed, key=lambda ll: ll.datetime)
         x = date2num( [ logline.datetime for logline in total ] )
-        conns = [int(re.search(r'(\d+) connections? now open', ll.line_str).group(1)) for ll in total]
+        
+        try:
+            conns = [int(re.search(r'(\d+) connections? now open', ll.line_str).group(1)) for ll in total]
+        except AttributeError:
+            # hack, v2.0.x doesn't have this information
+            axis.set_ylim(top = self.ymax*1.1) 
+            return 
 
         axis.plot(x, conns, '-', color='black', linewidth=2, alpha=0.7, label='# open connections total')
 
