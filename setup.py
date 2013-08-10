@@ -36,7 +36,7 @@ setup(
     },
     scripts=['scripts/mlaunch','scripts/mlog2json','scripts/mlogdistinct',
         'scripts/mlogfilter','scripts/mlogmerge','scripts/mlogversion',
-        'scripts/mlogvis','scripts/mplotqueries'],
+        'scripts/mlogvis','scripts/mplotqueries', 'scripts/mloginfo'],
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
