@@ -14,6 +14,8 @@ class BaseCmdLineTool(object):
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
 
+        self.is_stdin = not sys.stdin.isatty()
+        
 
     def run(self, arguments=None, get_unknowns=False):
         """ Init point to execute the script. If `arguments` string is given, will evaluate the 
@@ -58,7 +60,10 @@ class LogFileTool(BaseCmdLineTool):
         else:
             arg_opts['help'] = 'logfile to parse'
 
-        if not sys.stdin.isatty():
+        if self.is_stdin:
+            if not self.stdin_allowed:
+                raise SystemExit("this tool can't parse input from stdin.")
+                
             arg_opts['const'] = sys.stdin
             arg_opts['action'] = 'store_const'
             del arg_opts['type']
@@ -71,4 +76,5 @@ if __name__ == '__main__':
     tool = LogFileTool(multiple_logfiles=True, stdin_allowed=False)
     tool.run()
     print tool.args
+    print tool.is_stdin
 

@@ -13,7 +13,7 @@ import mtools.mlogfilter.filters as filters
 class MLogFilterTool(LogFileTool):
 
     def __init__(self):
-        LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
+        LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=True)
         
         # add all filter classes from the filters module
         self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
@@ -97,6 +97,16 @@ class MLogFilterTool(LogFileTool):
             return line[:last_index] + ("").join(splitted)
 
 
+    def logfile_generator(self):
+        if len(self.args['logfile']) > 1:
+            # todo, merge
+            pass
+        else:
+            # only one file
+            for line in self.args['logfile'][0]:
+                yield line
+
+
     def run(self, arguments=None):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
@@ -109,10 +119,10 @@ class MLogFilterTool(LogFileTool):
 
         # now parse arguments and post-process
         LogFileTool.run(self)
-        self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
+        self.args = dict((k, self.args[k] if k == 'logfile' else self._arrayToString(self.args[k])) for k in self.args)
 
         # create filter objects from classes and pass args
-        self.filters = [f(self.args) for f in self.filters]
+        self.filters = [f(self) for f in self.filters]
 
         # remove non-active filter objects
         self.filters = [f for f in self.filters if f.active]
@@ -132,10 +142,9 @@ class MLogFilterTool(LogFileTool):
 
         # go through each line and ask each filter if it accepts
         if not 'logfile' in self.args or not self.args['logfile']:
-            exit()
+            raise SystemExit('no logfile found.')
 
-
-        for line in self.args['logfile']:
+        for line in self.logfile_generator():
             logline = LogLine(line)
             if self.args['exclude']:
                 # print line if any filter disagrees

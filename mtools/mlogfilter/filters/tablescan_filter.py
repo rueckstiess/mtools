@@ -7,10 +7,11 @@ class TableScanFilter(BaseFilter):
         ('--scan', {'action':'store_true', 'help':'only output lines which appear to be table scans (if nscanned>10000 and ratio of nscanned to nreturned>100)'})
     ]
 
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
-        if 'scan' in self.commandLineArgs:
-            self.active = self.commandLineArgs['scan']
+    def __init__(self, mlogfilter):
+        BaseFilter.__init__(self, mlogfilter)
+        
+        if 'scan' in self.mlogfilter.args:
+            self.active = self.mlogfilter.args['scan']
 
     def accept(self, logline):
 
