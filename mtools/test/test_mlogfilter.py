@@ -1,12 +1,12 @@
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logline import LogLine
+from mtools.util.logfile import LogFile
 import mtools
 
 from nose.tools import *
 
 from random import randrange
 from datetime import timedelta
-import dateutil.parser
 import os
 import sys
 import re
@@ -29,6 +29,8 @@ class TestMLogFilter(object):
 
         # load logfile(s)
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_225.log')
+        self.logfile = LogFile(open(self.logfile_path, 'r'))
+
 
     def test_msToString(self):
         assert(self.tool._msToString(100) == '0hr 0min 0secs 100ms')
@@ -37,14 +39,23 @@ class TestMLogFilter(object):
         assert(self.tool._msToString(10000000) == '2hr 46min 40secs 0ms')
 
     def test_from(self):
-        self.tool.run('%s --from Aug 5 21:04:52'%self.logfile_path)
+        random_start = random_date(self.logfile.start, self.logfile.end)
+
+        self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
-        assert(output.count('\n') == 25)
+        for line in output.splitlines():
+            ll = LogLine(line)
+            assert(ll.datetime >= random_start)
 
     def test_from_to(self):
-        self.tool.run('%s --from Aug 5 21:00:00 --to Aug 5 21:01:00'%self.logfile_path)
+        random_start = random_date(self.logfile.start, self.logfile.end)
+        random_end = random_date(random_start, self.logfile.end)
+
+        self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
-        assert(output.count('\n') == 8)
+        for line in output.splitlines():
+            ll = LogLine(line)
+            assert(ll.datetime >= random_start and ll.datetime <= random_end)
 
     def test_shorten(self):
         self.tool.run('%s --shorten 50'%self.logfile_path)
