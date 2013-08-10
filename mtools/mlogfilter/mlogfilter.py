@@ -22,7 +22,7 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability ')
+        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability.')
 
 
     def addFilter(self, filterClass):
@@ -30,6 +30,7 @@ class MLogFilterTool(LogFileTool):
         if not filterClass in self.filters:
             self.filters.append(filterClass)
 
+    
     def _arrayToString(self, arr):
         """ if arr is of type list, join elements with space delimiter. """
         if isinstance(arr, list):
@@ -37,6 +38,7 @@ class MLogFilterTool(LogFileTool):
         else:
             return arr
 
+    
     def _outputLine(self, line, length=None, human=False):
         if length:
             if len(line) > length:
@@ -108,7 +110,7 @@ class MLogFilterTool(LogFileTool):
                 self.argparser.add_argument(fa[0], **fa[1])
 
         # now parse arguments and post-process
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
         self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
 
         # create filter objects from classes and pass args
