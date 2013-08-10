@@ -49,7 +49,6 @@ class LogLine(object):
         self._split_tokens_calculated = False
         self._split_tokens = None
 
-
         self._duration_calculated = False
         self._duration = None
 
@@ -131,6 +130,14 @@ class LogLine(object):
                     break
 
         return self._datetime
+
+    
+    @property 
+    def datetime_format(self):
+        if not self._datetime_calculated:
+            self.datetime
+
+        return self._datetime_format
 
 
     def _match_datetime_pattern(self, tokens):

@@ -1,4 +1,6 @@
 from mtools.util.logline import LogLine
+import time
+import re
 
 class LogFile(object):
     """ wrapper class for log files, either as open file streams of from stdin. 
@@ -11,7 +13,9 @@ class LogFile(object):
         self.from_stdin = logfile.name == "<stdin>"
         self._start = None
         self._end = None
-
+        self._num_lines = None
+        self._restarts = None
+        self._binary = None
 
     @property
     def start(self):
@@ -37,16 +41,64 @@ class LogFile(object):
         if self.from_stdin:
             return None
         if not self._num_lines:
-            self._count_lines()
+            self._iterate_lines()
         return self._num_lines
 
+    @property
+    def restarts(self):
+        """ lazy evaluation of all restarts. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._restarts
+
+    @property
+    def binary(self):
+        """ lazy evaluation of the binary name. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._binary
+
+    @property
+    def versions(self):
+        """ return all version changes. """
+        versions = []
+        for v, _ in self.restarts:
+            if len(versions) == 0 or v != versions[-1]:
+                versions.append(v)
+        return versions
 
 
-    def _count_lines(self):
+    def _iterate_lines(self):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
-        for line in self.logfile:
-            self._num_lines += 1
+        self._restarts = []
+
+        l = 0
+        for l, line in enumerate(self.logfile):
+
+            # find version string
+            if "version" in line:
+
+                restart = None
+                # differentiate between different variations
+                if "mongos" in line or "MongoS" in line:
+                    self._binary = 'mongos'
+                elif "db version v" in line:
+                    self._binary = 'mongod'
+
+                else: 
+                    continue
+
+                version = re.search(r'(\d\.\d\.\d+)', line)
+                if version:
+                    version = version.group(1)
+                    restart = (version, LogLine(line))
+                    self._restarts.append(restart)
+
+        self._num_lines = l
+
+        # reset logfile
+        self.logfile.seek(0)
 
 
     def _calculate_bounds(self):
