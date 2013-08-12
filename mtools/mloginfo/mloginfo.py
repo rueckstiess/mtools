@@ -14,9 +14,9 @@ class MLogInfoTool(LogFileTool):
         self.argparser.add_argument('--restarts', action='store_true', help='outputs information about every detected restart.')
 
 
-    def run(self):
+    def run(self, arguments=None):
         """ Print out useful information about the log file. """
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
 
         logfile = LogFile(self.args['logfile'])
         print "start of logfile: %s" % logfile.start.strftime("%b %d %H:%M:%S")
