@@ -18,8 +18,8 @@ class MLogVersionTool(LogFileTool):
         self.argparser.description = 'mongod/mongos log file version detector. Parses a log file and matches each line to its original source code version. Each line that limits the remaining possible set of versions is printed. If a mongos/d restart is detected, the definitive version is printed instead.'
 
 
-    def run(self):
-        LogFileTool.run(self)
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments)
 
         possible_versions = set(Log2CodeConverter.all_versions)
 

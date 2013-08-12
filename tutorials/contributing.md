@@ -98,3 +98,21 @@ is a number starting at 0. For example, version `1.2rc2` is the 3rd release cand
 Github milestones and git tags are named with a prefix `v`, for example `v1.0.1`.
 
 
+### Testing
+
+mtools uses the [nose testing framework](https://github.com/nose-devs/nose). You can install it with `sudo pip install nose` or 
+you can just run the test suite, which will take care of all the testing dependencies:
+
+    python setup.py test
+
+If you want to run the tests manually, go into the `mtools/test/` directory and run `nosetests`. The full test suite may take a while, as
+some of the tests have to set up and tear down replica sets and sharded clusters, especially for mlaunch testing. You can skip the slow tests
+with this command:
+
+    nosetests -a '!slow'
+
+If you implement a new feature anywhere in mlaunch, please write a test function or test class for the feature. If you fix a bug,
+please re-run the test suite after the code change and make sure the tests still pass. Please think carefully before changing
+a code and its related test concurrently, so it still tests the expected behavior and not what you consider as "fixed behavior".
+
+

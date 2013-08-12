@@ -18,8 +18,8 @@ class MLogMergeTool(LogFileTool):
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file")
 
 
-    def run(self):
-        LogFileTool.run(self)
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments)
 
         logfiles = self.args['logfile']
 

@@ -75,6 +75,4 @@ class LogFileTool(BaseCmdLineTool):
 if __name__ == '__main__':
     tool = LogFileTool(multiple_logfiles=True, stdin_allowed=False)
     tool.run()
-    print tool.args
-    print tool.is_stdin
 
