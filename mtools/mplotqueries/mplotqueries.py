@@ -105,7 +105,7 @@ class MPlotQueriesTool(LogFileTool):
             self.args['group'] = 'filename'
         
         plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
-        
+
         for logfile in self.logfiles:
             start = None
 
@@ -114,6 +114,9 @@ class MPlotQueriesTool(LogFileTool):
                 logline = LogLine(line)
                 if not start:
                     start = logline.datetime
+
+                if logline.datetime:
+                    end = logline.datetime
 
                 if multiple_files:
                     # amend logline object with filename for group by filename
@@ -139,8 +142,6 @@ class MPlotQueriesTool(LogFileTool):
 
                     line_accepted = True
                     plot_instance.add_line(logline)
-
-            end = logline.datetime
 
             # store start and end for each logfile
             self.logfile_ranges.append( (start, end) )
