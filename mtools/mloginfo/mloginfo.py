@@ -19,13 +19,16 @@ class MLogInfoTool(LogFileTool):
         LogFileTool.run(self, arguments)
 
         logfile = LogFile(self.args['logfile'])
-        print "start of logfile: %s" % logfile.start.strftime("%b %d %H:%M:%S")
-        print "  end of logfile: %s" % logfile.end.strftime("%b %d %H:%M:%S")
+        print "start of logfile: %s" % (logfile.start.strftime("%b %d %H:%M:%S") if logfile.start else "unknown")
+        print "  end of logfile: %s" % (logfile.end.strftime("%b %d %H:%M:%S") if logfile.start else "unknown")
 
         # get one logline (within first 20 lines) for datetime format
         logline = None
         for i in range(20):
-            logline = LogLine(self.args['logfile'].next())
+            try:
+                logline = LogLine(self.args['logfile'].next())
+            except StopIteration as e:
+                raise SystemExit("no valid log lines found (datetime not available).")
             if logline.datetime:
                 break
 

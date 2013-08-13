@@ -112,8 +112,8 @@ class LogFile(object):
             logline = LogLine(line)
             date = logline.datetime
             if date:
+                self._start = date
                 break
-        self._start = date
 
         # get end datetime (lines are at most 10k, go back 15k at most to make sure)
         self.logfile.seek(0, 2)
@@ -124,8 +124,8 @@ class LogFile(object):
             logline = LogLine(line)
             date = logline.datetime
             if date:
+                self._end = date
                 break
-        self._end = date
 
         # if there was a roll-over, subtract 1 year from start time
         if self._end < self._start:
