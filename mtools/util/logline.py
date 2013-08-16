@@ -384,6 +384,38 @@ class LogLine(object):
         r = self.r
 
 
+    def reformat_timestamp(self, format):
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-local', 'iso8601-utc']:
+            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-local, or iso8601-utc.')
+
+        if self.datetime_format == None or self.datetime_format == format:
+            return
+        elif format == 'ctime':
+            num_tokens = 4
+            dt_string = self.datetime.strftime("%a %b %d %H:%M:%S")
+            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
+            print "dt_string", dt_string
+        elif format == 'ctime-pre2.4':
+            num_tokens = 4
+            dt_string = self.datetime.strftime("%a %b %d %H:%M:%S")
+        elif format == 'iso8601-local':
+            num_tokens = 1
+            dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
+            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
+            offset = str(self.datetime.utcoffset())
+            print "offset", offset
+            hours, minutes = offset.split(':')[:2]
+            hours.zfill(2)
+            dt_string += '+' if hours > 0 else '-' + hours + minutes
+        elif format == 'iso8601-utc':
+            num_tokens = 1
+            dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
+            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3) + 'Z'
+
+        self.line_str = dt_string + ' ' + ' '.join(self.split_tokens[num_tokens:])
+        print self.line_str
+
+
     def __str__(self):
         """ default string conversion for a LogLine object. """
         output = ''
