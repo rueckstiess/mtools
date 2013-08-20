@@ -67,8 +67,8 @@ class ConnectionChurnPlotType(BasePlotType):
 
         bins = np.linspace(xmin, xmax, n_bins)
 
-        n, bins, artists = axis.hist(x, bins=bins, rwidth=1, align='mid', log=self.logscale, histtype="bar", color=color, 
-            edgecolor="white", alpha=0.65, picker=True, label="# connections %s per bin" % group)
+        n, bins, artists = axis.hist(x, bins=bins, align='mid', log=self.logscale, histtype="bar", color=color, 
+            edgecolor="white", alpha=0.75, picker=True, label="# connections %s per bin" % group)
 
         if group == 'closed':
             ymin = 0
