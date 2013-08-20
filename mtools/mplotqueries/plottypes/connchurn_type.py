@@ -5,7 +5,7 @@ import re
 import numpy as np
 
 try:
-    from matplotlib.dates import date2num
+    from matplotlib.dates import date2num, num2date
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
         instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
@@ -84,6 +84,13 @@ class ConnectionChurnPlotType(BasePlotType):
         elif group == 'opened':
             self.ymax = max([a.get_height() for a in artists])
 
+        for num_conn, bin, artist in zip(n, bins, artists):
+            # add meta-data for picking
+            artist._mt_plot_type = self
+            artist._mt_group = group
+            artist._mt_n = num_conn
+            artist._mt_bin = bin
+
         return artists
 
 
@@ -128,5 +135,6 @@ class ConnectionChurnPlotType(BasePlotType):
         """ print group name and number of items in bin. """
         group = event.artist._mt_group
         n = event.artist._mt_n
-        print "%4i %s" % (n, group)
+        dt = num2date(event.artist._mt_bin)
+        print "%4i connections %s in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S"))
 
