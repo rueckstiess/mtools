@@ -83,8 +83,8 @@ class BasePlotType(object):
                 key = None
 
             # special case: group together all connections
-            if group_by == "thread" and key and key.startswith("conn"):
-                key = "conn####"
+            # if group_by == "thread" and key and key.startswith("conn"):
+            #     key = "conn####"
 
             groups.setdefault(key, list()).append(logline)
         

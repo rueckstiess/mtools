@@ -1,4 +1,4 @@
-from scatter_type import ScatterPlotType, DurationPlotType, NScannedNPlotType
+from scatter_type import ScatterPlotType, NScannedNPlotType
 from event_type import EventPlotType, RSStatePlotType
 from range_type import RangePlotType
 from histogram_type import HistogramPlotType
