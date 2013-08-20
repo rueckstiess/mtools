@@ -56,7 +56,7 @@ class HistogramPlotType(BasePlotType):
         raise NotImplementedError("Not implemented for histogram plots.")
 
 
-    def plot(self, axis, ith_plot, total_plots):
+    def plot(self, axis, ith_plot, total_plots, limits):
         """ Plots the histogram as a whole over all groups, rather than individual groups like other plot types. """
         
         print self.plot_type_str.upper(), "plot"
@@ -93,7 +93,7 @@ class HistogramPlotType(BasePlotType):
             # warning for too many buckets
             print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
 
-        n, bins, artists = axis.hist(datasets, bins=n_bins, rwidth=0.9, align='mid', log=self.logscale, histtype="barstacked", color=colors, edgecolor="white", alpha=0.65, picker=True, label=map(str, self.groups.keys()))
+        n, bins, artists = axis.hist(datasets, bins=n_bins, align='mid', log=self.logscale, histtype="barstacked", color=colors, edgecolor="white", alpha=0.65, picker=True, label=map(str, self.groups.keys()))
         
         # scale current y-axis to match min and max values
         axis.set_ylim(np.min(n), np.max(n))

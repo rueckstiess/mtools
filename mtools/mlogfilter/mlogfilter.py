@@ -2,24 +2,27 @@
 
 import argparse, re
 import sys
+import inspect
 
 from mtools.util.logline import LogLine
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
+import mtools.mlogfilter.filters as filters
 
 class MLogFilterTool(LogFileTool):
 
     def __init__(self):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
         
-        self.filters = [] 
+        # add all filter classes from the filters module
+        self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
 
         self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.'
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability ')
+        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability.')
 
 
     def addFilter(self, filterClass):
@@ -27,6 +30,7 @@ class MLogFilterTool(LogFileTool):
         if not filterClass in self.filters:
             self.filters.append(filterClass)
 
+    
     def _arrayToString(self, arr):
         """ if arr is of type list, join elements with space delimiter. """
         if isinstance(arr, list):
@@ -34,10 +38,11 @@ class MLogFilterTool(LogFileTool):
         else:
             return arr
 
+    
     def _outputLine(self, line, length=None, human=False):
         if length:
             if len(line) > length:
-                line = line[:length/2-2] + '...' + line[-length/2:]
+                line = line[:length/2-2] + '...' + line[-length/2+1:]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
@@ -105,7 +110,7 @@ class MLogFilterTool(LogFileTool):
                 self.argparser.add_argument(fa[0], **fa[1])
 
         # now parse arguments and post-process
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
         self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
 
         # create filter objects from classes and pass args
@@ -153,14 +158,5 @@ class MLogFilterTool(LogFileTool):
 
 if __name__ == '__main__':
 
-    tool = MLogFilterTool()
-
-    # add filters
-    tool.addFilter(LogLineFilter)
-    tool.addFilter(SlowFilter)
-    tool.addFilter(FastFilter)
-    tool.addFilter(WordFilter)
-    tool.addFilter(TableScanFilter)
-    tool.addFilter(DateTimeFilter)
-    
+    tool = MLogFilterTool()    
     tool.run()

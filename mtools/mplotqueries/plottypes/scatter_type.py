@@ -24,7 +24,11 @@ class ScatterPlotType(BasePlotType):
         args = vars(self.argparser.parse_args(unknown_args))
 
         self.field = args['yaxis']
-        self.ylabel = args['yaxis']
+        if args['yaxis'] == 'duration':
+            self.ylabel = 'duration in ms'
+        else:
+            self.ylabel = args['yaxis']
+
 
     def accept_line(self, logline):
         """ return True if the log line has the nominated yaxis field. """
@@ -53,17 +57,17 @@ class ScatterPlotType(BasePlotType):
             print self.groups[group][i].line_str
 
 
-class DurationPlotType(ScatterPlotType):
+# class DurationPlotType(ScatterPlotType):
 
-    plot_type_str = 'duration'
-    default_group_by = 'namespace'
+#     plot_type_str = 'duration'
+#     default_group_by = 'namespace'
 
 
-    def __init__(self, args=None, unknown_args=None):
-        # Only call BasePlotType constructor, we don't need argparser
-        BasePlotType.__init__(self, args, unknown_args)
-        self.field = 'duration'
-        self.ylabel = 'duration in ms'
+#     def __init__(self, args=None, unknown_args=None):
+#         # Only call BasePlotType constructor, we don't need argparser
+#         BasePlotType.__init__(self, args, unknown_args)
+#         self.field = 'duration'
+#         self.ylabel = 'duration in ms'
 
 
 class NScannedNPlotType(ScatterPlotType):

@@ -1,3 +1,7 @@
+# nose tests require multiprocessing package, see 
+# https://groups.google.com/forum/#!msg/nose-users/fnJ-kAUbYHQ/_UsLN786ygcJ
+import multiprocessing
+
 # try importing from setuptools, if unavailable use distutils.core
 try:
     from setuptools import setup, find_packages
@@ -36,11 +40,13 @@ setup(
     },
     scripts=['scripts/mlaunch','scripts/mlog2json','scripts/mlogdistinct',
         'scripts/mlogfilter','scripts/mlogmerge','scripts/mlogversion',
-        'scripts/mlogvis','scripts/mplotqueries'],
+        'scripts/mlogvis','scripts/mplotqueries', 'scripts/mloginfo'],
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files.',
     long_description=long_description,
+    tests_require=['nose>=1.0', 'psutil', 'pymongo>=2.4'],
+    test_suite = 'nose.collector',
     **kws
 )

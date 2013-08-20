@@ -24,11 +24,11 @@ class MLogDistinctTool(LogFileTool):
             help="outputs lines that couldn't be matched.")
 
     
-    def run(self):
+    def run(self, arguments=None):
         """ go over each line in the logfile, run through log2code matcher 
             and group by matched pattern.
         """
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
 
         codelines = defaultdict(lambda: 0)
         non_matches = 0

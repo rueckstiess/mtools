@@ -15,6 +15,7 @@ The following tools are in the mtools collection:
 * [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
 * [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
 * [mlogmerge](#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
+* [mloginfo](#mloginfo) -- general info about log file: start and end time, version, binary, restarts
 * [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
 * [mlogvis](#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
@@ -34,12 +35,20 @@ instructions for these modules.
 
 Recent Changes
 --------------
-The current version of mtools is 1.0.4. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
+
+The current version of mtools is 1.0.5. See [CHANGES.md](./CHANGES.md) for a list of changes from previous versions of mtools.
 
 
 Contribute to mtools
 --------------------
 If you'd like to contribute to mtools, please read the [contributor page](tutorials/contributing.md) for instructions.
+
+
+Disclaimer
+----------
+
+This software is not supported by [10gen](http://www.10gen.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk. 
+Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/rueckstiess/mtools/issues?state=open) section here on github. 
 
 
 <hr>
@@ -226,6 +235,41 @@ available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
 
 <hr>
 
+mloginfo
+--------
+
+#### Description
+
+This little helper script prints out useful information about a mongod or mongos log file.
+
+
+    usage: mloginfo [-h] [--version] [--restarts] logfile
+
+    Extracts general information from logfile and prints it to stdout.
+
+    positional arguments:
+      logfile     logfile to parse
+
+    optional arguments:
+      -h, --help  show this help message and exit
+      --version   show program's version number and exit
+      --restarts  outputs information about every detected restart.
+
+
+Some of the information may not always be available, like version or binary. Below is an example output:
+
+    start of logfile: Jul 10 07:00:00
+      end of logfile: Jul 19 06:59:59
+        line numbers: 601424
+              binary: mongod
+             version: 2.2.2 -> 2.2.4
+
+    RESTARTS
+       Jul 12 09:20:36 version 2.2.2
+       Jul 17 18:41:11 version 2.2.4
+
+
+<hr>
 
 mlog2json
 ---------

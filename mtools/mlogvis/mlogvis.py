@@ -17,7 +17,6 @@ class MLogVisTool(LogFileTool):
             information from each line of the log file and outputs a html file that can be viewed in \
             a browser. Automatically opens a browser tab and shows the file.'
 
-
     def _export(self, with_line_str=True):
         fields = ['_id', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration', 'numYields', 'w', 'r']
         if with_line_str:
@@ -45,9 +44,10 @@ class MLogVisTool(LogFileTool):
                 logline._id = line_no
                 result_str += logline.to_json(fields)
         return result_str
+        
 
-    def run(self):
-        LogFileTool.run(self)
+    def run(self, arguments=None):
+        LogFileTool.run(self, arguments)
 
         # store in current local folder
         mlogvis_dir = '.'

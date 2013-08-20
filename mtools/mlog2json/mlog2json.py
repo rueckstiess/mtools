@@ -14,11 +14,11 @@ class MLog2JsonTool(LogFileTool):
             json document per line. To import into mongodb, use: mlog2json \
             logfile | mongoimport -d DATABASE -c COLLECTION'
 
-    def run(self):
+    def run(self, arguments=None):
         """ Go through each line, convert string to LogLine object, then print
             JSON representation of the line. 
         """
-        LogFileTool.run(self)
+        LogFileTool.run(self, arguments)
 
         for line in self.args['logfile']:
             print LogLine(line).to_json()

@@ -20,6 +20,7 @@ class BasePlotType(object):
         self.unknown_args = unknown_args
         self.groups = OrderedDict()
         self.empty = True
+        self.limits = None
 
     def accept_line(self, logline):
         """ return True if this PlotType can plot this line. """
@@ -82,8 +83,8 @@ class BasePlotType(object):
                 key = None
 
             # special case: group together all connections
-            if group_by == "thread" and key and key.startswith("conn"):
-                key = "conn####"
+            # if group_by == "thread" and key and key.startswith("conn"):
+            #     key = "conn####"
 
             groups.setdefault(key, list()).append(logline)
         
@@ -92,7 +93,9 @@ class BasePlotType(object):
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("BasePlotType can't plot. Use a derived class instead")
 
-    def plot(self, axis, ith_plot, total_plots):
+    def plot(self, axis, ith_plot, total_plots, limits):
+        self.limits = limits
+
         artists = []
         print self.plot_type_str.upper(), "plot"
         print "%5s %9s  %s"%("id", " #points", "group")

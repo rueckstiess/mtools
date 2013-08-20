@@ -1,6 +1,15 @@
 Changes to mtools
 =================
 
+#### version 1.0.5
+
+  * mplotqueries: included a new plot type 'connchurn' that shows opened vs. closed connections over time (#77, #74).
+  * mplotqueries: removed redundant `--type duration` plot and set the default to `--type scatter --yaxis duration`.
+  * mloginfo: new tool that summarizes log file information, including start/end time, version if present, and optionally restarts.
+  * added nosetests infrastructure and first tests for mlaunch and mlogfilter (#39).  
+  * added internal LogFile class that offers helper methods around log files (#80).
+  * fixed bug where `mlogfilter --shorten` was off by one character.
+
 #### version 1.0.4
 
   * mlogvis: fixed a bug displaying the data in the wrong time zone (#70).

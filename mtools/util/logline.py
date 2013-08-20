@@ -43,12 +43,14 @@ class LogLine(object):
 
 
     def __init__(self, line_str, auto_parse=True):
-        # remove line breaks at end of line_str
-        self.line_str = line_str.rstrip('\n')
+        # remove line breaks at end of _line_str
+        self._line_str = line_str.rstrip('\n')
+        self._reset()
 
+
+    def _reset(self):
         self._split_tokens_calculated = False
         self._split_tokens = None
-
 
         self._duration_calculated = False
         self._duration = None
@@ -77,13 +79,24 @@ class LogLine(object):
         self._w = None
 
 
+    def set_line_str(self, line_str):
+        if line_str != self._line_str:
+            self._line_str = line_str.rstrip('\n')
+            self._reset()
+
+    def get_line_str(self):
+        return self._line_str
+
+    line_str = property(get_line_str, set_line_str)
+
+
     @property
     def split_tokens(self):
         """ splits string into tokens (lazy) """
 
         if not self._split_tokens_calculated:
             # split into items (whitespace split)
-            self._split_tokens = self.line_str.split()
+            self._split_tokens = self._line_str.split()
             self._split_tokens_calculated = True
 
         return self._split_tokens
@@ -131,6 +144,14 @@ class LogLine(object):
                     break
 
         return self._datetime
+
+    
+    @property 
+    def datetime_format(self):
+        if not self._datetime_calculated:
+            self.datetime
+
+        return self._datetime_format
 
 
     def _match_datetime_pattern(self, tokens):
