@@ -88,11 +88,12 @@ class HistogramPlotType(BasePlotType):
             axis.patch.set_visible(False) # hide the 'canvas' 
             axis = twin_axis
 
-        n_bins = int((maxx-minx)*24.*60.*60./self.bucketsize)
+        n_bins = n_bins = max(1, int((maxx - minx)*24.*60.*60./self.bucketsize))
         if n_bins > 1000:
             # warning for too many buckets
             print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
 
+        print n_bins," bins!"
         n, bins, artists = axis.hist(datasets, bins=n_bins, align='mid', log=self.logscale, histtype="barstacked", color=colors, edgecolor="white", alpha=0.65, picker=True, label=map(str, self.groups.keys()))
         
         # scale current y-axis to match min and max values

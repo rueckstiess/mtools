@@ -63,7 +63,10 @@ class ConnectionChurnPlotType(BasePlotType):
         color, _ = self.color_map(group)
 
         xmin, xmax = date2num(self.limits)
-        n_bins = (xmax - xmin)*24.*60.*60./self.bucketsize
+        n_bins = max(1, int((xmax - xmin)*24.*60.*60./self.bucketsize))
+        if n_bins > 1000:
+            # warning for too many buckets
+            print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
 
         bins = np.linspace(xmin, xmax, n_bins)
 
