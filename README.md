@@ -257,9 +257,9 @@ This little helper script prints out useful information about a mongod or mongos
 
 Some of the information may not always be available, like version or binary. Below is an example output:
 
-    start of logfile: Jul 17 07:00:00
-      end of logfile: Jul 17 09:19:59
-        line numbers: 606000
+    start of logfile: Jul 10 07:00:00
+      end of logfile: Jul 19 06:59:59
+        line numbers: 601424
               binary: mongod
              version: 2.2.2 -> 2.2.4
 
