@@ -50,6 +50,9 @@ class LogFileTool(BaseCmdLineTool):
         if self.stdin_allowed:
             arg_opts['default'] = None
             arg_opts['nargs'] = '?'
+        else:
+            if not sys.stdin.isatty():
+                raise SystemExit('stdin input not supported.')
 
         if self.multiple_logfiles:
             arg_opts['nargs'] = '*'
@@ -60,8 +63,10 @@ class LogFileTool(BaseCmdLineTool):
         if not sys.stdin.isatty():
             arg_opts['const'] = sys.stdin
             arg_opts['action'] = 'store_const'
-            del arg_opts['type']
-            del arg_opts['nargs']
+            if 'type' in arg_opts: 
+                del arg_opts['type']
+            if 'nargs' in arg_opts:
+                del arg_opts['nargs']
 
         self.argparser.add_argument('logfile', **arg_opts)
 
