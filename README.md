@@ -42,6 +42,13 @@ Contribute to mtools
 If you'd like to contribute to mtools, please read the [contributor page](tutorials/contributing.md) for instructions.
 
 
+Disclaimer
+----------
+
+This software is not supported by [10gen](http://www.10gen.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk. 
+Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/rueckstiess/mtools/issues?state=open) section here on github. 
+
+
 <hr>
 
 mlogfilter
