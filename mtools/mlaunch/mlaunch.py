@@ -46,7 +46,7 @@ class MLaunchTool(BaseCmdLineTool):
         me_group = self.argparser.add_mutually_exclusive_group(required=True)
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
-        me_group.add_argument('--restart', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
+        me_group.add_argument('--restart', '--restore', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
 
         # replica set arguments
         self.argparser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
