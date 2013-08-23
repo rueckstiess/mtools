@@ -402,11 +402,11 @@ class LogLine(object):
         r = self.r
 
 
-    def _reformat_timestamp(self, format):
-        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-local', 'iso8601-utc']:
-            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-local, or iso8601-utc.')
+    def _reformat_timestamp(self, format, force=False):
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc'] #, 'iso8601-local']:
+            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc.') # iso8601-local
 
-        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != ''):
+        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
             return
         elif format == 'ctime':
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
@@ -423,7 +423,7 @@ class LogLine(object):
             else: 
                 hours = '00'
                 minutes = '00'
-            hours.zfill(2)
+            hours = hours.zfill(2)
             dt_string += '+' if int(hours) >= 0 else '-' + hours + minutes
         elif format == 'iso8601-utc':
             dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")

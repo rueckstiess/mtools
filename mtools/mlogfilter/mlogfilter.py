@@ -29,7 +29,7 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='markers to distinguish original files. Choose from none, enum, alpha, filename (default), or provide list.')
         self.argparser.add_argument('--marker-pos', action='store', default=0, type=int, help="position of marker (default=0, front of line, other options are 'eol' or the position as int.")
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
-
+        self.argparser.add_argument('--datetime-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
 
     def addFilter(self, filterClass):
         """ adds a filter class to the parser. """
@@ -45,13 +45,20 @@ class MLogFilterTool(LogFileTool):
             return arr
 
     
-    def _outputLine(self, line, length=None, human=False):
+    def _outputLine(self, logline, length=None, human=False):
+        # adapt timezone output if necessary
+        if self.args['datetime_format'] != 'none':
+            logline._reformat_timestamp(self.args['datetime_format'], force=True)
+
+        line = logline.line_str
+
         if length:
             if len(line) > length:
                 line = line[:length/2-2] + '...' + line[-length/2+1:]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
+
         print line
 
 
@@ -158,9 +165,8 @@ class MLogFilterTool(LogFileTool):
             # only one file
             for line in self.args['logfile'][0]:
                 logline = LogLine(line)
-                if logline.datetime:
+                if logline.datetime: 
                     logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
-
                 yield logline
 
 
@@ -224,21 +230,25 @@ class MLogFilterTool(LogFileTool):
         else:
             raise SystemExit('Error: Number of markers not the same as number of files.')
 
+        # with --human, change to ctime format if not specified otherwise
+        if self.args['datetime_format'] == 'none' and self.args['human']:
+            self.args['datetime_format'] = 'ctime'
 
         # go through each line and ask each filter if it accepts
         if not 'logfile' in self.args or not self.args['logfile']:
             raise SystemExit('no logfile found.')
 
         for logline in self.logfile_generator():
+
             if self.args['exclude']:
                 # print line if any filter disagrees
                 if any([not f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
+                    self._outputLine(logline, self.args['shorten'], self.args['human'])
 
             else:
                 # only print line if all filters agree
                 if all([f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
+                    self._outputLine(logline, self.args['shorten'], self.args['human'])
 
                 # if at least one filter refuses to accept any remaining lines, stop
                 if any([f.skipRemaining() for f in self.filters]):
