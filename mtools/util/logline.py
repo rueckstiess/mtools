@@ -43,9 +43,12 @@ class LogLine(object):
 
 
     def __init__(self, line_str, auto_parse=True):
-        # remove line breaks at end of line_str
-        self.line_str = line_str.rstrip('\n')
+        # remove line breaks at end of _line_str
+        self._line_str = line_str.rstrip('\n')
+        self._reset()
 
+
+    def _reset(self):
         self._split_tokens_calculated = False
         self._split_tokens = None
 
@@ -56,6 +59,7 @@ class LogLine(object):
         self._datetime = None
         self._datetime_nextpos = None
         self._datetime_format = None
+        self._datetime_str = ''
 
         self._thread_calculated = False
         self._thread = None
@@ -74,6 +78,17 @@ class LogLine(object):
         self._numYields = None
         self._r = None
         self._w = None
+
+
+    def set_line_str(self, line_str):
+        if line_str != self._line_str:
+            self._line_str = line_str.rstrip('\n')
+            self._reset()
+
+    def get_line_str(self):
+        return self._datetime_str + self._line_str
+
+    line_str = property(get_line_str, set_line_str)
 
 
     @property
@@ -127,6 +142,9 @@ class LogLine(object):
                     else:
                         self._datetime_nextpos += 4
 
+                    # separate datetime str and linestr
+                    self._line_str = ' ' + ' '.join(self.split_tokens[self._datetime_nextpos:])
+                    self._reformat_timestamp(self._datetime_format)
                     break
 
         return self._datetime
@@ -135,7 +153,7 @@ class LogLine(object):
     @property 
     def datetime_format(self):
         if not self._datetime_calculated:
-            self.datetime
+            _ = self.datetime
 
         return self._datetime_format
 
@@ -384,36 +402,36 @@ class LogLine(object):
         r = self.r
 
 
-    def reformat_timestamp(self, format):
+    def _reformat_timestamp(self, format):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-local', 'iso8601-utc']:
             raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-local, or iso8601-utc.')
 
-        if self.datetime_format == None or self.datetime_format == format:
+        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != ''):
             return
         elif format == 'ctime':
-            num_tokens = 4
-            dt_string = self.datetime.strftime("%a %b %d %H:%M:%S")
+            dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
             dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
-            print "dt_string", dt_string
         elif format == 'ctime-pre2.4':
-            num_tokens = 4
-            dt_string = self.datetime.strftime("%a %b %d %H:%M:%S")
+            dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
         elif format == 'iso8601-local':
-            num_tokens = 1
             dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
             dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
-            offset = str(self.datetime.utcoffset())
-            print "offset", offset
-            hours, minutes = offset.split(':')[:2]
+            offset = self.datetime.utcoffset()
+            print "offset:", offset
+            if offset:
+                hours, minutes = str(offset).split(':')[:2]
+            else: 
+                hours = '00'
+                minutes = '00'
             hours.zfill(2)
-            dt_string += '+' if hours > 0 else '-' + hours + minutes
+            dt_string += '+' if int(hours) >= 0 else '-' + hours + minutes
         elif format == 'iso8601-utc':
-            num_tokens = 1
             dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3) + 'Z'
+            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
 
-        self.line_str = dt_string + ' ' + ' '.join(self.split_tokens[num_tokens:])
-        print self.line_str
+        # set new string and format
+        self._datetime_str = dt_string
+        self._datetime_format = format
 
 
     def __str__(self):

@@ -104,8 +104,6 @@ class DateTimeFilter(BaseFilter):
             logfiles = [LogFile(lf) for lf in self.mlogfilter.args['logfile']]
             self.startDateTime = min([lf.start+timedelta(hours=self.mlogfilter.args['timezone'][i]) for i, lf in enumerate(logfiles)])
             self.endDateTime = max([lf.end+timedelta(hours=self.mlogfilter.args['timezone'][i]) for i, lf in enumerate(logfiles)])
-            print "start", self.startDateTime
-            print "end", self.endDateTime
 
         # now parse for further changes to from and to datetimes
         dtbound = DateTimeBoundaries(self.startDateTime, self.endDateTime)

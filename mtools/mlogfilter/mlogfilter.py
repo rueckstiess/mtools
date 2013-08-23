@@ -29,7 +29,6 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='markers to distinguish original files. Choose from none, enum, alpha, filename (default), or provide list.')
         self.argparser.add_argument('--marker-pos', action='store', default=0, type=int, help="position of marker (default=0, front of line, other options are 'eol' or the position as int.")
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
-        self.argparser.add_argument('--datetime-format', action='store', default='auto', type=int, metavar="DT", choices=['ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local', 'auto'], help="timezone format output.")
 
 
     def addFilter(self, filterClass):
@@ -243,7 +242,6 @@ class MLogFilterTool(LogFileTool):
 
                 # if at least one filter refuses to accept any remaining lines, stop
                 if any([f.skipRemaining() for f in self.filters]):
-                    print [f]
                     # if input is not stdin
                     if sys.stdin.isatty():
                         break
