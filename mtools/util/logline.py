@@ -436,20 +436,8 @@ class LogLine(object):
 
 
     def __str__(self):
-        """ default string conversion for a LogLine object. """
-        output = ''
-        labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                  'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                  'nreturned', 'ninserted', 'nupdated', 'duration', 'r', 'w', 'numYields']
-
-        for label in labels:
-            value = getattr(self, label, None)
-            if value != None:
-                output += '%s:'%label
-                output += str(value)
-                output += ' '
-
-        return output
+        """ default string conversion for a LogLine object is just its line_str. """
+        return str(self.line_str)
 
 
     def to_dict(self, labels=None):

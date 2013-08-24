@@ -27,7 +27,6 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability.')
 
         self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='markers to distinguish original files. Choose from none, enum, alpha, filename (default), or provide list.')
-        self.argparser.add_argument('--marker-pos', action='store', default=0, type=int, help="position of marker (default=0, front of line, other options are 'eol' or the position as int.")
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
         self.argparser.add_argument('--datetime-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
 
@@ -48,6 +47,10 @@ class MLogFilterTool(LogFileTool):
     def _outputLine(self, logline, length=None, human=False):
         # adapt timezone output if necessary
         if self.args['datetime_format'] != 'none':
+            logline._reformat_timestamp(self.args['datetime_format'], force=True)
+        if any(self.args['timezone']):
+            if self.args['datetime_format'] == 'none':
+                self.args['datetime_format'] = logline.datetime_format
             logline._reformat_timestamp(self.args['datetime_format'], force=True)
 
         line = logline.line_str
@@ -113,47 +116,40 @@ class MLogFilterTool(LogFileTool):
 
 
     def _datetime_key_for_merge(self, logline):
-        dt = logline.datetime
-
-        if logline.line_str == '':
-            # if logline is empty (i.e. end of this log file reached) return maxdate to never pick this line
+        if not logline:
+            # if logfile end is reached, return max datetime to never pick this line
             return datetime(MAXYEAR, 12, 31, 23, 59, 59)
-        else:
-            # if no datetime present (line doesn't have one) return mindate to pick this line immediately
-            return dt or datetime(MINYEAR, 1, 1, 0, 0, 0)
 
+        # if no datetime present (line doesn't have one) return mindate to pick this line immediately
+        return logline.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0)
 
 
     def _merge_logfiles(self):
         # open files, read first lines, extract first dates
-        lines = [LogLine(f.readline()) for f in self.args['logfile']]
-        
+        lines = [f.readline() for f in self.args['logfile']]
+        lines = [LogLine(l) if l else None for l in lines]
+
         # adjust lines by timezone
         for i in range(len(lines)):
-            new_datetime = lines[i].datetime + timedelta(self.args['timezone'][i])
+            if lines[i].datetime:
+                lines[i]._datetime = lines[i].datetime + timedelta(hours=self.args['timezone'][i])
             # TODO REPLACE DATE WITH NEW DATE FOR ALL FORMATS
             # lines[i]._line_str = replace(lines[i].datetime.strftime('%a %b %d %H:%M:%S'), new_datetime.strftime('%a %b %d %H:%M:%S'))
-            lines[i]._datetime = new_datetime
 
-        while any([ll.line_str != '' for ll in lines]):
+        while any(lines):
             min_line = min(lines, key=self._datetime_key_for_merge)
             min_index = lines.index(min_line)
 
             if self.args['markers'][min_index]:
-                if self.args['marker_pos'] == 0:
-                    min_line.line_str = self.args['markers'][min_index] + ' ' + min_line.line_str
-                elif self.args['marker_pos'] == 'eol':
-                    min_line.line_str = min_line.line_str + ' ' + self.args['markers'][min_index]
-                else:
-                    tokens = min_line.split_tokens()
-                    outline = " ".join(tokens[:self.args['marker_pos']]) + ' ' + self.args['markers'][min_index] + ' ' + " ".join(tokens[self.args['marker_pos']:])
+                min_line.merge_marker_str = self.args['markers'][min_index]
 
             yield min_line
 
             # update lines array with a new line from the min_index'th logfile
-            lines[min_index] = LogLine(self.args['logfile'][min_index].readline())
-            if lines[min_index].datetime:
-                lines[min_index]._datetime = lines[min_index].datetime + timedelta(self.args['timezone'][i])
+            new_line = self.args['logfile'][min_index].readline()
+            lines[min_index] = LogLine(new_line) if new_line else None
+            if lines[min_index] and lines[min_index].datetime:
+                lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
 
 
     def logfile_generator(self):
