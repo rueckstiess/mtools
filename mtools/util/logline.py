@@ -79,6 +79,7 @@ class LogLine(object):
         self._r = None
         self._w = None
 
+        self.merge_marker_str = ''
 
     def set_line_str(self, line_str):
         if line_str != self._line_str:
@@ -86,7 +87,7 @@ class LogLine(object):
             self._reset()
 
     def get_line_str(self):
-        return self._datetime_str + self._line_str
+        return ' '.join([s for s in [self.merge_marker_str, self._datetime_str, self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
@@ -143,7 +144,7 @@ class LogLine(object):
                         self._datetime_nextpos += 4
 
                     # separate datetime str and linestr
-                    self._line_str = ' ' + ' '.join(self.split_tokens[self._datetime_nextpos:])
+                    self._line_str = ' '.join(self.split_tokens[self._datetime_nextpos:])
                     self._reformat_timestamp(self._datetime_format)
                     break
 
@@ -403,7 +404,7 @@ class LogLine(object):
 
 
     def _reformat_timestamp(self, format, force=False):
-        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc'] #, 'iso8601-local']:
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc']: #, 'iso8601-local']:
             raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc.') # iso8601-local
 
         if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
