@@ -24,9 +24,9 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability.')
+        self.argparser.add_argument('--human', action='store_true', help='outputs large numbers formatted with commas and print milliseconds as hr,min,sec,ms for easier readability.')
 
-        self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='markers to distinguish original files. Choose from none, enum, alpha, filename (default), or provide list.')
+        self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='use markers when merging several files to distinguish them. Choose from none, enum, alpha, filename (default), or provide list.')
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
         self.argparser.add_argument('--datetime-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
 
