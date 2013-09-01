@@ -161,6 +161,11 @@ class MLogFilterTool(LogFileTool):
                 yield logline
         else:
             # only one file
+            if not self.is_stdin and not self.args['exclude']:
+                # find datetime filter and binary-search for start date 
+                dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)[0]
+                dtfilter.seek_binary()
+
             for line in self.args['logfile'][0]:
                 logline = LogLine(line)
                 if logline.datetime: 

@@ -3,6 +3,7 @@ from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 from mtools.util.logline import LogLine
 from mtools.util.logfile import LogFile
+from math import ceil 
 
 from base_filter import BaseFilter
 
@@ -133,4 +134,63 @@ class DateTimeFilter(BaseFilter):
     def skipRemaining(self):
         return self.toReached
 
+
+    def _find_curr_line(self, logfile, prev=False):
+        curr_pos = logfile.tell()
+
+        logfile.seek(curr_pos, 0)
+        line = None
+
+        # jump back 15k characters (at most) and find last newline char
+        jump_back = min(logfile.tell(), 15000)
+        logfile.seek(-jump_back, 1)
+        buff = logfile.read(jump_back)
+        logfile.seek(curr_pos, 0)
+
+        newline_pos = buff.rfind('\n')
+        if prev:
+            newline_pos = buff[:newline_pos].rfind('\n')
+
+        # move back to last newline char
+        logfile.seek(newline_pos - jump_back, 1)
+
+        while line != '':
+            line = logfile.readline()
+            logline = LogLine(line)
+            date = logline.datetime
+            if date:
+                return logline
+
+        return None
+
+    def seek_binary(self):
+        logfile = self.mlogfilter.args['logfile'][0]
+        logfile_info = LogFile(logfile)
+
+        min_mark = 0
+        max_mark = logfile_info.filesize
+        step_size = max_mark
+
+        ll = None
+        if self.fromDateTime:
+
+            # search for lower bound
+            while abs(step_size) > 100:
+                step_size = ceil(step_size / 2.)
+                
+                logfile.seek(step_size, 1)
+                ll = self._find_curr_line(logfile)
+                if not ll:
+                    break
+                                
+                if ll.datetime >= self.fromDateTime:
+                    step_size = -abs(step_size)
+                else:
+                    step_size = abs(step_size)
+
+
+            # now walk backwards until we found a truely smaller line
+            while logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
+                logfile.seek(-2, 1)
+                ll = self._find_curr_line(logfile, prev=True)
 
