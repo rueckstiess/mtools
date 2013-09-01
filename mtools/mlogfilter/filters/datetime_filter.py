@@ -88,8 +88,8 @@ class DateTimeFilter(BaseFilter):
         self.fromReached = False
         self.toReached = False
 
-        if 'from' in self.mlogfilter.args or 'to' in self.mlogfilter.args:
-            self.active = True
+        self.active = ('from' in self.mlogfilter.args and self.mlogfilter.args['from'] != 'start') or \
+                      ('to' in self.mlogfilter.args and self.mlogfilter.args['to'] != 'end')
 
 
     def setup(self):
@@ -137,8 +137,6 @@ class DateTimeFilter(BaseFilter):
 
     def _find_curr_line(self, logfile, prev=False):
         curr_pos = logfile.tell()
-
-        logfile.seek(curr_pos, 0)
         line = None
 
         # jump back 15k characters (at most) and find last newline char
@@ -152,6 +150,9 @@ class DateTimeFilter(BaseFilter):
             newline_pos = buff[:newline_pos].rfind('\n')
 
         # move back to last newline char
+        if newline_pos == -1:
+            return None
+
         logfile.seek(newline_pos - jump_back, 1)
 
         while line != '':
@@ -188,9 +189,11 @@ class DateTimeFilter(BaseFilter):
                     else:
                         step_size = abs(step_size)
 
+                if not ll:
+                    return 
 
                 # now walk backwards until we found a truely smaller line
-                while logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
+                while ll and logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
                     logfile.seek(-2, 1)
                     ll = self._find_curr_line(logfile, prev=True)
 

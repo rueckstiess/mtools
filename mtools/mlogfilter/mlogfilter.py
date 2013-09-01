@@ -158,9 +158,9 @@ class MLogFilterTool(LogFileTool):
         
         if not self.is_stdin and not self.args['exclude']:
             # find datetime filter and binary-search for start date 
-            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)[0]
-            if dtfilter.active:
-                dtfilter.seek_binary()
+            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)
+            if len(dtfilter) > 0:
+                dtfilter[0].seek_binary()
 
         if len(self.args['logfile']) > 1:
             # todo, merge
@@ -218,6 +218,10 @@ class MLogFilterTool(LogFileTool):
             print "mlogfilter> command line arguments"
             for a in self.args:
                 print "mlogfilter> %8s: %s" % (a, self.args[a])
+            print
+            print "mlogfilter> active filters:",
+            print ', '.join([f.__class__.__name__ for f in self.filters])
+            print
 
         # handle markers parameter
         if len(self.args['markers']) == 1:
