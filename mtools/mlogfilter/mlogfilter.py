@@ -45,6 +45,7 @@ class MLogFilterTool(LogFileTool):
 
     
     def _outputLine(self, logline, length=None, human=False):
+        """ prints the final line, with various options (length, human, datetime changes, ...) """
         # adapt timezone output if necessary
         if self.args['datetime_format'] != 'none':
             logline._reformat_timestamp(self.args['datetime_format'], force=True)
@@ -116,6 +117,7 @@ class MLogFilterTool(LogFileTool):
 
 
     def _datetime_key_for_merge(self, logline):
+        """ helper method for ordering log lines correctly during merge. """
         if not logline:
             # if logfile end is reached, return max datetime to never pick this line
             return datetime(MAXYEAR, 12, 31, 23, 59, 59)
@@ -125,6 +127,7 @@ class MLogFilterTool(LogFileTool):
 
 
     def _merge_logfiles(self):
+        """ helper method to merge several files together by datetime. """
         # open files, read first lines, extract first dates
         lines = [f.readline() for f in self.args['logfile']]
         lines = [LogLine(l) if l else None for l in lines]
@@ -133,8 +136,6 @@ class MLogFilterTool(LogFileTool):
         for i in range(len(lines)):
             if lines[i].datetime:
                 lines[i]._datetime = lines[i].datetime + timedelta(hours=self.args['timezone'][i])
-            # TODO REPLACE DATE WITH NEW DATE FOR ALL FORMATS
-            # lines[i]._line_str = replace(lines[i].datetime.strftime('%a %b %d %H:%M:%S'), new_datetime.strftime('%a %b %d %H:%M:%S'))
 
         while any(lines):
             min_line = min(lines, key=self._datetime_key_for_merge)
@@ -153,6 +154,7 @@ class MLogFilterTool(LogFileTool):
 
 
     def logfile_generator(self):
+        """ generator method that yields each line of the logfile, or the next line in case of several log files. """
         if len(self.args['logfile']) > 1:
             # todo, merge
             for logline in self._merge_logfiles():
