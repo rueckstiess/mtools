@@ -155,17 +155,19 @@ class MLogFilterTool(LogFileTool):
 
     def logfile_generator(self):
         """ generator method that yields each line of the logfile, or the next line in case of several log files. """
+        
+        if not self.is_stdin and not self.args['exclude']:
+            # find datetime filter and binary-search for start date 
+            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)[0]
+            if dtfilter.active:
+                dtfilter.seek_binary()
+
         if len(self.args['logfile']) > 1:
             # todo, merge
             for logline in self._merge_logfiles():
                 yield logline
         else:
             # only one file
-            if not self.is_stdin and not self.args['exclude']:
-                # find datetime filter and binary-search for start date 
-                dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)[0]
-                dtfilter.seek_binary()
-
             for line in self.args['logfile'][0]:
                 logline = LogLine(line)
                 if logline.datetime: 
