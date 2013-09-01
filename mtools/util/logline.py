@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.tz import tzutc
 import dateutil.parser
 import re
 import json
@@ -404,8 +405,8 @@ class LogLine(object):
 
 
     def _reformat_timestamp(self, format, force=False):
-        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc']: #, 'iso8601-local']:
-            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc.') # iso8601-local
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
+            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.') 
 
         if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
             return
@@ -415,19 +416,17 @@ class LogLine(object):
         elif format == 'ctime-pre2.4':
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
         elif format == 'iso8601-local':
-            dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
-            offset = self.datetime.utcoffset()
-            print "offset:", offset
-            if offset:
-                hours, minutes = str(offset).split(':')[:2]
-            else: 
-                hours = '00'
-                minutes = '00'
-            hours = hours.zfill(2)
-            dt_string += '+' if int(hours) >= 0 else '-' + hours + minutes
+            dt_string = self.datetime.isoformat()
+            if not self.datetime.utcoffset():
+                dt_string += '+00:00'
+            ms_str = str(int(self.datetime.microsecond * 1000)).zfill(3)[:3]
+            # change isoformat string to have 3 digit milliseconds and no : in offset
+            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string)
         elif format == 'iso8601-utc':
-            dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
+            if self.datetime.utcoffset():
+                dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
+            else: 
+                dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
             dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
 
         # set new string and format
