@@ -93,17 +93,6 @@ class LogLine(object):
     line_str = property(get_line_str, set_line_str)
 
 
-    def set_line_str(self, line_str):
-        if line_str != self._line_str:
-            self._line_str = line_str.rstrip('\n')
-            self._reset()
-
-    def get_line_str(self):
-        return self._line_str
-
-    line_str = property(get_line_str, set_line_str)
-
-
     @property
     def split_tokens(self):
         """ splits string into tokens (lazy) """
