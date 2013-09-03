@@ -10,11 +10,11 @@ class BaseFilter(object):
 
     filterArgs = []
 
-    def __init__(self, commandLineArgs):
+    def __init__(self, mlogfilter):
         """ constructor. save command line arguments and set active to False
             by default. 
         """
-        self.commandLineArgs = commandLineArgs
+        self.mlogfilter = mlogfilter
 
         # filters need to actively set this flag to true
         self.active = False

@@ -14,24 +14,34 @@ def test_logline_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
 
     ll = LogLine(line_ctime_pre24)
+    ll_str = ll.line_str
     assert(str(ll.datetime) == '2013-08-03 21:52:05')
     assert(ll._datetime_format == 'ctime-pre2.4')
+    print ll_str
+    print ll.line_str
+    assert(ll.line_str == ll_str)
 
     ll = LogLine(line_ctime)
+    ll_str = ll.line_str
     assert(str(ll.datetime) == '2013-08-03 21:52:05.995000')
     assert(ll._datetime_format == 'ctime')
+    assert(ll.line_str == ll_str)
 
     ll = LogLine(line_iso8601_utc)
+    ll_str = ll.line_str
     assert(str(ll.datetime) == '2013-08-03 11:52:05.995000+00:00')
     assert(ll._datetime_format == 'iso8601-utc')
+    assert(ll.line_str == ll_str)
 
     ll = LogLine(line_iso8601_local)
+    ll_str = ll.line_str
     assert(str(ll.datetime) == '2013-08-03 21:52:05.995000+10:00')
     assert(ll._datetime_format == 'iso8601-local')
+    assert(ll.line_str == ll_str)
 
 
 def test_logline_value_extraction():
-    """ Check that all four timestamp formats are correctly parsed. """
+    """ Check for correct value extraction of all fields. """
     
     ll = LogLine(line_getmore)
     assert(ll.thread == 'conn9')

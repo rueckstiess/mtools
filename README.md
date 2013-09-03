@@ -11,10 +11,9 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-* [mlogfilter](#mlogfilter) -- slice log files by time, filter slow queries, find table scans, shorten log lines
+* [mlogfilter](#mlogfilter) -- slice log files by time, merge log files, filter slow queries, find table scans, shorten log lines
 * [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
 * [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
-* [mlogmerge](#mlogmerge) -- merge several logfiles by time, includes time zone adjustments
 * [mloginfo](#mloginfo) -- general info about log file: start and end time, version, binary, restarts
 * [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
@@ -202,34 +201,6 @@ Example output:
          5    old journal file will be removed:
          1    ClientCursor::yield can't unlock b/c of recursive lock ... ns: ... top:
          1    key seems to have moved in the index, refinding.
-
-
-<hr>
-
-mlogmerge
----------
-
-#### Description
-
-A script that takes log files as input and merges them by date/time. Each line receives an additional "tag", which
-indicates the original file name. Tags can be generated automatically, different styles (enum, alpha, filename) are
-available, or you can provide custom tags, for example "[PRI] [SEC] [ARB]".
-    
-    usage: mlogmerge logfiles [-h | --help] [--label LABELS] [--pos POS]
-
-    positional arguments: 
-      logfiles              list of logfiles to merge
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --labels LABELS       either one of 'enum' (default), 'alpha', 
-                            'filename', 'none' or a list of labels (must
-                            match number of logfiles)
-      --pos POS             position where label is printed in line. 
-                            either a number (default: 4) or 'eol'
-      --timezone [N [N ..]] timezone adjustments: add N hours to 
-                            corresponding log file. If only one number
-                            is given, adjust globally
 
 
 <hr>
@@ -496,10 +467,10 @@ combined to quickly create complex analytical queries.
 
 Example:
 
-    mlogmerge mongod_prim.log mongod_sec.log mongod_arb.log --label [pri] [sec] [arb] | 
+    mlogfilter mongod_prim.log mongod_sec.log mongod_arb.log --markers [pri] [sec] [arb] | 
         grep -v writebacklisten | 
         mlogfilter --slow --from Jan 30 20:16 --to +1h | 
-        mplotqueries --log
+        mplotqueries --logscale
 
 This combination of commands merges the log files of a primary, secondary, and arbiter node, 
 removes the 300 second writebacklisten commands, filters out only the slow queries from Jan 30 

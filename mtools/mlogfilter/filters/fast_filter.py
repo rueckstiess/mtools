@@ -8,14 +8,15 @@ class FastFilter(BaseFilter):
         ('--fast', {'action':'store', 'nargs':'?', 'default':False, 'type':int, 'help':'only output lines with query times shorter than FAST ms (default 1000)'})
     ]
 
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
-        if 'fast' in self.commandLineArgs and self.commandLineArgs['fast'] != False:
+    def __init__(self, mlogfilter):
+        BaseFilter.__init__(self, mlogfilter
+            )
+        if 'fast' in self.mlogfilter.args and self.mlogfilter.args['fast'] != False:
             self.active = True
-            if self.commandLineArgs['fast'] == None:
+            if self.mlogfilter.args['fast'] == None:
                 self.fastms = 1000
             else:
-                self.fastms = self.commandLineArgs['fast']
+                self.fastms = self.mlogfilter.args['fast']
 
     def accept(self, logline):
         if self.active and logline.duration:

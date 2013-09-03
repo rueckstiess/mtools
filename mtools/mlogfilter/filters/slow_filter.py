@@ -8,14 +8,15 @@ class SlowFilter(BaseFilter):
         ('--slow', {'action':'store', 'nargs':'?', 'default':False, 'type':int, 'help':'only output lines with query times longer than SLOW ms (default 1000)'})
     ]
 
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
-        if 'slow' in self.commandLineArgs and self.commandLineArgs['slow'] != False:
+    def __init__(self, mlogfilter):
+        BaseFilter.__init__(self, mlogfilter)
+        
+        if 'slow' in self.mlogfilter.args and self.mlogfilter.args['slow'] != False:
             self.active = True
-            if self.commandLineArgs['slow'] == None:
+            if self.mlogfilter.args['slow'] == None:
                 self.slowms = 1000
             else:
-                self.slowms = self.commandLineArgs['slow']
+                self.slowms = self.mlogfilter.args['slow']
 
     def accept(self, logline):
         if logline.duration:
