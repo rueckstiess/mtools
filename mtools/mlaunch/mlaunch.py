@@ -11,7 +11,10 @@ import re
 from mtools.util.cmdlinetool import BaseCmdLineTool
 
 try:
-    from pymongo import Connection
+    try:
+        from pymongo import MongoClient as Connection
+    except ImportError:
+        from pymongo import Connection
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
