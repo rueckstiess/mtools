@@ -13,6 +13,7 @@ class LogFile(object):
         self.from_stdin = logfile.name == "<stdin>"
         self._start = None
         self._end = None
+        self._filesize = None
         self._num_lines = None
         self._restarts = None
         self._binary = None
@@ -34,6 +35,15 @@ class LogFile(object):
         if not self._end:
             self._calculate_bounds()
         return self._end
+
+    @property
+    def filesize(self):
+        """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
+        if self.from_stdin:
+            return None
+        if not self._filesize:
+            self._calculate_bounds()
+        return self._filesize
 
     @property
     def num_lines(self):
@@ -117,8 +127,8 @@ class LogFile(object):
 
         # get end datetime (lines are at most 10k, go back 15k at most to make sure)
         self.logfile.seek(0, 2)
-        file_size = self.logfile.tell()
-        self.logfile.seek(-min(file_size, 15000), 2)
+        self._filesize = self.logfile.tell()
+        self.logfile.seek(-min(self._filesize, 15000), 2)
 
         for line in reversed(self.logfile.readlines()):
             logline = LogLine(line)

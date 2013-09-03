@@ -20,7 +20,7 @@ class MLogFilterTool(LogFileTool):
         # add all filter classes from the filters module
         self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
 
-        self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.'
+        self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters. If several log files are provided, their lines are merged by timestamp.'
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
@@ -155,6 +155,13 @@ class MLogFilterTool(LogFileTool):
 
     def logfile_generator(self):
         """ generator method that yields each line of the logfile, or the next line in case of several log files. """
+        
+        if not self.is_stdin and not self.args['exclude']:
+            # find datetime filter and binary-search for start date 
+            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)
+            if len(dtfilter) > 0:
+                dtfilter[0].seek_binary()
+
         if len(self.args['logfile']) > 1:
             # todo, merge
             for logline in self._merge_logfiles():
@@ -211,6 +218,10 @@ class MLogFilterTool(LogFileTool):
             print "mlogfilter> command line arguments"
             for a in self.args:
                 print "mlogfilter> %8s: %s" % (a, self.args[a])
+            print
+            print "mlogfilter> active filters:",
+            print ', '.join([f.__class__.__name__ for f in self.filters])
+            print
 
         # handle markers parameter
         if len(self.args['markers']) == 1:
