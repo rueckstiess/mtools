@@ -45,7 +45,7 @@ If you'd like to contribute to mtools, please read the [contributor page](tutori
 Disclaimer
 ----------
 
-This software is not supported by [10gen](http://www.10gen.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk. 
+This software is not supported by [MongoDB, Inc.](http://www.mongodb.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk. 
 Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/rueckstiess/mtools/issues?state=open) section here on github. 
 
 
