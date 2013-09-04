@@ -15,7 +15,6 @@ The following tools are in the mtools collection:
 * [mlogversion](#mlogversion) -- auto-detect the version number of a mongos/mongod log file
 * [mlogdistinct](#mlogdistinct) -- groups all similar log messages together and displays their counts
 * [mloginfo](#mloginfo) -- general info about log file: start and end time, version, binary, restarts
-* [mlog2json](#mlog2json) -- convert each line of a log file to a JSON document for mongoimport
 * [mplotqueries](#mplotqueries) -- visualize logfiles with different types of plots (requires matplotlib)
 * [mlogvis](#mlogvis) -- creates a self-contained html file that shows a visualization in a web browser
 * [mlaunch](#mlaunch) -- a script to quickly spin up local mongod/mongos environments (requires pymongo)
@@ -240,32 +239,6 @@ Some of the information may not always be available, like version or binary. Bel
 
 
 <hr>
-
-mlog2json
----------
-
-#### Description
-
-A script to convert mongod/mongos log files to JSON. The script extracts information
-from each line of the log file and outputs a JSON document for each line.  
-    
-    usage: mlog2json logfile [-h]
-               
-    positional arguments: 
-      logfile              log file to convert
-
-    optional arguments:
-      -h, --help           show this help message and exit
-
-
-A common usecase for this tool is to import the JSON documents back into mongodb for
-further processing. This can easily be done with `mongoimport`. The usage is:
-
-    mlog2json logfile | mongoimport -d DATABASE -c COLLECTION
-
-You need a running mongod/mongos process to import the data.
-
-<hr> 
 
 mplotqueries
 ------------

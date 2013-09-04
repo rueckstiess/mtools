@@ -10,6 +10,7 @@ from datetime import timedelta
 import os
 import sys
 import re
+import json
 
 
 def random_date(start, end):
@@ -55,6 +56,15 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             ll = LogLine(line)
             assert(ll.datetime >= random_start and ll.datetime <= random_end)
+
+    def test_json(self):
+        """ output with --json is in JSON format. """
+        self.tool.run('%s --json'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            line_dict = json.loads(line)
+            assert(line_dict)
+            assert(type(line_dict) == dict)
 
     def test_shorten(self):
         self.tool.run('%s --shorten 50'%self.logfile_path)

@@ -27,7 +27,6 @@ except ImportError:
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
         'mtools.mlaunch',
-        'mtools.mlog2json',
         'mtools.mlogdistinct',
         'mtools.mlogfilter',
         'mtools.mloginfo',
@@ -54,7 +53,7 @@ setup(
     package_data = {
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
-    scripts=['scripts/mlaunch','scripts/mlog2json','scripts/mlogdistinct',
+    scripts=['scripts/mlaunch','scripts/mlogdistinct',
         'scripts/mlogfilter','scripts/mlogversion','scripts/mlogvis',
         'scripts/mplotqueries', 'scripts/mloginfo'],
     author='Thomas Rueckstiess',
