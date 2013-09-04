@@ -18,10 +18,26 @@ try:
     except ImportError:
         install_requires.append('ordereddict')
 
+    packages = find_packages()
     kws = {'install_requires': install_requires}
 
 except ImportError:
     from distutils.core import setup
+    
+    # find_packages not available in distutils, manually define packaging
+    packages = ['mtools',
+        'mtools.mlaunch',
+        'mtools.mlog2json',
+        'mtools.mlogdistinct',
+        'mtools.mlogfilter',
+        'mtools.mloginfo',
+        'mtools.mlogversion',
+        'mtools.mlogvis',
+        'mtools.mplotqueries',
+        'mtools.test',
+        'mtools.util',
+        'mtools.mlogfilter.filters',
+        'mtools.mplotqueries.plottypes']
     kws = {}
 
 # import version from mtools/version.py
@@ -34,7 +50,7 @@ with open('README.md') as f:
 setup(
     name='mtools', 
     version=__version__,
-    packages=find_packages(),
+    packages=packages,
     package_data = {
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
