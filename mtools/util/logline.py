@@ -410,11 +410,15 @@ class LogLine(object):
 
         if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
             return
-        elif format == 'ctime':
+        elif format.startswith('ctime'):
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
-        elif format == 'ctime-pre2.4':
-            dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
+            # remove zero-padding from day number
+            tokens = dt_string.split(' ')
+            if tokens[2].startswith('0'):
+                tokens[2] = tokens[2].replace('0', ' ', 1)
+            dt_string = ' '.join(tokens)
+            if format == 'ctime':
+                dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
         elif format == 'iso8601-local':
             dt_string = self.datetime.isoformat()
             if not self.datetime.utcoffset():

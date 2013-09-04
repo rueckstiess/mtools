@@ -40,8 +40,6 @@ class TestMLogFilter(object):
 
     def test_from(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
-        print "random_start", random_start
-
         self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
