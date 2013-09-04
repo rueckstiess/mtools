@@ -434,8 +434,7 @@ class LogLine(object):
     def to_json(self, labels=None):
         """ converts LogLine object to valid JSON. """
         output = self.to_dict(labels)
-        decoded = output.decode('utf8','ignore')
-        return json.dumps(decoded, cls=DateTimeEncoder)
+        return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
 
 
