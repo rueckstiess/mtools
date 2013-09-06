@@ -27,7 +27,6 @@ except ImportError:
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
         'mtools.mlaunch',
-        'mtools.mlogdistinct',
         'mtools.mlogfilter',
         'mtools.mloginfo',
         'mtools.mlogversion',
@@ -36,7 +35,8 @@ except ImportError:
         'mtools.test',
         'mtools.util',
         'mtools.mlogfilter.filters',
-        'mtools.mplotqueries.plottypes']
+        'mtools.mplotqueries.plottypes',
+        'mtools.mloginfo.sections']
     kws = {}
 
 # import version from mtools/version.py
@@ -53,9 +53,8 @@ setup(
     package_data = {
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
-    scripts=['scripts/mlaunch','scripts/mlogdistinct',
-        'scripts/mlogfilter','scripts/mlogversion','scripts/mlogvis',
-        'scripts/mplotqueries', 'scripts/mloginfo'],
+    scripts=['scripts/mlaunch', 'scripts/mlogfilter', 'scripts/mlogversion',
+        'scripts/mlogvis', 'scripts/mplotqueries', 'scripts/mloginfo'],
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
