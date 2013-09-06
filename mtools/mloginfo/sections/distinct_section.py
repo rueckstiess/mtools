@@ -36,6 +36,9 @@ class DistinctSection(BaseSection):
         codelines = defaultdict(lambda: 0)
         non_matches = 0
 
+        # rewind log file in case other sections are walking the lines
+        self.mloginfo.args['logfile'].seek(0, 0)
+
         for line in self.mloginfo.args['logfile']:
             cl = self.log2code(line)
             if cl:

@@ -58,6 +58,7 @@ class MLogInfoTool(LogFileTool):
                 version = '>= 2.6 (iso8601 format)'
 
         print "         version: %s" % version
+        print 
 
         # now run all sections
         for section in self.sections:
