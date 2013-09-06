@@ -4,6 +4,11 @@ from mtools.util.logfile import LogFile
 from mtools.util.logline import LogLine
 from mtools.util.cmdlinetool import LogFileTool
 
+import inspect
+import mtools.mloginfo.sections as sections
+
+
+
 class MLogInfoTool(LogFileTool):
 
     def __init__(self):
@@ -11,16 +16,20 @@ class MLogInfoTool(LogFileTool):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=False)
         
         self.argparser.description = 'Extracts general information from logfile and prints it to stdout.'
-        self.argparser.add_argument('--restarts', action='store_true', help='outputs information about every detected restart.')
+        self.argparser.add_argument('--verbose', action='store_true', help='show more verbose output (depends on info section)')
+        self.argparser_sectiongroup = self.argparser.add_argument_group('info sections', 'Below commands activate additional info sections for the log file.')
+
+        # add all filter classes from the filters module
+        self.sections = [c[1](self) for c in inspect.getmembers(sections, inspect.isclass)]
 
 
     def run(self, arguments=None):
         """ Print out useful information about the log file. """
         LogFileTool.run(self, arguments)
 
-        logfile = LogFile(self.args['logfile'])
-        print "start of logfile: %s" % (logfile.start.strftime("%b %d %H:%M:%S") if logfile.start else "unknown")
-        print "  end of logfile: %s" % (logfile.end.strftime("%b %d %H:%M:%S") if logfile.start else "unknown")
+        self.logfile = LogFile(self.args['logfile'])
+        print "start of logfile: %s" % (self.logfile.start.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
+        print "  end of logfile: %s" % (self.logfile.end.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
 
         # get one logline (within first 20 lines) for datetime format
         logline = None
@@ -34,10 +43,10 @@ class MLogInfoTool(LogFileTool):
 
         # TODO: add timezone if iso8601 format
         
-        print "    line numbers: %s" % logfile.num_lines
-        print "          binary: %s" % (logfile.binary or "unknown")
+        print "    line numbers: %s" % self.logfile.num_lines
+        print "          binary: %s" % (self.logfile.binary or "unknown")
 
-        version = (' -> '.join(logfile.versions) or "unknown")
+        version = (' -> '.join(self.logfile.versions) or "unknown")
         
         # if version is unknown, go by date
         if version == 'unknown' and logline:
@@ -50,16 +59,13 @@ class MLogInfoTool(LogFileTool):
 
         print "         version: %s" % version
 
-        # restarts section
-        if self.args['restarts']:
-            print
-            print "RESTARTS"
-
-            for version, logline in logfile.restarts:
-                print "   %s version %s" % (logline.datetime.strftime("%b %d %H:%M:%S"), version)
-
-            if len(logfile.restarts) == 0:
-                print "  no restarts found"
+        # now run all sections
+        for section in self.sections:
+            if section.active:
+                print
+                print section.name.upper()
+                print
+                section.run()
 
 
 if __name__ == '__main__':
