@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import subprocess
-import argparse
 import threading
 import os, time
 import socket
@@ -125,16 +124,11 @@ class MLaunchTool(BaseCmdLineTool):
         except Exception:
             pass
 
-    
     def check_port_availability(self, port, binary):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.bind(('', port))
-            s.close()
-        except:
+        if pingMongoDS('%s:%i' % (self.hostname, port), 1, 1) is True:
             raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already being used")
 
-    
+
     def _createPaths(self, basedir, name=None):
         if name:
             datapath = os.path.join(basedir, name)
