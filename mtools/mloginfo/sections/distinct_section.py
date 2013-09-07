@@ -1,39 +1,45 @@
-#!/usr/bin/python
+from base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
 from mtools.util.logline import LogLine
-from mtools.util.cmdlinetool import LogFileTool
-
-import argparse
-import sys
 from collections import defaultdict
 
 
-class MLogDistinctTool(LogFileTool):
-
+class DistinctSection(BaseSection):
+    """ This section shows a distinct view of all log lines matched with the Log2Code matcher.
+    	It will output sorted statistics of which logline patterns where matched how often
+    	(most frequent first).
+    """
+    
+    name = "distinct"
     log2code = Log2CodeConverter()
 
-    def __init__(self):
-        """ Constructor: add description to argparser. """
-        LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
-        
-        self.argparser.description = 'Groups all log messages in the logfile together \
-            and only displays a distinct set of messages with count'
 
-        self.argparser.add_argument('--verbose', action='store_true', default=False, 
-            help="outputs lines that couldn't be matched.")
+    def __init__(self, mloginfo):
+        BaseSection.__init__(self, mloginfo)
 
-    
-    def run(self, arguments=None):
+        # add --restarts flag to argparser
+        self.mloginfo.argparser_sectiongroup.add_argument('--distinct', action='store_true', help='outputs distinct list of all log line by message type (slow)')
+
+
+    @property
+    def active(self):
+        """ return boolean if this section is active. """
+        return self.mloginfo.args['distinct']
+
+
+    def run(self):
         """ go over each line in the logfile, run through log2code matcher 
             and group by matched pattern.
         """
-        LogFileTool.run(self, arguments)
 
         codelines = defaultdict(lambda: 0)
         non_matches = 0
 
-        for line in self.args['logfile']:
+        # rewind log file in case other sections are walking the lines
+        self.mloginfo.args['logfile'].seek(0, 0)
+
+        for line in self.mloginfo.args['logfile']:
             cl = self.log2code(line)
             if cl:
                 codelines[cl.pattern] += 1
@@ -51,10 +57,10 @@ class MLogDistinctTool(LogFileTool):
 
                 # everything else is a real non-match
                 non_matches += 1
-                if self.args['verbose']:
+                if self.mloginfo.args['verbose']:
                     print "couldn't match:", line,
 
-        if self.args['verbose']: 
+        if self.mloginfo.args['verbose']: 
             print
 
         for cl in sorted(codelines, key=lambda x: codelines[x], reverse=True):
@@ -62,11 +68,6 @@ class MLogDistinctTool(LogFileTool):
 
         print
         if non_matches > 0:
-            print "couldn't match %i lines"%non_matches
-            if not self.args['verbose']:
+            print "distinct couldn't match %i lines"%non_matches
+            if not self.mloginfo.args['verbose']:
                 print "to show non-matched lines, run with --verbose."
-
-
-if __name__ == '__main__':
-    tool = MLogDistinctTool()
-    tool.run()
