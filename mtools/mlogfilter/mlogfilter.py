@@ -28,7 +28,7 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--json', action='store_true', help='outputs all matching lines in json format rather than the native log line.')
         self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='use markers when merging several files to distinguish them. Choose from none, enum, alpha, filename (default), or provide list.')
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
-        self.argparser.add_argument('--datetime-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
+        self.argparser.add_argument('--timestamp-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
 
     def addFilter(self, filterClass):
         """ adds a filter class to the parser. """
@@ -47,12 +47,12 @@ class MLogFilterTool(LogFileTool):
     def _outputLine(self, logline, length=None, human=False):
         """ prints the final line, with various options (length, human, datetime changes, ...) """
         # adapt timezone output if necessary
-        if self.args['datetime_format'] != 'none':
-            logline._reformat_timestamp(self.args['datetime_format'], force=True)
+        if self.args['timestamp_format'] != 'none':
+            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
         if any(self.args['timezone']):
-            if self.args['datetime_format'] == 'none':
-                self.args['datetime_format'] = logline.datetime_format
-            logline._reformat_timestamp(self.args['datetime_format'], force=True)
+            if self.args['timestamp_format'] == 'none':
+                self.args['timestamp_format'] = logline.datetime_format
+            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
 
         if self.args['json']:
             print logline.to_json()
@@ -244,8 +244,8 @@ class MLogFilterTool(LogFileTool):
             raise SystemExit('Error: Number of markers not the same as number of files.')
 
         # with --human, change to ctime format if not specified otherwise
-        if self.args['datetime_format'] == 'none' and self.args['human']:
-            self.args['datetime_format'] = 'ctime'
+        if self.args['timestamp_format'] == 'none' and self.args['human']:
+            self.args['timestamp_format'] = 'ctime'
 
         # go through each line and ask each filter if it accepts
         if not 'logfile' in self.args or not self.args['logfile']:
