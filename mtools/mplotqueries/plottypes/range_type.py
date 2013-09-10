@@ -69,7 +69,7 @@ class RangePlotType(BasePlotType):
             
             if group:
                 if len(self.groups) < 50:
-                    axis.text(x_right, y_bottom-0.5*height, group + '   ', verticalalignment='center', horizontalalignment='right', color=color, fontsize=9)
+                    axis.text(x_right, y_bottom-0.5*height, group + '  ', verticalalignment='center', horizontalalignment='right', color='k', fontsize=9)
 
             artist._mt_plot_type = self
             artist._mt_group = group
