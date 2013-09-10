@@ -9,6 +9,8 @@ import glob
 import cPickle
 import types
 import inspect
+import datetime
+
 from copy import copy
 from mtools import __version__
 
@@ -23,6 +25,8 @@ except ImportError:
 
 
 from mtools.util.logline import LogLine
+from mtools.util.logfile import LogFile
+
 from mtools.util.cmdlinetool import LogFileTool
 
 class MPlotQueriesTool(LogFileTool):
@@ -86,6 +90,8 @@ class MPlotQueriesTool(LogFileTool):
             print "Nothing to plot."
             raise SystemExit
 
+    def _datetime_to_epoch(self, dt):
+        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
 
     def parse_loglines(self):
         multiple_files = False
@@ -105,7 +111,12 @@ class MPlotQueriesTool(LogFileTool):
         for logfile in self.logfiles:
             start = None
 
-            for line in logfile:
+            # get log file information
+            lfinfo = LogFile(logfile)
+            progress_start = self._datetime_to_epoch(lfinfo.start)
+            progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+
+            for i, line in enumerate(logfile):
                 # create LogLine object
                 logline = LogLine(line)
                 if not start:
@@ -113,6 +124,11 @@ class MPlotQueriesTool(LogFileTool):
 
                 if logline.datetime:
                     end = logline.datetime
+
+                # update progress bar every 1000 lines
+                if i % 1000 == 0:
+                    progress_curr = self._datetime_to_epoch(logline.datetime)
+                    self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
                 if multiple_files:
                     # amend logline object with filename for group by filename
@@ -134,6 +150,9 @@ class MPlotQueriesTool(LogFileTool):
 
             # store start and end for each logfile
             self.logfile_ranges.append( (start, end) )
+
+        # clear progress bar
+        self.update_progress(1.0, 'parsing %s'%logfile.name)
 
         self.plot_instances.append(plot_instance)
 
