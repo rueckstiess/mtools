@@ -1,5 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
+import re
+import types
 
 class BasePlotType(object):
 
@@ -81,6 +83,14 @@ class BasePlotType(object):
             # else key is None
             else:
                 key = None
+                # try to match as regular expression
+                if type(group_by) == types.StringType:
+                    match = re.search(group_by, logline.line_str)
+                    if match:
+                        if len(match.groups()) > 0:
+                            key = match.group(1)
+                        else:
+                            key = match.group()
 
             # special case: group together all connections
             # if group_by == "thread" and key and key.startswith("conn"):
