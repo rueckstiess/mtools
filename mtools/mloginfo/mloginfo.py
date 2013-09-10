@@ -65,7 +65,6 @@ class MLogInfoTool(LogFileTool):
             if section.active:
                 print
                 print section.name.upper()
-                print
                 section.run()
 
 

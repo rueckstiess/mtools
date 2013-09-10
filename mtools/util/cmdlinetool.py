@@ -56,7 +56,7 @@ class BaseCmdLineTool(object):
             sys.stdout.flush()
         else:
             bar_length = int(round(total_length*progress))
-            sys.stdout.write('\r%s [%s%s] %% %3.1f ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
+            sys.stdout.write('\r%s [%s%s] %.1f %% ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
             sys.stdout.flush()
 
 
