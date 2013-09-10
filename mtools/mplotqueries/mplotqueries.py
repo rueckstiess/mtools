@@ -9,7 +9,6 @@ import glob
 import cPickle
 import types
 import inspect
-import datetime
 
 from copy import copy
 from mtools import __version__
@@ -90,8 +89,6 @@ class MPlotQueriesTool(LogFileTool):
             print "Nothing to plot."
             raise SystemExit
 
-    def _datetime_to_epoch(self, dt):
-        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
 
     def parse_loglines(self):
         multiple_files = False
@@ -112,9 +109,10 @@ class MPlotQueriesTool(LogFileTool):
             start = None
 
             # get log file information
-            lfinfo = LogFile(logfile)
-            progress_start = self._datetime_to_epoch(lfinfo.start)
-            progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+            if not self.is_stdin:
+                lfinfo = LogFile(logfile)
+                progress_start = self._datetime_to_epoch(lfinfo.start)
+                progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
 
             for i, line in enumerate(logfile):
                 # create LogLine object
@@ -126,7 +124,7 @@ class MPlotQueriesTool(LogFileTool):
                     end = logline.datetime
 
                 # update progress bar every 1000 lines
-                if i % 1000 == 0:
+                if not self.is_stdin and (i % 1000 == 0):
                     progress_curr = self._datetime_to_epoch(logline.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
@@ -152,7 +150,8 @@ class MPlotQueriesTool(LogFileTool):
             self.logfile_ranges.append( (start, end) )
 
         # clear progress bar
-        self.update_progress(1.0, 'parsing %s'%logfile.name)
+        if not self.is_stdin:
+            self.update_progress(1.0, 'parsing %s'%logfile.name)
 
         self.plot_instances.append(plot_instance)
 

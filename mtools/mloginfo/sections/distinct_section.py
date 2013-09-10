@@ -2,6 +2,8 @@ from base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
 from mtools.util.logline import LogLine
+from mtools.util.logfile import LogFile
+
 from collections import defaultdict
 
 
@@ -39,8 +41,20 @@ class DistinctSection(BaseSection):
         # rewind log file in case other sections are walking the lines
         self.mloginfo.args['logfile'].seek(0, 0)
 
-        for line in self.mloginfo.args['logfile']:
+        # get log file information
+        lfinfo = LogFile(self.mloginfo.args['logfile'])
+        progress_start = self.mloginfo._datetime_to_epoch(lfinfo.start)
+        progress_total = self.mloginfo._datetime_to_epoch(lfinfo.end) - progress_start
+
+        for i, line in enumerate(self.mloginfo.args['logfile']):
             cl = self.log2code(line)
+
+            # update progress bar every 1000 lines
+            if i % 1000 == 0:
+                ll = LogLine(line)
+                progress_curr = self.mloginfo._datetime_to_epoch(ll.datetime)
+                self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
+
             if cl:
                 codelines[cl.pattern] += 1
             else:
@@ -59,6 +73,9 @@ class DistinctSection(BaseSection):
                 non_matches += 1
                 if self.mloginfo.args['verbose']:
                     print "couldn't match:", line,
+
+        # clear progress bar again
+        self.mloginfo.update_progress(1.0)
 
         if self.mloginfo.args['verbose']: 
             print

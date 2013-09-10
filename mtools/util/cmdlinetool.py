@@ -2,6 +2,7 @@ import argparse
 import sys
 from mtools.version import __version__
 import signal
+import datetime
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -37,6 +38,10 @@ class BaseCmdLineTool(object):
             else:
                 self.args = vars(self.argparser.parse_args())
 
+    
+    def _datetime_to_epoch(self, dt):
+        """ converts the datetime to unix epoch (properly). """
+        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
 
     def update_progress(self, progress, prefix=''):
         """ use this helper function to print a progress bar for longer-running scripts. 
