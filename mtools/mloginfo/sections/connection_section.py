@@ -67,8 +67,8 @@ class ConnectionSection(BaseSection):
         print
 
         for ip in sorted(unique_ips, key=lambda x: ip_opened[x], reverse=True):
-            print ip
-            print "    opened:", ip_opened[ip] if ip in ip_opened else 0
-            print "    closed:", ip_closed[ip] if ip in ip_closed else 0
-            print
+            opened = ip_opened[ip] if ip in ip_opened else 0
+            closed = ip_closed[ip] if ip in ip_closed else 0
 
+            print "%-15s  opened: %-8i  closed: %-8i" % (ip, opened, closed)
+        print
