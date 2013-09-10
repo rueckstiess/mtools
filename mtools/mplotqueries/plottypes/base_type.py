@@ -119,6 +119,10 @@ class BasePlotType(object):
                 groups['other'].extend(groups[other_group])
                 del groups[other_group]
 
+            # remove if empty
+            if len(groups['other']) == 0:
+                del groups['other']
+
         self.groups = groups
 
     def plot_group(self, group, idx, axis):
