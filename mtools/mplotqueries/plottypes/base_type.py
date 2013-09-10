@@ -3,9 +3,14 @@ from mtools.util.log2code import Log2CodeConverter
 import re
 import types
 
+try:
+    from matplotlib import cm
+except ImportError:
+    raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
+
 class BasePlotType(object):
 
-    colors = ['k', 'b', 'g', 'r', 'c', 'm', 'y']
+    colors = ['k', 'b', 'g', 'r', 'c', 'm', 'y'] 
     color_index = 0
     markers = ['o', 's', '<', 'D']
     marker_index = 0
@@ -98,6 +103,19 @@ class BasePlotType(object):
 
             groups.setdefault(key, list()).append(logline)
         
+        # sort groups by number of data points
+        groups = OrderedDict( sorted(groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
+
+        # if --group-limit is provided, combine remaining groups
+        if self.args['group_limit']:
+
+            # now group together all groups that did not make the limit
+            groups['other'] = []
+            # only go to second last (-1), since the 'other' group is now last
+            for other_group in groups.keys()[ self.args['group_limit']:-1 ]:
+                groups['other'].extend(groups[other_group])
+                del groups[other_group]
+
         self.groups = groups
 
     def plot_group(self, group, idx, axis):

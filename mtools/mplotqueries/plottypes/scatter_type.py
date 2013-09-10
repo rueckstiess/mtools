@@ -42,7 +42,7 @@ class ScatterPlotType(BasePlotType):
 
         # duration plots require y coordinate and use plot_date
         y = [ getattr(logline, self.field) for logline in self.groups[group] ]
-        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.5, \
+        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.7, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self

@@ -65,7 +65,7 @@ class RangePlotType(BasePlotType):
         artists = []
 
         for x_left, x_right in zip(x_lefts, x_rights):
-            artist = axis.barh(y_bottom-0.5*height, x_right-x_left, height=0.7*height, left=x_left, color=color, alpha=0.4, edgecolor='white', picker=5, linewidth=1, align='center')[0]
+            artist = axis.barh(y_bottom-0.5*height, x_right-x_left, height=0.7*height, left=x_left, color=color, alpha=0.7, edgecolor='white', picker=5, linewidth=1, align='center')[0]
             
             if group:
                 if len(self.groups) < 50:
