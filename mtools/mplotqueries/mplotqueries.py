@@ -232,7 +232,12 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def print_shortcuts(self):
-        print "keyboard shortcuts (focus must be on figure window):"
+        if self.args['type'] == 'scatter':
+            print "keyboard/mouse shortcuts (focus must be on figure window):"
+            print "  click on legend item to toggle individual plots"
+        else:
+            print "keyboard shortcuts (focus must be on figure window):"
+
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
         print "%5s  %s" % ("0", "toggle visibility of all plots")
         print "%5s  %s" % ("-", "toggle visibility of legend")
@@ -246,7 +251,16 @@ class MPlotQueriesTool(LogFileTool):
     def onpick(self, event):
         """ this method is called per artist (group), with possibly
             a list of indices.
-        """        
+        """   
+        if hasattr(event.artist, '_mt_legend_item'):
+            # legend item, instead of data point
+            idx = event.artist._mt_legend_item
+            try:
+                self.toggle_artist(self.artists[idx])
+            except IndexError:
+                pass
+            return
+
         # only print loglines of visible points
         if not event.artist.get_visible():
             return
@@ -274,7 +288,11 @@ class MPlotQueriesTool(LogFileTool):
                 pass
 
         if event.key == '0':
-            visible = any([a.get_visible() for a in self.artists])
+            try:
+                visible = any([a.get_visible() for a in self.artists])
+            except AttributeError:
+                return
+
             for artist in self.artists:
                 artist.set_visible(not visible)
             plt.gcf().canvas.draw()
@@ -334,6 +352,12 @@ class MPlotQueriesTool(LogFileTool):
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
             self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+        
+        if self.args['type'] == 'scatter':
+            # enable legend picking for scatter plots
+            for i, legend_line in enumerate(self.legend.get_lines()):
+                legend_line.set_picker(10)
+                legend_line._mt_legend_item = i
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
