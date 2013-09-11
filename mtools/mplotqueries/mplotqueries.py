@@ -9,7 +9,6 @@ import glob
 import cPickle
 import types
 import inspect
-import datetime
 
 from copy import copy
 from mtools import __version__
