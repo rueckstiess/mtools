@@ -124,7 +124,7 @@ class MPlotQueriesTool(LogFileTool):
                     end = logline.datetime
 
                 # update progress bar every 1000 lines
-                if not self.is_stdin and (i % 1000 == 0):
+                if not self.is_stdin and (i % 1000 == 0) and logline.datetime:
                     progress_curr = self._datetime_to_epoch(logline.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
