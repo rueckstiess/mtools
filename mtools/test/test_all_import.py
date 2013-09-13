@@ -2,14 +2,11 @@ from nose.tools import nottest, make_decorator
 from functools import wraps
 
 # tools without any external dependencies
-from mtools.mlogdistinct.mlogdistinct import MLogDistinctTool
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
-from mtools.mlogversion.mlogversion import MLogVersionTool
 from mtools.mlogvis.mlogvis import MLogVisTool
 from mtools.mloginfo.mloginfo import MLogInfoTool
 
-tools = [MLogDistinctTool, MLogFilterTool, \
-         MLogVersionTool, MLogVisTool, MLogInfoTool]
+tools = [MLogFilterTool, MLogVisTool, MLogInfoTool]
 
 
 # mlaunch depends on pymongo
