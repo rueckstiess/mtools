@@ -49,6 +49,7 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--logscale', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="create combinations of several plots. Use '--overlay' to create an overlay (this will not plot anything). The first call without '--overlay' will additionally plot all existing overlays. Use '--overlay reset' to clear all overlays.")
         self.argparser.add_argument('--type', action='store', default='scatter', choices=self.plot_types.keys(), help='type of plot (default=scatter with --yaxis duration).')        
+        self.argparser.add_argument('--title', action='store', default=None, help='change the title of the plot (default=filename(s))')        
         self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range and histogram plots can additionally group on 'log2code'. The group can also be a regular expression.")
         self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'other' group")
 
@@ -370,7 +371,7 @@ class MPlotQueriesTool(LogFileTool):
         axis.set_ylabel(ylabel)
 
         # title and mtools link
-        axis.set_title(', '.join([l.name for l in self.logfiles]))
+        axis.set_title(self.args['title'] or ', '.join([l.name for l in self.logfiles if l.name != '<stdin>']))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
         self.footnote = plt.annotate('created with mtools v%s: https://github.com/rueckstiess/mtools' % __version__, (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
 
