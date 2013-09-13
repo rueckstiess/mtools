@@ -57,6 +57,9 @@ class MPlotQueriesTool(LogFileTool):
         # store logfile ranges
         self.logfile_ranges = []
 
+        # progress bar
+        self.progress_bar_enabled = not self.is_stdin
+
 
     def run(self, arguments=None):
         LogFileTool.run(self, arguments, get_unknowns=True)
@@ -107,12 +110,16 @@ class MPlotQueriesTool(LogFileTool):
 
         for logfile in self.logfiles:
             start = None
-
+            end = None
+            
             # get log file information
-            if not self.is_stdin:
+            if self.progress_bar_enabled:
                 lfinfo = LogFile(logfile)
-                progress_start = self._datetime_to_epoch(lfinfo.start)
-                progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+                if lfinfo.start and lfinfo.end:
+                    progress_start = self._datetime_to_epoch(lfinfo.start)
+                    progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+                else:
+                    self.progress_bar_enabled = False
 
             for i, line in enumerate(logfile):
                 # create LogLine object
@@ -124,7 +131,7 @@ class MPlotQueriesTool(LogFileTool):
                     end = logline.datetime
 
                 # update progress bar every 1000 lines
-                if not self.is_stdin and (i % 1000 == 0) and logline.datetime:
+                if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:
                     progress_curr = self._datetime_to_epoch(logline.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
@@ -150,7 +157,7 @@ class MPlotQueriesTool(LogFileTool):
             self.logfile_ranges.append( (start, end) )
 
         # clear progress bar
-        if not self.is_stdin:
+        if self.progress_bar_enabled:
             self.update_progress(1.0, 'parsing %s'%logfile.name)
 
         self.plot_instances.append(plot_instance)

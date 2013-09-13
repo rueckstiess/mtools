@@ -37,7 +37,7 @@ class MLogInfoTool(LogFileTool):
             try:
                 logline = LogLine(self.args['logfile'].next())
             except StopIteration as e:
-                raise SystemExit("no valid log lines found (datetime not available).")
+                raise SystemExit("no valid timestamp found within the first 20 log lines.")
             if logline.datetime:
                 break
 
