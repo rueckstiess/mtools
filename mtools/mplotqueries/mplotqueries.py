@@ -158,8 +158,8 @@ class MPlotQueriesTool(LogFileTool):
             self.logfile_ranges.append( (start, end) )
 
         # clear progress bar
-        if self.progress_bar_enabled:
-            self.update_progress(1.0, 'parsing %s'%logfile.name)
+        if self.logfiles and self.progress_bar_enabled:
+            self.update_progress(1.0)
 
         self.plot_instances.append(plot_instance)
 
