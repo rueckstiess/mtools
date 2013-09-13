@@ -28,10 +28,11 @@ class MLogInfoTool(LogFileTool):
 
         self.logfiles = self.args['logfile']
 
-        for logfileOpen in self.args['logfile']:
+        for i, logfileOpen in enumerate(self.args['logfile']):
+            self.logfileOpen = logfileOpen
             self.logfile = LogFile(logfileOpen)
 
-            print "        filename: %s" % self.args['logfile'][0].name
+            print "        filename: %s" % self.args['logfile'][i].name
             print "start of logfile: %s" % (self.logfile.start.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
             print "  end of logfile: %s" % (self.logfile.end.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
 

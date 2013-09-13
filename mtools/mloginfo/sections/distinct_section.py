@@ -39,14 +39,14 @@ class DistinctSection(BaseSection):
         non_matches = 0
 
         # rewind log file in case other sections are walking the lines
-        self.mloginfo.args['logfile'].seek(0, 0)
+        self.mloginfo.logfileOpen.seek(0, 0)
 
         # get log file information
-        lfinfo = LogFile(self.mloginfo.args['logfile'])
+        lfinfo = LogFile(self.mloginfo.logfileOpen)
         progress_start = self.mloginfo._datetime_to_epoch(lfinfo.start)
         progress_total = self.mloginfo._datetime_to_epoch(lfinfo.end) - progress_start
 
-        for i, line in enumerate(self.mloginfo.args['logfile']):
+        for i, line in enumerate(self.mloginfo.logfileOpen):
             cl = self.log2code(line)
 
             # update progress bar every 1000 lines

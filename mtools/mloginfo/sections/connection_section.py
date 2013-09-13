@@ -30,9 +30,9 @@ class ConnectionSection(BaseSection):
         socket_exceptions = 0
 
         # rewind log file in case other sections are walking the lines
-        self.mloginfo.args['logfile'].seek(0, 0)
+        self.mloginfo.logfileOpen.seek(0, 0)
 
-        for line in self.mloginfo.args['logfile']:
+        for line in self.mloginfo.logfileOpen:
             pos = line.find('connection accepted')
             if pos != -1:
                 # connection was opened, increase counter
