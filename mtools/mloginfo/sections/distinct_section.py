@@ -23,6 +23,9 @@ class DistinctSection(BaseSection):
         # add --restarts flag to argparser
         self.mloginfo.argparser_sectiongroup.add_argument('--distinct', action='store_true', help='outputs distinct list of all log line by message type (slow)')
 
+        # progress bar
+        self.progress_bar_enabled = not self.mloginfo.is_stdin
+
 
     @property
     def active(self):
@@ -43,17 +46,21 @@ class DistinctSection(BaseSection):
 
         # get log file information
         lfinfo = LogFile(self.mloginfo.args['logfile'])
-        progress_start = self.mloginfo._datetime_to_epoch(lfinfo.start)
-        progress_total = self.mloginfo._datetime_to_epoch(lfinfo.end) - progress_start
+        if lfinfo.start and lfinfo.end:
+            progress_start = self.mloginfo._datetime_to_epoch(lfinfo.start)
+            progress_total = self.mloginfo._datetime_to_epoch(lfinfo.end) - progress_start
+        else:
+            self.progress_bar_enabled = False
 
         for i, line in enumerate(self.mloginfo.args['logfile']):
             cl = self.log2code(line)
 
             # update progress bar every 1000 lines
-            if i % 1000 == 0:
+            if self.progress_bar_enabled and (i % 1000 == 0):
                 ll = LogLine(line)
-                progress_curr = self.mloginfo._datetime_to_epoch(ll.datetime)
-                self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
+                if ll.datetime:
+                    progress_curr = self.mloginfo._datetime_to_epoch(ll.datetime)
+                    self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if cl:
                 codelines[cl.pattern] += 1
