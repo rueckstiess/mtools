@@ -3,6 +3,7 @@
 import argparse, re
 import sys
 import inspect
+import types
 
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
@@ -138,7 +139,7 @@ class MLogFilterTool(LogFileTool):
 
         # adjust lines by timezone
         for i in range(len(lines)):
-            if lines[i].datetime:
+            if lines[i] and lines[i].datetime:
                 lines[i]._datetime = lines[i].datetime + timedelta(hours=self.args['timezone'][i])
 
         while any(lines):
@@ -193,6 +194,10 @@ class MLogFilterTool(LogFileTool):
         # now parse arguments and post-process
         LogFileTool.run(self, arguments)
         self.args = dict((k, self.args[k] if k in ['logfile', 'markers', 'timezone'] else self._arrayToString(self.args[k])) for k in self.args)
+
+        # make sure logfile is always a list, even if 1 is provided through sys.stdin
+        if type(self.args['logfile']) != types.ListType:
+            self.args['logfile'] = [self.args['logfile']]
 
         # handle timezone parameter
         if len(self.args['timezone']) == 1:

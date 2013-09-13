@@ -89,13 +89,6 @@ class LogFileTool(BaseCmdLineTool):
 
         arg_opts = {'action':'store', 'type':argparse.FileType('r')}
 
-        if self.stdin_allowed:
-            arg_opts['default'] = None
-            arg_opts['nargs'] = '?'
-        else:
-            if not sys.stdin.isatty():
-                raise SystemExit('stdin input not supported.')
-
         if self.multiple_logfiles:
             arg_opts['nargs'] = '*'
             arg_opts['help'] = 'logfile(s) to parse'
@@ -117,6 +110,7 @@ class LogFileTool(BaseCmdLineTool):
 
 
 if __name__ == '__main__':
-    tool = LogFileTool(multiple_logfiles=True, stdin_allowed=False)
+    tool = LogFileTool(multiple_logfiles=False, stdin_allowed=True)
     tool.run()
+    print tool.args
 
