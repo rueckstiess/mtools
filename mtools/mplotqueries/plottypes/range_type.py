@@ -75,10 +75,10 @@ class RangePlotType(BasePlotType):
 
             artists.append(artist)
 
-        if group:
-            if len(self.groups) < 50:
-                axis.text(x_lefts[0], y_bottom-0.5*height, group + '  ', verticalalignment='center', horizontalalignment='left', color='k', fontsize=9)
+        if len(self.groups) < 50:
+            axis.annotate(group, xy=(0, y_bottom-height/2.), xycoords='axes fraction', xytext=(-10, 0), textcoords='offset pixels', va='bottom', ha='right', fontsize=9)
 
+        axis.axes.get_yaxis().set_visible(False)
 
         return artists
 
