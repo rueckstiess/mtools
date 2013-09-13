@@ -18,6 +18,12 @@ try:
     except ImportError:
         install_requires.append('ordereddict')
 
+    # add dateutil if not installed already
+    try: 
+        import dateutil
+    except ImportError:
+        install_requires.append('python-dateutil')
+
     packages = find_packages()
     kws = {'install_requires': install_requires}
 
