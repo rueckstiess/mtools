@@ -407,8 +407,6 @@ class MLaunchTool(BaseCmdLineTool):
         print "mongos at %s running."%host
 
 
-
 if __name__ == '__main__':
     tool = MLaunchTool()
     tool.run()
-
