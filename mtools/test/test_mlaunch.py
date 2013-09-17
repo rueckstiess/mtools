@@ -50,6 +50,7 @@ class TestMLaunch(object):
 
         # shutdown as many processes as the test required
         for p in range(self.n_processes_started):
+            print "shutting", self.port + p
             self._shutdown_mongosd(self.port + p)
 
         # if the test data path exists, remove it
@@ -62,8 +63,8 @@ class TestMLaunch(object):
         try:
             mc = MongoClient('localhost:%i' % port)
             try:
-                mc.admin.command({'shutdown':1})
-            except AutoReconnect: 
+                mc.admin.command('shutdown', force=True)
+            except AutoReconnect:
                 pass
         except ConnectionFailure:
             pass
@@ -186,11 +187,15 @@ class TestMLaunch(object):
         mc = MongoClient('localhost:%i' % self.port)
 
         # test if first node becomes primary after some time
-        while True:
-            ismaster = mc.admin.command({'ismaster': 1})
-            if ismaster['ismaster']:
-                break
+        ismaster = False
+        while not ismaster:
+            result = mc.admin.command("ismaster")
+            ismaster = result["ismaster"]
             time.sleep(1)
+            print "sleeping"
+
+        # insert a document and wait to replicate to 2 secondaries (10 sec timeout)
+        mc.test.smokeWait.insert({}, w=2, wtimeout=10*60*1000)
 
 
     def test_sharded_status(self):
@@ -266,5 +271,3 @@ class TestMLaunch(object):
     # mark slow tests
     test_replicaset_ismaster.slow = 1
     test_sharded_status.slow = 1
-
-
