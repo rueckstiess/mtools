@@ -142,7 +142,7 @@ class DateTimeBoundaries(object):
                 dtdict['minute'] = int(m)
                 dtdict['second'] = int(s)
                 dtdict['microsecond'] = int(us) * 1000
-                del dtdict['time3']
+                del dtdict['time4']
 
             else:
                 notime = True
