@@ -253,6 +253,28 @@ class TestMLaunch(object):
         self.tool.check_port_availability(self.port, "mongod")
 
 
+    def test_single_mongos_explicit(self):
+        """ mlaunch: test if single mongos creates <datadir>/mongos.log """
+        self._reserve_ports(4)
+
+        # start 2 shards, 1 config server, 1 mongos
+        self.tool.run("--sharded 2 --single --config 1 --mongos 1 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if mongos log files exist on correct ports
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos.log'))
+
+
+    def test_multiple_mongos(self):
+        """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir """
+        self._reserve_ports(5)
+
+        # start 2 shards, 1 config server, 2 mongos
+        self.tool.run("--sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 3)))
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 4)))
+
+
     def test_filter_valid_arguments(self):
         """ mlaunch: check arguments unknown to mlaunch against mongos and mongod """
 
@@ -265,7 +287,7 @@ class TestMLaunch(object):
         assert result == "-vvv --configdb localhost:27017"
 
 
-    # TODO: test functionality of --binarypath, --authentication, --verbose, --mongos, --name
+    # TODO: test functionality of --binarypath, --authentication, --verbose, --name
 
 
     # mark slow tests

@@ -216,9 +216,19 @@ class MLaunchTool(BaseCmdLineTool):
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
-        # start up mongos (at least 1)
-        for i in range(max(1, self.args['mongos'])):
-            self._launchMongoS(os.path.join(self.args['dir'], 'mongos.log'), nextport, ','.join(config_string))
+        # multiple mongos use <datadir>/mongos/ as subdir for log files
+        if self.args['mongos'] > 1:
+            mongosdir = os.path.join(self.args['dir'], 'mongos')
+            if not os.path.exists(mongosdir):
+                os.makedirs(mongosdir) 
+
+        # start up mongos
+        for i in range(self.args['mongos']):
+            if self.args['mongos'] > 1:
+                mongos_logfile = 'mongos/mongos_%i.log' % nextport
+            else:
+                mongos_logfile = 'mongos.log'
+            self._launchMongoS(os.path.join(self.args['dir'], mongos_logfile), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos (use localhost)
                 self.mongos_host = '%s:%i'%(self.hostname, nextport)
