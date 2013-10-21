@@ -370,18 +370,20 @@ class LogLine(object):
         if self.thread:
             for t, token in enumerate(split_tokens[self._thread_offset+2:]):
                 for counter in counters:
-                    # special case for numYields because of space in between ("numYields: 2")
-                    if counter == 'numYields' and token.startswith('numYields'):
-                        try:
-                            self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
-                        except ValueError:
-                            pass
-                    elif token.startswith('%s:'%counter):
+                    if token.startswith('%s:'%counter):
                         try:
                             vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
-                            pass
+                            # see if this is a pre-2.5.2 numYields with space in between (e.g. "numYields: 2")
+                            # https://jira.mongodb.org/browse/SERVER-10101
+                            if counter == 'numYields' and token.startswith('numYields'):
+                                try:
+                                    self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                        # token not parsable, skip
                         break
+                    
 
 
     def parse_all(self):
