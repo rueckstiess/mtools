@@ -158,11 +158,13 @@ class DateTimeFilter(BaseFilter):
         while line != '':
             line = logfile.readline()
             logline = LogLine(line)
-            date = logline.datetime
-            if date:
+            if logline.datetime:
                 return logline
 
-        return None
+            # to avoid infinite loops, quit here if previous line not found
+            if prev:
+                return None
+
 
     def seek_binary(self):
         for logfile in self.mlogfilter.args['logfile']: 
