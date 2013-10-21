@@ -1,6 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
 import re
+from datetime import MINYEAR, MAXYEAR, datetime
 import types
 
 try:
@@ -21,6 +22,7 @@ class BasePlotType(object):
     sort_order = 0
     plot_type_str = 'base'
     default_group_by = None
+    date_range = (datetime(MAXYEAR, 12, 31), datetime(MINYEAR, 1, 1))
 
     # set group_by in sub-classes to force a group_by as below
     # group_by = 'example'
@@ -31,6 +33,7 @@ class BasePlotType(object):
         self.groups = OrderedDict()
         self.empty = True
         self.limits = None
+
 
     def accept_line(self, logline):
         """ return True if this PlotType can plot this line. """

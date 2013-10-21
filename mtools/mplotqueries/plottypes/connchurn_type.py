@@ -29,9 +29,9 @@ class ConnectionChurnPlotType(BasePlotType):
         BasePlotType.__init__(self, args, unknown_args)
 
         # parse arguments further to get --bucketsize argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --type histogram")
-        self.argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
-        sub_args = vars(self.argparser.parse_args(unknown_args))
+        argparser = argparse.ArgumentParser("mplotqueries --type histogram")
+        argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
+        sub_args = vars(argparser.parse_args(unknown_args))
 
         self.logscale = args['logscale']
         # get bucket size, either as int (seconds) or as string (see timeunits above)

@@ -21,9 +21,9 @@ class ScatterPlotType(BasePlotType):
         self.logscale = args['logscale']
 
         # parse arguments further to get --yaxis argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --type scatter")
-        self.argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
-        args = vars(self.argparser.parse_args(unknown_args))
+        argparser = argparse.ArgumentParser("mplotqueries --type scatter")
+        argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
+        args = vars(argparser.parse_args(unknown_args))
 
         self.field = args['yaxis']
         if args['yaxis'] == 'duration':

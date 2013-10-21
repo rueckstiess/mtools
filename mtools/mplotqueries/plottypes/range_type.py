@@ -21,9 +21,9 @@ class RangePlotType(BasePlotType):
         BasePlotType.__init__(self, args, unknown_args)
 
         # parse arguments further to get --bucketsize argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --type range")
-        self.argparser.add_argument('--gap', action='store', metavar='SEC', type=int, help="gap threshold in seconds after which a new line is started (default: 60)", default=None)
-        sub_args = vars(self.argparser.parse_args(unknown_args))
+        argparser = argparse.ArgumentParser("mplotqueries --type range")
+        argparser.add_argument('--gap', action='store', metavar='SEC', type=int, help="gap threshold in seconds after which a new line is started (default: 60)", default=None)
+        sub_args = vars(argparser.parse_args(unknown_args))
 
         self.gap = sub_args['gap']
 

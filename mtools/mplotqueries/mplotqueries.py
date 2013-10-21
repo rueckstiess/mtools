@@ -55,9 +55,6 @@ class MPlotQueriesTool(LogFileTool):
 
         self.legend = None
 
-        # store logfile ranges
-        self.logfile_ranges = []
-
         # progress bar
         self.progress_bar_enabled = not self.is_stdin
 
@@ -75,18 +72,23 @@ class MPlotQueriesTool(LogFileTool):
         if self.args['overlay'] == "list":
             self.list_overlays()
             raise SystemExit
-        elif self.args['overlay'] == "" or self.args['overlay'] == "add":
-            self.save_overlay()
-            raise SystemExit
 
         plot_specified = not sys.stdin.isatty() or len(self.args['logfile']) > 0
 
         # if no plot is specified (either pipe or filename(s)) and reset, quit now
         if not plot_specified and self.args['overlay'] == 'reset':
             raise SystemExit
+        
+        if self.args['overlay'] == "" or self.args['overlay'] == "add":
+            if plot_specified:
+                self.save_overlay()
+            else:
+                print "Nothing to plot."
+            raise SystemExit
 
         # else plot (with potential overlays) if there is something to plot
         overlay_loaded = self.load_overlays()
+        
         if plot_specified or overlay_loaded:
             self.plot()
         else:
@@ -155,7 +157,7 @@ class MPlotQueriesTool(LogFileTool):
                     plot_instance.add_line(logline)
 
             # store start and end for each logfile
-            self.logfile_ranges.append( (start, end) )
+            plot_instance.date_range = (start, end)
 
         # clear progress bar
         if self.logfiles and self.progress_bar_enabled:
@@ -342,10 +344,10 @@ class MPlotQueriesTool(LogFileTool):
         axis = plt.subplot(111)
 
         # set xlim from min to max of logfile ranges
-        xlim_min = min([dt[0] for dt in self.logfile_ranges])
-        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+        xlim_min = min([pi.date_range[0] for pi in self.plot_instances])
+        xlim_max = max([pi.date_range[1] for pi in self.plot_instances])
 
-        if xlim_min == None or xlim_max == None:
+        if xlim_max < xlim_min:
             raise SystemExit('no data to plot.')
 
         ylabel = ''
