@@ -1,6 +1,42 @@
 Changes to mtools
 =================
 
+#### version 1.1
+
+###### Simpler Structure
+
+Simplified tool structure. A lot of the mini-scripts have been combined. There are only 5 scripts left: mlogfilter, mloginfo, mplotqueries, mlogvis, mlaunch. No features have been cut, they are all still available within the 5 scripts, but may have moved. 
+
+###### New Features
+
+**mlogfilter**
+* very fast binary search for time slicing
+* timestamp-format aware, can convert between formats
+* mlogmerge is now fully included into mlogfilter
+* can output in json format
+
+**mloginfo**
+* mloginfo supports multiple files
+* now with info sections on restarts, connections, distinct log lines
+* shows progress bar during distinct log file parsing
+
+**mplotqueries**
+* can now group on arbitrary regular expressions
+* has a new group limits feature, to group all but the top x groups together
+* range plots support gaps 
+* better color scheme
+* shows progress bar during log file parsing
+* and mloginfo show progress bar for logfile parsing
+
+**mlaunch**
+* support multiple mongos 
+
+
+###### And Many Bug Fixes
+
+For a full list of fixed issues, visit the [github issue page](https://github.com/rueckstiess/mtools/issues) of mtools.
+
+
 #### version 1.0.5
 
   * mplotqueries: included a new plot type 'connchurn' that shows opened vs. closed connections over time (#77, #74).

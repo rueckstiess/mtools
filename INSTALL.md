@@ -42,8 +42,16 @@ This will install mtools into your Python's site-packages folder, create links t
 scripts and set everything up. You should now be able to use all the scripts directly
 from the command line. 
 
+If you want to contribute to mtools development or test beta and release candidate versions,
+you should install mtools in "development mode". Instead of the last command, run
+
+    sudo python setup.py develop
+
+More information about switching to development mode can be found on the page [mtools Development Mode](https://github.com/rueckstiess/mtools/wiki/mtools-Development-Mode).
+
 Except for external dependencies like pymongo (required for mlaunch) or matplotlib (required
 for mplotqueries), mtools is now setup and ready to be used.
+
 
 
 ### Additional Dependencies
@@ -68,16 +76,7 @@ In that case, you need to add `sudo` in front of the command.
 [matplotlib](http://matplotlib.org/) is a python 2D plotting library which produces 
 figures and graphs in a variety of formats and interactive environments across platforms.
 
-Try installing matplotlib with `pip`, by doing:
-
-    pip install matplotlib
-
-Depending on your user rights, it may complain about not having permissions to install the module. 
-In that case, you need to add `sudo` in front of the command.
-
-If this doesn't work for you, there are a number of alternative ways to install matplotlib. Refer
-to the [matplotlib installation page](http://matplotlib.org/users/installing.html) for additional
-information.
+Installation instructions for matplotlib can be found under the [matplotlib Installation Guide](https://github.com/rueckstiess/mtools/wiki/matplotlib-Installation-Guide) page.
 
 
 #### NumPy
