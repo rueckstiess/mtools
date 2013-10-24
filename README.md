@@ -5,7 +5,8 @@
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
 
 
-### What's in the box?
+What's in the box?
+------------------
 
 The following tools are in the mtools collection:
 
@@ -13,7 +14,7 @@ The following tools are in the mtools collection:
 slices log files by time, merges log files, filters slow queries, finds table scans, shortens log lines, filters by other atributes, convert to JSON
 
 [mloginfo](./wiki/mloginfo) <br>
-returns info about log file, like start and end time, version, binary, special sections like restarts, connections, distinct view.
+returns info about log file, like start and end time, version, binary, special sections like restarts, connections, distinct view
 
 [mplotqueries](./wiki/mplotqueries) <br>
 visualize logfiles with different types of plots (requires matplotlib)
@@ -24,6 +25,8 @@ creates a self-contained html file that shows an interactive visualization in a 
 [mlaunch](./wiki/mlaunch) <br>
 a script to quickly spin up local test environments, including replica sets and sharded systems (requires pymongo)
 
+
+You can find the manual and many usage examples on the [mtools wiki pages](https://github.com/rueckstiess/mtools/wiki).
 
 
 Requirements and Installation Instructions
