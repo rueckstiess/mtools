@@ -123,6 +123,10 @@ class MPlotQueriesTool(LogFileTool):
                     progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
                 else:
                     self.progress_bar_enabled = False
+                
+                if progress_total == 0:
+                    # protect from division by zero errors
+                    self.progress_bar_enabled = False
 
             for i, line in enumerate(logfile):
                 # create LogLine object
@@ -339,6 +343,10 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def plot(self):
+        # check if there is anything to plot
+        if len(self.plot_instances) == 0:
+            raise SystemExit('no data to plot.')
+
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
         axis = plt.subplot(111)
