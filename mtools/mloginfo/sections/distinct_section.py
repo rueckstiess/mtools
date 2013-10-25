@@ -75,6 +75,9 @@ class DistinctSection(BaseSection):
                 if len(ll.split_tokens) - ll._thread_offset <= 1:
                     # skip empty log messages (after thread name)
                     continue
+                if "warning: log line attempted" in ll.line_str and "over max size" in ll.line_str:
+                    # skip lines that are too long
+                    continue
 
                 # everything else is a real non-match
                 non_matches += 1

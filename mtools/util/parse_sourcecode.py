@@ -234,7 +234,7 @@ if __name__ == '__main__':
     #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
 
     # write out to mongodb
-    mc = MongoClient()
+    # mc = MongoClient()
     for pattern_id, pattern in enumerate(log_code_lines):
         lcl = log_code_lines[pattern]
 
@@ -259,7 +259,7 @@ if __name__ == '__main__':
                     'trigger': occ[3]
                 })
         
-        mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
+        # mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 
