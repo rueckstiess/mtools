@@ -50,6 +50,7 @@ class TestMLaunch(object):
 
         # shutdown as many processes as the test required
         for p in range(self.n_processes_started):
+            print "shutting", self.port + p
             self._shutdown_mongosd(self.port + p)
 
         # if the test data path exists, remove it
@@ -62,8 +63,8 @@ class TestMLaunch(object):
         try:
             mc = MongoClient('localhost:%i' % port)
             try:
-                mc.admin.command({'shutdown':1})
-            except AutoReconnect: 
+                mc.admin.command('shutdown', force=True)
+            except AutoReconnect:
                 pass
         except ConnectionFailure:
             pass
@@ -186,11 +187,15 @@ class TestMLaunch(object):
         mc = MongoClient('localhost:%i' % self.port)
 
         # test if first node becomes primary after some time
-        while True:
-            ismaster = mc.admin.command({'ismaster': 1})
-            if ismaster['ismaster']:
-                break
+        ismaster = False
+        while not ismaster:
+            result = mc.admin.command("ismaster")
+            ismaster = result["ismaster"]
             time.sleep(1)
+            print "sleeping"
+
+        # insert a document and wait to replicate to 2 secondaries (10 sec timeout)
+        mc.test.smokeWait.insert({}, w=2, wtimeout=10*60*1000)
 
 
     def test_sharded_status(self):
@@ -248,6 +253,28 @@ class TestMLaunch(object):
         self.tool.check_port_availability(self.port, "mongod")
 
 
+    def test_single_mongos_explicit(self):
+        """ mlaunch: test if single mongos creates <datadir>/mongos.log """
+        self._reserve_ports(4)
+
+        # start 2 shards, 1 config server, 1 mongos
+        self.tool.run("--sharded 2 --single --config 1 --mongos 1 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if mongos log files exist on correct ports
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos.log'))
+
+
+    def test_multiple_mongos(self):
+        """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir """
+        self._reserve_ports(5)
+
+        # start 2 shards, 1 config server, 2 mongos
+        self.tool.run("--sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 3)))
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 4)))
+
+
     def test_filter_valid_arguments(self):
         """ mlaunch: check arguments unknown to mlaunch against mongos and mongod """
 
@@ -260,11 +287,9 @@ class TestMLaunch(object):
         assert result == "-vvv --configdb localhost:27017"
 
 
-    # TODO: test functionality of --binarypath, --authentication, --verbose, --mongos, --name
+    # TODO: test functionality of --binarypath, --authentication, --verbose, --name
 
 
     # mark slow tests
     test_replicaset_ismaster.slow = 1
     test_sharded_status.slow = 1
-
-

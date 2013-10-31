@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.tz import tzutc
 import dateutil.parser
 import re
 import json
@@ -59,6 +60,7 @@ class LogLine(object):
         self._datetime = None
         self._datetime_nextpos = None
         self._datetime_format = None
+        self._datetime_str = ''
 
         self._thread_calculated = False
         self._thread = None
@@ -78,6 +80,7 @@ class LogLine(object):
         self._r = None
         self._w = None
 
+        self.merge_marker_str = ''
 
     def set_line_str(self, line_str):
         if line_str != self._line_str:
@@ -85,7 +88,7 @@ class LogLine(object):
             self._reset()
 
     def get_line_str(self):
-        return self._line_str
+        return ' '.join([s for s in [self.merge_marker_str, self._datetime_str, self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
@@ -141,6 +144,9 @@ class LogLine(object):
                     else:
                         self._datetime_nextpos += 4
 
+                    # separate datetime str and linestr
+                    self._line_str = ' '.join(self.split_tokens[self._datetime_nextpos:])
+                    self._reformat_timestamp(self._datetime_format)
                     break
 
         return self._datetime
@@ -149,7 +155,7 @@ class LogLine(object):
     @property 
     def datetime_format(self):
         if not self._datetime_calculated:
-            self.datetime
+            _ = self.datetime
 
         return self._datetime_format
 
@@ -364,18 +370,20 @@ class LogLine(object):
         if self.thread:
             for t, token in enumerate(split_tokens[self._thread_offset+2:]):
                 for counter in counters:
-                    # special case for numYields because of space in between ("numYields: 2")
-                    if counter == 'numYields' and token.startswith('numYields'):
-                        try:
-                            self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
-                        except ValueError:
-                            pass
-                    elif token.startswith('%s:'%counter):
+                    if token.startswith('%s:'%counter):
                         try:
                             vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
-                            pass
+                            # see if this is a pre-2.5.2 numYields with space in between (e.g. "numYields: 2")
+                            # https://jira.mongodb.org/browse/SERVER-10101
+                            if counter == 'numYields' and token.startswith('numYields'):
+                                try:
+                                    self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                        # token not parsable, skip
                         break
+                    
 
 
     def parse_all(self):
@@ -398,21 +406,43 @@ class LogLine(object):
         r = self.r
 
 
+    def _reformat_timestamp(self, format, force=False):
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
+            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.') 
+
+        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
+            return
+        elif format.startswith('ctime'):
+            dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
+            # remove zero-padding from day number
+            tokens = dt_string.split(' ')
+            if tokens[2].startswith('0'):
+                tokens[2] = tokens[2].replace('0', ' ', 1)
+            dt_string = ' '.join(tokens)
+            if format == 'ctime':
+                dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
+        elif format == 'iso8601-local':
+            dt_string = self.datetime.isoformat()
+            if not self.datetime.utcoffset():
+                dt_string += '+00:00'
+            ms_str = str(int(self.datetime.microsecond * 1000)).zfill(3)[:3]
+            # change isoformat string to have 3 digit milliseconds and no : in offset
+            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string)
+        elif format == 'iso8601-utc':
+            if self.datetime.utcoffset():
+                dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
+            else: 
+                dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
+            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
+
+        # set new string and format
+        self._datetime_str = dt_string
+        self._datetime_format = format
+
+
     def __str__(self):
-        """ default string conversion for a LogLine object. """
-        output = ''
-        labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                  'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                  'nreturned', 'ninserted', 'nupdated', 'duration', 'r', 'w', 'numYields']
-
-        for label in labels:
-            value = getattr(self, label, None)
-            if value != None:
-                output += '%s:'%label
-                output += str(value)
-                output += ' '
-
-        return output
+        """ default string conversion for a LogLine object is just its line_str. """
+        return str(self.line_str)
 
 
     def to_dict(self, labels=None):
@@ -434,7 +464,7 @@ class LogLine(object):
     def to_json(self, labels=None):
         """ converts LogLine object to valid JSON. """
         output = self.to_dict(labels)
-        return json.dumps(output, cls=DateTimeEncoder)
+        return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
 
 

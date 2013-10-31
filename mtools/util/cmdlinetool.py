@@ -2,6 +2,7 @@ import argparse
 import sys
 from mtools.version import __version__
 import signal
+import datetime
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -13,6 +14,9 @@ class BaseCmdLineTool(object):
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
+
+        self.is_stdin = not sys.stdin.isatty()
+        
 
     def run(self, arguments=None, get_unknowns=False):
         """ Init point to execute the script. If `arguments` string is given, will evaluate the 
@@ -34,6 +38,44 @@ class BaseCmdLineTool(object):
             else:
                 self.args = vars(self.argparser.parse_args())
 
+    
+    def _datetime_to_epoch(self, dt):
+        """ converts the datetime to unix epoch (properly). """
+        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
+
+    def update_progress(self, progress, prefix=''):
+        """ use this helper function to print a progress bar for longer-running scripts. 
+            The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
+            will be printed before the progress bar. 
+        """
+        total_length = 40
+
+        if progress == 1.:
+            sys.stdout.write('\r' + ' '*(total_length + len(prefix) + 12))
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+        else:
+            bar_length = int(round(total_length*progress))
+            sys.stdout.write('\r%s [%s%s] %.1f %% ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
+            sys.stdout.flush()
+
+
+    def update_progress(self, progress, prefix=''):
+        """ use this helper function to print a progress bar for longer-running scripts. 
+            The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
+            will be printed before the progress bar. 
+        """
+        total_length = 40
+
+        if progress == 1.:
+            sys.stdout.write('\r' + ' '*(total_length*2 + len(prefix)))
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+        else:
+            bar_length = int(round(total_length*progress))
+            sys.stdout.write('\r%s [%s%s] %% %3.1f ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
+            sys.stdout.flush()
+
 
 class LogFileTool(BaseCmdLineTool):
     """ Base class for any mtools tool that acts on logfile(s). """
@@ -47,25 +89,28 @@ class LogFileTool(BaseCmdLineTool):
 
         arg_opts = {'action':'store', 'type':argparse.FileType('r')}
 
-        if self.stdin_allowed:
-            arg_opts['default'] = None
-            arg_opts['nargs'] = '?'
-
         if self.multiple_logfiles:
             arg_opts['nargs'] = '*'
             arg_opts['help'] = 'logfile(s) to parse'
         else:
             arg_opts['help'] = 'logfile to parse'
 
-        if not sys.stdin.isatty():
+        if self.is_stdin:
+            if not self.stdin_allowed:
+                raise SystemExit("this tool can't parse input from stdin.")
+                
             arg_opts['const'] = sys.stdin
             arg_opts['action'] = 'store_const'
-            del arg_opts['type']
-            del arg_opts['nargs']
+            if 'type' in arg_opts: 
+                del arg_opts['type']
+            if 'nargs' in arg_opts:
+                del arg_opts['nargs']
 
         self.argparser.add_argument('logfile', **arg_opts)
 
 
 if __name__ == '__main__':
-    tool = LogFileTool(multiple_logfiles=True, stdin_allowed=False)
+    tool = LogFileTool(multiple_logfiles=False, stdin_allowed=True)
     tool.run()
+    print tool.args
+

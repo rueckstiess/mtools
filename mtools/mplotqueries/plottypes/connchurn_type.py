@@ -29,9 +29,9 @@ class ConnectionChurnPlotType(BasePlotType):
         BasePlotType.__init__(self, args, unknown_args)
 
         # parse arguments further to get --bucketsize argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --type histogram")
-        self.argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
-        sub_args = vars(self.argparser.parse_args(unknown_args))
+        argparser = argparse.ArgumentParser("mplotqueries --type histogram")
+        argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
+        sub_args = vars(argparser.parse_args(unknown_args))
 
         self.logscale = args['logscale']
         # get bucket size, either as int (seconds) or as string (see timeunits above)
@@ -63,12 +63,15 @@ class ConnectionChurnPlotType(BasePlotType):
         color, _ = self.color_map(group)
 
         xmin, xmax = date2num(self.limits)
-        n_bins = (xmax - xmin)*24.*60.*60./self.bucketsize
+        n_bins = max(1, int((xmax - xmin)*24.*60.*60./self.bucketsize))
+        if n_bins > 1000:
+            # warning for too many buckets
+            print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
 
         bins = np.linspace(xmin, xmax, n_bins)
 
         n, bins, artists = axis.hist(x, bins=bins, align='mid', log=self.logscale, histtype="bar", color=color, 
-            edgecolor="white", alpha=0.75, picker=True, label="# connections %s per bin" % group)
+            edgecolor="white", alpha=0.7, picker=True, label="# connections %s per bin" % group)
 
         if group == 'closed':
             ymin = 0

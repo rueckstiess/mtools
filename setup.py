@@ -18,10 +18,34 @@ try:
     except ImportError:
         install_requires.append('ordereddict')
 
+    # add dateutil if not installed already
+    try: 
+        import dateutil
+    except ImportError:
+        install_requires.append('python-dateutil')
+
+    packages = find_packages()
     kws = {'install_requires': install_requires}
 
 except ImportError:
     from distutils.core import setup
+    
+    # find_packages not available in distutils, manually define packaging
+    packages = ['mtools',
+        'mtools.mlaunch',
+        'mtools.mlogfilter',
+        'mtools.mloginfo',        
+        'mtools.mlogvis',
+        'mtools.mplotqueries',
+        'mtools.mlogversion',
+        'mtools.mlogdistinct',
+        'mtools.mlogmerge',
+        'mtools.mlog2json',
+        'mtools.test',
+        'mtools.util',
+        'mtools.mlogfilter.filters',
+        'mtools.mplotqueries.plottypes',
+        'mtools.mloginfo.sections']
     kws = {}
 
 # import version from mtools/version.py
@@ -34,17 +58,16 @@ with open('README.md') as f:
 setup(
     name='mtools', 
     version=__version__,
-    packages=find_packages(),
+    packages=packages,
     package_data = {
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
-    scripts=['scripts/mlaunch','scripts/mlog2json','scripts/mlogdistinct',
-        'scripts/mlogfilter','scripts/mlogmerge','scripts/mlogversion',
-        'scripts/mlogvis','scripts/mplotqueries', 'scripts/mloginfo'],
+    scripts=['scripts/mlaunch', 'scripts/mlogfilter', 'scripts/mlogvis', 'scripts/mplotqueries', 'scripts/mloginfo', \
+             'scripts/mlogversion', 'scripts/mlogmerge', 'scripts/mlog2json', 'scripts/mlogdistinct'],
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
-    description='Useful scripts to parse and visualize MongoDB log files.',
+    description='Useful scripts to parse and visualize MongoDB log files and launch test environments.',
     long_description=long_description,
     tests_require=['nose>=1.0', 'psutil', 'pymongo>=2.4'],
     test_suite = 'nose.collector',

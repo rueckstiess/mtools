@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import subprocess
-import argparse
 import threading
 import os, time
 import socket
@@ -11,7 +10,10 @@ import re
 from mtools.util.cmdlinetool import BaseCmdLineTool
 
 try:
-    from pymongo import Connection
+    try:
+        from pymongo import MongoClient as Connection
+    except ImportError:
+        from pymongo import Connection
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
@@ -46,7 +48,7 @@ class MLaunchTool(BaseCmdLineTool):
         me_group = self.argparser.add_mutually_exclusive_group(required=True)
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
-        me_group.add_argument('--restart', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
+        me_group.add_argument('--restart', '--restore', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
 
         # replica set arguments
         self.argparser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
@@ -122,16 +124,11 @@ class MLaunchTool(BaseCmdLineTool):
         except Exception:
             pass
 
-    
     def check_port_availability(self, port, binary):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.bind(('', port))
-            s.close()
-        except:
+        if pingMongoDS('%s:%i' % (self.hostname, port), 1, 1) is True:
             raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already being used")
 
-    
+
     def _createPaths(self, basedir, name=None):
         if name:
             datapath = os.path.join(basedir, name)
@@ -219,9 +216,19 @@ class MLaunchTool(BaseCmdLineTool):
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
-        # start up mongos (at least 1)
-        for i in range(max(1, self.args['mongos'])):
-            self._launchMongoS(os.path.join(self.args['dir'], 'mongos.log'), nextport, ','.join(config_string))
+        # multiple mongos use <datadir>/mongos/ as subdir for log files
+        if self.args['mongos'] > 1:
+            mongosdir = os.path.join(self.args['dir'], 'mongos')
+            if not os.path.exists(mongosdir):
+                os.makedirs(mongosdir) 
+
+        # start up mongos
+        for i in range(self.args['mongos']):
+            if self.args['mongos'] > 1:
+                mongos_logfile = 'mongos/mongos_%i.log' % nextport
+            else:
+                mongos_logfile = 'mongos.log'
+            self._launchMongoS(os.path.join(self.args['dir'], mongos_logfile), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos (use localhost)
                 self.mongos_host = '%s:%i'%(self.hostname, nextport)
@@ -410,8 +417,6 @@ class MLaunchTool(BaseCmdLineTool):
         print "mongos at %s running."%host
 
 
-
 if __name__ == '__main__':
     tool = MLaunchTool()
     tool.run()
-

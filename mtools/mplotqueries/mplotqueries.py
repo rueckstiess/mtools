@@ -9,6 +9,7 @@ import glob
 import cPickle
 import types
 import inspect
+
 from copy import copy
 from mtools import __version__
 
@@ -23,6 +24,8 @@ except ImportError:
 
 
 from mtools.util.logline import LogLine
+from mtools.util.logfile import LogFile
+
 from mtools.util.cmdlinetool import LogFileTool
 
 class MPlotQueriesTool(LogFileTool):
@@ -43,20 +46,17 @@ class MPlotQueriesTool(LogFileTool):
         self.plot_instances = []
 
         # main parser arguments
-        self.argparser.add_argument('--exclude-ns', action='store', nargs='*', metavar='NS', help='(deprecated) use a prior mlogfilter instead.')
-        self.argparser.add_argument('--ns', action='store', nargs='*', metavar='NS', help='(deprecated) use a prior mlogfilter instead. ')
         self.argparser.add_argument('--logscale', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
         self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="create combinations of several plots. Use '--overlay' to create an overlay (this will not plot anything). The first call without '--overlay' will additionally plot all existing overlays. Use '--overlay reset' to clear all overlays.")
         self.argparser.add_argument('--type', action='store', default='scatter', choices=self.plot_types.keys(), help='type of plot (default=scatter with --yaxis duration).')        
-        self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range and histogram plots can additionally group on 'log2code'.")
-
-        # mutex = self.argparser.add_mutually_exclusive_group()
-        # mutex.add_argument('--label', help="instead of specifying a group, a label can be specified. Grouping is then disabled, and the single group for all data points is named LABEL.")
+        self.argparser.add_argument('--title', action='store', default=None, help='change the title of the plot (default=filename(s))')        
+        self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range and histogram plots can additionally group on 'log2code'. The group can also be a regular expression.")
+        self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'other' group")
 
         self.legend = None
 
-        # store logfile ranges
-        self.logfile_ranges = []
+        # progress bar
+        self.progress_bar_enabled = not self.is_stdin
 
 
     def run(self, arguments=None):
@@ -72,18 +72,23 @@ class MPlotQueriesTool(LogFileTool):
         if self.args['overlay'] == "list":
             self.list_overlays()
             raise SystemExit
-        elif self.args['overlay'] == "" or self.args['overlay'] == "add":
-            self.save_overlay()
-            raise SystemExit
 
         plot_specified = not sys.stdin.isatty() or len(self.args['logfile']) > 0
 
         # if no plot is specified (either pipe or filename(s)) and reset, quit now
         if not plot_specified and self.args['overlay'] == 'reset':
             raise SystemExit
+        
+        if self.args['overlay'] == "" or self.args['overlay'] == "add":
+            if plot_specified:
+                self.save_overlay()
+            else:
+                print "Nothing to plot."
+            raise SystemExit
 
         # else plot (with potential overlays) if there is something to plot
         overlay_loaded = self.load_overlays()
+        
         if plot_specified or overlay_loaded:
             self.plot()
         else:
@@ -108,8 +113,22 @@ class MPlotQueriesTool(LogFileTool):
 
         for logfile in self.logfiles:
             start = None
+            end = None
+            
+            # get log file information
+            if self.progress_bar_enabled:
+                lfinfo = LogFile(logfile)
+                if lfinfo.start and lfinfo.end:
+                    progress_start = self._datetime_to_epoch(lfinfo.start)
+                    progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+                else:
+                    self.progress_bar_enabled = False
+                
+                if progress_total == 0:
+                    # protect from division by zero errors
+                    self.progress_bar_enabled = False
 
-            for line in logfile:
+            for i, line in enumerate(logfile):
                 # create LogLine object
                 logline = LogLine(line)
                 if not start:
@@ -117,6 +136,11 @@ class MPlotQueriesTool(LogFileTool):
 
                 if logline.datetime:
                     end = logline.datetime
+
+                # update progress bar every 1000 lines
+                if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:
+                    progress_curr = self._datetime_to_epoch(logline.datetime)
+                    self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
                 if multiple_files:
                     # amend logline object with filename for group by filename
@@ -126,13 +150,6 @@ class MPlotQueriesTool(LogFileTool):
                 line_accepted = False
                 if plot_instance.accept_line(logline):
                     
-                    # only add if it doesn't conflict with namespace restrictions
-                    if self.args['ns'] != None and logline.namespace not in self.args['ns']:
-                        continue
-
-                    if self.args['exclude_ns'] != None and (logline.namespace in self.args['exclude_ns']):
-                        continue
-
                     # if logline doesn't have datetime, skip
                     if logline.datetime == None:
                         continue
@@ -144,7 +161,11 @@ class MPlotQueriesTool(LogFileTool):
                     plot_instance.add_line(logline)
 
             # store start and end for each logfile
-            self.logfile_ranges.append( (start, end) )
+            plot_instance.date_range = (start, end)
+
+        # clear progress bar
+        if self.logfiles and self.progress_bar_enabled:
+            self.update_progress(1.0)
 
         self.plot_instances.append(plot_instance)
 
@@ -243,7 +264,12 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def print_shortcuts(self):
-        print "keyboard shortcuts (focus must be on figure window):"
+        if self.args['type'] == 'scatter':
+            print "keyboard/mouse shortcuts (focus must be on figure window):"
+            print "  click on legend item to toggle individual plots"
+        else:
+            print "keyboard shortcuts (focus must be on figure window):"
+
         print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
         print "%5s  %s" % ("0", "toggle visibility of all plots")
         print "%5s  %s" % ("-", "toggle visibility of legend")
@@ -257,7 +283,16 @@ class MPlotQueriesTool(LogFileTool):
     def onpick(self, event):
         """ this method is called per artist (group), with possibly
             a list of indices.
-        """        
+        """   
+        if hasattr(event.artist, '_mt_legend_item'):
+            # legend item, instead of data point
+            idx = event.artist._mt_legend_item
+            try:
+                self.toggle_artist(self.artists[idx])
+            except IndexError:
+                pass
+            return
+
         # only print loglines of visible points
         if not event.artist.get_visible():
             return
@@ -285,7 +320,11 @@ class MPlotQueriesTool(LogFileTool):
                 pass
 
         if event.key == '0':
-            visible = any([a.get_visible() for a in self.artists])
+            try:
+                visible = any([a.get_visible() for a in self.artists])
+            except AttributeError:
+                return
+
             for artist in self.artists:
                 artist.set_visible(not visible)
             plt.gcf().canvas.draw()
@@ -304,15 +343,19 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def plot(self):
+        # check if there is anything to plot
+        if len(self.plot_instances) == 0:
+            raise SystemExit('no data to plot.')
+
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
         axis = plt.subplot(111)
 
         # set xlim from min to max of logfile ranges
-        xlim_min = min([dt[0] for dt in self.logfile_ranges])
-        xlim_max = max([dt[1] for dt in self.logfile_ranges])
+        xlim_min = min([pi.date_range[0] for pi in self.plot_instances])
+        xlim_max = max([pi.date_range[1] for pi in self.plot_instances])
 
-        if xlim_min == None or xlim_max == None:
+        if xlim_max < xlim_min:
             raise SystemExit('no data to plot.')
 
         ylabel = ''
@@ -338,13 +381,19 @@ class MPlotQueriesTool(LogFileTool):
         axis.set_ylabel(ylabel)
 
         # title and mtools link
-        axis.set_title(', '.join([l.name for l in self.logfiles]))
+        axis.set_title(self.args['title'] or ', '.join([l.name for l in self.logfiles if l.name != '<stdin>']))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
         self.footnote = plt.annotate('created with mtools v%s: https://github.com/rueckstiess/mtools' % __version__, (10, 10), xycoords='figure pixels', va='bottom', fontsize=8)
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
             self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+        
+        if self.args['type'] == 'scatter':
+            # enable legend picking for scatter plots
+            for i, legend_line in enumerate(self.legend.get_lines()):
+                legend_line.set_picker(10)
+                legend_line._mt_legend_item = i
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)

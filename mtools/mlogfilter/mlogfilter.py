@@ -3,6 +3,9 @@
 import argparse, re
 import sys
 import inspect
+import types
+
+from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
 from mtools.util.logline import LogLine
 from mtools.util.cmdlinetool import LogFileTool
@@ -13,17 +16,20 @@ import mtools.mlogfilter.filters as filters
 class MLogFilterTool(LogFileTool):
 
     def __init__(self):
-        LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
+        LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=True)
         
         # add all filter classes from the filters module
         self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
 
-        self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters.'
+        self.argparser.description = 'mongod/mongos log file parser. Use parameters to enable filters. A line only gets printed if it passes all enabled filters. If several log files are provided, their lines are merged by timestamp.'
         self.argparser.add_argument('--verbose', action='store_true', help='outputs information about the parser and arguments.')
         self.argparser.add_argument('--shorten', action='store', type=int, default=False, nargs='?', metavar='LENGTH', help='shortens long lines by cutting characters out of the middle until the length is <= LENGTH (default 200)')
         self.argparser.add_argument('--exclude', action='store_true', default=False, help='if set, excludes the matching lines rather than includes them.')
-        self.argparser.add_argument('--human', action='store_true', help='outputs numbers formatted with commas and milliseconds as hr,min,sec,ms for easier readability.')
-
+        self.argparser.add_argument('--human', action='store_true', help='outputs large numbers formatted with commas and print milliseconds as hr,min,sec,ms for easier readability.')
+        self.argparser.add_argument('--json', action='store_true', help='outputs all matching lines in json format rather than the native log line.')
+        self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='use markers when merging several files to distinguish them. Choose from none, enum, alpha, filename (default), or provide list.')
+        self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
+        self.argparser.add_argument('--timestamp-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
 
     def addFilter(self, filterClass):
         """ adds a filter class to the parser. """
@@ -39,13 +45,29 @@ class MLogFilterTool(LogFileTool):
             return arr
 
     
-    def _outputLine(self, line, length=None, human=False):
+    def _outputLine(self, logline, length=None, human=False):
+        """ prints the final line, with various options (length, human, datetime changes, ...) """
+        # adapt timezone output if necessary
+        if self.args['timestamp_format'] != 'none':
+            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
+        if any(self.args['timezone']):
+            if self.args['timestamp_format'] == 'none':
+                self.args['timestamp_format'] = logline.datetime_format
+            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
+
+        if self.args['json']:
+            print logline.to_json()
+            return
+
+        line = logline.line_str
+
         if length:
             if len(line) > length:
                 line = line[:length/2-2] + '...' + line[-length/2+1:]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
+
         print line
 
 
@@ -99,6 +121,66 @@ class MLogFilterTool(LogFileTool):
             return line[:last_index] + ("").join(splitted)
 
 
+    def _datetime_key_for_merge(self, logline):
+        """ helper method for ordering log lines correctly during merge. """
+        if not logline:
+            # if logfile end is reached, return max datetime to never pick this line
+            return datetime(MAXYEAR, 12, 31, 23, 59, 59)
+
+        # if no datetime present (line doesn't have one) return mindate to pick this line immediately
+        return logline.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0)
+
+
+    def _merge_logfiles(self):
+        """ helper method to merge several files together by datetime. """
+        # open files, read first lines, extract first dates
+        lines = [f.readline() for f in self.args['logfile']]
+        lines = [LogLine(l) if l else None for l in lines]
+
+        # adjust lines by timezone
+        for i in range(len(lines)):
+            if lines[i] and lines[i].datetime:
+                lines[i]._datetime = lines[i].datetime + timedelta(hours=self.args['timezone'][i])
+
+        while any(lines):
+            min_line = min(lines, key=self._datetime_key_for_merge)
+            min_index = lines.index(min_line)
+
+            if self.args['markers'][min_index]:
+                min_line.merge_marker_str = self.args['markers'][min_index]
+
+            yield min_line
+
+            # update lines array with a new line from the min_index'th logfile
+            new_line = self.args['logfile'][min_index].readline()
+            lines[min_index] = LogLine(new_line) if new_line else None
+            if lines[min_index] and lines[min_index].datetime:
+                lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
+
+
+    def logfile_generator(self):
+        """ generator method that yields each line of the logfile, or the next line in case of several log files. """
+        
+        if not self.is_stdin and not self.args['exclude']:
+            # find datetime filter and binary-search for start date 
+            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)
+            if len(dtfilter) > 0:
+                dtfilter[0].seek_binary()
+
+        if len(self.args['logfile']) > 1:
+            # todo, merge
+            for logline in self._merge_logfiles():
+                yield logline
+        else:
+            # only one file
+            for line in self.args['logfile'][0]:
+                logline = LogLine(line)
+                if logline.datetime: 
+                    logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
+                yield logline
+
+
+
     def run(self, arguments=None):
         """ parses the logfile and asks each filter if it accepts the line.
             it will only be printed if all filters accept the line.
@@ -111,10 +193,24 @@ class MLogFilterTool(LogFileTool):
 
         # now parse arguments and post-process
         LogFileTool.run(self, arguments)
-        self.args = dict((k, self._arrayToString(self.args[k])) for k in self.args)
+        self.args = dict((k, self.args[k] if k in ['logfile', 'markers', 'timezone'] else self._arrayToString(self.args[k])) for k in self.args)
+
+        # make sure logfile is always a list, even if 1 is provided through sys.stdin
+        if type(self.args['logfile']) != types.ListType:
+            self.args['logfile'] = [self.args['logfile']]
+
+        # handle timezone parameter
+        if len(self.args['timezone']) == 1:
+            self.args['timezone'] = self.args['timezone'] * len(self.args['logfile'])
+        elif len(self.args['timezone']) == len(self.args['logfile']):
+            pass
+        elif len(self.args['timezone']) == 0:
+            self.args['timezone'] = [0] * len(self.args['logfile'])
+        else:
+            raise SystemExit('Error: Invalid number of timezone parameters. Use either one parameter (for global adjustment) or the number of log files (for individual adjustments).')
 
         # create filter objects from classes and pass args
-        self.filters = [f(self.args) for f in self.filters]
+        self.filters = [f(self) for f in self.filters]
 
         # remove non-active filter objects
         self.filters = [f for f in self.filters if f.active]
@@ -131,23 +227,46 @@ class MLogFilterTool(LogFileTool):
             print "mlogfilter> command line arguments"
             for a in self.args:
                 print "mlogfilter> %8s: %s" % (a, self.args[a])
+            print
+            print "mlogfilter> active filters:",
+            print ', '.join([f.__class__.__name__ for f in self.filters])
+            print
+
+        # handle markers parameter
+        if len(self.args['markers']) == 1:
+            marker = self.args['markers'][0]
+            if marker == 'enum':
+                self.args['markers'] = ['{%i}'%(i+1) for i in range(len(self.args['logfile']))]
+            elif marker == 'alpha':
+                self.args['markers'] = ['{%s}'%chr(97+i) for i in range(len(self.args['logfile']))]
+            elif marker == 'none':
+                self.args['markers'] = [None for _ in self.args['logfile']]
+            elif marker == 'filename':
+                self.args['markers'] = ['{%s}'%fn.name for fn in self.args['logfile']]
+        elif len(self.args['markers']) == len(self.args['logfile']):
+            pass
+        else:
+            raise SystemExit('Error: Number of markers not the same as number of files.')
+
+        # with --human, change to ctime format if not specified otherwise
+        if self.args['timestamp_format'] == 'none' and self.args['human']:
+            self.args['timestamp_format'] = 'ctime'
 
         # go through each line and ask each filter if it accepts
         if not 'logfile' in self.args or not self.args['logfile']:
-            exit()
+            raise SystemExit('no logfile found.')
 
+        for logline in self.logfile_generator():
 
-        for line in self.args['logfile']:
-            logline = LogLine(line)
             if self.args['exclude']:
                 # print line if any filter disagrees
                 if any([not f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
+                    self._outputLine(logline, self.args['shorten'], self.args['human'])
 
             else:
                 # only print line if all filters agree
                 if all([f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline.line_str, self.args['shorten'], self.args['human'])
+                    self._outputLine(logline, self.args['shorten'], self.args['human'])
 
                 # if at least one filter refuses to accept any remaining lines, stop
                 if any([f.skipRemaining() for f in self.filters]):

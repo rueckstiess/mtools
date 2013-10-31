@@ -1,9 +1,20 @@
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
+import re
+from datetime import MINYEAR, MAXYEAR, datetime
+import types
+
+try:
+    from matplotlib import cm
+except ImportError:
+    raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
 class BasePlotType(object):
 
-    colors = ['k', 'b', 'g', 'r', 'c', 'm', 'y']
+    # 14 most distinguishable colors, according to 
+    # http://stackoverflow.com/questions/309149/generate-distinctly-different-rgb-colors-in-graphs
+    colors = ['#000000','#00FF00','#0000FF','#FF0000','#01FFFE','#FFA6FE','#FFDB66','#006401', \
+              '#010067','#95003A','#007DB5','#FF00F6','#FFEEE8','#774D00']
     color_index = 0
     markers = ['o', 's', '<', 'D']
     marker_index = 0
@@ -11,6 +22,7 @@ class BasePlotType(object):
     sort_order = 0
     plot_type_str = 'base'
     default_group_by = None
+    date_range = (datetime(MAXYEAR, 12, 31), datetime(MINYEAR, 1, 1))
 
     # set group_by in sub-classes to force a group_by as below
     # group_by = 'example'
@@ -21,6 +33,7 @@ class BasePlotType(object):
         self.groups = OrderedDict()
         self.empty = True
         self.limits = None
+
 
     def accept_line(self, logline):
         """ return True if this PlotType can plot this line. """
@@ -81,6 +94,14 @@ class BasePlotType(object):
             # else key is None
             else:
                 key = None
+                # try to match as regular expression
+                if type(group_by) == types.StringType:
+                    match = re.search(group_by, logline.line_str)
+                    if match:
+                        if len(match.groups()) > 0:
+                            key = match.group(1)
+                        else:
+                            key = match.group()
 
             # special case: group together all connections
             # if group_by == "thread" and key and key.startswith("conn"):
@@ -88,6 +109,23 @@ class BasePlotType(object):
 
             groups.setdefault(key, list()).append(logline)
         
+        # sort groups by number of data points
+        groups = OrderedDict( sorted(groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
+
+        # if --group-limit is provided, combine remaining groups
+        if self.args['group_limit']:
+
+            # now group together all groups that did not make the limit
+            groups['other'] = []
+            # only go to second last (-1), since the 'other' group is now last
+            for other_group in groups.keys()[ self.args['group_limit']:-1 ]:
+                groups['other'].extend(groups[other_group])
+                del groups[other_group]
+
+            # remove if empty
+            if len(groups['other']) == 0:
+                del groups['other']
+
         self.groups = groups
 
     def plot_group(self, group, idx, axis):

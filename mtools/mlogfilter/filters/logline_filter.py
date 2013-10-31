@@ -10,21 +10,21 @@ class LogLineFilter(BaseFilter):
         ('--thread',    {'action':'store', 'help':'only output log lines of thread THREAD.'})
     ]
 
-    def __init__(self, commandLineArgs):
-        BaseFilter.__init__(self, commandLineArgs)
+    def __init__(self, mlogfilter):
+        BaseFilter.__init__(self, mlogfilter)
 
         self.namespace = None
         self.operation = None
         self.thread = None
 
-        if 'namespace' in self.commandLineArgs and self.commandLineArgs['namespace']:
-            self.namespace = self.commandLineArgs['namespace']
+        if 'namespace' in self.mlogfilter.args and self.mlogfilter.args['namespace']:
+            self.namespace = self.mlogfilter.args['namespace']
             self.active = True
-        if 'operation' in self.commandLineArgs and self.commandLineArgs['operation']:
-            self.operation = self.commandLineArgs['operation']
+        if 'operation' in self.mlogfilter.args and self.mlogfilter.args['operation']:
+            self.operation = self.mlogfilter.args['operation']
             self.active = True
-        if 'thread' in self.commandLineArgs and self.commandLineArgs['thread']:
-            self.thread = self.commandLineArgs['thread']
+        if 'thread' in self.mlogfilter.args and self.mlogfilter.args['thread']:
+            self.thread = self.mlogfilter.args['thread']
             self.active = True
 
     def accept(self, logline):

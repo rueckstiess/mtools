@@ -18,10 +18,12 @@ class ScatterPlotType(BasePlotType):
     def __init__(self, args=None, unknown_args=None):
         BasePlotType.__init__(self, args, unknown_args)
 
+        self.logscale = args['logscale']
+
         # parse arguments further to get --yaxis argument
-        self.argparser = argparse.ArgumentParser("mplotqueries --type scatter")
-        self.argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
-        args = vars(self.argparser.parse_args(unknown_args))
+        argparser = argparse.ArgumentParser("mplotqueries --type scatter")
+        argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
+        args = vars(argparser.parse_args(unknown_args))
 
         self.field = args['yaxis']
         if args['yaxis'] == 'duration':
@@ -42,7 +44,11 @@ class ScatterPlotType(BasePlotType):
 
         # duration plots require y coordinate and use plot_date
         y = [ getattr(logline, self.field) for logline in self.groups[group] ]
-        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.5, \
+        
+        if self.logscale:
+            axis.semilogy()
+
+        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.7, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
@@ -56,18 +62,6 @@ class ScatterPlotType(BasePlotType):
         for i in indices:
             print self.groups[group][i].line_str
 
-
-# class DurationPlotType(ScatterPlotType):
-
-#     plot_type_str = 'duration'
-#     default_group_by = 'namespace'
-
-
-#     def __init__(self, args=None, unknown_args=None):
-#         # Only call BasePlotType constructor, we don't need argparser
-#         BasePlotType.__init__(self, args, unknown_args)
-#         self.field = 'duration'
-#         self.ylabel = 'duration in ms'
 
 
 class NScannedNPlotType(ScatterPlotType):
