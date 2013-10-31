@@ -26,7 +26,6 @@ Simplified tool structure. A lot of the mini-scripts have been combined. There a
 * range plots support gaps 
 * better color scheme
 * shows progress bar during log file parsing
-* and mloginfo show progress bar for logfile parsing
 
 **mlaunch**
 * support multiple mongos 
