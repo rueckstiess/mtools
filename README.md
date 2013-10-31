@@ -10,19 +10,19 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-[mlogfilter](./wiki/mlogfilter) <br>
+[mlogfilter](https://github.com/rueckstiess/mtools/wiki/mlogfilter) <br>
 slices log files by time, merges log files, filters slow queries, finds table scans, shortens log lines, filters by other atributes, convert to JSON
 
-[mloginfo](./wiki/mloginfo) <br>
+[mloginfo](https://github.com/rueckstiess/mtools/wiki/mloginfo) <br>
 returns info about log file, like start and end time, version, binary, special sections like restarts, connections, distinct view
 
-[mplotqueries](./wiki/mplotqueries) <br>
+[mplotqueries](https://github.com/rueckstiess/mtools/wiki/mplotqueries) <br>
 visualize logfiles with different types of plots (requires matplotlib)
 
-[mlogvis](./wiki/mlogvis) <br>
+[mlogvis](https://github.com/rueckstiess/mtools/wiki/mlogvis) <br>
 creates a self-contained html file that shows an interactive visualization in a web browser (as an alternative to mplotqueries)
 
-[mlaunch](./wiki/mlaunch) <br>
+[mlaunch](https://github.com/rueckstiess/mtools/wiki/mlaunch) <br>
 a script to quickly spin up local test environments, including replica sets and sharded systems (requires pymongo)
 
 
