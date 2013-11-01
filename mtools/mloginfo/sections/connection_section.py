@@ -37,14 +37,20 @@ class ConnectionSection(BaseSection):
             if pos != -1:
                 # connection was opened, increase counter
                 tokens = line[pos:pos+100].split(' ')
-                ip, _ = tokens[3].split(':')
+                if tokens[3] == 'anonymous':
+                    ip = 'anonymous'
+                else:
+                    ip, _ = tokens[3].split(':')
                 ip_opened[ip] += 1
 
             pos = line.find('end connection')
             if pos != -1:
                 # connection was closed, increase counter
                 tokens = line[pos:pos+100].split(' ')
-                ip, _ = tokens[2].split(':')
+                if tokens[2] == 'anonymous':
+                    ip = 'anonymous'
+                else:
+                    ip, _ = tokens[2].split(':')
                 ip_closed[ip] += 1
 
             if "SocketException" in line:
