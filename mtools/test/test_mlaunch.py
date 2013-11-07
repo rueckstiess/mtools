@@ -287,6 +287,72 @@ class TestMLaunch(object):
         assert result == "-vvv --configdb localhost:27017"
 
 
+    def test_large_replicaset_arbiter(self):
+        """ mlaunch: start large replica set of 12 nodes with arbiter """
+
+        # get ports for processes during this test
+        self._reserve_ports(12)
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--replicaset --nodes 11 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if data directories exist
+        assert os.path.exists(os.path.join(self.data_dir, 'replset'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs1'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs2'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs3'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs4'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs5'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs6'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs7'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs8'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs9'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs10'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs11'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/arb'))
+
+        # create mongo client for the next tests
+        mc = MongoClient('localhost:%i' % self.port)
+
+        # get rs.conf() and check for 12 members, exactly one arbiter
+        conf = mc['local']['system.replset'].find_one()
+        assert len(conf['members']) == 12
+        assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
+
+
+    def test_large_replicaset_noarbiter(self):
+        """ mlaunch: start large replica set of 12 nodes without arbiter """
+
+        # get ports for processes during this test
+        self._reserve_ports(12)
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("--replicaset --nodes 12 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # check if data directories exist
+        assert os.path.exists(os.path.join(self.data_dir, 'replset'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs1'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs2'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs3'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs4'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs5'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs6'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs7'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs8'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs9'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs10'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs11'))
+        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs12'))
+
+        # create mongo client for the next tests
+        mc = MongoClient('localhost:%i' % self.port)
+
+        # get rs.conf() and check for 12 members, no arbiters
+        conf = mc['local']['system.replset'].find_one()
+        assert len(conf['members']) == 12
+        assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 0
+
+
     # TODO: test functionality of --binarypath, --authentication, --verbose, --name
 
 
