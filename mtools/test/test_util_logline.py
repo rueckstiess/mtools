@@ -61,12 +61,13 @@ def test_logline_value_extraction():
     assert(ll.r == 85093)
     assert(ll.ntoreturn == 0)
     assert(ll.nreturned == 13551)
+    assert(ll.pattern == '{ts: 1}')
 
 
 def test_logline_lazy_evaluation():
     """ Check that all LogLine variables are evaluated lazily. """
     
-    fields = ['_thread', '_operation', '_namespace', '_duration', '_numYields', '_r', '_ntoreturn', '_nreturned']
+    fields = ['_thread', '_operation', '_namespace', '_duration', '_numYields', '_r', '_ntoreturn', '_nreturned', '_pattern']
 
     # before parsing all member variables need to be None
     ll = LogLine(line_getmore)
