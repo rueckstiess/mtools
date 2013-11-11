@@ -114,17 +114,17 @@ class BasePlotType(object):
 
         # if --group-limit is provided, combine remaining groups
         if self.args['group_limit']:
-
+            group_label = 'all others combined'
             # now group together all groups that did not make the limit
-            groups['other'] = []
+            groups[group_label] = []
             # only go to second last (-1), since the 'other' group is now last
             for other_group in groups.keys()[ self.args['group_limit']:-1 ]:
-                groups['other'].extend(groups[other_group])
+                groups[group_label].extend(groups[other_group])
                 del groups[other_group]
 
             # remove if empty
-            if len(groups['other']) == 0:
-                del groups['other']
+            if len(groups[group_label]) == 0:
+                del groups[group_label]
 
         self.groups = groups
 

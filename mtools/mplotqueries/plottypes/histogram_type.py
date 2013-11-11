@@ -29,6 +29,7 @@ class HistogramPlotType(BasePlotType):
         # parse arguments further to get --bucketsize argument
         argparser = argparse.ArgumentParser("mplotqueries --type histogram")
         argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
+        argparser.add_argument('--stacked', action='store_true', help="switch graph mode to stacked bar histogram", default=False)
         sub_args = vars(argparser.parse_args(unknown_args))
 
         self.logscale = args['logscale']
@@ -38,8 +39,9 @@ class HistogramPlotType(BasePlotType):
             self.bucketsize = int(bs)
         except ValueError:
             self.bucketsize = self.timeunits[bs]
+        self.barstacked = sub_args['stacked']
 
-        self.ylabel = "# occurences per bin"
+        self.ylabel = "# lines per %i second bin" % self.bucketsize
 
     def accept_line(self, logline):
         """ return True for each line. We bucket everything. Filtering has to be done before passing to this type of plot. """
@@ -93,7 +95,7 @@ class HistogramPlotType(BasePlotType):
             # warning for too many buckets
             print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
 
-        n, bins, artists = axis.hist(datasets, bins=n_bins, align='mid', log=self.logscale, histtype="barstacked", color=colors, edgecolor="white", alpha=0.7, picker=True, label=map(str, self.groups.keys()))
+        n, bins, artists = axis.hist(datasets, bins=n_bins, align='mid', log=self.logscale, histtype="barstacked" if self.barstacked else "bar", color=colors, edgecolor="none", linewidth=0, alpha=0.8, picker=True, label=map(str, self.groups.keys()))
         
         # scale current y-axis to match min and max values
         axis.set_ylim(np.min(n), np.max(n))
