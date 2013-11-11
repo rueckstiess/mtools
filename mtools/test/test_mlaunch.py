@@ -147,10 +147,10 @@ class TestMLaunch(object):
         # create mongo client for the next tests
         mc = MongoClient('localhost:%i' % self.port)
 
-        # get rs.conf() and check for 3 members, last one is arbiter        
+        # get rs.conf() and check for 3 members, exactly one is arbiter
         conf = mc['local']['system.replset'].find_one()
         assert len(conf['members']) == 3
-        assert conf['members'][2]['arbiterOnly'] == True
+        assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
 
 
     def test_restart(self):
