@@ -70,6 +70,8 @@ class LogLine(object):
         self._operation = None
         self._namespace = None
 
+        self._pattern = None
+
         self._counters_calculated = False
         self._nscanned = None
         self._ntoreturn = None
@@ -273,6 +275,38 @@ class LogLine(object):
 
 
     @property
+    def pattern(self):
+        """ extract query pattern from operations """
+
+        if not self._pattern:
+
+            # trigger evaluation of operation
+            if self.operation:
+                # get start of json query pattern
+                start_idx = self.line_str.rfind(' query: ')
+                if start_idx == -1:
+                    # no query pattern found
+                    return
+
+                stop_idx = 0
+                brace_counter = 0
+                search_str = self.line_str[start_idx+8:]
+
+                for match in re.finditer(r'{|}', search_str):
+                    stop_idx = match.start()
+                    if search_str[stop_idx] == '{':
+                        brace_counter += 1
+                    else:
+                        brace_counter -= 1
+                    if brace_counter == 0:
+                        break
+                search_str = search_str[:stop_idx+1].strip()
+                self._pattern = '{' + ': 1, '.join(sorted(re.findall(r' (\w+): ', search_str))) + ': 1}'
+
+        return self._pattern
+
+
+    @property
     def nscanned(self):
         """ extract nscanned counter if available (lazy) """
 
@@ -396,6 +430,7 @@ class LogLine(object):
         thread = self.thread
         operation = self.operation
         namespace = self.namespace
+        pattern = self.pattern
         nscanned = self.nscanned
         ntoreturn = self.ntoreturn
         nreturned = self.nreturned
