@@ -280,7 +280,7 @@ class MLaunchTool(BaseCmdLineTool):
             self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
             host = '%s:%i'%(self.hostname, portstart+i)
-            configDoc['members'].append({'_id':len(configDoc['members']), 'host':host})
+            configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'votes':int(len(configDoc['members']) < 7 - int(self.args['arbiter']))})
             threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
             if self.args['verbose']:
                 print "waiting for mongod at %s to start up..."%host
