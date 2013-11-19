@@ -50,8 +50,9 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--overlay', action='store', nargs='?', default=None, const='add', choices=['add', 'list', 'reset'], help="create combinations of several plots. Use '--overlay' to create an overlay (this will not plot anything). The first call without '--overlay' will additionally plot all existing overlays. Use '--overlay reset' to clear all overlays.")
         self.argparser.add_argument('--type', action='store', default='scatter', choices=self.plot_types.keys(), help='type of plot (default=scatter with --yaxis duration).')        
         self.argparser.add_argument('--title', action='store', default=None, help='change the title of the plot (default=filename(s))')        
-        self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', range and histogram plots can additionally group on 'log2code'. The group can also be a regular expression.")
+        self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', 'pattern', range and histogram plots can additionally group on 'log2code'. The group can also be a regular expression.")
         self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'other' group")
+        self.argparser.add_argument('--xpos', action='store', choices=['start', 'end'], default='end', help="plot operations with a duration when they finished (default='end') or when they started ('start')")
 
         self.legend = None
 
@@ -358,15 +359,17 @@ class MPlotQueriesTool(LogFileTool):
         if xlim_max < xlim_min:
             raise SystemExit('no data to plot.')
 
+        xlabel = 'time'
         ylabel = ''
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
             self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances), (xlim_min, xlim_max) ))
+            if hasattr(plot_inst, 'xlabel'):
+                xlabel = plot_inst.xlabel
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
-            
         self.print_shortcuts()
 
-        axis.set_xlabel('time')
+        axis.set_xlabel(xlabel)
         axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=10)
         axis.xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
 

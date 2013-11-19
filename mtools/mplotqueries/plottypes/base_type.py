@@ -1,7 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
 import re
-from datetime import MINYEAR, MAXYEAR, datetime
+from datetime import MINYEAR, MAXYEAR, datetime, timedelta
 import types
 
 try:
@@ -78,6 +78,16 @@ class BasePlotType(object):
         groups = OrderedDict()
 
         for logline in self.loglines:
+
+            if self.args['xpos'] == 'start' and logline.duration:
+                # create new variable end_datetime in logline object and store starttime there
+                logline.end_datetime = logline.datetime 
+                logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
+                logline._datetime_calculated = True
+                self.xlabel = 'time (start of ops)'
+            else:
+                self.xlabel = 'time (end of ops)'
+
             # if group_by is a function, call on logline
             if hasattr(group_by, '__call__'):
                 key = group_by(logline)
