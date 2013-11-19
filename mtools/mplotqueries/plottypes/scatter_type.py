@@ -3,6 +3,7 @@ import argparse
 
 try:
     from matplotlib.dates import date2num
+    from matplotlib.lines import Line2D
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
         instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
@@ -61,6 +62,64 @@ class ScatterPlotType(BasePlotType):
         indices = event.ind
         for i in indices:
             print self.groups[group][i].line_str
+
+
+
+
+
+class DurationLineType(ScatterPlotType):
+
+    plot_type_str = 'durline'
+    sort_order = 3
+    default_group_by = 'namespace'
+
+    def __init__(self, args=None, unknown_args=None):
+        ScatterPlotType.__init__(self, args, unknown_args)
+        self.args['xpos'] = 'start'
+
+    def plot_group(self, group, idx, axis):
+        # create x-coordinates for all log lines in this group
+        x_start = date2num( [ logline.datetime for logline in self.groups[group] ] )
+        x_end = date2num( [ logline.end_datetime for logline in self.groups[group] ] )
+
+        color, marker = self.color_map(group)
+
+        # duration plots require y coordinate and use plot_date
+        y = [ getattr(logline, 'duration') for logline in self.groups[group] ]
+        
+        if self.logscale:
+            axis.semilogy()
+
+        # artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.7, \
+        #     markersize=7, picker=5, label=group)[0]
+        
+        artists = []
+        labels = set()
+
+        for i, (xs, xe, ye) in enumerate(zip(x_start, x_end, y)):
+            artist = axis.plot_date([xs, xe], [0, ye], '-', color=color, alpha=0.7, linewidth=2,
+            markersize=7, picker=5, label=None if group in labels else group)[0]
+            
+            labels.add(group)
+
+            # add meta-data for picking
+            artist._mt_plot_type = self
+            artist._mt_group = group 
+            artist._mt_line_id = i
+            artists.append(artist)
+
+        return artists
+
+    # def print_line(self, event):
+    #     group = event.artist._mt_group
+    #     indices = event.ind
+    #     for i in indices:
+    #         print self.groups[group][i].line_str
+
+    def print_line(self, event):
+        group = event.artist._mt_group
+        line_id = event.artist._mt_line_id
+        print self.groups[group][line_id].line_str
 
 
 
