@@ -90,7 +90,7 @@ class HistogramPlotType(BasePlotType):
             axis.patch.set_visible(False) # hide the 'canvas' 
             axis = twin_axis
 
-        n_bins = n_bins = max(1, int((maxx - minx)*24.*60.*60./self.bucketsize))
+        n_bins = max(1, int((maxx - minx)*24.*60.*60./self.bucketsize))
         if n_bins > 1000:
             # warning for too many buckets
             print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
