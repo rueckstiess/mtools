@@ -12,6 +12,7 @@ import inspect
 
 from copy import copy
 from mtools import __version__
+from datetime import timedelta
 
 try:
     import matplotlib.pyplot as plt
@@ -52,7 +53,7 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--title', action='store', default=None, help='change the title of the plot (default=filename(s))')        
         self.argparser.add_argument('--group', help="specify value to group on. Possible values depend on type of plot. All basic plot types can group on 'namespace', 'operation', 'thread', 'pattern', range and histogram plots can additionally group on 'log2code'. The group can also be a regular expression.")
         self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'other' group")
-        self.argparser.add_argument('--xpos', action='store', choices=['start', 'end'], default='end', help="plot operations with a duration when they finished (default='end') or when they started ('start')")
+        self.argparser.add_argument('--optime-start', action='store_true', default=False, help="plot operations with a duration when they started instead (by subtracting the duration). The default is to plot them when they finish (at the time they are logged).")
 
         self.legend = None
 
@@ -132,11 +133,22 @@ class MPlotQueriesTool(LogFileTool):
             for i, line in enumerate(logfile):
                 # create LogLine object
                 logline = LogLine(line)
+
+                # adjust times if --optime-start is enabled
+                if self.args['optime_start'] and logline.duration:
+                    # create new variable end_datetime in logline object and store starttime there
+                    logline.end_datetime = logline.datetime 
+                    logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
+                    logline._datetime_calculated = True
+
                 if not start:
                     start = logline.datetime
 
                 if logline.datetime:
-                    end = logline.datetime
+                    if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
+                        end = logline.end_datetime
+                    else:
+                        end = logline.datetime
 
                 # update progress bar every 1000 lines
                 if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:

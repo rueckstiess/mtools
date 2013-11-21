@@ -79,12 +79,7 @@ class BasePlotType(object):
 
         for logline in self.loglines:
 
-            if self.args['xpos'] == 'start':
-                if logline.duration:
-                    # create new variable end_datetime in logline object and store starttime there
-                    logline.end_datetime = logline.datetime 
-                    logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
-                    logline._datetime_calculated = True
+            if self.args['optime_start']:
                 self.xlabel = 'time (start of ops)'
             else:
                 self.xlabel = 'time (end of ops)'

@@ -75,7 +75,7 @@ class DurationLineType(ScatterPlotType):
 
     def __init__(self, args=None, unknown_args=None):
         ScatterPlotType.__init__(self, args, unknown_args)
-        self.args['xpos'] = 'start'
+        self.args['optime_start'] = True
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group
