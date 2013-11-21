@@ -43,7 +43,7 @@ instructions for these modules.
 Recent Changes
 --------------
 
-The current version of mtools is 1.1.0. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
+The current version of mtools is 1.1.2. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
 
 
 Contribute to mtools
