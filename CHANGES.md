@@ -4,6 +4,7 @@ Changes to mtools
 
 #### version 1.1.1
 
+  * mplotqueries: introduced a new type of plot "durline", to visualize start and end of long-running operations.
   * mplotqueries: use start times of operations that have a duration, rather than end time with `--optime-start` (#130)
   * mplotqueries: group by query pattern with `--group pattern` (#129).
   * mlaunch: allow more than 7 nodes, everyone above 7 is non-voting (#123).

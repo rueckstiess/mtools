@@ -3,6 +3,7 @@ import sys
 from mtools.version import __version__
 import signal
 import datetime
+import os
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -23,8 +24,9 @@ class BaseCmdLineTool(object):
             arguments, else evaluates sys.argv. Any inheriting class should extend the run method 
             (but first calling BaseCmdLineTool.run(self)).
         """
-        # redirect PIPE signal to quiet kill script
-        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        # redirect PIPE signal to quiet kill script, if not on Windows
+        if os.name != 'nt':
+            signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
         if get_unknowns:
             if arguments:
