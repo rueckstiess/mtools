@@ -34,6 +34,11 @@ class BasePlotType(object):
         self.empty = True
         self.limits = None
 
+        if self.args['optime_start']:
+            self.xlabel = 'time (start of ops)'
+        else:
+            self.xlabel = 'time (end of ops)'
+
 
     def accept_line(self, logline):
         """ return True if this PlotType can plot this line. """
@@ -74,15 +79,10 @@ class BasePlotType(object):
             group_by = self.default_group_by
             if self.args['group'] != None:
                 group_by = self.args['group']
-        
+
         groups = OrderedDict()
 
         for logline in self.loglines:
-
-            if self.args['optime_start']:
-                self.xlabel = 'time (start of ops)'
-            else:
-                self.xlabel = 'time (end of ops)'
 
             # if group_by is a function, call on logline
             if hasattr(group_by, '__call__'):
