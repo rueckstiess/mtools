@@ -135,7 +135,7 @@ class MPlotQueriesTool(LogFileTool):
                 logline = LogLine(line)
 
                 # adjust times if --optime-start is enabled
-                if self.args['optime_start'] and logline.duration:
+                if self.args['optime_start'] and logline.datetime and logline.duration:
                     # create new variable end_datetime in logline object and store starttime there
                     logline.end_datetime = logline.datetime 
                     logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
