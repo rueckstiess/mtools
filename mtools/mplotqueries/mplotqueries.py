@@ -130,6 +130,9 @@ class MPlotQueriesTool(LogFileTool):
                     # protect from division by zero errors
                     self.progress_bar_enabled = False
 
+            
+            logline = None
+
             for i, line in enumerate(logfile):
                 # create LogLine object
                 logline = LogLine(line)
@@ -143,12 +146,6 @@ class MPlotQueriesTool(LogFileTool):
 
                 if not start:
                     start = logline.datetime
-
-                if logline.datetime:
-                    if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
-                        end = logline.end_datetime
-                    else:
-                        end = logline.datetime
 
                 # update progress bar every 1000 lines
                 if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:
@@ -172,6 +169,13 @@ class MPlotQueriesTool(LogFileTool):
 
                     line_accepted = True
                     plot_instance.add_line(logline)
+
+            # store end of logfile 
+            if logline and logline.datetime:
+                if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
+                    end = logline.end_datetime
+                else:
+                    end = logline.datetime
 
             # store start and end for each logfile
             plot_instance.date_range = (start, end)
