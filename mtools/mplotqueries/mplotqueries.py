@@ -115,7 +115,8 @@ class MPlotQueriesTool(LogFileTool):
 
         for logfile in self.logfiles:
             start = None
-            end = None
+            end = None         
+            logline = None
             
             # get log file information
             if self.progress_bar_enabled:
@@ -129,9 +130,6 @@ class MPlotQueriesTool(LogFileTool):
                 if progress_total == 0:
                     # protect from division by zero errors
                     self.progress_bar_enabled = False
-
-            
-            logline = None
 
             for i, line in enumerate(logfile):
                 # create LogLine object
@@ -152,12 +150,7 @@ class MPlotQueriesTool(LogFileTool):
                     progress_curr = self._datetime_to_epoch(logline.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
-                if multiple_files:
-                    # amend logline object with filename for group by filename
-                    logline.filename = logfile.name
-
                 # offer plot_instance and see if it can plot it
-                line_accepted = False
                 if plot_instance.accept_line(logline):
                     
                     # if logline doesn't have datetime, skip
@@ -167,8 +160,12 @@ class MPlotQueriesTool(LogFileTool):
                     if logline.namespace == None:
                         logline._namespace = "None"
 
-                    line_accepted = True
                     plot_instance.add_line(logline)
+
+                if multiple_files:
+                    # amend logline object with filename for group by filename
+                    logline.filename = logfile.name
+
 
             # store end of logfile 
             if logline and logline.datetime:
