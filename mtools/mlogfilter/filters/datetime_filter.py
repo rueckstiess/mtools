@@ -138,36 +138,3 @@ class DateTimeFilter(BaseFilter):
         return self.toReached
 
 
-    # def seek_binary(self):
-    #     for logfile in self.mlogfilter.args['logfile']: 
-    #         logfile_info = LogFile(logfile)
-
-    #         min_mark = 0
-    #         max_mark = logfile_info.filesize
-    #         step_size = max_mark
-
-    #         ll = None
-    #         if self.fromDateTime:
-
-    #             # search for lower bound
-    #             while abs(step_size) > 100:
-    #                 step_size = ceil(step_size / 2.)
-                    
-    #                 logfile.seek(step_size, 1)
-    #                 ll = self._find_curr_line(logfile)
-    #                 if not ll:
-    #                     break
-                                    
-    #                 if ll.datetime >= self.fromDateTime:
-    #                     step_size = -abs(step_size)
-    #                 else:
-    #                     step_size = abs(step_size)
-
-    #             if not ll:
-    #                 return 
-
-    #             # now walk backwards until we found a truely smaller line
-    #             while ll and logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
-    #                 logfile.seek(-2, 1)
-    #                 ll = self._find_curr_line(logfile, prev=True)
-
