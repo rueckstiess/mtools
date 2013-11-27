@@ -3,7 +3,6 @@ from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 from mtools.util.logline import LogLine
 from mtools.util.logfile import LogFile
-from math import ceil 
 
 from base_filter import BaseFilter
 
@@ -111,6 +110,10 @@ class DateTimeFilter(BaseFilter):
         self.fromDateTime, self.toDateTime = dtbound(self.mlogfilter.args['from'] or None, 
                                                      self.mlogfilter.args['to'] or None)
 
+        # define start_limit for mlogfilter's fast_forward method
+        self.start_limit = self.fromDateTime
+
+
     def accept(self, logline):
         dt = logline.datetime
 
@@ -135,67 +138,36 @@ class DateTimeFilter(BaseFilter):
         return self.toReached
 
 
-    def _find_curr_line(self, logfile, prev=False):
-        curr_pos = logfile.tell()
-        line = None
+    # def seek_binary(self):
+    #     for logfile in self.mlogfilter.args['logfile']: 
+    #         logfile_info = LogFile(logfile)
 
-        # jump back 15k characters (at most) and find last newline char
-        jump_back = min(logfile.tell(), 15000)
-        logfile.seek(-jump_back, 1)
-        buff = logfile.read(jump_back)
-        logfile.seek(curr_pos, 0)
+    #         min_mark = 0
+    #         max_mark = logfile_info.filesize
+    #         step_size = max_mark
 
-        newline_pos = buff.rfind('\n')
-        if prev:
-            newline_pos = buff[:newline_pos].rfind('\n')
+    #         ll = None
+    #         if self.fromDateTime:
 
-        # move back to last newline char
-        if newline_pos == -1:
-            return None
-
-        logfile.seek(newline_pos - jump_back, 1)
-
-        while line != '':
-            line = logfile.readline()
-            logline = LogLine(line)
-            if logline.datetime:
-                return logline
-
-            # to avoid infinite loops, quit here if previous line not found
-            if prev:
-                return None
-
-
-    def seek_binary(self):
-        for logfile in self.mlogfilter.args['logfile']: 
-            logfile_info = LogFile(logfile)
-
-            min_mark = 0
-            max_mark = logfile_info.filesize
-            step_size = max_mark
-
-            ll = None
-            if self.fromDateTime:
-
-                # search for lower bound
-                while abs(step_size) > 100:
-                    step_size = ceil(step_size / 2.)
+    #             # search for lower bound
+    #             while abs(step_size) > 100:
+    #                 step_size = ceil(step_size / 2.)
                     
-                    logfile.seek(step_size, 1)
-                    ll = self._find_curr_line(logfile)
-                    if not ll:
-                        break
+    #                 logfile.seek(step_size, 1)
+    #                 ll = self._find_curr_line(logfile)
+    #                 if not ll:
+    #                     break
                                     
-                    if ll.datetime >= self.fromDateTime:
-                        step_size = -abs(step_size)
-                    else:
-                        step_size = abs(step_size)
+    #                 if ll.datetime >= self.fromDateTime:
+    #                     step_size = -abs(step_size)
+    #                 else:
+    #                     step_size = abs(step_size)
 
-                if not ll:
-                    return 
+    #             if not ll:
+    #                 return 
 
-                # now walk backwards until we found a truely smaller line
-                while ll and logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
-                    logfile.seek(-2, 1)
-                    ll = self._find_curr_line(logfile, prev=True)
+    #             # now walk backwards until we found a truely smaller line
+    #             while ll and logfile.tell() >= 2 and ll.datetime >= self.fromDateTime:
+    #                 logfile.seek(-2, 1)
+    #                 ll = self._find_curr_line(logfile, prev=True)
 
