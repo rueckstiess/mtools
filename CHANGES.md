@@ -1,6 +1,10 @@
 Changes to mtools
 =================
 
+#### version 1.1.2
+
+  * mlogfilter: added filter masks `--mask errors.log` to search for correlations around certain events (#138)
+  
 
 #### version 1.1.1
 
