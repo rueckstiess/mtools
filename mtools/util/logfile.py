@@ -1,4 +1,6 @@
 from mtools.util.logline import LogLine
+from math import ceil 
+
 import time
 import re
 
@@ -143,5 +145,84 @@ class LogFile(object):
 
         # reset logfile
         self.logfile.seek(0)
+
+
+    def _find_curr_line(self, prev=False):
+        """ internal helper function that finds the current (or previous if prev=True) line in a log file
+            based on the current seek position.
+        """
+        curr_pos = self.logfile.tell()
+        line = None
+
+        # jump back 15k characters (at most) and find last newline char
+        jump_back = min(self.logfile.tell(), 15000)
+        self.logfile.seek(-jump_back, 1)
+        buff = self.logfile.read(jump_back)
+        self.logfile.seek(curr_pos, 0)
+
+        newline_pos = buff.rfind('\n')
+        if prev:
+            newline_pos = buff[:newline_pos].rfind('\n')
+
+        # move back to last newline char
+        if newline_pos == -1:
+            return None
+
+        self.logfile.seek(newline_pos - jump_back, 1)
+
+        while line != '':
+            line = self.logfile.readline()
+            logline = LogLine(line)
+            if logline.datetime:
+                return logline
+
+            # to avoid infinite loops, quit here if previous line not found
+            if prev:
+                return None
+
+
+    def fast_forward(self, start_dt):
+        """ Fast-forward a log file to the given start_dt datetime object using binary search.
+            Only fast for files. Streams need to be forwarded manually, and it will miss the 
+            first line that would otherwise match (as it consumes the log line). 
+        """
+
+        if self.from_stdin:
+            # skip lines until start_dt is reached
+            ll = None
+            while not (ll and ll.datetime and ll.datetime >= start_dt):
+                line = self.logfile.next()
+                ll = LogLine(line)
+
+        else:
+            # fast bisection path
+            min_mark = 0
+            max_mark = self.filesize
+            step_size = max_mark
+
+            ll = None
+
+            # search for lower bound
+            while abs(step_size) > 100:
+                step_size = ceil(step_size / 2.)
+                
+                self.logfile.seek(step_size, 1)
+                ll = self._find_curr_line()
+                if not ll:
+                    break
+                                
+                if ll.datetime >= start_dt:
+                    step_size = -abs(step_size)
+                else:
+                    step_size = abs(step_size)
+
+            if not ll:
+                return 
+
+            # now walk backwards until we found a truely smaller line
+            while ll and self.logfile.tell() >= 2 and ll.datetime >= start_dt:
+                self.logfile.seek(-2, 1)
+                ll = self._find_curr_line(prev=True)
+
 
 

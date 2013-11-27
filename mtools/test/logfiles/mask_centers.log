@@ -1,0 +1,2 @@
+Mon Aug  5 20:27:15 [conn4] command test.$cmd command: { dropDatabase: 1.0 } ntoreturn:1 keyUpdates:0 locks(micros) W:1574563 reslen:55 75000ms
+Mon Aug  5 20:30:09 [conn40] end connection 10.0.0.12:52237 (2 connections now open)
