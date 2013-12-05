@@ -29,7 +29,7 @@ class HistogramPlotType(BasePlotType):
         # parse arguments further to get --bucketsize argument
         argparser = argparse.ArgumentParser("mplotqueries --type histogram")
         argparser.add_argument('--bucketsize', '-b', action='store', metavar='SIZE', help="histogram bucket size in seconds", default=60)
-        argparser.add_argument('--stacked', action='store_true', help="switch graph mode to stacked bar histogram", default=False)
+        argparser.add_argument('--no-stacked', action='store_true', help="switch graph mode from stacked histogram (default) to side-by-side histograms.", default=False)
         sub_args = vars(argparser.parse_args(unknown_args))
 
         self.logscale = args['logscale']
@@ -39,7 +39,7 @@ class HistogramPlotType(BasePlotType):
             self.bucketsize = int(bs)
         except ValueError:
             self.bucketsize = self.timeunits[bs]
-        self.barstacked = sub_args['stacked']
+        self.barstacked = not sub_args['no_stacked']
 
         self.ylabel = "# lines per %i second bin" % self.bucketsize
 
