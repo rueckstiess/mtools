@@ -2,7 +2,7 @@
 
 import subprocess
 import threading
-import os, time
+import os, time, sys
 import socket
 import json
 import re
@@ -55,33 +55,61 @@ class MLaunchTool(BaseCmdLineTool):
 
     def __init__(self):
         BaseCmdLineTool.__init__(self)
+
+        self.hostname = socket.gethostname()
+        
+        self.startup_info = {}
+
         self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards. You must specify either --single or --replicaset. \
             In addition to the optional arguments below, you can specify any mongos and mongod argument, which will be passed on, if the process accepts it.'
 
+        # default sub-command is `start` if not provided
+        if len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
+            # not sub command given, redirect all options to main parser
+            start_redirected = True
+            start_parser = self.argparser
+            start_parser.add_argument('--command', action='store_const', const='start', default='start')
+        else:
+            # create sub-parser for the command `start`
+            start_redirected = False
+            subparsers = self.argparser.add_subparsers(dest='command')
+            start_parser = subparsers.add_parser('start', help='start MongoDB stand-alone instances, replica sets, or sharded clusters')
+
+        # --- start command ---
+
         # either single or replica set
-        me_group = self.argparser.add_mutually_exclusive_group(required=True)
+        me_group = start_parser.add_mutually_exclusive_group(required=True)
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
-        me_group.add_argument('--restart', '--restore', action='store_true', help='restarts a previously launched existing configuration from the data directory.')
 
         # replica set arguments
-        self.argparser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
-        self.argparser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
-        self.argparser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
+        start_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
+        start_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
+        start_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
         
         # sharded clusters
-        self.argparser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
-        self.argparser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
-        self.argparser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
+        start_parser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
+        start_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
+        start_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
         # dir, verbose, port, auth
-        self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
-        self.argparser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
-        self.argparser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
-        self.argparser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        self.argparser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
+        start_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+        start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
+        start_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
+        start_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        start_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
-        self.hostname = socket.gethostname()
+        if not start_redirected:
+
+            # --- restart command ---
+            restart_parser = subparsers.add_parser('restart', help='restart existing MongoDB instances')
+
+            # --- stop command ---
+            stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
+
+            # --- list command ---
+            list_parser = subparsers.add_parser('list', help='list MongoDB instances')
+
 
 
     def run(self, arguments=None):
@@ -90,13 +118,19 @@ class MLaunchTool(BaseCmdLineTool):
         # replace path with absolute path
         self.dir = os.path.abspath(self.args['dir'])
 
-        # load or store parameters
-        if self.args['restart']:
-            self.load_parameters()
-        else:
-            self.store_parameters()
-        
-        # check if authentication is enabled        
+        # branch out in sub-commands
+        getattr(self, self.args['command'])()
+
+        print self.startup_info
+
+
+    def restart(self):
+        self.load_parameters()
+        # todo
+
+
+    def start(self):
+        # check if authentication is enabled, make key file       
         if self.args['authentication']:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
@@ -109,6 +143,9 @@ class MLaunchTool(BaseCmdLineTool):
             self._launchSingle(self.dir, self.args['port'])
         elif self.args['replicaset']:
             self._launchReplSet(self.dir, self.args['port'], self.args['name'])
+
+        # write out parameters
+        self.store_parameters()
 
 
     def convert_u2b(self, obj):
