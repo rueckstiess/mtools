@@ -265,14 +265,15 @@ class TestMLaunch(object):
 
 
     def test_multiple_mongos(self):
-        """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir """
+        """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir. """
         self._reserve_ports(5)
 
         # start 2 shards, 1 config server, 2 mongos
         self.tool.run("--sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
-        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 3)))
-        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 4)))
+        # this also tests that mongos are started at the beginning of the port range
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port)))
+        assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 1)))
 
 
     def test_filter_valid_arguments(self):

@@ -33,6 +33,20 @@ def pingMongoDS(host, interval=1, timeout=30):
             time.sleep(interval)
 
 
+def shutdownMongoDS(host_port):
+    """ send the shutdown command to a mongod or mongos on given port. """
+    try:
+        mc = Connection(host_port)
+        try:
+            mc.admin.command('shutdown', force=True)
+        except AutoReconnect:
+            pass
+    except ConnectionFailure:
+        pass
+    else:
+        mc.close()
+
+
 class MLaunchTool(BaseCmdLineTool):
 
     # additional arguments that can be passed on to mongos, all others will only go to mongod
@@ -178,6 +192,15 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchSharded(self):
+
+        if self.args['mongos'] == 0:
+            # start a temporary mongos and kill it again later
+            num_mongos = 1
+            kill_mongos = True
+        else:
+            num_mongos = self.args['mongos']
+            kill_mongos = False
+
         # start up shards
         if len(self.args['sharded']) == 1:
             try:
@@ -192,7 +215,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         # create shards as stand-alones or replica sets
-        nextport = self.args['port']
+        nextport = self.args['port'] + num_mongos
         for p, shard in enumerate(shard_names):
             if self.args['single']:
                 shard_names[p] = self._launchSingle(self.args['dir'], nextport, name=shard)
@@ -222,27 +245,26 @@ class MLaunchTool(BaseCmdLineTool):
             if not os.path.exists(mongosdir):
                 os.makedirs(mongosdir) 
 
-        # start up mongos
-        for i in range(self.args['mongos']):
-            if self.args['mongos'] > 1:
+
+        # start up mongos, but put them to the front of the port range
+        nextport = self.args['port']
+        for i in range(num_mongos):
+            if num_mongos > 1:
                 mongos_logfile = 'mongos/mongos_%i.log' % nextport
             else:
                 mongos_logfile = 'mongos.log'
             self._launchMongoS(os.path.join(self.args['dir'], mongos_logfile), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos (use localhost)
-                self.mongos_host = '%s:%i'%(self.hostname, nextport)
-                if self.args['authentication']:
-                    self.mongos_host = 'localhost:%i'%(nextport)
+                self.mongos_host = 'localhost:%i' % nextport
+
             nextport += 1
 
         # add shards
         print "adding shards (can take a few seconds, grab a snickers) ..."
-
         con = Connection(self.mongos_host)
-
+        
         shards_to_add = len(shard_names)
-
         while True:
             try:
                 nshards = con['config']['shards'].count()
@@ -269,6 +291,11 @@ class MLaunchTool(BaseCmdLineTool):
                         print res, '- will retry.'
 
             time.sleep(1)
+
+        # if mongos was temporary, kill it again
+        if kill_mongos:
+            print "shutting down temporary mongos on %s" % self.mongos_host
+            shutdownMongoDS(self.mongos_host)
 
 
     def _launchReplSet(self, basedir, portstart, name):
