@@ -5,6 +5,7 @@ Changes to mtools
 
   * mlogfilter: added filter masks `--mask errors.log` to search for correlations around certain events (#138)
   * mlaunch: mongos nodes start at beginning of port range for easier access (#145)
+  * mlaunch: always uses absolute paths for the data directory, which shows up in `ps aux | grep mongo` output (#143)
   * mplotqueries: log parsing performance improvements for most plots
   
 

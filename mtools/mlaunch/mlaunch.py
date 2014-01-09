@@ -87,26 +87,28 @@ class MLaunchTool(BaseCmdLineTool):
     def run(self, arguments=None):
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
+        # replace path with absolute path
+        self.dir = os.path.abspath(self.args['dir'])
+
         # load or store parameters
         if self.args['restart']:
             self.load_parameters()
         else:
             self.store_parameters()
-
         
         # check if authentication is enabled        
         if self.args['authentication']:
-            if not os.path.exists(self.args['dir']):
-                os.makedirs(self.args['dir'])
-            os.system('openssl rand -base64 753 > %s/keyfile'%self.args['dir'])
-            os.system('chmod 600 %s/keyfile'%self.args['dir'])
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)
+            os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
+            os.system('chmod 600 %s/keyfile'%self.dir)
 
         if self.args['sharded']:
             self._launchSharded()
         elif self.args['single']:
-            self._launchSingle(self.args['dir'], self.args['port'])
+            self._launchSingle(self.dir, self.args['port'])
         elif self.args['replicaset']:
-            self._launchReplSet(self.args['dir'], self.args['port'], self.args['name'])
+            self._launchReplSet(self.dir, self.args['port'], self.args['name'])
 
 
     def convert_u2b(self, obj):
@@ -121,7 +123,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def load_parameters(self):
-        datapath = self.args['dir']
+        datapath = self.dir
 
         startup_file = os.path.join(datapath, '.mlaunch_startup')
         if os.path.exists(startup_file):
@@ -129,7 +131,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def store_parameters(self):
-        datapath = self.args['dir']
+        datapath = self.dir
 
         if not os.path.exists(datapath):
             os.makedirs(datapath)
@@ -218,10 +220,10 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port'] + num_mongos
         for p, shard in enumerate(shard_names):
             if self.args['single']:
-                shard_names[p] = self._launchSingle(self.args['dir'], nextport, name=shard)
+                shard_names[p] = self._launchSingle(self.dir, nextport, name=shard)
                 nextport += 1
             elif self.args['replicaset']:
-                shard_names[p] = self._launchReplSet(self.args['dir'], nextport, shard)
+                shard_names[p] = self._launchReplSet(self.dir, nextport, shard)
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -235,13 +237,13 @@ class MLaunchTool(BaseCmdLineTool):
             config_names = ['config1', 'config2', 'config3']
             
         for name in config_names:
-            self._launchConfig(self.args['dir'], nextport, name)
+            self._launchConfig(self.dir, nextport, name)
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
         # multiple mongos use <datadir>/mongos/ as subdir for log files
         if self.args['mongos'] > 1:
-            mongosdir = os.path.join(self.args['dir'], 'mongos')
+            mongosdir = os.path.join(self.dir, 'mongos')
             if not os.path.exists(mongosdir):
                 os.makedirs(mongosdir) 
 
@@ -253,7 +255,7 @@ class MLaunchTool(BaseCmdLineTool):
                 mongos_logfile = 'mongos/mongos_%i.log' % nextport
             else:
                 mongos_logfile = 'mongos.log'
-            self._launchMongoS(os.path.join(self.args['dir'], mongos_logfile), nextport, ','.join(config_string))
+            self._launchMongoS(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos (use localhost)
                 self.mongos_host = 'localhost:%i' % nextport
@@ -383,7 +385,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
+            key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
@@ -415,7 +417,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['authentication']:
-            key_path = os.path.abspath(os.path.join(self.args['dir'], 'keyfile'))
+            key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
