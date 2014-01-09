@@ -4,6 +4,8 @@ Changes to mtools
 #### version 1.1.2
 
   * mlogfilter: added filter masks `--mask errors.log` to search for correlations around certain events (#138)
+  * mlaunch: mongos nodes start at beginning of port range for easier access (#145)
+  * mplotqueries: log parsing performance improvements for most plots
   
 
 #### version 1.1.1
