@@ -122,7 +122,7 @@ class LogLine(object):
                 except ValueError:
                     self._duration = None
             elif "flushing" in self.line_str:
-                matchobj = re.search(r'flushing mmaps took (\d+)ms for', self.line_str)
+                matchobj = re.search(r'flushing mmaps took (\d+)ms', self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1))
 
