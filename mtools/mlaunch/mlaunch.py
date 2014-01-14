@@ -8,6 +8,7 @@ import json
 import re
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
+from mtools.util.cluster import Cluster
 
 try:
     try:
@@ -75,6 +76,10 @@ class MLaunchTool(BaseCmdLineTool):
             subparsers = self.argparser.add_subparsers(dest='command')
             start_parser = subparsers.add_parser('start', help='start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
+        # general argparser arguments
+        self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+
+
         # --- start command ---
 
         # either single or replica set
@@ -93,7 +98,6 @@ class MLaunchTool(BaseCmdLineTool):
         start_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
         # dir, verbose, port, auth
-        start_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
         start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
         start_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         start_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
@@ -106,6 +110,15 @@ class MLaunchTool(BaseCmdLineTool):
 
             # --- stop command ---
             stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
+            stop_parser.add_argument('--primary', action='store_true', default=False, help='stops primary node(s) of the cluster')
+            stop_parser.add_argument('--secondary', action='store', default=False, help='stops arbiter(s) of the cluster')
+            stop_parser.add_argument('--arbiter', action='store_true', default=False, help='stops arbiter(s) of the cluster')
+            
+            # sharded clusters
+            stop_parser.add_argument('--shard', action='store', type=int, default=False)
+            stop_parser.add_argument('--config', action='store', type=int, default=False)
+            stop_parser.add_argument('--mongos', action='store', type=int, default=False)
+            stop_parser.add_argument('--all', action='store_true')
 
             # --- list command ---
             list_parser = subparsers.add_parser('list', help='list MongoDB instances')
@@ -121,7 +134,33 @@ class MLaunchTool(BaseCmdLineTool):
         # branch out in sub-commands
         getattr(self, self.args['command'])()
 
-        print self.startup_info
+
+    def stop(self):
+        possible_tags = ['primary', 'secondary', 'arbiter', 'shard', 'config', 'mongos', 'all']
+        cluster = Cluster()
+        cluster.discover(self.dir)
+
+        tags = set(self.args).intersection(possible_tags)
+        actual_tags = []
+
+        for tag in tags:
+            value = self.args[tag]
+            if not value:
+                continue
+            if tag in ['mongos', 'shard', 'config', 'secondary']:
+                tag = (tag, value)
+
+            actual_tags.append(tag)
+
+        actual_tags.append('running')
+        matches = cluster.get_tagged(actual_tags)
+
+        for port in matches:
+            mc = MongoClient('localhost:%i' % port)
+            try:
+                mc.admin.command( SON( [ ('shutdown', 1), ('force', True) ] ) )
+            except AutoReconnect:
+                pass
 
 
     def restart(self):
@@ -165,6 +204,9 @@ class MLaunchTool(BaseCmdLineTool):
         startup_file = os.path.join(datapath, '.mlaunch_startup')
         if os.path.exists(startup_file):
             self.args = self.convert_u2b(json.load(open(startup_file, 'r')))
+            return True
+        else: 
+            return False
 
 
     def store_parameters(self):
@@ -230,16 +272,7 @@ class MLaunchTool(BaseCmdLineTool):
         return ' '.join(result)
 
 
-    def _launchSharded(self):
-
-        if self.args['mongos'] == 0:
-            # start a temporary mongos and kill it again later
-            num_mongos = 1
-            kill_mongos = True
-        else:
-            num_mongos = self.args['mongos']
-            kill_mongos = False
-
+    def _getShardNames(self):
         # start up shards
         if len(self.args['sharded']) == 1:
             try:
@@ -251,6 +284,20 @@ class MLaunchTool(BaseCmdLineTool):
                 shard_names = self.args['sharded']
         else:
             shard_names = self.args['sharded']
+        return shard_names
+
+
+    def _launchSharded(self):
+
+        if self.args['mongos'] == 0:
+            # start a temporary mongos and kill it again later
+            num_mongos = 1
+            kill_mongos = True
+        else:
+            num_mongos = self.args['mongos']
+            kill_mongos = False
+
+        shard_names = self._getShardNames()
 
 
         # create shards as stand-alones or replica sets

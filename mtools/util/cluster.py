@@ -111,6 +111,13 @@ class Cluster(object):
                     self.tags['secondary'].extend( map(itemgetter(1), mrsc.secondaries) )
                     self.tags['arbiter'].extend( map(itemgetter(1), mrsc.arbiters) )
 
+                    # split by secondary position
+                    self.cluster_tree.setdefault( 'secondary', [] )
+                    for i, secondary in enumerate(map(itemgetter(1), mrsc.secondaries)):
+                        if len(self.cluster_tree['secondary']) <= i:
+                            self.cluster_tree['secondary'].append([])
+                        self.cluster_tree['secondary'][i].append(secondary)
+
                 except ConnectionFailure:
                     # none of the nodes of the replica set is running, mark down then next shard
                     self.tags['down'].extend( port_range )
