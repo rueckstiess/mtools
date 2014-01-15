@@ -11,13 +11,15 @@ from collections import defaultdict
 from operator import itemgetter
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
-
+from mtools.util.print_table import print_table
 
 try:
     try:
         from pymongo import MongoClient as Connection
+        from pymongo import MongoReplicaSetClient as ReplicaSetConnection
     except ImportError:
         from pymongo import Connection
+        from pymongo import ReplicaSetConnection
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
@@ -120,14 +122,14 @@ class MLaunchTool(BaseCmdLineTool):
             # --- stop command ---
             stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
             stop_parser.add_argument('--primary', action='store_true', default=False, help='stops primary node(s) of the cluster')
-            stop_parser.add_argument('--secondary', action='store', default=False, help='stops arbiter(s) of the cluster')
             stop_parser.add_argument('--arbiter', action='store_true', default=False, help='stops arbiter(s) of the cluster')
-            
-            # sharded clusters
-            stop_parser.add_argument('--shard', action='store', type=int, default=False)
-            stop_parser.add_argument('--config', action='store', type=int, default=False)
-            stop_parser.add_argument('--mongos', action='store', type=int, default=False)
             stop_parser.add_argument('--all', action='store_true')
+            
+            # arguments that can take an int as value
+            stop_parser.add_argument('--shard', action='store', nargs='?', type=int, default=False)
+            stop_parser.add_argument('--config', action='store', nargs='?', type=int, default=False)
+            stop_parser.add_argument('--mongos', action='store', nargs='?', type=int, default=False, const=True)
+            stop_parser.add_argument('--secondary', action='store', nargs='?', type=int, default=False)
 
             # --- list command ---
             list_parser = subparsers.add_parser('list', help='list MongoDB instances')
@@ -145,9 +147,14 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def stop(self):
+        print self.args
+
+        if not self.load_parameters():
+            raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
+
+        self.discover()
+
         possible_tags = ['primary', 'secondary', 'arbiter', 'shard', 'config', 'mongos', 'all']
-        cluster = Cluster()
-        cluster.discover(self.dir)
 
         tags = set(self.args).intersection(possible_tags)
         actual_tags = []
@@ -162,12 +169,13 @@ class MLaunchTool(BaseCmdLineTool):
             actual_tags.append(tag)
 
         actual_tags.append('running')
-        matches = cluster.get_tagged(actual_tags)
+        matches = self.get_tagged(actual_tags)
 
         for port in matches:
             mc = MongoClient('localhost:%i' % port)
             try:
                 mc.admin.command( SON( [ ('shutdown', 1), ('force', True) ] ) )
+                print "shut down localhost:%i" % port
             except AutoReconnect:
                 pass
 
@@ -178,12 +186,70 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def list(self):
-        # ---DEBUG---
         if not self.load_parameters():
             raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
 
         self.discover()
-        print self.cluster_running
+        print_docs = []
+        # mongos
+        for node in self.get_tagged(['mongos']):
+            doc = {'process':'mongos', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
+            print_docs.append( doc )
+        
+        if len(self.get_tagged(['mongos'])) > 0:
+            print_docs.append( None )
+
+        # mongod
+        for shard in self._getShardNames():
+            tags = []
+            replicaset = 'replicaset' in self.args and self.args['replicaset']
+            padding = ''
+
+            if shard:
+                print_docs.append(shard)
+                tags.append(shard)
+                padding = '   '
+
+            if replicaset:
+                # primary
+                nodes = self.get_tagged(tags + ['primary'])
+                if len(nodes) > 0:
+                    node = nodes.pop()
+                    print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                
+                # secondaries
+                nodes = self.get_tagged(tags + ['secondary'])
+                for node in nodes:
+                    print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                
+                # arbiters
+                nodes = self.get_tagged(tags + ['arbiter'])
+                for node in nodes:
+                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+
+                # replica set members that are down
+                nodes = self.get_tagged(tags + ['mongod', 'down'])
+                for node in nodes:
+                    print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'down'})
+
+            else:
+                nodes = self.get_tagged(tags + ['mongod'])
+                if len(nodes) > 0:
+                    node = nodes.pop()
+                    print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+            if shard:
+                print_docs.append(None)
+
+        # configs
+        for node in self.get_tagged(['config']):
+            doc = {'process':'config server', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
+            print_docs.append( doc )
+        
+        if len(self.get_tagged(['config'])) > 0:
+            print_docs.append( None )
+
+        print_docs.append( None )
+        print_table(print_docs)
 
 
     def start(self):
@@ -284,6 +350,10 @@ class MLaunchTool(BaseCmdLineTool):
         # tag all nodes with 'all'
         self.cluster_tags['all'].extend ( range(current_port, current_port + num_nodes) )
 
+        # tag all nodes with their port number
+        for port in range(current_port, current_port + num_nodes):
+            self.cluster_tags['%s'%port].append(port)
+
         # find all mongos
         for i in range(num_mongos):
             port = i+current_port
@@ -325,11 +395,12 @@ class MLaunchTool(BaseCmdLineTool):
 
             if 'replicaset' in self.args and self.args['replicaset']:
                 # treat replica set as a whole
-                rs_name = shard if shard else self.args['replset']
+                rs_name = shard if shard else self.args['name']
                 try:
                     mrsc = ReplicaSetConnection( ','.join( 'localhost:%i'%i for i in port_range ), replicaSet=rs_name )
                     # primary, secondaries, arbiters
-                    self.cluster_tags['primary'].append( mrsc.primary[1] )
+                    if mrsc.primary:
+                        self.cluster_tags['primary'].append( mrsc.primary[1] )
                     self.cluster_tags['secondary'].extend( map(itemgetter(1), mrsc.secondaries) )
                     self.cluster_tags['arbiter'].extend( map(itemgetter(1), mrsc.arbiters) )
 
@@ -414,6 +485,9 @@ class MLaunchTool(BaseCmdLineTool):
                 tag, number = tag
                 assert (tag in ('mongos', 'config', 'shard'))
 
+                print tag
+                print number
+
                 branch = self.cluster_tree[tag][number]
                 if hasattr(branch, '__iter__'):
                     subset = set(branch)
@@ -464,7 +538,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _getShardNames(self):
         # start up shards
-        if len(self.args['sharded']) == 1:
+        if 'sharded' in self.args and self.args['sharded'] and len(self.args['sharded']) == 1:
             try:
                 # --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
                 n_shards = int(self.args['sharded'][0])
@@ -473,7 +547,7 @@ class MLaunchTool(BaseCmdLineTool):
                 # --sharded was a string, use it as name for the one shard 
                 shard_names = self.args['sharded']
         else:
-            shard_names = self.args['sharded']
+            shard_names = [ None ]
         return shard_names
 
 
