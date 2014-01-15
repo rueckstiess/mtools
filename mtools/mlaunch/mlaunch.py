@@ -187,10 +187,17 @@ class MLaunchTool(BaseCmdLineTool):
         if not self.load_parameters():
             raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
 
-        if not self.startup_info:
-            raise SystemExit("startup options not available. If this configuration was initialized with a previous version, try killing all nodes manually, then running 'mlaunch start' again.")
-
         self.discover()
+
+        if not self.startup_info:
+            # try to start nodes via init if all nodes are down
+            if len(self.get_tagged(['down'])) == len(self.get_tagged(['all'])):
+                self.args = self.loaded_args
+                self.init()
+                return 
+            else:
+                raise SystemExit("old .mlaunch_startup file format detected. Try killing all nodes manually, then running 'mlaunch start' again.")
+
 
         matches = self.get_ports_from_args(self.args, 'down')
 
@@ -338,15 +345,13 @@ class MLaunchTool(BaseCmdLineTool):
         # handle legacy version without versioned protocol
         if 'protocol_version' not in in_dict:
             in_dict['protocol_version'] = 1
-
+            self.loaded_args = in_dict
             self.startup_info = {}
 
         elif in_dict['protocol_version'] == 2:
             self.startup_info = in_dict['startup_info']
             self.unknown_loaded_args = in_dict['unknown_args']
-
-        # all protocol versions can load the parsed arguments
-        self.loaded_args = in_dict['parsed_args']
+            self.loaded_args = in_dict['parsed_args']
 
         return True
 
