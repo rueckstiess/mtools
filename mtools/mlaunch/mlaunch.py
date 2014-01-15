@@ -73,8 +73,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.cluster_tags = defaultdict(list)
         self.cluster_running = {}
 
-        self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards. You must specify either --single or --replicaset. \
-            In addition to the optional arguments below, you can specify any mongos and mongod argument, which will be passed on, if the process accepts it.'
+        self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards.'
 
         # default sub-command is `init` if none provided
         if len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
@@ -86,6 +85,8 @@ class MLaunchTool(BaseCmdLineTool):
             # create sub-parser for the command `start`
             init_redirected = False
             subparsers = self.argparser.add_subparsers(dest='command')
+            self.argparser._action_groups[0].title = 'commands'
+            self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch [command] --help'
             init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
         # general argparser arguments: dir, verbose
@@ -116,17 +117,17 @@ class MLaunchTool(BaseCmdLineTool):
 
         if not init_redirected:
             # start command
-            start_parser = subparsers.add_parser('start', help='start existing MongoDB instances')
-            start_parser.add_argument('tags', action='store', nargs='*', default=[])
+            start_parser = subparsers.add_parser('start', description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
+            start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
             start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
             # stop command
-            stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
-            stop_parser.add_argument('tags', action='store', nargs='*', default=[])
+            stop_parser = subparsers.add_parser('stop', description='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
+            stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
             stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
             # list command
-            list_parser = subparsers.add_parser('list', help='list MongoDB instances')
+            list_parser = subparsers.add_parser('list', description='list MongoDB instances for this configuration')
 
 
 
@@ -174,6 +175,8 @@ class MLaunchTool(BaseCmdLineTool):
         self.discover()
 
         matches = self.get_ports_from_args(self.args, 'running')
+        if len(matches) == 0:
+            raise SystemExit('no nodes stopped.')
 
         for port in matches:
             host_port = 'localhost:%i'%port
@@ -196,10 +199,12 @@ class MLaunchTool(BaseCmdLineTool):
                 self.init()
                 return 
             else:
-                raise SystemExit("old .mlaunch_startup file format detected. Try killing all nodes manually, then running 'mlaunch start' again.")
+                raise SystemExit("These nodes were created with an older version of mlaunch. To use the new 'start' command, kill all nodes manually, then run 'mlaunch start'. You only have to do this once.")
 
 
         matches = self.get_ports_from_args(self.args, 'down')
+        if len(matches) == 0:
+            raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
         mongod_matches = self.get_tagged(['mongod'])
@@ -583,7 +588,6 @@ class MLaunchTool(BaseCmdLineTool):
         tags = []
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
-            print tag1, tag2
             if re.match('^\d+$', tag1):
                 continue
 
