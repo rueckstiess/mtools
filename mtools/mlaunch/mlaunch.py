@@ -63,7 +63,8 @@ class MLaunchTool(BaseCmdLineTool):
         BaseCmdLineTool.__init__(self)
 
         self.hostname = socket.gethostname()
-        
+
+        # startup parameters for each port
         self.startup_info = {}
 
         # data structures for the discovery feature
@@ -75,7 +76,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards. You must specify either --single or --replicaset. \
             In addition to the optional arguments below, you can specify any mongos and mongod argument, which will be passed on, if the process accepts it.'
 
-        # default sub-command is `start` if not provided
+        # default sub-command is `init` if none provided
         if len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
             # not sub command given, redirect all options to main parser
             init_redirected = True
@@ -90,8 +91,7 @@ class MLaunchTool(BaseCmdLineTool):
         # general argparser arguments
         self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
 
-
-        # --- start command ---
+        # init command 
 
         # either single or replica set
         me_group = init_parser.add_mutually_exclusive_group(required=True)
@@ -129,6 +129,9 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def run(self, arguments=None):
+        """ This is the main run method, called for all sub-commands and parameters.
+            It will then call the sub-command method with the same name.
+        """
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
         # replace path with absolute path
@@ -138,7 +141,31 @@ class MLaunchTool(BaseCmdLineTool):
         getattr(self, self.args['command'])()
 
 
+    def init(self):
+        """ sub-command init. Branches out to sharded, replicaset or single node methods. """
+        # check if authentication is enabled, make key file       
+        if self.args['authentication']:
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)
+            os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
+            os.system('chmod 600 %s/keyfile'%self.dir)
+
+        if self.args['sharded']:
+            self._launchSharded()
+        elif self.args['single']:
+            self._launchSingle(self.dir, self.args['port'])
+        elif self.args['replicaset']:
+            self._launchReplSet(self.dir, self.args['port'], self.args['name'])
+
+        # write out parameters
+        self.store_parameters()
+
+
     def stop(self):
+        """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
+            Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
+            will be shut down.
+        """
         self.params = self.load_parameters()
         if not self.params:
             raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
@@ -176,12 +203,15 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def start(self):
+        """ sub-command start. TODO """
         self.load_parameters()
         # todo
 
 
     def list(self):
-
+        """ sub-command list. Takes no further parameters. Will discover the current configuration and
+            print a table of all the nodes with status and port.
+        """
         self.params = self.load_parameters()
         if not self.params:
             raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
@@ -249,30 +279,14 @@ class MLaunchTool(BaseCmdLineTool):
         print_table(print_docs)
 
 
-    def init(self):
-        # check if authentication is enabled, make key file       
-        if self.args['authentication']:
-            if not os.path.exists(self.dir):
-                os.makedirs(self.dir)
-            os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
-            os.system('chmod 600 %s/keyfile'%self.dir)
+    # --- below here are helper methods ---
 
-        if self.args['sharded']:
-            self._launchSharded()
-        elif self.args['single']:
-            self._launchSingle(self.dir, self.args['port'])
-        elif self.args['replicaset']:
-            self._launchReplSet(self.dir, self.args['port'], self.args['name'])
-
-        # write out parameters
-        self.store_parameters()
-
-
-    def convert_u2b(self, obj):
+    def _convert_u2b(self, obj):
+        """ helper method to convert unicode back to plain text. """
         if isinstance(obj, dict):
-            return dict([(self.convert_u2b(key), self.convert_u2b(value)) for key, value in obj.iteritems()])
+            return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in obj.iteritems()])
         elif isinstance(obj, list):
-            return [self.convert_u2b(element) for element in obj]
+            return [self._convert_u2b(element) for element in obj]
         elif isinstance(obj, unicode):
             return obj.encode('utf-8')
         else:
@@ -280,16 +294,18 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def load_parameters(self):
+        """ tries to load the .mlaunch_startup file that exists in each datadir. """
         datapath = self.dir
 
         startup_file = os.path.join(datapath, '.mlaunch_startup')
         if os.path.exists(startup_file):
-            return self.convert_u2b(json.load(open(startup_file, 'r')))
+            return self._convert_u2b(json.load(open(startup_file, 'r')))
         else: 
             return False
 
 
     def store_parameters(self):
+        """ stores the startup parameters and config in the .mlaunch_startup file in the datadir. """
         datapath = self.dir
 
         if not os.path.exists(datapath):
@@ -305,6 +321,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _createPaths(self, basedir, name=None):
+        """ create datadir and subdir paths. """
         if name:
             datapath = os.path.join(basedir, name)
         else:
@@ -321,6 +338,10 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def discover(self):
+        """ This method will go out to each of the processes and get their state. It builds the
+            self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
+            for sub-commands start, stop, list.
+        """
         
         # get shard names
         shard_names = self._getShardNames(self.params)
@@ -465,6 +486,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def is_running(self, port):
+        """ returns if a host on a specific port is running. Requires discover(). """
         return self.cluster_running[port]
 
 
@@ -531,7 +553,11 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _getShardNames(self, args):
-        # start up shards
+        """ get the shard names based on the self.args['sharded'] parameter. If it's a number, create
+            shard names of type shard##, where ## is a 2-digit number. Returns a list [ None ] if 
+            no shards are present.
+        """
+
         if 'sharded' in args and args['sharded'] and len(args['sharded']) == 1:
             try:
                 # --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
@@ -546,6 +572,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchSharded(self):
+        """ start a sharded cluster. """
 
         if self.args['mongos'] == 0:
             # start a temporary mongos and kill it again later
@@ -643,6 +670,8 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchReplSet(self, basedir, portstart, name):
+        """ start a replica set, either for sharded cluster or by itself. """
+
         threads = []
         configDoc = {'_id':name, 'members':[]}
 
@@ -691,6 +720,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchConfig(self, basedir, port, name=None):
+        """ start a config server """
         datapath = self._createPaths(basedir, name)
         self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
@@ -704,6 +734,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchSingle(self, basedir, port, name=None):
+        """ start a single node, either for shards or as a stand-alone. """
         datapath = self._createPaths(basedir, name)
         self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
@@ -719,6 +750,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchMongoD(self, dbpath, logpath, port, replset=None, extra=''):
+        """ starts a mongod process. """
         self.check_port_availability(port, "mongod")
 
         rs_param = ''
@@ -750,6 +782,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _launchMongoS(self, logpath, port, configdb):
+        """ start a mongos process. """
         extra = ''
         self.check_port_availability(port, "mongos")
 
