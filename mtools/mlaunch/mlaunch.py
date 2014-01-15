@@ -78,14 +78,14 @@ class MLaunchTool(BaseCmdLineTool):
         # default sub-command is `start` if not provided
         if len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
             # not sub command given, redirect all options to main parser
-            start_redirected = True
-            start_parser = self.argparser
-            start_parser.add_argument('--command', action='store_const', const='start', default='start')
+            init_redirected = True
+            init_parser = self.argparser
+            init_parser.add_argument('--command', action='store_const', const='init', default='init')
         else:
             # create sub-parser for the command `start`
-            start_redirected = False
+            init_redirected = False
             subparsers = self.argparser.add_subparsers(dest='command')
-            start_parser = subparsers.add_parser('start', help='start MongoDB stand-alone instances, replica sets, or sharded clusters')
+            init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
         # general argparser arguments
         self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
@@ -94,46 +94,36 @@ class MLaunchTool(BaseCmdLineTool):
         # --- start command ---
 
         # either single or replica set
-        me_group = start_parser.add_mutually_exclusive_group(required=True)
+        me_group = init_parser.add_mutually_exclusive_group(required=True)
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
 
         # replica set arguments
-        start_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
-        start_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
-        start_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
+        init_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
+        init_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
+        init_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
         
         # sharded clusters
-        start_parser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
-        start_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
-        start_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
+        init_parser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
+        init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
+        init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
         # dir, verbose, port, auth
-        start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
-        start_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
-        start_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        start_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
+        init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
+        init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
+        init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
-        if not start_redirected:
+        if not init_redirected:
+            # start command
+            start_parser = subparsers.add_parser('start', help='start existing MongoDB instances')
+            start_parser.add_argument('tags', action='store', nargs='*', default=[])
 
-            # --- restart command ---
-            restart_parser = subparsers.add_parser('restart', help='restart existing MongoDB instances')
-
-            # --- stop command ---
+            # stop command
             stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
             stop_parser.add_argument('tags', action='store', nargs='*', default=[])
 
-            # stop_parser.add_argument('--primary', action='store_true', default=False, help='stops primary node(s) of the cluster')
-            # stop_parser.add_argument('--arbiter', action='store_true', default=False, help='stops arbiter(s) of the cluster')
-            # stop_parser.add_argument('--all', action='store_true')
-            
-            # # arguments that can take an int as value
-            # stop_parser.add_argument('--shard', action='store', nargs='?', type=int, default=False)
-            # stop_parser.add_argument('--config', action='store', nargs='?', type=int, default=False)
-            # stop_parser.add_argument('--mongos', action='store', nargs='?', type=int, default=False, const=True)
-            # stop_parser.add_argument('--secondary', action='store', nargs='?', type=int, default=False)
-
-            # --- list command ---
+            # list command
             list_parser = subparsers.add_parser('list', help='list MongoDB instances')
 
 
@@ -185,7 +175,7 @@ class MLaunchTool(BaseCmdLineTool):
             shutdownMongoDS(host_port)
 
 
-    def restart(self):
+    def start(self):
         self.load_parameters()
         # todo
 
@@ -259,7 +249,7 @@ class MLaunchTool(BaseCmdLineTool):
         print_table(print_docs)
 
 
-    def start(self):
+    def init(self):
         # check if authentication is enabled, make key file       
         if self.args['authentication']:
             if not os.path.exists(self.dir):
