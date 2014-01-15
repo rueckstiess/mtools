@@ -73,7 +73,6 @@ class MLaunchTool(BaseCmdLineTool):
         self.cluster_tags = defaultdict(list)
         self.cluster_running = {}
 
-
         self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards. You must specify either --single or --replicaset. \
             In addition to the optional arguments below, you can specify any mongos and mongod argument, which will be passed on, if the process accepts it.'
 
@@ -89,7 +88,7 @@ class MLaunchTool(BaseCmdLineTool):
             subparsers = self.argparser.add_subparsers(dest='command')
             init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
-        # general argparser arguments
+        # general argparser arguments: dir, verbose
         self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
 
         # init command 
@@ -109,8 +108,8 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
-        # dir, verbose, port, auth
-        init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs information about the launch')
+        # verbose, port, auth, binary path
+        init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
@@ -119,10 +118,12 @@ class MLaunchTool(BaseCmdLineTool):
             # start command
             start_parser = subparsers.add_parser('start', help='start existing MongoDB instances')
             start_parser.add_argument('tags', action='store', nargs='*', default=[])
+            start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
             # stop command
             stop_parser = subparsers.add_parser('stop', help='stop running MongoDB instances')
             stop_parser.add_argument('tags', action='store', nargs='*', default=[])
+            stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
             # list command
             list_parser = subparsers.add_parser('list', help='list MongoDB instances')
@@ -176,6 +177,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         for port in matches:
             host_port = 'localhost:%i'%port
+            if self.args['verbose']:
+                print "shutting down %s" % host_port
             shutdownMongoDS(host_port)
 
 
@@ -191,7 +194,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         matches = self.get_ports_from_args(self.args, 'down')
 
-        # start mongod and config servers first, then mongos
+        # start mongod and config servers first
         mongod_matches = self.get_tagged(['mongod'])
         mongod_matches = mongod_matches.union(self.get_tagged(['config']))
 
@@ -202,7 +205,9 @@ class MLaunchTool(BaseCmdLineTool):
         for port in mongod_matches:
             command_str = self.startup_info[str(port)]
             ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            print command_str
+            
+            if self.args['verbose']:
+                print command_str
 
             if ret > 0:
                 print "can't start mongod, return code %i."%ret
@@ -222,7 +227,9 @@ class MLaunchTool(BaseCmdLineTool):
         for port in mongos_matches:
             command_str = self.startup_info[str(port)]
             ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            print command_str
+            
+            if self.args['verbose']:
+                print command_str
 
             if ret > 0:
                 print "can't start mongos, return code %i."%ret
