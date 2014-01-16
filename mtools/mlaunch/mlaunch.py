@@ -89,9 +89,6 @@ class MLaunchTool(BaseCmdLineTool):
             self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch [command] --help'
             init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
-        # general argparser arguments: dir, verbose
-        self.argparser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
-
         # init command 
 
         # either single or replica set
@@ -114,20 +111,26 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
+        init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+
 
         if not init_redirected:
             # start command
             start_parser = subparsers.add_parser('start', description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
             start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
             start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+            start_parser.add_argument('--dir', action='store', default='./data', help='base directory to start nodes (default=./data/)')
 
             # stop command
             stop_parser = subparsers.add_parser('stop', description='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
             stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
             stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-
+            stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
+            
             # list command
             list_parser = subparsers.add_parser('list', description='list MongoDB instances for this configuration')
+            list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
+            list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
 
 
@@ -261,7 +264,7 @@ class MLaunchTool(BaseCmdLineTool):
         print_docs = []
 
         # mongos
-        for node in self.get_tagged(['mongos']):
+        for node in sorted(self.get_tagged(['mongos'])):
             doc = {'process':'mongos', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
@@ -269,7 +272,7 @@ class MLaunchTool(BaseCmdLineTool):
             print_docs.append( None )
 
         # configs
-        for node in self.get_tagged(['config']):
+        for node in sorted(self.get_tagged(['config'])):
             doc = {'process':'config server', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
@@ -285,29 +288,32 @@ class MLaunchTool(BaseCmdLineTool):
             if shard:
                 print_docs.append(shard)
                 tags.append(shard)
-                padding = '   '
+                padding = '    '
 
             if replicaset:
                 # primary
-                nodes = self.get_tagged(tags + ['primary'])
+                nodes = self.get_tagged(tags + ['primary', 'running'])
                 if len(nodes) > 0:
                     node = nodes.pop()
                     print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
                 # secondaries
-                nodes = self.get_tagged(tags + ['secondary'])
+                nodes = sorted(self.get_tagged(tags + ['secondary', 'running']))
                 for node in nodes:
                     print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
-                # arbiters
-                nodes = self.get_tagged(tags + ['arbiter'])
-                for node in nodes:
-                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
-
-                # replica set members that are down
+                # data-bearing nodes that are down
                 nodes = self.get_tagged(tags + ['mongod', 'down'])
+                arbiters = self.get_tagged(tags + ['arbiter'])
+
+                nodes = sorted(nodes - arbiters)
                 for node in nodes:
                     print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'down'})
+
+                # arbiters
+                nodes = sorted(self.get_tagged(tags + ['arbiter']))
+                for node in nodes:
+                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
 
             else:
                 nodes = self.get_tagged(tags + ['mongod'])
@@ -317,7 +323,15 @@ class MLaunchTool(BaseCmdLineTool):
             if shard:
                 print_docs.append(None)
 
-        print_docs.append( None )            
+
+        if self.args['verbose']:
+            # print tags as well
+            for doc in filter(lambda x: type(x) == dict, print_docs):               
+                printable_tags = sorted([tag for tag in self.cluster_tags if doc['port'] in self.cluster_tags[tag] ])
+                doc['tags'] = ', '.join(printable_tags)
+
+        print_docs.append( None )   
+        print         
         print_table(print_docs)
 
 
@@ -487,9 +501,9 @@ class MLaunchTool(BaseCmdLineTool):
                     self.cluster_tags['secondary'].extend( map(itemgetter(1), mrsc.secondaries) )
                     self.cluster_tags['arbiter'].extend( map(itemgetter(1), mrsc.arbiters) )
 
-                    # split by secondary position
+                    # secondaries in cluster_tree (order is now important)
                     self.cluster_tree.setdefault( 'secondary', [] )
-                    for i, secondary in enumerate(map(itemgetter(1), mrsc.secondaries)):
+                    for i, secondary in enumerate(sorted(map(itemgetter(1), mrsc.secondaries))):
                         if len(self.cluster_tree['secondary']) <= i:
                             self.cluster_tree['secondary'].append([])
                         self.cluster_tree['secondary'][i].append(secondary)
@@ -550,7 +564,6 @@ class MLaunchTool(BaseCmdLineTool):
         current_port += num_mongos
 
 
-
     def is_running(self, port):
         """ returns if a host on a specific port is running. Requires discover(). """
         return self.cluster_running[port]
@@ -588,10 +601,10 @@ class MLaunchTool(BaseCmdLineTool):
         tags = []
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
-            if re.match('^\d+$', tag1):
+            if re.match('^\d{1,2}$', tag1):
                 continue
 
-            if re.match('^\d+$', tag2):
+            if re.match('^\d{1,2}$', tag2):
                 if tag1 in ['mongos', 'shard', 'secondary', 'mongod', 'config']:
                     tags.append( (tag1, int(tag2)-1) )
                     continue
@@ -600,7 +613,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         if len(args['tags']) > 0:
             tag = args['tags'][-1]
-            if not re.match('^\d+$', tag):
+            if not re.match('^\d{1,2}$', tag):
                 tags.append(tag)
 
         tags.append(extra_tag)
