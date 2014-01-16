@@ -182,12 +182,16 @@ class MLaunchTool(BaseCmdLineTool):
             self.start_on_ports(mongos, wait=True)
 
             # add shards
+            mongos = sorted(self.get_tagged(['mongos']))
             con = Connection('localhost:%i'%mongos[0])
 
-            if self.args['replicaset']:
-                print "adding shards: need to wait for replica sets to initialize. can take a few seconds..."
-
             shards_to_add = len(self.shard_connection_str)
+            nshards = con['config']['shards'].count()
+            if nshards < shards_to_add:
+                print "adding shards."
+                if self.args['replicaset']:
+                    print "waiting for replica sets to initialize. can take up to 30 seconds..."
+
             while True:
                 try:
                     nshards = con['config']['shards'].count()
@@ -201,7 +205,7 @@ class MLaunchTool(BaseCmdLineTool):
                         res = con['admin'].command({'addShard': conn_str})
                     except Exception as e:
                         if self.args['verbose']:
-                            print e, '- will retry'
+                            print e, ', will retry in a moment.'
                         continue
 
                     if res['ok']:
@@ -246,9 +250,13 @@ class MLaunchTool(BaseCmdLineTool):
             # initiate replica set
             self.initiate_replset(nodes[0], self.args['name'])
 
-
         # write out parameters
+        if self.args['verbose']:
+            print "writing .mlaunch_startup file."
         self.store_parameters()
+
+        if self.args['verbose']:
+            print "done."
 
 
     def stop(self):
@@ -270,6 +278,8 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['verbose']:
                 print "shutting down %s" % host_port
             shutdownMongoDS(host_port)
+
+        print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
 
 
     def start(self):
@@ -867,17 +877,21 @@ class MLaunchTool(BaseCmdLineTool):
             ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
             
             if self.args['verbose']:
-                print command_str
+                print "launching: %s" % command_str
+            else:
+                print "launching: %s on port %s" % (command_str.split()[0], port)
 
             if ret > 0:
                 print "can't start process, return code %i."%ret
-                print "tried to start: %s"%command_str
+                print "tried to launch: %s" % command_str
                 raise SystemExit
 
             if wait:
                 threads.append(threading.Thread(target=pingMongoDS, args=('localhost:%i'%port, 1.0, 30)))
 
         if wait:
+            if self.args['verbose']:
+                print "waiting for nodes to start..."
             for thread in threads:
                 thread.start()
             for thread in threads:
@@ -895,7 +909,8 @@ class MLaunchTool(BaseCmdLineTool):
         except OperationFailure, e:
             con['admin'].command({'replSetInitiate':self.config_docs[name]})
             if self.args['verbose']:
-                print "replica set '%s' configured." % name
+                print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
+            print "replica set '%s' initialized." % name
 
 
 
