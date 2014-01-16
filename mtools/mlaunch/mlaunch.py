@@ -56,10 +56,6 @@ def shutdownMongoDS(host_port):
 
 class MLaunchTool(BaseCmdLineTool):
 
-    # additional arguments that can be passed on to mongos, all others will only go to mongod
-    mongos_arguments = ['quiet', 'logappend', 'pidfilepath', 'keyFile', 'nounixsocket', 'syslog', \
-                        'nohttpinterface', 'test', 'upgrade', 'ipv6', 'jsonp', 'noscripting']
-
     def __init__(self):
         BaseCmdLineTool.__init__(self)
 
@@ -157,11 +153,11 @@ class MLaunchTool(BaseCmdLineTool):
             os.system('chmod 600 %s/keyfile'%self.dir)
 
         if self.args['sharded']:
-            self._launchSharded()
+            self._launch_sharded()
         elif self.args['single']:
-            self._launchSingle(self.dir, self.args['port'])
+            self._launch_single(self.dir, self.args['port'])
         elif self.args['replicaset']:
-            self._launchReplSet(self.dir, self.args['port'], self.args['name'])
+            self._launch_replset(self.dir, self.args['port'], self.args['name'])
 
         # write out parameters
         self.store_parameters()
@@ -212,7 +208,6 @@ class MLaunchTool(BaseCmdLineTool):
         # start mongod and config servers first
         mongod_matches = self.get_tagged(['mongod'])
         mongod_matches = mongod_matches.union(self.get_tagged(['config']))
-
         mongod_matches = mongod_matches.intersection(matches)
 
         threads = []
@@ -280,7 +275,7 @@ class MLaunchTool(BaseCmdLineTool):
             print_docs.append( None )
 
         # mongod
-        for shard in self._getShardNames(self.loaded_args):
+        for shard in self._get_shard_names(self.loaded_args):
             tags = []
             replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
             padding = ''
@@ -397,10 +392,10 @@ class MLaunchTool(BaseCmdLineTool):
 
     def check_port_availability(self, port, binary):
         if pingMongoDS('%s:%i' % (self.hostname, port), 1, 1) is True:
-            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already being used")
+            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already in use.")
 
 
-    def _createPaths(self, basedir, name=None):
+    def _create_paths(self, basedir, name=None):
         """ create datadir and subdir paths. """
         if name:
             datapath = os.path.join(basedir, name)
@@ -424,7 +419,7 @@ class MLaunchTool(BaseCmdLineTool):
         """
         
         # get shard names
-        shard_names = self._getShardNames(self.loaded_args)
+        shard_names = self._get_shard_names(self.loaded_args)
 
         # determine number of nodes to inspect
         if 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None:
@@ -655,7 +650,7 @@ class MLaunchTool(BaseCmdLineTool):
         return ' '.join(result)
 
 
-    def _getShardNames(self, args):
+    def _get_shard_names(self, args):
         """ get the shard names based on the self.args['sharded'] parameter. If it's a number, create
             shard names of type shard##, where ## is a 2-digit number. Returns a list [ None ] if 
             no shards are present.
@@ -674,7 +669,7 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
 
-    def _launchSharded(self):
+    def _launch_sharded(self):
         """ start a sharded cluster. """
 
         if self.args['mongos'] == 0:
@@ -685,17 +680,17 @@ class MLaunchTool(BaseCmdLineTool):
             num_mongos = self.args['mongos']
             kill_mongos = False
 
-        shard_names = self._getShardNames(self.args)
+        shard_names = self._get_shard_names(self.args)
 
 
         # create shards as stand-alones or replica sets
         nextport = self.args['port'] + num_mongos
         for p, shard in enumerate(shard_names):
             if self.args['single']:
-                shard_names[p] = self._launchSingle(self.dir, nextport, name=shard)
+                shard_names[p] = self._launch_single(self.dir, nextport, name=shard)
                 nextport += 1
             elif self.args['replicaset']:
-                shard_names[p] = self._launchReplSet(self.dir, nextport, shard)
+                shard_names[p] = self._launch_replset(self.dir, nextport, shard)
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -709,7 +704,7 @@ class MLaunchTool(BaseCmdLineTool):
             config_names = ['config1', 'config2', 'config3']
             
         for name in config_names:
-            self._launchConfig(self.dir, nextport, name)
+            self._launch_config(self.dir, nextport, name)
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
@@ -727,7 +722,7 @@ class MLaunchTool(BaseCmdLineTool):
                 mongos_logfile = 'mongos/mongos_%i.log' % nextport
             else:
                 mongos_logfile = 'mongos.log'
-            self._launchMongoS(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
+            self._launch_mongos(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
             if i == 0: 
                 # store host/port of first mongos (use localhost)
                 self.mongos_host = 'localhost:%i' % nextport
@@ -772,15 +767,15 @@ class MLaunchTool(BaseCmdLineTool):
             shutdownMongoDS(self.mongos_host)
 
 
-    def _launchReplSet(self, basedir, portstart, name):
+    def _launch_replset(self, basedir, portstart, name):
         """ start a replica set, either for sharded cluster or by itself. """
 
         threads = []
         configDoc = {'_id':name, 'members':[]}
 
         for i in range(self.args['nodes']):
-            datapath = self._createPaths(basedir, '%s/rs%i'%(name, i+1))
-            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
+            datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
+            self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
             host = '%s:%i'%(self.hostname, portstart+i)
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'votes':int(len(configDoc['members']) < 7 - int(self.args['arbiter']))})
@@ -792,8 +787,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         # launch arbiter if True
         if self.args['arbiter']:
-            datapath = self._createPaths(basedir, '%s/arb'%(name))
-            self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
+            datapath = self._create_paths(basedir, '%s/arb'%(name))
+            self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
             
             host = '%s:%i'%(self.hostname, portstart+self.args['nodes'])
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
@@ -822,10 +817,10 @@ class MLaunchTool(BaseCmdLineTool):
         return name + '/' + ','.join([c['host'] for c in configDoc['members']])
 
 
-    def _launchConfig(self, basedir, port, name=None):
+    def _launch_config(self, basedir, port, name=None):
         """ start a config server """
-        datapath = self._createPaths(basedir, name)
-        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
+        datapath = self._create_paths(basedir, name)
+        self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
@@ -836,10 +831,10 @@ class MLaunchTool(BaseCmdLineTool):
         print "mongod config server at %s running."%host
 
 
-    def _launchSingle(self, basedir, port, name=None):
+    def _launch_single(self, basedir, port, name=None):
         """ start a single node, either for shards or as a stand-alone. """
-        datapath = self._createPaths(basedir, name)
-        self._launchMongoD(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
+        datapath = self._create_paths(basedir, name)
+        self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
         host = '%s:%i'%(self.hostname, port)
         t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
@@ -852,7 +847,7 @@ class MLaunchTool(BaseCmdLineTool):
         return host
 
 
-    def _launchMongoD(self, dbpath, logpath, port, replset=None, extra=''):
+    def _launch_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """ starts a mongod process. """
         self.check_port_availability(port, "mongod")
 
@@ -887,7 +882,7 @@ class MLaunchTool(BaseCmdLineTool):
         return ret
 
 
-    def _launchMongoS(self, logpath, port, configdb):
+    def _launch_mongos(self, logpath, port, configdb):
         """ start a mongos process. """
         extra = ''
         self.check_port_availability(port, "mongos")
