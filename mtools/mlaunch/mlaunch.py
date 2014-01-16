@@ -153,11 +153,65 @@ class MLaunchTool(BaseCmdLineTool):
             os.system('chmod 600 %s/keyfile'%self.dir)
 
         if self.args['sharded']:
-            self._launch_sharded()
+            self._construct_sharded()
+
+            
+            # add shards
+            # print "adding shards (can take a few seconds, grab a snickers) ..."
+            # con = Connection(self.mongos_host)
+            
+            # shards_to_add = len(shard_names)
+            # while True:
+            #     try:
+            #         nshards = con['config']['shards'].count()
+            #     except:
+            #         nshards = 0
+            #     if nshards >= shards_to_add:
+            #         break
+
+            #     for shard in shard_names:
+            #         try:
+            #             res = con['admin'].command({'addShard':shard})
+            #         except Exception as e:
+            #             if self.args['verbose']:
+            #                 print e, '- will retry.'
+            #             continue
+
+            #         if res['ok']:
+            #             if self.args['verbose']:
+            #                 print "shard %s added successfully"%shard
+            #                 shard_names.remove(shard)
+            #                 break
+            #         else:
+            #             if self.args['verbose']:
+            #                 print res, '- will retry.'
+
+            #     time.sleep(1)
+
+
+            # MUST KILL DUMMY MONGOS
+
+
+        
         elif self.args['single']:
-            self._launch_single(self.dir, self.args['port'])
+            self._construct_single(self.dir, self.args['port'])
+        
         elif self.args['replicaset']:
-            self._launch_replset(self.dir, self.args['port'], self.args['name'])
+            self._construct_replset(self.dir, self.args['port'], self.args['name'])
+
+            # IF REPLSET
+
+            # MOVE: initiate replica set
+            # con = Connection('localhost:%i'%portstart)
+
+            # try:
+            #     rs_status = con['admin'].command({'replSetGetStatus': 1})
+            # except OperationFailure, e:
+            #     con['admin'].command({'replSetInitiate':configDoc})
+            #     if self.args['verbose']:
+            #         print "replica set configured."
+
+
 
         # write out parameters
         self.store_parameters()
@@ -200,7 +254,6 @@ class MLaunchTool(BaseCmdLineTool):
             else:
                 raise SystemExit("These nodes were created with an older version of mlaunch. To use the new 'start' command, kill all nodes manually, then run 'mlaunch start'. You only have to do this once.")
 
-
         matches = self.get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
             raise SystemExit('no nodes started.')
@@ -209,43 +262,11 @@ class MLaunchTool(BaseCmdLineTool):
         mongod_matches = self.get_tagged(['mongod'])
         mongod_matches = mongod_matches.union(self.get_tagged(['config']))
         mongod_matches = mongod_matches.intersection(matches)
-
-        threads = []
-
-        for port in mongod_matches:
-            command_str = self.startup_info[str(port)]
-            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            
-            if self.args['verbose']:
-                print command_str
-
-            if ret > 0:
-                print "can't start mongod, return code %i."%ret
-                print "tried to start: %s"%command_str
-                raise SystemExit
-
-            threads.append(threading.Thread(target=pingMongoDS, args=('localhost:%i'%port, 1.0, 30)))
-
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
+        self.start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
         mongos_matches = self.get_tagged(['mongos']).intersection(matches)
-
-        for port in mongos_matches:
-            command_str = self.startup_info[str(port)]
-            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            
-            if self.args['verbose']:
-                print command_str
-
-            if ret > 0:
-                print "can't start mongos, return code %i."%ret
-                print "tried to start: %s"%command_str
-                raise SystemExit
-
+        self.start_on_ports(mongos_matches)
 
 
     def list(self):
@@ -329,6 +350,8 @@ class MLaunchTool(BaseCmdLineTool):
         print         
         print_table(print_docs)
 
+
+    
 
     # --- below here are helper methods ---
 
@@ -669,42 +692,30 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
 
-    def _launch_sharded(self):
+    def _construct_sharded(self):
         """ start a sharded cluster. """
 
-        if self.args['mongos'] == 0:
-            # start a temporary mongos and kill it again later
-            num_mongos = 1
-            kill_mongos = True
-        else:
-            num_mongos = self.args['mongos']
-            kill_mongos = False
-
+        num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
         shard_names = self._get_shard_names(self.args)
-
 
         # create shards as stand-alones or replica sets
         nextport = self.args['port'] + num_mongos
         for p, shard in enumerate(shard_names):
             if self.args['single']:
-                shard_names[p] = self._launch_single(self.dir, nextport, name=shard)
+                shard_names[p] = self._construct_single(self.dir, nextport, name=shard)
                 nextport += 1
             elif self.args['replicaset']:
-                shard_names[p] = self._launch_replset(self.dir, nextport, shard)
+                shard_names[p] = self._construct_replset(self.dir, nextport, shard)
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
 
-        
         # start up config server(s)
         config_string = []
-        if self.args['config'] == 1:
-            config_names = ['config']
-        else:
-            config_names = ['config1', 'config2', 'config3']
+        config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
             
         for name in config_names:
-            self._launch_config(self.dir, nextport, name)
+            self._construct_config(self.dir, nextport, name)
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
@@ -714,7 +725,6 @@ class MLaunchTool(BaseCmdLineTool):
             if not os.path.exists(mongosdir):
                 os.makedirs(mongosdir) 
 
-
         # start up mongos, but put them to the front of the port range
         nextport = self.args['port']
         for i in range(num_mongos):
@@ -722,134 +732,93 @@ class MLaunchTool(BaseCmdLineTool):
                 mongos_logfile = 'mongos/mongos_%i.log' % nextport
             else:
                 mongos_logfile = 'mongos.log'
-            self._launch_mongos(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
-            if i == 0: 
-                # store host/port of first mongos (use localhost)
-                self.mongos_host = 'localhost:%i' % nextport
+            self._construct_mongos(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
+            # if i == 0: 
+            #     # store host/port of first mongos (use localhost)
+            #     self.mongos_host = 'localhost:%i' % nextport
 
             nextport += 1
 
-        # add shards
-        print "adding shards (can take a few seconds, grab a snickers) ..."
-        con = Connection(self.mongos_host)
-        
-        shards_to_add = len(shard_names)
-        while True:
-            try:
-                nshards = con['config']['shards'].count()
-            except:
-                nshards = 0
-            if nshards >= shards_to_add:
-                break
-
-            for shard in shard_names:
-                try:
-                    res = con['admin'].command({'addShard':shard})
-                except Exception as e:
-                    if self.args['verbose']:
-                        print e, '- will retry.'
-                    continue
-
-                if res['ok']:
-                    if self.args['verbose']:
-                        print "shard %s added successfully"%shard
-                        shard_names.remove(shard)
-                        break
-                else:
-                    if self.args['verbose']:
-                        print res, '- will retry.'
-
-            time.sleep(1)
-
         # if mongos was temporary, kill it again
-        if kill_mongos:
-            print "shutting down temporary mongos on %s" % self.mongos_host
-            shutdownMongoDS(self.mongos_host)
+        # if kill_mongos:
+        #     print "shutting down temporary mongos on %s" % self.mongos_host
+        #     shutdownMongoDS(self.mongos_host)
 
 
-    def _launch_replset(self, basedir, portstart, name):
+    def _construct_replset(self, basedir, portstart, name):
         """ start a replica set, either for sharded cluster or by itself. """
 
-        threads = []
         configDoc = {'_id':name, 'members':[]}
 
         for i in range(self.args['nodes']):
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
-            self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
+            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
             host = '%s:%i'%(self.hostname, portstart+i)
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'votes':int(len(configDoc['members']) < 7 - int(self.args['arbiter']))})
-            threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
-            if self.args['verbose']:
-                print "waiting for mongod at %s to start up..."%host
+            
+            # threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
+            # if self.args['verbose']:
+            #     print "waiting for mongod at %s to start up..."%host
 
-            print "mongod at %s running." % host
+            # print "mongod at %s running." % host
 
         # launch arbiter if True
         if self.args['arbiter']:
             datapath = self._create_paths(basedir, '%s/arb'%(name))
-            self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
+            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
             
             host = '%s:%i'%(self.hostname, portstart+self.args['nodes'])
             configDoc['members'].append({'_id':len(configDoc['members']), 'host':host, 'arbiterOnly': True})
-            threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
-            if self.args['verbose']:
-                print "waiting for mongod at %s to start up..."%host
+        #     threads.append(threading.Thread(target=pingMongoDS, args=(host, 1.0, 30)))
+        #     if self.args['verbose']:
+        #         print "waiting for mongod at %s to start up..."%host
 
-            print "arbiter at %s running." % host
+        #     print "arbiter at %s running." % host
 
-        for thread in threads:
-            thread.start()
+        # for thread in threads:
+        #     thread.start()
 
-        for thread in threads:
-            thread.join()
-
-        # initiate replica set
-        con = Connection('localhost:%i'%portstart)
-
-        try:
-            rs_status = con['admin'].command({'replSetGetStatus': 1})
-        except OperationFailure, e:
-            con['admin'].command({'replSetInitiate':configDoc})
-            if self.args['verbose']:
-                print "replica set configured."
+        # for thread in threads:
+        #     thread.join()
 
         return name + '/' + ','.join([c['host'] for c in configDoc['members']])
 
 
-    def _launch_config(self, basedir, port, name=None):
+    def _construct_config(self, basedir, port, name=None):
         """ start a config server """
         datapath = self._create_paths(basedir, name)
-        self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
-        host = '%s:%i'%(self.hostname, port)
-        t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
-        t.start()
-        if self.args['verbose']:
-            print "waiting for mongod config server at %s to start up..."%host
-        t.join()
-        print "mongod config server at %s running."%host
+        # host = '%s:%i'%(self.hostname, port)
+        # t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
+        # t.start()
+        # if self.args['verbose']:
+        #     print "waiting for mongod config server at %s to start up..."%host
+        # t.join()
+        # print "mongod config server at %s running."%host
 
 
-    def _launch_single(self, basedir, port, name=None):
+    def _construct_single(self, basedir, port, name=None):
         """ start a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
-        self._launch_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
         host = '%s:%i'%(self.hostname, port)
-        t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
-        t.start()
-        if self.args['verbose']:
-            print "waiting for mongod at %s to start up..."%host
-        t.join()
-        print "mongod at %s running."%host
+
+        # t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
+        # t.start()
+        # if self.args['verbose']:
+        #     print "waiting for mongod at %s to start up..."%host
+        # t.join()
+        # print "mongod at %s running."%host
 
         return host
 
 
-    def _launch_mongod(self, dbpath, logpath, port, replset=None, extra=''):
+    def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """ starts a mongod process. """
-        self.check_port_availability(port, "mongod")
+        # self.check_port_availability(port, "mongod")
 
         rs_param = ''
         if replset:
@@ -867,25 +836,25 @@ class MLaunchTool(BaseCmdLineTool):
 
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
-        ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        if ret > 0:
-            print "can't start mongod, return code %i."%ret
-            print "tried to start: %s"%command_str
-            raise SystemExit
+        # ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        # if ret > 0:
+        #     print "can't start mongod, return code %i."%ret
+        #     print "tried to start: %s"%command_str
+        #     raise SystemExit
 
-        if self.args['verbose']:
-            print 'launching: %s'%command_str
+        # if self.args['verbose']:
+        #     print 'launching: %s'%command_str
 
         # store parameters in startup_info
+
         self.startup_info[port] = command_str
 
-        return ret
 
 
-    def _launch_mongos(self, logpath, port, configdb):
+    def _construct_mongos(self, logpath, port, configdb):
         """ start a mongos process. """
         extra = ''
-        self.check_port_availability(port, "mongos")
+        # self.check_port_availability(port, "mongos")
 
         out = subprocess.PIPE
         if self.args['verbose']:
@@ -903,26 +872,51 @@ class MLaunchTool(BaseCmdLineTool):
 
         command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
-        ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        # ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
 
-        if ret > 0:
-            print "can't start mongos, return code %i."%ret
-            print "tried to start: %s"%command_str
-            raise SystemExit
+        # if ret > 0:
+        #     print "can't start mongos, return code %i."%ret
+        #     print "tried to start: %s"%command_str
+        #     raise SystemExit
 
-        if self.args['verbose']:
-            print 'launching: %s'%command_str
+        # if self.args['verbose']:
+        #     print 'launching: %s'%command_str
         
-        host = '%s:%i'%(self.hostname, port)
-        t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
-        t.start()
-        if self.args['verbose']:
-            print "waiting for mongos to start up..."
-        t.join()
-        print "mongos at %s running."%host
+        # host = '%s:%i'%(self.hostname, port)
+        # t = threading.Thread(target=pingMongoDS, args=(host, 1.0, 30))
+        # t.start()
+        # if self.args['verbose']:
+        #     print "waiting for mongos to start up..."
+        # t.join()
+        # print "mongos at %s running."%host
 
         # store parameters in startup_info
         self.startup_info[port] = command_str
+
+
+    def start_on_ports(self, ports, wait=False):
+        threads = []
+
+        for port in ports:
+            command_str = self.startup_info[str(port)]
+            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+            
+            if self.args['verbose']:
+                print command_str
+
+            if ret > 0:
+                print "can't start process, return code %i."%ret
+                print "tried to start: %s"%command_str
+                raise SystemExit
+
+            if wait:
+                threads.append(threading.Thread(target=pingMongoDS, args=('localhost:%i'%port, 1.0, 30)))
+
+        if wait:
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
 
 
 
