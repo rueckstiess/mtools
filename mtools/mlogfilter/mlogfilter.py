@@ -99,6 +99,11 @@ class MLogFilterTool(LogFileTool):
 
     def _formatNumbers(self, line):
         """ formats the numbers so that there are commas inserted, ie. 1200300 becomes 1,200,300 """
+        
+        # below thousands separator syntax only works for python 2.7, skip for 2.6
+        if sys.version_info < (2, 7):
+            return line
+
         last_index = 0
         try:
             # find the index of the last } character
