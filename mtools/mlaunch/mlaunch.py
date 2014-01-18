@@ -30,14 +30,13 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
         is set to False, will wait for the node to shut down instead. This function can be called as a separate thread.
     """
-    con = None
     startTime = time.time()
-    while not con:
+    while True:
         if (time.time() - startTime) > timeout:
             return False
         try:
             con = Connection(host)
-            if to_start:
+            if con.alive() and to_start:
                 return True
             else:
                 time.sleep(interval)
@@ -68,6 +67,9 @@ class MLaunchTool(BaseCmdLineTool):
         BaseCmdLineTool.__init__(self)
 
         self.hostname = socket.gethostname()
+
+        # arguments
+        self.args = None
 
         # startup parameters for each port
         self.startup_info = {}
@@ -160,7 +162,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     # -- below are the main commands: init, start, stop, list
-    
+
 
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
@@ -174,27 +176,26 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['sharded']:
             # construct startup strings
             self._construct_sharded()
-            self.loaded_args, self.unknown_loaded_args = self.args, self.unknown_args
             self.discover()
 
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
-            nodes = self.get_tagged_ports(['mongod', 'down'])
+            nodes = self.get_tagged(['mongod', 'down'])
             self._start_on_ports(nodes, wait=True)
 
             # initiate replica sets
             for shard in shard_names:
                 # initiate replica set on first member
-                members = sorted(self.get_tagged_ports([shard]))
+                members = sorted(self.get_tagged([shard]))
                 self._initiate_replset(members[0], shard)
 
             # add mongos
-            mongos = sorted(self.get_tagged_ports(['mongos', 'down']))
+            mongos = sorted(self.get_tagged(['mongos', 'down']))
             self._start_on_ports(mongos, wait=True)
 
             # add shards
-            mongos = sorted(self.get_tagged_ports(['mongos']))
+            mongos = sorted(self.get_tagged(['mongos']))
             con = Connection('localhost:%i'%mongos[0])
 
             shards_to_add = len(self.shard_connection_str)
@@ -242,22 +243,20 @@ class MLaunchTool(BaseCmdLineTool):
         elif self.args['single']:
             # construct startup string
             self._construct_single(self.dir, self.args['port'])
-            self.loaded_args, self.unknown_loaded_args = self.args, self.unknown_args
             self.discover()
             
             # start node
-            nodes = self.get_tagged_ports(['single', 'down'])
+            nodes = self.get_tagged(['single', 'down'])
             self._start_on_ports(nodes, wait=False)
 
         
         elif self.args['replicaset']:
             # construct startup strings
             self._construct_replset(self.dir, self.args['port'], self.args['name'])
-            self.loaded_args, self.unknown_loaded_args = self.args, self.unknown_args
             self.discover()
 
             # start nodes and wait
-            nodes = sorted(self.get_tagged_ports(['mongod', 'down']))
+            nodes = sorted(self.get_tagged(['mongod', 'down']))
             self._start_on_ports(nodes, wait=True)
 
             # initiate replica set
@@ -277,9 +276,6 @@ class MLaunchTool(BaseCmdLineTool):
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
             will be shut down.
         """
-        if not self._load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
-
         self.discover()
 
         matches = self._get_ports_from_args(self.args, 'running')
@@ -297,14 +293,11 @@ class MLaunchTool(BaseCmdLineTool):
 
     def start(self):
         """ sub-command start. TODO """
-        if not self._load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
-
         self.discover()
 
         if not self.startup_info:
             # try to start nodes via init if all nodes are down
-            if len(self.get_tagged_ports(['down'])) == len(self.get_tagged_ports(['all'])):
+            if len(self.get_tagged(['down'])) == len(self.get_tagged(['all'])):
                 self.args = self.loaded_args
                 self.init()
                 return 
@@ -316,13 +309,13 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
-        mongod_matches = self.get_tagged_ports(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged_ports(['config']))
+        mongod_matches = self.get_tagged(['mongod'])
+        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
         mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
-        mongos_matches = self.get_tagged_ports(['mongos']).intersection(matches)
+        mongos_matches = self.get_tagged(['mongos']).intersection(matches)
         self._start_on_ports(mongos_matches)
 
 
@@ -330,26 +323,23 @@ class MLaunchTool(BaseCmdLineTool):
         """ sub-command list. Takes no further parameters. Will discover the current configuration and
             print a table of all the nodes with status and port.
         """
-        if not self._load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
-
         self.discover()
         print_docs = []
 
         # mongos
-        for node in sorted(self.get_tagged_ports(['mongos'])):
+        for node in sorted(self.get_tagged(['mongos'])):
             doc = {'process':'mongos', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
-        if len(self.get_tagged_ports(['mongos'])) > 0:
+        if len(self.get_tagged(['mongos'])) > 0:
             print_docs.append( None )
 
         # configs
-        for node in sorted(self.get_tagged_ports(['config'])):
+        for node in sorted(self.get_tagged(['config'])):
             doc = {'process':'config server', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
-        if len(self.get_tagged_ports(['config'])) > 0:
+        if len(self.get_tagged(['config'])) > 0:
             print_docs.append( None )
 
         # mongod
@@ -365,31 +355,31 @@ class MLaunchTool(BaseCmdLineTool):
 
             if replicaset:
                 # primary
-                nodes = self.get_tagged_ports(tags + ['primary', 'running'])
+                nodes = self.get_tagged(tags + ['primary', 'running'])
                 if len(nodes) > 0:
                     node = nodes.pop()
                     print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
                 # secondaries
-                nodes = sorted(self.get_tagged_ports(tags + ['secondary', 'running']))
+                nodes = sorted(self.get_tagged(tags + ['secondary', 'running']))
                 for node in nodes:
                     print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
                 # data-bearing nodes that are down
-                nodes = self.get_tagged_ports(tags + ['mongod', 'down'])
-                arbiters = self.get_tagged_ports(tags + ['arbiter'])
+                nodes = self.get_tagged(tags + ['mongod', 'down'])
+                arbiters = self.get_tagged(tags + ['arbiter'])
 
                 nodes = sorted(nodes - arbiters)
                 for node in nodes:
                     print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'down'})
 
                 # arbiters
-                nodes = sorted(self.get_tagged_ports(tags + ['arbiter']))
+                nodes = sorted(self.get_tagged(tags + ['arbiter']))
                 for node in nodes:
                     print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
 
             else:
-                nodes = self.get_tagged_ports(tags + ['mongod'])
+                nodes = self.get_tagged(tags + ['mongod'])
                 if len(nodes) > 0:
                     node = nodes.pop()
                     print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
@@ -417,6 +407,13 @@ class MLaunchTool(BaseCmdLineTool):
             self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
             for sub-commands start, stop, list.
         """
+
+        # load .mlaunch_startup file for start, stop, list, use current parameters for init
+        if self.args['command'] == 'init':
+            self.loaded_args, self.unknown_loaded_args = self.args, self.unknown_args
+        else:
+            if not self._load_parameters():
+                raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
         # reset cluster_* variables
         self.cluster_tree = {}
@@ -577,7 +574,7 @@ class MLaunchTool(BaseCmdLineTool):
         return self.cluster_running[port]
 
 
-    def get_tagged_ports(self, tags):
+    def get_tagged(self, tags):
         """ The format for the tags list is tuples for tags: mongos, config, shard, secondary tags
             of the form (tag, number), e.g. ('mongos', 2) which references the second mongos 
             in the list. For all other tags, it is simply the string, e.g. 'primary'.
@@ -620,7 +617,7 @@ class MLaunchTool(BaseCmdLineTool):
         for port in ports:
             threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
 
-        if self.args['verbose']:
+        if self.args and 'verbose' in self.args and self.args['verbose']:
             print "waiting for nodes %..." % 'to start' if to_start else 'to shutdown'
         for thread in threads:
             thread.start()
@@ -732,7 +729,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         tags.append(extra_tag)
 
-        matches = self.get_tagged_ports(tags)
+        matches = self.get_tagged(tags)
         return matches
 
 
@@ -901,6 +898,7 @@ class MLaunchTool(BaseCmdLineTool):
         """ start a config server """
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
+
 
 
     def _construct_single(self, basedir, port, name=None):
