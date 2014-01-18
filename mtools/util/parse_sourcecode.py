@@ -13,7 +13,7 @@ from pymongo import MongoClient
 
 
 mongodb_path = "/Users/tr/Documents/code/mongo/"
-git_path = "/usr/local/bin/git"
+git_path = "/usr/bin/git"
 
 def source_files(mongodb_path):
     for root, dirs, files in os.walk(mongodb_path):
@@ -39,7 +39,6 @@ def get_all_versions():
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
-
     versions = out.split()
 
     # only newer than 1.8.0
