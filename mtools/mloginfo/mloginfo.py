@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from mtools.util.logfile import LogFile
 from mtools.util.logline import LogLine
