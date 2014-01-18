@@ -9,6 +9,7 @@ Changes to mtools
   * mlogfilter: added filter masks `--mask errors.log` to search for correlations around certain events (#138)
   * mplotqueries: log parsing performance improvements for most plots
   * mlogvis: log parsing performance improvements
+  * all tools: replaced shebang with `#!/usr/bin/env python`, to support non-standard python installations
   
 
 #### version 1.1.1
