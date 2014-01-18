@@ -4,7 +4,6 @@ import argparse, re
 import sys
 import inspect
 import types
-import locale
 
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
@@ -32,10 +31,6 @@ class MLogFilterTool(LogFileTool):
         self.argparser.add_argument('--markers', action='store', nargs='*', default=['filename'], help='use markers when merging several files to distinguish them. Choose from none, enum, alpha, filename (default), or provide list.')
         self.argparser.add_argument('--timezone', action='store', nargs='*', default=[], type=int, metavar="N", help="timezone adjustments: add N hours to corresponding log file, single value for global adjustment.")
         self.argparser.add_argument('--timestamp-format', action='store', default='none', choices=['none', 'ctime-pre2.4', 'ctime', 'iso8601-utc', 'iso8601-local'], help="choose datetime format for log output")
-
-        # for thousands separator conversion in python 2.6
-        locale.setlocale(locale.LC_ALL, 'en_US')
-
 
     def addFilter(self, filterClass):
         """ adds a filter class to the parser. """
@@ -104,7 +99,10 @@ class MLogFilterTool(LogFileTool):
 
     def _formatNumbers(self, line):
         """ formats the numbers so that there are commas inserted, ie. 1200300 becomes 1,200,300 """
-        
+        # below thousands separator syntax only works for python 2.7, skip for 2.6
+        if sys.version_info < (2, 7):
+            return line
+
         last_index = 0
         try:
             # find the index of the last } character
@@ -124,7 +122,7 @@ class MLogFilterTool(LogFileTool):
                     pass
                 else:
                     if converted > 1000:
-                        splitted[index] = locale.format("%d", converted, grouping=True)
+                        splitted[index] = format(converted, ",d")
             return line[:last_index] + ("").join(splitted)
 
 

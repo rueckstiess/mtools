@@ -4,6 +4,7 @@ from mtools.util.logfile import LogFile
 import mtools
 
 from nose.tools import *
+from nose.plugins.skip import Skip, SkipTest
 
 from random import randrange
 from datetime import timedelta
@@ -74,6 +75,10 @@ class TestMLogFilter(object):
             assert(len(line) <= 50)
 
     def test_human(self):
+        # need to skip this test for python 2.6.x because thousands separator format is not compatible
+        if sys.version_info < (2, 7):
+            raise SkipTest
+
         self.tool.run('%s --slow --thread conn8 --human'%self.logfile_path)
         output = sys.stdout.getvalue().rstrip()
         assert(output.endswith('(0hr 0min 1secs 324ms) 1,324ms'))
