@@ -175,6 +175,12 @@ class MLaunchTool(BaseCmdLineTool):
 
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
+        
+        # check for existing environment. Only allow subsequent 'mlaunch init' if they are identical.
+        if self._load_parameters():
+            if self.loaded_args != self.args:
+                raise SystemExit('A different environment already exists at %s.' % self.dir)
+
         # check if authentication is enabled, make key file       
         if self.args['authentication']:
             if not os.path.exists(self.dir):
