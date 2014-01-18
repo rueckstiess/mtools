@@ -390,27 +390,26 @@ class MLaunchTool(BaseCmdLineTool):
 
             if replicaset:
                 # primary
-                nodes = self.get_tagged(tags + ['primary', 'running'])
-                if len(nodes) > 0:
-                    node = nodes.pop()
+                primary = self.get_tagged(tags + ['primary', 'running'])
+                if len(primary) > 0:
+                    node = list(primary)[0]
                     print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
                 
                 # secondaries
-                nodes = sorted(self.get_tagged(tags + ['secondary', 'running']))
-                for node in nodes:
+                secondaries = self.get_tagged(tags + ['secondary', 'running'])
+                for node in sorted(secondaries):
                     print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
                 
-                # data-bearing nodes that are down
-                nodes = self.get_tagged(tags + ['mongod', 'down'])
+                # data-bearing nodes that are down or not in the replica set yet
+                mongods = self.get_tagged(tags + ['mongod'])
                 arbiters = self.get_tagged(tags + ['arbiter'])
 
-                nodes = sorted(nodes - arbiters)
+                nodes = sorted(mongods - primary - secondaries - arbiters)
                 for node in nodes:
-                    print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'down'})
+                    print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'})
 
                 # arbiters
-                nodes = sorted(self.get_tagged(tags + ['arbiter']))
-                for node in nodes:
+                for node in arbiters:
                     print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
 
             else:
