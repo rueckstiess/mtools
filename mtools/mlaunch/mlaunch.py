@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import argparse
 import subprocess
 import threading
 import os, time, sys, re
@@ -88,23 +89,33 @@ class MLaunchTool(BaseCmdLineTool):
         self.shard_connection_str = []
 
 
+    def run(self, arguments=None):
+        """ This is the main run method, called for all sub-commands and parameters.
+            It sets up argument parsing, then calls the sub-command method with the same name.
+        """
+
+        # set up argument parsing in run, so that subsequent calls to run can call different sub-commands
+        self.argparser = argparse.ArgumentParser()
+        self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
+
         self.argparser.description = 'script to launch MongoDB stand-alone servers, replica sets and shards.'
 
+        # make sure init is default command even when specifying arguments directly
+        if arguments and arguments.startswith('-'):
+            arguments = 'init ' + arguments
+        
         # default sub-command is `init` if none provided
-        if len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
-            # not sub command given, redirect all options to main parser
-            init_redirected = True
-            init_parser = self.argparser
-            init_parser.add_argument('--command', action='store_const', const='init', default='init')
-        else:
-            # create sub-parser for the command `start`
-            init_redirected = False
-            subparsers = self.argparser.add_subparsers(dest='command')
-            self.argparser._action_groups[0].title = 'commands'
-            self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch [command] --help'
-            init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
+        elif len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
+            sys.argv = sys.argv[0:1] + ['init'] + sys.argv[1:]
 
+        # create command sub-parsers
+        subparsers = self.argparser.add_subparsers(dest='command')
+        self.argparser._action_groups[0].title = 'commands'
+        self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch [command] --help'
+        
         # init command 
+        init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters.',
+            description='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
 
         # either single or replica set
         me_group = init_parser.add_mutually_exclusive_group(required=True)
@@ -128,30 +139,27 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
 
-        if not init_redirected:
-            # start command
-            start_parser = subparsers.add_parser('start', description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
-            start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
-            start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-            start_parser.add_argument('--dir', action='store', default='./data', help='base directory to start nodes (default=./data/)')
+        # start command
+        start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
+            description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
+        start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
+        start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        start_parser.add_argument('--dir', action='store', default='./data', help='base directory to start nodes (default=./data/)')
 
-            # stop command
-            stop_parser = subparsers.add_parser('stop', description='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
-            stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
-            stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-            stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
-            
-            # list command
-            list_parser = subparsers.add_parser('list', description='list MongoDB instances for this configuration')
-            list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
-            list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        # stop command
+        stop_parser = subparsers.add_parser('stop', help='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.',
+            description='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
+        stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
+        stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
+        
+        # list command
+        list_parser = subparsers.add_parser('list', help='list MongoDB instances for this configuration',
+            description='list MongoDB instances for this configuration')
+        list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
+        list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
-
-
-    def run(self, arguments=None):
-        """ This is the main run method, called for all sub-commands and parameters.
-            It will then call the sub-command method with the same name.
-        """
+        # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
         # replace path with absolute path
@@ -297,7 +305,12 @@ class MLaunchTool(BaseCmdLineTool):
                 print "shutting down %s" % host_port
             shutdown_host(host_port)
 
+        # wait until nodes are all shut down
+        self.wait_for(matches, to_start=False)
         print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
+
+        # refresh discover
+        self.discover()
 
 
     def start(self):
@@ -326,6 +339,13 @@ class MLaunchTool(BaseCmdLineTool):
         # now start mongos
         mongos_matches = self.get_tagged(['mongos']).intersection(matches)
         self._start_on_ports(mongos_matches)
+
+        # wait for all nodes to be running
+        nodes = self.get_tagged(['all'])
+        self.wait_for(nodes)
+
+        # refresh discover
+        self.discover()
 
 
     def list(self):
@@ -399,7 +419,7 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             # print tags as well
             for doc in filter(lambda x: type(x) == dict, print_docs):               
-                tags = self.get_tags_for_port(doc['port'])
+                tags = self.get_tags_of_port(doc['port'])
                 doc['tags'] = ', '.join(tags)
 
         print_docs.append( None )   
@@ -416,6 +436,8 @@ class MLaunchTool(BaseCmdLineTool):
             self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
             for sub-commands start, stop, list.
         """
+        if not self.args or not self.args['command']:
+            return
 
         # load .mlaunch_startup file for start, stop, list, use current parameters for init
         if self.args['command'] == 'init':
@@ -432,7 +454,7 @@ class MLaunchTool(BaseCmdLineTool):
         # get shard names
         shard_names = self._get_shard_names(self.loaded_args)
 
-        # states
+        # some shortcut variables
         is_sharded = 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None
         is_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
         is_single = 'single' in self.loaded_args and self.loaded_args['single']
@@ -460,31 +482,23 @@ class MLaunchTool(BaseCmdLineTool):
         # tag all nodes with 'all'
         self.cluster_tags['all'].extend ( range(current_port, current_port + num_nodes) )
 
-        # tag all nodes with their port number (as string)
+        # tag all nodes with their port number (as string) and whether they are running
         for port in range(current_port, current_port + num_nodes):
             self.cluster_tags[str(port)].append(port)
 
+            running = self.is_running(port)
+            self.cluster_running[port] = running
+            self.cluster_tags['running' if running else 'down'].append(port)
+
+        
         # find all mongos
         for i in range(num_mongos):
             port = i+current_port
-
-            try:
-                mc = Connection( 'localhost:%i'%port )
-                # if this is not a mongos, something went wrong, fail
-                assert (mc.is_mongos)
-                running = True
-
-            except ConnectionFailure:
-                # node not reachable
-                running = False
 
             # add mongos to cluster tree
             self.cluster_tree.setdefault( 'mongos', [] ).append( port )
             # add mongos to tags
             self.cluster_tags['mongos'].append( port )
-            self.cluster_tags['running' if running else 'down'].append( port )
-            # add mongos to running map
-            self.cluster_running[port] = running
 
         current_port += num_mongos
 
@@ -523,32 +537,10 @@ class MLaunchTool(BaseCmdLineTool):
                         self.cluster_tree['secondary'][i].append(secondary)
 
                 except (ConnectionFailure, ConfigurationError):
-                    # none of the nodes of the replica set is running, mark down then next shard
-                    self.cluster_tags['down'].extend( port_range )
-                    current_port += num_nodes_per_shard
-                    continue
+                    pass
 
             elif is_single:
                 self.cluster_tags['single'].append( current_port )
-
-            
-            # now determine which nodes are running / down
-            for i in range(num_nodes_per_shard):
-                port = i+current_port
-                
-                try:
-                    mc = Connection( 'localhost:%i'% port )
-                    running = True
-
-                except ConnectionFailure:
-                    # node not reachable
-                    running = False
-
-                # add mongod to tags
-                self.cluster_tags['running' if running else 'down'].append( port )
-
-                # add node to running map
-                self.cluster_running[port] = running
 
             # increase current_port
             current_port += num_nodes_per_shard
@@ -571,9 +563,6 @@ class MLaunchTool(BaseCmdLineTool):
             # add config server to tags
             self.cluster_tags['config'].append( port )
             self.cluster_tags['mongod'].append( port )
-            self.cluster_tags['running' if running else 'down'].append( port )
-            # add config server to running map
-            self.cluster_running[port] = running
 
         current_port += num_mongos
 
@@ -594,19 +583,22 @@ class MLaunchTool(BaseCmdLineTool):
             in the list. For all other tags, it is simply the string, e.g. 'primary'.
         """
 
-        # if tags is a simple string, make it a list
+        # if tags is a simple string, make it a list (note: tuples like ('mongos', 2) must be in a surrounding list)
         if not hasattr(tags, '__iter__') and type(tags) == str:
             tags = [ tags ]
 
         nodes = set(self.cluster_tags['all'])
 
         for tag in tags:
-            if type(tag) == tuple:
+            if re.match(r'\w+ \d{1,2}', tag):
                 # special case for tuple tags: mongos, config, shard, secondary. These can contain a number
-                tag, number = tag
-                assert (tag in ('mongos', 'config', 'shard', 'secondary'))
+                tag, number = tag.split()
 
-                branch = self.cluster_tree[tag][number]
+                try:
+                    branch = self.cluster_tree[tag][int(number)-1]
+                except (IndexError, KeyError):
+                    continue
+
                 if hasattr(branch, '__iter__'):
                     subset = set(branch)
                 else:
@@ -726,12 +718,16 @@ class MLaunchTool(BaseCmdLineTool):
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
             if re.match('^\d{1,2}$', tag1):
+                print "warning: ignoring numeric value '%s'" % tag1
                 continue
 
             if re.match('^\d{1,2}$', tag2):
-                if tag1 in ['mongos', 'shard', 'secondary', 'mongod', 'config']:
-                    tags.append( (tag1, int(tag2)-1) )
+                if tag1 in ['mongos', 'shard', 'secondary', 'config']:
+                    # combine tag with number, separate by string
+                    tags.append( '%s %s' % (tag1, tag2) )
                     continue
+                else: 
+                    print "warning: ignoring numeric value '%s' after '%s'"  % (tag2, tag1)
             
             tags.append( tag1 )
 
@@ -970,8 +966,6 @@ class MLaunchTool(BaseCmdLineTool):
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
-
-
 
 
 
