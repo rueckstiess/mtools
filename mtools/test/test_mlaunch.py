@@ -371,15 +371,11 @@ class TestMLaunch(object):
             time.sleep(1)
             self.tool.discover()
 
-        # test for primary, secondary, but as the nodes lose their tags, needs to be manual
+        # test for primary, but as the nodes lose their tags, needs to be manual
         self.tool.run("stop primary --dir %s" % self.data_dir)
         assert len(self.tool.get_tagged('down')) == 2
         self.tool.run("start --dir %s" % self.data_dir)
 
-        # all 'first' secondaries
-        self.tool.run("stop secondary 1 --dir %s" % self.data_dir)
-        assert len(self.tool.get_tagged('down')) == 2
-        self.tool.run("start --dir %s" % self.data_dir)
 
 
     # TODO 
