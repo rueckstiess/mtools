@@ -5,10 +5,11 @@ import os
 import json
 import sys
 
-from mtools.mlaunch.mlaunch import MLaunchTool
+from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
 from pymongo.errors import AutoReconnect, ConnectionFailure
 from nose.tools import *
+from nose.plugins.attrib import attr
 
 
 class TestMLaunch(object):
@@ -18,26 +19,18 @@ class TestMLaunch(object):
     """
 
     static_port = 33333
-    max_port_range = 100
-    data_dir = 'test_mlaunch_data'
+    data_dir = 'data_test_mlaunch'
 
 
     def __init__(self):
         """ Constructor. """
         self.n_processes_started = 0
         self.port = TestMLaunch.static_port
-
-
-    def _reserve_ports(self, number):
-        self.n_processes_started = number
-        self.port = TestMLaunch.static_port
-        TestMLaunch.static_port += number
         
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLaunchTool()
-        # self.port = self._find_free_port(self.port)
         self.n_processes_started = 0
 
         # if the test data path exists, remove it
@@ -48,45 +41,31 @@ class TestMLaunch(object):
     def teardown(self):
         """ tear down method after each test, removes data directory. """
 
-        # shutdown as many processes as the test required
-        for p in range(self.n_processes_started):
-            print "shutting", self.port + p
-            self._shutdown_mongosd(self.port + p)
+        # shutdown all running processes
+        self.tool.discover()
+        ports = self.tool.get_tagged('all')
+
+        for port in ports:
+            shutdown_host('localhost:%s' % port)
+        self.tool.wait_for(ports, to_start=False)
 
         # if the test data path exists, remove it
         if os.path.exists(self.data_dir):
             shutil.rmtree(self.data_dir)
 
 
-    def _shutdown_mongosd(self, port):
-        """ send the shutdown command to a mongod or mongos on given port. """
-        try:
-            mc = MongoClient('localhost:%i' % port)
-            try:
-                mc.admin.command('shutdown', force=True)
-            except AutoReconnect:
-                pass
-        except ConnectionFailure:
-            pass
-        else:
-            mc.close()
 
+    # -- tests below ---
 
     @raises(ConnectionFailure)
     def test_test(self):
         """ TestMLaunch setup and teardown test """
 
-        # test that variable is reset
-        assert self.n_processes_started == 0
-
         # test that data dir does not exist
         assert not os.path.exists(self.data_dir)
 
-        # get ports for processes during this test
-        self._reserve_ports(1)
-
         # start mongo process on free test port
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # call teardown method within this test
         self.teardown()
@@ -94,49 +73,71 @@ class TestMLaunch(object):
         # test that data dir does not exist anymore
         assert not os.path.exists(self.data_dir)
 
-        # no processes need to be killed anymore for the real teardown
-        self.n_processes_started = 0
-
         # test that mongod is not running on this port anymore (raises ConnectionFailure)
         mc = MongoClient('localhost:%i' % self.port)
+
+
+    def test_argv_run(self):
+        """ mlaunch: test true command line arguments, instead of passing into tool.run(). """
+        
+        # make command line arguments through sys.argv
+        sys.argv = ['mlaunch', 'init', '--single', '--dir', self.data_dir, '--port', str(self.port), '--nojournal']
+
+        tool = MLaunchTool()
+        tool.run()
+        assert tool.is_running(self.port)
+
+
+    def test_init_default(self):
+        """ mlaunch: test that 'init' command can be omitted, is default """
+
+        # make command line arguments through sys.argv
+        sys.argv = ['mlaunch', '--single', '--dir', self.data_dir, '--port', str(self.port), '--nojournal']
+
+        tool = MLaunchTool()
+        tool.run()
+        assert tool.is_running(self.port)
+
+
+    def test_init_default_arguments(self):
+        """ mlaunch: test that 'init' command is default, even when specifying arguments to run() """
+        
+        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        assert self.tool.is_running(self.port)
 
 
     def test_single(self):
         """ mlaunch: start stand-alone server and tear down again """
 
-        # get ports for processes during this test
-        self._reserve_ports(1)
+        # start mongo process on free test port
+        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
-        # start mongo process on free test port 
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        # make sure node is running
+        assert self.tool.is_running(self.port)
 
         # check if data directory and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'db'))
         assert os.path.isfile(os.path.join(self.data_dir, 'mongod.log'))
 
+        # check that the tags are set correctly: 'single', 'mongod', 'running', <port>
+        assert set(self.tool.get_tags_of_port(self.port)) == set(['running', 'mongod', 'all', 'single', str(self.port)])
 
-    @raises(SystemExit)
+
     def test_single_on_existing_port(self):
         """ mlaunch: using already existing port fails """
 
-        # get ports for processes during this test
-        self._reserve_ports(1)
-
         # start mongo process on free test port
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
-        # start mongo process on same port, should raise SystemExit
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        # start mongo process on same port, should not throw error, finish normally
+        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
 
     def test_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter and compare rs.conf() """
 
-        # get ports for processes during this test
-        self._reserve_ports(3)
-
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -153,35 +154,15 @@ class TestMLaunch(object):
         assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
 
 
-    def test_restart(self):
-        """ mlaunch: --restart brings up the same configuration """
-
-        # get ports for processes during this test
-        self._reserve_ports(3)
-
-        # start mongo process on free test port 
-        self.tool.run("--replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
-
-        self.teardown()
-
-        # start mongo process on free test port 
-        self.tool.run("--restart --dir %s" % self.data_dir)
-
-        # repeat test on replica set with restarted set
-        self.test_replicaset_conf()
-
-
     @timed(60)
+    @attr('slow')
     def test_replicaset_ismaster(self):
-        """ mlaunch: start replica set and verify that first node becomes primary (slow)
-            Test must complete in 60 seconds.
+        """ mlaunch: start replica set and verify that first node becomes primary. 
+            Then replicate one document. Test must complete in 60 seconds.
         """
 
-        # get ports for processes during this test
-        self._reserve_ports(3)
-
         # start mongo process on free test port
-        self.tool.run("--replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # create mongo client
         mc = MongoClient('localhost:%i' % self.port)
@@ -201,11 +182,8 @@ class TestMLaunch(object):
     def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
-        # get ports for processes during this test
-        self._reserve_ports(4)
-
         # start mongo process on free test port 
-        self.tool.run("--sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
     
         # check if data directories and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'shard01/db'))
@@ -214,7 +192,7 @@ class TestMLaunch(object):
         assert os.path.isfile(os.path.join(self.data_dir, 'mongos.log'))
 
         # create mongo client
-        mc = MongoClient('localhost:%i' % (self.port+3))
+        mc = MongoClient('localhost:%i' % (self.port))
 
         # check for 2 shards and 1 mongos
         assert mc['config']['shards'].count() == 2
@@ -225,55 +203,43 @@ class TestMLaunch(object):
         """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
         """
-        # get ports for processes during this test
-        self._reserve_ports(1)
-
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --single --port %i -v --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if the startup file exists
         startup_file = os.path.join(self.data_dir, '.mlaunch_startup')
         assert os.path.isfile(startup_file)
 
         # compare content of startup file with tool.args
-        file_args = self.tool.convert_u2b(json.load(open(startup_file, 'r')))
-        assert file_args == self.tool.args
-
-
-    @raises(SystemExit)
-    def test_check_port_availability(self):
-        """ mlaunch: test check_port_availability() method """
-        
-        # get ports for processes during this test
-        self._reserve_ports(1)
-
-        # start mongod
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
-
-        # make sure port is not available for another launch on that port
-        self.tool.check_port_availability(self.port, "mongod")
+        file_contents = self.tool._convert_u2b(json.load(open(startup_file, 'r')))
+        assert file_contents['parsed_args'] == self.tool.args
+        assert file_contents['unknown_args'] == self.tool.unknown_args
 
 
     def test_single_mongos_explicit(self):
-        """ mlaunch: test if single mongos creates <datadir>/mongos.log """
-        self._reserve_ports(4)
-
+        """ mlaunch: test if single mongos is running on start port and creates <datadir>/mongos.log """
+        
         # start 2 shards, 1 config server, 1 mongos
-        self.tool.run("--sharded 2 --single --config 1 --mongos 1 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --sharded 2 --single --config 1 --mongos 1 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if mongos log files exist on correct ports
         assert os.path.exists(os.path.join(self.data_dir, 'mongos.log'))
 
+        # check for correct port
+        assert self.tool.get_tagged('mongos') == set([self.port])
+
 
     def test_multiple_mongos(self):
         """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir. """
-        self._reserve_ports(5)
 
         # start 2 shards, 1 config server, 2 mongos
-        self.tool.run("--sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # this also tests that mongos are started at the beginning of the port range
         assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port)))
         assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port + 1)))
+
+        # check that 2 mongos are running
+        assert len( self.tool.get_tagged(['mongos', 'running']) ) == 2
 
 
     def test_filter_valid_arguments(self):
@@ -291,11 +257,8 @@ class TestMLaunch(object):
     def test_large_replicaset_arbiter(self):
         """ mlaunch: start large replica set of 12 nodes with arbiter """
 
-        # get ports for processes during this test
-        self._reserve_ports(12)
-
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("--replicaset --nodes 11 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --replicaset --nodes 11 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -320,15 +283,15 @@ class TestMLaunch(object):
         assert len(conf['members']) == 12
         assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
 
+        # check that 12 nodes are discovered
+        assert len(self.tool.get_tagged('all')) == 12
+
 
     def test_large_replicaset_noarbiter(self):
         """ mlaunch: start large replica set of 12 nodes without arbiter """
 
-        # get ports for processes during this test
-        self._reserve_ports(12)
-
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("--replicaset --nodes 12 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --replicaset --nodes 12 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -354,9 +317,71 @@ class TestMLaunch(object):
         assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 0
 
 
-    # TODO: test functionality of --binarypath, --authentication, --verbose, --name
+    def test_stop(self):
+        """ mlaunch: test stopping all nodes """
+
+        # start mongo process on free test port (don't need journal for this test)
+        self.tool.run("init --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.tool.run("stop --dir %s" % self.data_dir)
+
+        # make sure all nodes are down
+        nodes = self.tool.get_tagged('all')
+        assert all( not self.tool.is_running(node) for node in nodes )
 
 
-    # mark slow tests
-    test_replicaset_ismaster.slow = 1
-    test_sharded_status.slow = 1
+    def test_stop_start(self):
+        """ mlaunch: test stop and then re-starting nodes """
+
+        # start, stop (as before)
+        self.test_stop()
+        self.tool.run("start --dir %s" % self.data_dir)
+
+        # make sure all nodes are running
+        nodes = self.tool.get_tagged('all')
+        assert all( self.tool.is_running(node) for node in nodes )
+
+    
+    @timed(90)
+    @attr('slow')
+    def test_stop_partial(self):
+
+        # key is tag for command line, value is tag for get_tagged
+        tags = ['shard01', 'shard 1', 'mongod', 'mongos', 'config', str(self.port)] 
+
+        # start large cluster
+        self.tool.run("init --sharded 2 --replicaset --config 3 --mongos 3 --port %i --dir %s" % (self.port, self.data_dir))
+
+        # make sure all nodes are running
+        nodes = self.tool.get_tagged('all')
+        assert all( self.tool.is_running(node) for node in nodes )
+
+        # go through all tags, stop nodes for each tag, confirm only the tagged ones are down, start again
+        for tag in tags:
+            self.tool.run("stop %s --dir %s" % (tag, self.data_dir))
+            assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
+            self.tool.run("start --dir %s" % self.data_dir)
+            assert len(self.tool.get_tagged('down')) == 0
+
+        # make sure primaries are running again (we just failed them over above). 
+        # while True is ok, because test times out after some time
+        while True:
+            primaries = self.tool.get_tagged('primary')
+            if len(primaries) == 2:
+                break
+            time.sleep(1)
+            self.tool.discover()
+
+        # test for primary, secondary, but as the nodes lose their tags, needs to be manual
+        self.tool.run("stop primary --dir %s" % self.data_dir)
+        assert len(self.tool.get_tagged('down')) == 2
+        self.tool.run("start --dir %s" % self.data_dir)
+
+        # all 'first' secondaries
+        self.tool.run("stop secondary 1 --dir %s" % self.data_dir)
+        assert len(self.tool.get_tagged('down')) == 2
+        self.tool.run("start --dir %s" % self.data_dir)
+
+
+    # TODO 
+    # - test functionality of --binarypath, --authentication, --verbose, --name
+
