@@ -35,7 +35,7 @@ class ScatterPlotType(BasePlotType):
 
     def accept_line(self, logline):
         """ return True if the log line has the nominated yaxis field. """
-        return getattr(logline, self.field)
+        return (getattr(logline, self.field) != None)
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group

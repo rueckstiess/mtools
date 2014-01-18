@@ -7,6 +7,7 @@ from nose.tools import *
 
 from random import randrange
 from datetime import timedelta
+from dateutil import parser
 import os
 import sys
 import re
@@ -112,6 +113,62 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert('lock' in line)
+
+
+    def test_mask_end(self):
+        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+
+        event1 = parser.parse("Mon Aug  5 20:27:15")
+        event2 = parser.parse("Mon Aug  5 20:30:09")
+        mask_size = randrange(10, 60)
+        padding = timedelta(seconds=mask_size/2)
+
+        self.tool.run('%s --mask %s --mask-size %i'%(self.logfile_path, mask_path, mask_size))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            ll = LogLine(line)
+            assert( 
+                    (ll.datetime >= event1 - padding and ll.datetime <= event1 + padding) or
+                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                  )
+
+
+    def test_mask_start(self):
+        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+
+        event1 = parser.parse("Mon Aug  5 20:27:15")
+        duration1 = timedelta(seconds=75)
+        event2 = parser.parse("Mon Aug  5 20:30:09")
+        mask_size = randrange(10, 60)
+        padding = timedelta(seconds=mask_size/2)
+
+        self.tool.run('%s --mask %s --mask-size %i --mask-center start'%(self.logfile_path, mask_path, mask_size))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            ll = LogLine(line)
+            assert( 
+                    (ll.datetime >= event1 - duration1 - padding and ll.datetime <= event1 - duration1 + padding) or
+                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                  )
+
+
+    def test_mask_both(self):
+        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+
+        event1 = parser.parse("Mon Aug  5 20:27:15")
+        duration1 = timedelta(seconds=75)
+        event2 = parser.parse("Mon Aug  5 20:30:09")
+        mask_size = randrange(10, 60)
+        padding = timedelta(seconds=mask_size/2)
+
+        self.tool.run('%s --mask %s --mask-size %i --mask-center both'%(self.logfile_path, mask_path, mask_size))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            ll = LogLine(line)
+            assert( 
+                    (ll.datetime >= event1 - duration1 - padding and ll.datetime <= event1 + padding) or
+                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                  )
 
 
 # output = sys.stdout.getvalue().strip()

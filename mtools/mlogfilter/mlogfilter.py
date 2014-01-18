@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse, re
 import sys
@@ -8,6 +8,7 @@ import types
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
 from mtools.util.logline import LogLine
+from mtools.util.logfile import LogFile
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
@@ -161,11 +162,14 @@ class MLogFilterTool(LogFileTool):
     def logfile_generator(self):
         """ generator method that yields each line of the logfile, or the next line in case of several log files. """
         
-        if not self.is_stdin and not self.args['exclude']:
-            # find datetime filter and binary-search for start date 
-            dtfilter = filter(lambda x: isinstance(x, filters.DateTimeFilter), self.filters)
-            if len(dtfilter) > 0:
-                dtfilter[0].seek_binary()
+        if not self.args['exclude']:
+            # ask all filters for a start_limit and fast-forward to the maximum
+            start_limits = [ f.start_limit for f in self.filters if hasattr(f, 'start_limit') ]
+
+            if start_limits:
+                for logfile in self.args['logfile']: 
+                    lf_info = LogFile(logfile)
+                    lf_info.fast_forward( max(start_limits) )
 
         if len(self.args['logfile']) > 1:
             # todo, merge
@@ -178,7 +182,6 @@ class MLogFilterTool(LogFileTool):
                 if logline.datetime: 
                     logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logline
-
 
 
     def run(self, arguments=None):

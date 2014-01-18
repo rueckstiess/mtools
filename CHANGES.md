@@ -1,6 +1,16 @@
 Changes to mtools
 =================
 
+#### version 1.1.2
+
+  * mlaunch: completely rewritten, is now aware of the launched environment, commands: init, start, stop, list (#148)
+  * mlaunch: mongos nodes start at beginning of port range for easier access (#145)
+  * mlaunch: always uses absolute paths for the data directory, which shows up in `ps aux | grep mongo` output (#143)
+  * mlogfilter: added filter masks `--mask errors.log` to search for correlations around certain events (#138)
+  * mplotqueries: log parsing performance improvements for most plots
+  * mlogvis: log parsing performance improvements
+  * all tools: replaced shebang with `#!/usr/bin/env python`, to support non-standard python installations
+  
 
 #### version 1.1.1
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
 import re
@@ -115,7 +115,8 @@ class MPlotQueriesTool(LogFileTool):
 
         for logfile in self.logfiles:
             start = None
-            end = None
+            end = None         
+            logline = None
             
             # get log file information
             if self.progress_bar_enabled:
@@ -135,7 +136,7 @@ class MPlotQueriesTool(LogFileTool):
                 logline = LogLine(line)
 
                 # adjust times if --optime-start is enabled
-                if self.args['optime_start'] and logline.duration:
+                if self.args['optime_start'] and logline.duration and logline.datetime:
                     # create new variable end_datetime in logline object and store starttime there
                     logline.end_datetime = logline.datetime 
                     logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
@@ -144,23 +145,12 @@ class MPlotQueriesTool(LogFileTool):
                 if not start:
                     start = logline.datetime
 
-                if logline.datetime:
-                    if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
-                        end = logline.end_datetime
-                    else:
-                        end = logline.datetime
-
                 # update progress bar every 1000 lines
                 if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:
                     progress_curr = self._datetime_to_epoch(logline.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
-                if multiple_files:
-                    # amend logline object with filename for group by filename
-                    logline.filename = logfile.name
-
                 # offer plot_instance and see if it can plot it
-                line_accepted = False
                 if plot_instance.accept_line(logline):
                     
                     # if logline doesn't have datetime, skip
@@ -170,8 +160,19 @@ class MPlotQueriesTool(LogFileTool):
                     if logline.namespace == None:
                         logline._namespace = "None"
 
-                    line_accepted = True
                     plot_instance.add_line(logline)
+
+                if multiple_files:
+                    # amend logline object with filename for group by filename
+                    logline.filename = logfile.name
+
+
+            # store end of logfile 
+            if logline and logline.datetime:
+                if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
+                    end = logline.end_datetime
+                else:
+                    end = logline.datetime
 
             # store start and end for each logfile
             plot_instance.date_range = (start, end)
