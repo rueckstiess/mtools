@@ -35,8 +35,10 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
         if (time.time() - startTime) > timeout:
             return False
         try:
+            # make connection and ping host
             con = Connection(host)
-            if con.alive() and to_start:
+            con.admin.command('ping')
+            if to_start:
                 return True
             else:
                 time.sleep(interval)
@@ -125,7 +127,6 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
-
 
         if not init_redirected:
             # start command
@@ -261,6 +262,14 @@ class MLaunchTool(BaseCmdLineTool):
 
             # initiate replica set
             self._initiate_replset(nodes[0], self.args['name'])
+
+
+        # wait for all nodes to be running
+        nodes = self.get_tagged(['all'])
+        self.wait_for(nodes)
+
+        # discover again, to get up-to-date info
+        self.discover()
 
         # write out parameters
         if self.args['verbose']:
@@ -580,6 +589,10 @@ class MLaunchTool(BaseCmdLineTool):
             in the list. For all other tags, it is simply the string, e.g. 'primary'.
         """
 
+        # if tags is a simple string, make it a list
+        if not hasattr(tags, '__iter__') and type(tags) == str:
+            tags = [ tags ]
+
         nodes = set(self.cluster_tags['all'])
 
         for tag in tags:
@@ -793,10 +806,14 @@ class MLaunchTool(BaseCmdLineTool):
             command_str = self.startup_info[str(port)]
             ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
             
+            binary = command_str.split()[0]
+            if '--configsvr' in command_str:
+                binary = 'config server'
+
             if self.args['verbose']:
                 print "launching: %s" % command_str
             else:
-                print "launching: %s on port %s" % (command_str.split()[0], port)
+                print "launching: %s on port %s" % (binary, port)
 
             if ret > 0:
                 print "can't start process, return code %i."%ret
