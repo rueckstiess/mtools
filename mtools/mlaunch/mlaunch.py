@@ -28,7 +28,7 @@ except ImportError:
 
 def wait_for_host(host, interval=1, timeout=30, to_start=True):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
-        is set to False, will wait for the node to shut down instead. 
+        is set to False, will wait for the node to shut down instead. This function can be called as a separate thread.
     """
     con = None
     startTime = time.time()
@@ -49,7 +49,7 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
 
 
 def shutdown_host(host_port):
-    """ send the shutdown command to a mongod or mongos on given port. """
+    """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
     try:
         mc = Connection(host_port)
         try:
@@ -158,6 +158,10 @@ class MLaunchTool(BaseCmdLineTool):
         getattr(self, self.args['command'])()
 
 
+
+    # -- below are the main commands: init, start, stop, list
+    
+
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
         # check if authentication is enabled, make key file       
@@ -176,29 +180,30 @@ class MLaunchTool(BaseCmdLineTool):
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
-            nodes = self.get_tagged(['mongod', 'down'])
-            self.start_on_ports(nodes, wait=True)
+            nodes = self.get_tagged_ports(['mongod', 'down'])
+            self._start_on_ports(nodes, wait=True)
 
             # initiate replica sets
             for shard in shard_names:
                 # initiate replica set on first member
-                members = sorted(self.get_tagged([shard]))
-                self.initiate_replset(members[0], shard)
+                members = sorted(self.get_tagged_ports([shard]))
+                self._initiate_replset(members[0], shard)
 
             # add mongos
-            mongos = sorted(self.get_tagged(['mongos', 'down']))
-            self.start_on_ports(mongos, wait=True)
+            mongos = sorted(self.get_tagged_ports(['mongos', 'down']))
+            self._start_on_ports(mongos, wait=True)
 
             # add shards
-            mongos = sorted(self.get_tagged(['mongos']))
+            mongos = sorted(self.get_tagged_ports(['mongos']))
             con = Connection('localhost:%i'%mongos[0])
 
             shards_to_add = len(self.shard_connection_str)
             nshards = con['config']['shards'].count()
             if nshards < shards_to_add:
-                print "adding shards."
                 if self.args['replicaset']:
-                    print "waiting for shards to be added. can take up to 30 seconds..."
+                    print "adding shards. can take up to 30 seconds..."
+                else:
+                    print "adding shards."
 
             while True:
                 try:
@@ -241,8 +246,8 @@ class MLaunchTool(BaseCmdLineTool):
             self.discover()
             
             # start node
-            nodes = self.get_tagged(['single', 'down'])
-            self.start_on_ports(nodes, wait=False)
+            nodes = self.get_tagged_ports(['single', 'down'])
+            self._start_on_ports(nodes, wait=False)
 
         
         elif self.args['replicaset']:
@@ -252,16 +257,16 @@ class MLaunchTool(BaseCmdLineTool):
             self.discover()
 
             # start nodes and wait
-            nodes = sorted(self.get_tagged(['mongod', 'down']))
-            self.start_on_ports(nodes, wait=True)
+            nodes = sorted(self.get_tagged_ports(['mongod', 'down']))
+            self._start_on_ports(nodes, wait=True)
 
             # initiate replica set
-            self.initiate_replset(nodes[0], self.args['name'])
+            self._initiate_replset(nodes[0], self.args['name'])
 
         # write out parameters
         if self.args['verbose']:
             print "writing .mlaunch_startup file."
-        self.store_parameters()
+        self._store_parameters()
 
         if self.args['verbose']:
             print "done."
@@ -272,12 +277,12 @@ class MLaunchTool(BaseCmdLineTool):
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
             will be shut down.
         """
-        if not self.load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
+        if not self._load_parameters():
+            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
         self.discover()
 
-        matches = self.get_ports_from_args(self.args, 'running')
+        matches = self._get_ports_from_args(self.args, 'running')
         if len(matches) == 0:
             raise SystemExit('no nodes stopped.')
 
@@ -292,59 +297,59 @@ class MLaunchTool(BaseCmdLineTool):
 
     def start(self):
         """ sub-command start. TODO """
-        if not self.load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
+        if not self._load_parameters():
+            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
         self.discover()
 
         if not self.startup_info:
             # try to start nodes via init if all nodes are down
-            if len(self.get_tagged(['down'])) == len(self.get_tagged(['all'])):
+            if len(self.get_tagged_ports(['down'])) == len(self.get_tagged_ports(['all'])):
                 self.args = self.loaded_args
                 self.init()
                 return 
             else:
                 raise SystemExit("These nodes were created with an older version of mlaunch. To use the new 'start' command, kill all nodes manually, then run 'mlaunch start'. You only have to do this once.")
 
-        matches = self.get_ports_from_args(self.args, 'down')
+        matches = self._get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
             raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
+        mongod_matches = self.get_tagged_ports(['mongod'])
+        mongod_matches = mongod_matches.union(self.get_tagged_ports(['config']))
         mongod_matches = mongod_matches.intersection(matches)
-        self.start_on_ports(mongod_matches, wait=True)
+        self._start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
-        mongos_matches = self.get_tagged(['mongos']).intersection(matches)
-        self.start_on_ports(mongos_matches)
+        mongos_matches = self.get_tagged_ports(['mongos']).intersection(matches)
+        self._start_on_ports(mongos_matches)
 
 
     def list(self):
         """ sub-command list. Takes no further parameters. Will discover the current configuration and
             print a table of all the nodes with status and port.
         """
-        if not self.load_parameters():
-            raise SystemExit("can't read %s/.mlaunch_startup. Is this an mlaunch'ed cluster?" % self.dir)
+        if not self._load_parameters():
+            raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
         self.discover()
         print_docs = []
 
         # mongos
-        for node in sorted(self.get_tagged(['mongos'])):
+        for node in sorted(self.get_tagged_ports(['mongos'])):
             doc = {'process':'mongos', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
-        if len(self.get_tagged(['mongos'])) > 0:
+        if len(self.get_tagged_ports(['mongos'])) > 0:
             print_docs.append( None )
 
         # configs
-        for node in sorted(self.get_tagged(['config'])):
+        for node in sorted(self.get_tagged_ports(['config'])):
             doc = {'process':'config server', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
             print_docs.append( doc )
         
-        if len(self.get_tagged(['config'])) > 0:
+        if len(self.get_tagged_ports(['config'])) > 0:
             print_docs.append( None )
 
         # mongod
@@ -360,31 +365,31 @@ class MLaunchTool(BaseCmdLineTool):
 
             if replicaset:
                 # primary
-                nodes = self.get_tagged(tags + ['primary', 'running'])
+                nodes = self.get_tagged_ports(tags + ['primary', 'running'])
                 if len(nodes) > 0:
                     node = nodes.pop()
                     print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
                 # secondaries
-                nodes = sorted(self.get_tagged(tags + ['secondary', 'running']))
+                nodes = sorted(self.get_tagged_ports(tags + ['secondary', 'running']))
                 for node in nodes:
                     print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
                 
                 # data-bearing nodes that are down
-                nodes = self.get_tagged(tags + ['mongod', 'down'])
-                arbiters = self.get_tagged(tags + ['arbiter'])
+                nodes = self.get_tagged_ports(tags + ['mongod', 'down'])
+                arbiters = self.get_tagged_ports(tags + ['arbiter'])
 
                 nodes = sorted(nodes - arbiters)
                 for node in nodes:
                     print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'down'})
 
                 # arbiters
-                nodes = sorted(self.get_tagged(tags + ['arbiter']))
+                nodes = sorted(self.get_tagged_ports(tags + ['arbiter']))
                 for node in nodes:
                     print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
 
             else:
-                nodes = self.get_tagged(tags + ['mongod'])
+                nodes = self.get_tagged_ports(tags + ['mongod'])
                 if len(nodes) > 0:
                     node = nodes.pop()
                     print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
@@ -404,87 +409,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     
-
-    # --- below here are helper methods ---
-
-    def _convert_u2b(self, obj):
-        """ helper method to convert unicode back to plain text. """
-        if isinstance(obj, dict):
-            return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in obj.iteritems()])
-        elif isinstance(obj, list):
-            return [self._convert_u2b(element) for element in obj]
-        elif isinstance(obj, unicode):
-            return obj.encode('utf-8')
-        else:
-            return obj
-
-
-    def load_parameters(self):
-        """ tries to load the .mlaunch_startup file that exists in each datadir. 
-            Handles different protocol versions. 
-        """
-        datapath = self.dir
-
-        startup_file = os.path.join(datapath, '.mlaunch_startup')
-        if not os.path.exists(startup_file):
-            return False
-
-        in_dict = self._convert_u2b(json.load(open(startup_file, 'r')))
-
-        # handle legacy version without versioned protocol
-        if 'protocol_version' not in in_dict:
-            in_dict['protocol_version'] = 1
-            self.loaded_args = in_dict
-            self.startup_info = {}
-
-        elif in_dict['protocol_version'] == 2:
-            self.startup_info = in_dict['startup_info']
-            self.unknown_loaded_args = in_dict['unknown_args']
-            self.loaded_args = in_dict['parsed_args']
-
-        return True
-
-
-    def store_parameters(self):
-        """ stores the startup parameters and config in the .mlaunch_startup file in the datadir. """
-        datapath = self.dir
-
-        out_dict = {
-            'protocol_version': 2, 
-            'mtools_version':  __version__,
-            'parsed_args': self.args,
-            'unknown_args': self.unknown_args,
-            'startup_info': self.startup_info
-        }
-
-        if not os.path.exists(datapath):
-            os.makedirs(datapath)
-        try:
-            json.dump(out_dict, open(os.path.join(datapath, '.mlaunch_startup'), 'w'), -1)
-        except Exception:
-            pass
-
-
-    def check_port_availability(self, port, binary):
-        if wait_for_host('%s:%i' % (self.hostname, port), 1, 1) is True:
-            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already in use.")
-
-
-    def _create_paths(self, basedir, name=None):
-        """ create datadir and subdir paths. """
-        if name:
-            datapath = os.path.join(basedir, name)
-        else:
-            datapath = basedir
-
-        dbpath = os.path.join(datapath, 'db')
-        if not os.path.exists(dbpath):
-            os.makedirs(dbpath)
-        if self.args['verbose']:
-            print 'creating directory: %s'%dbpath
-        
-        return datapath
-
+    # --- below are api helper methods, can be called after creating an MLaunchTool() object
 
 
     def discover(self):
@@ -652,7 +577,7 @@ class MLaunchTool(BaseCmdLineTool):
         return self.cluster_running[port]
 
 
-    def get_tagged(self, tags):
+    def get_tagged_ports(self, tags):
         """ The format for the tags list is tuples for tags: mongos, config, shard, secondary tags
             of the form (tag, number), e.g. ('mongos', 2) which references the second mongos 
             in the list. For all other tags, it is simply the string, e.g. 'primary'.
@@ -680,7 +605,113 @@ class MLaunchTool(BaseCmdLineTool):
         return nodes
 
     
-    def get_ports_from_args(self, args, extra_tag):
+
+    def get_tags_of_port(self, port):
+        """ get all tags related to a given port (inverse of what is stored in self.cluster_tags) """
+        return sorted([tag for tag in self.cluster_tags if port in self.cluster_tags[tag] ])
+
+
+    def wait_for(self, ports, interval=1.0, timeout=30, to_start=True):
+        """ Given a list of ports, spawns up threads that will ping the host on each port concurrently. 
+            Returns when all hosts are running (if to_start=True) / shut down (if to_start=False)
+        """
+        threads = []
+
+        for port in ports:
+            threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
+
+        if self.args['verbose']:
+            print "waiting for nodes %..." % 'to start' if to_start else 'to shutdown'
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+
+
+    # --- below here are internal helper methods, should not be called externally ---
+
+
+    def _convert_u2b(self, obj):
+        """ helper method to convert unicode back to plain text. """
+        if isinstance(obj, dict):
+            return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in obj.iteritems()])
+        elif isinstance(obj, list):
+            return [self._convert_u2b(element) for element in obj]
+        elif isinstance(obj, unicode):
+            return obj.encode('utf-8')
+        else:
+            return obj
+
+
+    def _load_parameters(self):
+        """ tries to load the .mlaunch_startup file that exists in each datadir. 
+            Handles different protocol versions. 
+        """
+        datapath = self.dir
+
+        startup_file = os.path.join(datapath, '.mlaunch_startup')
+        if not os.path.exists(startup_file):
+            return False
+
+        in_dict = self._convert_u2b(json.load(open(startup_file, 'r')))
+
+        # handle legacy version without versioned protocol
+        if 'protocol_version' not in in_dict:
+            in_dict['protocol_version'] = 1
+            self.loaded_args = in_dict
+            self.startup_info = {}
+
+        elif in_dict['protocol_version'] == 2:
+            self.startup_info = in_dict['startup_info']
+            self.unknown_loaded_args = in_dict['unknown_args']
+            self.loaded_args = in_dict['parsed_args']
+
+        return True
+
+
+    def _store_parameters(self):
+        """ stores the startup parameters and config in the .mlaunch_startup file in the datadir. """
+        datapath = self.dir
+
+        out_dict = {
+            'protocol_version': 2, 
+            'mtools_version':  __version__,
+            'parsed_args': self.args,
+            'unknown_args': self.unknown_args,
+            'startup_info': self.startup_info
+        }
+
+        if not os.path.exists(datapath):
+            os.makedirs(datapath)
+        try:
+            json.dump(out_dict, open(os.path.join(datapath, '.mlaunch_startup'), 'w'), -1)
+        except Exception:
+            pass
+
+
+    def _check_port_availability(self, port, binary):
+        if wait_for_host('%s:%i' % (self.hostname, port), 1, 1) is True:
+            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already in use.")
+
+
+    def _create_paths(self, basedir, name=None):
+        """ create datadir and subdir paths. """
+        if name:
+            datapath = os.path.join(basedir, name)
+        else:
+            datapath = basedir
+
+        dbpath = os.path.join(datapath, 'db')
+        if not os.path.exists(dbpath):
+            os.makedirs(dbpath)
+        if self.args['verbose']:
+            print 'creating directory: %s'%dbpath
+        
+        return datapath
+
+
+    def _get_ports_from_args(self, args, extra_tag):
         tags = []
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
@@ -701,7 +732,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         tags.append(extra_tag)
 
-        matches = self.get_tagged(tags)
+        matches = self.get_tagged_ports(tags)
         return matches
 
 
@@ -756,6 +787,46 @@ class MLaunchTool(BaseCmdLineTool):
             shard_names = [ None ]
         return shard_names
 
+
+    
+    def _start_on_ports(self, ports, wait=False):
+        threads = []
+
+        for port in ports:
+            command_str = self.startup_info[str(port)]
+            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+            
+            if self.args['verbose']:
+                print "launching: %s" % command_str
+            else:
+                print "launching: %s on port %s" % (command_str.split()[0], port)
+
+            if ret > 0:
+                print "can't start process, return code %i."%ret
+                print "tried to launch: %s" % command_str
+                raise SystemExit
+
+        if wait:
+            self.wait_for(ports)
+
+
+    def _initiate_replset(self, port, name):
+        # initiate replica set
+        if not self.args['replicaset']:
+            return 
+
+        con = Connection('localhost:%i'%port)
+        try:
+            rs_status = con['admin'].command({'replSetGetStatus': 1})
+        except OperationFailure, e:
+            con['admin'].command({'replSetInitiate':self.config_docs[name]})
+            if self.args['verbose']:
+                print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
+            print "replica set '%s' initialized." % name
+
+
+
+    # --- below are command line constructor methods, that build the command line strings to be called
 
     def _construct_sharded(self):
         """ start a sharded cluster. """
@@ -844,7 +915,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """ starts a mongod process. """
-        # self.check_port_availability(port, "mongod")
+        # self._check_port_availability(port, "mongod")
 
         rs_param = ''
         if replset:
@@ -869,7 +940,7 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_mongos(self, logpath, port, configdb):
         """ start a mongos process. """
         extra = ''
-        # self.check_port_availability(port, "mongos")
+        # self._check_port_availability(port, "mongos")
 
         out = subprocess.PIPE
         if self.args['verbose']:
@@ -889,60 +960,6 @@ class MLaunchTool(BaseCmdLineTool):
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
 
-
-    def get_tags_of_port(self, port):
-        """ get all tags related to a given port (inverse of what is stored in self.cluster_tags) """
-        return sorted([tag for tag in self.cluster_tags if port in self.cluster_tags[tag] ])
-
-
-    def start_on_ports(self, ports, wait=False):
-        threads = []
-
-        for port in ports:
-            command_str = self.startup_info[str(port)]
-            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            
-            if self.args['verbose']:
-                print "launching: %s" % command_str
-            else:
-                print "launching: %s on port %s" % (command_str.split()[0], port)
-
-            if ret > 0:
-                print "can't start process, return code %i."%ret
-                print "tried to launch: %s" % command_str
-                raise SystemExit
-
-        if wait:
-            self.wait_for(ports)
-
-    
-    def wait_for(self, ports, interval=1.0, timeout=30, to_start=True):
-        threads = []
-
-        for port in ports:
-            threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
-
-        if self.args['verbose']:
-            print "waiting for nodes %..." % 'to start' if to_start else 'to shutdown'
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-
-
-    def initiate_replset(self, port, name):
-        # initiate replica set
-        if not self.args['replicaset']:
-            return 
-
-        con = Connection('localhost:%i'%port)
-        try:
-            rs_status = con['admin'].command({'replSetGetStatus': 1})
-        except OperationFailure, e:
-            con['admin'].command({'replSetInitiate':self.config_docs[name]})
-            if self.args['verbose']:
-                print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
-            print "replica set '%s' initialized." % name
 
 
 
