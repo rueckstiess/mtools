@@ -1,6 +1,6 @@
 # mtools
 
-[![PyPI version](https://badge.fury.io/py/mtools.png)](http://badge.fury.io/py/mtools)
+[![PyPI version](https://badge.fury.io/py/mtools.png)](http://badge.fury.io/py/mtools) [![Build Status](https://travis-ci.org/rueckstiess/mtools.png?branch=develop)](https://travis-ci.org/rueckstiess/mtools)
 
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
 
