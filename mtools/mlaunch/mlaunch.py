@@ -26,8 +26,10 @@ except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
 
-def pingMongoDS(host, interval=1, timeout=30):
-    """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. """
+def wait_for_host(host, interval=1, timeout=30, to_start=True):
+    """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
+        is set to False, will wait for the node to shut down instead. 
+    """
     con = None
     startTime = time.time()
     while not con:
@@ -35,12 +37,18 @@ def pingMongoDS(host, interval=1, timeout=30):
             return False
         try:
             con = Connection(host)
-            return True
+            if to_start:
+                return True
+            else:
+                time.sleep(interval)
         except (ConnectionFailure, AutoReconnect) as e:
-            time.sleep(interval)
+            if to_start:
+                time.sleep(interval)
+            else:
+                return True
 
 
-def shutdownMongoDS(host_port):
+def shutdown_host(host_port):
     """ send the shutdown command to a mongod or mongos on given port. """
     try:
         mc = Connection(host_port)
@@ -190,7 +198,7 @@ class MLaunchTool(BaseCmdLineTool):
             if nshards < shards_to_add:
                 print "adding shards."
                 if self.args['replicaset']:
-                    print "waiting for replica sets to initialize. can take up to 30 seconds..."
+                    print "waiting for shards to be added. can take up to 30 seconds..."
 
             while True:
                 try:
@@ -223,7 +231,7 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['mongos'] == 0:
                 host_port = 'localhost:%s'%mongos[0]
                 print "shutting down temporary mongos on %s" % host_port
-                shutdownMongoDS(host_port)
+                shutdown_host(host_port)
 
         
         elif self.args['single']:
@@ -277,7 +285,7 @@ class MLaunchTool(BaseCmdLineTool):
             host_port = 'localhost:%i'%port
             if self.args['verbose']:
                 print "shutting down %s" % host_port
-            shutdownMongoDS(host_port)
+            shutdown_host(host_port)
 
         print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
 
@@ -387,8 +395,8 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             # print tags as well
             for doc in filter(lambda x: type(x) == dict, print_docs):               
-                printable_tags = sorted([tag for tag in self.cluster_tags if doc['port'] in self.cluster_tags[tag] ])
-                doc['tags'] = ', '.join(printable_tags)
+                tags = self.get_tags_for_port(doc['port'])
+                doc['tags'] = ', '.join(tags)
 
         print_docs.append( None )   
         print         
@@ -458,7 +466,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def check_port_availability(self, port, binary):
-        if pingMongoDS('%s:%i' % (self.hostname, port), 1, 1) is True:
+        if wait_for_host('%s:%i' % (self.hostname, port), 1, 1) is True:
             raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already in use.")
 
 
@@ -484,13 +492,25 @@ class MLaunchTool(BaseCmdLineTool):
             self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
             for sub-commands start, stop, list.
         """
+
+        # reset cluster_* variables
+        self.cluster_tree = {}
+        self.cluster_tags = defaultdict(list)
+        self.cluster_running = {}
         
         # get shard names
         shard_names = self._get_shard_names(self.loaded_args)
 
+        # states
+        is_sharded = 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None
+        is_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
+        is_single = 'single' in self.loaded_args and self.loaded_args['single']
+        has_arbiter = 'arbiter' in self.loaded_args and self.loaded_args['arbiter']
+
         # determine number of nodes to inspect
-        if 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None:
+        if is_sharded:
             num_config = self.loaded_args['config']
+            # at least one temp. mongos for adding shards, will be killed later on
             num_mongos = max(1, self.loaded_args['mongos'])
             num_shards = len(shard_names)
         else:
@@ -498,8 +518,8 @@ class MLaunchTool(BaseCmdLineTool):
             num_config = 0
             num_mongos = 0
 
-        num_nodes_per_shard = self.loaded_args['nodes'] if 'replicaset' in self.loaded_args and self.loaded_args['replicaset'] else 1
-        if 'arbiter' in self.loaded_args and self.loaded_args['arbiter']:
+        num_nodes_per_shard = self.loaded_args['nodes'] if is_replicaset else 1
+        if has_arbiter:
             num_nodes_per_shard += 1
 
         num_nodes = num_shards * num_nodes_per_shard + num_config + num_mongos
@@ -509,9 +529,9 @@ class MLaunchTool(BaseCmdLineTool):
         # tag all nodes with 'all'
         self.cluster_tags['all'].extend ( range(current_port, current_port + num_nodes) )
 
-        # tag all nodes with their port number
+        # tag all nodes with their port number (as string)
         for port in range(current_port, current_port + num_nodes):
-            self.cluster_tags['%s'%port].append(port)
+            self.cluster_tags[str(port)].append(port)
 
         # find all mongos
         for i in range(num_mongos):
@@ -552,9 +572,10 @@ class MLaunchTool(BaseCmdLineTool):
                 self.cluster_tree.setdefault( 'shard', [] ).append( port_range )
                 self.cluster_tags[shard].extend( port_range )
 
-            if 'replicaset' in self.loaded_args and self.loaded_args['replicaset']:
-                # treat replica set as a whole
+            if is_replicaset:
+                # get replica set states
                 rs_name = shard if shard else self.loaded_args['name']
+                
                 try:
                     mrsc = ReplicaSetConnection( ','.join( 'localhost:%i'%i for i in port_range ), replicaSet=rs_name )
                     # primary, secondaries, arbiters
@@ -576,10 +597,10 @@ class MLaunchTool(BaseCmdLineTool):
                     current_port += num_nodes_per_shard
                     continue
 
-
-            elif 'single' in self.loaded_args and self.loaded_args['single']:
+            elif is_single:
                 self.cluster_tags['single'].append( current_port )
 
+            
             # now determine which nodes are running / down
             for i in range(num_nodes_per_shard):
                 port = i+current_port
@@ -869,6 +890,11 @@ class MLaunchTool(BaseCmdLineTool):
         self.startup_info[str(port)] = command_str
 
 
+    def get_tags_of_port(self, port):
+        """ get all tags related to a given port (inverse of what is stored in self.cluster_tags) """
+        return sorted([tag for tag in self.cluster_tags if port in self.cluster_tags[tag] ])
+
+
     def start_on_ports(self, ports, wait=False):
         threads = []
 
@@ -886,16 +912,22 @@ class MLaunchTool(BaseCmdLineTool):
                 print "tried to launch: %s" % command_str
                 raise SystemExit
 
-            if wait:
-                threads.append(threading.Thread(target=pingMongoDS, args=('localhost:%i'%port, 1.0, 30)))
-
         if wait:
-            if self.args['verbose']:
-                print "waiting for nodes to start..."
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join()
+            self.wait_for(ports)
+
+    
+    def wait_for(self, ports, interval=1.0, timeout=30, to_start=True):
+        threads = []
+
+        for port in ports:
+            threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
+
+        if self.args['verbose']:
+            print "waiting for nodes %..." % 'to start' if to_start else 'to shutdown'
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
 
     def initiate_replset(self, port, name):
