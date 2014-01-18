@@ -337,7 +337,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # mongos
         for node in sorted(self.get_tagged(['mongos'])):
-            doc = {'process':'mongos', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
+            doc = {'process':'mongos', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
             print_docs.append( doc )
         
         if len(self.get_tagged(['mongos'])) > 0:
@@ -345,7 +345,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # configs
         for node in sorted(self.get_tagged(['config'])):
-            doc = {'process':'config server', 'port':node, 'status': 'running' if self.is_running(node) else 'down'}
+            doc = {'process':'config server', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
             print_docs.append( doc )
         
         if len(self.get_tagged(['config'])) > 0:
@@ -367,12 +367,12 @@ class MLaunchTool(BaseCmdLineTool):
                 nodes = self.get_tagged(tags + ['primary', 'running'])
                 if len(nodes) > 0:
                     node = nodes.pop()
-                    print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                    print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
                 
                 # secondaries
                 nodes = sorted(self.get_tagged(tags + ['secondary', 'running']))
                 for node in nodes:
-                    print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                    print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
                 
                 # data-bearing nodes that are down
                 nodes = self.get_tagged(tags + ['mongod', 'down'])
@@ -385,13 +385,13 @@ class MLaunchTool(BaseCmdLineTool):
                 # arbiters
                 nodes = sorted(self.get_tagged(tags + ['arbiter']))
                 for node in nodes:
-                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
 
             else:
                 nodes = self.get_tagged(tags + ['mongod'])
                 if len(nodes) > 0:
                     node = nodes.pop()
-                    print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.is_running(node) else 'down'} )
+                    print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
             if shard:
                 print_docs.append(None)
 
@@ -579,8 +579,13 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def is_running(self, port):
-        """ returns if a host on a specific port is running. Requires discover(). """
-        return self.cluster_running[port]
+        """ returns if a host on a specific port is running. """
+        try:
+            con = Connection('localhost:%s' % port)
+            con.admin.command('ping')
+            return True
+        except (AutoReconnect, ConnectionFailure):
+            return False
 
 
     def get_tagged(self, tags):
@@ -698,11 +703,6 @@ class MLaunchTool(BaseCmdLineTool):
             json.dump(out_dict, open(os.path.join(datapath, '.mlaunch_startup'), 'w'), -1)
         except Exception:
             pass
-
-
-    def _check_port_availability(self, port, binary):
-        if wait_for_host('%s:%i' % (self.hostname, port), 1, 1) is True:
-            raise SystemExit("Can't start " + binary + ", port " + str(port) + " is already in use.")
 
 
     def _create_paths(self, basedir, name=None):
@@ -930,8 +930,6 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """ starts a mongod process. """
-        # self._check_port_availability(port, "mongod")
-
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
@@ -955,8 +953,6 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_mongos(self, logpath, port, configdb):
         """ start a mongos process. """
         extra = ''
-        # self._check_port_availability(port, "mongos")
-
         out = subprocess.PIPE
         if self.args['verbose']:
             out = None
