@@ -188,11 +188,12 @@ class MLaunchTool(BaseCmdLineTool):
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
             os.system('chmod 600 %s/keyfile'%self.dir)
 
-        if self.args['sharded']:
-            # construct startup strings
-            self._construct_sharded()
-            self.discover()
 
+        # construct startup strings
+        self._construct_cmdlines()
+
+
+        if self.args['sharded']:
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
@@ -255,21 +256,13 @@ class MLaunchTool(BaseCmdLineTool):
                 shutdown_host(host_port)
 
         
-        elif self.args['single']:
-            # construct startup string
-            self._construct_single(self.dir, self.args['port'])
-            self.discover()
-            
-            # start node
+        elif self.args['single']:            
+            # just start node
             nodes = self.get_tagged(['single', 'down'])
             self._start_on_ports(nodes, wait=False)
 
         
         elif self.args['replicaset']:
-            # construct startup strings
-            self._construct_replset(self.dir, self.args['port'], self.args['name'])
-            self.discover()
-
             # start nodes and wait
             nodes = sorted(self.get_tagged(['mongod', 'down']))
             self._start_on_ports(nodes, wait=True)
@@ -843,8 +836,33 @@ class MLaunchTool(BaseCmdLineTool):
 
     # --- below are command line constructor methods, that build the command line strings to be called
 
+    def _construct_cmdlines(self):
+        """ This is the top-level _construct_* method. From here, it will branch out to
+            the different cases: _construct_sharded, _construct_replicaset, _construct_single. These
+            can themselves call each other (for example sharded needs to create the shards with
+            either replicaset or single node). At the lowest level, the construct_mongod, _mongos, _config
+            will create the actual command line strings and store them in self.startup_info.
+        """
+
+        if self.args['sharded']:
+            # construct startup string for sharded environments
+            self._construct_sharded()
+        
+        elif self.args['single']:
+            # construct startup string for single node environment
+            self._construct_single(self.dir, self.args['port'])
+            
+        elif self.args['replicaset']:
+            # construct startup strings for a non-sharded replica set
+            self._construct_replset(self.dir, self.args['port'], self.args['name'])
+
+        # discover current setup
+        self.discover()
+
+
+
     def _construct_sharded(self):
-        """ start a sharded cluster. """
+        """ construct command line strings for a sharded cluster. """
 
         num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
         shard_names = self._get_shard_names(self.args)
@@ -889,7 +907,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _construct_replset(self, basedir, portstart, name):
-        """ start a replica set, either for sharded cluster or by itself. """
+        """ construct command line strings for a replicaset, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
 
@@ -913,14 +931,14 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _construct_config(self, basedir, port, name=None):
-        """ start a config server """
+        """ construct command line strings for a config server """
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
 
 
     def _construct_single(self, basedir, port, name=None):
-        """ start a single node, either for shards or as a stand-alone. """
+        """ construct command line strings for a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
@@ -930,7 +948,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
-        """ starts a mongod process. """
+        """ construct command line strings for mongod process. """
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
@@ -952,7 +970,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _construct_mongos(self, logpath, port, configdb):
-        """ start a mongos process. """
+        """ construct command line strings for a mongos process. """
         extra = ''
         out = subprocess.PIPE
         if self.args['verbose']:
