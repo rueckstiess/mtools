@@ -128,7 +128,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
         
         # sharded clusters
-        init_parser.add_argument('--sharded', action='store', nargs='*', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards (default=1)')
+        init_parser.add_argument('--sharded', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
         init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
@@ -180,18 +180,19 @@ class MLaunchTool(BaseCmdLineTool):
         if self._load_parameters():
             if self.loaded_args != self.args:
                 raise SystemExit('A different environment already exists at %s.' % self.dir)
+            first_init = False
+        else:
+            first_init = True
 
         # check if authentication is enabled, make key file       
-        if self.args['authentication']:
+        if self.args['authentication'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
             os.system('chmod 600 %s/keyfile'%self.dir)
 
-
         # construct startup strings
         self._construct_cmdlines()
-
 
         if self.args['sharded']:
             shard_names = self._get_shard_names(self.args)
@@ -200,54 +201,56 @@ class MLaunchTool(BaseCmdLineTool):
             nodes = self.get_tagged(['mongod', 'down'])
             self._start_on_ports(nodes, wait=True)
 
-            # initiate replica sets
-            for shard in shard_names:
-                # initiate replica set on first member
-                members = sorted(self.get_tagged([shard]))
-                self._initiate_replset(members[0], shard)
+            # initiate replica sets if init is called for the first time
+            if first_init:
+                for shard in shard_names:
+                    # initiate replica set on first member
+                    members = sorted(self.get_tagged([shard]))
+                    self._initiate_replset(members[0], shard)
 
             # add mongos
             mongos = sorted(self.get_tagged(['mongos', 'down']))
             self._start_on_ports(mongos, wait=True)
 
-            # add shards
-            mongos = sorted(self.get_tagged(['mongos']))
-            con = Connection('localhost:%i'%mongos[0])
+            if first_init:
+                # add shards
+                mongos = sorted(self.get_tagged(['mongos']))
+                con = Connection('localhost:%i'%mongos[0])
 
-            shards_to_add = len(self.shard_connection_str)
-            nshards = con['config']['shards'].count()
-            if nshards < shards_to_add:
-                if self.args['replicaset']:
-                    print "adding shards. can take up to 30 seconds..."
-                else:
-                    print "adding shards."
-
-            while True:
-                try:
-                    nshards = con['config']['shards'].count()
-                except:
-                    nshards = 0
-                if nshards >= shards_to_add:
-                    break
-
-                for conn_str in self.shard_connection_str:
-                    try:
-                        res = con['admin'].command({'addShard': conn_str})
-                    except Exception as e:
-                        if self.args['verbose']:
-                            print e, ', will retry in a moment.'
-                        continue
-
-                    if res['ok']:
-                        if self.args['verbose']:
-                            print "shard %s added successfully"%conn_str
-                            self.shard_connection_str.remove(conn_str)
-                            break
+                shards_to_add = len(self.shard_connection_str)
+                nshards = con['config']['shards'].count()
+                if nshards < shards_to_add:
+                    if self.args['replicaset']:
+                        print "adding shards. can take up to 30 seconds..."
                     else:
-                        if self.args['verbose']:
-                            print res, '- will retry'
+                        print "adding shards."
 
-                time.sleep(1)
+                while True:
+                    try:
+                        nshards = con['config']['shards'].count()
+                    except:
+                        nshards = 0
+                    if nshards >= shards_to_add:
+                        break
+
+                    for conn_str in self.shard_connection_str:
+                        try:
+                            res = con['admin'].command({'addShard': conn_str})
+                        except Exception as e:
+                            if self.args['verbose']:
+                                print e, ', will retry in a moment.'
+                            continue
+
+                        if res['ok']:
+                            if self.args['verbose']:
+                                print "shard %s added successfully"%conn_str
+                                self.shard_connection_str.remove(conn_str)
+                                break
+                        else:
+                            if self.args['verbose']:
+                                print res, '- will retry'
+
+                    time.sleep(1)
 
             # if --mongos 0, kill the dummy mongos
             if self.args['mongos'] == 0:
@@ -268,7 +271,8 @@ class MLaunchTool(BaseCmdLineTool):
             self._start_on_ports(nodes, wait=True)
 
             # initiate replica set
-            self._initiate_replset(nodes[0], self.args['name'])
+            if first_init:
+                self._initiate_replset(nodes[0], self.args['name'])
 
 
         # wait for all nodes to be running
