@@ -794,13 +794,16 @@ class MLaunchTool(BaseCmdLineTool):
             no shards are present.
         """
 
-        if 'sharded' in args and args['sharded'] and len(args['sharded']) == 1:
-            try:
-                # --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
-                n_shards = int(args['sharded'][0])
-                shard_names = ['shard%.2i'%(i+1) for i in range(n_shards)]
-            except ValueError, e:
-                # --sharded was a string, use it as name for the one shard 
+        if 'sharded' in args and args['sharded']:
+            if len(args['sharded']) == 1:
+                try:
+                    # --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
+                    n_shards = int(args['sharded'][0])
+                    shard_names = ['shard%.2i'%(i+1) for i in range(n_shards)]
+                except ValueError, e:
+                    # --sharded was a string, use it as name for the one shard 
+                    shard_names = args['sharded']
+            else:
                 shard_names = args['sharded']
         else:
             shard_names = [ None ]

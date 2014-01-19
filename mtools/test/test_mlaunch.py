@@ -201,6 +201,20 @@ class TestMLaunch(object):
         assert mc['config']['mongos'].count() == 1
 
 
+    def test_shard_names(self):
+        """ mlaunch: test if sharded cluster with explicit shard names works """
+
+        # start mongo process on free test port 
+        self.tool.run("init --sharded tic tac toe --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+
+        # create mongo client
+        mc = MongoClient('localhost:%i' % (self.port))
+
+        # check that shard names match
+        shard_names = set( doc['_id'] for doc in mc['config']['shards'].find() )
+        assert shard_names == set(['tic', 'tac', 'toe'])
+
+
     def test_startup_file(self):
         """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
@@ -377,7 +391,6 @@ class TestMLaunch(object):
         self.tool.run("stop primary --dir %s" % self.data_dir)
         assert len(self.tool.get_tagged('down')) == 2
         self.tool.run("start --dir %s" % self.data_dir)
-
 
 
     def test_restart_with_unkown_args(self):
