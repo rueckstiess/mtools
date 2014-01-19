@@ -275,13 +275,13 @@ class MLaunchTool(BaseCmdLineTool):
         nodes = self.get_tagged(['all'])
         self.wait_for(nodes)
 
-        # discover again, to get up-to-date info
-        self.discover()
-
         # write out parameters
         if self.args['verbose']:
             print "writing .mlaunch_startup file."
         self._store_parameters()
+
+        # discover again, to get up-to-date info
+        self.discover()
 
         if self.args['verbose']:
             print "done."
@@ -316,14 +316,29 @@ class MLaunchTool(BaseCmdLineTool):
         """ sub-command start. TODO """
         self.discover()
 
+        # startup_info only gets loaded from protocol version 2 on, check if it's loaded
         if not self.startup_info:
-            # try to start nodes via init if all nodes are down
+            # hack to make environment startable with older protocol versions < 2: try to start nodes via init if all nodes are down
             if len(self.get_tagged(['down'])) == len(self.get_tagged(['all'])):
                 self.args = self.loaded_args
-                self.init()
-                return 
+                print "upgrading mlaunch environment meta-data."
+                return self.init() 
             else:
-                raise SystemExit("These nodes were created with an older version of mlaunch. To use the new 'start' command, kill all nodes manually, then run 'mlaunch start'. You only have to do this once.")
+                raise SystemExit("These nodes were created with an older version of mlaunch (v1.1.1 or below). To upgrade this environment and make use of the start/stop/list commands, stop all nodes manually, then run 'mlaunch start' again. You only have to do this once.")
+
+        
+        # if new unknown_args are present, compare them with loaded ones (here we can be certain of protocol v2+)
+        if self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args):
+            # store current args, use self.args from the file (self.loaded_args)
+            start_args = self.args
+            self.args = self.loaded_args
+            
+            # construct new startup strings with updated unknown args. They are for this start only and 
+            # will not be persisted in the .mlaunch_startup file
+            self._construct_cmdlines()
+
+            # reset to original args for this start command
+            self.args = start_args
 
         matches = self._get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
@@ -439,7 +454,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # load .mlaunch_startup file for start, stop, list, use current parameters for init
         if self.args['command'] == 'init':
-            self.loaded_args, self.unknown_loaded_args = self.args, self.unknown_args
+            self.loaded_args, self.loaded_unknown_args = self.args, self.unknown_args
         else:
             if not self._load_parameters():
                 raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
@@ -669,7 +684,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         elif in_dict['protocol_version'] == 2:
             self.startup_info = in_dict['startup_info']
-            self.unknown_loaded_args = in_dict['unknown_args']
+            self.loaded_unknown_args = in_dict['unknown_args']
             self.loaded_args = in_dict['parsed_args']
 
         return True

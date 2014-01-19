@@ -381,8 +381,6 @@ class TestMLaunch(object):
 
 
     def test_restart_with_unkown_args(self):
-        # not implemented yet, skip
-        raise SkipTest
 
         # init environment (sharded, single shards ok)
         self.tool.run("init --single --port %i --dir %s" % (self.port, self.data_dir))
@@ -392,16 +390,24 @@ class TestMLaunch(object):
         loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
         assert loglevel[u'logLevel'] == 0
 
-        # stop nodes
+        # stop and start nodes but pass in unknown_args
         self.tool.run("stop --dir %s" % self.data_dir)
-
-        # start nodes but pass in unknown_args
         self.tool.run("start --dir %s -vv" % self.data_dir)
 
         # compare that the nodes are restarted with the new unknown_args, assert loglevel is now 2
         mc = MongoClient(port=self.port)
-        nloglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
+        loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
         assert loglevel[u'logLevel'] == 2
+
+        # stop and start nodes without unknown args again
+        self.tool.run("stop --dir %s" % self.data_dir)
+        self.tool.run("start --dir %s" % self.data_dir)
+
+        # compare that the nodes are restarted with the previous loglevel
+        mc = MongoClient(port=self.port)
+        loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
+        assert loglevel[u'logLevel'] == 2
+
 
     # TODO 
     # - test functionality of --binarypath, --authentication, --verbose, --name
