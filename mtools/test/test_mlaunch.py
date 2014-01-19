@@ -8,8 +8,10 @@ import sys
 from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
 from pymongo.errors import AutoReconnect, ConnectionFailure
+from bson import SON
 from nose.tools import *
 from nose.plugins.attrib import attr
+from nose.plugins.skip import Skip, SkipTest
 
 
 class TestMLaunch(object):
@@ -376,6 +378,35 @@ class TestMLaunch(object):
         assert len(self.tool.get_tagged('down')) == 2
         self.tool.run("start --dir %s" % self.data_dir)
 
+
+
+    def test_restart_with_unkown_args(self):
+
+        # init environment (sharded, single shards ok)
+        self.tool.run("init --single --port %i --dir %s" % (self.port, self.data_dir))
+        
+        # get verbosity of mongod, assert it is 0
+        mc = MongoClient(port=self.port)
+        loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
+        assert loglevel[u'logLevel'] == 0
+
+        # stop and start nodes but pass in unknown_args
+        self.tool.run("stop --dir %s" % self.data_dir)
+        self.tool.run("start --dir %s -vv" % self.data_dir)
+
+        # compare that the nodes are restarted with the new unknown_args, assert loglevel is now 2
+        mc = MongoClient(port=self.port)
+        loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
+        assert loglevel[u'logLevel'] == 2
+
+        # stop and start nodes without unknown args again
+        self.tool.run("stop --dir %s" % self.data_dir)
+        self.tool.run("start --dir %s" % self.data_dir)
+
+        # compare that the nodes are restarted with the previous loglevel
+        mc = MongoClient(port=self.port)
+        loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
+        assert loglevel[u'logLevel'] == 2
 
 
     # TODO 
