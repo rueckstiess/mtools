@@ -406,7 +406,7 @@ class TestMLaunch(object):
         # compare that the nodes are restarted with the previous loglevel
         mc = MongoClient(port=self.port)
         loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
-        assert loglevel[u'logLevel'] == 2
+        assert loglevel[u'logLevel'] == 0
 
 
     # TODO 
