@@ -19,6 +19,7 @@ class LogFile(object):
         self._num_lines = None
         self._restarts = None
         self._binary = None
+        self._year_offset= None
 
     @property
     def start(self):
@@ -78,6 +79,16 @@ class LogFile(object):
             if len(versions) == 0 or v != versions[-1]:
                 versions.append(v)
         return versions
+
+    @property
+    def year_offset(self):
+        """ return the year offset. """
+        return self._year_offset
+
+
+    def adjust_year(self,date):
+        """ adjust the date. """
+        return date.replace(year=date.year-self.year_offset)
 
 
     def _iterate_lines(self):
@@ -141,7 +152,8 @@ class LogFile(object):
 
         # if there was a roll-over, subtract 1 year from start time
         if self._end < self._start:
-            self._start = self._start.replace(year=self._start.year-1)
+            self._year_offset = 1
+        self._start = self.adjust_year(self._start)
 
         # reset logfile
         self.logfile.seek(0)

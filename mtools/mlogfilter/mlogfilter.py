@@ -13,6 +13,7 @@ from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
 import mtools.mlogfilter.filters as filters
+from mtools.util.logfile import LogFile
 
 class MLogFilterTool(LogFileTool):
 
@@ -139,13 +140,24 @@ class MLogFilterTool(LogFileTool):
     def _merge_logfiles(self):
         """ helper method to merge several files together by datetime. """
         # open files, read first lines, extract first dates
-        lines = [f.readline() for f in self.args['logfile']]
-        lines = [LogLine(l) if l else None for l in lines]
+        logfiles= [LogFile(lf) for lf in self.args['logfile']]
+        lines = []
+        prevs = [None] * len(self.args['logfile'])
+        for i in range(len(self.args['logfile'])):
+            f = self.args['logfile'][i]
+            lf = logfiles[i]
+            lf._calculate_bounds()
+            logline = f.readline()
+            logline= LogLine(logline)
+            if logline.datetime:
+                prev = prevs[i] = logline.datetime.month
+                if not (prev and prev > logline.datetime.month ):
+                    logline._datetime = lf.adjust_year(logline._datetime)
+                logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
 
-        # adjust lines by timezone
-        for i in range(len(lines)):
-            if lines[i] and lines[i].datetime:
-                lines[i]._datetime = lines[i].datetime + timedelta(hours=self.args['timezone'][i])
+            if logline and logline.datetime:
+                logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][i])
+            lines.append(logline)
 
         while any(lines):
             min_line = min(lines, key=self._datetime_key_for_merge)
@@ -160,6 +172,10 @@ class MLogFilterTool(LogFileTool):
             new_line = self.args['logfile'][min_index].readline()
             lines[min_index] = LogLine(new_line) if new_line else None
             if lines[min_index] and lines[min_index].datetime:
+                prev = prevs[min_index]
+                prevs[min_index] = min_line.datetime.month
+                if not (prev and prev > lines[min_index].datetime.month):
+                    lines[min_index]._datetime = logfiles[min_index].adjust_year(lines[min_index]._datetime)
                 lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
 
 
@@ -180,10 +196,18 @@ class MLogFilterTool(LogFileTool):
             for logline in self._merge_logfiles():
                 yield logline
         else:
+            lf = LogFile(self.args['logfile'][0])
+            lf._calculate_bounds()
+
+            prev = None
             # only one file
             for line in self.args['logfile'][0]:
                 logline = LogLine(line)
-                if logline.datetime: 
+                if logline.datetime:
+                    if prev == None:
+                        prev = logline.datetime.month
+                    if not (prev and prev > logline.datetime.month ):
+                        logline._datetime = lf.adjust_year(logline._datetime)
                     logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logline
 
