@@ -5,9 +5,7 @@ import time
 import re
 
 class LogFile(object):
-    """ wrapper class for log files, either as open file streams of from stdin. 
-        Later planned to include logfile from a mongod instance.
-    """
+    """ wrapper class for log files, either as open file streams of from stdin. """
 
     def __init__(self, filehandle):
         """ provide logfile as open file stream or stdin. """
@@ -80,6 +78,22 @@ class LogFile(object):
         return versions
 
 
+    def __iter__(self):
+        """ iteration over LogFile object will return a LogLine object for each line. """
+        
+        # always start from the beginning logfile
+        self.filehandle.seek(0)
+
+        for line in self.filehandle:
+            ll = LogLine(line)
+            yield ll
+
+
+    def __len__(self):
+        """ return the number of lines in a log file. """
+        return self.num_lines
+
+
     def _iterate_lines(self):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
@@ -107,7 +121,7 @@ class LogFile(object):
                     restart = (version, LogLine(line))
                     self._restarts.append(restart)
 
-        self._num_lines = l
+        self._num_lines = l+1
 
         # reset logfile
         self.filehandle.seek(0)
@@ -117,7 +131,7 @@ class LogFile(object):
         """ calculate beginning and end of logfile. """
 
         if self.from_stdin: 
-            return None
+            return False
 
         # get start datetime 
         for line in self.filehandle:
@@ -145,6 +159,8 @@ class LogFile(object):
 
         # reset logfile
         self.filehandle.seek(0)
+
+        return True
 
 
     def _find_curr_line(self, prev=False):
@@ -217,7 +233,7 @@ class LogFile(object):
                     step_size = abs(step_size)
 
             if not ll:
-                return 
+                return
 
             # now walk backwards until we found a truely smaller line
             while ll and self.filehandle.tell() >= 2 and ll.datetime >= start_dt:
