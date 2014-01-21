@@ -9,10 +9,10 @@ class LogFile(object):
         Later planned to include logfile from a mongod instance.
     """
 
-    def __init__(self, logfile):
+    def __init__(self, filehandle):
         """ provide logfile as open file stream or stdin. """
-        self.logfile = logfile
-        self.from_stdin = logfile.name == "<stdin>"
+        self.filehandle = filehandle
+        self.from_stdin = filehandle.name == "<stdin>"
         self._start = None
         self._end = None
         self._filesize = None
@@ -86,7 +86,7 @@ class LogFile(object):
         self._restarts = []
 
         l = 0
-        for l, line in enumerate(self.logfile):
+        for l, line in enumerate(self.filehandle):
 
             # find version string
             if "version" in line:
@@ -110,7 +110,7 @@ class LogFile(object):
         self._num_lines = l
 
         # reset logfile
-        self.logfile.seek(0)
+        self.filehandle.seek(0)
 
 
     def _calculate_bounds(self):
@@ -120,7 +120,7 @@ class LogFile(object):
             return None
 
         # get start datetime 
-        for line in self.logfile:
+        for line in self.filehandle:
             logline = LogLine(line)
             date = logline.datetime
             if date:
@@ -128,11 +128,11 @@ class LogFile(object):
                 break
 
         # get end datetime (lines are at most 10k, go back 15k at most to make sure)
-        self.logfile.seek(0, 2)
-        self._filesize = self.logfile.tell()
-        self.logfile.seek(-min(self._filesize, 15000), 2)
+        self.filehandle.seek(0, 2)
+        self._filesize = self.filehandle.tell()
+        self.filehandle.seek(-min(self._filesize, 15000), 2)
 
-        for line in reversed(self.logfile.readlines()):
+        for line in reversed(self.filehandle.readlines()):
             logline = LogLine(line)
             date = logline.datetime
             if date:
@@ -144,21 +144,21 @@ class LogFile(object):
             self._start = self._start.replace(year=self._start.year-1)
 
         # reset logfile
-        self.logfile.seek(0)
+        self.filehandle.seek(0)
 
 
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.logfile.tell()
+        curr_pos = self.filehandle.tell()
         line = None
 
         # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.logfile.tell(), 15000)
-        self.logfile.seek(-jump_back, 1)
-        buff = self.logfile.read(jump_back)
-        self.logfile.seek(curr_pos, 0)
+        jump_back = min(self.filehandle.tell(), 15000)
+        self.filehandle.seek(-jump_back, 1)
+        buff = self.filehandle.read(jump_back)
+        self.filehandle.seek(curr_pos, 0)
 
         newline_pos = buff.rfind('\n')
         if prev:
@@ -168,10 +168,10 @@ class LogFile(object):
         if newline_pos == -1:
             return None
 
-        self.logfile.seek(newline_pos - jump_back, 1)
+        self.filehandle.seek(newline_pos - jump_back, 1)
 
         while line != '':
-            line = self.logfile.readline()
+            line = self.filehandle.readline()
             logline = LogLine(line)
             if logline.datetime:
                 return logline
@@ -191,7 +191,7 @@ class LogFile(object):
             # skip lines until start_dt is reached
             ll = None
             while not (ll and ll.datetime and ll.datetime >= start_dt):
-                line = self.logfile.next()
+                line = self.filehandle.next()
                 ll = LogLine(line)
 
         else:
@@ -206,7 +206,7 @@ class LogFile(object):
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
                 
-                self.logfile.seek(step_size, 1)
+                self.filehandle.seek(step_size, 1)
                 ll = self._find_curr_line()
                 if not ll:
                     break
@@ -220,8 +220,8 @@ class LogFile(object):
                 return 
 
             # now walk backwards until we found a truely smaller line
-            while ll and self.logfile.tell() >= 2 and ll.datetime >= start_dt:
-                self.logfile.seek(-2, 1)
+            while ll and self.filehandle.tell() >= 2 and ll.datetime >= start_dt:
+                self.filehandle.seek(-2, 1)
                 ll = self._find_curr_line(prev=True)
 
 
