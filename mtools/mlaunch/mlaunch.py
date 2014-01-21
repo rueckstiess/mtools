@@ -312,6 +312,11 @@ class MLaunchTool(BaseCmdLineTool):
         self.wait_for(matches, to_start=False)
         print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
 
+        # there is a very brief period in which nodes are not reachable anymore, but the
+        # port is not torn down fully yet and an immediate start command would fail. This 
+        # very short sleep prevents that case, and it is practically not noticable by users
+        time.sleep(0.1)
+
         # refresh discover
         self.discover()
 

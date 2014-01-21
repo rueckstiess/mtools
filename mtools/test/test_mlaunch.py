@@ -422,6 +422,38 @@ class TestMLaunch(object):
         assert loglevel[u'logLevel'] == 0
 
 
+    def test_start_stop_single_repeatedly(self):
+        """ mlaunch: test starting and stopping single node in short succession """ 
+        # repeatedly start single node
+        self.tool.run("init --single --port %i --dir %s" % (self.port, self.data_dir))
+
+        for i in range(10):
+            self.tool.run("stop --dir %s" % self.data_dir)
+            self.tool.run("start --dir %s" % self.data_dir)
+
+    
+    def test_init_init_replicaset(self):
+        """ mlaunch: test calling init a second time on the replica set. """
+
+        # repeatedly init a replica set
+        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+
+        # now stop and init again
+        self.tool.run("stop --dir %s" % self.data_dir)
+        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+
+
+    def test_start_stop_replicaset_repeatedly(self):
+        """ mlaunch: test starting and stopping replica set in short succession """ 
+        # repeatedly start replicaset nodes
+        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+
+        for i in range(10):
+            self.tool.run("stop --dir %s" % self.data_dir)
+            self.tool.run("start --dir %s" % self.data_dir)
+
+
     # TODO 
     # - test functionality of --binarypath, --authentication, --verbose, --name
 
