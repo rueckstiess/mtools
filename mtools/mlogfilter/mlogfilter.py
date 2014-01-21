@@ -206,6 +206,10 @@ class MLogFilterTool(LogFileTool):
         if type(self.args['logfile']) != types.ListType:
             self.args['logfile'] = [self.args['logfile']]
 
+        # require at least 1 log file (either through stdin or as parameter)
+        if len(self.args['logfile']) == 0:
+            raise SystemExit('Error: Need at least 1 log file, either as command line parameter or through stdin.')
+
         # handle timezone parameter
         if len(self.args['timezone']) == 1:
             self.args['timezone'] = self.args['timezone'] * len(self.args['logfile'])
