@@ -357,7 +357,7 @@ class TestMLaunch(object):
         assert all( self.tool.is_running(node) for node in nodes )
 
     
-    @timed(90)
+    @timed(120)
     @attr('slow')
     def test_stop_partial(self):
 
