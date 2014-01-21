@@ -2,8 +2,10 @@ import sys, os
 import mtools
 
 from nose.tools import *
+from datetime import datetime
 from mtools.util.logfile import LogFile
 from mtools.util.logline import LogLine
+
 
 class TestUtilLogFile(object):
 
@@ -25,4 +27,14 @@ class TestUtilLogFile(object):
         for i, ll in enumerate(logfile):
             assert isinstance(ll, LogLine)
 
-        assert i+1 == length
+        assert length == i+1 
+        assert length == 1836
+
+
+    def test_start_end(self):
+        """ LogFile: test .start and .end property work correctly """
+
+        logfile = LogFile(self.filehandle)
+        
+        assert logfile.start == datetime(2013, 12, 30, 00, 13, 01, 661000)
+        assert logfile.end == datetime(2014, 01, 02, 23, 27, 11, 720000)
