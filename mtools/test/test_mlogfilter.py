@@ -175,5 +175,13 @@ class TestMLogFilter(object):
                     (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
                   )
 
+    @raises(SystemExit)
+    def test_no_logfile(self):
+        """ mlogfilter: test that not providing at least 1 log file throws clean error. """
+
+        self.tool.run('--from Jan 1')
+
+
+
 
 # output = sys.stdout.getvalue().strip()
