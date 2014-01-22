@@ -181,109 +181,34 @@ class MLaunchTool(BaseCmdLineTool):
             if self.loaded_args != self.args:
                 raise SystemExit('A different environment already exists at %s.' % self.dir)
 
-        # check if authentication is enabled, make key file       
         if self.args['authentication']:
-            if not os.path.exists(self.dir):
-                os.makedirs(self.dir)
-            os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
-            os.system('chmod 600 %s/keyfile'%self.dir)
+            # initialize without authentication
+            self._init(override_authentication=True)
+            nodes = []
+            roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
 
-        if self.args['sharded']:
-            # construct startup strings
-            self._construct_sharded()
-            self.discover()
+            # add admin user and wait until admin user propagates to all nodes
+            if self.args['sharded']:
+                # TODO wait for shards?
+                nodes = self.get_tagged(['mongos', 'running'])
+            elif self.args['single']:
+                nodes = self.get_tagged(['running'])
+            elif self.args['replicaset']:
+                self._wait_for_primary()
+                nodes = self.get_tagged(['primary', 'running'])
 
-            shard_names = self._get_shard_names(self.args)
+            nodes = sorted(nodes)
+            self._add_admin_user(nodes[0], roles=roles)
+            time.sleep(2)
+            # TODO actually check for the existence of the admin user
 
-            # start mongod (shard and config) nodes and wait
-            nodes = self.get_tagged(['mongod', 'down'])
-            self._start_on_ports(nodes, wait=True)
+            # stop all nodes
+            self.args['tags'] = []
+            self.stop()
+            del self.args['tags']
 
-            # initiate replica sets
-            for shard in shard_names:
-                # initiate replica set on first member
-                members = sorted(self.get_tagged([shard]))
-                self._initiate_replset(members[0], shard)
-
-            # add mongos
-            mongos = sorted(self.get_tagged(['mongos', 'down']))
-            self._start_on_ports(mongos, wait=True)
-
-            # add shards
-            mongos = sorted(self.get_tagged(['mongos']))
-            con = Connection('localhost:%i'%mongos[0])
-
-            shards_to_add = len(self.shard_connection_str)
-            nshards = con['config']['shards'].count()
-            if nshards < shards_to_add:
-                if self.args['replicaset']:
-                    print "adding shards. can take up to 30 seconds..."
-                else:
-                    print "adding shards."
-
-            while True:
-                try:
-                    nshards = con['config']['shards'].count()
-                except:
-                    nshards = 0
-                if nshards >= shards_to_add:
-                    break
-
-                for conn_str in self.shard_connection_str:
-                    try:
-                        res = con['admin'].command({'addShard': conn_str})
-                    except Exception as e:
-                        if self.args['verbose']:
-                            print e, ', will retry in a moment.'
-                        continue
-
-                    if res['ok']:
-                        if self.args['verbose']:
-                            print "shard %s added successfully"%conn_str
-                            self.shard_connection_str.remove(conn_str)
-                            break
-                    else:
-                        if self.args['verbose']:
-                            print res, '- will retry'
-
-                time.sleep(1)
-
-            # if --mongos 0, kill the dummy mongos
-            if self.args['mongos'] == 0:
-                host_port = 'localhost:%s'%mongos[0]
-                print "shutting down temporary mongos on %s" % host_port
-                shutdown_host(host_port)
-
-        
-        elif self.args['single']:
-            # construct startup string
-            self._construct_single(self.dir, self.args['port'])
-            self.discover()
-            
-            # start node
-            nodes = self.get_tagged(['single', 'down'])
-            self._start_on_ports(nodes, wait=False)
-
-        
-        elif self.args['replicaset']:
-            # construct startup strings
-            self._construct_replset(self.dir, self.args['port'], self.args['name'])
-            self.discover()
-
-            # start nodes and wait
-            nodes = sorted(self.get_tagged(['mongod', 'down']))
-            self._start_on_ports(nodes, wait=True)
-
-            # initiate replica set
-            self._initiate_replset(nodes[0], self.args['name'])
-
-
-        # wait for all nodes to be running
-        nodes = self.get_tagged(['all'])
-        self.wait_for(nodes)
-
-        # discover again, to get up-to-date info
-        self.discover()
+        # normal initialization
+        self._init(override_authentication=False)
 
         # write out parameters
         if self.args['verbose']:
@@ -644,6 +569,114 @@ class MLaunchTool(BaseCmdLineTool):
     # --- below here are internal helper methods, should not be called externally ---
 
 
+    def _init(self, override_authentication):
+        # check if authentication is enabled, make key file       
+        if self.args['authentication'] and override_authentication:
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)
+            os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
+            os.system('chmod 600 %s/keyfile'%self.dir)
+
+        if self.args['sharded']:
+            # construct startup strings
+            self._construct_sharded(override_authentication=override_authentication)
+            self.discover()
+
+            shard_names = self._get_shard_names(self.args)
+
+            # start mongod (shard and config) nodes and wait
+            nodes = self.get_tagged(['mongod', 'down'])
+            self._start_on_ports(nodes, wait=True)
+
+            # initiate replica sets
+            for shard in shard_names:
+                # initiate replica set on first member
+                members = sorted(self.get_tagged([shard]))
+                self._initiate_replset(members[0], shard)
+
+            # add mongos
+            mongos = sorted(self.get_tagged(['mongos', 'down']))
+            self._start_on_ports(mongos, wait=True)
+
+            if not self.args['authentication'] or (self.args['authentication'] and override_authentication):
+                # add shards
+                mongos = sorted(self.get_tagged(['mongos']))
+                con = Connection('localhost:%i'%mongos[0])
+
+                shards_to_add = len(self.shard_connection_str)
+                nshards = con['config']['shards'].count()
+                if nshards < shards_to_add:
+                    if self.args['replicaset']:
+                        print "adding shards. can take up to 30 seconds..."
+                    else:
+                        print "adding shards."
+
+                while True:
+                    try:
+                        nshards = con['config']['shards'].count()
+                    except:
+                        nshards = 0
+                    if nshards >= shards_to_add:
+                        break
+
+                    for conn_str in self.shard_connection_str:
+                        try:
+                            res = con['admin'].command({'addShard': conn_str})
+                        except Exception as e:
+                            if self.args['verbose']:
+                                print e, ', will retry in a moment.'
+                            continue
+
+                        if res['ok']:
+                            if self.args['verbose']:
+                                print "shard %s added successfully"%conn_str
+                                self.shard_connection_str.remove(conn_str)
+                                break
+                        else:
+                            if self.args['verbose']:
+                                print res, '- will retry'
+
+                    time.sleep(1)
+
+            # if --mongos 0, kill the dummy mongos
+            if self.args['mongos'] == 0:
+                host_port = 'localhost:%s'%mongos[0]
+                print "shutting down temporary mongos on %s" % host_port
+                shutdown_host(host_port)
+
+        
+        elif self.args['single']:
+            # construct startup string
+            self._construct_single(self.dir, self.args['port'], override_authentication=override_authentication)
+            self.discover()
+            
+            # start node
+            nodes = self.get_tagged(['single', 'down'])
+            self._start_on_ports(nodes, wait=False)
+
+        
+        elif self.args['replicaset']:
+            # construct startup strings
+            self._construct_replset(self.dir, self.args['port'], self.args['name'], override_authentication=override_authentication)
+            self.discover()
+
+            # start nodes and wait
+            nodes = sorted(self.get_tagged(['mongod', 'down']))
+            self._start_on_ports(nodes, wait=True)
+
+            # initiate replica set
+            if override_authentication:
+                self._initiate_replset(nodes[0], self.args['name'])
+
+
+        # wait for all nodes to be running
+        nodes = self.get_tagged(['all'])
+        self.wait_for(nodes)
+
+        # discover again, to get up-to-date info
+        self.discover()
+
+
     def _convert_u2b(self, obj):
         """ helper method to convert unicode back to plain text. """
         if isinstance(obj, dict):
@@ -698,8 +731,8 @@ class MLaunchTool(BaseCmdLineTool):
             os.makedirs(datapath)
         try:
             json.dump(out_dict, open(os.path.join(datapath, '.mlaunch_startup'), 'w'), -1)
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(e)
 
 
     def _create_paths(self, basedir, name=None):
@@ -825,6 +858,18 @@ class MLaunchTool(BaseCmdLineTool):
             self.wait_for(ports)
 
 
+    def _add_admin_user(self, port, name='admin', password='mypassword', database='admin', roles=None):
+        if not roles:
+            roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
+
+        con = Connection('localhost:%i'%port)
+
+        try:
+            con[database].add_user(name, password=password, roles=roles)
+        except OperationFailure, e:
+            raise RuntimeError(e)
+
+
     def _initiate_replset(self, port, name):
         # initiate replica set
         if not self.args['replicaset']:
@@ -843,7 +888,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     # --- below are command line constructor methods, that build the command line strings to be called
 
-    def _construct_sharded(self):
+    def _construct_sharded(self, override_authentication):
         """ start a sharded cluster. """
 
         num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
@@ -853,10 +898,10 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
             if self.args['single']:
-                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard) )
+                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, override_authentication=override_authentication) )
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard) )
+                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, override_authentication=override_authentication) )
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -866,7 +911,7 @@ class MLaunchTool(BaseCmdLineTool):
         config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
             
         for name in config_names:
-            self._construct_config(self.dir, nextport, name)
+            self._construct_config(self.dir, nextport, name, override_authentication=override_authentication)
             config_string.append('%s:%i'%(self.hostname, nextport))
             nextport += 1
         
@@ -883,19 +928,19 @@ class MLaunchTool(BaseCmdLineTool):
                 mongos_logfile = 'mongos/mongos_%i.log' % nextport
             else:
                 mongos_logfile = 'mongos.log'
-            self._construct_mongos(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string))
+            self._construct_mongos(os.path.join(self.dir, mongos_logfile), nextport, ','.join(config_string), override_authentication=override_authentication)
 
             nextport += 1
 
 
-    def _construct_replset(self, basedir, portstart, name):
+    def _construct_replset(self, basedir, portstart, name, override_authentication):
         """ start a replica set, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
 
         for i in range(self.args['nodes']):
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
-            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
+            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, override_authentication=override_authentication)
         
             host = '%s:%i'%(self.hostname, portstart+i)
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
@@ -912,33 +957,33 @@ class MLaunchTool(BaseCmdLineTool):
 
 
 
-    def _construct_config(self, basedir, port, name=None):
+    def _construct_config(self, basedir, port, name=None, override_authentication=False):
         """ start a config server """
         datapath = self._create_paths(basedir, name)
-        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr', override_authentication=override_authentication)
 
 
 
-    def _construct_single(self, basedir, port, name=None):
+    def _construct_single(self, basedir, port, name=None, override_authentication=False):
         """ start a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
-        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, override_authentication=override_authentication)
 
         host = '%s:%i'%(self.hostname, port)
 
         return host
 
 
-    def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
+    def _construct_mongod(self, dbpath, logpath, port, replset=None, extra='', override_authentication=False):
         """ starts a mongod process. """
         rs_param = ''
         if replset:
             rs_param = '--replSet %s'%replset
 
         auth_param = ''
-        if self.args['authentication']:
+        if self.args['authentication'] and not override_authentication:
             key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
-            auth_param = '--keyFile %s'%key_path
+            auth_param = '--auth --keyFile %s'%key_path
 
         if self.unknown_args:
             extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' ' + extra
@@ -951,7 +996,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
 
-    def _construct_mongos(self, logpath, port, configdb):
+    def _construct_mongos(self, logpath, port, configdb, override_authentication):
         """ start a mongos process. """
         extra = ''
         out = subprocess.PIPE
@@ -959,7 +1004,7 @@ class MLaunchTool(BaseCmdLineTool):
             out = None
 
         auth_param = ''
-        if self.args['authentication']:
+        if self.args['authentication'] and not override_authentication:
             key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
@@ -972,6 +1017,18 @@ class MLaunchTool(BaseCmdLineTool):
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
 
+
+    def _wait_for_primary(self):
+        while True:
+            self.discover()
+
+            if "primary" in self.cluster_tags and self.cluster_tags['primary']:
+                return True
+
+            time.sleep(1)
+
+            if self.args['verbose']:
+                print "waiting for a primary."
 
 
 if __name__ == '__main__':
