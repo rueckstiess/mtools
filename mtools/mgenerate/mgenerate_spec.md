@@ -96,6 +96,19 @@ time periods, for example `-2d` which means 2 days ago, or `+15y` which means 15
 Short form for `{ "$datetime" : {"min" : MIN, "max" : MAX } }`.
 
 
+### `$missing`
+
+### `$choose`
+
+### `$array`
+
+### `$email`
+
+### `$concat`
+
+### `$geo`
+
+
 
 
 
