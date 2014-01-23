@@ -449,7 +449,7 @@ class LogLine(object):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
             raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.') 
 
-        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
+        if (self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '')) and not force:
             return
         elif format.startswith('ctime'):
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
