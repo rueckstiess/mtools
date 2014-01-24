@@ -98,9 +98,57 @@ Short form for `{ "$datetime" : {"min" : MIN, "max" : MAX } }`.
 
 ### `$missing`
 
+Will not insert the key/value pair. A percentage of missing values can be specified.
+
+> ##### Example
+>     
+>     { "name" : "$missing" }
+> 
+> This will cause the entire key/value pair with key "name" to be missing.
+
+#### Additional Parameters
+
+
+###### Missing Percentage
+`{ "$missing" : { "percentage" : 30, "ifnot" : VALUE } }` <br>
+
+Will cause the key/value pair to be missing 30% of the time, and otherwise set the VALUE for the given key.
+
+
 ### `$choose`
 
+Chooses one of the specified values. 
+
+> ##### Example
+>     
+>     { "status" : { "$choose" : { "from" : [ "read", "unread", "deleted" ] } } }
+> 
+> This will cause the entire key/value pair with key "status" to be missing.
+
+#### Array Syntax
+`{ "$choose" : [ VAL1, VAL2, ... ] }` <br>
+
+Short form for `{ "$choose" : { "from" : [ VAL1, VAL2, ... ] } }`.
+
+
 ### `$array`
+
+Builds an array of elements of given length. Can be combined with $number to create random-length arrays.
+
+> ##### Example
+>     
+>     { "friends" : { "$array" : { "of": 12345, "number": 20 } } }
+> 
+> This will create an array for friends containing 20 times the value 12345.
+
+
+#### Array Syntax
+`{ "$array" : [ VALUE, NUMBER ] }` <br>
+
+Short form for `{ "$array" : { "of" : VALUE, "number" : NUMBER } }`.
+
+
+
 
 ### `$email`
 
