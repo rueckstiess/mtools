@@ -123,7 +123,22 @@ Chooses one of the specified values.
 >     
 >     { "status" : { "$choose" : { "from" : [ "read", "unread", "deleted" ] } } }
 > 
-> This will cause the entire key/value pair with key "status" to be missing.
+> Will pick one of the values from the array with equal probability.
+
+
+#### Additional Parameters
+
+###### Ratio 
+`{ "$choose" : { "from" : [ VAL1, VAL2, ... ], "ratio": [ RATIO1, RATIO2, ... ] } }` <br>
+
+Will pick the values proportionally to the given ratios. The `ratio` array must be the same length as the `from` array.
+
+> ##### Example
+>     
+>     { "status" : { "$choose" : { "from" : [ "read", "unread", "deleted" ], "ratio" : [ 1, 1, 10 ] } } }
+> 
+> Will pick one of the values from the array. Will pick "deleted" 10 times more likely than read and unread.
+
 
 #### Array Syntax
 `{ "$choose" : [ VAL1, VAL2, ... ] }` <br>
