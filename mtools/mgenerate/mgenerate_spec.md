@@ -1,9 +1,9 @@
 # mgenerate spec
 
-This is a spec to add a new script `mgenerate` to the mtools family. It will generate structured, semi-random data according to a template document. The template can be specified directly as a command line argument or it can be a file. The format for the template argument is in JSON. Additional arguments to `mgenerate` specify how many documents should be inserted. The output is one JSON document per line, which can be piped to mongoimport.
+This is a spec to add a new script `mgenerate` to the mtools family. It will generate structured, semi-random data according to a template document. The template can be specified directly as a command line argument or it can be a file. The format for the template argument is in JSON. Additional arguments to `mgenerate` specify how many documents should be inserted. The generated documents are directly inserted into a mongod/s, as specified with `--host` and `--port`. The default host is `localhost` and the default port is `27017`.
 
 > ##### Example
->     mgenerate <JSON or file> --num 10000 | mongoimport --port 27017
+>     mgenerate <JSON or file> --num 10000 --port 27017
 > 
 
 
@@ -82,7 +82,7 @@ Creates a random date and time. Alias is `$date`.
 
 
 ###### lower and upper bounds
-`{ "$number" : {"min" : 1358831035, "max" : 1390367035 } }` <br>
+`{ "$datetime" : {"min" : 1358831035, "max" : 1390367035 } }` <br>
 
 Generate a random date and time between the `min` and `max` values (both ends inclusive).
 
