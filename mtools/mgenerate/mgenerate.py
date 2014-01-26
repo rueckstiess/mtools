@@ -1,114 +1,44 @@
 import json
 import sys
-from random import choice
-from random import randint
-from itertools import repeat
+import inspect 
 
-from mtools.util import OrderedDict
-from bson import ObjectId
-
-
-class BaseOperator(object):
-    names = []
-    dict_format = False
-    string_format = False
-    defaults = OrderedDict()
-
-    def _parse_options(self, options={}):
-        self.options = self.defaults.copy()
-
-        if isinstance(options, list):
-            self.options.update( zip(self.defaults.keys(), options) )
-
-        elif isinstance(options, dict):
-            self.options.update( options )
-
-        for k,v in self.options.iteritems():
-            if isinstance(v, unicode):
-                self.options[k] = v.encode('utf-8')
+try:
+    try:
+        from pymongo import MongoClient as Connection
+    except ImportError:
+        from pymongo import Connection
+    from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+except ImportError:
+    raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
 
-class ObjectIdOperator(BaseOperator):
+import mtools.mgenerate.operators as operators
+from mtools.util.cmdlinetool import BaseCmdLineTool
 
-    names = ['$objectid', '$oid']
-    string_format = True
-
-    def __call__(self, options=None):
-        self._parse_options(options)
-        return ObjectId()
-
-
-
-class NumberOperator(BaseOperator):
-
-    dict_format = True
-    string_format = True
-    names = ['$number', '$num']
-    defaults = OrderedDict([ ('min', 0), ('max', 100) ])
-
-    def __call__(self, options=None):
-        self._parse_options(options)
-        assert self.options['min'] <= self.options['max']
-        return randint(self.options['min'], self.options['max'])
-
-
-class MissingOperator(BaseOperator):
-
-    dict_format = True
-    names = ['$missing']
-    defaults = OrderedDict([ ('percent', 100), ('ifnot', None) ])
-
-    def __call__(self, options=None):
-        self._parse_options(options)
-
-        if randint(1,100) <= self.options['percent']:
-            return '$missing'
-        else:
-            return self.options['ifnot']
-
-
-class ChooseOperator(BaseOperator):
-
-    dict_format = True
-    names = ['$choose']
-    defaults = OrderedDict([ ('from', []) ])
-
-
-    def __call__(self, options=None):
-        # options can be arbitrary long list
-        if isinstance(options, list):
-            options = {'from': options}
-
-        self._parse_options(options)
-
-        return choice(self.options['from'])
-
-
-# class DateDimeOperator(BaseOperator):
-
-#     dict_format = True
-#     string_format = True
-
-#     names = ['$datetime', '$date']
-
-#     defaults = OrderedDict([ ('min', 0), ('max', 100) ])
-
-#     def __call__(self, options=None):
-#         self._parse_options(options)
-#         assert self.options['min'] <= self.options['max']
-#         return randint(self.options['min'], self.options['max'])
-
-
-
-
-class MGeneratorTool(object):
-
-    operators = [ ObjectIdOperator(), NumberOperator(), MissingOperator(), ChooseOperator() ] 
+class MGeneratorTool(BaseCmdLineTool):
 
     def __init__(self):
+        BaseCmdLineTool.__init__(self)
+        
+        self.argparser.description = 'Script to generate pseudo-random data based on template documents.'
+        
+        self.argparser.add_argument('template', action='store', help='template for data generation, JSON or file')
+        self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
+        self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
+        self.argparser.add_argument('--port', action='store', default=27017, help='mongod/s port to import data, default=27017')
+        self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
+        self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
+        self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
+        self.argparser.add_argument('--out', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
+        self.argparser.add_argument('-w', action='store', default=1, help='write concern for inserts, default=1')
+
+
+        # add all filter classes from the filters module
+        self.operators = [c[1]() for c in inspect.getmembers(operators, inspect.isclass)]
         
         self.string_operators = {}
         self.dict_operators = {}
+        self.late_operators = {}
 
         # separate into key and value operators
         for o in self.operators:
@@ -118,48 +48,132 @@ class MGeneratorTool(object):
             if o.dict_format:
                 for name in o.names:
                     self.dict_operators[name] = o
+                    if o.late_eval:
+                        self.late_operators[name] = o
 
 
-    def _construct_list(self, data, parent=None):
+    def run(self, arguments=None):
+        BaseCmdLineTool.run(self, arguments)
+
+        if self.args['template'].startswith('{'):
+            # not a file
+            try:
+                template = json.loads(self.args['template'], object_hook=self._decode_dict)
+            except ValueError as e:
+                raise SystemExit("can't parse template: %s" % e)
+        else:
+            try:
+                f = open(self.args['template'])
+            except IOError as e:
+                raise SystemExit("can't open file %s: %s" % (self.args['template'], e))
+
+            try:
+                template = json.load(f, object_hook=self._decode_dict)
+            except ValueError as e:
+                raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
+
+
+        if not self.args['out']:        
+            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['w'])        
+            col = mc[self.args['database']][self.args['collection']]
+            if self.args['drop']:
+                col.drop()
+
+        batch = []
+        for n in xrange(self.args['number']):
+            # two evaluation rounds, early and late
+            doc = self._construct_dict(template, late=False)
+            doc = self._construct_dict(doc, late=True)
+
+            if self.args['out']:
+                print doc
+            else:
+                batch.append(doc)
+                if n % 100 == 0:
+                    col.insert(batch)
+                    batch = []
+                    self.update_progress(float(n) / self.args['number'], prefix='inserting data')
+
+        if not self.args['out']:
+            self.update_progress(1.0, prefix='inserting data')
+            if batch:
+                col.insert(batch)
+
+
+    def _decode_list(self, data):
         rv = []
         for item in data:
             if isinstance(item, unicode):
                 item = item.encode('utf-8')
-                if item.startswith('$'):
-                    item = self.string_operators[item]()
-            
-            if isinstance(item, list):
-                item = self._construct_list(item)
-            if isinstance(item, dict):
-                item = self._construct_dict(item)
+            elif isinstance(item, list):
+                item = self._decode_list(item)
+            elif isinstance(item, dict):
+                item = self._decode_dict(item)
             rv.append(item)
         return rv
 
 
-    def _construct_dict(self, data, parent=None):
+    def _decode_dict(self, data):
         rv = {}
-        return_key = False
         for key, value in data.iteritems():
             if isinstance(key, unicode):
                 key = key.encode('utf-8')
             if isinstance(value, unicode):
                 value = value.encode('utf-8')
+            elif isinstance(value, list):
+                value = self._decode_list(value)
+            elif isinstance(value, dict):
+                value = self._decode_dict(value)
+            rv[key] = value
+        return rv
 
-            if key.startswith('$') and key in self.dict_operators:
-                return_key = True
-                value = self.dict_operators[key](options=value)
-                        
-            if isinstance(value, list):
-                value = self._construct_list(value)
+
+    def _construct_list(self, data, late=False):
+        rv = []
+        for item in data: 
+            
+            if not late:
+                # skip late evaluations in the first round (like $choose)
+                if isinstance(item, str) and item.startswith('$') and item in self.late_operators:
+                    rv.append(item)
+                    continue
+           
+            if isinstance(item, list):
+                item = self._construct_list(item, late=late)
+
+            if isinstance(item, dict):
+                item = self._construct_dict(item, True)
+
+            if isinstance(item, str) and item.startswith('$'):
+                item = self.string_operators[item]()
+
+            if item != '$missing':
+                rv.append(item)
+
+        return rv
+
+
+    def _construct_dict(self, data, late=False):
+        rv = {}
+        for key, value in data.iteritems():                        
+
+            if not late:
+                # skip late evaluations in the first round (like $choose)
+                if key.startswith('$') and key in self.late_operators:
+                    rv[key] = value
+                    continue
 
             if isinstance(value, dict):
-                value = self._construct_dict(value)
+                value = self._construct_dict(value, late=late)
+
+            if isinstance(value, list):
+                value = self._construct_list(value)
 
             if isinstance(value, str) and value.startswith('$') and value in self.string_operators:
                 value = self.string_operators[value]()
 
-            if return_key:
-                return value
+            if key.startswith('$') and key in self.dict_operators:
+                return self.dict_operators[key](options=value)
 
             # special case for missing value, has to be taken care of here
             if value != '$missing':
@@ -168,13 +182,6 @@ class MGeneratorTool(object):
         return rv
 
 
-
-if len(sys.argv) > 1:
-    dct = json.loads(sys.argv[1])
-else:
-    dct = json.load(open('example_doc.json', 'r'))
-
-
-tool = MGeneratorTool()
-result = tool._construct_dict(dct)
-print result
+if __name__ == '__main__':
+    tool = MGeneratorTool()
+    tool.run()
