@@ -43,7 +43,7 @@ class BaseCmdLineTool(object):
     
     def _datetime_to_epoch(self, dt):
         """ converts the datetime to unix epoch (properly). """
-        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
+        return int((dt - datetime.utcfromtimestamp(0)).total_seconds())
 
     def update_progress(self, progress, prefix=''):
         """ use this helper function to print a progress bar for longer-running scripts. 
