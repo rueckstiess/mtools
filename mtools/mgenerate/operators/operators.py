@@ -4,6 +4,11 @@ from mtools.util import OrderedDict
 from random import choice
 from random import randint
 
+from datetime import datetime
+from dateutil import parser
+
+import time
+
 
 class BaseOperator(object):
     names = []
@@ -54,7 +59,7 @@ class MissingOperator(BaseOperator):
     dict_format = True
     string_format = True
     late_eval = True
-    
+
     names = ['$missing']
     defaults = OrderedDict([ ('percent', 100), ('ifnot', None) ])
 
@@ -73,7 +78,6 @@ class ChooseOperator(BaseOperator):
     late_eval = True
     names = ['$choose']
     defaults = OrderedDict([ ('from', []) ])
-
 
     def __call__(self, options=None):
         # options can be arbitrary long list
@@ -97,5 +101,39 @@ class ArrayOperator(BaseOperator):
 
         return [ self.options['of'] ] * self.options['number']
 
+
+
+class DateTimeOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$datetime', '$date']
+    defaults = OrderedDict([ ('min', 0), ('max', int(time.time())) ])
+
+
+    def _parse_dt(self, input):
+        """ parse input, either int (epoch) or date string (use dateutil parser). """
+        if isinstance(input, str):
+            # string needs conversion, try parsing with dateutil's parser
+            try:
+                dt = parser.parse(input)
+            except Exception as e:
+                raise SystemExit("can't parse date/time format for %s." % input)
+
+            return int(( dt - datetime.utcfromtimestamp(0) ).total_seconds())
+        else:
+            return int(input)
+
+
+    def __call__(self, options=None):
+        self._parse_options(options)
+
+        # convert time formats to epochs
+        mintime = self._parse_dt(self.options['min'])
+        maxtime = self._parse_dt(self.options['max'])
+
+        # generate random epoch number
+        epoch = randint(mintime, maxtime)
+        return datetime.fromtimestamp(epoch)
 
 
