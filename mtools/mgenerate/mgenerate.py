@@ -33,12 +33,11 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('-w', action='store', default=1, help='write concern for inserts, default=1')
 
 
-        # add all filter classes from the filters module
-        self.operators = [c[1]() for c in inspect.getmembers(operators, inspect.isclass)]
+        # add all operators classes from the operators module, pass in _decode method
+        self.operators = [c[1](self._decode) for c in inspect.getmembers(operators, inspect.isclass)]
         
         self.string_operators = {}
         self.dict_operators = {}
-        self.late_operators = {}
 
         # separate into key and value operators
         for o in self.operators:
@@ -48,8 +47,6 @@ class MGeneratorTool(BaseCmdLineTool):
             if o.dict_format:
                 for name in o.names:
                     self.dict_operators[name] = o
-                    if o.late_eval:
-                        self.late_operators[name] = o
 
 
     def run(self, arguments=None):
@@ -58,7 +55,7 @@ class MGeneratorTool(BaseCmdLineTool):
         if self.args['template'].startswith('{'):
             # not a file
             try:
-                template = json.loads(self.args['template'], object_hook=self._decode_dict)
+                template = json.loads(self.args['template'])
             except ValueError as e:
                 raise SystemExit("can't parse template: %s" % e)
         else:
@@ -68,7 +65,7 @@ class MGeneratorTool(BaseCmdLineTool):
                 raise SystemExit("can't open file %s: %s" % (self.args['template'], e))
 
             try:
-                template = json.load(f, object_hook=self._decode_dict)
+                template = json.load(f)
             except ValueError as e:
                 raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
 
@@ -81,9 +78,8 @@ class MGeneratorTool(BaseCmdLineTool):
 
         batch = []
         for n in xrange(self.args['number']):
-            # two evaluation rounds, early and late
-            doc = self._construct_dict(template, late=False)
-            doc = self._construct_dict(doc, late=True)
+            # decode the template
+            doc = self._decode(template)
 
             if self.args['out']:
                 print doc
@@ -100,86 +96,61 @@ class MGeneratorTool(BaseCmdLineTool):
                 col.insert(batch)
 
 
+    def _decode_operator(self, data):
+        if isinstance(data, str):
+            # string-format operator
+            return self._decode(self.string_operators[data]())
+
+        # dict-format operators should only ever have one key
+        assert len(data.keys()) == 1
+        key = data.keys()[0]
+        value = data[key]
+        # call operator with parameters (which will recursively evaluate sub-documents) and return result
+        return self._decode(self.dict_operators[key](value))
+
+
     def _decode_list(self, data):
         rv = []
         for item in data:
-            if isinstance(item, unicode):
-                item = item.encode('utf-8')
-            elif isinstance(item, list):
-                item = self._decode_list(item)
-            elif isinstance(item, dict):
-                item = self._decode_dict(item)
-            rv.append(item)
+            item = self._decode(item)
+            if item != "$missing":
+                rv.append(item)
         return rv
 
 
     def _decode_dict(self, data):
         rv = {}
         for key, value in data.iteritems():
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
-            if isinstance(value, unicode):
-                value = value.encode('utf-8')
-            elif isinstance(value, list):
-                value = self._decode_list(value)
-            elif isinstance(value, dict):
-                value = self._decode_dict(value)
-            rv[key] = value
-        return rv
-
-
-    def _construct_list(self, data, late=False):
-        rv = []
-        for item in data: 
-            
-            if not late:
-                # skip late evaluations in the first round (like $choose)
-                if isinstance(item, str) and item.startswith('$') and item in self.late_operators:
-                    rv.append(item)
-                    continue
-           
-            if isinstance(item, list):
-                item = self._construct_list(item, late=late)
-
-            if isinstance(item, dict):
-                item = self._construct_dict(item, True)
-
-            if isinstance(item, str) and item.startswith('$'):
-                item = self.string_operators[item]()
-
-            if item != '$missing':
-                rv.append(item)
-
-        return rv
-
-
-    def _construct_dict(self, data, late=False):
-        rv = {}
-        for key, value in data.iteritems():                        
-
-            if not late:
-                # skip late evaluations in the first round (like $choose)
-                if key.startswith('$') and key in self.late_operators:
-                    rv[key] = value
-                    continue
-
-            if isinstance(value, dict):
-                value = self._construct_dict(value, late=late)
-
-            if isinstance(value, list):
-                value = self._construct_list(value)
-
-            if isinstance(value, str) and value.startswith('$') and value in self.string_operators:
-                value = self.string_operators[value]()
-
-            if key.startswith('$') and key in self.dict_operators:
-                return self.dict_operators[key](options=value)
-
-            # special case for missing value, has to be taken care of here
-            if value != '$missing':
+            key = self._decode(key)
+            value = self._decode(value)
+            if value != "$missing":
                 rv[key] = value
-
         return rv
+
+
+    def _decode(self, data):
+
+        # if dict, check if it's a dict-format command
+        if isinstance(data, dict): 
+            if data.keys()[0] in self.dict_operators:
+                return self._decode_operator(data)
+            else:
+                return self._decode_dict(data)
+
+        # decode as list
+        if isinstance(data, list):
+            return self._decode_list(data)
+
+        # if it's a unicode string, encode as utf-8
+        if isinstance(data, unicode):
+            data = data.encode('utf-8')
+
+        # decode string-format commands
+        if isinstance(data, str) and data != "$missing" and data in self.string_operators:
+            return self._decode_operator(data)
+
+        # everything else, just return the data as is
+        return data
 
 
 if __name__ == '__main__':
