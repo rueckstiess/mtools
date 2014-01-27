@@ -1,8 +1,7 @@
 from bson import ObjectId
 from mtools.util import OrderedDict
 
-from random import choice
-from random import randint
+from random import choice, random, randint
 
 from datetime import datetime
 from dateutil import parser
@@ -89,7 +88,7 @@ class ChooseOperator(BaseOperator):
 
     dict_format = True
     names = ['$choose']
-    defaults = OrderedDict([ ('from', []) ])
+    defaults = OrderedDict([ ('from', []), ('weights', None) ])
 
     def __call__(self, options=None):
         # options can be arbitrary long list, store as "from" in options dictionary
@@ -98,8 +97,25 @@ class ChooseOperator(BaseOperator):
 
         options = self._parse_options(options)
 
-        # pick one choice, but don't evaluate yet
-        return choice(options['from'])
+        # decode ratio
+        weights = self._decode(options['weights'])
+        if not weights:
+            # pick one choice, uniformly distributed, but don't evaluate yet
+            return choice(options['from'])
+        else:
+            assert len(weights) == len(options['from'])
+            
+            total_weight = 0
+            acc_weight_items = []
+            for item, weight in zip(options['from'], weights):
+                total_weight += weight
+                acc_weight_items.append( (total_weight, item) )
+            
+            pick = random() * total_weight
+            for weight, item in acc_weight_items:
+                if weight >= pick:
+                    return item
+
 
 
 class ArrayOperator(BaseOperator):

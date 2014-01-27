@@ -86,8 +86,7 @@ Creates a random date and time. Alias is `$date`.
 
 Generate a random date and time between the `min` and `max` values (both ends inclusive).
 
-`min` and `max` values can be epoch numbers (see example above). They can also be strings that can be parsed as date (and optionally time), e.g. "2013-05-12 13:30". Finally, `min` and `max` can be relative
-time periods, for example `-2d` which means 2 days ago, or `+15y` which means 15 years in the future. These values are always relative to "now", the creation date. The full list of options is listed in the mtools hci.py module.
+`min` and `max` values can be epoch numbers (see example above). They can also be strings that can be parsed as date (and optionally time), e.g. "2013-05-12 13:30". 
 
 
 #### Array Syntax
@@ -129,13 +128,13 @@ Chooses one of the specified values.
 #### Additional Parameters
 
 ###### Ratio 
-`{ "$choose" : { "from" : [ VAL1, VAL2, ... ], "ratio": [ RATIO1, RATIO2, ... ] } }` <br>
+`{ "$choose" : { "from" : [ VAL1, VAL2, ... ], "weights": [ W1, W2, ... ] } }` <br>
 
-Will pick the values proportionally to the given ratios. The `ratio` array must be the same length as the `from` array.
+Will pick the values proportionally to the given weights. The `weights` array must be the same length as the `from` array.
 
 > ##### Example
 >     
->     { "status" : { "$choose" : { "from" : [ "read", "unread", "deleted" ], "ratio" : [ 1, 1, 10 ] } } }
+>     { "status" : { "$choose" : { "from" : [ "read", "unread", "deleted" ], "weights" : [ 1, 1, 10 ] } } }
 > 
 > Will pick one of the values from the array. Will pick "deleted" 10 times more likely than read and unread.
 
@@ -152,9 +151,9 @@ Builds an array of elements of given length. Can be combined with $number to cre
 
 > ##### Example
 >     
->     { "friends" : { "$array" : { "of": 12345, "number": 20 } } }
+>     { "friends" : { "$array" : { "of": "$oid", "number": 20 } } }
 > 
-> This will create an array for friends containing 20 times the value 12345.
+> This will create an array for friends containing 20 unique ObjectIds.
 
 
 #### Array Syntax
