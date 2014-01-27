@@ -105,7 +105,7 @@ class MLaunchTool(BaseCmdLineTool):
             arguments = 'init ' + arguments
         
         # default sub-command is `init` if none provided
-        elif len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
+        elif len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help', '--version']:
             sys.argv = sys.argv[0:1] + ['init'] + sys.argv[1:]
 
         # create command sub-parsers

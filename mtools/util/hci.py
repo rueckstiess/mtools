@@ -5,7 +5,7 @@ import copy
 
 class DateTimeBoundaries(object):
 
-    timeunits = ['sec', 's', 'min', 'months', 'mo', 'm', 'hours', 'h', 'days', 'd', 'weeks', 'w', 'years', 'y']
+    timeunits = ['secs', 'sec', 's', 'mins', 'min', 'm', 'months', 'month', 'mo', 'hours', 'hour', 'h', 'days', 'day', 'd', 'weeks','week', 'w', 'years', 'year', 'y']
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -173,21 +173,21 @@ class DateTimeBoundaries(object):
             
             mult = 1
 
-            if unit in ['s', 'sec']:
+            if unit in ['s', 'sec', 'secs']:
                 unit = 'seconds'
-            elif unit in ['m', 'min']:
+            elif unit in ['m', 'min', 'mins']:
                 unit = 'minutes'
-            elif unit in ['h', 'hours']:
+            elif unit in ['h', 'hour', 'hours']:
                 unit = 'hours'
-            elif unit in ['d', 'days']:
+            elif unit in ['d', 'day', 'days']:
                 unit = 'days'
-            elif unit in ['w', 'weeks']:
+            elif unit in ['w', 'week', 'weeks']:
                 unit = 'days'
                 mult = 7
-            elif unit in ['mo', 'months']:
+            elif unit in ['mo', 'month', 'months']:
                 unit = 'days'
                 mult = 30.43
-            elif unit in ['y', 'years']:
+            elif unit in ['y', 'year', 'years']:
                 unit = 'days'
                 mult = 365.24
             
@@ -230,7 +230,7 @@ if __name__ == '__main__':
     start = datetime(2012, 10, 14)
     end = datetime(2013, 6, 2)
     dtb = DateTimeBoundaries(start, end)
-    dtb.limit('Feb 19', '+1y')
+    print dtb('Feb 19', '+1day')
 
 
 
