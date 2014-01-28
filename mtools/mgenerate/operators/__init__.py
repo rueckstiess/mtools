@@ -1,1 +1,1 @@
-from operators import ChooseOperator, MissingOperator, NumberOperator, ObjectIdOperator, ArrayOperator, DateTimeOperator
+from operators import ChooseOperator, MissingOperator, NumberOperator, ObjectIdOperator, ArrayOperator, DateTimeOperator, StringOperator

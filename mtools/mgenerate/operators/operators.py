@@ -7,6 +7,7 @@ from datetime import datetime
 from dateutil import parser
 
 import time
+import string
 
 
 class BaseOperator(object):
@@ -61,6 +62,30 @@ class NumberOperator(BaseOperator):
         assert minval <= maxval
 
         return randint(minval, maxval)
+
+
+
+class StringOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$string', '$str']
+    defaults = OrderedDict([ ('length', 10), ('mask', None) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # decode min and max first
+        length = self._decode(options['length'])
+        mask = self._decode(options['mask'])
+
+        if mask == None:
+            mask = '.' * length
+
+        assert length > 0
+        result = ''.join( choice(string.ascii_letters + string.digits) for i in xrange(length) )
+
+        return result
 
 
 class MissingOperator(BaseOperator):
