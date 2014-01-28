@@ -357,7 +357,7 @@ class TestMLaunch(object):
         assert all( self.tool.is_running(node) for node in nodes )
 
     
-    @timed(120)
+    @timed(180)
     @attr('slow')
     def test_stop_partial(self):
 
@@ -375,6 +375,10 @@ class TestMLaunch(object):
         for tag in tags:
             self.tool.run("stop %s --dir %s" % (tag, self.data_dir))
             assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
             self.tool.run("start --dir %s" % self.data_dir)
             assert len(self.tool.get_tagged('down')) == 0
 
@@ -405,6 +409,10 @@ class TestMLaunch(object):
 
         # stop and start nodes but pass in unknown_args
         self.tool.run("stop --dir %s" % self.data_dir)
+
+        # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+        time.sleep(1)
+
         self.tool.run("start --dir %s -vv" % self.data_dir)
 
         # compare that the nodes are restarted with the new unknown_args, assert loglevel is now 2
@@ -414,6 +422,10 @@ class TestMLaunch(object):
 
         # stop and start nodes without unknown args again
         self.tool.run("stop --dir %s" % self.data_dir)
+        
+        # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+        time.sleep(1)
+
         self.tool.run("start --dir %s" % self.data_dir)
 
         # compare that the nodes are restarted with the previous loglevel
@@ -429,6 +441,10 @@ class TestMLaunch(object):
 
         for i in range(10):
             self.tool.run("stop --dir %s" % self.data_dir)
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
             self.tool.run("start --dir %s" % self.data_dir)
 
     
@@ -451,6 +467,10 @@ class TestMLaunch(object):
 
         for i in range(10):
             self.tool.run("stop --dir %s" % self.data_dir)
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
             self.tool.run("start --dir %s" % self.data_dir)
 
 
