@@ -3,8 +3,10 @@ from mtools.util.logline import LogLine
 
 
 mc = MongoClient()
+database = 'test'
+collection = 'profile_28'
 
-for doc in mc.test.profile_after.find().sort([('ts', ASCENDING)]):
+for doc in mc[database][collection].find().sort([('ts', ASCENDING)]):
 
     # build a log line
     ll = LogLine('', auto_parse=False)
@@ -42,8 +44,12 @@ for doc in mc.test.profile_after.find().sort([('ts', ASCENDING)]):
     if 'updateobj' in doc:
         payload += ' update: %s' % doc['updateobj']
 
-    ll._line_str = "[{thread}] {operation} {namespace} {payload} locks(micros) {locks} {duration}".format(
-        datetime=ll.datetime, thread=ll.thread, operation=ll.operation, namespace=ll.namespace, payload=payload, locks=locks, duration=duration)
+    scanned = 'nscanned:%i'%ll._nscanned if 'nscanned' in doc else ''
+    yields = 'numYields: %i'%ll._numYields if 'numYield' in doc else ''
+
+
+    ll._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(
+        datetime=ll.datetime, thread=ll.thread, operation=ll.operation, namespace=ll.namespace, payload=payload, scanned=scanned, yields=yields, locks=locks, duration=duration)
 
     ll._reformat_timestamp("ctime", force=True)
 
