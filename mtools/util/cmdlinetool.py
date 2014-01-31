@@ -45,6 +45,7 @@ class BaseCmdLineTool(object):
         """ converts the datetime to unix epoch (properly). """
         return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds())
 
+    
     def update_progress(self, progress, prefix=''):
         """ use this helper function to print a progress bar for longer-running scripts. 
             The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
@@ -61,22 +62,6 @@ class BaseCmdLineTool(object):
             sys.stdout.write('\r%s [%s%s] %.1f %% ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
             sys.stdout.flush()
 
-
-    def update_progress(self, progress, prefix=''):
-        """ use this helper function to print a progress bar for longer-running scripts. 
-            The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
-            will be printed before the progress bar. 
-        """
-        total_length = 40
-
-        if progress == 1.:
-            sys.stdout.write('\r' + ' '*(total_length*2 + len(prefix)))
-            sys.stdout.write('\n')
-            sys.stdout.flush()
-        else:
-            bar_length = int(round(total_length*progress))
-            sys.stdout.write('\r%s [%s%s] %% %3.1f ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
-            sys.stdout.flush()
 
 
 class LogFileTool(BaseCmdLineTool):
