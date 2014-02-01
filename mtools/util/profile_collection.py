@@ -1,0 +1,95 @@
+from mtools.util.logevent import LogEvent
+from mtools.util.input_source import InputSource
+
+try:
+    try:
+        from pymongo import MongoClient as Connection
+    except ImportError:
+        from pymongo import Connection
+    from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+except ImportError:
+    raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
+
+from pymongo import ASCENDING, DESCENDING
+
+class ProfileCollection(InputSource):
+    """ wrapper class for input source system.profile collection """
+
+    def __init__(self, host='localhost', port=27017, database='test', collection='system.profile'):
+        """ constructor for ProfileCollection. Takes host, port, database and collection as parameters. 
+            All are optional and have default values.
+        """
+
+        # store parameters
+        self.host = host
+        self.port = port
+        self.database = database
+        self.collection = collection
+
+        # property variables
+        self._start = None
+        self._end = None
+        self._num_events = None
+
+        # test if database can be reached and collection exists
+        try:
+            mc = Connection(host=host, port=port)
+        except (ConnectionFailure, AutoReconnect) as e:
+            raise SystemExit("can't connect to database, please check if a mongod instance is running on %s:%s." % (host, port))
+        
+        self.coll_handle = mc[database][collection]
+
+        if self.coll_handle.count() == 0:
+            raise SystemExit("can't find any data in %s.%s collection. Please check database and collection name." % (database, collection))
+
+
+    @property
+    def start(self):
+        """ lazy evaluation of start and end of events. """
+        if not self._start:
+            self._calculate_bounds()
+        return self._start
+
+    @property
+    def end(self):
+        """ lazy evaluation of start and end of events. """
+        if not self._end:
+            self._calculate_bounds()
+        return self._end
+
+    @property
+    def num_events(self):
+        """ lazy evaluation of the number of events. """
+        if not self._num_events:
+            self._num_events = self.coll_handle.count()
+        return self._num_events
+
+
+    def __iter__(self):
+        """ iteration over ProfileCollection object will return a LogEvent object for each document. """
+
+        cursor = self.coll_handle.find().sort([ ("ts", ASCENDING) ])
+
+        for doc in cursor:
+            le = LogEvent(doc)
+            yield le
+
+
+    def _calculate_bounds(self):
+        """ calculate beginning and end of log events. """
+
+        # get start datetime 
+        first = self.coll_handle.find_one(None, sort=[ ("ts", ASCENDING) ])
+        last = self.coll_handle.find_one(None, sort=[ ("ts", DESCENDING) ])
+
+        self._start = first.ts
+        self._end = last.ts
+
+        return True
+
+
+if __name__ == '__main__':
+    pc = ProfileCollection()
+
+    for event in pc:
+        print event
