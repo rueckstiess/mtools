@@ -1,4 +1,4 @@
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from math import ceil 
 
 import time
@@ -104,7 +104,7 @@ class LogFile(object):
                 version = re.search(r'(\d\.\d\.\d+)', line)
                 if version:
                     version = version.group(1)
-                    restart = (version, LogLine(line))
+                    restart = (version, LogEvent(line))
                     self._restarts.append(restart)
 
         self._num_lines = l
@@ -121,7 +121,7 @@ class LogFile(object):
 
         # get start datetime 
         for line in self.logfile:
-            logline = LogLine(line)
+            logline = LogEvent(line)
             date = logline.datetime
             if date:
                 self._start = date
@@ -133,7 +133,7 @@ class LogFile(object):
         self.logfile.seek(-min(self._filesize, 15000), 2)
 
         for line in reversed(self.logfile.readlines()):
-            logline = LogLine(line)
+            logline = LogEvent(line)
             date = logline.datetime
             if date:
                 self._end = date
@@ -172,7 +172,7 @@ class LogFile(object):
 
         while line != '':
             line = self.logfile.readline()
-            logline = LogLine(line)
+            logline = LogEvent(line)
             if logline.datetime:
                 return logline
 
@@ -189,10 +189,10 @@ class LogFile(object):
 
         if self.from_stdin:
             # skip lines until start_dt is reached
-            ll = None
-            while not (ll and ll.datetime and ll.datetime >= start_dt):
+            le =  None
+            while not (le and le.datetime and le.datetime >= start_dt):
                 line = self.logfile.next()
-                ll = LogLine(line)
+                le =  LogEvent(line)
 
         else:
             # fast bisection path
@@ -200,29 +200,29 @@ class LogFile(object):
             max_mark = self.filesize
             step_size = max_mark
 
-            ll = None
+            le =  None
 
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
                 
                 self.logfile.seek(step_size, 1)
-                ll = self._find_curr_line()
-                if not ll:
+                le =  self._find_curr_line()
+                if not le:
                     break
                                 
-                if ll.datetime >= start_dt:
+                if le.datetime >= start_dt:
                     step_size = -abs(step_size)
                 else:
                     step_size = abs(step_size)
 
-            if not ll:
+            if not le:
                 return 
 
             # now walk backwards until we found a truely smaller line
-            while ll and self.logfile.tell() >= 2 and ll.datetime >= start_dt:
+            while le and self.logfile.tell() >= 2 and le.datetime >= start_dt:
                 self.logfile.seek(-2, 1)
-                ll = self._find_curr_line(prev=True)
+                le =  self._find_curr_line(prev=True)
 
 
 

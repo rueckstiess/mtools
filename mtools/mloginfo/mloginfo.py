@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from mtools.util.logfile import LogFile
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 
 import inspect
@@ -45,7 +45,7 @@ class MLogInfoTool(LogFileTool):
             logline = None
             for i in range(20):
                 try:
-                    logline = LogLine(logfileOpen.next())
+                    logline = LogEvent(logfileOpen.next())
                 except StopIteration as e:
                     raise SystemExit("no valid log lines found (datetime not available).")
                 if logline.datetime:

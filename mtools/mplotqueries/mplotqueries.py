@@ -24,7 +24,7 @@ except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
 
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.logfile import LogFile
 
 from mtools.util.cmdlinetool import LogFileTool
@@ -132,8 +132,8 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, line in enumerate(logfile):
-                # create LogLine object
-                logline = LogLine(line)
+                # create LogEvent object
+                logline = LogEvent(line)
 
                 # adjust times if --optime-start is enabled
                 if self.args['optime_start'] and logline.duration and logline.datetime:

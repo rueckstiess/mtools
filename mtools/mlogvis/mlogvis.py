@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 import mtools
 
@@ -26,7 +26,7 @@ class MLogVisTool(LogFileTool):
         result_str = ''
         out_count = 0
         for line_no, line in enumerate(self.args['logfile']):
-            logline = LogLine(line)
+            logline = LogEvent(line)
             # only export lines that have a datetime and duration
             if logline.duration and logline.datetime:
                 out_count += 1

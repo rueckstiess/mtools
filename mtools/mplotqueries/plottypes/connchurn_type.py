@@ -101,11 +101,11 @@ class ConnectionChurnPlotType(BasePlotType):
         opened = self.groups['opened']
         closed = self.groups['closed']
 
-        total = sorted(opened+closed, key=lambda ll: ll.datetime)
+        total = sorted(opened+closed, key=lambda le: le.datetime)
         x = date2num( [ logline.datetime for logline in total ] )
         
         try:
-            conns = [int(re.search(r'(\d+) connections? now open', ll.line_str).group(1)) for ll in total]
+            conns = [int(re.search(r'(\d+) connections? now open', le.line_str).group(1)) for le in total]
         except AttributeError:
             # hack, v2.0.x doesn't have this information
             axis.set_ylim(top = self.ymax*1.1) 

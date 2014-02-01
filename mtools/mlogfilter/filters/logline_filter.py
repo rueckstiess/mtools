@@ -1,4 +1,4 @@
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from base_filter import BaseFilter
 
 class LogLineFilter(BaseFilter):

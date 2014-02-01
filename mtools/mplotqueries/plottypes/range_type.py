@@ -53,10 +53,10 @@ class RangePlotType(BasePlotType):
 
         if self.gap:
             td = timedelta(seconds=self.gap)
-            for ll, ll_next in zip(self.groups[group][:-1], self.groups[group][1:]):
-                if ll_next.datetime - ll.datetime >= td:
-                    x_lefts.append( date2num(ll_next.datetime) )
-                    x_rights.append( date2num(ll.datetime) )
+            for le, le_next in zip(self.groups[group][:-1], self.groups[group][1:]):
+                if le_next.datetime - le.datetime >= td:
+                    x_lefts.append( date2num(le_next.datetime) )
+                    x_rights.append( date2num(le.datetime) )
 
         x_rights.append( date2num( self.groups[group][-1].datetime ) )
 

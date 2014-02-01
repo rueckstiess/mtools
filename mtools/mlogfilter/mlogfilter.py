@@ -7,7 +7,7 @@ import types
 
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.logfile import LogFile
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
@@ -140,7 +140,7 @@ class MLogFilterTool(LogFileTool):
         """ helper method to merge several files together by datetime. """
         # open files, read first lines, extract first dates
         lines = [f.readline() for f in self.args['logfile']]
-        lines = [LogLine(l) if l else None for l in lines]
+        lines = [LogEvent(l) if l else None for l in lines]
 
         # adjust lines by timezone
         for i in range(len(lines)):
@@ -158,7 +158,7 @@ class MLogFilterTool(LogFileTool):
 
             # update lines array with a new line from the min_index'th logfile
             new_line = self.args['logfile'][min_index].readline()
-            lines[min_index] = LogLine(new_line) if new_line else None
+            lines[min_index] = LogEvent(new_line) if new_line else None
             if lines[min_index] and lines[min_index].datetime:
                 lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
 
@@ -182,7 +182,7 @@ class MLogFilterTool(LogFileTool):
         else:
             # only one file
             for line in self.args['logfile'][0]:
-                logline = LogLine(line)
+                logline = LogEvent(line)
                 if logline.datetime: 
                     logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logline

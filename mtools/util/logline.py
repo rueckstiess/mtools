@@ -12,8 +12,8 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class LogLine(object):
-    """ LogLine extracts information from a mongod/mongos log file line and 
+class LogEvent(object):
+    """ LogEvent extracts information from a mongod/mongos log file line and 
         stores the following properties/variables:
 
         line_str: the original line string
@@ -480,12 +480,12 @@ class LogLine(object):
 
 
     def __str__(self):
-        """ default string conversion for a LogLine object is just its line_str. """
+        """ default string conversion for a LogEvent object is just its line_str. """
         return str(self.line_str)
 
 
     def to_dict(self, labels=None):
-        """ converts LogLine object to a dictionary. """
+        """ converts LogEvent object to a dictionary. """
         output = {}
         if labels == None:
             labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
@@ -501,7 +501,7 @@ class LogLine(object):
 
     
     def to_json(self, labels=None):
-        """ converts LogLine object to valid JSON. """
+        """ converts LogEvent object to valid JSON. """
         output = self.to_dict(labels)
         return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 

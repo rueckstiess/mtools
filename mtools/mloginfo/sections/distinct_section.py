@@ -1,7 +1,7 @@
 from base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.logfile import LogFile
 
 from collections import defaultdict
@@ -57,25 +57,25 @@ class DistinctSection(BaseSection):
 
             # update progress bar every 1000 lines
             if self.progress_bar_enabled and (i % 1000 == 0):
-                ll = LogLine(line)
-                if ll.datetime:
-                    progress_curr = self.mloginfo._datetime_to_epoch(ll.datetime)
+                le =  LogEvent(line)
+                if le.datetime:
+                    progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if cl:
                 codelines[cl.pattern] += 1
             else:
-                ll = LogLine(line)
-                if ll.operation:
+                le =  LogEvent(line)
+                if le.operation:
                     # skip operations (command, insert, update, delete, query, getmore)
                     continue
-                if not ll.thread:
+                if not le.thread:
                     # skip the lines that don't have a thread name (usually map/reduce or assertions)
                     continue
-                if len(ll.split_tokens) - ll._thread_offset <= 1:
+                if len(le.split_tokens) - le._thread_offset <= 1:
                     # skip empty log messages (after thread name)
                     continue
-                if "warning: log line attempted" in ll.line_str and "over max size" in ll.line_str:
+                if "warning: log line attempted" in le.line_str and "over max size" in le.line_str:
                     # skip lines that are too long
                     continue
 

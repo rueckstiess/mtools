@@ -1,7 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 from mtools.util.logfile import LogFile
 
 from base_filter import BaseFilter

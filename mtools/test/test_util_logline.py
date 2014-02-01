@@ -1,6 +1,6 @@
 import sys
 from nose.tools import *
-from mtools.util.logline import LogLine
+from mtools.util.logline import LogEvent
 import time
 
 line_ctime_pre24 = "Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, pdfile version 4.5"
@@ -14,68 +14,68 @@ line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { f
 def test_logline_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
 
-    ll = LogLine(line_ctime_pre24)
+    le =  LogEvent(line_ctime_pre24)
 
-    ll_str = ll.line_str
-    assert(str(ll.datetime) == '2014-08-03 21:52:05')
-    assert(ll._datetime_format == 'ctime-pre2.4')
-    print ll_str
-    print ll.line_str
-    assert(ll.line_str[4:] == ll_str[4:])
+    le_str = le.line_str
+    assert(str(le.datetime) == '2014-08-03 21:52:05')
+    assert(le._datetime_format == 'ctime-pre2.4')
+    print le_str
+    print le.line_str
+    assert(le.line_str[4:] == le_str[4:])
 
-    ll = LogLine(line_ctime)
-    ll_str = ll.line_str
-    assert(str(ll.datetime) == '2014-08-03 21:52:05.995000')
-    assert(ll._datetime_format == 'ctime')
-    assert(ll.line_str[4:] == ll_str[4:])
+    le =  LogEvent(line_ctime)
+    le_str = le.line_str
+    assert(str(le.datetime) == '2014-08-03 21:52:05.995000')
+    assert(le._datetime_format == 'ctime')
+    assert(le.line_str[4:] == le_str[4:])
 
-    ll = LogLine(line_iso8601_utc)
-    ll_str = ll.line_str
-    assert(str(ll.datetime) == '2013-08-03 11:52:05.995000+00:00')
-    assert(ll._datetime_format == 'iso8601-utc')
-    assert(ll.line_str[4:] == ll_str[4:])
+    le =  LogEvent(line_iso8601_utc)
+    le_str = le.line_str
+    assert(str(le.datetime) == '2013-08-03 11:52:05.995000+00:00')
+    assert(le._datetime_format == 'iso8601-utc')
+    assert(le.line_str[4:] == le_str[4:])
 
-    ll = LogLine(line_iso8601_local)
-    ll_str = ll.line_str
-    assert(str(ll.datetime) == '2013-08-03 21:52:05.995000+10:00')
-    assert(ll._datetime_format == 'iso8601-local')
-    assert(ll.line_str[4:] == ll_str[4:])
+    le =  LogEvent(line_iso8601_local)
+    le_str = le.line_str
+    assert(str(le.datetime) == '2013-08-03 21:52:05.995000+10:00')
+    assert(le._datetime_format == 'iso8601-local')
+    assert(le.line_str[4:] == le_str[4:])
 
 
 def test_logline_extract_new_and_old_numYields():
-    ll = LogLine(line_246_numYields)
-    assert(ll.numYields == 2405)
+    le =  LogEvent(line_246_numYields)
+    assert(le.numYields == 2405)
 
-    ll = LogLine(line_253_numYields)
-    assert(ll.numYields == 1)
+    le =  LogEvent(line_253_numYields)
+    assert(le.numYields == 1)
 
 
 def test_logline_value_extraction():
     """ Check for correct value extraction of all fields. """
     
-    ll = LogLine(line_getmore)
-    assert(ll.thread == 'conn9')
-    assert(ll.operation == 'getmore')
-    assert(ll.namespace == 'local.oplog.rs')
-    assert(ll.duration == 144)
-    assert(ll.numYields == 107)
-    assert(ll.r == 85093)
-    assert(ll.ntoreturn == 0)
-    assert(ll.nreturned == 13551)
-    assert(ll.pattern == '{ts: 1}')
+    le =  LogEvent(line_getmore)
+    assert(le.thread == 'conn9')
+    assert(le.operation == 'getmore')
+    assert(le.namespace == 'local.oplog.rs')
+    assert(le.duration == 144)
+    assert(le.numYields == 107)
+    assert(le.r == 85093)
+    assert(le.ntoreturn == 0)
+    assert(le.nreturned == 13551)
+    assert(le.pattern == '{ts: 1}')
 
 
 def test_logline_lazy_evaluation():
-    """ Check that all LogLine variables are evaluated lazily. """
+    """ Check that all LogEvent variables are evaluated lazily. """
     
     fields = ['_thread', '_operation', '_namespace', '_duration', '_numYields', '_r', '_ntoreturn', '_nreturned', '_pattern']
 
     # before parsing all member variables need to be None
-    ll = LogLine(line_getmore)
+    le =  LogEvent(line_getmore)
     for attr in fields:
-        assert(getattr(ll, attr) == None)
+        assert(getattr(le, attr) == None)
 
     # after parsing, they all need to be filled out
-    ll.parse_all()
+    le.parse_all()
     for attr in fields:
-        assert(getattr(ll, attr) != None)
+        assert(getattr(le, attr) != None)
