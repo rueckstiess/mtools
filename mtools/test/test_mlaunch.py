@@ -24,13 +24,12 @@ class TestMLaunch(object):
         its own data directory (for debugging).
     """
 
-    static_port = 33333
+    port = 33333
     base_dir = 'data_test_mlaunch'
 
 
     def __init__(self):
         """ Constructor. """
-        self.port = TestMLaunch.static_port
         self.use_authentication = False
         self.data_dir = ''
         
@@ -385,6 +384,7 @@ class TestMLaunch(object):
     @timed(180)
     @attr('slow')
     def test_stop_partial(self):
+        """ mlaunch: test stopping and restarting tagged groups on different tags. """
 
         # key is tag for command line, value is tag for get_tagged
         tags = ['shard01', 'shard 1', 'mongod', 'mongos', 'config', str(self.port)] 
@@ -423,6 +423,7 @@ class TestMLaunch(object):
 
 
     def test_restart_with_unkown_args(self):
+        """ mlaunch: test start command with extra unknown arguments """
 
         # init environment (sharded, single shards ok)
         self.run_tool("init --single")
@@ -499,27 +500,27 @@ class TestMLaunch(object):
             self.run_tool("start")
 
 
-    @attr('slow')
-    @attr('auth')
-    def test_repeat_all_with_auth(self):
-        """ this test will repeat all the tests in this class (excluding itself) but with authentication. """
+    # @attr('slow')
+    # @attr('auth')
+    # def test_repeat_all_with_auth(self):
+    #     """ this test will repeat all the tests in this class (excluding itself) but with authentication. """
 
-        tests = [t for t in inspect.getmembers(self, predicate=inspect.ismethod) if t[0].startswith('test_') ]
+    #     tests = [t for t in inspect.getmembers(self, predicate=inspect.ismethod) if t[0].startswith('test_') ]
 
-        self.use_authentication = True
+    #     self.use_authentication = True
         
-        for name, method in tests:
-            # don't call recursively
-            if name in ['test_repeat_all_with_auth', 'test_argv_run', 'test_init_default']:
-                continue
+    #     for name, method in tests:
+    #         # don't call recursively
+    #         if name in ['test_repeat_all_with_auth', 'test_argv_run', 'test_init_default']:
+    #             continue
 
-            print "running %s with authentication" % name
-            # manual setup, test, teardown
-            self.setup()
-            method()
-            self.teardown()
+    #         print "running %s with authentication" % name
+    #         # manual setup, test, teardown
+    #         self.setup()
+    #         method()
+    #         self.teardown()
 
-        self.use_authentication = False
+    #     self.use_authentication = False
 
 
     # TODO 
