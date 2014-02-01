@@ -1,10 +1,12 @@
 from mtools.util.logevent import LogEvent
+from mtools.util.input_source import InputSource
+
 from math import ceil 
 
 import time
 import re
 
-class LogFile(object):
+class LogFile(InputSource):
     """ wrapper class for log files, either as open file streams of from stdin. """
 
     def __init__(self, filehandle):
