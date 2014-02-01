@@ -40,22 +40,22 @@ class BasePlotType(object):
             self.xlabel = 'time (end of ops)'
 
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True if this PlotType can plot this line. """
         return True
 
-    def add_line(self, logline):
+    def add_line(self, logevent):
         """ append log line to this plot type. """
         key = None
         self.empty = False
-        self.groups.setdefault(key, list()).append(logline)
+        self.groups.setdefault(key, list()).append(logevent)
 
     @property 
-    def loglines(self):
-        """ iterator yielding all loglines from groups dictionary. """
+    def logevents(self):
+        """ iterator yielding all logevents from groups dictionary. """
         for key in self.groups:
-            for logline in self.groups[key]:
-                yield logline
+            for logevent in self.groups[key]:
+                yield logevent
 
     @classmethod
     def color_map(cls, group):
@@ -72,7 +72,7 @@ class BasePlotType(object):
 
 
     def group(self):
-        """ (re-)group all loglines by the given group. """
+        """ (re-)group all logevents by the given group. """
         if hasattr(self, 'group_by'):
             group_by = self.group_by
         else:
@@ -82,18 +82,18 @@ class BasePlotType(object):
 
         groups = OrderedDict()
 
-        for logline in self.loglines:
+        for logevent in self.logevents:
 
-            # if group_by is a function, call on logline
+            # if group_by is a function, call on logevent
             if hasattr(group_by, '__call__'):
-                key = group_by(logline)
-            # if the logline has attribute of group_by, use that as key
-            elif group_by and hasattr(logline, group_by):
-                key = getattr(logline, group_by)
-            # if the PlotType has a method with the name of group_by call that on logline
+                key = group_by(logevent)
+            # if the logevent has attribute of group_by, use that as key
+            elif group_by and hasattr(logevent, group_by):
+                key = getattr(logevent, group_by)
+            # if the PlotType has a method with the name of group_by call that on logevent
             elif group_by and hasattr(self, group_by):
                 f = getattr(self, group_by)
-                key = f(logline)
+                key = f(logevent)
             # if a --label was given, use that as key
             # elif self.args and self.args['label']:
             #     key = self.args['label']
@@ -102,7 +102,7 @@ class BasePlotType(object):
                 key = None
                 # try to match as regular expression
                 if type(group_by) == types.StringType:
-                    match = re.search(group_by, logline.line_str)
+                    match = re.search(group_by, logevent.line_str)
                     if match:
                         if len(match.groups()) > 0:
                             key = match.group(1)
@@ -113,7 +113,7 @@ class BasePlotType(object):
             # if group_by == "thread" and key and key.startswith("conn"):
             #     key = "conn####"
 
-            groups.setdefault(key, list()).append(logline)
+            groups.setdefault(key, list()).append(logevent)
         
         # sort groups by number of data points
         groups = OrderedDict( sorted(groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )

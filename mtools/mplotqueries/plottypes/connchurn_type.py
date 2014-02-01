@@ -16,7 +16,7 @@ from mtools.util.log2code import Log2CodeConverter
 
 
 class ConnectionChurnPlotType(BasePlotType):
-    """ plots a histogram plot over all loglines. The bucket size can be specified with the --bucketsize or -b parameter. Unit is in seconds. """
+    """ plots a histogram plot over all logevents. The bucket size can be specified with the --bucketsize or -b parameter. Unit is in seconds. """
 
     plot_type_str = 'connchurn'
     timeunits = {'sec':1, 's':1, 'min':60, 'm':1, 'hour':3600, 'h':3600, 'day':86400, 'd':86400}
@@ -43,23 +43,23 @@ class ConnectionChurnPlotType(BasePlotType):
 
         self.ylabel = "# connections opened/closed"
 
-    def opened_closed(self, logline):
+    def opened_closed(self, logevent):
         """ inspects a log line and groups it by connection being openend or closed. If neither, return False. """
-        if "connection accepted" in logline.line_str:
+        if "connection accepted" in logevent.line_str:
             return "opened"
-        elif "end connection" in logline.line_str:
+        elif "end connection" in logevent.line_str:
             return "closed"
         else:
             return False
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True for each line. We bucket everything. Filtering has to be done before passing to this type of plot. """
-        return self.opened_closed(logline)
+        return self.opened_closed(logevent)
 
 
     def plot_group(self, group, idx, axis):
 
-        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+        x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
         color, _ = self.color_map(group)
 
         xmin, xmax = date2num(self.limits)
@@ -102,7 +102,7 @@ class ConnectionChurnPlotType(BasePlotType):
         closed = self.groups['closed']
 
         total = sorted(opened+closed, key=lambda le: le.datetime)
-        x = date2num( [ logline.datetime for logline in total ] )
+        x = date2num( [ logevent.datetime for logevent in total ] )
         
         try:
             conns = [int(re.search(r'(\d+) connections? now open', le.line_str).group(1)) for le in total]

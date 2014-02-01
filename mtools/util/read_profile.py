@@ -1,5 +1,5 @@
 from pymongo import MongoClient, ASCENDING
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 
 
 mc = MongoClient()

@@ -1,7 +1,7 @@
 from base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 
 from collections import defaultdict
@@ -9,7 +9,7 @@ from collections import defaultdict
 
 class DistinctSection(BaseSection):
     """ This section shows a distinct view of all log lines matched with the Log2Code matcher.
-    	It will output sorted statistics of which logline patterns where matched how often
+    	It will output sorted statistics of which logevent patterns where matched how often
     	(most frequent first).
     """
     

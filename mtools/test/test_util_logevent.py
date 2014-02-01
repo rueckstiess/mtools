@@ -1,6 +1,6 @@
 import sys
 from nose.tools import *
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 import time
 
 line_ctime_pre24 = "Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, pdfile version 4.5"
@@ -11,7 +11,7 @@ line_getmore = "Mon Aug  5 20:26:32 [conn9] getmore local.oplog.rs query: { ts: 
 line_253_numYields = "2013-10-21T12:07:27.057+1100 [conn2] query test.docs query: { foo: 234333.0 } ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:1 locks(micros) r:239078 nreturned:0 reslen:20 145ms"
 line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { foo: 23432.0 } ntoreturn:0 ntoskip:0 nscanned:316776 keyUpdates:0 numYields: 2405 locks(micros) r:743292 nreturned:2 reslen:2116 451ms"
 
-def test_logline_datetime_parsing():
+def test_logevent_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
 
     le =  LogEvent(line_ctime_pre24)
@@ -42,7 +42,7 @@ def test_logline_datetime_parsing():
     assert(le.line_str[4:] == le_str[4:])
 
 
-def test_logline_extract_new_and_old_numYields():
+def test_logevent_extract_new_and_old_numYields():
     le =  LogEvent(line_246_numYields)
     assert(le.numYields == 2405)
 
@@ -50,7 +50,7 @@ def test_logline_extract_new_and_old_numYields():
     assert(le.numYields == 1)
 
 
-def test_logline_value_extraction():
+def test_logevent_value_extraction():
     """ Check for correct value extraction of all fields. """
     
     le =  LogEvent(line_getmore)
@@ -65,7 +65,7 @@ def test_logline_value_extraction():
     assert(le.pattern == '{ts: 1}')
 
 
-def test_logline_lazy_evaluation():
+def test_logevent_lazy_evaluation():
     """ Check that all LogEvent variables are evaluated lazily. """
     
     fields = ['_thread', '_operation', '_namespace', '_duration', '_numYields', '_r', '_ntoreturn', '_nreturned', '_pattern']

@@ -1,4 +1,4 @@
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from math import ceil 
 
 import time
@@ -188,9 +188,9 @@ class LogFile(object):
 
         while line != '':
             line = self.filehandle.readline()
-            logline = LogEvent(line)
-            if logline.datetime:
-                return logline
+            logevent = LogEvent(line)
+            if logevent.datetime:
+                return logevent
 
             # to avoid infinite loops, quit here if previous line not found
             if prev:

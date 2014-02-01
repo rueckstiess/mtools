@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 import mtools
 
@@ -26,9 +26,9 @@ class MLogVisTool(LogFileTool):
         result_str = ''
         out_count = 0
         for line_no, line in enumerate(self.args['logfile']):
-            logline = LogEvent(line)
+            logevent = LogEvent(line)
             # only export lines that have a datetime and duration
-            if logline.duration and logline.datetime:
+            if logevent.duration and logevent.datetime:
                 out_count += 1
                 # if too many lines include a line_str, the page won't load
                 if with_line_str and out_count > 10000:
@@ -41,8 +41,8 @@ class MLogVisTool(LogFileTool):
                 else:
                     first_row = False
                 # hack to include _id for log lines from file
-                logline._id = line_no
-                result_str += logline.to_json(fields)
+                logevent._id = line_no
+                result_str += logevent.to_json(fields)
         return result_str
         
 

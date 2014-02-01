@@ -19,7 +19,7 @@ class LogEvent(object):
         line_str: the original line string
         split_tokens: a list of string tokens after splitting line_str using 
                       whitespace as split points
-        datetime: a datetime object for the logline. For logfiles created with 
+        datetime: a datetime object for the logevent. For logfiles created with 
                   version 2.4+, it also contains micro-seconds
         duration: the duration of a timed operation in ms
         thread: the thread name (e.g. "conn1234") as string
@@ -260,7 +260,7 @@ class LogEvent(object):
 
     def _extract_operation_and_namespace(self):
         """ Helper method to extract both operation and namespace from a 
-            logline. It doesn't make sense to only extract one as they
+            logevent. It doesn't make sense to only extract one as they
             appear back to back in the token list.
         """
 
@@ -395,7 +395,7 @@ class LogEvent(object):
 
     def _extract_counters(self):
         """ Helper method to extract counters like nscanned, nreturned, etc.
-            from the logline. 
+            from the logevent. 
         """
 
         # extract counters (if present)

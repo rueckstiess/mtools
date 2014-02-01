@@ -23,8 +23,8 @@ class RestartSection(BaseSection):
 
     def run(self):
         """ run this section and print out information. """
-        for version, logline in self.mloginfo.logfile.restarts:
-            print "   %s version %s" % (logline.datetime.strftime("%b %d %H:%M:%S"), version)
+        for version, logevent in self.mloginfo.logfile.restarts:
+            print "   %s version %s" % (logevent.datetime.strftime("%b %d %H:%M:%S"), version)
 
         if len(self.mloginfo.logfile.restarts) == 0:
             print "  no restarts found"

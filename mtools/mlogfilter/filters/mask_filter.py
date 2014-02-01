@@ -1,6 +1,6 @@
 from datetime_filter import DateTimeFilter
 from datetime import MINYEAR, timedelta
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 
 
@@ -51,7 +51,7 @@ class MaskFilter(DateTimeFilter):
         self.mask_half_td = timedelta( seconds=self.mlogfilter.args['mask_size'] / 2 )
 
         # load filter mask file
-        logline_list = [ LogEvent(line) for line in self.mask_file ]
+        logevent_list = [ LogEvent(line) for line in self.mask_file ]
 
         # define start and end of total mask
         self.mask_start = lfinfo.start - self.mask_half_td
@@ -59,24 +59,24 @@ class MaskFilter(DateTimeFilter):
         
         # consider --mask-center
         if self.mlogfilter.args['mask_center'] in ['start', 'both']:
-            if logline_list[0].duration:
-                self.mask_start -= timedelta(milliseconds=logline_list[0].duration)
+            if logevent_list[0].duration:
+                self.mask_start -= timedelta(milliseconds=logevent_list[0].duration)
 
         if self.mlogfilter.args['mask_center'] == 'start':
-            if logline_list[-1].duration:
-                self.mask_end -= timedelta(milliseconds=logline_list[-1].duration)
+            if logevent_list[-1].duration:
+                self.mask_end -= timedelta(milliseconds=logevent_list[-1].duration)
 
         self.start_limit = self.mask_start
 
-        # event_list = [le.datetime for le in logline_list if le.datetime]
+        # event_list = [le.datetime for le in logevent_list if le.datetime]
 
         # different center points
         if 'mask_center' in self.mlogfilter.args:
             if self.mlogfilter.args['mask_center'] in ['start', 'both']:
-                starts = [(le.datetime - timedelta(milliseconds=le.duration)) if le.duration else le.datetime for le in logline_list if le.datetime]
+                starts = [(le.datetime - timedelta(milliseconds=le.duration)) if le.duration else le.datetime for le in logevent_list if le.datetime]
 
             if self.mlogfilter.args['mask_center'] in ['end', 'both']:
-                ends = [le.datetime for le in logline_list if le.datetime]
+                ends = [le.datetime for le in logevent_list if le.datetime]
 
             if self.mlogfilter.args['mask_center'] == 'start':
                 event_list = sorted(starts)
@@ -121,11 +121,11 @@ class MaskFilter(DateTimeFilter):
         return start_point, end_point
 
 
-    def accept(self, logline):
+    def accept(self, logevent):
         """ overwrite this method in subclass and return True if the provided 
-            logline should be accepted (causing output), or False if not.
+            logevent should be accepted (causing output), or False if not.
         """
-        dt = logline.datetime
+        dt = logevent.datetime
         if not dt:
             return False
 

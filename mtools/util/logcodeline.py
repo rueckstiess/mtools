@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 class LogCodeLine(object):
-    """ LogCodeLine represents a logline pattern extracted from the source code.
+    """ LogCodeLine represents a logevent pattern extracted from the source code.
         The pattern is a tuple of constant strings, variables are cut out.
         LogCodeLine stores "matches" of the same log pattern from different
         source files and different versions of the code. 

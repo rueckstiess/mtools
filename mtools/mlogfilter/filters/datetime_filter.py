@@ -1,7 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 
 from base_filter import BaseFilter
@@ -114,10 +114,10 @@ class DateTimeFilter(BaseFilter):
         self.start_limit = self.fromDateTime
 
 
-    def accept(self, logline):
-        dt = logline.datetime
+    def accept(self, logevent):
+        dt = logevent.datetime
 
-        # if logline has no datetime, accept if between --from and --to
+        # if logevent has no datetime, accept if between --from and --to
         if dt == None:
             return self.fromReached
 

@@ -1,4 +1,4 @@
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from base_filter import BaseFilter
 
 class LogLineFilter(BaseFilter):
@@ -27,12 +27,12 @@ class LogLineFilter(BaseFilter):
             self.thread = self.mlogfilter.args['thread']
             self.active = True
 
-    def accept(self, logline):
-        if self.namespace and logline.namespace == self.namespace:
+    def accept(self, logevent):
+        if self.namespace and logevent.namespace == self.namespace:
             return True
-        if self.operation and logline.operation == self.operation:
+        if self.operation and logevent.operation == self.operation:
             return True
-        if self.thread and logline.thread == self.thread:
+        if self.thread and logevent.thread == self.thread:
             return True
 
         return False

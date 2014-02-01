@@ -1,5 +1,5 @@
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 import mtools
 

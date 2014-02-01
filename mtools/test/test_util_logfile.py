@@ -4,7 +4,7 @@ import mtools
 from nose.tools import *
 from datetime import datetime
 from mtools.util.logfile import LogFile
-from mtools.util.logline import LogEvent
+from mtools.util.logevent import LogEvent
 
 
 class TestUtilLogFile(object):

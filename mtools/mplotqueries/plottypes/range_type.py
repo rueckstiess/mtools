@@ -28,12 +28,12 @@ class RangePlotType(BasePlotType):
         self.gap = sub_args['gap']
 
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True if the log line does not have a duration. """
         return True
 
-    def log2code(self, logline):
-        codeline = self.l2cc(logline.line_str)
+    def log2code(self, logevent):
+        codeline = self.l2cc(logevent.line_str)
         if codeline:
             return ' ... '.join(codeline.pattern)
         else:
