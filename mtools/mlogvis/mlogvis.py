@@ -25,8 +25,7 @@ class MLogVisTool(LogFileTool):
         first_row = True
         result_str = ''
         out_count = 0
-        for line_no, line in enumerate(self.args['logfile']):
-            logevent = LogEvent(line)
+        for line_no, logevent in enumerate(self.args['logfile']):
             # only export lines that have a datetime and duration
             if logevent.duration and logevent.datetime:
                 out_count += 1

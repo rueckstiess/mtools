@@ -120,10 +120,9 @@ class MPlotQueriesTool(LogFileTool):
             
             # get log file information
             if self.progress_bar_enabled:
-                lfinfo = LogFile(logfile)
-                if lfinfo.start and lfinfo.end:
-                    progress_start = self._datetime_to_epoch(lfinfo.start)
-                    progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+                if logfile.start and logfile.end:
+                    progress_start = self._datetime_to_epoch(logfile.start)
+                    progress_total = self._datetime_to_epoch(logfile.end) - progress_start
                 else:
                     self.progress_bar_enabled = False
                 
@@ -131,9 +130,7 @@ class MPlotQueriesTool(LogFileTool):
                     # protect from division by zero errors
                     self.progress_bar_enabled = False
 
-            for i, line in enumerate(logfile):
-                # create LogEvent object
-                logevent = LogEvent(line)
+            for i, logevent in enumerate(logfile):
 
                 # adjust times if --optime-start is enabled
                 if self.args['optime_start'] and logevent.duration and logevent.datetime:
@@ -182,11 +179,6 @@ class MPlotQueriesTool(LogFileTool):
             self.update_progress(1.0)
 
         self.plot_instances.append(plot_instance)
-
-        # close files after parsing
-        if sys.stdin.isatty():
-            for f in self.logfiles:
-                f.close()
 
 
     def group(self):
