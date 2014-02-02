@@ -19,6 +19,7 @@ try:
     from matplotlib.dates import DateFormatter, date2num
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
+    from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
@@ -395,7 +396,12 @@ class MPlotQueriesTool(LogFileTool):
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
-            self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+            # only change fontsize if supported 
+            major, minor, _ = mpl_version.split('.')
+            if (int(major), int(minor)) >= (1, 3):
+                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+            else:
+                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1)
         
         if self.args['type'] == 'scatter':
             # enable legend picking for scatter plots
