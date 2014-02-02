@@ -8,7 +8,6 @@ import types
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
 from mtools.util.logevent import LogEvent
-from mtools.util.logfile import LogFile
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 

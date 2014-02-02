@@ -2,7 +2,6 @@ from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 from mtools.util.logevent import LogEvent
-from mtools.util.logfile import LogFile
 
 from base_filter import BaseFilter
 
@@ -101,7 +100,7 @@ class DateTimeFilter(BaseFilter):
             self.endDateTime = datetime(MAXYEAR, 12, 31)
         
         else:
-            logfiles = [LogFile(lf) for lf in self.mlogfilter.args['logfile']]
+            logfiles = self.mlogfilter.args['logfile']
             self.startDateTime = min([lf.start+timedelta(hours=self.mlogfilter.args['timezone'][i]) for i, lf in enumerate(logfiles)])
             self.endDateTime = max([lf.end+timedelta(hours=self.mlogfilter.args['timezone'][i]) for i, lf in enumerate(logfiles)])
 

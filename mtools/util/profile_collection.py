@@ -35,6 +35,10 @@ class ProfileCollection(InputSource):
         # test if database can be reached and collection exists
         try:
             mc = Connection(host=host, port=port)
+            self.versions = [ mc.server_info()[u'version'] ]
+            binary = 'mongos' if mc.is_mongos else 'mongod'
+            self.binary = "%s (running on %s:%i)" % (binary, host, port)
+
         except (ConnectionFailure, AutoReconnect) as e:
             raise SystemExit("can't connect to database, please check if a mongod instance is running on %s:%s." % (host, port))
         
@@ -76,6 +80,11 @@ class ProfileCollection(InputSource):
             yield le
 
 
+    def __len__(self):
+        """ returns the number of events in the collection. """
+        return self.num_events
+
+
     def _calculate_bounds(self):
         """ calculate beginning and end of log events. """
 
@@ -83,8 +92,8 @@ class ProfileCollection(InputSource):
         first = self.coll_handle.find_one(None, sort=[ ("ts", ASCENDING) ])
         last = self.coll_handle.find_one(None, sort=[ ("ts", DESCENDING) ])
 
-        self._start = first.ts
-        self._end = last.ts
+        self._start = first['ts']
+        self._end = last['ts']
 
         return True
 

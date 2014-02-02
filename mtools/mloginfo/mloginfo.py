@@ -26,35 +26,25 @@ class MLogInfoTool(LogFileTool):
         """ Print out useful information about the log file. """
         LogFileTool.run(self, arguments)
 
-        self.logfiles = self.args['logfile']
-
-        for i, logfileOpen in enumerate(self.args['logfile']):
+        for i, self.logfile in enumerate(self.args['logfile']):
             if i > 0:
                 print
                 print ' ------------------------------------------'
                 print
 
-            self.logfileOpen = logfileOpen
-            self.logfile = LogFile(logfileOpen)
+            print "     source: %s" % self.logfile.name
+            print "      start: %s" % (self.logfile.start.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
+            print "        end: %s" % (self.logfile.end.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
 
-            print "        filename: %s" % self.args['logfile'][i].name
-            print "start of logfile: %s" % (self.logfile.start.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
-            print "  end of logfile: %s" % (self.logfile.end.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
-
-            # get one logevent (within first 20 lines) for datetime format
-            logevent = None
-            for i in range(20):
-                try:
-                    logevent = LogEvent(logfileOpen.next())
-                except StopIteration as e:
-                    raise SystemExit("no valid log lines found (datetime not available).")
+            # get one logevent for datetime format
+            for logevent in self.logfile:
                 if logevent.datetime:
                     break
 
             # TODO: add timezone if iso8601 format
 
-            print "    line numbers: %s" % self.logfile.num_lines
-            print "          binary: %s" % (self.logfile.binary or "unknown")
+            print "     length: %s" % len(self.logfile)
+            print "     binary: %s" % (self.logfile.binary or "unknown")
 
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
@@ -67,7 +57,7 @@ class MLogInfoTool(LogFileTool):
                 elif logevent.datetime_format.startswith('iso8601-'):
                     version = '>= 2.6 (iso8601 format)'
 
-            print "         version: %s" % version,
+            print "    version: %s" % version,
             print
 
             # now run all sections

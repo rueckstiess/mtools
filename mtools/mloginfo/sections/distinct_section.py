@@ -1,8 +1,7 @@
 from base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
-from mtools.util.logevent import LogEvent
-from mtools.util.logfile import LogFile
+from mtools.util.profile_collection import ProfileCollection
 
 from collections import defaultdict
 
@@ -38,51 +37,53 @@ class DistinctSection(BaseSection):
             and group by matched pattern.
         """
 
+        if isinstance(self.mloginfo.logfile, ProfileCollection):
+            print
+            print "    not available for system.profile collections"
+            print
+            return
+
+
         codelines = defaultdict(lambda: 0)
         non_matches = 0
 
-        # rewind log file in case other sections are walking the lines
-        self.mloginfo.logfileOpen.seek(0, 0)
-
         # get log file information
-        lfinfo = LogFile(self.mloginfo.logfileOpen)
-        if lfinfo.start and lfinfo.end:
-            progress_start = self.mloginfo._datetime_to_epoch(lfinfo.start)
-            progress_total = self.mloginfo._datetime_to_epoch(lfinfo.end) - progress_start
+        logfile = self.mloginfo.logfile
+        if logfile.start and logfile.end and not self.mloginfo.args['verbose']:
+            progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
+            progress_total = self.mloginfo._datetime_to_epoch(logfile.end) - progress_start
         else:
             self.progress_bar_enabled = False
 
-        for i, line in enumerate(self.mloginfo.logfileOpen):
-            cl = self.log2code(line)
+        for i, logevent in enumerate(self.mloginfo.logfile):
+            cl = self.log2code(logevent.line_str)
 
             # update progress bar every 1000 lines
             if self.progress_bar_enabled and (i % 1000 == 0):
-                le =  LogEvent(line)
-                if le.datetime:
-                    progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
+                if logevent.datetime:
+                    progress_curr = self.mloginfo._datetime_to_epoch(logevent.datetime)
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if cl:
                 codelines[cl.pattern] += 1
             else:
-                le =  LogEvent(line)
-                if le.operation:
+                if logevent.operation:
                     # skip operations (command, insert, update, delete, query, getmore)
                     continue
-                if not le.thread:
+                if not logevent.thread:
                     # skip the lines that don't have a thread name (usually map/reduce or assertions)
                     continue
-                if len(le.split_tokens) - le._thread_offset <= 1:
+                if len(logevent.split_tokens) - logevent._thread_offset <= 1:
                     # skip empty log messages (after thread name)
                     continue
-                if "warning: log line attempted" in le.line_str and "over max size" in le.line_str:
+                if "warning: log line attempted" in logevent.line_str and "over max size" in logevent.line_str:
                     # skip lines that are too long
                     continue
 
                 # everything else is a real non-match
                 non_matches += 1
                 if self.mloginfo.args['verbose']:
-                    print "couldn't match:", line,
+                    print "couldn't match:", logevent
 
         # clear progress bar again
         self.mloginfo.update_progress(1.0)
