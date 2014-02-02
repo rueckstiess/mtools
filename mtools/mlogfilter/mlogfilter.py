@@ -139,8 +139,7 @@ class MLogFilterTool(LogFileTool):
     def _merge_logfiles(self):
         """ helper method to merge several files together by datetime. """
         # open files, read first lines, extract first dates
-        lines = [f.readline() for f in self.args['logfile']]
-        lines = [LogEvent(l) if l else None for l in lines]
+        lines = [next(logfile, None) for logfile in self.args['logfile']]
 
         # adjust lines by timezone
         for i in range(len(lines)):
@@ -157,8 +156,7 @@ class MLogFilterTool(LogFileTool):
             yield min_line
 
             # update lines array with a new line from the min_index'th logfile
-            new_line = self.args['logfile'][min_index].readline()
-            lines[min_index] = LogEvent(new_line) if new_line else None
+            lines[min_index] = next(self.args['logfile'][min_index], None)
             if lines[min_index] and lines[min_index].datetime:
                 lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
 
@@ -172,17 +170,15 @@ class MLogFilterTool(LogFileTool):
 
             if start_limits:
                 for logfile in self.args['logfile']: 
-                    lf_info = LogFile(logfile)
-                    lf_info.fast_forward( max(start_limits) )
+                    logfile.fast_forward( max(start_limits) )
 
         if len(self.args['logfile']) > 1:
-            # todo, merge
+            # merge log files by time
             for logevent in self._merge_logfiles():
                 yield logevent
         else:
             # only one file
-            for line in self.args['logfile'][0]:
-                logevent = LogEvent(line)
+            for logevent in self.args['logfile'][0]:
                 if logevent.datetime: 
                     logevent._datetime = logevent.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logevent
@@ -253,7 +249,7 @@ class MLogFilterTool(LogFileTool):
             elif marker == 'none':
                 self.args['markers'] = [None for _ in self.args['logfile']]
             elif marker == 'filename':
-                self.args['markers'] = ['{%s}'%fn.name for fn in self.args['logfile']]
+                self.args['markers'] = ['{%s}'%logfile.name for logfile in self.args['logfile']]
         elif len(self.args['markers']) == len(self.args['logfile']):
             pass
         else:

@@ -12,6 +12,8 @@ class LogFile(InputSource):
     def __init__(self, filehandle):
         """ provide logfile as open file stream or stdin. """
         self.filehandle = filehandle
+        self.name = filehandle.name
+        
         self.from_stdin = filehandle.name == "<stdin>"
         self._start = None
         self._end = None

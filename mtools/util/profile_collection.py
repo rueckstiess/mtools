@@ -25,6 +25,7 @@ class ProfileCollection(InputSource):
         self.port = port
         self.database = database
         self.collection = collection
+        self.name = "%s.%s" % (database, collection)
 
         # property variables
         self._start = None
