@@ -1,6 +1,10 @@
 Changes to mtools
 =================
 
+#### version 1.1.3
+  * all tools can now read from system.profile collections as if it was a logfile. Use this syntax as command line argument: "host:port/database.collection" (#164)
+
+
 #### version 1.1.2
 
   * mlaunch: completely rewritten, is now aware of the launched environment, commands: init, start, stop, list (#148)
