@@ -139,7 +139,7 @@ class LogFileTool(BaseCmdLineTool):
             if not self.stdin_allowed:
                 raise SystemExit("this tool can't parse input from stdin.")
                 
-            arg_opts['const'] = sys.stdin
+            arg_opts['const'] = LogFile(sys.stdin)
             arg_opts['action'] = 'store_const'
             if 'type' in arg_opts: 
                 del arg_opts['type']

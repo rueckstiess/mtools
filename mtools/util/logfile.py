@@ -86,7 +86,8 @@ class LogFile(InputSource):
         """ iteration over LogFile object will return a LogEvent object for each line. """
         
         # always start from the beginning logfile
-        self.filehandle.seek(0)
+        if not self.from_stdin: 
+            self.filehandle.seek(0)
 
         for line in self.filehandle:
             le = LogEvent(line)
