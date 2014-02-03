@@ -85,13 +85,13 @@ class LogFile(InputSource):
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line. """
         
-        # always start from the beginning logfile
-        if not self.from_stdin: 
-            self.filehandle.seek(0)
-
         for line in self.filehandle:
             le = LogEvent(line)
             yield le
+
+        # future iterations start from the beginning
+        if not self.from_stdin:
+            self.filehandle.seek(0)
 
 
     def __len__(self):
