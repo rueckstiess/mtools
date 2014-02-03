@@ -28,11 +28,13 @@ class LogLineFilter(BaseFilter):
             self.active = True
 
     def accept(self, logevent):
-        if self.namespace and logevent.namespace == self.namespace:
-            return True
-        if self.operation and logevent.operation == self.operation:
-            return True
-        if self.thread and logevent.thread == self.thread:
-            return True
+        # if several filters are active, all have to agree
+        res = False
+        if self.namespace and logevent.namespace != self.namespace:
+            return False
+        if self.operation and logevent.operation != self.operation:
+            return False
+        if self.thread and logevent.thread != self.thread:
+            return False
 
-        return False
+        return True
