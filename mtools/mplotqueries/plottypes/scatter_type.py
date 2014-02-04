@@ -33,18 +33,18 @@ class ScatterPlotType(BasePlotType):
             self.ylabel = args['yaxis']
 
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True if the log line has the nominated yaxis field. """
-        return (getattr(logline, self.field) != None)
+        return (getattr(logevent, self.field) != None)
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group
-        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+        x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
 
         color, marker = self.color_map(group)
 
         # duration plots require y coordinate and use plot_date
-        y = [ getattr(logline, self.field) for logline in self.groups[group] ]
+        y = [ getattr(logevent, self.field) for logevent in self.groups[group] ]
         
         if self.logscale:
             axis.semilogy()
@@ -79,13 +79,13 @@ class DurationLineType(ScatterPlotType):
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group
-        x_start = date2num( [ logline.datetime for logline in self.groups[group] ] )
-        x_end = date2num( [ logline.end_datetime for logline in self.groups[group] ] )
+        x_start = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
+        x_end = date2num( [ logevent.end_datetime for logevent in self.groups[group] ] )
 
         color, marker = self.color_map(group)
 
         # duration plots require y coordinate and use plot_date
-        y = [ getattr(logline, 'duration') for logline in self.groups[group] ]
+        y = [ getattr(logevent, 'duration') for logevent in self.groups[group] ]
         
         if self.logscale:
             axis.semilogy()
@@ -135,22 +135,22 @@ class NScannedNPlotType(ScatterPlotType):
 
         self.ylabel = 'nscanned / n ratio'
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True if the log line has a duration. """
-        return getattr(logline, 'nscanned') and getattr(logline, 'nreturned')
+        return getattr(logevent, 'nscanned') and getattr(logevent, 'nreturned')
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group
-        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+        x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
 
         color, marker = self.color_map(group)
 
         # duration plots require y coordinate and use plot_date
-        nreturned = float(logline.nreturned)
+        nreturned = float(logevent.nreturned)
         if nreturned == 0.0:
             nreturned = 1.0
 
-        y = [ getattr(logline, 'nscanned') / nreturned for logline in self.groups[group] ]
+        y = [ getattr(logevent, 'nscanned') / nreturned for logevent in self.groups[group] ]
         artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.5, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking

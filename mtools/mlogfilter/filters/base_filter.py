@@ -21,13 +21,13 @@ class BaseFilter(object):
 
     def setup(self):
         """ hook to setup anything necessary for the filter before actually
-            going through loglines. overwrite in subclass if setup is required.
+            going through logevents. overwrite in subclass if setup is required.
         """
         pass
 
-    def accept(self, logline):
+    def accept(self, logevent):
         """ overwrite this method in subclass and return True if the provided 
-            logline should be accepted (causing output), or False if not.
+            logevent should be accepted (causing output), or False if not.
         """
         return True
 

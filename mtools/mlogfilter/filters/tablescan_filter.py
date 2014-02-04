@@ -13,10 +13,10 @@ class TableScanFilter(BaseFilter):
         if 'scan' in self.mlogfilter.args:
             self.active = self.mlogfilter.args['scan']
 
-    def accept(self, logline):
+    def accept(self, logevent):
 
-        ns = logline.nscanned
-        nr = logline.nreturned
+        ns = logevent.nscanned
+        nr = logevent.nreturned
 
         if ns != None and nr != None:
             if nr == 0:

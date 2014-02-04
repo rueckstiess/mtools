@@ -1,3 +1,4 @@
+import inspect
 import shutil
 import socket
 import time
@@ -18,26 +19,28 @@ class TestMLaunch(object):
     """ This class tests functionality around the mlaunch tool. It has some
         additional methods that are helpful for the tests, as well as a setup
         and teardown method for all tests.
+
+        Don't call tests from other tests. This won't work as each test gets
+        its own data directory (for debugging).
     """
 
-    static_port = 33333
-    data_dir = 'data_test_mlaunch'
+    port = 33333
+    base_dir = 'data_test_mlaunch'
 
 
     def __init__(self):
         """ Constructor. """
-        self.n_processes_started = 0
-        self.port = TestMLaunch.static_port
+        self.use_authentication = False
+        self.data_dir = ''
         
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLaunchTool()
-        self.n_processes_started = 0
 
         # if the test data path exists, remove it
-        if os.path.exists(self.data_dir):
-            shutil.rmtree(self.data_dir)
+        if os.path.exists(self.base_dir):
+            shutil.rmtree(self.base_dir)
 
 
     def teardown(self):
@@ -52,9 +55,28 @@ class TestMLaunch(object):
         self.tool.wait_for(ports, to_start=False)
 
         # if the test data path exists, remove it
-        if os.path.exists(self.data_dir):
-            shutil.rmtree(self.data_dir)
+        if os.path.exists(self.base_dir):
+            shutil.rmtree(self.base_dir)
 
+
+    def run_tool(self, arg_str):
+        """ wrapper to call self.tool.run() with or without authentication. """
+        # name data directory according to test method name
+        caller = inspect.stack()[1][3]
+        self.data_dir = os.path.join(self.base_dir, caller)
+
+        # add data directory to arguments for all commands
+        arg_str += ' --dir %s' % self.data_dir
+        
+        if arg_str.startswith('init') or arg_str.startswith('--'):
+            # add --port and --nojournal to init calls
+            arg_str += ' --port %i --nojournal' % self.port 
+            
+            if self.use_authentication:
+                # add --authentication to init calls if flag is set
+                arg_str += ' --authentication'
+
+        self.tool.run(arg_str)
 
 
     # -- tests below ---
@@ -67,7 +89,7 @@ class TestMLaunch(object):
         assert not os.path.exists(self.data_dir)
 
         # start mongo process on free test port
-        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
 
         # call teardown method within this test
         self.teardown()
@@ -83,7 +105,7 @@ class TestMLaunch(object):
         """ mlaunch: test true command line arguments, instead of passing into tool.run(). """
         
         # make command line arguments through sys.argv
-        sys.argv = ['mlaunch', 'init', '--single', '--dir', self.data_dir, '--port', str(self.port), '--nojournal']
+        sys.argv = ['mlaunch', 'init', '--single', '--dir', self.base_dir, '--port', str(self.port), '--nojournal']
 
         tool = MLaunchTool()
         tool.run()
@@ -94,7 +116,7 @@ class TestMLaunch(object):
         """ mlaunch: test that 'init' command can be omitted, is default """
 
         # make command line arguments through sys.argv
-        sys.argv = ['mlaunch', '--single', '--dir', self.data_dir, '--port', str(self.port), '--nojournal']
+        sys.argv = ['mlaunch', '--single', '--dir', self.base_dir, '--port', str(self.port), '--nojournal']
 
         tool = MLaunchTool()
         tool.run()
@@ -104,7 +126,7 @@ class TestMLaunch(object):
     def test_init_default_arguments(self):
         """ mlaunch: test that 'init' command is default, even when specifying arguments to run() """
         
-        self.tool.run("--single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("--single")
         assert self.tool.is_running(self.port)
 
 
@@ -112,7 +134,7 @@ class TestMLaunch(object):
         """ mlaunch: start stand-alone server and tear down again """
 
         # start mongo process on free test port
-        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
 
         # make sure node is running
         assert self.tool.is_running(self.port)
@@ -129,17 +151,17 @@ class TestMLaunch(object):
         """ mlaunch: using already existing port fails """
 
         # start mongo process on free test port
-        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
 
         # start mongo process on same port, should not throw error, finish normally
-        self.tool.run("init --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
 
 
     def test_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter and compare rs.conf() """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("init --replicaset --nodes 2 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset --nodes 2 --arbiter")
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -164,7 +186,7 @@ class TestMLaunch(object):
         """
 
         # start mongo process on free test port
-        self.tool.run("init --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset")
 
         # create mongo client
         mc = MongoClient('localhost:%i' % self.port)
@@ -185,7 +207,7 @@ class TestMLaunch(object):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
         # start mongo process on free test port 
-        self.tool.run("init --sharded 2 --single --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --sharded 2 --single")
     
         # check if data directories and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'shard01/db'))
@@ -205,7 +227,7 @@ class TestMLaunch(object):
         """ mlaunch: test if sharded cluster with explicit shard names works """
 
         # start mongo process on free test port 
-        self.tool.run("init --sharded tic tac toe --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --sharded tic tac toe --replicaset")
 
         # create mongo client
         mc = MongoClient('localhost:%i' % (self.port))
@@ -219,7 +241,7 @@ class TestMLaunch(object):
         """ mlaunch: create .mlaunch_startup file in data path
             Also tests utf-8 to byte conversion and json import.
         """
-        self.tool.run("init --single --port %i -v --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single -v")
 
         # check if the startup file exists
         startup_file = os.path.join(self.data_dir, '.mlaunch_startup')
@@ -235,7 +257,7 @@ class TestMLaunch(object):
         """ mlaunch: test if single mongos is running on start port and creates <datadir>/mongos.log """
         
         # start 2 shards, 1 config server, 1 mongos
-        self.tool.run("init --sharded 2 --single --config 1 --mongos 1 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --sharded 2 --single --config 1 --mongos 1")
 
         # check if mongos log files exist on correct ports
         assert os.path.exists(os.path.join(self.data_dir, 'mongos.log'))
@@ -248,7 +270,7 @@ class TestMLaunch(object):
         """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir. """
 
         # start 2 shards, 1 config server, 2 mongos
-        self.tool.run("init --sharded 2 --single --config 1 --mongos 2 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --sharded 2 --single --config 1 --mongos 2")
 
         # this also tests that mongos are started at the beginning of the port range
         assert os.path.exists(os.path.join(self.data_dir, 'mongos', 'mongos_%i.log' % (self.port)))
@@ -274,7 +296,7 @@ class TestMLaunch(object):
         """ mlaunch: start large replica set of 12 nodes with arbiter """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("init --replicaset --nodes 11 --arbiter --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset --nodes 11 --arbiter")
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -307,7 +329,7 @@ class TestMLaunch(object):
         """ mlaunch: start large replica set of 12 nodes without arbiter """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("init --replicaset --nodes 12 --port %i --nojournal --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset --nodes 12")
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -337,8 +359,8 @@ class TestMLaunch(object):
         """ mlaunch: test stopping all nodes """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.tool.run("init --replicaset --port %i --nojournal --dir %s" % (self.port, self.data_dir))
-        self.tool.run("stop --dir %s" % self.data_dir)
+        self.run_tool("init --replicaset")
+        self.run_tool("stop")
 
         # make sure all nodes are down
         nodes = self.tool.get_tagged('all')
@@ -348,24 +370,27 @@ class TestMLaunch(object):
     def test_stop_start(self):
         """ mlaunch: test stop and then re-starting nodes """
 
-        # start, stop (as before)
-        self.test_stop()
-        self.tool.run("start --dir %s" % self.data_dir)
+        # start mongo process on free test port
+        self.run_tool("init --replicaset")
+        self.run_tool("stop")
+        time.sleep(1)
+        self.run_tool("start")
 
         # make sure all nodes are running
         nodes = self.tool.get_tagged('all')
         assert all( self.tool.is_running(node) for node in nodes )
 
     
-    @timed(120)
+    @timed(180)
     @attr('slow')
     def test_stop_partial(self):
+        """ mlaunch: test stopping and restarting tagged groups on different tags. """
 
         # key is tag for command line, value is tag for get_tagged
         tags = ['shard01', 'shard 1', 'mongod', 'mongos', 'config', str(self.port)] 
 
         # start large cluster
-        self.tool.run("init --sharded 2 --replicaset --config 3 --mongos 3 --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3")
 
         # make sure all nodes are running
         nodes = self.tool.get_tagged('all')
@@ -373,9 +398,13 @@ class TestMLaunch(object):
 
         # go through all tags, stop nodes for each tag, confirm only the tagged ones are down, start again
         for tag in tags:
-            self.tool.run("stop %s --dir %s" % (tag, self.data_dir))
+            self.run_tool("stop %s" % tag)
             assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
-            self.tool.run("start --dir %s" % self.data_dir)
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
+            self.run_tool("start")
             assert len(self.tool.get_tagged('down')) == 0
 
         # make sure primaries are running again (we just failed them over above). 
@@ -388,15 +417,16 @@ class TestMLaunch(object):
             self.tool.discover()
 
         # test for primary, but as the nodes lose their tags, needs to be manual
-        self.tool.run("stop primary --dir %s" % self.data_dir)
+        self.run_tool("stop primary")
         assert len(self.tool.get_tagged('down')) == 2
-        self.tool.run("start --dir %s" % self.data_dir)
+        self.run_tool("start")
 
 
     def test_restart_with_unkown_args(self):
+        """ mlaunch: test start command with extra unknown arguments """
 
         # init environment (sharded, single shards ok)
-        self.tool.run("init --single --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
         
         # get verbosity of mongod, assert it is 0
         mc = MongoClient(port=self.port)
@@ -404,8 +434,12 @@ class TestMLaunch(object):
         assert loglevel[u'logLevel'] == 0
 
         # stop and start nodes but pass in unknown_args
-        self.tool.run("stop --dir %s" % self.data_dir)
-        self.tool.run("start --dir %s -vv" % self.data_dir)
+        self.run_tool("stop")
+
+        # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+        time.sleep(1)
+
+        self.run_tool("start -vv")
 
         # compare that the nodes are restarted with the new unknown_args, assert loglevel is now 2
         mc = MongoClient(port=self.port)
@@ -413,8 +447,12 @@ class TestMLaunch(object):
         assert loglevel[u'logLevel'] == 2
 
         # stop and start nodes without unknown args again
-        self.tool.run("stop --dir %s" % self.data_dir)
-        self.tool.run("start --dir %s" % self.data_dir)
+        self.run_tool("stop")
+        
+        # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+        time.sleep(1)
+
+        self.run_tool("start")
 
         # compare that the nodes are restarted with the previous loglevel
         mc = MongoClient(port=self.port)
@@ -425,35 +463,66 @@ class TestMLaunch(object):
     def test_start_stop_single_repeatedly(self):
         """ mlaunch: test starting and stopping single node in short succession """ 
         # repeatedly start single node
-        self.tool.run("init --single --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --single")
 
         for i in range(10):
-            self.tool.run("stop --dir %s" % self.data_dir)
-            self.tool.run("start --dir %s" % self.data_dir)
+            self.run_tool("stop")
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
+            self.run_tool("start")
 
     
     def test_init_init_replicaset(self):
         """ mlaunch: test calling init a second time on the replica set. """
 
         # repeatedly init a replica set
-        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
-        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset")
+        self.run_tool("init --replicaset")
 
         # now stop and init again
-        self.tool.run("stop --dir %s" % self.data_dir)
-        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("stop")
+        self.run_tool("init --replicaset")
 
 
     def test_start_stop_replicaset_repeatedly(self):
         """ mlaunch: test starting and stopping replica set in short succession """ 
         # repeatedly start replicaset nodes
-        self.tool.run("init --replicaset --port %i --dir %s" % (self.port, self.data_dir))
+        self.run_tool("init --replicaset")
 
         for i in range(10):
-            self.tool.run("stop --dir %s" % self.data_dir)
-            self.tool.run("start --dir %s" % self.data_dir)
+            self.run_tool("stop")
+
+            # short sleep, because travis seems to be sensitive and sometimes fails otherwise
+            time.sleep(1)
+
+            self.run_tool("start")
+
+
+    # @attr('slow')
+    # @attr('auth')
+    # def test_repeat_all_with_auth(self):
+    #     """ this test will repeat all the tests in this class (excluding itself) but with authentication. """
+
+    #     tests = [t for t in inspect.getmembers(self, predicate=inspect.ismethod) if t[0].startswith('test_') ]
+
+    #     self.use_authentication = True
+        
+    #     for name, method in tests:
+    #         # don't call recursively
+    #         if name in ['test_repeat_all_with_auth', 'test_argv_run', 'test_init_default']:
+    #             continue
+
+    #         print "running %s with authentication" % name
+    #         # manual setup, test, teardown
+    #         self.setup()
+    #         method()
+    #         self.teardown()
+
+    #     self.use_authentication = False
 
 
     # TODO 
-    # - test functionality of --binarypath, --authentication, --verbose, --name
+    # - test functionality of --binarypath, --verbose, --name
 

@@ -12,7 +12,7 @@ class EventPlotType(BasePlotType):
     plot_type_str = 'event'
 
     def plot_group(self, group, idx, axis):
-        x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+        x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
 
         # event plots use axvline
         artists = []
@@ -59,22 +59,22 @@ class RSStatePlotType(EventPlotType):
     states = ['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2', 'RECOVERING', 'ROLLBACK', 'ARBITER']
 
     
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ only match log lines containing 'is now in state' (reflects other node's state changes) 
             or of type "[rsMgr] replSet PRIMARY" (reflects own state changes). 
         """
-        if "is now in state" in logline.line_str and logline.split_tokens[-1] in self.states:
+        if "is now in state" in logevent.line_str and logevent.split_tokens[-1] in self.states:
             return True
 
-        if "replSet" in logline.line_str and logline.thread == "rsMgr" and logline.split_tokens[-1] in self.states:
+        if "replSet" in logevent.line_str and logevent.thread == "rsMgr" and logevent.split_tokens[-1] in self.states:
             return True
 
         return False
 
 
-    def lastword(self, logline):
+    def lastword(self, logevent):
         """ group by the last token of the log line (PRIMARY, SECONDARY, ...) """
-        return logline.split_tokens[-1]
+        return logevent.split_tokens[-1]
 
 
     @classmethod

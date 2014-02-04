@@ -12,14 +12,14 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class LogLine(object):
-    """ LogLine extracts information from a mongod/mongos log file line and 
+class LogEvent(object):
+    """ LogEvent extracts information from a mongod/mongos log file line and 
         stores the following properties/variables:
 
         line_str: the original line string
         split_tokens: a list of string tokens after splitting line_str using 
                       whitespace as split points
-        datetime: a datetime object for the logline. For logfiles created with 
+        datetime: a datetime object for the logevent. For logfiles created with 
                   version 2.4+, it also contains micro-seconds
         duration: the duration of a timed operation in ms
         thread: the thread name (e.g. "conn1234") as string
@@ -43,10 +43,19 @@ class LogLine(object):
         'Oct', 'Nov', 'Dec']
 
 
-    def __init__(self, line_str, auto_parse=True):
-        # remove line breaks at end of _line_str
-        self._line_str = line_str.rstrip('\n')
-        self._reset()
+    def __init__(self, doc_or_str):
+        if isinstance(doc_or_str, str):
+            # create from string, remove line breaks at end of _line_str
+            self.from_string = True
+            self._line_str = doc_or_str.rstrip('\n')
+            self._profile_doc = None
+            self._reset()
+        else:
+            self.from_string = False
+            self._profile_doc = doc_or_str
+            # docs don't need to be parsed lazily, they are fast
+            self._parse_document()
+
 
 
     def _reset(self):
@@ -78,6 +87,7 @@ class LogLine(object):
         self._nupdated = None
         self._nreturned = None
         self._ninserted = None
+        self._ndeleted = None
         self._numYields = None
         self._r = None
         self._w = None
@@ -85,12 +95,23 @@ class LogLine(object):
         self.merge_marker_str = ''
 
     def set_line_str(self, line_str):
+        """ line_str is only writeable if LogEvent was created from a string, not from a system.profile documents. """
+
+        if not self.from_string:
+            raise ValueError("can't set line_str for LogEvent created from system.profile documents.")
+
         if line_str != self._line_str:
             self._line_str = line_str.rstrip('\n')
             self._reset()
 
+
     def get_line_str(self):
-        return ' '.join([s for s in [self.merge_marker_str, self._datetime_str, self._line_str] if s])
+        """ return line_str depending on source, logfile or system.profile. """
+
+        if self.from_string:
+            return ' '.join([s for s in [self.merge_marker_str, self._datetime_str, self._line_str] if s])
+        else:
+            return ' '.join([s for s in [self._datetime_str, self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
@@ -260,7 +281,7 @@ class LogLine(object):
 
     def _extract_operation_and_namespace(self):
         """ Helper method to extract both operation and namespace from a 
-            logline. It doesn't make sense to only extract one as they
+            logevent. It doesn't make sense to only extract one as they
             appear back to back in the token list.
         """
 
@@ -353,6 +374,16 @@ class LogLine(object):
         return self._ninserted
 
     @property
+    def ndeleted(self):
+        """ extract ndeleted counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._ndeleted
+
+    @property
     def nupdated(self):
         """ extract nupdated counter if available (lazy) """
 
@@ -395,12 +426,12 @@ class LogLine(object):
 
     def _extract_counters(self):
         """ Helper method to extract counters like nscanned, nreturned, etc.
-            from the logline. 
+            from the logevent. 
         """
 
         # extract counters (if present)
         counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated', 'r', 'w', 'numYields']
+            'nupdated', 'ndeleted', 'r', 'w', 'numYields']
 
         split_tokens = self.split_tokens
 
@@ -439,6 +470,7 @@ class LogLine(object):
         ntoreturn = self.ntoreturn
         nreturned = self.nreturned
         ninserted = self.ninserted
+        ndeleted = self.ndeleted
         nupdated = self.nupdated
         numYields = self.numYields
         w = self.w
@@ -449,7 +481,7 @@ class LogLine(object):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
             raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.') 
 
-        if self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '') and not force:
+        if (self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '')) and not force:
             return
         elif format.startswith('ctime'):
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
@@ -480,17 +512,17 @@ class LogLine(object):
 
 
     def __str__(self):
-        """ default string conversion for a LogLine object is just its line_str. """
+        """ default string conversion for a LogEvent object is just its line_str. """
         return str(self.line_str)
 
 
     def to_dict(self, labels=None):
-        """ converts LogLine object to a dictionary. """
+        """ converts LogEvent object to a dictionary. """
         output = {}
         if labels == None:
             labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
                 'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                'nreturned', 'ninserted', 'nupdated', 'duration', 'r', 'w', 'numYields']
+                'nreturned', 'ninserted', 'nupdated', 'ndeleted', 'duration', 'r', 'w', 'numYields']
 
         for label in labels:
             value = getattr(self, label, None)
@@ -501,11 +533,66 @@ class LogLine(object):
 
     
     def to_json(self, labels=None):
-        """ converts LogLine object to valid JSON. """
+        """ converts LogEvent object to valid JSON. """
         output = self.to_dict(labels)
         return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
 
+    def _parse_document(self):
+        """ Parses a system.profile document and copies all the values to the member variables. """
+        doc = self._profile_doc
 
+        self._split_tokens_calculated = True
+        self._split_tokens = None
+
+        self._duration_calculated = True
+        self._duration = doc[u'millis']
+
+        self._datetime_calculated = True
+        self._datetime = doc[u'ts']
+        self._datetime_format = None
+        self._reformat_timestamp('ctime', force=True)
+
+        self._thread_calculated = True
+        self._thread = "<profile>"
+        self._thread_offset = None
+
+        self._operation_calculated = True
+        self._operation = doc[u'op']
+        self._namespace = doc[u'ns']
+
+        # TODO: pattern parser also for system.profile events
+        self._pattern = '{}'
+
+        self._counters_calculated = True
+        self._nscanned = doc[u'nscanned'] if 'nscanned' in doc else None
+        self._ntoreturn = doc[u'ntoreturn'] if 'ntoreturn' in doc else None
+        self._nupdated = doc[u'nupdated'] if 'nupdated' in doc else None
+        self._nreturned = doc[u'nreturned'] if 'nreturned' in doc else None
+        self._ninserted = doc[u'ninserted'] if 'ninserted' in doc else None
+        self._ndeleted = doc[u'ndeleted'] if 'ndeleted' in doc else None
+        self._numYields = doc[u'numYield'] if 'numYield' in doc else None
+        self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
+        self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
+
+        self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
+        self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
+
+        # build a fake line_str
+        payload = ''
+        if 'query' in doc:
+            payload += 'query: %s' % str(doc[u'query']).replace("u'", "'").replace("'", '"')
+        if 'command' in doc:
+            payload += 'command: %s' % str(doc[u'command']).replace("u'", "'").replace("'", '"')
+        if 'updateobj' in doc:
+            payload += ' update: %s' % str(doc[u'updateobj']).replace("u'", "'").replace("'", '"')
+
+        scanned = 'nscanned:%i'%self._nscanned if 'nscanned' in doc else ''
+        yields = 'numYields:%i'%self._numYields if 'numYield' in doc else ''
+        locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
+        duration = '%ims' % self.duration if self.duration != None else ''    
+
+        self._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(
+            datetime=self.datetime, thread=self.thread, operation=self.operation, namespace=self.namespace, payload=payload, scanned=scanned, yields=yields, locks=locks, duration=duration)
 
 

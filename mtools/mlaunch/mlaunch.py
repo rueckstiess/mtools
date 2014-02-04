@@ -112,7 +112,7 @@ class MLaunchTool(BaseCmdLineTool):
             arguments = 'init ' + arguments
         
         # default sub-command is `init` if none provided
-        elif len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help']:
+        elif len(sys.argv) > 1 and sys.argv[1].startswith('-') and sys.argv[1] not in ['-h', '--help', '--version']:
             sys.argv = sys.argv[0:1] + ['init'] + sys.argv[1:]
 
         # create command sub-parsers
@@ -693,7 +693,7 @@ class MLaunchTool(BaseCmdLineTool):
             threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
-            print "waiting for nodes %..." % 'to start' if to_start else 'to shutdown'
+            print "waiting for nodes %s..." % 'to start' if to_start else 'to shutdown'
         for thread in threads:
             thread.start()
         for thread in threads:
