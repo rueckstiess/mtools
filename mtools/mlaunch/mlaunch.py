@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import Queue
 import argparse
 import subprocess
 import threading
@@ -27,19 +28,27 @@ except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
 
-def wait_for_host(host, interval=1, timeout=30, to_start=True):
+def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
         is set to False, will wait for the node to shut down instead. This function can be called as a separate thread.
+
+        If queue is provided, it will place the results in the message queue and return, otherwise it will just return the result
+        directly.
     """
+    host = 'localhost:%i'%port
     startTime = time.time()
     while True:
         if (time.time() - startTime) > timeout:
+            if queue:
+                queue.put((port, False))
             return False
         try:
             # make connection and ping host
             con = Connection(host)
             con.admin.command('ping')
             if to_start:
+                if queue:
+                    queue.put((port, True))
                 return True
             else:
                 time.sleep(interval)
@@ -47,6 +56,8 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
             if to_start:
                 time.sleep(interval)
             else:
+                if queue:
+                    queue.put((port, True))
                 return True
 
 
@@ -193,6 +204,18 @@ class MLaunchTool(BaseCmdLineTool):
 
         # construct startup strings
         self._construct_cmdlines()
+
+        # if not all ports are free, complain and suggest alternatives.
+        all_ports = self.get_tagged(['all'])
+        ports_avail = self.wait_for(all_ports, 1, 1, to_start=False)
+
+        if not all(map(itemgetter(1), ports_avail)):
+            dir_addon = ' --dir %s'%self.args['dir'] if self.args['dir'] != './data' else ''
+            errmsg = '\nThe following ports are not available: %s\n\n' % ', '.join( [ str(p[0]) for p in ports_avail if not p[1] ] )
+            errmsg += " * If you want to restart nodes from this environment, use 'mlaunch start%s' instead.\n" % dir_addon
+            errmsg += " * If the ports are used by a different mlaunch environment, stop those first with 'mlaunch stop --dir <env>'.\n"
+            errmsg += " * You can also specify a different port range with an additional '--port <startport>'\n"
+            raise SystemExit(errmsg)
 
         if self.args['sharded']:
             shard_names = self._get_shard_names(self.args)
@@ -363,9 +386,8 @@ class MLaunchTool(BaseCmdLineTool):
         mongos_matches = self.get_tagged(['mongos']).intersection(matches)
         self._start_on_ports(mongos_matches)
 
-        # wait for all nodes to be running
-        nodes = self.get_tagged(['all'])
-        self.wait_for(nodes)
+        # wait for all matched nodes to be running
+        self.wait_for(matches)
 
         # refresh discover
         self.discover()
@@ -645,17 +667,22 @@ class MLaunchTool(BaseCmdLineTool):
             Returns when all hosts are running (if to_start=True) / shut down (if to_start=False)
         """
         threads = []
+        queue = Queue.Queue()
 
         for port in ports:
-            threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
+            threads.append(threading.Thread(target=wait_for_host, args=(port, interval, timeout, to_start, queue)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
             print "waiting for nodes %s..." % 'to start' if to_start else 'to shutdown'
+        
         for thread in threads:
             thread.start()
+
         for thread in threads:
             thread.join()
 
+        # get all results back and return tuple
+        return tuple(queue.get() for _ in ports)
 
 
     # --- below here are internal helper methods, should not be called externally ---
