@@ -7,6 +7,7 @@ import os, time, sys, re
 import socket
 import json
 import re
+import warnings
 
 from collections import defaultdict
 from operator import itemgetter
@@ -50,11 +51,17 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
                 return True
 
 
-def shutdown_host(host_port):
+def shutdown_host(host_port, username=None, password=None, authdb=None):
     """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
     try:
         mc = Connection(host_port)
         try:
+            if username and password and authdb:
+                if authdb != "admin":
+                    raise RuntimeError("given username/password is not for admin database")
+                else:
+                    mc.admin.authenticate(name=username, password=password)
+
             mc.admin.command('shutdown', force=True)
         except AutoReconnect:
             pass
@@ -133,9 +140,14 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
         # verbose, port, auth, binary path
+        default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
         init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        init_parser.add_argument('-u', '--username', action='store', type=str, default='admin', help='username to add (requires --authentication, default=admin)')
+        init_parser.add_argument('-p', '--password', action='store', type=str, default='mypassword', help='password for given username (requires --authentication, default=mypassword)')
+        init_parser.add_argument('--authdb', action='store', type=str, default='admin', help='database where user will be added (requires --authentication, default=admin)')
+        init_parser.add_argument('--roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s]' % ', '.join(default_roles))
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
 
@@ -259,7 +271,7 @@ class MLaunchTool(BaseCmdLineTool):
                 shutdown_host(host_port)
 
         
-        elif self.args['single']:            
+        elif self.args['single']:
             # just start node
             nodes = self.get_tagged(['single', 'down'])
             self._start_on_ports(nodes, wait=False)
@@ -278,6 +290,33 @@ class MLaunchTool(BaseCmdLineTool):
         # wait for all nodes to be running
         nodes = self.get_tagged(['all'])
         self.wait_for(nodes)
+
+        # now that nodes are running, add admin user if authentication enabled
+        if self.args['authentication'] and first_init:
+            self.discover()
+            nodes = []
+
+            if self.args['sharded']:
+                nodes = self.get_tagged(['mongos', 'running'])
+            elif self.args['single']:
+                nodes = self.get_tagged(['single', 'running'])
+            elif self.args['replicaset']:
+                if self._wait_for_primary():
+                    nodes = self.get_tagged(['primary', 'running'])
+                else:
+                    raise RuntimeError("failed to find a primary, so adding admin user isn't possible")
+
+            if not nodes:
+                raise RuntimeError("mongo is not running, so adding admin user isn't possible")
+
+            if "clusterAdmin" not in self.args['roles']:
+                warnings.warn("the stop command will not work with authentication enabled but without the clusterAdmin role")
+
+            self._add_user(sorted(nodes)[0], name=self.args['username'], password=self.args['password'], 
+                database=self.args['authdb'], roles=self.args['roles'])
+
+            if self.args['verbose']:
+                print "added user %s on %s database" % (self.args['username'], self.args['authdb'])
 
         # write out parameters
         if self.args['verbose']:
@@ -306,7 +345,11 @@ class MLaunchTool(BaseCmdLineTool):
             host_port = 'localhost:%i'%port
             if self.args['verbose']:
                 print "shutting down %s" % host_port
-            shutdown_host(host_port)
+
+            username = self.loaded_args['username'] if self.loaded_args['authentication'] else None
+            password = self.loaded_args['password'] if self.loaded_args['authentication'] else None
+            authdb = self.loaded_args['authdb'] if self.loaded_args['authentication'] else None
+            shutdown_host(host_port, username, password, authdb)
 
         # wait until nodes are all shut down
         self.wait_for(matches, to_start=False)
@@ -860,6 +903,15 @@ class MLaunchTool(BaseCmdLineTool):
             print "replica set '%s' initialized." % name
 
 
+    def _add_user(self, port, name='admin', password='mypassword', database='admin', roles=['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']):
+        con = Connection('localhost:%i'%port)
+
+        try:
+            con[database].add_user(name, password=password, roles=roles)
+        except OperationFailure, e:
+            raise RuntimeError(e)
+
+
 
     # --- below are command line constructor methods, that build the command line strings to be called
 
@@ -995,7 +1047,6 @@ class MLaunchTool(BaseCmdLineTool):
         self.startup_info[str(port)] = command_str
 
 
-
     def _construct_mongos(self, logpath, port, configdb):
         """ construct command line strings for a mongos process. """
         extra = ''
@@ -1016,6 +1067,21 @@ class MLaunchTool(BaseCmdLineTool):
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
+
+
+    def _wait_for_primary(self, max_wait=120):
+        if self.args['verbose']:
+            print "waiting for a primary."
+
+        for i in range(max_wait):
+            self.discover()
+
+            if "primary" in self.cluster_tags and self.cluster_tags['primary']:
+                return True
+
+            time.sleep(1)
+
+        return False
 
 
 
