@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import Queue
 import argparse
 import subprocess
 import threading
@@ -8,6 +9,8 @@ import socket
 import json
 import re
 import warnings
+import psutil
+import signal
 
 from collections import defaultdict
 from operator import itemgetter
@@ -28,19 +31,27 @@ except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
 
-def wait_for_host(host, interval=1, timeout=30, to_start=True):
+def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
         is set to False, will wait for the node to shut down instead. This function can be called as a separate thread.
+
+        If queue is provided, it will place the results in the message queue and return, otherwise it will just return the result
+        directly.
     """
+    host = 'localhost:%i'%port
     startTime = time.time()
     while True:
         if (time.time() - startTime) > timeout:
+            if queue:
+                queue.put((port, False))
             return False
         try:
             # make connection and ping host
             con = Connection(host)
             con.admin.command('ping')
             if to_start:
+                if queue:
+                    queue.put((port, True))
                 return True
             else:
                 time.sleep(interval)
@@ -48,19 +59,27 @@ def wait_for_host(host, interval=1, timeout=30, to_start=True):
             if to_start:
                 time.sleep(interval)
             else:
+                if queue:
+                    queue.put((port, True))
                 return True
 
 
-def shutdown_host(host_port, username=None, password=None, authdb=None):
+
+def shutdown_host(port, username=None, password=None, authdb=None):
     """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
+    host = 'localhost:%i'%port
     try:
-        mc = Connection(host_port)
+        mc = Connection(host)
         try:
             if username and password and authdb:
                 if authdb != "admin":
                     raise RuntimeError("given username/password is not for admin database")
                 else:
-                    mc.admin.authenticate(name=username, password=password)
+                    try:
+                        mc.admin.authenticate(name=username, password=password)
+                    except OperationFailure:
+                        # perhaps auth is not required
+                        pass
 
             mc.admin.command('shutdown', force=True)
         except AutoReconnect:
@@ -148,10 +167,10 @@ class MLaunchTool(BaseCmdLineTool):
         # authentication, users, roles
         default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        init_parser.add_argument('-u', '--username', action='store', type=str, default='admin', help='username to add (requires --authentication, default=admin)')
-        init_parser.add_argument('-p', '--password', action='store', type=str, default='mypassword', help='password for given username (requires --authentication, default=mypassword)')
-        init_parser.add_argument('--authdb', action='store', type=str, default='admin', help='database where user will be added (requires --authentication, default=admin)')
-        init_parser.add_argument('--roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s])' % ', '.join(default_roles))
+        init_parser.add_argument('--username', action='store', type=str, default='admin', help='username to add (requires --authentication, default=admin)')
+        init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --authentication, default=password)')
+        init_parser.add_argument('--auth-db', action='store', type=str, default='admin', help='database where user will be added (requires --authentication, default=admin)')
+        init_parser.add_argument('--auth-roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s])' % ', '.join(default_roles))
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
@@ -172,6 +191,14 @@ class MLaunchTool(BaseCmdLineTool):
             description='list MongoDB instances for this configuration')
         list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
         list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+
+        # list command
+        kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances for this configuration',
+            description='kills (or sends another signal to) MongoDB instances for this configuration')
+        kill_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be killed. Provide additional tags to narrow down the set of nodes to kill.')
+        kill_parser.add_argument('--dir', action='store', default='./data', help='base directory to kill nodes (default=./data/)')
+        kill_parser.add_argument('--signal', action='store', default=15, help='signal to send to processes, default=15 (SIGTERM)')
+        kill_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
@@ -207,6 +234,18 @@ class MLaunchTool(BaseCmdLineTool):
 
         # construct startup strings
         self._construct_cmdlines()
+
+        # if not all ports are free, complain and suggest alternatives.
+        all_ports = self.get_tagged(['all'])
+        ports_avail = self.wait_for(all_ports, 1, 1, to_start=False)
+
+        if not all(map(itemgetter(1), ports_avail)):
+            dir_addon = ' --dir %s'%self.args['dir'] if self.args['dir'] != './data' else ''
+            errmsg = '\nThe following ports are not available: %s\n\n' % ', '.join( [ str(p[0]) for p in ports_avail if not p[1] ] )
+            errmsg += " * If you want to restart nodes from this environment, use 'mlaunch start%s' instead.\n" % dir_addon
+            errmsg += " * If the ports are used by a different mlaunch environment, stop those first with 'mlaunch stop --dir <env>'.\n"
+            errmsg += " * You can also specify a different port range with an additional '--port <startport>'\n"
+            raise SystemExit(errmsg)
 
         if self.args['sharded']:
             shard_names = self._get_shard_names(self.args)
@@ -268,9 +307,9 @@ class MLaunchTool(BaseCmdLineTool):
 
             # if --mongos 0, kill the dummy mongos
             if self.args['mongos'] == 0:
-                host_port = 'localhost:%s'%mongos[0]
-                print "shutting down temporary mongos on %s" % host_port
-                shutdown_host(host_port)
+                port = mongos[0]
+                print "shutting down temporary mongos on localhost:%s" % port
+                shutdown_host(port)
 
         
         elif self.args['single']:
@@ -303,6 +342,7 @@ class MLaunchTool(BaseCmdLineTool):
             elif self.args['single']:
                 nodes = self.get_tagged(['single', 'running'])
             elif self.args['replicaset']:
+                print "waiting for primary to add a user."
                 if self._wait_for_primary():
                     nodes = self.get_tagged(['primary', 'running'])
                 else:
@@ -311,14 +351,14 @@ class MLaunchTool(BaseCmdLineTool):
             if not nodes:
                 raise RuntimeError("mongo is not running, so adding admin user isn't possible")
 
-            if "clusterAdmin" not in self.args['roles']:
+            if "clusterAdmin" not in self.args['auth_roles']:
                 warnings.warn("the stop command will not work with authentication enabled but without the clusterAdmin role")
 
             self._add_user(sorted(nodes)[0], name=self.args['username'], password=self.args['password'], 
-                database=self.args['authdb'], roles=self.args['roles'])
+                database=self.args['auth_db'], roles=self.args['auth_roles'])
 
             if self.args['verbose']:
-                print "added user %s on %s database" % (self.args['username'], self.args['authdb'])
+                print "added user %s on %s database" % (self.args['username'], self.args['auth_db'])
 
         # write out parameters
         if self.args['verbose']:
@@ -344,14 +384,13 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes stopped.')
 
         for port in matches:
-            host_port = 'localhost:%i'%port
             if self.args['verbose']:
-                print "shutting down %s" % host_port
+                print "shutting down localhost:%s" % port
 
             username = self.loaded_args['username'] if self.loaded_args['authentication'] else None
             password = self.loaded_args['password'] if self.loaded_args['authentication'] else None
-            authdb = self.loaded_args['authdb'] if self.loaded_args['authentication'] else None
-            shutdown_host(host_port, username, password, authdb)
+            authdb = self.loaded_args['auth_db'] if self.loaded_args['authentication'] else None
+            shutdown_host(port, username, password, authdb)
 
         # wait until nodes are all shut down
         self.wait_for(matches, to_start=False)
@@ -408,9 +447,8 @@ class MLaunchTool(BaseCmdLineTool):
         mongos_matches = self.get_tagged(['mongos']).intersection(matches)
         self._start_on_ports(mongos_matches)
 
-        # wait for all nodes to be running
-        nodes = self.get_tagged(['all'])
-        self.wait_for(nodes)
+        # wait for all matched nodes to be running
+        self.wait_for(matches)
 
         # refresh discover
         self.discover()
@@ -494,6 +532,46 @@ class MLaunchTool(BaseCmdLineTool):
         print_table(print_docs)
 
 
+    def kill(self):
+        self.discover()
+
+        # get matching tags, can only send signals to running nodes
+        matches = self._get_ports_from_args(self.args, 'running')
+        processes = self._get_processes()
+
+        # convert signal to int
+        sig = self.args['signal']
+        if type(sig) == int:
+            pass
+        elif isinstance(sig, str):
+            try:
+                sig = int(sig)
+            except ValueError as e:
+                try:
+                    sig = getattr(signal, sig)
+                except AttributeError as e:
+                    raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
+
+        print processes
+
+        for port in processes:
+            # only send signal to matching processes
+            if port in matches:
+                p = processes[port]
+                p.send_signal(sig)
+                if self.args['verbose']:
+                    print " %s on port %i, pid=%i" % (p.name, port, p.pid)
+
+        print "sent signal %s to %i process%s." % (sig, len(matches), '' if len(matches) == 1 else 'es')
+
+        # there is a very brief period in which nodes are not reachable anymore, but the
+        # port is not torn down fully yet and an immediate start command would fail. This 
+        # very short sleep prevents that case, and it is practically not noticable by users
+        time.sleep(0.1)
+
+        # refresh discover
+        self.discover()
+
     
     # --- below are api helper methods, can be called after creating an MLaunchTool() object
 
@@ -503,6 +581,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
             for sub-commands start, stop, list.
         """
+        # need self.args['command'] so fail if it's not available
         if not self.args or not self.args['command']:
             return
 
@@ -690,17 +769,22 @@ class MLaunchTool(BaseCmdLineTool):
             Returns when all hosts are running (if to_start=True) / shut down (if to_start=False)
         """
         threads = []
+        queue = Queue.Queue()
 
         for port in ports:
-            threads.append(threading.Thread(target=wait_for_host, args=('localhost:%i'%port, interval, timeout, to_start)))
+            threads.append(threading.Thread(target=wait_for_host, args=(port, interval, timeout, to_start, queue)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
             print "waiting for nodes %s..." % 'to start' if to_start else 'to shutdown'
+        
         for thread in threads:
             thread.start()
+
         for thread in threads:
             thread.join()
 
+        # get all results back and return tuple
+        return tuple(queue.get() for _ in ports)
 
 
     # --- below here are internal helper methods, should not be called externally ---
@@ -905,14 +989,33 @@ class MLaunchTool(BaseCmdLineTool):
             print "replica set '%s' initialized." % name
 
 
-    def _add_user(self, port, name='admin', password='mypassword', database='admin', roles=['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']):
+    def _add_user(self, port, name, password, database, roles):
         con = Connection('localhost:%i'%port)
-
         try:
             con[database].add_user(name, password=password, roles=roles)
-        except OperationFailure, e:
-            raise RuntimeError(e)
+        except OperationFailure as e:
+            pass
 
+
+    def _get_processes(self):
+        all_ports = self.get_tagged('all')
+        
+        process_dict = {}
+
+        for p in psutil.process_iter():
+            # skip all but mongod / mongos
+            if p.name not in ['mongos', 'mongod']:
+                continue
+
+            print p
+            # find first TCP listening port
+            port = min( [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN'] )
+            print port
+            # only consider processes belonging to this environment
+            if port in all_ports:
+                process_dict[port] = p
+
+        return process_dict
 
 
     # --- below are command line constructor methods, that build the command line strings to be called
@@ -1072,8 +1175,6 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _wait_for_primary(self, max_wait=120):
-        if self.args['verbose']:
-            print "waiting for a primary."
 
         for i in range(max_wait):
             self.discover()
