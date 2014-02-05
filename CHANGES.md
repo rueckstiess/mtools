@@ -3,7 +3,7 @@ Changes to mtools
 
 #### version 1.1.3
   * all tools can now read from system.profile collections as if it was a logfile. Use this syntax as command line argument: "host:port/database.collection" (#164)
-
+  * mlaunch: Added a 'kill' command to send SIGTERM or any other signal to all or a subset of instances (#168)
 
 #### version 1.1.2
 
