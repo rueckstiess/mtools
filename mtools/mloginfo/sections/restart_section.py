@@ -1,5 +1,7 @@
 from base_section import BaseSection
 
+from mtools.util.profile_collection import ProfileCollection
+
 class RestartSection(BaseSection):
     """ This section determines if there were any restarts in the log file and prints out
         the times and version of the restarts found. It uses the information collected in
@@ -22,9 +24,16 @@ class RestartSection(BaseSection):
 
 
     def run(self):
+
+        if isinstance(self.mloginfo.logfile, ProfileCollection):
+            print
+            print "    not available for system.profile collections"
+            print
+            return
+
         """ run this section and print out information. """
-        for version, logline in self.mloginfo.logfile.restarts:
-            print "   %s version %s" % (logline.datetime.strftime("%b %d %H:%M:%S"), version)
+        for version, logevent in self.mloginfo.logfile.restarts:
+            print "   %s version %s" % (logevent.datetime.strftime("%b %d %H:%M:%S"), version)
 
         if len(self.mloginfo.logfile.restarts) == 0:
             print "  no restarts found"

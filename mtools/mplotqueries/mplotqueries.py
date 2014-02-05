@@ -19,12 +19,13 @@ try:
     from matplotlib.dates import DateFormatter, date2num
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
+    from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries that visualizes the logfile in a web browser.")
 
 
-from mtools.util.logline import LogLine
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 
 from mtools.util.cmdlinetool import LogFileTool
@@ -64,7 +65,7 @@ class MPlotQueriesTool(LogFileTool):
     def run(self, arguments=None):
         LogFileTool.run(self, arguments, get_unknowns=True)
 
-        self.parse_loglines()
+        self.parse_logevents()
         self.group()
 
         if self.args['overlay'] == 'reset':
@@ -98,7 +99,7 @@ class MPlotQueriesTool(LogFileTool):
             raise SystemExit
 
 
-    def parse_loglines(self):
+    def parse_logevents(self):
         multiple_files = False
 
         # create generator for logfile(s) handles
@@ -116,14 +117,13 @@ class MPlotQueriesTool(LogFileTool):
         for logfile in self.logfiles:
             start = None
             end = None         
-            logline = None
+            logevent = None
             
             # get log file information
             if self.progress_bar_enabled:
-                lfinfo = LogFile(logfile)
-                if lfinfo.start and lfinfo.end:
-                    progress_start = self._datetime_to_epoch(lfinfo.start)
-                    progress_total = self._datetime_to_epoch(lfinfo.end) - progress_start
+                if logfile.start and logfile.end:
+                    progress_start = self._datetime_to_epoch(logfile.start)
+                    progress_total = self._datetime_to_epoch(logfile.end) - progress_start
                 else:
                     self.progress_bar_enabled = False
                 
@@ -131,48 +131,46 @@ class MPlotQueriesTool(LogFileTool):
                     # protect from division by zero errors
                     self.progress_bar_enabled = False
 
-            for i, line in enumerate(logfile):
-                # create LogLine object
-                logline = LogLine(line)
+            for i, logevent in enumerate(logfile):
 
                 # adjust times if --optime-start is enabled
-                if self.args['optime_start'] and logline.duration and logline.datetime:
-                    # create new variable end_datetime in logline object and store starttime there
-                    logline.end_datetime = logline.datetime 
-                    logline._datetime = logline._datetime - timedelta(milliseconds=logline.duration)
-                    logline._datetime_calculated = True
+                if self.args['optime_start'] and logevent.duration and logevent.datetime:
+                    # create new variable end_datetime in logevent object and store starttime there
+                    logevent.end_datetime = logevent.datetime 
+                    logevent._datetime = logevent._datetime - timedelta(milliseconds=logevent.duration)
+                    logevent._datetime_calculated = True
 
                 if not start:
-                    start = logline.datetime
+                    start = logevent.datetime
 
                 # update progress bar every 1000 lines
-                if self.progress_bar_enabled and (i % 1000 == 0) and logline.datetime:
-                    progress_curr = self._datetime_to_epoch(logline.datetime)
+                if self.progress_bar_enabled and (i % 1000 == 0) and logevent.datetime:
+                    progress_curr = self._datetime_to_epoch(logevent.datetime)
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
                 # offer plot_instance and see if it can plot it
-                if plot_instance.accept_line(logline):
+                if plot_instance.accept_line(logevent):
                     
-                    # if logline doesn't have datetime, skip
-                    if logline.datetime == None:
+                    # if logevent doesn't have datetime, skip
+                    if logevent.datetime == None:
                         continue
                     
-                    if logline.namespace == None:
-                        logline._namespace = "None"
+                    if logevent.namespace == None:
+                        logevent._namespace = "None"
 
-                    plot_instance.add_line(logline)
+                    plot_instance.add_line(logevent)
 
                 if multiple_files:
-                    # amend logline object with filename for group by filename
-                    logline.filename = logfile.name
+                    # amend logevent object with filename for group by filename
+                    logevent.filename = logfile.name
 
 
             # store end of logfile 
-            if logline and logline.datetime:
-                if self.args['optime_start'] and hasattr(logline, 'end_datetime'):
-                    end = logline.end_datetime
+            if logevent and logevent.datetime:
+                if self.args['optime_start'] and hasattr(logevent, 'end_datetime'):
+                    end = logevent.end_datetime
                 else:
-                    end = logline.datetime
+                    end = logevent.datetime
 
             # store start and end for each logfile
             plot_instance.date_range = (start, end)
@@ -182,11 +180,6 @@ class MPlotQueriesTool(LogFileTool):
             self.update_progress(1.0)
 
         self.plot_instances.append(plot_instance)
-
-        # close files after parsing
-        if sys.stdin.isatty():
-            for f in self.logfiles:
-                f.close()
 
 
     def group(self):
@@ -307,7 +300,7 @@ class MPlotQueriesTool(LogFileTool):
                 pass
             return
 
-        # only print loglines of visible points
+        # only print logevents of visible points
         if not event.artist.get_visible():
             return
 
@@ -403,7 +396,12 @@ class MPlotQueriesTool(LogFileTool):
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
-            self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+            # only change fontsize if supported 
+            major, minor, _ = mpl_version.split('.')
+            if (int(major), int(minor)) >= (1, 3):
+                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1, fontsize=9)
+            else:
+                self.legend = axis.legend(loc='upper left', frameon=False, numpoints=1)
         
         if self.args['type'] == 'scatter':
             # enable legend picking for scatter plots

@@ -1,5 +1,5 @@
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
-from mtools.util.logline import LogLine
+from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 import mtools
 
@@ -46,8 +46,8 @@ class TestMLogFilter(object):
         self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.datetime >= random_start)
+            le =  LogEvent(line)
+            assert(le.datetime >= random_start)
 
     def test_from_to(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
@@ -56,8 +56,8 @@ class TestMLogFilter(object):
         self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.datetime >= random_start and ll.datetime <= random_end)
+            le =  LogEvent(line)
+            assert(le.datetime >= random_start and le.datetime <= random_end)
 
     def test_json(self):
         """ output with --json is in JSON format. """
@@ -89,29 +89,29 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert(len(output.splitlines()) > 0)
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.duration >= 145 and ll.duration <= 500)
+            le =  LogEvent(line)
+            assert(le.duration >= 145 and le.duration <= 500)
 
     def test_thread(self):
         self.tool.run('%s --thread initandlisten'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.thread == 'initandlisten')
+            le =  LogEvent(line)
+            assert(le.thread == 'initandlisten')
 
     def test_operation(self):
         self.tool.run('%s --operation insert'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.operation == 'insert')
+            le =  LogEvent(line)
+            assert(le.operation == 'insert')
 
     def test_namespace(self):
         self.tool.run('%s --namespace local.oplog.rs'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
-            assert(ll.namespace == 'local.oplog.rs')
+            le =  LogEvent(line)
+            assert(le.namespace == 'local.oplog.rs')
 
     def test_word(self):
         self.tool.run('%s --word lock'%self.logfile_path)
@@ -131,10 +131,10 @@ class TestMLogFilter(object):
         self.tool.run('%s --mask %s --mask-size %i'%(self.logfile_path, mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
+            le =  LogEvent(line)
             assert( 
-                    (ll.datetime >= event1 - padding and ll.datetime <= event1 + padding) or
-                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                    (le.datetime >= event1 - padding and le.datetime <= event1 + padding) or
+                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )
 
 
@@ -150,10 +150,10 @@ class TestMLogFilter(object):
         self.tool.run('%s --mask %s --mask-size %i --mask-center start'%(self.logfile_path, mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
+            le =  LogEvent(line)
             assert( 
-                    (ll.datetime >= event1 - duration1 - padding and ll.datetime <= event1 - duration1 + padding) or
-                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                    (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 - duration1 + padding) or
+                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )
 
 
@@ -169,10 +169,10 @@ class TestMLogFilter(object):
         self.tool.run('%s --mask %s --mask-size %i --mask-center both'%(self.logfile_path, mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            ll = LogLine(line)
+            le =  LogEvent(line)
             assert( 
-                    (ll.datetime >= event1 - duration1 - padding and ll.datetime <= event1 + padding) or
-                    (ll.datetime >= event2 - padding and ll.datetime <= event2 + padding)
+                    (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 + padding) or
+                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )
 
     @raises(SystemExit)

@@ -7,8 +7,7 @@ import types
 
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 
-from mtools.util.logline import LogLine
-from mtools.util.logfile import LogFile
+from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 from mtools.mlogfilter.filters import *
 
@@ -46,21 +45,21 @@ class MLogFilterTool(LogFileTool):
             return arr
 
     
-    def _outputLine(self, logline, length=None, human=False):
+    def _outputLine(self, logevent, length=None, human=False):
         """ prints the final line, with various options (length, human, datetime changes, ...) """
         # adapt timezone output if necessary
         if self.args['timestamp_format'] != 'none':
-            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
+            logevent._reformat_timestamp(self.args['timestamp_format'], force=True)
         if any(self.args['timezone']):
             if self.args['timestamp_format'] == 'none':
-                self.args['timestamp_format'] = logline.datetime_format
-            logline._reformat_timestamp(self.args['timestamp_format'], force=True)
+                self.args['timestamp_format'] = logevent.datetime_format
+            logevent._reformat_timestamp(self.args['timestamp_format'], force=True)
 
         if self.args['json']:
-            print logline.to_json()
+            print logevent.to_json()
             return
 
-        line = logline.line_str
+        line = logevent.line_str
 
         if length:
             if len(line) > length:
@@ -126,21 +125,20 @@ class MLogFilterTool(LogFileTool):
             return line[:last_index] + ("").join(splitted)
 
 
-    def _datetime_key_for_merge(self, logline):
+    def _datetime_key_for_merge(self, logevent):
         """ helper method for ordering log lines correctly during merge. """
-        if not logline:
+        if not logevent:
             # if logfile end is reached, return max datetime to never pick this line
             return datetime(MAXYEAR, 12, 31, 23, 59, 59)
 
         # if no datetime present (line doesn't have one) return mindate to pick this line immediately
-        return logline.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0)
+        return logevent.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0)
 
 
     def _merge_logfiles(self):
         """ helper method to merge several files together by datetime. """
         # open files, read first lines, extract first dates
-        lines = [f.readline() for f in self.args['logfile']]
-        lines = [LogLine(l) if l else None for l in lines]
+        lines = [next(logfile, None) for logfile in self.args['logfile']]
 
         # adjust lines by timezone
         for i in range(len(lines)):
@@ -157,8 +155,7 @@ class MLogFilterTool(LogFileTool):
             yield min_line
 
             # update lines array with a new line from the min_index'th logfile
-            new_line = self.args['logfile'][min_index].readline()
-            lines[min_index] = LogLine(new_line) if new_line else None
+            lines[min_index] = next(self.args['logfile'][min_index], None)
             if lines[min_index] and lines[min_index].datetime:
                 lines[min_index]._datetime = lines[min_index].datetime + timedelta(hours=self.args['timezone'][min_index])
 
@@ -172,20 +169,18 @@ class MLogFilterTool(LogFileTool):
 
             if start_limits:
                 for logfile in self.args['logfile']: 
-                    lf_info = LogFile(logfile)
-                    lf_info.fast_forward( max(start_limits) )
+                    logfile.fast_forward( max(start_limits) )
 
         if len(self.args['logfile']) > 1:
-            # todo, merge
-            for logline in self._merge_logfiles():
-                yield logline
+            # merge log files by time
+            for logevent in self._merge_logfiles():
+                yield logevent
         else:
             # only one file
-            for line in self.args['logfile'][0]:
-                logline = LogLine(line)
-                if logline.datetime: 
-                    logline._datetime = logline.datetime + timedelta(hours=self.args['timezone'][0])
-                yield logline
+            for logevent in self.args['logfile'][0]:
+                if logevent.datetime: 
+                    logevent._datetime = logevent.datetime + timedelta(hours=self.args['timezone'][0])
+                yield logevent
 
 
     def run(self, arguments=None):
@@ -253,7 +248,7 @@ class MLogFilterTool(LogFileTool):
             elif marker == 'none':
                 self.args['markers'] = [None for _ in self.args['logfile']]
             elif marker == 'filename':
-                self.args['markers'] = ['{%s}'%fn.name for fn in self.args['logfile']]
+                self.args['markers'] = ['{%s}'%logfile.name for logfile in self.args['logfile']]
         elif len(self.args['markers']) == len(self.args['logfile']):
             pass
         else:
@@ -267,17 +262,17 @@ class MLogFilterTool(LogFileTool):
         if not 'logfile' in self.args or not self.args['logfile']:
             raise SystemExit('no logfile found.')
 
-        for logline in self.logfile_generator():
+        for logevent in self.logfile_generator():
 
             if self.args['exclude']:
                 # print line if any filter disagrees
-                if any([not f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline, self.args['shorten'], self.args['human'])
+                if any([not f.accept(logevent) for f in self.filters]):
+                    self._outputLine(logevent, self.args['shorten'], self.args['human'])
 
             else:
                 # only print line if all filters agree
-                if all([f.accept(logline) for f in self.filters]):
-                    self._outputLine(logline, self.args['shorten'], self.args['human'])
+                if all([f.accept(logevent) for f in self.filters]):
+                    self._outputLine(logevent, self.args['shorten'], self.args['human'])
 
                 # if at least one filter refuses to accept any remaining lines, stop
                 if any([f.skipRemaining() for f in self.filters]):
