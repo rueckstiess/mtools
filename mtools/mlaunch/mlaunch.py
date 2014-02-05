@@ -139,17 +139,19 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
-        # verbose, port, auth, binary path
-        default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
+        # verbose, port, binary path
         init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
+        init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
+        init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+
+        # authentication, users, roles
+        default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
         init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
         init_parser.add_argument('-u', '--username', action='store', type=str, default='admin', help='username to add (requires --authentication, default=admin)')
         init_parser.add_argument('-p', '--password', action='store', type=str, default='mypassword', help='password for given username (requires --authentication, default=mypassword)')
         init_parser.add_argument('--authdb', action='store', type=str, default='admin', help='database where user will be added (requires --authentication, default=admin)')
-        init_parser.add_argument('--roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s]' % ', '.join(default_roles))
-        init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
-        init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+        init_parser.add_argument('--roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s])' % ', '.join(default_roles))
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
