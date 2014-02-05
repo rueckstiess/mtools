@@ -178,6 +178,7 @@ class MLaunchTool(BaseCmdLineTool):
         start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
         start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         start_parser.add_argument('--dir', action='store', default='./data', help='base directory to start nodes (default=./data/)')
+        start_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
         # stop command
         stop_parser = subparsers.add_parser('stop', help='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.',
@@ -421,11 +422,13 @@ class MLaunchTool(BaseCmdLineTool):
 
         
         # if new unknown_args are present, compare them with loaded ones (here we can be certain of protocol v2+)
-        if self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args):
+        if self.args['binarypath'] != './data' or (self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args)):
+
             # store current args, use self.args from the file (self.loaded_args)
             start_args = self.args
             self.args = self.loaded_args
-            
+
+            self.args['binarypath'] = start_args['binarypath']
             # construct new startup strings with updated unknown args. They are for this start only and 
             # will not be persisted in the .mlaunch_startup file
             self._construct_cmdlines()
