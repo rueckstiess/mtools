@@ -480,6 +480,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.cluster_tree, self.cluster_tags, self.cluster_running data structures, needed
             for sub-commands start, stop, list.
         """
+        # need self.args['command'] so fail if it's not available
         if not self.args or not self.args['command']:
             return
 

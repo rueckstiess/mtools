@@ -44,15 +44,23 @@ class TestMLaunch(object):
 
 
     def teardown(self):
-        """ tear down method after each test, removes data directory. """
+        """ tear down method after each test, removes data directory. """        
 
         # shutdown all running processes
         self.tool.discover()
-        ports = self.tool.get_tagged('all')
 
+        ports = self.tool.get_tagged(['mongos', 'running'])
         for port in ports:
             shutdown_host('localhost:%s' % port)
         self.tool.wait_for(ports, to_start=False)
+
+        ports = self.tool.get_tagged(['all', 'running'])
+        for port in ports:
+            shutdown_host('localhost:%s' % port)
+        self.tool.wait_for(ports, to_start=False)
+
+        # quick sleep to avoid spurious test failures
+        time.sleep(0.1)
 
         # if the test data path exists, remove it
         if os.path.exists(self.base_dir):
@@ -107,9 +115,8 @@ class TestMLaunch(object):
         # make command line arguments through sys.argv
         sys.argv = ['mlaunch', 'init', '--single', '--dir', self.base_dir, '--port', str(self.port), '--nojournal']
 
-        tool = MLaunchTool()
-        tool.run()
-        assert tool.is_running(self.port)
+        self.tool.run()
+        assert self.tool.is_running(self.port)
 
 
     def test_init_default(self):
@@ -118,9 +125,8 @@ class TestMLaunch(object):
         # make command line arguments through sys.argv
         sys.argv = ['mlaunch', '--single', '--dir', self.base_dir, '--port', str(self.port), '--nojournal']
 
-        tool = MLaunchTool()
-        tool.run()
-        assert tool.is_running(self.port)
+        self.tool.run()
+        assert self.tool.is_running(self.port)
 
 
     def test_init_default_arguments(self):
@@ -147,20 +153,11 @@ class TestMLaunch(object):
         assert set(self.tool.get_tags_of_port(self.port)) == set(['running', 'mongod', 'all', 'single', str(self.port)])
 
 
-    def test_single_on_existing_port(self):
-        """ mlaunch: using already existing port fails """
-
-        # start mongo process on free test port
-        self.run_tool("init --single")
-
-        # start mongo process on same port, should not throw error, finish normally
-        self.run_tool("init --single")
-
 
     def test_replicaset_conf(self):
         """ mlaunch: start replica set of 2 nodes + arbiter and compare rs.conf() """
 
-        # start mongo process on free test port (don't need journal for this test)
+        # start mongo process on free test port
         self.run_tool("init --replicaset --nodes 2 --arbiter")
 
         # check if data directories exist
@@ -264,6 +261,16 @@ class TestMLaunch(object):
 
         # check for correct port
         assert self.tool.get_tagged('mongos') == set([self.port])
+
+
+    def test_single_mongos(self):
+        """ mlaunch: test if multiple mongos use separate log files in 'mongos' subdir. """
+
+        # start 2 shards, 1 config server, 2 mongos
+        self.run_tool("init --sharded 2 --single --config 1 --mongos 1")
+
+        # check that 2 mongos are running
+        assert len( self.tool.get_tagged(['mongos', 'running']) ) == 1
 
 
     def test_multiple_mongos(self):
@@ -390,7 +397,7 @@ class TestMLaunch(object):
         tags = ['shard01', 'shard 1', 'mongod', 'mongos', 'config', str(self.port)] 
 
         # start large cluster
-        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3")
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3 --authentication")
 
         # make sure all nodes are running
         nodes = self.tool.get_tagged('all')
@@ -399,12 +406,15 @@ class TestMLaunch(object):
         # go through all tags, stop nodes for each tag, confirm only the tagged ones are down, start again
         for tag in tags:
             self.run_tool("stop %s" % tag)
+            time.sleep(4)
+            print tag
+            print "down:", self.tool.get_tagged('down')
+            print "tag:", tag, self.tool.get_tagged(tag)
             assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
 
             # short sleep, because travis seems to be sensitive and sometimes fails otherwise
-            time.sleep(1)
-
             self.run_tool("start")
+            time.sleep(1)
             assert len(self.tool.get_tagged('down')) == 0
 
         # make sure primaries are running again (we just failed them over above). 
@@ -419,7 +429,6 @@ class TestMLaunch(object):
         # test for primary, but as the nodes lose their tags, needs to be manual
         self.run_tool("stop primary")
         assert len(self.tool.get_tagged('down')) == 2
-        self.run_tool("start")
 
 
     def test_restart_with_unkown_args(self):
@@ -474,15 +483,18 @@ class TestMLaunch(object):
             self.run_tool("start")
 
     
+    @raises(SystemExit)
     def test_init_init_replicaset(self):
         """ mlaunch: test calling init a second time on the replica set. """
 
-        # repeatedly init a replica set
-        self.run_tool("init --replicaset")
+        # init a replica set
         self.run_tool("init --replicaset")
 
-        # now stop and init again
+        # now stop and init again, this should work if everything is stopped and identical environment
         self.run_tool("stop")
+        self.run_tool("init --replicaset")
+
+        # but another init should fail with a SystemExit
         self.run_tool("init --replicaset")
 
 
@@ -525,4 +537,17 @@ class TestMLaunch(object):
 
     # TODO 
     # - test functionality of --binarypath, --verbose, --name
+
+
+
+if __name__ == '__main__':
+
+    # run individual tests with normal print output 
+    tml = TestMLaunch()
+    tml.setup()
+    tml.test_stop_partial()
+    # tml.test_repeat_all_with_auth()
+    tml.teardown()
+
+
 
