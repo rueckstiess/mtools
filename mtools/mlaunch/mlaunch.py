@@ -137,11 +137,11 @@ class MLaunchTool(BaseCmdLineTool):
         # create command sub-parsers
         subparsers = self.argparser.add_subparsers(dest='command')
         self.argparser._action_groups[0].title = 'commands'
-        self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch [command] --help'
+        self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch <command> --help'
         
         # init command 
-        init_parser = subparsers.add_parser('init', help='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters.',
-            description='initialize and start MongoDB stand-alone instances, replica sets, or sharded clusters')
+        init_parser = subparsers.add_parser('init', help='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters.',
+            description='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters')
 
         # either single or replica set
         me_group = init_parser.add_mutually_exclusive_group(required=True)
@@ -166,11 +166,11 @@ class MLaunchTool(BaseCmdLineTool):
 
         # authentication, users, roles
         default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
-        init_parser.add_argument('--authentication', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        init_parser.add_argument('--username', action='store', type=str, default='admin', help='username to add (requires --authentication, default=admin)')
+        init_parser.add_argument('--auth', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        init_parser.add_argument('--username', action='store', type=str, default='user', help='username to add (requires --authentication, default=admin)')
         init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --authentication, default=password)')
-        init_parser.add_argument('--auth-db', action='store', type=str, default='admin', help='database where user will be added (requires --authentication, default=admin)')
-        init_parser.add_argument('--auth-roles', action='store', default=default_roles, nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default=[%s])' % ', '.join(default_roles))
+        init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --authentication, default=admin)')
+        init_parser.add_argument('--auth-roles', action='store', default=default_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default="%s")' % ' '.join(default_roles))
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
@@ -182,20 +182,20 @@ class MLaunchTool(BaseCmdLineTool):
 
         # stop command
         stop_parser = subparsers.add_parser('stop', help='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.',
-            description='stops running MongoDB instances. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
+            description='stops running MongoDB instances with the shutdown command. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
         stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
         stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
         
         # list command
-        list_parser = subparsers.add_parser('list', help='list MongoDB instances for this configuration',
-            description='list MongoDB instances for this configuration')
+        list_parser = subparsers.add_parser('list', help='list MongoDB instances of this environment.',
+            description='list MongoDB instances of this environment.')
         list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
         list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
         # list command
-        kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances for this configuration',
-            description='kills (or sends another signal to) MongoDB instances for this configuration')
+        kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances of this environment.',
+            description='kills (or sends another signal to) MongoDB instances of this environment.')
         kill_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be killed. Provide additional tags to narrow down the set of nodes to kill.')
         kill_parser.add_argument('--dir', action='store', default='./data', help='base directory to kill nodes (default=./data/)')
         kill_parser.add_argument('--signal', action='store', default=15, help='signal to send to processes, default=15 (SIGTERM)')
@@ -227,7 +227,7 @@ class MLaunchTool(BaseCmdLineTool):
             first_init = True
 
         # check if authentication is enabled, make key file       
-        if self.args['authentication'] and first_init:
+        if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
@@ -334,7 +334,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.wait_for(nodes)
 
         # now that nodes are running, add admin user if authentication enabled
-        if self.args['authentication'] and first_init:
+        if self.args['auth'] and first_init:
             self.discover()
             nodes = []
 
@@ -388,9 +388,9 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['verbose']:
                 print "shutting down localhost:%s" % port
 
-            username = self.loaded_args['username'] if self.loaded_args['authentication'] else None
-            password = self.loaded_args['password'] if self.loaded_args['authentication'] else None
-            authdb = self.loaded_args['auth_db'] if self.loaded_args['authentication'] else None
+            username = self.loaded_args['username'] if self.loaded_args['auth'] else None
+            password = self.loaded_args['password'] if self.loaded_args['auth'] else None
+            authdb = self.loaded_args['auth_db'] if self.loaded_args['auth'] else None
             shutdown_host(port, username, password, authdb)
 
         # wait until nodes are all shut down
@@ -554,8 +554,6 @@ class MLaunchTool(BaseCmdLineTool):
                     sig = getattr(signal, sig)
                 except AttributeError as e:
                     raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
-
-        print processes
 
         for port in processes:
             # only send signal to matching processes
@@ -1019,6 +1017,19 @@ class MLaunchTool(BaseCmdLineTool):
         return process_dict
 
 
+    def _wait_for_primary(self, max_wait=120):
+
+        for i in range(max_wait):
+            self.discover()
+
+            if "primary" in self.cluster_tags and self.cluster_tags['primary']:
+                return True
+
+            time.sleep(1)
+
+        return False
+        
+
     # --- below are command line constructor methods, that build the command line strings to be called
 
     def _construct_cmdlines(self):
@@ -1139,7 +1150,7 @@ class MLaunchTool(BaseCmdLineTool):
             rs_param = '--replSet %s'%replset
 
         auth_param = ''
-        if self.args['authentication']:
+        if self.args['auth']:
             key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
@@ -1161,7 +1172,7 @@ class MLaunchTool(BaseCmdLineTool):
             out = None
 
         auth_param = ''
-        if self.args['authentication']:
+        if self.args['auth']:
             key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
             auth_param = '--keyFile %s'%key_path
 
@@ -1174,18 +1185,6 @@ class MLaunchTool(BaseCmdLineTool):
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
 
-
-    def _wait_for_primary(self, max_wait=120):
-
-        for i in range(max_wait):
-            self.discover()
-
-            if "primary" in self.cluster_tags and self.cluster_tags['primary']:
-                return True
-
-            time.sleep(1)
-
-        return False
 
 
 

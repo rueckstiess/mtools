@@ -30,7 +30,7 @@ class TestMLaunch(object):
 
     def __init__(self):
         """ Constructor. """
-        self.use_authentication = False
+        self.use_auth = False
         self.data_dir = ''
         
 
@@ -65,7 +65,7 @@ class TestMLaunch(object):
 
 
     def run_tool(self, arg_str):
-        """ wrapper to call self.tool.run() with or without authentication """
+        """ wrapper to call self.tool.run() with or without auth """
         # name data directory according to test method name
         caller = inspect.stack()[1][3]
         self.data_dir = os.path.join(self.base_dir, caller)
@@ -77,9 +77,9 @@ class TestMLaunch(object):
             # add --port and --nojournal to init calls
             arg_str += ' --port %i --nojournal' % self.port 
             
-            if self.use_authentication:
-                # add --authentication to init calls if flag is set
-                arg_str += ' --authentication'
+            if self.use_auth:
+                # add --auth to init calls if flag is set
+                arg_str += ' --auth'
 
         self.tool.run(arg_str)
 
@@ -180,18 +180,11 @@ class TestMLaunch(object):
         # start mongo process on free test port
         self.run_tool("init --replicaset")
 
-        # create mongo client
-        mc = MongoClient('localhost:%i' % self.port)
-
-        # test if first node becomes primary after some time
-        ismaster = False
-        while not ismaster:
-            result = mc.admin.command("ismaster")
-            ismaster = result["ismaster"]
-            time.sleep(1)
-            print "sleeping"
+        # wait for primary
+        assert self.tool._wait_for_primary()
 
         # insert a document and wait to replicate to 2 secondaries (10 sec timeout)
+        mc = MongoClient('localhost:%i' % self.port)
         mc.test.smokeWait.insert({}, w=2, wtimeout=10*60*1000)
 
 
@@ -420,10 +413,10 @@ class TestMLaunch(object):
         """ mlaunch: test killing and restarting tagged groups on different tags """
 
         # key is tag for command line, value is tag for get_tagged
-        tags = ['shard01', 'shard 1', 'mongos', 'mongod 2', 'config 1', str(self.port)] 
+        tags = ['shard01', 'shard 1', 'mongos', 'mongod', 'config 1', str(self.port)] 
 
         # start large cluster
-        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3 --authentication")
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3 --auth")
 
         # make sure all nodes are running
         nodes = self.tool.get_tagged('all')
@@ -539,25 +532,25 @@ class TestMLaunch(object):
     @attr('slow')
     @attr('auth')
     def test_repeat_all_with_auth(self):
-        """ this test will repeat all the tests in this class (excluding itself) but with authentication. """
+        """ this test will repeat all the tests in this class (excluding itself) but with auth. """
         tests = [t for t in inspect.getmembers(self, predicate=inspect.ismethod) if t[0].startswith('test_') ]
 
-        self.use_authentication = True
+        self.use_auth = True
 
         for name, method in tests:
             # don't call any tests that use auth already (tagged with 'auth' attribute), including this method
             if hasattr(method, 'auth'):
                 continue
 
-            setattr(method.__func__, 'description', method.__doc__.strip() + ' with authentication.')
+            setattr(method.__func__, 'description', method.__doc__.strip() + ', with auth.')
             yield ( method, )
 
-        self.use_authentication = False
+        self.use_auth = False
 
     # TODO 
     # - test functionality of --binarypath, --verbose, --name
 
-    # All tests that use authentication need to be decorated with @attr('auth')
+    # All tests that use auth need to be decorated with @attr('auth')
 
 
 if __name__ == '__main__':
@@ -565,7 +558,7 @@ if __name__ == '__main__':
     # run individual tests with normal print output 
     tml = TestMLaunch()
     tml.setup()
-    tml.test_start_stop_replicaset_repeatedly()
+    tml.test_kill_partial()
     tml.teardown()
 
 
