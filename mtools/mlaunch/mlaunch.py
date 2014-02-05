@@ -167,10 +167,10 @@ class MLaunchTool(BaseCmdLineTool):
         # authentication, users, roles
         default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
         init_parser.add_argument('--auth', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
-        init_parser.add_argument('--username', action='store', type=str, default='user', help='username to add (requires --authentication, default=admin)')
-        init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --authentication, default=password)')
-        init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --authentication, default=admin)')
-        init_parser.add_argument('--auth-roles', action='store', default=default_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --authentication, default="%s")' % ' '.join(default_roles))
+        init_parser.add_argument('--username', action='store', type=str, default='user', help='username to add (requires --auth, default=user)')
+        init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --auth, default=password)')
+        init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --auth, default=admin)')
+        init_parser.add_argument('--auth-roles', action='store', default=default_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(default_roles))
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
@@ -1028,7 +1028,7 @@ class MLaunchTool(BaseCmdLineTool):
             time.sleep(1)
 
         return False
-        
+
 
     # --- below are command line constructor methods, that build the command line strings to be called
 
