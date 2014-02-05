@@ -6,7 +6,7 @@ Changes to mtools
   * all tools can now read from system.profile collections as if it was a logfile. Use this syntax as command line argument: "host:port/database.collection" (#164)
   * mtools now uses [Travis CI](https://travis-ci.org/rueckstiess/mtools) for continuous integration testing
   * mlaunch: Added a `kill` command to send SIGTERM or any other signal to all or a subset of instances (#168)
-  * mlaunch: Environments with `--authentication` add a user/password. Configurable username, password, database, roles (#156)
+  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles (#156)
   * mlaunch: start command can receive new arguments to pass through to mongos/d, and a different `--binarypath` (#151)
   * mlaunch: now checks in advance if port range is free, and warns if not (#166)
   * mlaunch: `--version` was removed by accident in 1.1.2. It's back now (#160)
