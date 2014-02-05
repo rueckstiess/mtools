@@ -8,6 +8,8 @@ import os, time, sys, re
 import socket
 import json
 import re
+import psutil
+import signal
 
 from collections import defaultdict
 from operator import itemgetter
@@ -61,10 +63,11 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
                 return True
 
 
-def shutdown_host(host_port):
+def shutdown_host(port):
     """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
+    host = 'localhost:%i'%port
     try:
-        mc = Connection(host_port)
+        mc = Connection(host)
         try:
             mc.admin.command('shutdown', force=True)
         except AutoReconnect:
@@ -98,6 +101,9 @@ class MLaunchTool(BaseCmdLineTool):
 
         # shard connection strings
         self.shard_connection_str = []
+
+        # pids of all processes, stored in .mlaunch_startup
+        self.pids = {}
 
 
     def run(self, arguments=None):
@@ -169,6 +175,14 @@ class MLaunchTool(BaseCmdLineTool):
             description='list MongoDB instances for this configuration')
         list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
         list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+
+        # list command
+        kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances for this configuration',
+            description='kills (or sends another signal to) MongoDB instances for this configuration')
+        kill_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be killed. Provide additional tags to narrow down the set of nodes to kill.')
+        kill_parser.add_argument('--dir', action='store', default='./data', help='base directory to kill nodes (default=./data/)')
+        kill_parser.add_argument('--signal', action='store', default=15, help='signal to send to processes, default=15 (SIGTERM)')
+        kill_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
@@ -277,9 +291,9 @@ class MLaunchTool(BaseCmdLineTool):
 
             # if --mongos 0, kill the dummy mongos
             if self.args['mongos'] == 0:
-                host_port = 'localhost:%s'%mongos[0]
-                print "shutting down temporary mongos on %s" % host_port
-                shutdown_host(host_port)
+                port = mongos[0]
+                print "shutting down temporary mongos on localhost:%s" % port
+                shutdown_host(port)
 
         
         elif self.args['single']:            
@@ -326,10 +340,9 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes stopped.')
 
         for port in matches:
-            host_port = 'localhost:%i'%port
             if self.args['verbose']:
-                print "shutting down %s" % host_port
-            shutdown_host(host_port)
+                print "shutting down localhost:%s" % port
+            shutdown_host(port)
 
         # wait until nodes are all shut down
         self.wait_for(matches, to_start=False)
@@ -470,6 +483,41 @@ class MLaunchTool(BaseCmdLineTool):
         print         
         print_table(print_docs)
 
+
+    def kill(self):
+        self.discover()
+
+        # get matching tags, can only send signals to running nodes
+        matches = self._get_ports_from_args(self.args, 'running')
+        processes = self._get_processes()
+
+        # convert signal to int
+        sig = self.args['signal']
+        if type(sig) == int:
+            pass
+        elif isinstance(sig, str):
+            try:
+                sig = int(sig)
+            except ValueError as e:
+                try:
+                    sig = getattr(signal, sig)
+                except AttributeError as e:
+                    raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
+
+        for port in processes:
+            # only send signal to matching processes
+            if port in matches:
+                processes[port].send_signal(sig)
+
+        print "sent signal %s to %i process%s." % (sig, len(matches), '' if len(matches) == 1 else 'es')
+
+        # there is a very brief period in which nodes are not reachable anymore, but the
+        # port is not torn down fully yet and an immediate start command would fail. This 
+        # very short sleep prevents that case, and it is practically not noticable by users
+        time.sleep(0.1)
+
+        # refresh discover
+        self.discover()
 
     
     # --- below are api helper methods, can be called after creating an MLaunchTool() object
@@ -887,6 +935,24 @@ class MLaunchTool(BaseCmdLineTool):
                 print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
             print "replica set '%s' initialized." % name
 
+
+    def _get_processes(self):
+        all_ports = self.get_tagged('all')
+        
+        process_dict = {}
+
+        for p in psutil.process_iter():
+            # skip all but mongod / mongos
+            if p.name not in ['mongos', 'mongod']:
+                continue
+            # find first TCP listening port
+            port = next(con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN')
+            
+            # only consider processes belonging to this environment
+            if port in all_ports:
+                process_dict[port] = p
+
+        return process_dict
 
 
     # --- below are command line constructor methods, that build the command line strings to be called
