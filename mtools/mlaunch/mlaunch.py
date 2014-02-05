@@ -1010,10 +1010,8 @@ class MLaunchTool(BaseCmdLineTool):
             if p.name not in ['mongos', 'mongod']:
                 continue
 
-            print p
             # find first TCP listening port
             port = min( [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN'] )
-            print port
             # only consider processes belonging to this environment
             if port in all_ports:
                 process_dict[port] = p

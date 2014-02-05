@@ -416,11 +416,11 @@ class TestMLaunch(object):
     
     @timed(180)
     @attr('slow')
-    def test_stop_partial(self):
-        """ mlaunch: test stopping and restarting tagged groups on different tags """
+    def test_kill_partial(self):
+        """ mlaunch: test killing and restarting tagged groups on different tags """
 
         # key is tag for command line, value is tag for get_tagged
-        tags = ['shard01', 'shard 1', 'mongod', 'mongos', 'config', str(self.port)] 
+        tags = ['shard01', 'shard 1', 'mongos', 'mongod 2', 'config 1', str(self.port)] 
 
         # start large cluster
         self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3 --authentication")
@@ -431,12 +431,15 @@ class TestMLaunch(object):
 
         # go through all tags, stop nodes for each tag, confirm only the tagged ones are down, start again
         for tag in tags:
-            self.run_tool("stop %s" % tag)
+            print "---------", tag
+            self.run_tool("kill %s" % tag)
             assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
+            time.sleep(1)
 
             # short sleep, because travis seems to be sensitive and sometimes fails otherwise
             self.run_tool("start")
             assert len(self.tool.get_tagged('down')) == 0
+            time.sleep(1)
 
         # make sure primaries are running again (we just failed them over above). 
         # while True is ok, because test times out after some time
@@ -448,7 +451,7 @@ class TestMLaunch(object):
             self.tool.discover()
 
         # test for primary, but as the nodes lose their tags, needs to be manual
-        self.run_tool("stop primary")
+        self.run_tool("kill primary")
         assert len(self.tool.get_tagged('down')) == 2
 
 
