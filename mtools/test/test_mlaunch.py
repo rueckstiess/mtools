@@ -361,13 +361,43 @@ class TestMLaunch(object):
     def test_stop(self):
         """ mlaunch: test stopping all nodes """
 
-        # start mongo process on free test port (don't need journal for this test)
         self.run_tool("init --replicaset")
         self.run_tool("stop")
 
         # make sure all nodes are down
         nodes = self.tool.get_tagged('all')
         assert all( not self.tool.is_running(node) for node in nodes )
+
+
+    def test_kill(self):
+        """ mlaunch: test killing all nodes """
+
+        # start sharded cluster and kill with default signal (15)
+        self.run_tool("init --sharded 2 --single")
+        self.run_tool("kill")
+
+        # make sure all nodes are down
+        nodes = self.tool.get_tagged('all')
+        assert all( not self.tool.is_running(node) for node in nodes )
+
+
+        # start nodes again, this time, kill with string "SIGTERM"
+        self.run_tool("start")
+        self.run_tool("kill --signal SIGTERM")
+
+        # make sure all nodes are down
+        nodes = self.tool.get_tagged('all')
+        assert all( not self.tool.is_running(node) for node in nodes )
+
+
+        # start nodes again, this time, kill with signal 9 (SIGKILL)
+        self.run_tool("start")
+        self.run_tool("kill --signal 9")
+
+        # make sure all nodes are down
+        nodes = self.tool.get_tagged('all')
+        assert all( not self.tool.is_running(node) for node in nodes )
+
 
 
     def test_stop_start(self):
