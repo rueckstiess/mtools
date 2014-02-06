@@ -31,8 +31,8 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
         self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
         self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
-        self.argparser.add_argument('--out', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
-        self.argparser.add_argument('-w', action='store', default=1, help='write concern for inserts, default=1')
+        self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
+        self.argparser.add_argument('--w', action='store', default=1, help='write concern for inserts, default=1')
 
 
         # add all operators classes from the operators module, pass in _decode method
@@ -72,7 +72,7 @@ class MGeneratorTool(BaseCmdLineTool):
                 raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
 
 
-        if not self.args['out']:        
+        if not self.args['stdout']:        
             mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['w'])        
             col = mc[self.args['database']][self.args['collection']]
             if self.args['drop']:
@@ -83,7 +83,7 @@ class MGeneratorTool(BaseCmdLineTool):
             # decode the template
             doc = self._decode(template)
 
-            if self.args['out']:
+            if self.args['stdout']:
                 print doc
             else:
                 batch.append(doc)
@@ -92,7 +92,7 @@ class MGeneratorTool(BaseCmdLineTool):
                     batch = []
                     self.update_progress(float(n) / self.args['number'], prefix='inserting data')
 
-        if not self.args['out']:
+        if not self.args['stdout']:
             self.update_progress(1.0, prefix='inserting data')
             if batch:
                 col.insert(batch)
