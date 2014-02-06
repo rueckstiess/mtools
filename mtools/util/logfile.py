@@ -108,7 +108,8 @@ class LogFile(InputSource):
         for line in self.filehandle:
             le = LogEvent(line)
             # adjust for year rollover if necessary
-            if self._year_rollover and le.datetime > self.end:
+
+            if self._year_rollover and le.datetime and le.datetime > self.end:
                 # roll back year now and set year_rollover flag for future conversions
                 le.year_rollover = True
                 le._datetime = le._datetime.replace(year=le._datetime.year - 1)
