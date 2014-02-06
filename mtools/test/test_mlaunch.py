@@ -553,6 +553,69 @@ class TestMLaunch(object):
     # All tests that use auth need to be decorated with @attr('auth')
 
 
+    def helper_adding_default_user(self, environment):
+        """ This is a helper function for the next test: test_adding_default_user() """
+
+        self.run_tool("init %s --auth" % environment)
+
+        # connect and authenticate with default credentials: user / password on admin database
+        mc = MongoClient('localhost:%i' % self.port)
+        mc.admin.authenticate('user', password='password')
+
+        # check if the user roles are correctly set to the default roles
+        user = mc.admin.system.users.find_one()
+        assert set(user['roles']) == set(self.tool._default_auth_roles)
+
+
+    @attr('auth')
+    def test_adding_default_user(self):
+        envs = (
+            "--single", 
+            "--replicaset", 
+            "--sharded 2 --single", 
+            "--sharded 2 --replicaset",
+            "--sharded 2 --single --config 3"
+        )
+
+        for env in envs:
+            method = self.helper_adding_default_user
+            setattr(method.__func__, 'description', method.__doc__.strip() + ', with ' + env)
+            yield (method, env)
+
+
+    @attr('auth')
+    def test_adding_default_user_no_mongos(self):
+        """ mlaunch: test that even with --mongos 0 there is a user created """
+
+        self.run_tool("init --sharded 2 --single --mongos 0 --auth")
+
+        # connect to config server instead to check for credentials (no mongos)
+        ports = list(self.tool.get_tagged('config'))
+        mc = MongoClient('localhost:%i' % ports[0])
+        mc.admin.authenticate('user', password='password')
+
+        # check if the user roles are correctly set to the default roles
+        user = mc.admin.system.users.find_one()
+        assert set(user['roles']) == set(self.tool._default_auth_roles)
+      
+
+    @attr('auth')
+    def test_adding_custom_user(self):
+        """ mlaunch: test custom username and password and custom roles. """
+
+        self.run_tool("init --single --auth --username corben --password fitzroy --auth-roles dbAdminAnyDatabase readWriteAnyDatabase userAdminAnyDatabase")
+
+        # connect and authenticate with default credentials: user / password on admin database
+        mc = MongoClient('localhost:%i' % self.port)
+        mc.admin.authenticate('corben', password='fitzroy')
+
+        # check if the user roles are correctly set to the specified roles
+        user = mc.admin.system.users.find_one()
+        print user
+        assert set(user['roles']) == set(["dbAdminAnyDatabase", "readWriteAnyDatabase", "userAdminAnyDatabase"])
+        assert user['user'] == 'corben'
+
+
 if __name__ == '__main__':
 
     # run individual tests with normal print output 

@@ -165,12 +165,12 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
 
         # authentication, users, roles
-        default_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
+        self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
         init_parser.add_argument('--auth', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
         init_parser.add_argument('--username', action='store', type=str, default='user', help='username to add (requires --auth, default=user)')
         init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --auth, default=password)')
         init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --auth, default=admin)')
-        init_parser.add_argument('--auth-roles', action='store', default=default_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(default_roles))
+        init_parser.add_argument('--auth-roles', action='store', default=self._default_auth_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(self._default_auth_roles))
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.', 
@@ -306,12 +306,6 @@ class MLaunchTool(BaseCmdLineTool):
 
                     time.sleep(1)
 
-            # if --mongos 0, kill the dummy mongos
-            if self.args['mongos'] == 0:
-                port = mongos[0]
-                print "shutting down temporary mongos on localhost:%s" % port
-                shutdown_host(port)
-
         
         elif self.args['single']:
             # just start node
@@ -350,7 +344,7 @@ class MLaunchTool(BaseCmdLineTool):
                     raise RuntimeError("failed to find a primary, so adding admin user isn't possible")
 
             if not nodes:
-                raise RuntimeError("mongo is not running, so adding admin user isn't possible")
+                raise RuntimeError("can't connect to server, so adding admin user isn't possible")
 
             if "clusterAdmin" not in self.args['auth_roles']:
                 warnings.warn("the stop command will not work with authentication enabled but without the clusterAdmin role")
@@ -360,6 +354,17 @@ class MLaunchTool(BaseCmdLineTool):
 
             if self.args['verbose']:
                 print "added user %s on %s database" % (self.args['username'], self.args['auth_db'])
+
+        
+        # in sharded env, if --mongos 0, kill the dummy mongos
+        if self.args['sharded'] and self.args['mongos'] == 0:
+            port = self.args['port']
+            print "shutting down temporary mongos on localhost:%s" % port
+            username = self.args['username'] if self.args['auth'] else None
+            password = self.args['password'] if self.args['auth'] else None
+            authdb = self.args['auth_db'] if self.args['auth'] else None
+            shutdown_host(port, username, password, authdb)
+
 
         # write out parameters
         if self.args['verbose']:
