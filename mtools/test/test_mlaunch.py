@@ -413,10 +413,10 @@ class TestMLaunch(object):
         """ mlaunch: test killing and restarting tagged groups on different tags """
 
         # key is tag for command line, value is tag for get_tagged
-        tags = ['shard01', 'shard 1', 'mongos', 'mongod', 'config 1', str(self.port)] 
+        tags = ['shard01', 'shard 1', 'mongos', 'config 1', str(self.port)] 
 
         # start large cluster
-        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3 --auth")
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3")
 
         # make sure all nodes are running
         nodes = self.tool.get_tagged('all')
