@@ -972,9 +972,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print "launching: %s on port %s" % (binary, port)
 
             if ret > 0:
-                print "can't start process, return code %i."%ret
-                print "tried to launch: %s" % command_str
-                raise SystemExit
+                raise SystemExit("can't start process, return code %i. tried to launch: %s"% (ret, command_str))
 
         if wait:
             self.wait_for(ports)
