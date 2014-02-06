@@ -347,7 +347,7 @@ class MLaunchTool(BaseCmdLineTool):
                 raise RuntimeError("can't connect to server, so adding admin user isn't possible")
 
             if "clusterAdmin" not in self.args['auth_roles']:
-                warnings.warn("the stop command will not work with authentication enabled but without the clusterAdmin role")
+                warnings.warn("the stop command will not work with auth if the user does not have the clusterAdmin role")
 
             self._add_user(sorted(nodes)[0], name=self.args['username'], password=self.args['password'], 
                 database=self.args['auth_db'], roles=self.args['auth_roles'])
@@ -1014,7 +1014,12 @@ class MLaunchTool(BaseCmdLineTool):
                 continue
 
             # find first TCP listening port
-            port = min( [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN'] )
+            ports = [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN']
+            if len(ports) > 0:
+                port = min(ports)
+            else:
+                continue
+                
             # only consider processes belonging to this environment
             if port in all_ports:
                 process_dict[port] = p

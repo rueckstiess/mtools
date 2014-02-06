@@ -33,28 +33,24 @@ class MLogInfoTool(LogFileTool):
                 print
 
             print "     source: %s" % self.logfile.name
-            print "      start: %s" % (self.logfile.start.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
-            print "        end: %s" % (self.logfile.end.strftime("%b %d %H:%M:%S") if self.logfile.start else "unknown")
-
-            # get one logevent for datetime format
-            for logevent in self.logfile:
-                if logevent.datetime:
-                    break
+            print "      start: %s" % (self.logfile.start.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
+            print "        end: %s" % (self.logfile.end.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
 
             # TODO: add timezone if iso8601 format
-
+            print "date format: %s" % self.logfile.datetime_format
             print "     length: %s" % len(self.logfile)
             print "     binary: %s" % (self.logfile.binary or "unknown")
+            
 
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
             # if version is unknown, go by date
-            if version == 'unknown' and logevent:
-                if logevent.datetime_format == 'ctime-pre2.4':
+            if version == 'unknown':
+                if self.logfile.datetime_format == 'ctime-pre2.4':
                     version = '< 2.4 (no milliseconds)'
-                elif logevent.datetime_format == 'ctime':
+                elif self.logfile.datetime_format == 'ctime':
                     version = '>= 2.4 (milliseconds present)'
-                elif logevent.datetime_format.startswith('iso8601-'):
+                elif self.logfile.datetime_format.startswith('iso8601-'):
                     version = '>= 2.6 (iso8601 format)'
 
             print "    version: %s" % version,

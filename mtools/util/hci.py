@@ -2,6 +2,7 @@ from mtools.util import OrderedDict
 from datetime import date, time, datetime, timedelta
 import re
 import copy
+from dateutil import parser
 
 class DateTimeBoundaries(object):
 
@@ -28,6 +29,8 @@ class DateTimeBoundaries(object):
 
 
     def extract_regex(self, timemark):
+        
+        timemark_original = timemark
         dtdict = {}
         matched = False
 
@@ -46,8 +49,13 @@ class DateTimeBoundaries(object):
                 break
 
         if timemark:
-            # still some string left after all filters applied. quitting.
-            raise ValueError("can't parse '%s'" % timemark)
+            try:
+                dt = parser.parse(timemark_original)
+                dtdict['parsed'] = dt
+
+            except TypeError:
+                # still some string left after all filters applied. quitting.
+                raise ValueError("can't parse '%s'" % timemark)
 
         return dtdict
 
@@ -59,6 +67,10 @@ class DateTimeBoundaries(object):
         nodate = False
 
         now = datetime.now()
+
+        # check if dateutil parser was used, return dt immediately
+        if 'parsed' in dtdict:
+            return dtdict['parsed']
 
         # process year
         if 'year' in dtdict:

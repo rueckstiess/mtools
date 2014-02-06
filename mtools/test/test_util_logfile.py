@@ -14,13 +14,13 @@ class TestUtilLogFile(object):
 
         # load logfile(s)
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
-        self.filehandle = open(self.logfile_path, 'r')
+        self.file_year_rollover = open(self.logfile_path, 'r')
 
 
     def test_len(self):
         """ LogFile: test len() and iteration over LogFile method """
 
-        logfile = LogFile(self.filehandle)
+        logfile = LogFile(self.file_year_rollover)
         length = len(logfile)
 
         i = 0
@@ -34,7 +34,15 @@ class TestUtilLogFile(object):
     def test_start_end(self):
         """ LogFile: test .start and .end property work correctly """
 
-        logfile = LogFile(self.filehandle)
+        logfile = LogFile(self.file_year_rollover)
         
         assert logfile.start == datetime(2013, 12, 30, 00, 13, 01, 661000)
         assert logfile.end == datetime(2014, 01, 02, 23, 27, 11, 720000)
+
+
+    def test_rollover_detection(self):
+        """ LogFile: test datetime_format and year_rollover properties """
+
+        logfile = LogFile(self.file_year_rollover)
+        assert logfile.datetime_format == "ctime"
+        assert logfile.year_rollover == True

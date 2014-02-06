@@ -7,7 +7,7 @@ from nose.tools import *
 from nose.plugins.skip import Skip, SkipTest
 
 from random import randrange
-from datetime import timedelta
+from datetime import timedelta, datetime
 from dateutil import parser
 import os
 import sys
@@ -182,6 +182,31 @@ class TestMLogFilter(object):
         self.tool.run('--from Jan 1')
 
 
+    def test_year_rollover_1(self):
+        """ mlogfilter: test that mlogfilter works correctly with year-rollovers in logfiles with ctime (1) """
+
+        # load year rollover logfile
+        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
+
+        self.tool.run('%s --from Jan 1' % yro_logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le =  LogEvent(line)
+            assert le.datetime.year == 2014 
+
+
+    def test_year_rollover_2(self):
+        """ mlogfilter: test that mlogfilter works correctly with year-rollovers in logfiles with ctime (2) """
+
+        # load year rollover logfile
+        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
+
+        self.tool.run('%s --from Dec 31 --to +1day --timestamp-format iso8601-utc' % yro_logfile_path)
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) > 0
+        for line in output.splitlines():
+            le = LogEvent(line)
+            assert le.datetime.year == 2013
 
 
 # output = sys.stdout.getvalue().strip()

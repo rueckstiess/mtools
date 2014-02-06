@@ -44,6 +44,8 @@ class LogEvent(object):
 
 
     def __init__(self, doc_or_str):
+        self.year_rollover = False
+
         if isinstance(doc_or_str, str):
             # create from string, remove line breaks at end of _line_str
             self.from_string = True
@@ -194,10 +196,10 @@ class LogEvent(object):
             There are several formats that this method needs to understand
             and distinguish between (see MongoDB's SERVER-7965):
 
-            ctime-pre2.4:   Wed Dec 31 19:00:00
-            ctime:          Wed Dec 31 19:00:00.000
-            iso8601-utc:    1970-01-01T00:00:00.000Z
-            iso8601-local:  1969-12-31T19:00:00.000+0500
+            ctime-pre2.4    Wed Dec 31 19:00:00
+            ctime           Wed Dec 31 19:00:00.000
+            iso8601-utc     1970-01-01T00:00:00.000Z
+            iso8601-local   1969-12-31T19:00:00.000+0500
         """
         # first check: less than 4 tokens can't be ctime
         assume_iso8601_format = len(tokens) < 4
@@ -223,8 +225,11 @@ class LogEvent(object):
                 if tokens[0].endswith('Z') else "iso8601-local"
 
         else:
-            # assume current year (no other info available)
+            # assume current year unless self.year_rollover is set (from LogFile)
             year = datetime.now().year
+            if self.year_rollover:
+                print "ROLLOVER applied"
+                year -= 1
             dt = dateutil.parser.parse(' '.join(tokens[:4]), \
                                        default=datetime(year, 1, 1))
             self._datetime_format = "ctime" \

@@ -2,7 +2,7 @@ from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 
 from math import ceil 
-
+from datetime import datetime
 import time
 import re
 
@@ -21,6 +21,12 @@ class LogFile(InputSource):
         self._num_lines = None
         self._restarts = None
         self._binary = None
+
+        self._datetime_format = None
+        self._year_rollover = None
+
+        # make sure bounds are calculated before starting to iterate, including potential year rollovers
+        self._calculate_bounds()
 
     @property
     def start(self):
@@ -48,6 +54,20 @@ class LogFile(InputSource):
         if not self._filesize:
             self._calculate_bounds()
         return self._filesize
+
+    @property
+    def datetime_format(self):
+        """ lazy evaluation of the datetime format. """
+        if not self._datetime_format:
+            self._calculate_bounds()
+        return self._datetime_format
+
+    @property
+    def year_rollover(self):
+        """ lazy evaluation of the datetime format. """
+        if self._year_rollover == None:
+            self._calculate_bounds()
+        return self._year_rollover
 
     @property
     def num_lines(self):
@@ -84,9 +104,14 @@ class LogFile(InputSource):
 
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line. """
-        
+
         for line in self.filehandle:
             le = LogEvent(line)
+            # adjust for year rollover if necessary
+            if self._year_rollover and le.datetime > self.end:
+                # roll back year now and set year_rollover flag for future conversions
+                le.year_rollover = True
+                le._datetime = le._datetime.replace(year=le._datetime.year - 1)
             yield le
 
         # future iterations start from the beginning
@@ -144,6 +169,7 @@ class LogFile(InputSource):
             date = logevent.datetime
             if date:
                 self._start = date
+                self._datetime_format = logevent.datetime_format
                 break
 
         # get end datetime (lines are at most 10k, go back 15k at most to make sure)
@@ -161,6 +187,9 @@ class LogFile(InputSource):
         # if there was a roll-over, subtract 1 year from start time
         if self._end < self._start:
             self._start = self._start.replace(year=self._start.year-1)
+            self._year_rollover = True
+        else:
+            self._year_rollover = False
 
         # reset logfile
         self.filehandle.seek(0)
