@@ -7,7 +7,7 @@ Changes to mtools
   * mtools now uses [Travis CI](https://travis-ci.org/rueckstiess/mtools) for continuous integration testing
   * added new tool `mgenerate` to create structured randomized data for issue reproduction
   * mlaunch: Added a `kill` command to send SIGTERM or any other signal to all or a subset of instances (#168)
-  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles (#156)
+  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles. Thanks, @sl33nyc (#156) 
   * mlaunch: start command can receive new arguments to pass through to mongos/d, and a different `--binarypath` (#151)
   * mlaunch: now checks in advance if port range is free, and warns if not (#166)
   * mlaunch: `--version` was removed by accident in 1.1.2. It's back now (#160)
