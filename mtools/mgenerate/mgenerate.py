@@ -32,7 +32,7 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
         self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
         self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
-        self.argparser.add_argument('--write-concern', '-w', action='store', default=1, help='write concern for inserts, default=1')
+        self.argparser.add_argument('--write-concern', '-w', action='store', metavar="W", default=1, help='write concern for inserts, default=1')
 
 
         # add all operators classes from the operators module, pass in _decode method
