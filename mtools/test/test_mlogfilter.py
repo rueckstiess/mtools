@@ -74,6 +74,16 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             assert(len(line) <= 50)
 
+    def test_merge_same(self):
+        file_length = len(self.logfile)
+        self.tool.run('%s %s'%(self.logfile_path, self.logfile_path))
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len(lines) == 2*file_length
+        for prev, next in zip(lines[:-1], lines[1:]):
+            assert LogEvent(prev).datetime <= LogEvent(next).datetime
+
+
     def test_human(self):
         # need to skip this test for python 2.6.x because thousands separator format is not compatible
         if sys.version_info < (2, 7):
