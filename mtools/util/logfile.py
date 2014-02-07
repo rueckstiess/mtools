@@ -101,9 +101,17 @@ class LogFile(InputSource):
                 versions.append(v)
         return versions
 
+    def next(self):
+        """ makes LogFiles iterators. """
+        line = self.filehandle.next()
+        le = LogEvent(line)
+        # adjust for year rollover if necessary
+        if self._year_rollover:
+            self._check_rollover(le)
+        return le
 
     def __iter__(self):
-        """ iteration over LogFile object will return a LogEvent object for each line. """
+        """ iteration over LogFile object will return a LogEvent object for each line (generator) """
 
         for line in self.filehandle:
             le = LogEvent(line)

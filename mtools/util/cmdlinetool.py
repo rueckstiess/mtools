@@ -24,9 +24,7 @@ try:
 
             Both derive from the same base class InputSource and support iteration over LogEvents.
         """
-
         def __call__(self, string):
-
             try:
                 # catch filetype and return LogFile object
                 filehandle = argparse.FileType.__call__(self, string)
@@ -45,10 +43,11 @@ try:
                         database = namespace
                         collection = 'system.profile'
 
-                    return ProfileCollection(host, port, database, collection)
+                    if host == 'localhost' or re.match('\d+\.\d+\.\d+\.\d+', host):
+                        return ProfileCollection(host, port, database, collection)
 
-                else:
-                    raise argparse.ArgumentTypeError("can't parse %s as file or MongoDB connection string." % string)
+                raise argparse.ArgumentTypeError("can't parse %s as file or MongoDB connection string." % string)
+
 
 except ImportError:
 
