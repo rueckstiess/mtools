@@ -228,7 +228,6 @@ class LogEvent(object):
             # assume current year unless self.year_rollover is set (from LogFile)
             year = datetime.now().year
             if self.year_rollover:
-                print "ROLLOVER applied"
                 year -= 1
             dt = dateutil.parser.parse(' '.join(tokens[:4]), \
                                        default=datetime(year, 1, 1))

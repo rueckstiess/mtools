@@ -108,11 +108,8 @@ class LogFile(InputSource):
         for line in self.filehandle:
             le = LogEvent(line)
             # adjust for year rollover if necessary
-
-            if self._year_rollover and le.datetime and le.datetime > self.end:
-                # roll back year now and set year_rollover flag for future conversions
-                le.year_rollover = True
-                le._datetime = le._datetime.replace(year=le._datetime.year - 1)
+            if self._year_rollover:
+                self._check_rollover(le)
             yield le
 
         # future iterations start from the beginning
@@ -123,6 +120,16 @@ class LogFile(InputSource):
     def __len__(self):
         """ return the number of lines in a log file. """
         return self.num_lines
+
+
+    def _check_rollover(self, logevent):
+        """ checks if logevent needs adjustment due to year rollover in logfile. """
+        if self._year_rollover and logevent.datetime and logevent.datetime > self.end:
+            # roll back year now and set year_rollover flag for future conversions
+            logevent.year_rollover = True
+            logevent._datetime = logevent._datetime.replace(year=logevent._datetime.year - 1)
+            logevent._reformat_timestamp(self._datetime_format, force=True)
+        return logevent
 
 
     def _iterate_lines(self):
@@ -225,6 +232,8 @@ class LogFile(InputSource):
             line = self.filehandle.readline()
             logevent = LogEvent(line)
             if logevent.datetime:
+                # check for year rollover
+                self._check_rollover(logevent)
                 return logevent
 
             # to avoid infinite loops, quit here if previous line not found
@@ -243,7 +252,9 @@ class LogFile(InputSource):
             le = None
             while not (le and le.datetime and le.datetime >= start_dt):
                 line = self.filehandle.next()
+                # can't check for year rollover in a stream
                 le = LogEvent(line)
+
 
         else:
             # fast bisection path
