@@ -5,6 +5,7 @@ from nose.tools import *
 from datetime import datetime
 from mtools.util.logfile import LogFile
 from mtools.util.logevent import LogEvent
+from dateutil.tz import tzutc
 
 
 class TestUtilLogFile(object):
@@ -36,8 +37,8 @@ class TestUtilLogFile(object):
 
         logfile = LogFile(self.file_year_rollover)
         
-        assert logfile.start == datetime(2013, 12, 30, 00, 13, 01, 661000)
-        assert logfile.end == datetime(2014, 01, 02, 23, 27, 11, 720000)
+        assert logfile.start == datetime(2013, 12, 30, 00, 13, 01, 661000, tzutc())
+        assert logfile.end == datetime(2014, 01, 02, 23, 27, 11, 720000, tzutc())
 
 
     def test_rollover_detection(self):
