@@ -204,16 +204,16 @@ class MLaunchTool(BaseCmdLineTool):
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
-        # replace path with absolute path
+        # replace path with absolute path, but store relative path as well
+        self.relative_dir = self.args['dir']
         self.dir = os.path.abspath(self.args['dir'])
+        self.args['dir'] = self.dir
 
         # branch out in sub-commands
         getattr(self, self.args['command'])()
 
 
-
     # -- below are the main commands: init, start, stop, list
-
 
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
@@ -241,7 +241,7 @@ class MLaunchTool(BaseCmdLineTool):
         ports_avail = self.wait_for(all_ports, 1, 1, to_start=False)
 
         if not all(map(itemgetter(1), ports_avail)):
-            dir_addon = ' --dir %s'%self.args['dir'] if self.args['dir'] != './data' else ''
+            dir_addon = ' --dir %s'%self.relative_dir if self.relative_dir != './data' else ''
             errmsg = '\nThe following ports are not available: %s\n\n' % ', '.join( [ str(p[0]) for p in ports_avail if not p[1] ] )
             errmsg += " * If you want to restart nodes from this environment, use 'mlaunch start%s' instead.\n" % dir_addon
             errmsg += " * If the ports are used by a different mlaunch environment, stop those first with 'mlaunch stop --dir <env>'.\n"
