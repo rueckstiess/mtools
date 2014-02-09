@@ -229,8 +229,10 @@ class LogEvent(object):
             year = datetime.now().year
             if self.year_rollover:
                 year -= 1
-            dt = dateutil.parser.parse(' '.join(tokens[:4]), \
-                                       default=datetime(year, 1, 1))
+            dt = dateutil.parser.parse(' '.join(tokens[:4]), default=datetime(year, 1, 1))
+            if dt.tzinfo == None:
+                dt = dt.replace(tzinfo=tzutc())
+                
             self._datetime_format = "ctime" \
                 if '.' in tokens[3] else "ctime-pre2.4"
 

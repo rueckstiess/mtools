@@ -133,8 +133,8 @@ class TestMLogFilter(object):
     def test_mask_end(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 
@@ -151,9 +151,9 @@ class TestMLogFilter(object):
     def test_mask_start(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 
@@ -170,9 +170,9 @@ class TestMLogFilter(object):
     def test_mask_both(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 

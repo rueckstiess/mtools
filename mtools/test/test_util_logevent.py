@@ -2,6 +2,7 @@ import sys
 from nose.tools import *
 from mtools.util.logevent import LogEvent
 import time
+import datetime
 
 line_ctime_pre24 = "Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, pdfile version 4.5"
 line_ctime = "Sun Aug  3 21:52:05.995 [initandlisten] db version v2.4.5"
@@ -14,32 +15,39 @@ line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { f
 def test_logevent_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
 
-    le =  LogEvent(line_ctime_pre24)
+    le = LogEvent(line_ctime_pre24)
+    this_year = datetime.datetime.now().year
 
     le_str = le.line_str
-    assert(str(le.datetime) == '2014-08-03 21:52:05')
+    assert(str(le.datetime) == '%s-08-03 21:52:05+00:00'%this_year)
     assert(le._datetime_format == 'ctime-pre2.4')
-    print le_str
-    print le.line_str
     assert(le.line_str[4:] == le_str[4:])
+    # make sure all datetime objects are timezone aware
+    assert(le.datetime.tzinfo != None)
 
     le =  LogEvent(line_ctime)
     le_str = le.line_str
-    assert(str(le.datetime) == '2014-08-03 21:52:05.995000')
+    assert(str(le.datetime) == '%s-08-03 21:52:05.995000+00:00'%this_year)
     assert(le._datetime_format == 'ctime')
     assert(le.line_str[4:] == le_str[4:])
+    # make sure all datetime objects are timezone aware
+    assert(le.datetime.tzinfo != None)
 
     le =  LogEvent(line_iso8601_utc)
     le_str = le.line_str
     assert(str(le.datetime) == '2013-08-03 11:52:05.995000+00:00')
     assert(le._datetime_format == 'iso8601-utc')
     assert(le.line_str[4:] == le_str[4:])
+    # make sure all datetime objects are timezone aware
+    assert(le.datetime.tzinfo != None)
 
     le =  LogEvent(line_iso8601_local)
     le_str = le.line_str
     assert(str(le.datetime) == '2013-08-03 21:52:05.995000+10:00')
     assert(le._datetime_format == 'iso8601-local')
     assert(le.line_str[4:] == le_str[4:])
+    # make sure all datetime objects are timezone aware
+    assert(le.datetime.tzinfo != None)
 
 
 def test_logevent_extract_new_and_old_numYields():
