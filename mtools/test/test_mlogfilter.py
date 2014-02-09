@@ -49,6 +49,14 @@ class TestMLogFilter(object):
             le =  LogEvent(line)
             assert(le.datetime >= random_start)
 
+    def test_from_iso8601_timestamp(self):
+        random_start = random_date(self.logfile.start, self.logfile.end)
+        self.tool.run('%s --from %s'%(self.logfile_path, random_start.isoformat()))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le =  LogEvent(line)
+            assert(le.datetime >= random_start)
+
     def test_from_to(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
         random_end = random_date(random_start, self.logfile.end)
@@ -133,8 +141,8 @@ class TestMLogFilter(object):
     def test_mask_end(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 
@@ -151,9 +159,9 @@ class TestMLogFilter(object):
     def test_mask_start(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 
@@ -170,9 +178,9 @@ class TestMLogFilter(object):
     def test_mask_both(self):
         mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
 
-        event1 = parser.parse("Mon Aug  5 20:27:15")
+        event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
-        event2 = parser.parse("Mon Aug  5 20:30:09")
+        event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 
@@ -198,11 +206,10 @@ class TestMLogFilter(object):
         # load year rollover logfile
         yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
 
-        self.tool.run('%s --from Jan 1' % yro_logfile_path)
+        self.tool.run('%s --from Jan 1 2014 --timestamp-format iso8601-utc' % yro_logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
-            assert le.datetime.year == 2014 
+            assert line.startswith("2014-")
 
 
     def test_year_rollover_2(self):
@@ -215,8 +222,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
         for line in output.splitlines():
-            le = LogEvent(line)
-            assert le.datetime.year == 2013
+            assert line.startswith("2013-")
 
 
 # output = sys.stdout.getvalue().strip()

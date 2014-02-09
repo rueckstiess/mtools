@@ -3,6 +3,7 @@ from datetime import date, time, datetime, timedelta
 import re
 import copy
 from dateutil import parser
+from dateutil.tz import tzutc
 
 class DateTimeBoundaries(object):
 
@@ -51,6 +52,9 @@ class DateTimeBoundaries(object):
         if timemark:
             try:
                 dt = parser.parse(timemark_original)
+                if dt.tzinfo == None:
+                    # make timezone-aware
+                    dt = dt.replace(tzinfo=tzutc())
                 dtdict['parsed'] = dt
 
             except TypeError:
@@ -66,7 +70,7 @@ class DateTimeBoundaries(object):
         notime = False
         nodate = False
 
-        now = datetime.now()
+        now = datetime.now(tzutc())
 
         # check if dateutil parser was used, return dt immediately
         if 'parsed' in dtdict:
@@ -180,8 +184,9 @@ class DateTimeBoundaries(object):
                         dtdict['year'], dtdict['month'], dtdict['day'] = self.end.year, self.end.month, self.end.day
                         dtdict['hour'], dtdict['minute'], dtdict['second'] = self.end.hour, self.end.minute, self.end.second          
 
-            # create datetime object
+            # create datetime object and make timezone-aware
             dt = datetime(**dtdict)
+            dt = dt.replace(tzinfo=tzutc())
             
             mult = 1
 
@@ -207,9 +212,10 @@ class DateTimeBoundaries(object):
                 mult *= -1
 
             dt = dt + eval('timedelta(%s=%i)'%(unit, mult*int(value)))
-        
+
         else:
             dt = datetime(**dtdict)
+            dt = dt.replace(tzinfo=tzutc())
 
         if dt < self.start:
             dt = self.start

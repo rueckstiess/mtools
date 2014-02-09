@@ -2,6 +2,7 @@ from datetime_filter import DateTimeFilter
 from datetime import MINYEAR, timedelta
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
+from mtools.util.cmdlinetool import InputSourceAction
 
 
 
@@ -25,7 +26,7 @@ class MaskFilter(DateTimeFilter):
 
 
     filterArgs = [
-       ('--mask', {'action':'store', 'help':'log file to use for creating the filter mask.'}), 
+       ('--mask', {'action':'store', 'type':InputSourceAction(), 'help':'source (log file or system.profile db) to create the filter mask.'}), 
        ('--mask-size', {'action':'store',  'type':int, 'default':60, 'help':'mask size in seconds around each filter point (default: 60 secs, 30 on each side of the event)'}),
        ('--mask-center', {'action':'store',  'choices':['start', 'end', 'both'], 'default':'end', 'help':'mask center point for events with duration (default: end). If both is chosen, all events from start to end are returned.'})
     ]
@@ -37,25 +38,24 @@ class MaskFilter(DateTimeFilter):
         self.active = ('mask' in self.mlogfilter.args and self.mlogfilter.args['mask'] != None)
         if self.active:
             self.mask_end_reached = False
-            self.mask_file = open(self.mlogfilter.args['mask'], 'r')
+            self.mask_source = self.mlogfilter.args['mask']
             self.mask_list = []
 
     def setup(self):
         """ create mask list consisting of all tuples between which this filter accepts lines. """
         
-        # get start and end of the mask log file and set a start_limit
-        lfinfo = LogFile(self.mask_file)
-        if not lfinfo.start:
-            raise SystemExit("Can't parse format of %s. Is this a log file?" % self.mlogfilter.args['mask'])
+        # get start and end of the mask and set a start_limit
+        if not self.mask_source.start:
+            raise SystemExit("Can't parse format of %s. Is this a log file or system.profile collection?" % self.mlogfilter.args['mask'])
 
         self.mask_half_td = timedelta( seconds=self.mlogfilter.args['mask_size'] / 2 )
 
         # load filter mask file
-        logevent_list = [ LogEvent(line) for line in self.mask_file ]
+        logevent_list = list(self.mask_source)
 
         # define start and end of total mask
-        self.mask_start = lfinfo.start - self.mask_half_td
-        self.mask_end = lfinfo.end + self.mask_half_td
+        self.mask_start = self.mask_source.start - self.mask_half_td
+        self.mask_end = self.mask_source.end + self.mask_half_td
         
         # consider --mask-center
         if self.mlogfilter.args['mask_center'] in ['start', 'both']:
@@ -67,8 +67,6 @@ class MaskFilter(DateTimeFilter):
                 self.mask_end -= timedelta(milliseconds=logevent_list[-1].duration)
 
         self.start_limit = self.mask_start
-
-        # event_list = [le.datetime for le in logevent_list if le.datetime]
 
         # different center points
         if 'mask_center' in self.mlogfilter.args:
@@ -130,7 +128,7 @@ class MaskFilter(DateTimeFilter):
             return False
 
         mask = next( (mask for mask in self.mask_list if mask[0] < dt and mask[1] > dt), None )
-        
+
         return True if mask else False
 
 

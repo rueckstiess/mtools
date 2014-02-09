@@ -6,6 +6,7 @@ import inspect
 import types
 
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
+from dateutil.tz import tzutc
 
 from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
@@ -129,10 +130,10 @@ class MLogFilterTool(LogFileTool):
         """ helper method for ordering log lines correctly during merge. """
         if not logevent:
             # if logfile end is reached, return max datetime to never pick this line
-            return datetime(MAXYEAR, 12, 31, 23, 59, 59)
+            return datetime(MAXYEAR, 12, 31, 23, 59, 59, 999999, tzutc())
 
         # if no datetime present (line doesn't have one) return mindate to pick this line immediately
-        return logevent.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0)
+        return logevent.datetime or datetime(MINYEAR, 1, 1, 0, 0, 0, 0, tzutc())
 
 
     def _merge_logfiles(self):
