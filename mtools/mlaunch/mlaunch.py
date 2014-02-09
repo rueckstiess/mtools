@@ -43,7 +43,7 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
     while True:
         if (time.time() - startTime) > timeout:
             if queue:
-                queue.put((port, False))
+                queue.put_nowait((port, False))
             return False
         try:
             # make connection and ping host
@@ -51,16 +51,16 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
             con.admin.command('ping')
             if to_start:
                 if queue:
-                    queue.put((port, True))
+                    queue.put_nowait((port, True))
                 return True
             else:
                 time.sleep(interval)
-        except (ConnectionFailure, AutoReconnect) as e:
+        except Exception as e:
             if to_start:
                 time.sleep(interval)
             else:
                 if queue:
-                    queue.put((port, True))
+                    queue.put_nowait((port, True))
                 return True
 
 
@@ -790,7 +790,7 @@ class MLaunchTool(BaseCmdLineTool):
             thread.join()
 
         # get all results back and return tuple
-        return tuple(queue.get() for _ in ports)
+        return tuple(queue.get_nowait() for _ in ports)
 
 
     # --- below here are internal helper methods, should not be called externally ---
