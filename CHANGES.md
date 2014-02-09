@@ -16,6 +16,7 @@ Changes to mtools
   * mlogfilter: bugfix for when no log file was specified at command line. Now outputs clean error message (#124)
   * mplotqueries: added a compatibility check for matplotlib version 1.1.1 for setting fontsize in legends (#128)
 
+For all changes, see the [closed issues tagged with milestone 1.1.3](https://github.com/rueckstiess/mtools/issues?direction=desc&milestone=8&page=1&sort=updated&state=closed)
 
 #### version 1.1.2
 
