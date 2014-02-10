@@ -56,6 +56,18 @@ for mplotqueries), mtools is now setup and ready to be used.
 
 ### Additional Dependencies
 
+#### psutil
+
+*required for mlaunch*
+
+mlaunch can now kill processes or send other signals. For this feature, the `psutil` 
+module is required. It will install automatically when mtools is installed with `pip`. 
+
+To install `psutil` manually, you can run
+
+    pip install psutil
+
+
 #### pymongo
 
 *required for mlaunch*
