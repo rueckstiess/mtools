@@ -76,7 +76,7 @@ class TestMLaunch(object):
         
         if arg_str.startswith('init') or arg_str.startswith('--'):
             # add --port and --nojournal to init calls
-            arg_str += ' --port %i --nojournal' % self.port 
+            arg_str += ' --port %i --nojournal --smallfiles' % self.port 
             
             if self.use_auth:
                 # add --auth to init calls if flag is set
