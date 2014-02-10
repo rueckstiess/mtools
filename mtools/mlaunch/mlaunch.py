@@ -831,6 +831,11 @@ class MLaunchTool(BaseCmdLineTool):
             self.loaded_unknown_args = in_dict['unknown_args']
             self.loaded_args = in_dict['parsed_args']
 
+        # changed 'authentication' to 'auth', if present (from old env) rename
+        if 'authentication' in self.loaded_args:
+            self.loaded_args['auth'] = self.loaded_args['authentication']
+            del self.loaded_args['authentication']
+
         return True
 
 
