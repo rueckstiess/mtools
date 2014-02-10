@@ -5,6 +5,8 @@ import signal
 import datetime
 import os
 
+from dateutil.tz import tzutc
+
 from mtools.version import __version__
 from mtools.util.profile_collection import ProfileCollection
 from mtools.util.logfile import LogFile
@@ -94,7 +96,7 @@ class BaseCmdLineTool(object):
     def _datetime_to_epoch(self, dt):
         """ converts the datetime to unix epoch (properly). """
         if dt:
-            return int((dt - datetime.datetime.utcfromtimestamp(0)).total_seconds())
+            return int((dt - datetime.datetime.fromtimestamp(0, tzutc())).total_seconds())
         else: 
             return 0
     
