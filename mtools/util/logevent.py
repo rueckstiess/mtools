@@ -562,7 +562,7 @@ class LogEvent(object):
         self._reformat_timestamp('ctime', force=True)
 
         self._thread_calculated = True
-        self._thread = "<profile>"
+        self._thread = doc['thread']
         self._thread_offset = None
 
         self._operation_calculated = True

@@ -16,6 +16,8 @@ from pymongo import ASCENDING, DESCENDING
 class ProfileCollection(InputSource):
     """ wrapper class for input source system.profile collection """
 
+    datetime_format = "ISODate()"
+
     def __init__(self, host='localhost', port=27017, database='test', collection='system.profile'):
         """ constructor for ProfileCollection. Takes host, port, database and collection as parameters. 
             All are optional and have default values.
@@ -32,6 +34,8 @@ class ProfileCollection(InputSource):
         self._start = None
         self._end = None
         self._num_events = None
+
+        self.cursor = None
 
         # test if database can be reached and collection exists
         try:
@@ -56,6 +60,7 @@ class ProfileCollection(InputSource):
             self._calculate_bounds()
         return self._start
 
+
     @property
     def end(self):
         """ lazy evaluation of start and end of events. """
@@ -71,12 +76,24 @@ class ProfileCollection(InputSource):
         return self._num_events
 
 
+    def next(self):
+        """ makes iterators. """
+        if not self.cursor:
+            self.cursor = self.coll_handle.find().sort([ ("ts", ASCENDING) ])
+
+        doc = self.cursor.next()
+        doc['thread'] = self.name
+        le = LogEvent(doc)
+        return le
+
+
     def __iter__(self):
         """ iteration over ProfileCollection object will return a LogEvent object for each document. """
 
-        cursor = self.coll_handle.find().sort([ ("ts", ASCENDING) ])
+        self.cursor = self.coll_handle.find().sort([ ("ts", ASCENDING) ])
 
-        for doc in cursor:
+        for doc in self.cursor:
+            doc['thread'] = self.name
             le = LogEvent(doc)
             yield le
 
