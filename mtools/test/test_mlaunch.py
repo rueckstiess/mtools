@@ -52,7 +52,8 @@ class TestMLaunch(object):
         ports = self.tool.get_tagged(['all', 'running'])
         processes = self.tool._get_processes().values()
         for p in processes:
-            p.kill()
+            p.terminate()
+            p.wait(10)
 
         self.tool.wait_for(ports, to_start=False)
 

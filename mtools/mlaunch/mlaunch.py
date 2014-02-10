@@ -48,7 +48,8 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
         try:
             # make connection and ping host
             con = Connection(host)
-            con.admin.command('ping')
+            if not con.alive():
+                raise Exception
             if to_start:
                 if queue:
                     queue.put_nowait((port, True))
