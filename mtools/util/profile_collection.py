@@ -1,5 +1,6 @@
 from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
+from dateutil.tz import tzutc
 
 try:
     try:
@@ -93,7 +94,12 @@ class ProfileCollection(InputSource):
         last = self.coll_handle.find_one(None, sort=[ ("ts", DESCENDING) ])
 
         self._start = first['ts']
+        if self._start.tzinfo == None:
+            self._start = self._start.replace(tzinfo=tzutc())
+
         self._end = last['ts']
+        if self._end.tzinfo == None:
+            self._end = self._end.replace(tzinfo=tzutc())
 
         return True
 

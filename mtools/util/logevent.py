@@ -556,6 +556,8 @@ class LogEvent(object):
 
         self._datetime_calculated = True
         self._datetime = doc[u'ts']
+        if self._datetime.tzinfo == None:
+            self._datetime = self._datetime.replace(tzinfo=tzutc())
         self._datetime_format = None
         self._reformat_timestamp('ctime', force=True)
 
