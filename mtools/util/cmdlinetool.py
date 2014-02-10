@@ -37,7 +37,7 @@ try:
                 m = re.match('^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$', string)
                 if m:
                     host, port, namespace = m.groups()
-                    port = port or 27017
+                    port = int(port) or 27017
                     namespace = namespace or 'test.system.profile'
                     if '.' in namespace:
                         database, collection = namespace.split('.', 1)
