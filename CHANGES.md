@@ -1,6 +1,23 @@
 Changes to mtools
 =================
 
+#### version 1.1.3
+
+  * all tools can now read from system.profile collections as if it was a logfile. Use this syntax as command line argument: "host:port/database.collection" (#164)
+  * mtools now uses [Travis CI](https://travis-ci.org/rueckstiess/mtools) for continuous integration testing
+  * all log-parsing tools are now timezone aware. If no timezone is specified (all log files <= 2.4.x), then UTC is assumed (#174)
+  * added new tool `mgenerate` to create structured randomized data for issue reproduction
+  * mlaunch: Added a `kill` command to send SIGTERM or any other signal to all or a subset of instances (#168)
+  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles. Thanks, @sl33nyc (#156) 
+  * mlaunch: start command can receive new arguments to pass through to mongos/d, and a different `--binarypath` (#151)
+  * mlaunch: now checks in advance if port range is free, and warns if not (#166)
+  * mlaunch: `--version` was removed by accident in 1.1.2. It's back now (#160)
+  * mlogfilter: `--thread`, `--namespace` and `--operation` filters can now be combined arbitrarily (#167)
+  * mlogfilter: bugfix for when no log file was specified at command line. Now outputs clean error message (#124)
+  * mplotqueries: added a compatibility check for matplotlib version 1.1.1 for setting fontsize in legends (#128)
+
+For all changes, see the [closed issues tagged with milestone 1.1.3](https://github.com/rueckstiess/mtools/issues?direction=desc&milestone=8&page=1&sort=updated&state=closed)
+
 #### version 1.1.2
 
   * mlaunch: completely rewritten, is now aware of the launched environment, commands: init, start, stop, list (#148)
@@ -14,11 +31,11 @@ Changes to mtools
 
 #### version 1.1.1
 
-  * mplotqueries: introduced a new type of plot "durline", to visualize start and end of long-running operations.
+  * mplotqueries: introduced a new type of plot "durline", to visualize start and end of long-running operations
   * mplotqueries: use start times of operations that have a duration, rather than end time with `--optime-start` (#130)
-  * mplotqueries: group by query pattern with `--group pattern` (#129).
-  * mlaunch: allow more than 7 nodes, everyone above 7 is non-voting (#123).
-  * mloginfo: fixed bug where anonymous unix sockets can't be parsed (#121).
+  * mplotqueries: group by query pattern with `--group pattern` (#129)
+  * mlaunch: allow more than 7 nodes, everyone above 7 is non-voting (#123)
+  * mloginfo: fixed bug where anonymous unix sockets can't be parsed (#121)
 
 
 #### version 1.1.0

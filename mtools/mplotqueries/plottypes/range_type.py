@@ -28,12 +28,12 @@ class RangePlotType(BasePlotType):
         self.gap = sub_args['gap']
 
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True if the log line does not have a duration. """
         return True
 
-    def log2code(self, logline):
-        codeline = self.l2cc(logline.line_str)
+    def log2code(self, logevent):
+        codeline = self.l2cc(logevent.line_str)
         if codeline:
             return ' ... '.join(codeline.pattern)
         else:
@@ -53,10 +53,10 @@ class RangePlotType(BasePlotType):
 
         if self.gap:
             td = timedelta(seconds=self.gap)
-            for ll, ll_next in zip(self.groups[group][:-1], self.groups[group][1:]):
-                if ll_next.datetime - ll.datetime >= td:
-                    x_lefts.append( date2num(ll_next.datetime) )
-                    x_rights.append( date2num(ll.datetime) )
+            for le, le_next in zip(self.groups[group][:-1], self.groups[group][1:]):
+                if le_next.datetime - le.datetime >= td:
+                    x_lefts.append( date2num(le_next.datetime) )
+                    x_rights.append( date2num(le.datetime) )
 
         x_rights.append( date2num( self.groups[group][-1].datetime ) )
 

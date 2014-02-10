@@ -1,24 +1,32 @@
-from mtools.util.logline import LogLine
-from math import ceil 
+from mtools.util.logevent import LogEvent
+from mtools.util.input_source import InputSource
 
+from math import ceil 
+from datetime import datetime
 import time
 import re
 
-class LogFile(object):
-    """ wrapper class for log files, either as open file streams of from stdin. 
-        Later planned to include logfile from a mongod instance.
-    """
+class LogFile(InputSource):
+    """ wrapper class for log files, either as open file streams of from stdin. """
 
-    def __init__(self, logfile):
+    def __init__(self, filehandle):
         """ provide logfile as open file stream or stdin. """
-        self.logfile = logfile
-        self.from_stdin = logfile.name == "<stdin>"
+        self.filehandle = filehandle
+        self.name = filehandle.name
+        
+        self.from_stdin = filehandle.name == "<stdin>"
         self._start = None
         self._end = None
         self._filesize = None
         self._num_lines = None
         self._restarts = None
         self._binary = None
+
+        self._datetime_format = None
+        self._year_rollover = None
+
+        # make sure bounds are calculated before starting to iterate, including potential year rollovers
+        self._calculate_bounds()
 
     @property
     def start(self):
@@ -46,6 +54,20 @@ class LogFile(object):
         if not self._filesize:
             self._calculate_bounds()
         return self._filesize
+
+    @property
+    def datetime_format(self):
+        """ lazy evaluation of the datetime format. """
+        if not self._datetime_format:
+            self._calculate_bounds()
+        return self._datetime_format
+
+    @property
+    def year_rollover(self):
+        """ lazy evaluation of the datetime format. """
+        if self._year_rollover == None:
+            self._calculate_bounds()
+        return self._year_rollover
 
     @property
     def num_lines(self):
@@ -79,6 +101,44 @@ class LogFile(object):
                 versions.append(v)
         return versions
 
+    def next(self):
+        """ makes LogFiles iterators. """
+        line = self.filehandle.next()
+        le = LogEvent(line)
+        # adjust for year rollover if necessary
+        if self._year_rollover:
+            self.adjust_year_rollover(le)
+        return le
+
+    def __iter__(self):
+        """ iteration over LogFile object will return a LogEvent object for each line (generator) """
+
+        for line in self.filehandle:
+            le = LogEvent(line)
+            # adjust for year rollover if necessary
+            if self._year_rollover:
+                self.adjust_year_rollover(le)
+            yield le
+
+        # future iterations start from the beginning
+        if not self.from_stdin:
+            self.filehandle.seek(0)
+
+
+    def __len__(self):
+        """ return the number of lines in a log file. """
+        return self.num_lines
+
+
+    def adjust_year_rollover(self, logevent):
+        """ checks if logevent needs adjustment due to year rollover in logfile. """
+        if self._year_rollover and logevent.datetime and logevent.datetime > self.end:
+            # roll back year now and set year_rollover flag for future conversions
+            logevent.year_rollover = True
+            logevent._datetime = logevent._datetime.replace(year=logevent._datetime.year - 1)
+            logevent._reformat_timestamp(self._datetime_format, force=True)
+        return logevent
+
 
     def _iterate_lines(self):
         """ count number of lines (can be expensive). """
@@ -86,7 +146,7 @@ class LogFile(object):
         self._restarts = []
 
         l = 0
-        for l, line in enumerate(self.logfile):
+        for l, line in enumerate(self.filehandle):
 
             # find version string
             if "version" in line:
@@ -104,37 +164,38 @@ class LogFile(object):
                 version = re.search(r'(\d\.\d\.\d+)', line)
                 if version:
                     version = version.group(1)
-                    restart = (version, LogLine(line))
+                    restart = (version, LogEvent(line))
                     self._restarts.append(restart)
 
-        self._num_lines = l
+        self._num_lines = l+1
 
         # reset logfile
-        self.logfile.seek(0)
+        self.filehandle.seek(0)
 
 
     def _calculate_bounds(self):
         """ calculate beginning and end of logfile. """
 
         if self.from_stdin: 
-            return None
+            return False
 
         # get start datetime 
-        for line in self.logfile:
-            logline = LogLine(line)
-            date = logline.datetime
+        for line in self.filehandle:
+            logevent = LogEvent(line)
+            date = logevent.datetime
             if date:
                 self._start = date
+                self._datetime_format = logevent.datetime_format
                 break
 
         # get end datetime (lines are at most 10k, go back 15k at most to make sure)
-        self.logfile.seek(0, 2)
-        self._filesize = self.logfile.tell()
-        self.logfile.seek(-min(self._filesize, 15000), 2)
+        self.filehandle.seek(0, 2)
+        self._filesize = self.filehandle.tell()
+        self.filehandle.seek(-min(self._filesize, 15000), 2)
 
-        for line in reversed(self.logfile.readlines()):
-            logline = LogLine(line)
-            date = logline.datetime
+        for line in reversed(self.filehandle.readlines()):
+            logevent = LogEvent(line)
+            date = logevent.datetime
             if date:
                 self._end = date
                 break
@@ -142,23 +203,28 @@ class LogFile(object):
         # if there was a roll-over, subtract 1 year from start time
         if self._end < self._start:
             self._start = self._start.replace(year=self._start.year-1)
+            self._year_rollover = True
+        else:
+            self._year_rollover = False
 
         # reset logfile
-        self.logfile.seek(0)
+        self.filehandle.seek(0)
+
+        return True
 
 
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.logfile.tell()
+        curr_pos = self.filehandle.tell()
         line = None
 
         # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.logfile.tell(), 15000)
-        self.logfile.seek(-jump_back, 1)
-        buff = self.logfile.read(jump_back)
-        self.logfile.seek(curr_pos, 0)
+        jump_back = min(self.filehandle.tell(), 15000)
+        self.filehandle.seek(-jump_back, 1)
+        buff = self.filehandle.read(jump_back)
+        self.filehandle.seek(curr_pos, 0)
 
         newline_pos = buff.rfind('\n')
         if prev:
@@ -168,13 +234,15 @@ class LogFile(object):
         if newline_pos == -1:
             return None
 
-        self.logfile.seek(newline_pos - jump_back, 1)
+        self.filehandle.seek(newline_pos - jump_back, 1)
 
         while line != '':
-            line = self.logfile.readline()
-            logline = LogLine(line)
-            if logline.datetime:
-                return logline
+            line = self.filehandle.readline()
+            logevent = LogEvent(line)
+            if logevent.datetime:
+                # check for year rollover
+                self.adjust_year_rollover(logevent)
+                return logevent
 
             # to avoid infinite loops, quit here if previous line not found
             if prev:
@@ -189,10 +257,12 @@ class LogFile(object):
 
         if self.from_stdin:
             # skip lines until start_dt is reached
-            ll = None
-            while not (ll and ll.datetime and ll.datetime >= start_dt):
-                line = self.logfile.next()
-                ll = LogLine(line)
+            le = None
+            while not (le and le.datetime and le.datetime >= start_dt):
+                line = self.filehandle.next()
+                # can't check for year rollover in a stream
+                le = LogEvent(line)
+
 
         else:
             # fast bisection path
@@ -200,29 +270,29 @@ class LogFile(object):
             max_mark = self.filesize
             step_size = max_mark
 
-            ll = None
+            le =  None
 
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
                 
-                self.logfile.seek(step_size, 1)
-                ll = self._find_curr_line()
-                if not ll:
+                self.filehandle.seek(step_size, 1)
+                le = self._find_curr_line()
+                if not le:
                     break
                                 
-                if ll.datetime >= start_dt:
+                if le.datetime >= start_dt:
                     step_size = -abs(step_size)
                 else:
                     step_size = abs(step_size)
 
-            if not ll:
-                return 
+            if not le:
+                return
 
             # now walk backwards until we found a truely smaller line
-            while ll and self.logfile.tell() >= 2 and ll.datetime >= start_dt:
-                self.logfile.seek(-2, 1)
-                ll = self._find_curr_line(prev=True)
+            while le and self.filehandle.tell() >= 2 and le.datetime >= start_dt:
+                self.filehandle.seek(-2, 1)
+                le = self._find_curr_line(prev=True)
 
 
 

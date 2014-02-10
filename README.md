@@ -1,6 +1,8 @@
 # mtools
 
-[![PyPI version](https://badge.fury.io/py/mtools.png)](http://badge.fury.io/py/mtools)
+[![PyPi version](https://pypip.in/v/mtools/badge.png)](https://crate.io/packages/$REPO/) 
+[![PyPi downloads](https://pypip.in/d/mtools/badge.png)](https://crate.io/packages/$REPO/) 
+[![Build Status](https://travis-ci.org/rueckstiess/mtools.png?branch=develop)](https://travis-ci.org/rueckstiess/mtools)
 
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
 
@@ -43,7 +45,7 @@ instructions for these modules.
 Recent Changes
 --------------
 
-The current version of mtools is 1.1.2. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
+The current version of mtools is 1.1.3. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
 
 
 Contribute to mtools

@@ -18,7 +18,7 @@ class SlowFilter(BaseFilter):
             else:
                 self.slowms = self.mlogfilter.args['slow']
 
-    def accept(self, logline):
-        if logline.duration:
-            return logline.duration >= self.slowms
+    def accept(self, logevent):
+        if logevent.duration:
+            return logevent.duration >= self.slowms
         return False

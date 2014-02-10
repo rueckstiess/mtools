@@ -20,8 +20,8 @@ class WordFilter(BaseFilter):
         else:
             self.active = False
 
-    def accept(self, logline):
+    def accept(self, logevent):
         for word in self.words:
-            if re.search(word, logline.line_str):
+            if re.search(word, logevent.line_str):
                 return True
         return False

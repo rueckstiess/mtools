@@ -2,6 +2,8 @@ from base_section import BaseSection
 from collections import defaultdict
 import re
 
+from mtools.util.profile_collection import ProfileCollection
+
 class ConnectionSection(BaseSection):
     """ This section goes through the logfile and extracts information 
         about opened and closed connections.
@@ -24,15 +26,18 @@ class ConnectionSection(BaseSection):
 
     def run(self):
         """ run this section and print out information. """
+        if isinstance(self.mloginfo.logfile, ProfileCollection):
+            print
+            print "    not available for system.profile collections"
+            print
+            return
 
         ip_opened = defaultdict(lambda: 0)
         ip_closed = defaultdict(lambda: 0)
         socket_exceptions = 0
 
-        # rewind log file in case other sections are walking the lines
-        self.mloginfo.logfileOpen.seek(0, 0)
-
-        for line in self.mloginfo.logfileOpen:
+        for logevent in self.mloginfo.logfile:
+            line = logevent.line_str
             pos = line.find('connection accepted')
             if pos != -1:
                 # connection was opened, increase counter

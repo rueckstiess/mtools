@@ -2,10 +2,12 @@ from mtools.util import OrderedDict
 from datetime import date, time, datetime, timedelta
 import re
 import copy
+from dateutil import parser
+from dateutil.tz import tzutc
 
 class DateTimeBoundaries(object):
 
-    timeunits = ['sec', 's', 'min', 'months', 'mo', 'm', 'hours', 'h', 'days', 'd', 'weeks', 'w', 'years', 'y']
+    timeunits = ['secs', 'sec', 's', 'mins', 'min', 'm', 'months', 'month', 'mo', 'hours', 'hour', 'h', 'days', 'day', 'd', 'weeks','week', 'w', 'years', 'year', 'y']
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -28,6 +30,8 @@ class DateTimeBoundaries(object):
 
 
     def extract_regex(self, timemark):
+        
+        timemark_original = timemark
         dtdict = {}
         matched = False
 
@@ -46,8 +50,16 @@ class DateTimeBoundaries(object):
                 break
 
         if timemark:
-            # still some string left after all filters applied. quitting.
-            raise ValueError("can't parse '%s'" % timemark)
+            try:
+                dt = parser.parse(timemark_original)
+                if dt.tzinfo == None:
+                    # make timezone-aware
+                    dt = dt.replace(tzinfo=tzutc())
+                dtdict['parsed'] = dt
+
+            except TypeError:
+                # still some string left after all filters applied. quitting.
+                raise ValueError("can't parse '%s'" % timemark)
 
         return dtdict
 
@@ -58,7 +70,11 @@ class DateTimeBoundaries(object):
         notime = False
         nodate = False
 
-        now = datetime.now()
+        now = datetime.now(tzutc())
+
+        # check if dateutil parser was used, return dt immediately
+        if 'parsed' in dtdict:
+            return dtdict['parsed']
 
         # process year
         if 'year' in dtdict:
@@ -168,26 +184,27 @@ class DateTimeBoundaries(object):
                         dtdict['year'], dtdict['month'], dtdict['day'] = self.end.year, self.end.month, self.end.day
                         dtdict['hour'], dtdict['minute'], dtdict['second'] = self.end.hour, self.end.minute, self.end.second          
 
-            # create datetime object
+            # create datetime object and make timezone-aware
             dt = datetime(**dtdict)
+            dt = dt.replace(tzinfo=tzutc())
             
             mult = 1
 
-            if unit in ['s', 'sec']:
+            if unit in ['s', 'sec', 'secs']:
                 unit = 'seconds'
-            elif unit in ['m', 'min']:
+            elif unit in ['m', 'min', 'mins']:
                 unit = 'minutes'
-            elif unit in ['h', 'hours']:
+            elif unit in ['h', 'hour', 'hours']:
                 unit = 'hours'
-            elif unit in ['d', 'days']:
+            elif unit in ['d', 'day', 'days']:
                 unit = 'days'
-            elif unit in ['w', 'weeks']:
+            elif unit in ['w', 'week', 'weeks']:
                 unit = 'days'
                 mult = 7
-            elif unit in ['mo', 'months']:
+            elif unit in ['mo', 'month', 'months']:
                 unit = 'days'
                 mult = 30.43
-            elif unit in ['y', 'years']:
+            elif unit in ['y', 'year', 'years']:
                 unit = 'days'
                 mult = 365.24
             
@@ -195,9 +212,10 @@ class DateTimeBoundaries(object):
                 mult *= -1
 
             dt = dt + eval('timedelta(%s=%i)'%(unit, mult*int(value)))
-        
+
         else:
             dt = datetime(**dtdict)
+            dt = dt.replace(tzinfo=tzutc())
 
         if dt < self.start:
             dt = self.start
@@ -230,7 +248,7 @@ if __name__ == '__main__':
     start = datetime(2012, 10, 14)
     end = datetime(2013, 6, 2)
     dtb = DateTimeBoundaries(start, end)
-    dtb.limit('Feb 19', '+1y')
+    print dtb('Feb 19', '+1day')
 
 
 

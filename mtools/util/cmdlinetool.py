@@ -1,9 +1,61 @@
 import argparse
 import sys
-from mtools.version import __version__
+import re
 import signal
 import datetime
 import os
+
+from dateutil.tz import tzutc
+
+from mtools.version import __version__
+from mtools.util.profile_collection import ProfileCollection
+from mtools.util.logfile import LogFile
+
+try:
+    try:
+        from pymongo import MongoClient as Connection
+    except ImportError:
+        from pymongo import Connection
+        from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+
+    class InputSourceAction(argparse.FileType):
+        """ This class extends the FileType class from the argparse module. It will try to open
+            the file and pass the handle to a new LogFile object, but if that's not possible it 
+            will catch the exception and interpret the string as a MongoDB URI and try to connect 
+            to the database. In that case, it will return a ProfileCollection object.
+
+            Both derive from the same base class InputSource and support iteration over LogEvents.
+        """
+        def __call__(self, string):
+            try:
+                # catch filetype and return LogFile object
+                filehandle = argparse.FileType.__call__(self, string)
+                return LogFile(filehandle)
+
+            except argparse.ArgumentTypeError as e:
+                # not a file, try open as MongoDB database 
+                m = re.match('^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$', string)
+                if m:
+                    host, port, namespace = m.groups()
+                    port = port or 27017
+                    namespace = namespace or 'test.system.profile'
+                    if '.' in namespace:
+                        database, collection = namespace.split('.', 1)
+                    else:
+                        database = namespace
+                        collection = 'system.profile'
+
+                    if host == 'localhost' or re.match('\d+\.\d+\.\d+\.\d+', host):
+                        return ProfileCollection(host, port, database, collection)
+
+                raise argparse.ArgumentTypeError("can't parse %s as file or MongoDB connection string." % string)
+
+
+except ImportError:
+
+    class InputSourceAction(argparse.FileType):
+        pass
+
 
 class BaseCmdLineTool(object):
     """ Base class for any mtools command line tool. Adds --version flag and basic control flow. """
@@ -43,8 +95,11 @@ class BaseCmdLineTool(object):
     
     def _datetime_to_epoch(self, dt):
         """ converts the datetime to unix epoch (properly). """
-        return int((dt - datetime.datetime(1970,1,1)).total_seconds())
-
+        if dt:
+            return int((dt - datetime.datetime.fromtimestamp(0, tzutc())).total_seconds())
+        else: 
+            return 0
+    
     def update_progress(self, progress, prefix=''):
         """ use this helper function to print a progress bar for longer-running scripts. 
             The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
@@ -62,22 +117,6 @@ class BaseCmdLineTool(object):
             sys.stdout.flush()
 
 
-    def update_progress(self, progress, prefix=''):
-        """ use this helper function to print a progress bar for longer-running scripts. 
-            The progress value is a value between 0.0 and 1.0. If a prefix is present, it 
-            will be printed before the progress bar. 
-        """
-        total_length = 40
-
-        if progress == 1.:
-            sys.stdout.write('\r' + ' '*(total_length*2 + len(prefix)))
-            sys.stdout.write('\n')
-            sys.stdout.flush()
-        else:
-            bar_length = int(round(total_length*progress))
-            sys.stdout.write('\r%s [%s%s] %% %3.1f ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
-            sys.stdout.flush()
-
 
 class LogFileTool(BaseCmdLineTool):
     """ Base class for any mtools tool that acts on logfile(s). """
@@ -89,7 +128,7 @@ class LogFileTool(BaseCmdLineTool):
         self.multiple_logfiles = multiple_logfiles
         self.stdin_allowed = stdin_allowed
 
-        arg_opts = {'action':'store', 'type':argparse.FileType('r')}
+        arg_opts = {'action':'store', 'type':InputSourceAction()}
 
         if self.multiple_logfiles:
             arg_opts['nargs'] = '*'
@@ -101,7 +140,7 @@ class LogFileTool(BaseCmdLineTool):
             if not self.stdin_allowed:
                 raise SystemExit("this tool can't parse input from stdin.")
                 
-            arg_opts['const'] = sys.stdin
+            arg_opts['const'] = LogFile(sys.stdin)
             arg_opts['action'] = 'store_const'
             if 'type' in arg_opts: 
                 del arg_opts['type']
@@ -112,7 +151,9 @@ class LogFileTool(BaseCmdLineTool):
 
 
 if __name__ == '__main__':
-    tool = LogFileTool(multiple_logfiles=False, stdin_allowed=True)
+    tool = LogFileTool(multiple_logfiles=True, stdin_allowed=True)
     tool.run()
     print tool.args
+    # for line in tool.args['logfile']:
+    #     print line
 

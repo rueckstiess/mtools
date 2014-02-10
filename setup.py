@@ -7,7 +7,7 @@ try:
     from setuptools import setup, find_packages
 
     # test for 2.7-included packages, add to requirements if not available
-    install_requires = []
+    install_requires = ['psutil']
     try:
         import argparse
     except ImportError:
@@ -41,6 +41,7 @@ except ImportError:
         'mtools.mlogdistinct',
         'mtools.mlogmerge',
         'mtools.mlog2json',
+        'mtools.mgenerate',
         'mtools.test',
         'mtools.util',
         'mtools.mlogfilter.filters',
@@ -63,11 +64,11 @@ setup(
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
     scripts=['scripts/mlaunch', 'scripts/mlogfilter', 'scripts/mlogvis', 'scripts/mplotqueries', 'scripts/mloginfo', \
-             'scripts/mlogversion', 'scripts/mlogmerge', 'scripts/mlog2json', 'scripts/mlogdistinct'],
+             'scripts/mlogversion', 'scripts/mlogmerge', 'scripts/mlog2json', 'scripts/mlogdistinct', 'scripts/mgenerate'],
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
-    description='Useful scripts to parse and visualize MongoDB log files and launch test environments.',
+    description='Useful scripts to parse and visualize MongoDB log files, launch test environments and reproduce issues.',
     long_description=long_description,
     tests_require=['nose>=1.0', 'psutil', 'pymongo>=2.4'],
     test_suite = 'nose.collector',

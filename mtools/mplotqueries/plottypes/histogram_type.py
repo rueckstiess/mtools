@@ -15,7 +15,7 @@ from mtools.util.log2code import Log2CodeConverter
 
 
 class HistogramPlotType(BasePlotType):
-    """ plots a histogram plot over all loglines. The bucket size can be specified with the --bucketsize or -b parameter. Unit is in seconds. """
+    """ plots a histogram plot over all logevents. The bucket size can be specified with the --bucketsize or -b parameter. Unit is in seconds. """
 
     plot_type_str = 'histogram'
     timeunits = {'sec':1, 's':1, 'min':60, 'm':1, 'hour':3600, 'h':3600, 'day':86400, 'd':86400}
@@ -43,12 +43,12 @@ class HistogramPlotType(BasePlotType):
 
         self.ylabel = "# lines per %i second bin" % self.bucketsize
 
-    def accept_line(self, logline):
+    def accept_line(self, logevent):
         """ return True for each line. We bucket everything. Filtering has to be done before passing to this type of plot. """
         return True
 
-    def log2code(self, logline):
-        codeline = self.l2cc(logline.line_str)
+    def log2code(self, logevent):
+        codeline = self.l2cc(logevent.line_str)
         if codeline:
             return ' ... '.join(codeline.pattern)
         else:
@@ -75,7 +75,7 @@ class HistogramPlotType(BasePlotType):
         maxx = -np.inf
 
         for idx, group in enumerate(self.groups):
-            x = date2num( [ logline.datetime for logline in self.groups[group] ] )
+            x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
             minx = min(minx, min(x))
             maxx = max(maxx, max(x))
             datasets.append(x)
