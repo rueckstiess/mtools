@@ -4,6 +4,9 @@ import dateutil.parser
 import re
 import json
 
+from mtools.util.pattern import json2pattern
+
+
 class DateTimeEncoder(json.JSONEncoder):
     """ custom datetime encoder for json output. """
     def default(self, obj):
@@ -332,7 +335,7 @@ class LogEvent(object):
                     if brace_counter == 0:
                         break
                 search_str = search_str[:stop_idx+1].strip()
-                self._pattern = '{' + ': 1, '.join(sorted(re.findall(r' (\w+): ', search_str))) + ': 1}'
+                self._pattern = json2pattern(search_str)
 
         return self._pattern
 
