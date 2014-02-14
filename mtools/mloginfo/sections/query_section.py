@@ -34,7 +34,7 @@ class QuerySection(BaseSection):
         grouping = Grouping(group_by='pattern')
         logfile = self.mloginfo.logfile
 
-        if logfile.start and logfile.end and not self.mloginfo.args['verbose']:
+        if logfile.start and logfile.end:
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
             progress_total = self.mloginfo._datetime_to_epoch(logfile.end) - progress_start
         else:
@@ -58,6 +58,7 @@ class QuerySection(BaseSection):
         # clear progress bar again
         self.mloginfo.update_progress(1.0)
 
+        titles = ['pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)']
         table_rows = []
         for g in grouping:
             # calculate statistics for this group
@@ -71,8 +72,12 @@ class QuerySection(BaseSection):
             stats['sum'] = sum( le.duration for le in grouping[g] if le.duration )
             stats['mean'] = stats['sum'] / stats['count']
 
+            if self.mloginfo.args['verbose']:
+                stats['example'] = grouping[g][0]
+                titles.append('example')
+
             table_rows.append(stats)
 
-        print_table(table_rows, ['pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)'], uppercase_headers=False)
+        print_table(table_rows, titles, uppercase_headers=False)
         print 
 
