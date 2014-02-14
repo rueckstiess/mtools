@@ -67,8 +67,20 @@ class Grouping(object):
                 self.add(item, group_by)
 
 
+    def move_items(self, from_group, to_group):
+        """ will take all elements from the from_group and add it to the to_group. """
+
+        self.groups.setdefault(to_group, list()).extend(self.groups.get(from_group, list()))
+        if from_group in self.groups:
+            del self.groups[from_group]
+
 
     def sort_by_size(self, group_limit=None, discard_others=False, others_label='others'):
+        """ sorts the groups by the number of elements they contain, descending. Also has option to 
+            limit the number of groups. If this option is chosen, the remaining elements are placed
+            into another group with the name specified with others_label. if discard_others is True,
+            the others group is removed instead.
+        """
 
         # sort groups by number of elements
         self.groups = OrderedDict( sorted(self.groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
@@ -78,10 +90,13 @@ class Grouping(object):
 
             # now group together all groups that did not make the limit
             if not discard_others:
+                group_keys = self.groups.keys()[ group_limit-1: ]
                 self.groups.setdefault(others_label, list())
+            else:
+                group_keys = self.groups.keys()[ group_limit: ]
 
             # only go to second last (-1), since the 'others' group is now last
-            for g in self.groups.keys()[ group_limit:-1 ]:
+            for g in group_keys:
                 if not discard_others:
                     self.groups[others_label].extend(self.groups[g])
                 del self.groups[g]
@@ -93,12 +108,14 @@ class Grouping(object):
 
 
 if __name__ == '__main__':
+    # Example
     items = [1, 4, 3, 5, 7, 8, 6, 7, 9, 8, 6, 4, 2, 3, 3, 0]
 
     grouping = Grouping(items, r'[3, 4, 5, 6, 7]')
-    grouping.sort_by_size(group_limit=2, discard_others=False, others_label='foo')
-    
-    # grouping.regroup(lambda x: 'even' if x % 2 == 0 else 'odd')
+    grouping.sort_by_size(group_limit=1, discard_others=True)
+    # grouping.move_items('no match', 'foo')
+
+    grouping.regroup(lambda x: 'even' if x % 2 == 0 else 'odd')
 
     for g in grouping:
         print g, grouping[g]

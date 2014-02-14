@@ -26,7 +26,7 @@ def _decode_pattern_dict(data):
                 value = 1
             if key in ['query', '$query']:
                 return _decode_pattern_dict(value)
-                
+
         if isinstance(value, list):
             value = _decode_pattern_list(value)
         elif isinstance(value, dict):
@@ -40,10 +40,12 @@ def _decode_pattern_dict(data):
 
 def json2pattern(s):
     """ converts JSON format (even mongo shell notation without quoted key names) to a query pattern """
-    # make valid JSON by wrapping field names in quotes, then prettify
+    
+    # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([^,{\s\'"]+)\s*:', ' "\\1" : ' , s)
-    s, _ = re.subn(r'\'', '"', s)
-
+    # convert values to 1 where possible, to get rid of things like new Date(...)
+    s, _ = re.subn(r'([:,\[])\s*([^{}\[\]]+?)\s*([,}\]])', '\\1 1 \\3' , s)
+    
     # now convert to dictionary, converting unicode to ascii    
     doc = json.loads(s, object_hook=_decode_pattern_dict)
     return json.dumps(doc, sort_keys=True, separators=(', ', ': ') )
@@ -52,4 +54,10 @@ def json2pattern(s):
 if __name__ == '__main__':
     
     s = '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'
+    print json2pattern(s)
+
+    s = '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'
+    print json2pattern(s)
+
+    s = '{a: new Date("2014-12-01"), b: "5" }'
     print json2pattern(s)
