@@ -179,7 +179,7 @@ class MLogFilterTool(LogFileTool):
         else:
             # only one file
             for logevent in self.args['logfile'][0]:
-                if logevent.datetime: 
+                if self.args['timezone'][0] != 0 and logevent.datetime: 
                     logevent._datetime = logevent.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logevent
 
