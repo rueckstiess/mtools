@@ -40,24 +40,29 @@ def _decode_pattern_dict(data):
 
 def json2pattern(s):
     """ converts JSON format (even mongo shell notation without quoted key names) to a query pattern """
-    
     # make valid JSON by wrapping field names in quotes
-    s, _ = re.subn(r'([^,{\s\'"]+)\s*:', ' "\\1" : ' , s)
+    s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ' , s)
     # convert values to 1 where possible, to get rid of things like new Date(...)
-    s, _ = re.subn(r'([:,\[])\s*([^{}\[\]]+?)\s*([,}\]])', '\\1 1 \\3' , s)
-    
-    # now convert to dictionary, converting unicode to ascii    
-    doc = json.loads(s, object_hook=_decode_pattern_dict)
-    return json.dumps(doc, sort_keys=True, separators=(', ', ': ') )
+    s, n = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
+
+    # now convert to dictionary, converting unicode to ascii 
+    try:
+        doc = json.loads(s, object_hook=_decode_pattern_dict)
+        return json.dumps(doc, sort_keys=True, separators=(', ', ': ') )
+    except ValueError:
+        return None
 
 
 if __name__ == '__main__':
     
-    s = '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'
+    s = '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, "foo", "bar"]}, "$or": [{a:1}, {b:1}] }'
     print json2pattern(s)
 
     s = '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'
     print json2pattern(s)
 
-    s = '{a: new Date("2014-12-01"), b: "5" }'
+    s = '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }'
+    print json2pattern(s)
+
+    s = '{ _id: ObjectId(\'528556616dde23324f233168\'), config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }'
     print json2pattern(s)
