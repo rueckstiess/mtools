@@ -70,7 +70,7 @@ def test_logevent_value_extraction():
     assert(le.r == 85093)
     assert(le.ntoreturn == 0)
     assert(le.nreturned == 13551)
-    assert(le.pattern == '{ts: 1}')
+    assert(le.pattern == '{"ts": 1}')
 
 
 def test_logevent_lazy_evaluation():

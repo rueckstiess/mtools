@@ -47,7 +47,7 @@ class LogEvent(object):
 
 
     def __init__(self, doc_or_str):
-        self.year_rollover = False
+        self._year_rollover = False
 
         if isinstance(doc_or_str, str):
             # create from string, remove line breaks at end of _line_str
@@ -230,11 +230,13 @@ class LogEvent(object):
         else:
             # assume current year unless self.year_rollover is set (from LogFile)
             year = datetime.now().year
-            if self.year_rollover:
-                year -= 1
             dt = dateutil.parser.parse(' '.join(tokens[:4]), default=datetime(year, 1, 1))
+
             if dt.tzinfo == None:
                 dt = dt.replace(tzinfo=tzutc())
+
+            if self._year_rollover and dt > self._year_rollover:
+                dt = dt.replace(year=year-1)
                 
             self._datetime_format = "ctime" \
                 if '.' in tokens[3] else "ctime-pre2.4"

@@ -117,7 +117,7 @@ class LogFile(InputSource):
             le = LogEvent(line)
             # adjust for year rollover if necessary
             if self._year_rollover:
-                self.adjust_year_rollover(le)
+                le._year_rollover = self.end
             yield le
 
         # future iterations start from the beginning
@@ -130,14 +130,14 @@ class LogFile(InputSource):
         return self.num_lines
 
 
-    def adjust_year_rollover(self, logevent):
-        """ checks if logevent needs adjustment due to year rollover in logfile. """
-        if self._year_rollover and logevent.datetime and logevent.datetime > self.end:
-            # roll back year now and set year_rollover flag for future conversions
-            logevent.year_rollover = True
-            logevent._datetime = logevent._datetime.replace(year=logevent._datetime.year - 1)
-            logevent._reformat_timestamp(self._datetime_format, force=True)
-        return logevent
+    # def adjust_year_rollover(self, logevent):
+    #     """ checks if logevent needs adjustment due to year rollover in logfile. """
+    #     if self._year_rollover and logevent.datetime and logevent.datetime > self.end:
+    #         # roll back year now and set year_rollover flag for future conversions
+    #         logevent.year_rollover = True
+    #         logevent._datetime = logevent._datetime.replace(year=logevent._datetime.year - 1)
+    #         logevent._reformat_timestamp(self._datetime_format, force=True)
+    #     return logevent
 
 
     def _iterate_lines(self):
@@ -241,7 +241,7 @@ class LogFile(InputSource):
             logevent = LogEvent(line)
             if logevent.datetime:
                 # check for year rollover
-                self.adjust_year_rollover(logevent)
+                logevent._year_rollover = self.end
                 return logevent
 
             # to avoid infinite loops, quit here if previous line not found
