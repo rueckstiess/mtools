@@ -1,6 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta, MINYEAR, MAXYEAR
+from dateutil.tz import tzutc
 from mtools.util.logevent import LogEvent
 
 from base_filter import BaseFilter
@@ -96,8 +97,8 @@ class DateTimeFilter(BaseFilter):
         if self.mlogfilter.is_stdin:
             # assume this year (we have no other info)
             now = datetime.now()
-            self.startDateTime = datetime(now.year, 1, 1)
-            self.endDateTime = datetime(MAXYEAR, 12, 31)
+            self.startDateTime = datetime(now.year, 1, 1, tzinfo=tzutc())
+            self.endDateTime = datetime(MAXYEAR, 12, 31, tzinfo=tzutc())
         
         else:
             logfiles = self.mlogfilter.args['logfile']
