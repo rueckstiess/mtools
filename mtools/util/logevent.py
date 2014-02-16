@@ -140,11 +140,16 @@ class LogEvent(object):
         if not self._duration_calculated:
             self._duration_calculated = True
 
-            split_tokens = self.split_tokens
+            # split_tokens = self.split_tokens
+            line_str = self.line_str
 
-            if len(split_tokens) > 0 and split_tokens[-1].endswith('ms'):
+            if line_str and line_str.endswith('ms'):
                 try:
-                    self._duration = int((split_tokens[-1][:-2]).replace(',',''))
+                    # find duration from end
+                    space_pos = line_str.rfind(" ")
+                    if space_pos == -1:
+                        return
+                    self._duration = int(line_str[line_str.rfind(" ")+1:-2].replace(',',''))
                 except ValueError:
                     self._duration = None
             elif "flushing" in self.line_str:
@@ -190,6 +195,20 @@ class LogEvent(object):
             _ = self.datetime
 
         return self._datetime_format
+
+
+    def set_datetime_info(self, format, nextpos, rollover):
+        self._datetime_format = format
+        self._datetime_nextpos = nextpos
+        self._year_rollover = rollover
+
+        # fast check if timezone changed. if it has, trigger datetime evaluation
+        if format.startswith('ctime'):
+            if self.split_tokens[self._datetime_nextpos-1] not in self.weekdays:
+                _ = self.datetime 
+        else:
+            if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
+                _ = self.datetime
 
 
     def _match_datetime_pattern(self, tokens):

@@ -46,4 +46,4 @@ class TestUtilLogFile(object):
 
         logfile = LogFile(self.file_year_rollover)
         assert logfile.datetime_format == "ctime"
-        assert logfile.year_rollover == True
+        assert logfile.year_rollover == logfile.end
