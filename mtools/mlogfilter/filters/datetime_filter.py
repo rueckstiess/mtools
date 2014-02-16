@@ -113,25 +113,43 @@ class DateTimeFilter(BaseFilter):
         # define start_limit for mlogfilter's fast_forward method
         self.start_limit = self.fromDateTime
 
+        # for single logfile, get file seek position of `to` datetime
+        if len(self.mlogfilter.args['logfile']) == 1 and not self.mlogfilter.is_stdin:
+            if self.mlogfilter.args['to']:
+                logfile = self.mlogfilter.args['logfile'][0]
+                # fast forward, get seek value, then reset file 
+                logfile.fast_forward(self.toDateTime)
+                self.seek_to = logfile.filehandle.tell()
+                logfile.filehandle.seek(0)
+            else:
+                self.seek_to = -1
+        else:
+            self.seek_to = False
+
 
     def accept(self, logevent):
-        dt = logevent.datetime
-
-        # if logevent has no datetime, accept if between --from and --to
-        if dt == None:
-            return self.fromReached
-
-        if self.fromDateTime <= dt <= self.toDateTime:
-            self.toReached = False
-            self.fromReached = True
+        if self.seek_to:
+            self.toReached = self.mlogfilter.args['logfile'][0].filehandle.tell() > self.seek_to
             return True
+        else:
+            # slow version has to check each datetime 
+            dt = logevent.datetime
 
-        elif dt > self.toDateTime:
-            self.toReached = True
-            return False
+            # if logevent has no datetime, accept if between --from and --to
+            if dt == None:
+                return self.fromReached
 
-        else: 
-            return False
+            if self.fromDateTime <= dt <= self.toDateTime:
+                self.toReached = False
+                self.fromReached = True
+                return True
+
+            elif dt > self.toDateTime:
+                self.toReached = True
+                return False
+
+            else: 
+                return False
 
         
     def skipRemaining(self):
