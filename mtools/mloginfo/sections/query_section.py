@@ -5,6 +5,8 @@ from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
 
+from operator import itemgetter
+
 import numpy as np
 
 class QuerySection(BaseSection):
@@ -31,7 +33,7 @@ class QuerySection(BaseSection):
 
     def run(self):
         """ run this section and print out information. """
-        grouping = Grouping(group_by='pattern')
+        grouping = Grouping(group_by=lambda x: (x.namespace, x.pattern))
         logfile = self.mloginfo.logfile
 
         if logfile.start and logfile.end:
@@ -58,13 +60,15 @@ class QuerySection(BaseSection):
         # clear progress bar again
         self.mloginfo.update_progress(1.0)
 
-        titles = ['pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)']
+        titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)']
         table_rows = []
         for g in grouping:
             # calculate statistics for this group
+            namespace, pattern = g
 
             stats = OrderedDict()
-            stats['pattern'] = g
+            stats['namespace'] = namespace
+            stats['pattern'] = pattern
             stats['count'] = len( [le for le in grouping[g] if le.duration] )
             stats['min'] = min( le.duration for le in grouping[g] if le.duration )
             stats['max'] = max( le.duration for le in grouping[g] if le.duration )
@@ -78,6 +82,7 @@ class QuerySection(BaseSection):
 
             table_rows.append(stats)
 
+        table_rows = sorted(table_rows, key=itemgetter('sum'), reverse=True)
         print_table(table_rows, titles, uppercase_headers=False)
         print 
 
