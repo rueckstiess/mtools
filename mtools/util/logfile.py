@@ -115,7 +115,18 @@ class LogFile(InputSource):
 
         for line in self.filehandle:
             le = LogEvent(line)
-            le.set_datetime_info(self._datetime_format, self._datetime_nextpos, self.year_rollover)
+            # hint format and nextpos from previous line
+            if self._datetime_format and self._datetime_nextpos != None:
+                ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
+                if not ret:
+                    # logevent indicates timestamp format has changed, invalidate hint info
+                    self._datetime_format = None
+                    self._datetime_nextpos = None
+            elif le.datetime:
+                # gather new hint info from another logevent
+                self._datetime_format = le.datetime_format
+                self._datetime_nextpos = le._datetime_nextpos  
+
             yield le
 
         # future iterations start from the beginning
@@ -170,9 +181,8 @@ class LogFile(InputSource):
         # get start datetime 
         for line in self.filehandle:
             logevent = LogEvent(line)
-            date = logevent.datetime
-            if date:
-                self._start = date
+            if logevent.datetime:
+                self._start = logevent.datetime
                 self._datetime_format = logevent.datetime_format
                 self._datetime_nextpos = logevent._datetime_nextpos
                 break
@@ -184,9 +194,8 @@ class LogFile(InputSource):
 
         for line in reversed(self.filehandle.readlines()):
             logevent = LogEvent(line)
-            date = logevent.datetime
-            if date:
-                self._end = date
+            if logevent.datetime:
+                self._end = logevent.datetime
                 break
 
         # if there was a roll-over, subtract 1 year from start time

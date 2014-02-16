@@ -197,18 +197,22 @@ class LogEvent(object):
         return self._datetime_format
 
 
-    def set_datetime_info(self, format, nextpos, rollover):
+    def set_datetime_hint(self, format, nextpos, rollover):
         self._datetime_format = format
         self._datetime_nextpos = nextpos
         self._year_rollover = rollover
 
         # fast check if timezone changed. if it has, trigger datetime evaluation
         if format.startswith('ctime'):
-            if self.split_tokens[self._datetime_nextpos-1] not in self.weekdays:
-                _ = self.datetime 
+            if len(self.split_tokens) < 4 or self.split_tokens[self._datetime_nextpos-4] not in self.weekdays:
+                _ = self.datetime
+                return False
+            return True
         else:
             if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
                 _ = self.datetime
+                return False
+            return True
 
 
     def _match_datetime_pattern(self, tokens):
@@ -272,16 +276,18 @@ class LogEvent(object):
 
             split_tokens = self.split_tokens
 
-            # force evaluation of datetime to get access to datetime_offset
-            if self.datetime:
-                if len(split_tokens) <= self._datetime_nextpos:
-                    return None
+            if not self._datetime_nextpos:
+                # force evaluation of datetime to get access to datetime_offset
+                _ = self.datetime
 
-                connection_token = split_tokens[self._datetime_nextpos]
-                match = re.match(r'^\[([^\]]*)\]$', connection_token)
-                if match:
-                    self._thread = match.group(1)
-                    self._thread_offset = self._datetime_nextpos
+            if len(split_tokens) <= self._datetime_nextpos:
+                return None
+
+            connection_token = split_tokens[self._datetime_nextpos]
+            match = re.match(r'^\[([^\]]*)\]$', connection_token)
+            if match:
+                self._thread = match.group(1)
+                self._thread_offset = self._datetime_nextpos
   
         return self._thread
 
@@ -317,15 +323,18 @@ class LogEvent(object):
 
         split_tokens = self.split_tokens
 
-        # trigger datetime evaluation to get access to offset
-        if self.datetime:
-            if len(split_tokens) <= self._datetime_nextpos + 2:
-                return
-            op = split_tokens[self._datetime_nextpos + 1]
+        if not self._datetime_nextpos:
+            # force evaluation of datetime to get access to datetime_offset
+            _ = self.datetime
 
-            if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
-                self._operation = op
-                self._namespace = split_tokens[self._datetime_nextpos + 2]
+        if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
+            return
+        
+        op = split_tokens[self._datetime_nextpos + 1]
+
+        if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
+            self._operation = op
+            self._namespace = split_tokens[self._datetime_nextpos + 2]
 
 
 
@@ -336,7 +345,7 @@ class LogEvent(object):
         if not self._pattern:
 
             # trigger evaluation of operation
-            if self.operation:
+            if self.operation in ['query', 'getmore', 'update', 'remove']:
                 # get start of json query pattern
                 start_idx = self.line_str.rfind(' query: ')
                 if start_idx == -1:

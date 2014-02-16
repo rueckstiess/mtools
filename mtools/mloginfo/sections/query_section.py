@@ -44,7 +44,6 @@ class QuerySection(BaseSection):
 
 
         for i, le in enumerate(logfile):
-
             # update progress bar every 1000 lines
             if self.progress_bar_enabled and (i % 1000 == 0):
                 if le.datetime:
@@ -52,7 +51,6 @@ class QuerySection(BaseSection):
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if le.operation in ['query', 'update', 'remove']:
-                # print le.pattern
                 grouping.add(le)
 
         grouping.sort_by_size()
@@ -66,15 +64,17 @@ class QuerySection(BaseSection):
             # calculate statistics for this group
             namespace, pattern = g
 
+            group_events = [le.duration for le in grouping[g] if le.duration != None]
+
             stats = OrderedDict()
             stats['namespace'] = namespace
             stats['pattern'] = pattern
-            stats['count'] = len( [le for le in grouping[g] if le.duration] )
-            stats['min'] = min( le.duration for le in grouping[g] if le.duration )
-            stats['max'] = max( le.duration for le in grouping[g] if le.duration )
+            stats['count'] = len( group_events )
+            stats['min'] = min( group_events ) if group_events else '-'
+            stats['max'] = max( group_events ) if group_events else '-'
             stats['mean'] = 0
-            stats['sum'] = sum( le.duration for le in grouping[g] if le.duration )
-            stats['mean'] = stats['sum'] / stats['count']
+            stats['sum'] = sum( group_events ) if group_events else '-'
+            stats['mean'] = stats['sum'] / stats['count'] if group_events else '-'
 
             if self.mloginfo.args['verbose']:
                 stats['example'] = grouping[g][0]
