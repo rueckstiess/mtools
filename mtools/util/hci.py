@@ -241,14 +241,10 @@ class DateTimeBoundaries(object):
         else:
             to_dt = self.end
     
+        if to_dt < from_dt:
+            raise ValueError('Error in DateTimeBoundaries: lower bound is greater than upper bound.')
+
         return from_dt, to_dt
-
-
-if __name__ == '__main__':
-    start = datetime(2012, 10, 14)
-    end = datetime(2013, 6, 2)
-    dtb = DateTimeBoundaries(start, end)
-    print dtb('Feb 19', '+1day')
 
 
 
