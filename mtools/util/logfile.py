@@ -102,35 +102,39 @@ class LogFile(InputSource):
         return versions
 
     def next(self):
-        """ makes LogFiles iterators. """
-        line = self.filehandle.next()
+        """ get next line, adjust for year rollover and hint datetime format. """
+
+        # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
+        line = self.filehandle.readline()
+        if line == '':
+            raise StopIteration
+        line = line.rstrip('\n')
+        # print "next line:", line
+
         le = LogEvent(line)
-        # adjust for year rollover if necessary
-        if self._year_rollover:
-            self.adjust_year_rollover(le)
+        
+        # hint format and nextpos from previous line
+        if self._datetime_format and self._datetime_nextpos != None:
+            # print "hinting"
+            ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
+            # print "ret", ret
+            if not ret:
+                # logevent indicates timestamp format has changed, invalidate hint info
+                self._datetime_format = None
+                self._datetime_nextpos = None
+        elif le.datetime:
+            # print "not hinting"
+            # gather new hint info from another logevent
+            self._datetime_format = le.datetime_format
+            self._datetime_nextpos = le._datetime_nextpos  
+
         return le
 
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line (generator) """
 
         while True:
-            # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
-            line = self.filehandle.readline()
-            if line == '':
-                raise StopIteration
-            le = LogEvent(line)
-            # hint format and nextpos from previous line
-            if self._datetime_format and self._datetime_nextpos != None:
-                ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
-                if not ret:
-                    # logevent indicates timestamp format has changed, invalidate hint info
-                    self._datetime_format = None
-                    self._datetime_nextpos = None
-            elif le.datetime:
-                # gather new hint info from another logevent
-                self._datetime_format = le.datetime_format
-                self._datetime_nextpos = le._datetime_nextpos  
-
+            le = self.next()
             yield le
 
         # future iterations start from the beginning
@@ -238,16 +242,16 @@ class LogFile(InputSource):
 
         self.filehandle.seek(newline_pos - jump_back + 1, 1)
 
-        while line != '':
-            line = self.filehandle.readline()
-            logevent = LogEvent(line)
-            if logevent.datetime:
-                # check for year rollover
-                logevent._year_rollover = self.end
-                return logevent
+        # roll forward until we found a line with a datetime
+        logevent = self.next()
+        while not logevent.datetime:
+            logevent = self.next()
+
+        return logevent
+            
             # to avoid infinite loops, quit here if previous line not found
-            if prev:
-                return None
+            # if prev:
+            #     return None
 
 
     def fast_forward(self, start_dt):
@@ -259,10 +263,9 @@ class LogFile(InputSource):
             # skip lines until start_dt is reached
             le = None
             while not (le and le.datetime and le.datetime >= start_dt):
-                line = self.filehandle.next()
-                # can't check for year rollover in a stream
+                line = self.filehandle.readline()
+                # can't check for year rollover in a stream, just return
                 le = LogEvent(line)
-
 
         else:
             # fast bisection path
