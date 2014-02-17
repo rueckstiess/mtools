@@ -113,7 +113,11 @@ class LogFile(InputSource):
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line (generator) """
 
-        for line in self.filehandle:
+        while True:
+            # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
+            line = self.filehandle.readline()
+            if line == '':
+                raise StopIteration
             le = LogEvent(line)
             # hint format and nextpos from previous line
             if self._datetime_format and self._datetime_nextpos != None:
@@ -232,7 +236,7 @@ class LogFile(InputSource):
         if newline_pos == -1:
             return None
 
-        self.filehandle.seek(newline_pos - jump_back, 1)
+        self.filehandle.seek(newline_pos - jump_back + 1, 1)
 
         while line != '':
             line = self.filehandle.readline()
@@ -241,7 +245,6 @@ class LogFile(InputSource):
                 # check for year rollover
                 logevent._year_rollover = self.end
                 return logevent
-
             # to avoid infinite loops, quit here if previous line not found
             if prev:
                 return None
@@ -252,7 +255,6 @@ class LogFile(InputSource):
             Only fast for files. Streams need to be forwarded manually, and it will miss the 
             first line that would otherwise match (as it consumes the log line). 
         """
-
         if self.from_stdin:
             # skip lines until start_dt is reached
             le = None
@@ -268,7 +270,8 @@ class LogFile(InputSource):
             max_mark = self.filesize
             step_size = max_mark
 
-            le =  None
+            le = None
+            self.filehandle.seek(0)
 
             # search for lower bound
             while abs(step_size) > 100:

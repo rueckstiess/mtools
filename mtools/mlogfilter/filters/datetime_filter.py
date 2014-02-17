@@ -115,9 +115,10 @@ class DateTimeFilter(BaseFilter):
 
         # for single logfile, get file seek position of `to` datetime
         if len(self.mlogfilter.args['logfile']) == 1 and not self.mlogfilter.is_stdin:
-            if self.mlogfilter.args['to']:
-                logfile = self.mlogfilter.args['logfile'][0]
+            
+            if self.mlogfilter.args['to'] != "end":
                 # fast forward, get seek value, then reset file 
+                logfile = self.mlogfilter.args['logfile'][0]
                 logfile.fast_forward(self.toDateTime)
                 self.seek_to = logfile.filehandle.tell()
                 logfile.filehandle.seek(0)
@@ -128,8 +129,9 @@ class DateTimeFilter(BaseFilter):
 
 
     def accept(self, logevent):
-        if self.seek_to:
-            self.toReached = self.mlogfilter.args['logfile'][0].filehandle.tell() > self.seek_to
+        if self.fromReached and self.seek_to:
+            if self.seek_to != -1:
+                self.toReached = self.mlogfilter.args['logfile'][0].filehandle.tell() >= self.seek_to
             return True
         else:
             # slow version has to check each datetime 

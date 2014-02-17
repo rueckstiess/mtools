@@ -264,7 +264,6 @@ class MLogFilterTool(LogFileTool):
             raise SystemExit('no logfile found.')
 
         for logevent in self.logfile_generator():
-
             if self.args['exclude']:
                 # print line if any filter disagrees
                 if any([not f.accept(logevent) for f in self.filters]):
