@@ -9,242 +9,150 @@ class DateTimeBoundaries(object):
 
     timeunits = ['secs', 'sec', 's', 'mins', 'min', 'm', 'months', 'month', 'mo', 'hours', 'hour', 'h', 'days', 'day', 'd', 'weeks','week', 'w', 'years', 'year', 'y']
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
     dtRegexes = OrderedDict([ 
-        ('year',     re.compile('(\d{4,})' + '($|\s+)')),                                     # year: 2005, 1993        
-        ('monthday', re.compile('(' + '|'.join(months) + ')' + '\s+\d{1,2}' + '($|\s+)')),    # month + day:  Jan 5, Sep 03
-        ('month',    re.compile('(' + '|'.join(months) + ')' + '($|\s+)')),                   # month alone:  Feb, Apr, Dec
         ('constant', re.compile('(now|start|end|today)' + '($|\s+)')),                        # special constants
         ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),                 # weekday: Mon, Wed, Sat
-        ('time4',    re.compile('(\d{1,2}:\d{2,2}:\d{2,2}.\d{3,})' + '($|\s+)')),             # 11:59:00.123, 1:13:12.004
-        ('time3',    re.compile('(\d{1,2}:\d{2,2}:\d{2,2})' + '($|\s+)')),                    # 11:59:00, 1:13:12, 00:00:59
-        ('time2',    re.compile('(\d{1,2}:\d{2,2})' + '($|\s+)')),                            # 11:59, 1:13, 00:00
-        ('offset',   re.compile('([\+-]\d+(' + '|'.join(timeunits) +'))'+'($|\s+)')),         # offsets: +3min, -20s, +7days                
+        ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?' + '($|\s+)')),    # 11:59:00.123, 1:13:12.004                                    
+        ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))          # offsets: +3min, -20s, +7days                
     ])
 
     def __init__(self, start, end):
         """ initialize the DateTimeBoundaries object with true start and end datetime objects. """
+
+        if start > end:
+            raise ValueError('Error in DateTimeBoundaries: end cannot be before start datetime.')
+
+        # make sure all datetimes are timezone-aware
         self.start = start
+        if not self.start.tzinfo:
+            self.start = self.start.replace(tzinfo=tzutc())
+        
         self.end = end
+        if not self.end.tzinfo:
+            self.end = self.end.replace(tzinfo=tzutc())
 
 
-    def extract_regex(self, timemark):
+    def string2dt(self, s, lower_bound=None):
+        original_s = s
         
-        timemark_original = timemark
-        dtdict = {}
-        matched = False
+        result = {}
+        dt = None
 
-        # go through all regexes in order and see which ones match
-        while timemark:
-            matched = False
-            for idx in self.dtRegexes:
-                regex = self.dtRegexes[idx]
-                mo = regex.match(timemark)
-                if mo:
-                    dtdict[idx] = mo.group(0).rstrip()
-                    timemark = timemark[len(mo.group(0)):]
-                    matched = True
-                    break
-            if not matched:
-                break
+        # if s is completely empty, return start or end, depending on what parameter is evaluated
+        if s == '':
+            return self.end if lower_bound else self.start
 
-        if timemark:
+        # first try to match the defined regexes
+        for idx in self.dtRegexes:
+            regex = self.dtRegexes[idx]
+            mo = regex.search(s)
+            # if match was found, cut it out of original string and store in result
+            if mo:
+                result[idx] = mo
+                s = s[:mo.start(0)] + s[mo.end(0):]
+
+        # only a constant and possibly offset were given
+        if 'constant' in result and s.strip() == '':
+            if result['constant'].group(0) == 'end':
+                dt = self.end
+            elif result['constant'].group(0) == 'start':
+                dt = self.start
+            elif result['constant'].group(0) == 'today':
+                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc())
+            elif result['constant'].group(0) == 'now':
+                dt = datetime.now().replace(tzinfo=tzutc())
+
+        elif 'weekday' in result:
+                weekday = result['weekday'].group(0).strip()
+                # assume most-recently occured weekday in logfile
+                most_recent_date = self.end.replace(hour=0, minute=0, second=0, microsecond=0)
+                offset = (most_recent_date.weekday() - self.weekdays.index(weekday)) % 7
+                dt = most_recent_date - timedelta(days=offset)
+            
+        if s.strip() != '':
             try:
-                dt = parser.parse(timemark_original)
-                if dt.tzinfo == None:
-                    # make timezone-aware
-                    dt = dt.replace(tzinfo=tzutc())
-                dtdict['parsed'] = dt
-
-            except TypeError:
-                # still some string left after all filters applied. quitting.
-                raise ValueError("can't parse '%s'" % timemark)
-
-        return dtdict
-
-    
-    def parse_dt(self, dtdict, from_dt=None):
-        
-        skiptime = False
-        notime = False
-        nodate = False
-
-        now = datetime.now(tzutc())
-
-        # check if dateutil parser was used, return dt immediately
-        if 'parsed' in dtdict:
-            return dtdict['parsed']
-
-        # process year
-        if 'year' in dtdict:
-            dtdict['year'] = int(dtdict['year'])
-        else:
-            dtdict['year'] = self.start.year
-
-        # process month and day
-        if 'monthday' in dtdict:
-            m, d = dtdict['monthday'].split()
-            dtdict['month'] = self.months.index(m)+1
-            dtdict['day'] = int(d)
-
-            del dtdict['monthday']
-            if 'weekday' in dtdict:
-                # if we have fixed date, we don't need the weekday
-                del dtdict['weekday']
-
-        elif 'weekday' in dtdict:
-            # assume most-recently occured weekday in logfile
-            most_recent_date = self.end.date()
-            offset = (most_recent_date.weekday() - self.weekdays.index(dtdict['weekday'])) % 7
-            d = most_recent_date - timedelta(days=offset)
-            dtdict['month'] = d.month
-            dtdict['day'] = d.day
-            
-            del dtdict['weekday']
-
-        elif 'month' in dtdict:
-            m = dtdict['month']
-            dtdict['month'] = self.months.index(m)+1
-            dtdict['day'] = 1
-
-        elif 'constant' in dtdict:
-            # handle special case of now, start, end
-            if dtdict['constant'] == 'now':
-                dtdict['year'], dtdict['month'], dtdict['day'] = now.year, now.month, now.day
-                dtdict['hour'], dtdict['minute'], dtdict['second'] = now.hour, now.minute, now.second
-                skiptime = True
-            elif dtdict['constant'] == 'today':
-                dtdict['year'], dtdict['month'], dtdict['day'] = now.year, now.month, now.day               
-            elif dtdict['constant'] == 'start':
-                dtdict['year'], dtdict['month'], dtdict['day'] = self.start.year, self.start.month, self.start.day
-                dtdict['hour'], dtdict['minute'], dtdict['second'] = self.start.hour, self.start.minute, self.start.second 
-                skiptime = True
-            elif dtdict['constant'] == 'end':
-                dtdict['year'], dtdict['month'], dtdict['day'] = self.end.year, self.end.month, self.end.day
-                dtdict['hour'], dtdict['minute'], dtdict['second'] = self.end.hour, self.end.minute, self.end.second 
-                skiptime = True
-
-            del dtdict['constant']
-
-        elif 'time2' in dtdict or 'time3' in dtdict or 'time4' in dtdict:
-            # just time given, use today
-            dtdict['year'], dtdict['month'], dtdict['day'] = self.end.year, self.end.month, self.end.day
-
-        else:
-            # nothing given, use same as start
-            dtdict['year'], dtdict['month'], dtdict['day'] = self.start.year, self.start.month, self.start.day
-            nodate = True
-
-        # process time
-        if not skiptime:
-            if 'time2' in dtdict:
-                h, m = dtdict['time2'].split(':')
-                dtdict['hour'] = int(h)
-                dtdict['minute'] = int(m)
-                del dtdict['time2']
-
-            elif 'time3' in dtdict:
-                h, m, s = dtdict['time3'].split(':')
-                dtdict['hour'] = int(h)
-                dtdict['minute'] = int(m)
-                dtdict['second'] = int(s)
-                del dtdict['time3']
-
-            elif 'time4' in dtdict:
-                hms, us = dtdict['time4'].split('.')
-                h, m, s = hms.split(':')
-                dtdict['hour'] = int(h)
-                dtdict['minute'] = int(m)
-                dtdict['second'] = int(s)
-                dtdict['microsecond'] = int(us) * 1000
-                del dtdict['time4']
-
-            else:
-                notime = True
-
-        # process offset
-        if 'offset' in dtdict:
-
-            offset = dtdict['offset']
-            del dtdict['offset']
-
-            matches = re.match(r'([+-])(\d+)([a-z]+)', offset)
-            operator, value, unit = matches.groups()
-
-            if notime and nodate:
-                if from_dt:  
-                    dtdict['year'], dtdict['month'], dtdict['day'] = from_dt.year, from_dt.month, from_dt.day
-                    dtdict['hour'], dtdict['minute'], dtdict['second'] = from_dt.hour, from_dt.minute, from_dt.second
+                if dt:
+                    dt = parser.parse(s, default=dt, tzinfos=tzutc)
                 else:
-                    if operator == '+':
-                        dtdict['year'], dtdict['month'], dtdict['day'] = self.start.year, self.start.month, self.start.day
-                        dtdict['hour'], dtdict['minute'], dtdict['second'] = self.start.hour, self.start.minute, self.start.second
-                    else:
-                        dtdict['year'], dtdict['month'], dtdict['day'] = self.end.year, self.end.month, self.end.day
-                        dtdict['hour'], dtdict['minute'], dtdict['second'] = self.end.hour, self.end.minute, self.end.second          
+                    dt = parser.parse(s, default=datetime(self.end.year, 1, 1, tzinfo=tzutc()), tzinfos=tzutc)
+            except ValueError as e:
+                raise ValueError("Error in DateTimeBoundaries: can't parse datetime from %s" % s)
 
-            # create datetime object and make timezone-aware
-            dt = datetime(**dtdict)
-            dt = dt.replace(tzinfo=tzutc())
-            
+        if not dt:
+            dt = lower_bound or self.end
+        
+        if 'time' in result:
+            dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
+            dct['microsecond'] *= 1000
+            dt = dt.replace(**dct)
+
+        # apply offset
+        if 'offset' in result:
+
+            # separate in operator, value, unit
+            dct = result['offset'].groupdict()
+
             mult = 1
-
-            if unit in ['s', 'sec', 'secs']:
-                unit = 'seconds'
-            elif unit in ['m', 'min', 'mins']:
-                unit = 'minutes'
-            elif unit in ['h', 'hour', 'hours']:
-                unit = 'hours'
-            elif unit in ['d', 'day', 'days']:
-                unit = 'days'
-            elif unit in ['w', 'week', 'weeks']:
-                unit = 'days'
+            if dct['unit'] in ['s', 'sec', 'secs']:
+                dct['unit'] = 'seconds'
+            elif dct['unit'] in ['m', 'min', 'mins']:
+                dct['unit'] = 'minutes'
+            elif dct['unit'] in ['h', 'hour', 'hours']:
+                dct['unit'] = 'hours'
+            elif dct['unit'] in ['d', 'day', 'days']:
+                dct['unit'] = 'days'
+            elif dct['unit'] in ['w', 'week', 'weeks']:
+                dct['unit'] = 'days'
                 mult = 7
-            elif unit in ['mo', 'month', 'months']:
-                unit = 'days'
+            elif dct['unit'] in ['mo', 'month', 'months']:
+                dct['unit'] = 'days'
                 mult = 30.43
-            elif unit in ['y', 'year', 'years']:
-                unit = 'days'
+            elif dct['unit'] in ['y', 'year', 'years']:
+                dct['unit'] = 'days'
                 mult = 365.24
             
-            if operator == '-':
+            if dct['operator'] == '-':
                 mult *= -1
 
-            dt = dt + eval('timedelta(%s=%i)'%(unit, mult*int(value)))
+            dt = dt + eval('timedelta(%s=%i)'%(dct['unit'], mult*int(dct['value'])))
 
-        else:
-            dt = datetime(**dtdict)
-            dt = dt.replace(tzinfo=tzutc())
+        # if parsed datetime is out of bounds and no year specified, try to adjust year
+        year_present = re.search('\d{4,4}', original_s)
 
-        if dt < self.start:
-            dt = self.start
+        if not year_present:
+            if dt < self.start and dt.replace(year=dt.year+1) >= self.start and dt.replace(year=dt.year+1) <= self.end:
+                dt = dt.replace(year=dt.year+1)
+            elif dt > self.end and dt.replace(year=dt.year-1) >= self.start and dt.replace(year=dt.year-1) <= self.end:
+                dt = dt.replace(year=dt.year-1)
 
-        if dt > self.end:
-            dt = self.end
-
-        return dt  
+        return dt
 
 
-    def __call__(self, from_dt=None, to_dt=None):
+    def __call__(self, from_str=None, to_str=None):
         """ sets the boundaries based on `from` and `to` strings. """
 
-        dtdict = self.extract_regex(from_dt)
-        if from_dt:
-            from_dt = self.parse_dt(dtdict)
-        else: 
-            from_dt = self.start
+        from_dt = self.string2dt(from_str, lower_bound=None)
+        to_dt = self.string2dt(to_str, lower_bound=from_dt)
 
-        dtdict = self.extract_regex(to_dt)
-        if to_dt:
-            to_dt = self.parse_dt(dtdict, from_dt)
-        else:
-            to_dt = self.end
-    
         if to_dt < from_dt:
             raise ValueError('Error in DateTimeBoundaries: lower bound is greater than upper bound.')
+
+        # limit from and to at the real boundaries
+        if to_dt > self.end:
+            to_dt = self.end
+        
+        if from_dt < self.start:
+            from_dt = self.start
 
         return from_dt, to_dt
 
 
+if __name__ == '__main__':
+    
+    dtb = DateTimeBoundaries(parser.parse('June 15 2013 13:00 UTC'), parser.parse('Jan 10 2014 16:21 UTC'))
+    lower, upper = dtb('Jan 13 -5d', 'Jan 15 -1h')
+
+    print lower
+    print upper
 
