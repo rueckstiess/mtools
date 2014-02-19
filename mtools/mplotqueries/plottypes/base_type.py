@@ -1,5 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
+from mtools.util.grouping import Grouping
+
 import re
 from datetime import MINYEAR, MAXYEAR, datetime, timedelta
 import types
@@ -80,59 +82,9 @@ class BasePlotType(object):
             if self.args['group'] != None:
                 group_by = self.args['group']
 
-        groups = OrderedDict()
-
-        for logevent in self.logevents:
-
-            # if group_by is a function, call on logevent
-            if hasattr(group_by, '__call__'):
-                key = group_by(logevent)
-            # if the logevent has attribute of group_by, use that as key
-            elif group_by and hasattr(logevent, group_by):
-                key = getattr(logevent, group_by)
-            # if the PlotType has a method with the name of group_by call that on logevent
-            elif group_by and hasattr(self, group_by):
-                f = getattr(self, group_by)
-                key = f(logevent)
-            # if a --label was given, use that as key
-            # elif self.args and self.args['label']:
-            #     key = self.args['label']
-            # else key is None
-            else:
-                key = None
-                # try to match as regular expression
-                if type(group_by) == types.StringType:
-                    match = re.search(group_by, logevent.line_str)
-                    if match:
-                        if len(match.groups()) > 0:
-                            key = match.group(1)
-                        else:
-                            key = match.group()
-
-            # special case: group together all connections
-            # if group_by == "thread" and key and key.startswith("conn"):
-            #     key = "conn####"
-
-            groups.setdefault(key, list()).append(logevent)
-        
-        # sort groups by number of data points
-        groups = OrderedDict( sorted(groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
-
-        # if --group-limit is provided, combine remaining groups
-        if self.args['group_limit']:
-            group_label = 'all others combined'
-            # now group together all groups that did not make the limit
-            groups[group_label] = []
-            # only go to second last (-1), since the 'other' group is now last
-            for other_group in groups.keys()[ self.args['group_limit']:-1 ]:
-                groups[group_label].extend(groups[other_group])
-                del groups[other_group]
-
-            # remove if empty
-            if len(groups[group_label]) == 0:
-                del groups[group_label]
-
-        self.groups = groups
+        self.groups = Grouping(self.logevents, group_by)
+        self.groups.move_items(None, ' ')
+        self.groups.sort_by_size(group_limit=self.args['group_limit'], discard_others=self.args['no_others'])
 
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("BasePlotType can't plot. Use a derived class instead")
