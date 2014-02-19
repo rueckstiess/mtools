@@ -911,7 +911,7 @@ class MLaunchTool(BaseCmdLineTool):
         return matches
 
 
-    def _filter_valid_arguments(self, arguments, binary="mongod"):
+    def _filter_valid_arguments(self, arguments, binary="mongod", config=False):
         """ check which of the list of arguments is accepted by the specified binary (mongod, mongos). 
             returns a list of accepted arguments. If an argument does not start with '-' but its preceding
             argument was accepted, then it is accepted as well. Example ['--slowms', '1000'] both arguments
@@ -927,7 +927,11 @@ class MLaunchTool(BaseCmdLineTool):
         for line in [option for option in out.split('\n')]:
             line = line.lstrip()
             if line.startswith('-'):
-                accepted_arguments.append(line.split()[0])
+                argument = line.split()[0]
+                # exception: don't allow --oplogSize for config servers
+                if config and argument == '--oplogSize':
+                    continue
+                accepted_arguments.append(argument)
 
         # filter valid arguments
         result = []
@@ -1177,7 +1181,8 @@ class MLaunchTool(BaseCmdLineTool):
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
-            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' ' + extra
+            config = '--configsvr' in extra
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
