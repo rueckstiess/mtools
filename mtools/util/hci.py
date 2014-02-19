@@ -11,10 +11,14 @@ class DateTimeBoundaries(object):
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     dtRegexes = OrderedDict([ 
-        ('constant', re.compile('(now|start|end|today)' + '($|\s+)')),                        # special constants
-        ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),                 # weekday: Mon, Wed, Sat
-        ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?' + '($|\s+)')),    # 11:59:00.123, 1:13:12.004                                    
-        ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))          # offsets: +3min, -20s, +7days                
+        # special constants
+        ('constant', re.compile('(now|start|end|today|yesterday)' + '($|\s+)')),                        
+        # weekday: Mon, Wed, Sat
+        ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),                 
+        # 11:59:00.123, 1:13:12.004  (also match timezone postfix like Z or +0700 or -05:30)
+        ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?([0-9Z:\+\-]+)?' + '($|\s+)')),                                      
+        # offsets: +3min, -20s, +7days  (see timeunits above)
+        ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))                          
     ])
 
     def __init__(self, start, end):
@@ -52,15 +56,18 @@ class DateTimeBoundaries(object):
                 result[idx] = mo
                 s = s[:mo.start(0)] + s[mo.end(0):]
 
-        # only a constant and possibly offset were given
-        if 'constant' in result and s.strip() == '':
-            if result['constant'].group(0) == 'end':
+        # handle constants
+        if 'constant' in result:
+            constant = result['constant'].group(0).strip()
+            if constant == 'end':
                 dt = self.end
-            elif result['constant'].group(0) == 'start':
+            elif constant == 'start':
                 dt = self.start
-            elif result['constant'].group(0) == 'today':
+            elif constant == 'today':
                 dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc())
-            elif result['constant'].group(0) == 'now':
+            elif constant == 'yesterday':
+                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc()) - timedelta(days=1)
+            elif constant == 'now':
                 dt = datetime.now().replace(tzinfo=tzutc())
 
         elif 'weekday' in result:
@@ -70,6 +77,7 @@ class DateTimeBoundaries(object):
                 offset = (most_recent_date.weekday() - self.weekdays.index(weekday)) % 7
                 dt = most_recent_date - timedelta(days=offset)
             
+        # if anything remains unmatched, try parsing it with dateutil's parser
         if s.strip() != '':
             try:
                 if dt:
@@ -82,6 +90,7 @@ class DateTimeBoundaries(object):
         if not dt:
             dt = lower_bound or self.end
         
+        # time is applied separately (not through the parser) so that string containing only time don't use today as default date (parser behavior)
         if 'time' in result:
             dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
             dct['microsecond'] *= 1000
@@ -151,8 +160,9 @@ class DateTimeBoundaries(object):
 if __name__ == '__main__':
     
     dtb = DateTimeBoundaries(parser.parse('June 15 2013 13:00 UTC'), parser.parse('Jan 10 2014 16:21 UTC'))
-    lower, upper = dtb('Jan 13 -5d', 'Jan 15 -1h')
+    # lower, upper = dtb('Jan 13 -5d', 'Jan 15 -1h')
+    # print lower
+    # print upper
 
-    print lower
-    print upper
+    print dtb.string2dt("start +3h")
 
