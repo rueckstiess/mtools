@@ -5,6 +5,7 @@ import time
 import os
 import json
 import sys
+import json
 
 from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
@@ -669,6 +670,25 @@ class TestMLaunch(object):
             self.run_tool("init --replicaset")
         except SystemExit as e:
             assert 'different environment already exists' in e.message
+
+
+    def test_upgrade_v1_to_v2(self):
+        startup_options = {"name": "replset", "replicaset": True, "dir": "./data", "authentication": False, "single": False, "arbiter": False, "mongos": 1, "binarypath": None, "sharded": None, "nodes": 3, "config": 1, "port": 33333, "restart": False, "verbose": False}
+
+        # create directory
+        self.run_tool("init --replicaset")
+        self.run_tool("stop")
+
+        # replace startup options
+        with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2', '.mlaunch_startup'), 'w') as f:
+            json.dump(startup_options, f, -1)
+
+        # now start with old config and check if upgrade worked
+        self.run_tool("start")
+        with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2', '.mlaunch_startup'), 'r') as f:
+            startup_options = json.load(f)
+            assert startup_options['protocol_version'] == 2
+
 
 if __name__ == '__main__':
 

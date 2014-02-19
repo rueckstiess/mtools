@@ -589,7 +589,7 @@ class MLaunchTool(BaseCmdLineTool):
             for sub-commands start, stop, list.
         """
         # need self.args['command'] so fail if it's not available
-        if not self.args or not self.args['command']:
+        if not self.args or not 'command' in self.args or not self.args['command']:
             return
 
         # load .mlaunch_startup file for start, stop, list, use current parameters for init
