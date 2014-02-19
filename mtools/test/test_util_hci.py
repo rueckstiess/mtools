@@ -85,6 +85,13 @@ def test_dtb_string2dt():
     assert dtb.string2dt('Wed') == datetime(2015, 6, 10, 0, 0, tzinfo=tzutc())
     assert dtb.string2dt('Sun') == datetime(2015, 6, 7, 0, 0, tzinfo=tzutc())
 
+    # constants
+    assert dtb.string2dt('start') == start
+    assert dtb.string2dt('end') == end
+    assert dtb.string2dt('today') == datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc())
+    assert dtb.string2dt('yesterday') == datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc()) - timedelta(days=1)
+
+
     # times
     assert dtb.string2dt('29 Sep 1978 13:06') == datetime(1978, 9, 29, 13, 6, tzinfo=tzutc())
     assert dtb.string2dt('29 Sep 13:06') == datetime(2014, 9, 29, 13, 6, tzinfo=tzutc())
@@ -108,13 +115,41 @@ def test_dtb_string2dt():
     assert dtb.string2dt('13:06:15 -16sec') == datetime(2014, 6, 13, 13, 5, 59, tzinfo=tzutc())
     assert dtb.string2dt('13:06:15.214 +1h') == datetime(2014, 6, 13, 14, 6, 15, 214000, tzinfo=tzutc())
     assert dtb.string2dt('Wed 13:06:15 -1day') == datetime(2015, 6, 9, 13, 6, 15, tzinfo=tzutc())
+    
+    print dtb.string2dt('start +3h')
+    assert dtb.string2dt('start +3h') == start + timedelta(hours=3)
+
+    # offset only
+    assert dtb.string2dt('-2d') == datetime(2015, 6, 11, tzinfo=tzutc())
 
     # test presence / absence of year and behavior for adjustment
     assert dtb.string2dt('July 30 2015') == datetime(2015, 7, 30, tzinfo=tzutc())
     assert dtb.string2dt('July 30') == datetime(2014, 7, 30, tzinfo=tzutc())
     assert dtb.string2dt('1899 Nov 1') == datetime(1899, 11, 1, tzinfo=tzutc())
 
+    # isoformat
+    from_dt = datetime(2014, 8, 5, 20, 57, 7, tzinfo=tzutc())
+    assert dtb.string2dt(from_dt.isoformat()) == datetime(2014, 8, 5, 20, 57, 7, tzinfo=tzutc())
+    assert dtb.string2dt('2014-04-28T16:17:18.192Z') == datetime(2014, 4, 28, 16, 17, 18, 192000, tzinfo=tzutc())
+
+    # with lower_bounds
+    lower = datetime(2013, 5, 2, 16, 21, 58, 123, tzinfo=tzutc())
+    assert dtb.string2dt('', lower) == end
+    assert dtb.string2dt('2013', lower) == datetime(2013, 1, 1, 0, 0, tzinfo=tzutc())
+    assert dtb.string2dt('Aug', lower) == datetime(2014, 8, 1, 0, 0, tzinfo=tzutc())
+    assert dtb.string2dt('+3sec', lower) == lower + timedelta(seconds=3)
+    assert dtb.string2dt('+4min', lower) == lower + timedelta(minutes=4)
+    assert dtb.string2dt('-5hours', lower) == lower - timedelta(hours=5)
+
 
 if __name__ == '__main__':
     
    test_dtb_string2dt()
+
+
+
+
+
+
+
+
