@@ -14,9 +14,10 @@ class LogCodeLine(object):
         for each pattern.
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, pattern_id):
         """ constructor takes a pattern, which is a tuple of strings. """
         self.pattern = pattern
+        self.pattern_id = pattern_id
         self.versions = set()
         self.matches = defaultdict(list)
 
