@@ -212,7 +212,7 @@ class TestMLaunch(object):
 
     def helper_output_has_line_with(self, keywords, output):
         """ checks if output contains a line where all keywords are present. """
-        return any( [ all( [kw in line for kw in keywords] ) for line in output] )
+        return len( filter( None, [ all( [kw in line for kw in keywords] ) for line in output] ) )
 
 
     def test_verbose_sharded(self):
@@ -673,6 +673,7 @@ class TestMLaunch(object):
 
 
     def test_upgrade_v1_to_v2(self):
+        """ mlaunch: test upgrade from protocol version 1 to 2. """
         startup_options = {"name": "replset", "replicaset": True, "dir": "./data", "authentication": False, "single": False, "arbiter": False, "mongos": 1, "binarypath": None, "sharded": None, "nodes": 3, "config": 1, "port": 33333, "restart": False, "verbose": False}
 
         # create directory
@@ -688,6 +689,25 @@ class TestMLaunch(object):
         with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2', '.mlaunch_startup'), 'r') as f:
             startup_options = json.load(f)
             assert startup_options['protocol_version'] == 2
+
+
+    def test_mlaunch_list(self):
+        """ mlaunch: test list command """
+
+        self.run_tool("init --sharded 2 --replicaset --mongos 2")
+        self.run_tool("list")
+
+        # capture stdout and only keep from actual LIST output
+        output = sys.stdout.getvalue().splitlines()
+        output = output[output.index( next(o for o in output if o.startswith('PROCESS')) ):]
+
+        assert self.helper_output_has_line_with(['PROCESS', 'STATUS', 'PORT'], output) == 1
+        assert self.helper_output_has_line_with(['mongos', 'running'], output) == 2
+        assert self.helper_output_has_line_with(['config server', 'running'], output) == 1
+        assert self.helper_output_has_line_with(['shard01'], output) == 1
+        assert self.helper_output_has_line_with(['shard02'], output) == 1
+        assert self.helper_output_has_line_with(['primary', 'running'], output) == 2
+        assert self.helper_output_has_line_with(['running', 'running'], output) == 9
 
 
 if __name__ == '__main__':
