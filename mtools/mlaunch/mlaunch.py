@@ -419,7 +419,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def start(self):
-        """ sub-command start. TODO """
+        """ sub-command start. """
         self.discover()
 
         # startup_info only gets loaded from protocol version 2 on, check if it's loaded
@@ -434,7 +434,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         
         # if new unknown_args are present, compare them with loaded ones (here we can be certain of protocol v2+)
-        if self.args['binarypath'] != './data' or (self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args)):
+        if self.args['binarypath'] != None or (self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args)):
 
             # store current args, use self.args from the file (self.loaded_args)
             start_args = self.args
