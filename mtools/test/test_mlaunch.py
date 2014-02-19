@@ -617,6 +617,16 @@ class TestMLaunch(object):
         assert user['user'] == 'corben'
 
 
+    def test_existing_environment(self):
+        """ mlaunch: test warning for overwriting an existing environment """
+
+        self.run_tool("init --single")
+        self.run_tool("stop")
+        try:
+            self.run_tool("init --replicaset")
+        except SystemExit as e:
+            assert 'different environment already exists' in e.message
+
 if __name__ == '__main__':
 
     # run individual tests with normal print output 
