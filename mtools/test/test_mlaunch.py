@@ -209,6 +209,49 @@ class TestMLaunch(object):
         assert mc['config']['mongos'].count() == 1
 
 
+    def helper_output_has_line_with(self, keywords, output):
+        """ checks if output contains a line where all keywords are present. """
+        return any( [ all( [kw in line for kw in keywords] ) for line in output] )
+
+
+    def test_verbose_sharded(self):
+        """ mlaunch: test verbose output when creating sharded cluster """
+
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 2 --verbose")
+
+        # capture stdout
+        output = sys.stdout.getvalue().splitlines()
+
+        keywords = ('rs1', 'rs2', 'rs3', 'shard01', 'shard02', 'config1', 'config2', 'config3')
+
+        # creating directory
+        for keyword in keywords:
+            # make sure every directory creation was announced to stdout
+            assert self.helper_output_has_line_with(['creating directory', keyword, 'db'], output)
+
+        assert self.helper_output_has_line_with(['creating directory', 'mongos'], output)
+
+        # launching nodes
+        for keyword in keywords:
+            assert self.helper_output_has_line_with(['launching', keyword, '--port', '--logpath', '--dbpath'], output)
+
+        # mongos
+        assert self.helper_output_has_line_with(['launching', 'mongos', '--port', '--logpath', str(self.port)], output)
+        assert self.helper_output_has_line_with(['launching', 'mongos', '--port', '--logpath', str(self.port + 1)], output)
+
+        # some fixed outputs
+        assert self.helper_output_has_line_with(['waiting for nodes to start'], output)
+        assert self.helper_output_has_line_with(['adding shards. can take up to 30 seconds'], output)
+        assert self.helper_output_has_line_with(['writing .mlaunch_startup file'], output)
+        assert self.helper_output_has_line_with(['done'], output)
+
+        # replica sets initialized, shard added
+        for keyword in ('shard01', 'shard02'):
+            assert self.helper_output_has_line_with(['replica set', keyword, 'initialized'], output)
+            assert self.helper_output_has_line_with(['shard', keyword, 'added successfully'], output)
+
+
+
     def test_shard_names(self):
         """ mlaunch: test if sharded cluster with explicit shard names works """
 

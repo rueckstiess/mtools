@@ -1102,6 +1102,8 @@ class MLaunchTool(BaseCmdLineTool):
         if num_mongos > 1:
             mongosdir = os.path.join(self.dir, 'mongos')
             if not os.path.exists(mongosdir):
+                if self.args['verbose']:
+                    print "creating directory: %s" % mongosdir
                 os.makedirs(mongosdir) 
 
         # start up mongos, but put them to the front of the port range
