@@ -56,7 +56,7 @@ class DistinctSection(BaseSection):
             self.progress_bar_enabled = False
 
         for i, logevent in enumerate(self.mloginfo.logfile):
-            cl = self.log2code(logevent.line_str)
+            cl, _ = self.log2code(logevent.line_str)
 
             # update progress bar every 1000 lines
             if self.progress_bar_enabled and (i % 1000 == 0):

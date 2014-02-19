@@ -5,7 +5,8 @@ import sys
 import argparse
 from mtools.util import OrderedDict
 from collections import defaultdict
-from itertools import chain
+from itertools import chain, izip_longest
+
 
 from mtools.util.logcodeline import LogCodeLine
 import mtools
@@ -19,7 +20,10 @@ def import_l2c_db():
         av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path, 'log2code.pickle'), 'rb'))
         return av, lv, lbw, lcl
     else:
+
         raise ImportError('log2code.pickle not found in %s.'%data_path)
+
+
 
 
 class Log2CodeConverter(object):
@@ -64,10 +68,97 @@ class Log2CodeConverter(object):
             best_match = self.logs_by_word[word][coverage.index(best_cov)]
             return self.log_code_lines[best_match]
 
-    def __call__(self, line):
-        return self._log2code(line)
+    def _strip_counters(self, sub_line):
+        """ finds the ending part of the codeline by 
+            taking out the counters and durations
+        """
+        try:
+            end = sub_line.rindex('}')
+        except ValueError, e:
+            return sub_line
+        else:
+            return sub_line[:(end + 1)]
+
+    def _strip_datetime(self,sub_line):
+        """ strip out datetime and other parts so that
+            there is no redundancy
+        """
+        try:
+            begin = sub_line.index(']')
+        except ValueError, e:
+            return sub_line
+        else:
+            # create a "" in place character for the beginnings..
+            # needed when interleaving the lists
+            sub = sub_line[begin + 1:]
+            return sub
 
 
+    def _find_variable(self, pattern, logline):
+        """ return the variable parts of the code 
+            given a tuple of strings pattern
+            ie. (this, is, a, pattern) -> 'this is a good pattern' -> [good]
+        """
+        var_subs = []
+        # find the beginning of the pattern
+        first_index = logline.index(pattern[0])
+        beg_str = logline[:first_index]
+        #strip the beginning substring
+        var_subs.append(self._strip_datetime(beg_str))
+
+        for patt, patt_next in zip(pattern[:-1], pattern[1:]):
+            # regular expression pattern that finds what's in the middle of two substrings
+            pat = re.escape(patt) + '(.*)' + re.escape(patt_next)
+            # extract whats in the middle of the two substrings
+            between = re.search(pat, logline)
+            try:
+                # add what's in between if the search isn't none 
+                var_subs.append(between.group(1))
+            except Exception, e:
+                pass
+        rest_of_string = logline.rindex(pattern[-1]) + len(pattern[-1])
+
+        # add the rest of the string to the end minus the counters and durations
+        end_str = logline[rest_of_string:]
+        var_subs.append(self._strip_counters(end_str))
+
+        # strip whitespace from each string, but keep the strings themselves
+        # var_subs = [v.strip() for v in var_subs]
+
+        return var_subs
+
+    def _variable_parts(self, line, codeline):
+        """returns the variable parts of the codeline, 
+            given the static parts
+        """
+        var_subs = []
+        # codeline has the pattern and then has the outputs in different versions
+        if codeline:
+            var_subs = self._find_variable(codeline.pattern, line)
+        else:
+            # make the variable part of the line string without all the other stuff
+            line_str= self._strip_datetime(self._strip_counters(line))
+            var_subs= [line_str.strip()]
+        return var_subs
+
+    def __call__(self, line, variable=False):
+        """ returns a tuple of the log2code and variable parts
+            when the class is called
+        """
+
+        if variable:
+            log2code = self._log2code(line)
+            return log2code, self._variable_parts(line,log2code)
+        else:
+            return self._log2code(line), None
+
+
+    def combine(self, pattern, variable):
+        """ combines a pattern and variable parts to be a line string again. """
+        
+        inter_zip= izip_longest(variable, pattern, fillvalue='')
+        interleaved = [elt for pair in inter_zip for elt in pair ]
+        return ''.join(interleaved)
 
 
 
