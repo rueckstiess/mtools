@@ -994,7 +994,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.wait_for(ports)
 
 
-    def _initiate_replset(self, port, name):
+    def _initiate_replset(self, port, name, maxwait=30):
         # initiate replica set
         if not self.args['replicaset']:
             return 
@@ -1003,7 +1003,15 @@ class MLaunchTool(BaseCmdLineTool):
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
         except OperationFailure, e:
-            con['admin'].command({'replSetInitiate':self.config_docs[name]})
+            # not initiated yet
+            for i in range(maxwait):
+                try:
+                    con['admin'].command({'replSetInitiate':self.config_docs[name]})
+                    break
+                except OperationFailure, e:
+                    print e.message, " - will retry"
+                    time.sleep(1)
+
             if self.args['verbose']:
                 print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
             print "replica set '%s' initialized." % name
