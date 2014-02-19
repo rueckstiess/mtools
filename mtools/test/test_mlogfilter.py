@@ -131,6 +131,14 @@ class TestMLogFilter(object):
             le =  LogEvent(line)
             assert(le.namespace == 'local.oplog.rs')
 
+    def test_pattern(self):
+        # test that pattern is correctly parsed, reordered and compared to logevent pattern
+        self.tool.run('%s --pattern {ns:1,_id:1,host:1}'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le =  LogEvent(line)
+            assert(le.pattern == '{"_id": 1, "host": 1, "ns": 1}')
+
     def test_word(self):
         self.tool.run('%s --word lock'%self.logfile_path)
         output = sys.stdout.getvalue()

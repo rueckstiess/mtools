@@ -589,7 +589,7 @@ class MLaunchTool(BaseCmdLineTool):
             for sub-commands start, stop, list.
         """
         # need self.args['command'] so fail if it's not available
-        if not self.args or not self.args['command']:
+        if not self.args or not 'command' in self.args or not self.args['command']:
             return
 
         # load .mlaunch_startup file for start, stop, list, use current parameters for init
@@ -1102,6 +1102,8 @@ class MLaunchTool(BaseCmdLineTool):
         if num_mongos > 1:
             mongosdir = os.path.join(self.dir, 'mongos')
             if not os.path.exists(mongosdir):
+                if self.args['verbose']:
+                    print "creating directory: %s" % mongosdir
                 os.makedirs(mongosdir) 
 
         # start up mongos, but put them to the front of the port range

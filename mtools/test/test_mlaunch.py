@@ -5,6 +5,7 @@ import time
 import os
 import json
 import sys
+import json
 
 from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
@@ -207,6 +208,49 @@ class TestMLaunch(object):
         # check for 2 shards and 1 mongos
         assert mc['config']['shards'].count() == 2
         assert mc['config']['mongos'].count() == 1
+
+
+    def helper_output_has_line_with(self, keywords, output):
+        """ checks if output contains a line where all keywords are present. """
+        return len( filter( None, [ all( [kw in line for kw in keywords] ) for line in output] ) )
+
+
+    def test_verbose_sharded(self):
+        """ mlaunch: test verbose output when creating sharded cluster """
+
+        self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 2 --verbose")
+
+        # capture stdout
+        output = sys.stdout.getvalue().splitlines()
+
+        keywords = ('rs1', 'rs2', 'rs3', 'shard01', 'shard02', 'config1', 'config2', 'config3')
+
+        # creating directory
+        for keyword in keywords:
+            # make sure every directory creation was announced to stdout
+            assert self.helper_output_has_line_with(['creating directory', keyword, 'db'], output)
+
+        assert self.helper_output_has_line_with(['creating directory', 'mongos'], output)
+
+        # launching nodes
+        for keyword in keywords:
+            assert self.helper_output_has_line_with(['launching', keyword, '--port', '--logpath', '--dbpath'], output)
+
+        # mongos
+        assert self.helper_output_has_line_with(['launching', 'mongos', '--port', '--logpath', str(self.port)], output)
+        assert self.helper_output_has_line_with(['launching', 'mongos', '--port', '--logpath', str(self.port + 1)], output)
+
+        # some fixed outputs
+        assert self.helper_output_has_line_with(['waiting for nodes to start'], output)
+        assert self.helper_output_has_line_with(['adding shards. can take up to 30 seconds'], output)
+        assert self.helper_output_has_line_with(['writing .mlaunch_startup file'], output)
+        assert self.helper_output_has_line_with(['done'], output)
+
+        # replica sets initialized, shard added
+        for keyword in ('shard01', 'shard02'):
+            assert self.helper_output_has_line_with(['replica set', keyword, 'initialized'], output)
+            assert self.helper_output_has_line_with(['shard', keyword, 'added successfully'], output)
+
 
 
     def test_shard_names(self):
@@ -615,6 +659,61 @@ class TestMLaunch(object):
         print user
         assert set(user['roles']) == set(["dbAdminAnyDatabase", "readWriteAnyDatabase", "userAdminAnyDatabase"])
         assert user['user'] == 'corben'
+
+
+    def test_existing_environment(self):
+        """ mlaunch: test warning for overwriting an existing environment """
+
+        self.run_tool("init --single")
+        self.run_tool("stop")
+        try:
+            self.run_tool("init --replicaset")
+        except SystemExit as e:
+            assert 'different environment already exists' in e.message
+
+
+    def test_upgrade_v1_to_v2(self):
+        """ mlaunch: test upgrade from protocol version 1 to 2. """
+        startup_options = {"name": "replset", "replicaset": True, "dir": "./data", "authentication": False, "single": False, "arbiter": False, "mongos": 1, "binarypath": None, "sharded": None, "nodes": 3, "config": 1, "port": 33333, "restart": False, "verbose": False}
+
+        # create directory
+        self.run_tool("init --replicaset")
+        self.run_tool("stop")
+
+        # replace startup options
+        with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2', '.mlaunch_startup'), 'w') as f:
+            json.dump(startup_options, f, -1)
+
+        # now start with old config and check if upgrade worked
+        self.run_tool("start")
+        with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2', '.mlaunch_startup'), 'r') as f:
+            startup_options = json.load(f)
+            assert startup_options['protocol_version'] == 2
+
+    def test_sharded_named_1(self):
+        """ mlaunch: test --sharded <name> for a single shard """
+
+        self.run_tool("init --sharded foo --single")
+        assert len(self.tool.get_tagged('foo'))  == 1
+
+
+    def test_mlaunch_list(self):
+        """ mlaunch: test list command """
+
+        self.run_tool("init --sharded 2 --replicaset --mongos 2")
+        self.run_tool("list")
+
+        # capture stdout and only keep from actual LIST output
+        output = sys.stdout.getvalue().splitlines()
+        output = output[output.index( next(o for o in output if o.startswith('PROCESS')) ):]
+
+        assert self.helper_output_has_line_with(['PROCESS', 'STATUS', 'PORT'], output) == 1
+        assert self.helper_output_has_line_with(['mongos', 'running'], output) == 2
+        assert self.helper_output_has_line_with(['config server', 'running'], output) == 1
+        assert self.helper_output_has_line_with(['shard01'], output) == 1
+        assert self.helper_output_has_line_with(['shard02'], output) == 1
+        assert self.helper_output_has_line_with(['primary', 'running'], output) == 2
+        assert self.helper_output_has_line_with(['running', 'running'], output) == 9
 
 
 if __name__ == '__main__':
