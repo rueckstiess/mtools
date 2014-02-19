@@ -327,28 +327,27 @@
 <p id='n264' class='stm mis'><a href='#n264'>264</a></p>
 <p id='n265' class='pln'><a href='#n265'>265</a></p>
 <p id='n266' class='stm run hide_run'><a href='#n266'>266</a></p>
-<p id='n267' class='pln'><a href='#n267'>267</a></p>
-<p id='n268' class='stm run hide_run'><a href='#n268'>268</a></p>
-<p id='n269' class='pln'><a href='#n269'>269</a></p>
+<p id='n267' class='stm run hide_run'><a href='#n267'>267</a></p>
+<p id='n268' class='pln'><a href='#n268'>268</a></p>
+<p id='n269' class='stm mis'><a href='#n269'>269</a></p>
 <p id='n270' class='stm mis'><a href='#n270'>270</a></p>
-<p id='n271' class='stm mis'><a href='#n271'>271</a></p>
+<p id='n271' class='pln'><a href='#n271'>271</a></p>
 <p id='n272' class='pln'><a href='#n272'>272</a></p>
 <p id='n273' class='pln'><a href='#n273'>273</a></p>
-<p id='n274' class='pln'><a href='#n274'>274</a></p>
+<p id='n274' class='stm run hide_run'><a href='#n274'>274</a></p>
 <p id='n275' class='stm run hide_run'><a href='#n275'>275</a></p>
-<p id='n276' class='stm run hide_run'><a href='#n276'>276</a></p>
+<p id='n276' class='pln'><a href='#n276'>276</a></p>
 <p id='n277' class='pln'><a href='#n277'>277</a></p>
-<p id='n278' class='pln'><a href='#n278'>278</a></p>
-<p id='n279' class='stm run hide_run'><a href='#n279'>279</a></p>
-<p id='n280' class='pln'><a href='#n280'>280</a></p>
+<p id='n278' class='stm run hide_run'><a href='#n278'>278</a></p>
+<p id='n279' class='pln'><a href='#n279'>279</a></p>
+<p id='n280' class='stm run hide_run'><a href='#n280'>280</a></p>
 <p id='n281' class='stm run hide_run'><a href='#n281'>281</a></p>
-<p id='n282' class='stm run hide_run'><a href='#n282'>282</a></p>
+<p id='n282' class='pln'><a href='#n282'>282</a></p>
 <p id='n283' class='pln'><a href='#n283'>283</a></p>
-<p id='n284' class='pln'><a href='#n284'>284</a></p>
-<p id='n285' class='stm run hide_run'><a href='#n285'>285</a></p>
-<p id='n286' class='pln'><a href='#n286'>286</a></p>
+<p id='n284' class='stm run hide_run'><a href='#n284'>284</a></p>
+<p id='n285' class='pln'><a href='#n285'>285</a></p>
+<p id='n286' class='stm mis'><a href='#n286'>286</a></p>
 <p id='n287' class='stm mis'><a href='#n287'>287</a></p>
-<p id='n288' class='stm mis'><a href='#n288'>288</a></p>
                 
             </td>
             <td class='text' valign='top'>
@@ -533,7 +532,7 @@
 <p id='t179' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t180' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># only one file</span><span class='strut'>&nbsp;</span></p>
 <p id='t181' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>for</span> <span class='nam'>logevent</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;logfile&#39;</span><span class='op'>]</span><span class='op'>[</span><span class='num'>0</span><span class='op'>]</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t182' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>logevent</span><span class='op'>.</span><span class='nam'>datetime</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t182' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;timezone&#39;</span><span class='op'>]</span><span class='op'>[</span><span class='num'>0</span><span class='op'>]</span> <span class='op'>!=</span> <span class='num'>0</span> <span class='key'>and</span> <span class='nam'>logevent</span><span class='op'>.</span><span class='nam'>datetime</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t183' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>logevent</span><span class='op'>.</span><span class='nam'>_datetime</span> <span class='op'>=</span> <span class='nam'>logevent</span><span class='op'>.</span><span class='nam'>datetime</span> <span class='op'>+</span> <span class='nam'>timedelta</span><span class='op'>(</span><span class='nam'>hours</span><span class='op'>=</span><span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;timezone&#39;</span><span class='op'>]</span><span class='op'>[</span><span class='num'>0</span><span class='op'>]</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t184' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>yield</span> <span class='nam'>logevent</span><span class='strut'>&nbsp;</span></p>
 <p id='t185' class='pln'><span class='strut'>&nbsp;</span></p>
@@ -618,28 +617,27 @@
 <p id='t264' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>raise</span> <span class='nam'>SystemExit</span><span class='op'>(</span><span class='str'>&#39;no logfile found.&#39;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t265' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t266' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>for</span> <span class='nam'>logevent</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile_generator</span><span class='op'>(</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t267' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t268' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;exclude&#39;</span><span class='op'>]</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t269' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># print line if any filter disagrees</span><span class='strut'>&nbsp;</span></p>
-<p id='t270' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>any</span><span class='op'>(</span><span class='op'>[</span><span class='key'>not</span> <span class='nam'>f</span><span class='op'>.</span><span class='nam'>accept</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t271' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>_outputLine</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;shorten&#39;</span><span class='op'>]</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;human&#39;</span><span class='op'>]</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t272' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t273' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t274' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># only print line if all filters agree</span><span class='strut'>&nbsp;</span></p>
-<p id='t275' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>all</span><span class='op'>(</span><span class='op'>[</span><span class='nam'>f</span><span class='op'>.</span><span class='nam'>accept</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t276' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>_outputLine</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;shorten&#39;</span><span class='op'>]</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;human&#39;</span><span class='op'>]</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t277' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t278' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># if at least one filter refuses to accept any remaining lines, stop</span><span class='strut'>&nbsp;</span></p>
-<p id='t279' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>any</span><span class='op'>(</span><span class='op'>[</span><span class='nam'>f</span><span class='op'>.</span><span class='nam'>skipRemaining</span><span class='op'>(</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t280' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># if input is not stdin</span><span class='strut'>&nbsp;</span></p>
-<p id='t281' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdin</span><span class='op'>.</span><span class='nam'>isatty</span><span class='op'>(</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t282' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>break</span><span class='strut'>&nbsp;</span></p>
+<p id='t267' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;exclude&#39;</span><span class='op'>]</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t268' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># print line if any filter disagrees</span><span class='strut'>&nbsp;</span></p>
+<p id='t269' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>any</span><span class='op'>(</span><span class='op'>[</span><span class='key'>not</span> <span class='nam'>f</span><span class='op'>.</span><span class='nam'>accept</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t270' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>_outputLine</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;shorten&#39;</span><span class='op'>]</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;human&#39;</span><span class='op'>]</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t271' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t272' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t273' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># only print line if all filters agree</span><span class='strut'>&nbsp;</span></p>
+<p id='t274' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>all</span><span class='op'>(</span><span class='op'>[</span><span class='nam'>f</span><span class='op'>.</span><span class='nam'>accept</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t275' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>_outputLine</span><span class='op'>(</span><span class='nam'>logevent</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;shorten&#39;</span><span class='op'>]</span><span class='op'>,</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;human&#39;</span><span class='op'>]</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t276' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t277' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># if at least one filter refuses to accept any remaining lines, stop</span><span class='strut'>&nbsp;</span></p>
+<p id='t278' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>any</span><span class='op'>(</span><span class='op'>[</span><span class='nam'>f</span><span class='op'>.</span><span class='nam'>skipRemaining</span><span class='op'>(</span><span class='op'>)</span> <span class='key'>for</span> <span class='nam'>f</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>filters</span><span class='op'>]</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t279' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># if input is not stdin</span><span class='strut'>&nbsp;</span></p>
+<p id='t280' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdin</span><span class='op'>.</span><span class='nam'>isatty</span><span class='op'>(</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t281' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>break</span><span class='strut'>&nbsp;</span></p>
+<p id='t282' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t283' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t284' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t285' class='stm run hide_run'><span class='key'>if</span> <span class='nam'>__name__</span> <span class='op'>==</span> <span class='str'>&#39;__main__&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t286' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t287' class='stm mis'>&nbsp; &nbsp; <span class='nam'>tool</span> <span class='op'>=</span> <span class='nam'>MLogFilterTool</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t288' class='stm mis'>&nbsp; &nbsp; <span class='nam'>tool</span><span class='op'>.</span><span class='nam'>run</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t284' class='stm run hide_run'><span class='key'>if</span> <span class='nam'>__name__</span> <span class='op'>==</span> <span class='str'>&#39;__main__&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t285' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t286' class='stm mis'>&nbsp; &nbsp; <span class='nam'>tool</span> <span class='op'>=</span> <span class='nam'>MLogFilterTool</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t287' class='stm mis'>&nbsp; &nbsp; <span class='nam'>tool</span><span class='op'>.</span><span class='nam'>run</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
                 
             </td>
         </tr>
