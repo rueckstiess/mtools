@@ -716,6 +716,13 @@ class TestMLaunch(object):
         assert self.helper_output_has_line_with(['running', 'running'], output) == 9
 
 
+    @raises(SystemExit)
+    def test_single_and_arbiter(self):
+        """ mlaunch: test --single with --arbiter error """
+        
+        self.run_tool("init --single --arbiter")
+
+
 if __name__ == '__main__':
 
     # run individual tests with normal print output 

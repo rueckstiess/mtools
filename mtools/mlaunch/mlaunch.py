@@ -205,6 +205,12 @@ class MLaunchTool(BaseCmdLineTool):
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
+        # conditions on argument combinations
+        if self.args['command'] == 'init' and 'single' in self.args and self.args['single']:
+            if self.args['arbiter']:
+                self.argparser.error("can't specify --arbiter for single nodes.")
+
+
         # replace path with absolute path, but store relative path as well
         self.relative_dir = self.args['dir']
         self.dir = os.path.abspath(self.args['dir'])
@@ -782,7 +788,7 @@ class MLaunchTool(BaseCmdLineTool):
             threads.append(threading.Thread(target=wait_for_host, args=(port, interval, timeout, to_start, queue)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
-            print "waiting for nodes %s..." % 'to start' if to_start else 'to shutdown'
+            print "waiting for nodes %s..." % ('to start' if to_start else 'to shutdown')
         
         for thread in threads:
             thread.start()
