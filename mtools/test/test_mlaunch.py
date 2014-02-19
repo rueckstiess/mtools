@@ -690,6 +690,12 @@ class TestMLaunch(object):
             startup_options = json.load(f)
             assert startup_options['protocol_version'] == 2
 
+    def test_sharded_named_1(self):
+        """ mlaunch: test --sharded <name> for a single shard """
+
+        self.run_tool("init --sharded foo --single")
+        assert len(self.tool.get_tagged('foo'))  == 1
+
 
     def test_mlaunch_list(self):
         """ mlaunch: test list command """
