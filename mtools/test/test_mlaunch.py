@@ -716,6 +716,56 @@ class TestMLaunch(object):
         assert self.helper_output_has_line_with(['running', 'running'], output) == 9
 
 
+    def helper_which(self, pgm):
+        """ equivalent of which command """
+        
+        path=os.getenv('PATH')
+        for p in path.split(os.path.pathsep):
+            p=os.path.join(p,pgm)
+            if os.path.exists(p) and os.access(p,os.X_OK):
+                return p
+
+    
+    def test_mlaunch_binary_path_start(self):
+        """ mlaunch: test if --binarypath is persistent between init and start """
+
+        # get true binary path (to test difference to not specifying one)
+        path = self.helper_which('mongod')
+        path = path[:path.rfind('/')]
+
+        self.run_tool("init --single --binarypath %s" % path)
+        self.run_tool("stop")
+        
+        self.run_tool("start")
+        assert self.tool.loaded_args['binarypath'] == path
+        assert self.tool.startup_info[str(self.port)].startswith('%s/mongod' % path)
+
+        self.run_tool("stop")
+        try:
+            self.run_tool("start --binarypath /some/other/path")
+            raise Exception
+        except:
+            assert self.tool.args['binarypath'] == '/some/other/path'
+            assert self.tool.startup_info[str(self.port)].startswith('/some/other/path/mongod')
+
+
+    @raises(SystemExit)
+    def test_single_and_arbiter(self):
+        """ mlaunch: test --single with --arbiter error """
+        
+        self.run_tool("init --single --arbiter")
+
+
+    def test_oplogsize_config(self):
+        """ mlaunch: test config server never receives --oplogSize parameter """
+
+        self.run_tool("init --sharded 1 --single --oplogSize 19 --verbose")
+        output = sys.stdout.getvalue().splitlines()
+
+        output_launch_config = next(o for o in output if '--configsvr' in o)
+        assert '--oplogSize' not in output_launch_config
+
+
 if __name__ == '__main__':
 
     # run individual tests with normal print output 

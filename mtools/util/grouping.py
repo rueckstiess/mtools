@@ -55,6 +55,19 @@ class Grouping(object):
             yield key
 
 
+    def __len__(self):
+        return len(self.groups)
+
+    def keys(self):
+        return self.groups.keys()
+
+    def values(self):
+        return self.groups.values()
+
+    def items(self):
+        return self.groups.items()
+
+
     def regroup(self, group_by):
         if not group_by:
             group_by = self.group_by

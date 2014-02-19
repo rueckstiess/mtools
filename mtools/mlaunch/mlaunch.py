@@ -205,6 +205,12 @@ class MLaunchTool(BaseCmdLineTool):
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
+        # conditions on argument combinations
+        if self.args['command'] == 'init' and 'single' in self.args and self.args['single']:
+            if self.args['arbiter']:
+                self.argparser.error("can't specify --arbiter for single nodes.")
+
+
         # replace path with absolute path, but store relative path as well
         self.relative_dir = self.args['dir']
         self.dir = os.path.abspath(self.args['dir'])
@@ -413,7 +419,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def start(self):
-        """ sub-command start. TODO """
+        """ sub-command start. """
         self.discover()
 
         # startup_info only gets loaded from protocol version 2 on, check if it's loaded
@@ -428,7 +434,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         
         # if new unknown_args are present, compare them with loaded ones (here we can be certain of protocol v2+)
-        if self.args['binarypath'] != './data' or (self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args)):
+        if self.args['binarypath'] != None or (self.unknown_args and set(self.unknown_args) != set(self.loaded_unknown_args)):
 
             # store current args, use self.args from the file (self.loaded_args)
             start_args = self.args
@@ -782,7 +788,7 @@ class MLaunchTool(BaseCmdLineTool):
             threads.append(threading.Thread(target=wait_for_host, args=(port, interval, timeout, to_start, queue)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
-            print "waiting for nodes %s..." % 'to start' if to_start else 'to shutdown'
+            print "waiting for nodes %s..." % ('to start' if to_start else 'to shutdown')
         
         for thread in threads:
             thread.start()
@@ -905,7 +911,7 @@ class MLaunchTool(BaseCmdLineTool):
         return matches
 
 
-    def _filter_valid_arguments(self, arguments, binary="mongod"):
+    def _filter_valid_arguments(self, arguments, binary="mongod", config=False):
         """ check which of the list of arguments is accepted by the specified binary (mongod, mongos). 
             returns a list of accepted arguments. If an argument does not start with '-' but its preceding
             argument was accepted, then it is accepted as well. Example ['--slowms', '1000'] both arguments
@@ -921,7 +927,11 @@ class MLaunchTool(BaseCmdLineTool):
         for line in [option for option in out.split('\n')]:
             line = line.lstrip()
             if line.startswith('-'):
-                accepted_arguments.append(line.split()[0])
+                argument = line.split()[0]
+                # exception: don't allow --oplogSize for config servers
+                if config and argument == '--oplogSize':
+                    continue
+                accepted_arguments.append(argument)
 
         # filter valid arguments
         result = []
@@ -984,7 +994,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.wait_for(ports)
 
 
-    def _initiate_replset(self, port, name):
+    def _initiate_replset(self, port, name, maxwait=30):
         # initiate replica set
         if not self.args['replicaset']:
             return 
@@ -993,7 +1003,15 @@ class MLaunchTool(BaseCmdLineTool):
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
         except OperationFailure, e:
-            con['admin'].command({'replSetInitiate':self.config_docs[name]})
+            # not initiated yet
+            for i in range(maxwait):
+                try:
+                    con['admin'].command({'replSetInitiate':self.config_docs[name]})
+                    break
+                except OperationFailure, e:
+                    print e.message, " - will retry"
+                    time.sleep(1)
+
             if self.args['verbose']:
                 print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
             print "replica set '%s' initialized." % name
@@ -1171,7 +1189,8 @@ class MLaunchTool(BaseCmdLineTool):
             auth_param = '--keyFile %s'%key_path
 
         if self.unknown_args:
-            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' ' + extra
+            config = '--configsvr' in extra
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)

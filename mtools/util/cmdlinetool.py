@@ -108,7 +108,7 @@ class BaseCmdLineTool(object):
         total_length = 40
 
         if progress == 1.:
-            sys.stdout.write('\r' + ' '*(total_length + len(prefix) + 12))
+            sys.stdout.write('\r' + ' '*(total_length + len(prefix) + 50))
             sys.stdout.write('\n')
             sys.stdout.flush()
         else:
