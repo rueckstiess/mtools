@@ -83,7 +83,7 @@ class BasePlotType(object):
                 group_by = self.args['group']
 
         self.groups = Grouping(self.logevents, group_by)
-        self.groups.move_items(None, ' ')
+        self.groups.move_items(None, 'others')
         self.groups.sort_by_size(group_limit=self.args['group_limit'], discard_others=self.args['no_others'])
 
     def plot_group(self, group, idx, axis):

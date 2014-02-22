@@ -15,14 +15,21 @@ except ImportError:
 from mtools.util.log2code import Log2CodeConverter
 
 
+def opened_closed(logevent):
+    """ inspects a log line and groups it by connection being openend or closed. If neither, return False. """
+    if "connection accepted" in logevent.line_str:
+        return "opened"
+    elif "end connection" in logevent.line_str:
+        return "closed"
+    else:
+        return False
+
 class ConnectionChurnPlotType(BasePlotType):
     """ plots a histogram plot over all logevents. The bucket size can be specified with the --bucketsize or -b parameter. Unit is in seconds. """
 
     plot_type_str = 'connchurn'
     timeunits = {'sec':1, 's':1, 'min':60, 'm':1, 'hour':3600, 'h':3600, 'day':86400, 'd':86400}
     sort_order = 1
-
-    group_by = 'opened_closed'
 
 
     def __init__(self, args=None, unknown_args=None):
@@ -43,18 +50,11 @@ class ConnectionChurnPlotType(BasePlotType):
 
         self.ylabel = "# connections opened/closed"
 
-    def opened_closed(self, logevent):
-        """ inspects a log line and groups it by connection being openend or closed. If neither, return False. """
-        if "connection accepted" in logevent.line_str:
-            return "opened"
-        elif "end connection" in logevent.line_str:
-            return "closed"
-        else:
-            return False
+        self.group_by = opened_closed
 
     def accept_line(self, logevent):
-        """ return True for each line. We bucket everything. Filtering has to be done before passing to this type of plot. """
-        return self.opened_closed(logevent)
+        """ only return lines with 'connection accepted' or 'end connection'. """
+        return opened_closed(logevent)
 
 
     def plot_group(self, group, idx, axis):

@@ -15,6 +15,8 @@ class Grouping(object):
     def add(self, item, group_by=None):
         """ General purpose class to group items by certain criteria. """
 
+        key = None
+        
         if not group_by:
             group_by = self.group_by
 
@@ -37,11 +39,6 @@ class Grouping(object):
                             key = match.group(1)
                         else:
                             key = match.group()
-                    else:
-                        key = 'no match'
-        else:
-            # group_by is None, throw it all in one big bucket
-            key = 'others'
             
         self.groups.setdefault(key, list()).append(item)
         
@@ -49,11 +46,9 @@ class Grouping(object):
     def __getitem__(self, key):
         return self.groups[key]
 
-
     def __iter__(self):
         for key in self.groups:
             yield key
-
 
     def __len__(self):
         return len(self.groups)
@@ -68,7 +63,7 @@ class Grouping(object):
         return self.groups.items()
 
 
-    def regroup(self, group_by):
+    def regroup(self, group_by=None):
         if not group_by:
             group_by = self.group_by
 
@@ -82,6 +77,8 @@ class Grouping(object):
 
     def move_items(self, from_group, to_group):
         """ will take all elements from the from_group and add it to the to_group. """
+        if from_group not in self.keys() or len(self.groups[from_group]) == 0:
+            return 
 
         self.groups.setdefault(to_group, list()).extend(self.groups.get(from_group, list()))
         if from_group in self.groups:
@@ -117,6 +114,10 @@ class Grouping(object):
             # remove if empty
             if others_label in self.groups and len(self.groups[others_label]) == 0:
                 del self.groups[others_label]
+
+        # remove others group regardless of limit if requested
+        if discard_others and others_label in self.groups:
+            del self.groups[others_label]
 
 
 

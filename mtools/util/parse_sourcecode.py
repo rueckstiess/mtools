@@ -14,6 +14,7 @@ from pymongo import MongoClient
 
 mongodb_path = "/Users/tr/Documents/code/mongo/"
 git_path = "/usr/bin/git"
+pattern_id = 0
 
 def source_files(mongodb_path):
     for root, dirs, files in os.walk(mongodb_path):
@@ -76,6 +77,7 @@ def output_verbose(version, filename, lineno, line, statement, matches, accepted
 
 
 def extract_logs(log_code_lines, current_version):
+    global pattern_id
     log_templates = set()
     log_triggers = [" log(", " LOG(", " LOGSOME", " warning()", " error()", " out()", " problem()"]
 
@@ -179,14 +181,15 @@ def extract_logs(log_code_lines, current_version):
                 if loglevel:
                     loglevel = int(loglevel.group(1))
 
-                matches = tuple(matches)
+                pattern = tuple(matches)
 
                 # add to log_code_lines dict
-                if not matches in log_code_lines:
-                    log_code_lines[matches] = LogCodeLine(matches)
+                if not pattern in log_code_lines:
+                    log_code_lines[pattern] = LogCodeLine(pattern, pattern_id)
+                    pattern_id += 1
 
-                log_code_lines[matches].addMatch(current_version, filename, lineno, loglevel, trigger)
-                log_templates.add(matches)
+                log_code_lines[pattern].addMatch(current_version, filename, lineno, loglevel, trigger)
+                log_templates.add(pattern)
 
                 # output_verbose(current_version, filename, lineno, line, statement, matches, True, "OK")
 
@@ -206,7 +209,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         versions = [sys.argv[1]]
 
-    log_code_lines = {}
+    log_code_lines = OrderedDict()
     logs_versions = defaultdict(list)
     print "parsing..."
     for v in versions:
@@ -233,15 +236,17 @@ if __name__ == '__main__':
     #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
 
     # write out to mongodb
-    # mc = MongoClient()
-    for pattern_id, pattern in enumerate(log_code_lines):
+    mc = MongoClient()
+    mc['log2code']['instances'].drop()
+
+    for pattern in log_code_lines:
         lcl = log_code_lines[pattern]
 
         first_token = pattern[0]
         split_words = first_token.split()
 
         instance = {
-            '_id': pattern_id,
+            '_id': lcl.pattern_id,
             'pattern': list(lcl.pattern),
             'first_word': split_words[0],
             'matches': []
@@ -258,7 +263,7 @@ if __name__ == '__main__':
                     'trigger': occ[3]
                 })
         
-        # mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
+        mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 
