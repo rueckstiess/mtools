@@ -73,7 +73,7 @@ class DistinctSection(BaseSection):
                 if not logevent.thread:
                     # skip the lines that don't have a thread name (usually map/reduce or assertions)
                     continue
-                if len(logevent.split_tokens) - logevent._thread_offset <= 1:
+                if len(logevent.split_tokens) - logevent.datetime_nextpos <= 1:
                     # skip empty log messages (after thread name)
                     continue
                 if "warning: log line attempted" in logevent.line_str and "over max size" in logevent.line_str:

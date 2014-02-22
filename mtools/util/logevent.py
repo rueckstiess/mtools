@@ -78,7 +78,6 @@ class LogEvent(object):
 
         self._thread_calculated = False
         self._thread = None
-        self._thread_offset = None
 
         self._operation_calculated = False
         self._operation = None
@@ -197,6 +196,13 @@ class LogEvent(object):
         return self._datetime_format
 
 
+    @property
+    def datetime_nextpos(self):
+        if self._datetime_nextpos == None and not self._datetime_calculated:
+            _ = self.datetime
+        return self._datetime_nextpos
+
+
     def set_datetime_hint(self, format, nextpos, rollover):
         self._datetime_format = format
         self._datetime_nextpos = nextpos
@@ -276,18 +282,13 @@ class LogEvent(object):
 
             split_tokens = self.split_tokens
 
-            if not self._datetime_nextpos:
-                # force evaluation of datetime to get access to datetime_offset
-                _ = self.datetime
-
-            if len(split_tokens) <= self._datetime_nextpos:
+            if not self.datetime_nextpos or len(split_tokens) <= self.datetime_nextpos:
                 return None
 
-            connection_token = split_tokens[self._datetime_nextpos]
+            connection_token = split_tokens[self.datetime_nextpos]
             match = re.match(r'^\[([^\]]*)\]$', connection_token)
             if match:
                 self._thread = match.group(1)
-                self._thread_offset = self._datetime_nextpos
   
         return self._thread
 
@@ -476,7 +477,7 @@ class LogEvent(object):
 
         # trigger thread evaluation to get access to offset
         if self.thread:
-            for t, token in enumerate(split_tokens[self._thread_offset+2:]):
+            for t, token in enumerate(split_tokens[self.datetime_nextpos+2:]):
                 for counter in counters:
                     if token.startswith('%s:'%counter):
                         try:
@@ -486,7 +487,7 @@ class LogEvent(object):
                             # https://jira.mongodb.org/browse/SERVER-10101
                             if counter == 'numYields' and token.startswith('numYields'):
                                 try:
-                                    self._numYields = int((split_tokens[t+1+self._thread_offset+2]).replace(',', ''))
+                                    self._numYields = int((split_tokens[t+1+self.datetime_nextpos+2]).replace(',', ''))
                                 except ValueError:
                                     pass
                         # token not parsable, skip
@@ -596,7 +597,6 @@ class LogEvent(object):
 
         self._thread_calculated = True
         self._thread = doc['thread']
-        self._thread_offset = None
 
         self._operation_calculated = True
         self._operation = doc[u'op']
