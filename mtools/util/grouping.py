@@ -15,6 +15,8 @@ class Grouping(object):
     def add(self, item, group_by=None):
         """ General purpose class to group items by certain criteria. """
 
+        key = None
+        
         if not group_by:
             group_by = self.group_by
 
@@ -61,7 +63,7 @@ class Grouping(object):
         return self.groups.items()
 
 
-    def regroup(self, group_by):
+    def regroup(self, group_by=None):
         if not group_by:
             group_by = self.group_by
 
@@ -112,6 +114,10 @@ class Grouping(object):
             # remove if empty
             if others_label in self.groups and len(self.groups[others_label]) == 0:
                 del self.groups[others_label]
+
+        # remove others group regardless of limit if requested
+        if discard_others and others_label in self.groups:
+            del self.groups[others_label]
 
 
 
