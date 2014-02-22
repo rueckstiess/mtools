@@ -22,8 +22,6 @@ class ConnectionChurnPlotType(BasePlotType):
     timeunits = {'sec':1, 's':1, 'min':60, 'm':1, 'hour':3600, 'h':3600, 'day':86400, 'd':86400}
     sort_order = 1
 
-    group_by = 'opened_closed'
-
 
     def __init__(self, args=None, unknown_args=None):
         BasePlotType.__init__(self, args, unknown_args)
@@ -52,8 +50,10 @@ class ConnectionChurnPlotType(BasePlotType):
         else:
             return False
 
+    group_by = opened_closed
+
     def accept_line(self, logevent):
-        """ return True for each line. We bucket everything. Filtering has to be done before passing to this type of plot. """
+        """ only return lines with 'connection accepted' or 'end connection'. """
         return self.opened_closed(logevent)
 
 

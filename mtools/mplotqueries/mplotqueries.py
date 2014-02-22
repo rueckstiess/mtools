@@ -116,9 +116,6 @@ class MPlotQueriesTool(LogFileTool):
         plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
 
         for logfile in self.logfiles:
-            start = None
-            end = None         
-            logevent = None
             
             # get log file information
             if self.progress_bar_enabled:
@@ -140,9 +137,6 @@ class MPlotQueriesTool(LogFileTool):
                     logevent.end_datetime = logevent.datetime 
                     logevent._datetime = logevent._datetime - timedelta(milliseconds=logevent.duration)
                     logevent._datetime_calculated = True
-
-                if not start:
-                    start = logevent.datetime
 
                 # update progress bar every 1000 lines
                 if self.progress_bar_enabled and (i % 1000 == 0) and logevent.datetime:
@@ -166,15 +160,8 @@ class MPlotQueriesTool(LogFileTool):
                     logevent.filename = logfile.name
 
 
-            # store end of logfile 
-            if logevent and logevent.datetime:
-                if self.args['optime_start'] and hasattr(logevent, 'end_datetime'):
-                    end = logevent.end_datetime
-                else:
-                    end = logevent.datetime
-
             # store start and end for each logfile
-            plot_instance.date_range = (start, end)
+            plot_instance.date_range = (logfile.start, logfile.end)
 
         # clear progress bar
         if self.logfiles and self.progress_bar_enabled:
