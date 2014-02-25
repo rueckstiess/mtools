@@ -92,6 +92,12 @@ class TestMLogFilter(object):
             assert LogEvent(prev).datetime <= LogEvent(next).datetime
 
 
+    def test_end_reached(self):
+        self.tool.run('%s --from Jan 3015 --to +10min'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        assert output.strip() == ''
+
+
     def test_human(self):
         # need to skip this test for python 2.6.x because thousands separator format is not compatible
         if sys.version_info < (2, 7):

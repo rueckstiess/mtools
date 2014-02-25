@@ -195,10 +195,10 @@ class LogFile(InputSource):
                 self._datetime_nextpos = logevent._datetime_nextpos
                 break
 
-        # get end datetime (lines are at most 10k, go back 15k at most to make sure)
+        # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
         self._filesize = self.filehandle.tell()
-        self.filehandle.seek(-min(self._filesize, 15000), 2)
+        self.filehandle.seek(-min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
             logevent = LogEvent(line)
@@ -243,15 +243,15 @@ class LogFile(InputSource):
         self.filehandle.seek(newline_pos - jump_back + 1, 1)
 
         # roll forward until we found a line with a datetime
-        logevent = self.next()
-        while not logevent.datetime:
+        try:
             logevent = self.next()
+            while not logevent.datetime:
+                logevent = self.next()
 
-        return logevent
-            
-            # to avoid infinite loops, quit here if previous line not found
-            # if prev:
-            #     return None
+            return logevent
+        except StopIteration:
+            # reached end of file
+            return None
 
 
     def fast_forward(self, start_dt):
