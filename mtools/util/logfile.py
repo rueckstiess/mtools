@@ -238,7 +238,8 @@ class LogFile(InputSource):
 
         # move back to last newline char
         if newline_pos == -1:
-            return None
+            self.filehandle.seek(0)
+            return self.next()
 
         self.filehandle.seek(newline_pos - jump_back + 1, 1)
 
@@ -261,17 +262,20 @@ class LogFile(InputSource):
         """
         if self.from_stdin:
             # skip lines until start_dt is reached
-            le = None
-            while not (le and le.datetime and le.datetime >= start_dt):
-                line = self.filehandle.readline()
-                # can't check for year rollover in a stream, just return
-                le = LogEvent(line)
+            return
 
         else:
             # fast bisection path
             min_mark = 0
             max_mark = self.filesize
             step_size = max_mark
+
+            # check if start_dt is already smaller than first datetime
+            self.filehandle.seek(0)
+            le = self.next()
+            if le.datetime and le.datetime >= start_dt:
+                self.filehandle.seek(0)
+                return
 
             le = None
             self.filehandle.seek(0)

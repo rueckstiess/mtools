@@ -394,7 +394,7 @@ Mon Aug  5 20:55:12 [conn140] end connection 10.0.0.12:52694 (2 connections now 
 Mon Aug  5 20:55:12 [initandlisten] connection accepted from 10.0.0.12:52702 #142 (3 connections now open)
 Mon Aug  5 20:55:20 [conn141] end connection 10.0.0.12:52695 (2 connections now open)
 Mon Aug  5 20:55:20 [initandlisten] connection accepted from 10.0.0.12:52703 #143 (3 connections now open)
-Mon Aug  5 20:55:42 [conn142] end connection 10.0.0.12:52702 (2 connections now open)
+=== a line without a datetime ===
 Mon Aug  5 20:55:42 [initandlisten] connection accepted from 10.0.0.12:52710 #144 (4 connections now open)
 Mon Aug  5 20:55:50 [conn143] end connection 10.0.0.12:52703 (2 connections now open)
 Mon Aug  5 20:55:50 [initandlisten] connection accepted from 10.0.0.12:52711 #145 (3 connections now open)

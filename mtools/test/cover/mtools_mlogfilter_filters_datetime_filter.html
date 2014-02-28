@@ -5,7 +5,7 @@
     
     
     <meta http-equiv='X-UA-Compatible' content='IE=emulateIE7' />
-    <title>Coverage for mtools.mlogfilter.filters.datetime_filter: 84%</title>
+    <title>Coverage for mtools.mlogfilter.filters.datetime_filter: 91%</title>
     <link rel='stylesheet' href='style.css' type='text/css'>
     
     <script type='text/javascript' src='jquery.min.js'></script>
@@ -21,13 +21,13 @@
 <div id='header'>
     <div class='content'>
         <h1>Coverage for <b>mtools.mlogfilter.filters.datetime_filter</b> :
-            <span class='pc_cov'>84%</span>
+            <span class='pc_cov'>91%</span>
         </h1>
         <img id='keyboard_icon' src='keybd_closed.png'>
         <h2 class='stats'>
             56 statements &nbsp;
-            <span class='run hide_run shortkey_r button_toggle_run'>47 run</span>
-            <span class='mis shortkey_m button_toggle_mis'>9 missing</span>
+            <span class='run hide_run shortkey_r button_toggle_run'>51 run</span>
+            <span class='mis shortkey_m button_toggle_mis'>5 missing</span>
             <span class='exc shortkey_x button_toggle_exc'>0 excluded</span>
             
         </h2>
@@ -159,9 +159,9 @@
 <p id='n96' class='pln'><a href='#n96'>96</a></p>
 <p id='n97' class='stm run hide_run'><a href='#n97'>97</a></p>
 <p id='n98' class='pln'><a href='#n98'>98</a></p>
-<p id='n99' class='stm mis'><a href='#n99'>99</a></p>
-<p id='n100' class='stm mis'><a href='#n100'>100</a></p>
-<p id='n101' class='stm mis'><a href='#n101'>101</a></p>
+<p id='n99' class='stm run hide_run'><a href='#n99'>99</a></p>
+<p id='n100' class='stm run hide_run'><a href='#n100'>100</a></p>
+<p id='n101' class='stm run hide_run'><a href='#n101'>101</a></p>
 <p id='n102' class='pln'><a href='#n102'>102</a></p>
 <p id='n103' class='pln'><a href='#n103'>103</a></p>
 <p id='n104' class='stm run hide_run'><a href='#n104'>104</a></p>
@@ -188,7 +188,7 @@
 <p id='n125' class='pln'><a href='#n125'>125</a></p>
 <p id='n126' class='stm run hide_run'><a href='#n126'>126</a></p>
 <p id='n127' class='pln'><a href='#n127'>127</a></p>
-<p id='n128' class='stm mis'><a href='#n128'>128</a></p>
+<p id='n128' class='stm run hide_run'><a href='#n128'>128</a></p>
 <p id='n129' class='pln'><a href='#n129'>129</a></p>
 <p id='n130' class='pln'><a href='#n130'>130</a></p>
 <p id='n131' class='stm run hide_run'><a href='#n131'>131</a></p>
@@ -322,9 +322,9 @@
 <p id='t96' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t97' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>mlogfilter</span><span class='op'>.</span><span class='nam'>is_stdin</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t98' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># assume this year (we have no other info)</span><span class='strut'>&nbsp;</span></p>
-<p id='t99' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>now</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>now</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t100' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>startDateTime</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>(</span><span class='nam'>now</span><span class='op'>.</span><span class='nam'>year</span><span class='op'>,</span> <span class='num'>1</span><span class='op'>,</span> <span class='num'>1</span><span class='op'>,</span> <span class='nam'>tzinfo</span><span class='op'>=</span><span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t101' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>endDateTime</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>(</span><span class='nam'>MAXYEAR</span><span class='op'>,</span> <span class='num'>12</span><span class='op'>,</span> <span class='num'>31</span><span class='op'>,</span> <span class='nam'>tzinfo</span><span class='op'>=</span><span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t99' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>now</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>now</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t100' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>startDateTime</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>(</span><span class='nam'>now</span><span class='op'>.</span><span class='nam'>year</span><span class='op'>,</span> <span class='num'>1</span><span class='op'>,</span> <span class='num'>1</span><span class='op'>,</span> <span class='nam'>tzinfo</span><span class='op'>=</span><span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t101' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>endDateTime</span> <span class='op'>=</span> <span class='nam'>datetime</span><span class='op'>(</span><span class='nam'>MAXYEAR</span><span class='op'>,</span> <span class='num'>12</span><span class='op'>,</span> <span class='num'>31</span><span class='op'>,</span> <span class='nam'>tzinfo</span><span class='op'>=</span><span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t102' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t103' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t104' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>logfiles</span> <span class='op'>=</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>mlogfilter</span><span class='op'>.</span><span class='nam'>args</span><span class='op'>[</span><span class='str'>&#39;logfile&#39;</span><span class='op'>]</span><span class='strut'>&nbsp;</span></p>
@@ -351,7 +351,7 @@
 <p id='t125' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t126' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>seek_to</span> <span class='op'>=</span> <span class='op'>-</span><span class='num'>1</span><span class='strut'>&nbsp;</span></p>
 <p id='t127' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t128' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>seek_to</span> <span class='op'>=</span> <span class='nam'>False</span><span class='strut'>&nbsp;</span></p>
+<p id='t128' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>self</span><span class='op'>.</span><span class='nam'>seek_to</span> <span class='op'>=</span> <span class='nam'>False</span><span class='strut'>&nbsp;</span></p>
 <p id='t129' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t130' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t131' class='stm run hide_run'>&nbsp; &nbsp; <span class='key'>def</span> <span class='nam'>accept</span><span class='op'>(</span><span class='nam'>self</span><span class='op'>,</span> <span class='nam'>logevent</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>

@@ -46,7 +46,9 @@ class TestMLogFilter(object):
         self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
             assert(le.datetime >= random_start)
 
     def test_from_iso8601_timestamp(self):
@@ -54,7 +56,9 @@ class TestMLogFilter(object):
         self.tool.run('%s --from %s'%(self.logfile_path, random_start.isoformat()))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
             assert(le.datetime >= random_start)
 
     def test_from_to(self):
@@ -64,8 +68,26 @@ class TestMLogFilter(object):
         self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
             assert(le.datetime >= random_start and le.datetime <= random_end)
+
+
+    def test_from_to_stdin(self):
+
+        year = datetime.now().year
+        start = datetime(year, 8, 5, 20, 45)
+        end = datetime(year, 8, 5, 21, 01)
+        self.tool.is_stdin = True
+
+        self.tool.run('%s --from %s --to %s'%(self.logfile_path, start.strftime("%b %d %H:%M:%S"), end.strftime("%b %d %H:%M:%S")))
+        
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            assert(le.datetime >= start and le.datetime <= end)
+
 
     def test_json(self):
         """ output with --json is in JSON format. """
@@ -89,7 +111,11 @@ class TestMLogFilter(object):
         lines = output.splitlines()
         assert len(lines) == 2*file_length
         for prev, next in zip(lines[:-1], lines[1:]):
-            assert LogEvent(prev).datetime <= LogEvent(next).datetime
+            prev_le = LogEvent(prev)
+            next_le = LogEvent(next)
+            if not prev_le.datetime or not next_le.datetime:
+                continue
+            assert prev_le.datetime <= next_le.datetime
 
 
     def test_end_reached(self):
@@ -113,28 +139,28 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert(len(output.splitlines()) > 0)
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
             assert(le.duration >= 145 and le.duration <= 500)
 
     def test_thread(self):
         self.tool.run('%s --thread initandlisten'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
             assert(le.thread == 'initandlisten')
 
     def test_operation(self):
         self.tool.run('%s --operation insert'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
             assert(le.operation == 'insert')
 
     def test_namespace(self):
         self.tool.run('%s --namespace local.oplog.rs'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
             assert(le.namespace == 'local.oplog.rs')
 
     def test_pattern(self):
@@ -142,7 +168,7 @@ class TestMLogFilter(object):
         self.tool.run('%s --pattern {ns:1,_id:1,host:1}'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
+            le = LogEvent(line)
             assert(le.pattern == '{"_id": 1, "host": 1, "ns": 1}')
 
     def test_word(self):
