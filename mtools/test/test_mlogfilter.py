@@ -80,9 +80,9 @@ class TestMLogFilter(object):
         start = datetime(year, 8, 5, 20, 45)
         end = datetime(year, 8, 5, 21, 01)
         self.tool.is_stdin = True
-
         self.tool.run('%s --from %s --to %s'%(self.logfile_path, start.strftime("%b %d %H:%M:%S"), end.strftime("%b %d %H:%M:%S")))
-        
+        self.tool.is_stdin = False
+
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -142,6 +142,24 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.duration >= 145 and le.duration <= 500)
 
+    def test_scan(self):
+        # load tablescan logfile
+        scn_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'collscans.log')
+
+        self.tool.run('%s --scan' % scn_logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len(lines) == 3
+
+    def test_accept_nodate(self):
+        self.tool.is_stdin = True
+        self.tool.run('%s --from Aug 5 2014 20:53:50 --to +5min'%self.logfile_path)
+        self.tool.is_stdin = False
+
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any('=== a line without a datetime ===' in l for l in lines)
+
     def test_thread(self):
         self.tool.run('%s --thread initandlisten'%self.logfile_path)
         output = sys.stdout.getvalue()
@@ -190,7 +208,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le =  LogEvent(line)
-            assert( 
+            assert(
                     (le.datetime >= event1 - padding and le.datetime <= event1 + padding) or
                     (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )
@@ -209,7 +227,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le =  LogEvent(line)
-            assert( 
+            assert(
                     (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 - duration1 + padding) or
                     (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )
@@ -228,7 +246,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le =  LogEvent(line)
-            assert( 
+            assert(
                     (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 + padding) or
                     (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
                   )

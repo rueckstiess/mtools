@@ -12,7 +12,7 @@ def custom_parse_dt(value):
 
 
 class DateTimeFilter(BaseFilter):
-    """ This filter has two parser arguments: --from and --to, both are 
+    """ This filter has two parser arguments: --from and --to, both are
         optional. All possible values for --from and --to can be described as:
 
         [DATE] [TIME] [OFFSET] in that order, separated by a space.
@@ -28,8 +28,8 @@ class DateTimeFilter(BaseFilter):
 
         [OFFSET] consists of [OPERATOR][VALUE][UNIT]   (no spaces in between)
 
-        [OPERATOR] can be + or - (note that - can only be used if the whole 
-            "[DATE] [TIME] [OFFSET]" is in quotation marks, otherwise it would 
+        [OPERATOR] can be + or - (note that - can only be used if the whole
+            "[DATE] [TIME] [OFFSET]" is in quotation marks, otherwise it would
             be confused with a separate parameter)
 
         [VALUE] can be any number
@@ -39,16 +39,16 @@ class DateTimeFilter(BaseFilter):
 
         The [OFFSET] is added/subtracted to/from the specified [DATE] [TIME].
 
-        For the --from parameter, the default is the same as 'start' 
-            (0001-01-01 00:00:00). If _only_ an [OFFSET] is given, it is 
+        For the --from parameter, the default is the same as 'start'
+            (0001-01-01 00:00:00). If _only_ an [OFFSET] is given, it is
             added to 'start' (which is not very useful).
 
-        For the --to parameter, the default is the same as 'end' 
-            (9999-31-12 23:59:59). If _only_ an [OFFSET] is given, however, 
+        For the --to parameter, the default is the same as 'end'
+            (9999-31-12 23:59:59). If _only_ an [OFFSET] is given, however,
             it is added to [FROM].
 
-        Examples:  
-            --from Sun 10:00 
+        Examples:
+            --from Sun 10:00
                 goes from last Sunday 10:00:00am to the end of the file
 
             --from Sep 29
@@ -60,12 +60,12 @@ class DateTimeFilter(BaseFilter):
             --from today --to +1h
                 goes from today's date 00:00:00 to today's date 01:00:00
 
-            --from 20:15 --to +3m  
+            --from 20:15 --to +3m
                 goes from today's date at 20:15:00 to today's date at 20:18:00
     """
 
     filterArgs = [
-       ('--from', {'action':'store',  'type':custom_parse_dt, 'nargs':'*', 'default':'start', 'help':'output starting at FROM', 'dest':'from'}), 
+       ('--from', {'action':'store',  'type':custom_parse_dt, 'nargs':'*', 'default':'start', 'help':'output starting at FROM', 'dest':'from'}),
        ('--to',   {'action':'store',  'type':custom_parse_dt, 'nargs':'*', 'default':'end',   'help':'output up to TO',         'dest':'to'})
     ]
 
@@ -73,13 +73,13 @@ class DateTimeFilter(BaseFilter):
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-    dtRegexes = OrderedDict([         
+    dtRegexes = OrderedDict([
         ('weekday', r'|'.join(weekdays)),                         # weekdays: see above
         ('date',    '('+ '|'.join(months) +')' + r'\s+\d{1,2}'),  # month + day:  Jan 5, Oct 13, Sep 03, ...
         ('word',    r'now|start|end|today'),
         ('time2',   r'\d{1,2}:\d{2,2}'),                          # 11:59, 1:13, 00:00, ...
         ('time3',   r'\d{1,2}:\d{2,2}:\d{2,2}'),                  # 11:59:00, 1:13:12, 00:00:59, ...
-        ('offset',  r'[\+-]\d+(' + '|'.join(timeunits) + ')'),    # offsets: +3min, -20s, +7days, ...                    
+        ('offset',  r'[\+-]\d+(' + '|'.join(timeunits) + ')'),    # offsets: +3min, -20s, +7days, ...
     ])
 
     def __init__(self, mlogfilter):
@@ -99,7 +99,7 @@ class DateTimeFilter(BaseFilter):
             now = datetime.now()
             self.startDateTime = datetime(now.year, 1, 1, tzinfo=tzutc())
             self.endDateTime = datetime(MAXYEAR, 12, 31, tzinfo=tzutc())
-        
+
         else:
             logfiles = self.mlogfilter.args['logfile']
             self.startDateTime = min([lf.start+timedelta(hours=self.mlogfilter.args['timezone'][i]) for i, lf in enumerate(logfiles)])
@@ -107,7 +107,7 @@ class DateTimeFilter(BaseFilter):
 
         # now parse for further changes to from and to datetimes
         dtbound = DateTimeBoundaries(self.startDateTime, self.endDateTime)
-        self.fromDateTime, self.toDateTime = dtbound(self.mlogfilter.args['from'] or None, 
+        self.fromDateTime, self.toDateTime = dtbound(self.mlogfilter.args['from'] or None,
                                                      self.mlogfilter.args['to'] or None)
 
         # define start_limit for mlogfilter's fast_forward method
@@ -115,9 +115,9 @@ class DateTimeFilter(BaseFilter):
 
         # for single logfile, get file seek position of `to` datetime
         if len(self.mlogfilter.args['logfile']) == 1 and not self.mlogfilter.is_stdin:
-            
+
             if self.mlogfilter.args['to'] != "end":
-                # fast forward, get seek value, then reset file 
+                # fast forward, get seek value, then reset file
                 logfile = self.mlogfilter.args['logfile'][0]
                 logfile.fast_forward(self.toDateTime)
                 self.seek_to = logfile.filehandle.tell()
@@ -134,7 +134,7 @@ class DateTimeFilter(BaseFilter):
                 self.toReached = self.mlogfilter.args['logfile'][0].filehandle.tell() >= self.seek_to
             return True
         else:
-            # slow version has to check each datetime 
+            # slow version has to check each datetime
             dt = logevent.datetime
 
             # if logevent has no datetime, accept if between --from and --to
@@ -150,11 +150,9 @@ class DateTimeFilter(BaseFilter):
                 self.toReached = True
                 return False
 
-            else: 
+            else:
                 return False
 
-        
+
     def skipRemaining(self):
         return self.toReached
-
-
