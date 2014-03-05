@@ -198,3 +198,9 @@ Wed Mar  5 18:10:24.855 [TTLMonitor] query test.system.indexes query: { expireAf
 Wed Mar  5 18:11:24.814 [DataFileSync] flushing mmaps took 2ms  for 4 files
 Wed Mar  5 18:11:24.858 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:0 keyUpdates:0 locks(micros) r:311 nreturned:0 reslen:20 0ms
 Wed Mar  5 18:11:24.859 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:1 keyUpdates:0 locks(micros) r:164 nreturned:0 reslen:20 0ms
+Wed Mar  5 18:12:24.818 [DataFileSync] flushing mmaps took 3ms  for 4 files
+Wed Mar  5 18:12:24.863 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:0 keyUpdates:0 locks(micros) r:127 nreturned:0 reslen:20 0ms
+Wed Mar  5 18:12:24.863 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:1 keyUpdates:0 locks(micros) r:55 nreturned:0 reslen:20 0ms
+Wed Mar  5 18:13:24.821 [DataFileSync] flushing mmaps took 3ms  for 4 files
+Wed Mar  5 18:13:24.867 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:0 keyUpdates:0 locks(micros) r:177 nreturned:0 reslen:20 0ms
+Wed Mar  5 18:13:24.868 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } ntoreturn:0 ntoskip:0 nscanned:1 keyUpdates:0 locks(micros) r:56 nreturned:0 reslen:20 0ms
