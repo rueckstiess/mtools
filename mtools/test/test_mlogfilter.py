@@ -98,11 +98,17 @@ class TestMLogFilter(object):
             assert(line_dict)
             assert(type(line_dict) == dict)
 
-    def test_shorten(self):
+    def test_shorten_50(self):
         self.tool.run('%s --shorten 50'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert(len(line) <= 50)
+
+    def test_shorten_default(self):
+        self.tool.run('%s --shorten'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            assert(len(line) <= 200)
 
     def test_merge_same(self):
         file_length = len(self.logfile)
@@ -116,6 +122,32 @@ class TestMLogFilter(object):
             if not prev_le.datetime or not next_le.datetime:
                 continue
             assert prev_le.datetime <= next_le.datetime
+
+    def test_merge_markers(self):
+        file_length = len(self.logfile)
+        self.tool.run('%s %s --markers foo bar'%(self.logfile_path, self.logfile_path))
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len([l for l in lines if l.startswith('foo')]) == file_length
+        assert len([l for l in lines if l.startswith('bar')]) == file_length
+
+    def test_merge_invalid_markers(self):
+        try:
+            self.tool.run('%s %s --markers foo bar baz'%(self.logfile_path, self.logfile_path))
+        except SystemExit as e:
+            assert 'Number of markers not the same' in e.message
+
+    def test_exclude(self):
+        file_length = len(self.logfile)
+        tool = MLogFilterTool()
+        tool.run('%s --slow 300' % self.logfile_path)
+
+        tool = MLogFilterTool()
+        tool.run('%s --slow 300 --exclude' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines_total = len(output.splitlines())
+
+        assert lines_total == file_length
 
 
     def test_end_reached(self):
@@ -167,12 +199,33 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.thread == 'initandlisten')
 
+    def test_no_timestamp_format(self):
+        self.tool.run('%s --timestamp-format none --timezone 5'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if le.datetime:
+                assert le.datetime_format == 'ctime-pre2.4'
+
     def test_operation(self):
         self.tool.run('%s --operation insert'%self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.operation == 'insert')
+
+    def test_invalid_timezone_args(self):
+        try:
+            self.tool.run('%s --timezone 1 2 3'%self.logfile_path)
+        except SystemExit as e:
+            assert "Invalid number of timezone parameters" in e.message
+
+    def test_verbose(self):
+        self.tool.run('%s --slow --verbose'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert lines[0].startswith('command line arguments')
+        assert any( line.startswith('active filters: SlowFilter') for line in lines )
 
     def test_namespace(self):
         self.tool.run('%s --namespace local.oplog.rs'%self.logfile_path)

@@ -18,7 +18,7 @@ class MLogFilterTool(LogFileTool):
 
     def __init__(self):
         LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=True)
-        
+
         # add all filter classes from the filters module
         self.filters = [c[1] for c in inspect.getmembers(filters, inspect.isclass)]
 
@@ -37,7 +37,7 @@ class MLogFilterTool(LogFileTool):
         if not filterClass in self.filters:
             self.filters.append(filterClass)
 
-    
+
     def _arrayToString(self, arr):
         """ if arr is of type list, join elements with space delimiter. """
         if isinstance(arr, list):
@@ -45,7 +45,7 @@ class MLogFilterTool(LogFileTool):
         else:
             return arr
 
-    
+
     def _outputLine(self, logevent, length=None, human=False):
         """ prints the final line, with various options (length, human, datetime changes, ...) """
         # adapt timezone output if necessary
@@ -73,15 +73,15 @@ class MLogFilterTool(LogFileTool):
 
 
     def _msToString(self, ms):
-        """ changes milliseconds to hours min sec ms format """ 
+        """ changes milliseconds to hours min sec ms format """
         hr, ms = divmod(ms, 3600000)
         mins, ms = divmod(ms, 60000)
         secs, mill = divmod(ms, 1000)
-        return "%ihr %imin %isecs %ims"%(hr, mins, secs, mill) 
+        return "%ihr %imin %isecs %ims"%(hr, mins, secs, mill)
 
 
     def _changeMs(self, line):
-        """ changes the ms part in the string if needed """ 
+        """ changes the ms part in the string if needed """
         # use the the position of the last space instead
         try:
             last_space_pos = line.rindex(' ')
@@ -91,7 +91,7 @@ class MLogFilterTool(LogFileTool):
             end_str = line[last_space_pos:]
             new_string = line
             if end_str[-2:] == 'ms' and int(end_str[:-2]) >= 1000:
-                # isolate the number of milliseconds 
+                # isolate the number of milliseconds
                 ms = int(end_str[:-2])
                 # create the new string with the beginning part of the log with the new ms part added in
                 new_string = line[:last_space_pos] + ' (' +  self._msToString(ms) + ')' + line[last_space_pos:]
@@ -163,13 +163,13 @@ class MLogFilterTool(LogFileTool):
 
     def logfile_generator(self):
         """ generator method that yields each line of the logfile, or the next line in case of several log files. """
-        
+
         if not self.args['exclude']:
             # ask all filters for a start_limit and fast-forward to the maximum
             start_limits = [ f.start_limit for f in self.filters if hasattr(f, 'start_limit') ]
 
             if start_limits:
-                for logfile in self.args['logfile']: 
+                for logfile in self.args['logfile']:
                     logfile.fast_forward( max(start_limits) )
 
         if len(self.args['logfile']) > 1:
@@ -179,7 +179,7 @@ class MLogFilterTool(LogFileTool):
         else:
             # only one file
             for logevent in self.args['logfile'][0]:
-                if self.args['timezone'][0] != 0 and logevent.datetime: 
+                if self.args['timezone'][0] != 0 and logevent.datetime:
                     logevent._datetime = logevent.datetime + timedelta(hours=self.args['timezone'][0])
                 yield logevent
 
@@ -228,16 +228,17 @@ class MLogFilterTool(LogFileTool):
 
         if self.args['shorten'] != False:
             if self.args['shorten'] == None:
-                self.args['shorten'] = 200        
+                self.args['shorten'] = 200
 
         if self.args['verbose']:
-            print "mlogfilter> command line arguments"
+            print "command line arguments"
             for a in self.args:
-                print "mlogfilter> %8s: %s" % (a, self.args[a])
+                print "    %s: %s" % (a, self.args[a])
             print
-            print "mlogfilter> active filters:",
+            print "active filters:",
             print ', '.join([f.__class__.__name__ for f in self.filters])
             print
+            print '===================='
 
         # handle markers parameter
         if len(self.args['markers']) == 1:
@@ -283,5 +284,5 @@ class MLogFilterTool(LogFileTool):
 
 if __name__ == '__main__':
 
-    tool = MLogFilterTool()    
+    tool = MLogFilterTool()
     tool.run()

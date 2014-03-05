@@ -16,21 +16,21 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class LogEvent(object):
-    """ LogEvent extracts information from a mongod/mongos log file line and 
+    """ LogEvent extracts information from a mongod/mongos log file line and
         stores the following properties/variables:
 
         line_str: the original line string
-        split_tokens: a list of string tokens after splitting line_str using 
+        split_tokens: a list of string tokens after splitting line_str using
                       whitespace as split points
-        datetime: a datetime object for the logevent. For logfiles created with 
+        datetime: a datetime object for the logevent. For logfiles created with
                   version 2.4+, it also contains micro-seconds
         duration: the duration of a timed operation in ms
         thread: the thread name (e.g. "conn1234") as string
         operation: insert, update, remove, query, command, getmore, None
         namespace: the namespace of the operation, or None
-        
+
         Certain operations also add the number of affected/scanned documents.
-        If applicable, the following variables are also set, otherwise the 
+        If applicable, the following variables are also set, otherwise the
         default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
 
         For performance reason, all fields are evaluated lazily upon first
@@ -135,7 +135,7 @@ class LogEvent(object):
     @property
     def duration(self):
         """ calculate duration if available (lazy) """
-        
+
         if not self._duration_calculated:
             self._duration_calculated = True
 
@@ -187,8 +187,8 @@ class LogEvent(object):
 
         return self._datetime
 
-    
-    @property 
+
+    @property
     def datetime_format(self):
         if not self._datetime_calculated:
             _ = self.datetime
@@ -222,8 +222,8 @@ class LogEvent(object):
 
 
     def _match_datetime_pattern(self, tokens):
-        """ Helper method that takes a list of tokens and tries to match 
-            the datetime pattern at the beginning of the token list. 
+        """ Helper method that takes a list of tokens and tries to match
+            the datetime pattern at the beginning of the token list.
 
             There are several formats that this method needs to understand
             and distinguish between (see MongoDB's SERVER-7965):
@@ -244,13 +244,13 @@ class LogEvent(object):
                 assume_iso8601_format = True
 
         if assume_iso8601_format:
-            # sanity check, because the dateutil parser could interpret 
+            # sanity check, because the dateutil parser could interpret
             # any numbers as a valid date
             if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}', \
                             tokens[0]):
                 return None
 
-            # convinced that this is a ISO-8601 format, the dateutil parser 
+            # convinced that this is a ISO-8601 format, the dateutil parser
             # will do the rest
             dt = dateutil.parser.parse(tokens[0])
             self._datetime_format = "iso8601-utc" \
@@ -266,7 +266,7 @@ class LogEvent(object):
 
             if self._year_rollover and dt > self._year_rollover:
                 dt = dt.replace(year=year-1)
-                
+
             self._datetime_format = "ctime" \
                 if '.' in tokens[3] else "ctime-pre2.4"
 
@@ -289,13 +289,13 @@ class LogEvent(object):
             match = re.match(r'^\[([^\]]*)\]$', connection_token)
             if match:
                 self._thread = match.group(1)
-  
+
         return self._thread
 
 
     @property
     def operation(self):
-        """ extract operation (query, insert, update, remove, getmore, command) 
+        """ extract operation (query, insert, update, remove, getmore, command)
             if available (lazy) """
 
         if not self._operation_calculated:
@@ -317,7 +317,7 @@ class LogEvent(object):
 
 
     def _extract_operation_and_namespace(self):
-        """ Helper method to extract both operation and namespace from a 
+        """ Helper method to extract both operation and namespace from a
             logevent. It doesn't make sense to only extract one as they
             appear back to back in the token list.
         """
@@ -330,7 +330,7 @@ class LogEvent(object):
 
         if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
             return
-        
+
         op = split_tokens[self._datetime_nextpos + 1]
 
         if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
@@ -466,7 +466,7 @@ class LogEvent(object):
 
     def _extract_counters(self):
         """ Helper method to extract counters like nscanned, nreturned, etc.
-            from the logevent. 
+            from the logevent.
         """
 
         # extract counters (if present)
@@ -492,12 +492,12 @@ class LogEvent(object):
                                     pass
                         # token not parsable, skip
                         break
-                    
+
 
 
     def parse_all(self):
         """ triggers the extraction of all information, which would usually
-            just be evaluated lazily. 
+            just be evaluated lazily.
         """
         tokens = self.split_tokens
         duration = self.duration
@@ -519,9 +519,11 @@ class LogEvent(object):
 
     def _reformat_timestamp(self, format, force=False):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
-            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.') 
+            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.')
 
         if (self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '')) and not force:
+            return
+        elif self.datetime == None:
             return
         elif format.startswith('ctime'):
             dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
@@ -542,7 +544,7 @@ class LogEvent(object):
         elif format == 'iso8601-utc':
             if self.datetime.utcoffset():
                 dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
-            else: 
+            else:
                 dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
             dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
 
@@ -569,9 +571,9 @@ class LogEvent(object):
             if value != None:
                 output[label] = value
 
-        return output     
+        return output
 
-    
+
     def to_json(self, labels=None):
         """ converts LogEvent object to valid JSON. """
         output = self.to_dict(labels)
@@ -631,9 +633,7 @@ class LogEvent(object):
         scanned = 'nscanned:%i'%self._nscanned if 'nscanned' in doc else ''
         yields = 'numYields:%i'%self._numYields if 'numYield' in doc else ''
         locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
-        duration = '%ims' % self.duration if self.duration != None else ''    
+        duration = '%ims' % self.duration if self.duration != None else ''
 
         self._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(
             datetime=self.datetime, thread=self.thread, operation=self.operation, namespace=self.namespace, payload=payload, scanned=scanned, yields=yields, locks=locks, duration=duration)
-
-
