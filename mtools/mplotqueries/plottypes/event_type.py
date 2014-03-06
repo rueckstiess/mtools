@@ -82,7 +82,7 @@ class RSStatePlotType(EventPlotType):
         """ change default color behavior to map certain states always to the same colors (similar to MMS). """
         try:
             state_idx = cls.states.index(group)
-        except KeyError:
+        except ValueError:
             # on any unexpected state, return black
             return 'k'
         return cls.colors[state_idx], cls.markers[0]
