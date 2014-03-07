@@ -8,6 +8,7 @@ try:
 
     # test for 2.7-included packages, add to requirements if not available
     install_requires = ['psutil']
+    test_requires = ['nose>=1.0', 'psutil', 'pymongo>=2.4']
     try:
         import argparse
     except ImportError:
@@ -17,12 +18,14 @@ try:
         from collections import OrderedDict
     except ImportError:
         install_requires.append('ordereddict')
+        test_requires.append('ordereddict')
 
     # add dateutil if not installed already
     try: 
         import dateutil
     except ImportError:
         install_requires.append('python-dateutil')
+        test_requires.append('ordereddict')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
@@ -70,7 +73,7 @@ setup(
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files, launch test environments and reproduce issues.',
     long_description=long_description,
-    tests_require=['nose>=1.0', 'psutil', 'pymongo>=2.4'],
+    tests_require=test_requires,
     test_suite = 'nose.collector',
     **kws
 )
