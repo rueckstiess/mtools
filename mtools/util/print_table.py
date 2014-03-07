@@ -21,7 +21,6 @@ def print_table( rows, override_headers=None, uppercase_headers=True ):
 
 
 if __name__ == '__main__':
-    from collections import OrderedDict as OD
 
     d = [ {'a': '123', 'b': '654', 'c':'foo'},
           {'a': '12ooo3', 'b': '654', 'c':'foo'},
@@ -30,5 +29,5 @@ if __name__ == '__main__':
           None,
           {'a': '123', 'b': '654', 'c':'foo'} ]
 
-    print_table(d, ['blantastica', 'foo', 'bar']) 
+    print_table(d, ['long title here', 'foo', 'bar']) 
     
