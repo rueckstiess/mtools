@@ -132,9 +132,16 @@ class LogFile(InputSource):
 
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line (generator) """
-
+        le = None
+        
         while True:
             le = self.next()
+
+            # get start and end date for stdin input
+            if not self.start and self.from_stdin:
+                if le.datetime:
+                    self.start = le.datetime
+
             yield le
 
         # future iterations start from the beginning
