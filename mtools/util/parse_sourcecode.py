@@ -4,12 +4,12 @@ import sys
 import commands
 import subprocess
 import cPickle
-from mtools.util import OrderedDict
 from collections import defaultdict
 
 from mtools.util.logcodeline import LogCodeLine
 
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 
 mongodb_path = "/Users/tr/Documents/code/mongo/"
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         versions = [sys.argv[1]]
 
-    log_code_lines = OrderedDict()
+    log_code_lines = {}
     logs_versions = defaultdict(list)
     print "parsing..."
     for v in versions:
@@ -236,8 +236,12 @@ if __name__ == '__main__':
     #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
 
     # write out to mongodb
-    mc = MongoClient()
-    mc['log2code']['instances'].drop()
+    write_to_db = True
+    try:
+        mc = MongoClient()
+        mc['log2code']['instances'].drop()
+    except ConnectionFailure:
+        write_to_db = False
 
     for pattern in log_code_lines:
         lcl = log_code_lines[pattern]
@@ -263,7 +267,8 @@ if __name__ == '__main__':
                     'trigger': occ[3]
                 })
         
-        mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
+        if write_to_db:
+            mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 

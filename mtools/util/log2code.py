@@ -3,7 +3,6 @@ import os
 import re
 import sys
 import argparse
-from mtools.util import OrderedDict
 from collections import defaultdict
 from itertools import chain, izip_longest
 
