@@ -31,8 +31,6 @@ class LogFile(InputSource):
     @property
     def start(self):
         """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
-        if self.from_stdin:
-            return None
         if not self._start:
             self._calculate_bounds()
         return self._start
@@ -40,8 +38,6 @@ class LogFile(InputSource):
     @property
     def end(self):
         """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
-        if self.from_stdin:
-            return None
         if not self._end:
             self._calculate_bounds()
         return self._end
@@ -109,15 +105,12 @@ class LogFile(InputSource):
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
-        # print "next line:", line
 
         le = LogEvent(line)
         
         # hint format and nextpos from previous line
         if self._datetime_format and self._datetime_nextpos != None:
-            # print "hinting"
             ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
-            # print "ret", ret
             if not ret:
                 # logevent indicates timestamp format has changed, invalidate hint info
                 self._datetime_format = None
@@ -132,14 +125,30 @@ class LogFile(InputSource):
 
     def __iter__(self):
         """ iteration over LogFile object will return a LogEvent object for each line (generator) """
-
+        le = None
+        
         while True:
-            le = self.next()
-            yield le
+            try:
+                le = self.next()
+            except StopIteration as e:
+                # end of log file, get end date
+                if not self.end and self.from_stdin:
+                    if le and le.datetime:
+                        self._end = le.datetime
 
-        # future iterations start from the beginning
-        if not self.from_stdin:
-            self.filehandle.seek(0)
+                # future iterations start from the beginning
+                if not self.from_stdin:
+                    self.filehandle.seek(0)
+                
+                # now raise StopIteration exception
+                raise e
+
+            # get start date for stdin input
+            if not self.start and self.from_stdin:
+                if le and le.datetime:
+                    self._start = le.datetime
+
+            yield le
 
 
     def __len__(self):
