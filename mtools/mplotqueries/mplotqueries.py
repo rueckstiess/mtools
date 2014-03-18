@@ -110,6 +110,7 @@ class MPlotQueriesTool(LogFileTool):
             self.logfiles = self.args['logfile']
             
         if len(self.logfiles) > 1:
+            # force "logfile" to be the group key for multiple files
             multiple_files = True
             self.args['group'] = 'filename'
         
@@ -160,7 +161,7 @@ class MPlotQueriesTool(LogFileTool):
                     logevent.filename = logfile.name
 
 
-            # store start and end for each logfile
+            # store start and end for each logfile (also works for system.profile and stdin stream)
             plot_instance.date_range = (logfile.start, logfile.end)
 
         # clear progress bar

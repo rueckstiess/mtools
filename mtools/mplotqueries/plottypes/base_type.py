@@ -26,8 +26,6 @@ class BasePlotType(object):
     default_group_by = None
     date_range = (datetime(MAXYEAR, 12, 31), datetime(MINYEAR, 1, 1))
 
-    # set group_by in sub-classes to force a group_by as below
-    # group_by = 'example'
 
     def __init__(self, args=None, unknown_args=None):
         self.args = args
