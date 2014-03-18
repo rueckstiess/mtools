@@ -360,7 +360,7 @@ class LogEvent(object):
         if not self._sort_pattern:
 
             # trigger evaluation of operation
-            if self.operation in ['query', 'getmore', 'update', 'remove']:
+            if self.operation in ['query', 'getmore']:
                 self._sort_pattern = self._find_pattern('orderby: ')
 
         return self._sort_pattern
@@ -513,11 +513,9 @@ class LogEvent(object):
 
 
     def _find_pattern(self, trigger):
-        print "trigger", trigger
 
         # get start of json query pattern
         start_idx = self.line_str.rfind(trigger)
-        print "start_idx", start_idx
         if start_idx == -1:
             # no query pattern found
             return None
@@ -535,7 +533,6 @@ class LogEvent(object):
             if brace_counter == 0:
                 break
         search_str = search_str[:stop_idx+1].strip()
-        print "search_str", search_str
         if search_str:
             return json2pattern(search_str)
         else:
