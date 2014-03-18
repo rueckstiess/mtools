@@ -90,9 +90,15 @@ class ScatterPlotType(BasePlotType):
 
             except ValueError:
                 # construct triangle and add to list of durlines
-                pts = [ [date2num(logevent.datetime), 0], 
-                        [date2num(logevent.datetime), logevent.duration], 
-                        [date2num(logevent.datetime - timedelta(milliseconds=logevent.duration)), 0] ]
+
+                if self.args['optime_start']:
+                    pts = [ [date2num(logevent.datetime), 0], 
+                            [date2num(logevent.datetime), logevent.duration], 
+                            [date2num(logevent.datetime + timedelta(milliseconds=logevent.duration)), 0] ]
+                else:
+                    pts = [ [date2num(logevent.datetime), 0], 
+                            [date2num(logevent.datetime), logevent.duration], 
+                            [date2num(logevent.datetime - timedelta(milliseconds=logevent.duration)), 0] ]
 
                 poly = Polygon(pts, closed=True, alpha=0.2, linewidth=0, facecolor=event.artist.get_markerfacecolor(), edgecolor=None, zorder=-10000)
 
