@@ -1,9 +1,16 @@
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
+from operator import itemgetter
+from datetime import timedelta
+
 import argparse
 
 try:
+    import matplotlib.pyplot as plt
+
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
+    from matplotlib.patches import Polygon
+
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
         instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
@@ -32,6 +39,8 @@ class ScatterPlotType(BasePlotType):
         else:
             self.ylabel = args['yaxis']
 
+        self.durlines = []
+
 
     def accept_line(self, logevent):
         """ return True if the log line has the nominated yaxis field. """
@@ -58,13 +67,40 @@ class ScatterPlotType(BasePlotType):
         return artist
 
     def clicked(self, event):
-        """ this is called if an element of this plottype was clicked. Implement in sub class. """
+        """ this is called if an element of this plottype was clicked. Implement in sub class. """        
         group = event.artist._mt_group
         indices = event.ind
-        for i in indices:
-            print self.groups[group][i].line_str
 
+        if not event.mouseevent.dblclick:
+            for i in indices:
+                print self.groups[group][i].line_str
 
+        else:
+            # toggle durline
+            first = indices[0]
+            logevent = self.groups[group][first]
+
+            try:
+                # remove triangle for this event
+                idx = map(itemgetter(0), self.durlines).index(logevent)
+                _, poly = self.durlines[idx]
+                poly.remove()
+                plt.gcf().canvas.draw()
+                del self.durlines[idx]
+
+            except ValueError:
+                # construct triangle and add to list of durlines
+                pts = [ [date2num(logevent.datetime), 0], 
+                        [date2num(logevent.datetime), logevent.duration], 
+                        [date2num(logevent.datetime - timedelta(milliseconds=logevent.duration)), 0] ]
+
+                poly = Polygon(pts, closed=True, alpha=0.2, linewidth=0, facecolor=event.artist.get_markerfacecolor(), edgecolor=None, zorder=-10000)
+
+                ax = plt.gca()
+                ax.add_patch(poly)
+                plt.gcf().canvas.draw()
+
+                self.durlines.append( (logevent, poly) )
 
 
 
