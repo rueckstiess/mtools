@@ -84,6 +84,7 @@ class LogEvent(object):
         self._namespace = None
 
         self._pattern = None
+        self._sort_pattern = None
 
         self._counters_calculated = False
         self._nscanned = None
@@ -347,28 +348,22 @@ class LogEvent(object):
 
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore', 'update', 'remove']:
-                # get start of json query pattern
-                start_idx = self.line_str.rfind(' query: ')
-                if start_idx == -1:
-                    # no query pattern found
-                    return
-
-                stop_idx = 0
-                brace_counter = 0
-                search_str = self.line_str[start_idx+8:]
-
-                for match in re.finditer(r'{|}', search_str):
-                    stop_idx = match.start()
-                    if search_str[stop_idx] == '{':
-                        brace_counter += 1
-                    else:
-                        brace_counter -= 1
-                    if brace_counter == 0:
-                        break
-                search_str = search_str[:stop_idx+1].strip()
-                self._pattern = json2pattern(search_str)
+                self._pattern = self._find_pattern('query: ')
 
         return self._pattern
+
+    
+    @property
+    def sort_pattern(self):
+        """ extract query pattern from operations """
+
+        if not self._sort_pattern:
+
+            # trigger evaluation of operation
+            if self.operation in ['query', 'getmore', 'update', 'remove']:
+                self._sort_pattern = self._find_pattern('orderby: ')
+
+        return self._sort_pattern
 
 
     @property
@@ -517,6 +512,37 @@ class LogEvent(object):
         r = self.r
 
 
+    def _find_pattern(self, trigger):
+        print "trigger", trigger
+
+        # get start of json query pattern
+        start_idx = self.line_str.rfind(trigger)
+        print "start_idx", start_idx
+        if start_idx == -1:
+            # no query pattern found
+            return None
+
+        stop_idx = 0
+        brace_counter = 0
+        search_str = self.line_str[start_idx+len(trigger):]
+
+        for match in re.finditer(r'{|}', search_str):
+            stop_idx = match.start()
+            if search_str[stop_idx] == '{':
+                brace_counter += 1
+            else:
+                brace_counter -= 1
+            if brace_counter == 0:
+                break
+        search_str = search_str[:stop_idx+1].strip()
+        print "search_str", search_str
+        if search_str:
+            return json2pattern(search_str)
+        else:
+            return None
+
+
+
     def _reformat_timestamp(self, format, force=False):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
             raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.')
@@ -604,8 +630,20 @@ class LogEvent(object):
         self._operation = doc[u'op']
         self._namespace = doc[u'ns']
 
-        # TODO: pattern parser also for system.profile events
-        self._pattern = '{}'
+        # query pattern for system.profile events, all three cases (see SERVER-13245)
+        if 'query' in doc:
+            if 'query' in doc['query'] and isinstance(doc['query']['query'], dict):
+                self._pattern = str(doc['query']['query'])
+            elif '$query' in doc['query']:
+                self._pattern = str(doc['query']['$query'])
+            else:
+                self._pattern = str(doc['query'])
+
+            # sort pattern
+            if 'orderby' in doc['query'] and isinstance(doc['query']['orderby'], dict):
+                self._sort_pattern = str(doc['query']['orderby'])    
+            elif '$orderby' in doc['query']:
+                self._sort_pattern = str(doc['query']['$orderby'])
 
         self._counters_calculated = True
         self._nscanned = doc[u'nscanned'] if 'nscanned' in doc else None

@@ -11,6 +11,9 @@ line_iso8601_utc = "2013-08-03T11:52:05.995Z [initandlisten] db version v2.5.2-p
 line_getmore = "Mon Aug  5 20:26:32 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 107 locks(micros) r:85093 nreturned:13551 reslen:230387 144ms"
 line_253_numYields = "2013-10-21T12:07:27.057+1100 [conn2] query test.docs query: { foo: 234333.0 } ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:1 locks(micros) r:239078 nreturned:0 reslen:20 145ms"
 line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { foo: 23432.0 } ntoreturn:0 ntoskip:0 nscanned:316776 keyUpdates:0 numYields: 2405 locks(micros) r:743292 nreturned:2 reslen:2116 451ms"
+line_pattern_26_a = """2014-03-18T18:34:30.435+1100 [conn10] query test.new query: { a: 1.0 } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:103 nreturned:0 reslen:20 0ms"""
+line_pattern_26_b = """2014-03-18T18:34:34.360+1100 [conn10] query test.new query: { query: { a: 1.0 }, orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:55 nreturned:0 reslen:20 0ms"""
+line_pattern_26_c = """2014-03-18T18:34:50.777+1100 [conn10] query test.new query: { $query: { a: 1.0 }, $orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:60 nreturned:0 reslen:20 0ms"""
 
 def test_logevent_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
@@ -48,6 +51,30 @@ def test_logevent_datetime_parsing():
     assert(le.line_str[4:] == le_str[4:])
     # make sure all datetime objects are timezone aware
     assert(le.datetime.tzinfo != None)
+
+
+def test_logevent_pattern_parsing():
+
+    le = LogEvent(line_pattern_26_a)
+    assert(le.pattern) == '{"a": 1}'
+
+    le = LogEvent(line_pattern_26_b)
+    assert(le.pattern) == '{"a": 1}'
+
+    le = LogEvent(line_pattern_26_c)
+    assert(le.pattern) == '{"a": 1}'
+
+
+def test_logevent_sort_pattern_parsing():
+
+    le = LogEvent(line_pattern_26_a)
+    assert(le.sort_pattern) == None
+
+    le = LogEvent(line_pattern_26_b)
+    assert(le.sort_pattern) == '{"b": 1}'
+
+    le = LogEvent(line_pattern_26_c)
+    assert(le.sort_pattern) == '{"b": 1}'
 
 
 def test_logevent_extract_new_and_old_numYields():
