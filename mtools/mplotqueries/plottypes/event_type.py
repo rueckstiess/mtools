@@ -32,7 +32,7 @@ class EventPlotType(BasePlotType):
         axis.autoscale_view(scaley=False)
         return artists
 
-    def print_line(self, event):
+    def clicked(self, event):
         group = event.artist._mt_group
         line_id = event.artist._mt_line_id
         print self.groups[group][line_id].line_str

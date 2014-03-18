@@ -115,7 +115,7 @@ class HistogramPlotType(BasePlotType):
 
         return artists
 
-    def print_line(self, event):
+    def clicked(self, event):
         """ print group name and number of items in bin. """
         group = event.artist._mt_group
         n = event.artist._mt_n

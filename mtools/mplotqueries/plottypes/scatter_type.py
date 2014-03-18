@@ -57,7 +57,8 @@ class ScatterPlotType(BasePlotType):
 
         return artist
 
-    def print_line(self, event):
+    def clicked(self, event):
+        """ this is called if an element of this plottype was clicked. Implement in sub class. """
         group = event.artist._mt_group
         indices = event.ind
         for i in indices:
@@ -110,13 +111,8 @@ class DurationLineType(ScatterPlotType):
 
         return artists
 
-    # def print_line(self, event):
-    #     group = event.artist._mt_group
-    #     indices = event.ind
-    #     for i in indices:
-    #         print self.groups[group][i].line_str
 
-    def print_line(self, event):
+    def clicked(self, event):
         group = event.artist._mt_group
         line_id = event.artist._mt_line_id
         print self.groups[group][line_id].line_str
