@@ -42,6 +42,10 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.description='A script to plot various information from logfiles. ' \
             'Clicking on any of the plot points will print the corresponding log line to stdout.'
 
+        # disable some default shortcuts
+        plt.rcParams['keymap.xscale'] = ''
+        plt.rcParams['keymap.yscale'] = ''
+
         # import all plot type classes in plottypes module
         self.plot_types = [c[1] for c in inspect.getmembers(plottypes, inspect.isclass)]
         self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
@@ -260,19 +264,22 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def print_shortcuts(self):
-        if self.args['type'] == 'scatter':
-            print "keyboard/mouse shortcuts (focus must be on figure window):"
-            print "  click on legend item to toggle individual plots"
-        else:
-            print "keyboard shortcuts (focus must be on figure window):"
+        print "\nkeyboard shortcuts (focus must be on figure window):\n"
 
-        print "%5s  %s" % ("1-9", "toggle visibility of individual plots 1-9")
-        print "%5s  %s" % ("0", "toggle visibility of all plots")
-        print "%5s  %s" % ("-", "toggle visibility of legend")
-        print "%5s  %s" % ("f", "toggle visibility of footnote")
-        print "%5s  %s" % ("g", "toggle grid")
-        print "%5s  %s" % ("l", "toggle log/linear y-axis")
-        print "%5s  %s" % ("q", "quit mplotqueries")
+        print "    %8s  %s" % ("p", "switch to pan mode")
+        print "    %8s  %s" % ("o", "switch to zoom mode")
+        print "    %8s  %s" % ("left/right", "back / forward")
+        print "    %8s  %s" % ("h", "home (original view)")
+        print "    %8s  %s" % ("l", "toggle log/linear y-axis")
+        print "    %8s  %s" % ("f", "toggle fullscreen")
+        print "    %8s  %s" % ("1-9", "toggle visibility of top 10 individual plots 1-9")
+        print "    %8s  %s" % ("0", "toggle visibility of all plots")
+        print "    %8s  %s" % ("-", "toggle visibility of legend")
+        print "    %8s  %s" % ("g", "toggle grid")
+        print "    %8s  %s" % ("c", "toggle 'created with' footnote")
+        print "    %8s  %s" % ("s", "save figure")
+        print "    %8s  %s" % ("q", "quit mplotqueries")
+
         print
 
 
@@ -308,6 +315,7 @@ class MPlotQueriesTool(LogFileTool):
 
 
     def onpress(self, event):
+        # number keys
         if event.key in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
             idx = int(event.key)-1
             try:
@@ -315,6 +323,7 @@ class MPlotQueriesTool(LogFileTool):
             except IndexError:
                 pass
 
+        # 0, toggle all plots
         if event.key == '0':
             try:
                 visible = any([a.get_visible() for a in self.artists])
@@ -325,16 +334,30 @@ class MPlotQueriesTool(LogFileTool):
                 artist.set_visible(not visible)
             plt.gcf().canvas.draw()
 
+        # quit
         if event.key == 'q':
             raise SystemExit('quitting.')
 
+        # toggle legend
         if event.key == '-':
             if self.legend:
                 self.toggle_artist(self.legend)
                 plt.gcf().canvas.draw()
 
-        if event.key == 'f':
+        # toggle created footnote
+        if event.key == 'c':
             self.toggle_artist(self.footnote)
+            plt.gcf().canvas.draw()
+
+        # toggle yaxis logscale
+        if event.key == 'l':
+            scale = plt.gca().get_yscale()
+            if scale == 'linear':
+                plt.gca().set_yscale('log')
+            else:
+                plt.gca().set_yscale('linear')
+
+            plt.autoscale(True, axis='y', tight=True)
             plt.gcf().canvas.draw()
 
 
