@@ -4,7 +4,7 @@ import types
 import numpy as np
 
 try:
-    from matplotlib.dates import date2num
+    from matplotlib.dates import date2num, num2date
 except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
         instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
@@ -103,21 +103,29 @@ class HistogramPlotType(BasePlotType):
         # add meta-data for picking
         if len(self.groups) > 1:
             for g, group in enumerate(self.groups.keys()):
+                print "group", group
                 for i in range(len(artists[g])):
+                    print n[g][i]
                     artists[g][i]._mt_plot_type = self
                     artists[g][i]._mt_group = group
-                    artists[g][i]._mt_n = n[g][i] - (n[g-1][i] if g > 0 else 0)
+                    artists[g][i]._mt_n = n[g][i]
+                    if self.barstacked:
+                        artists[g][i]._mt_n -= (n[g-1][i] if g > 0 else 0)
+
+                    artists[g][i]._mt_bin = bins[i]
         else:
             for i in range(len(artists)):
                 artists[i]._mt_plot_type = self
                 artists[i]._mt_group = group
                 artists[i]._mt_n = n[i]
+                artists[i]._mt_bin = bins[i]
 
         return artists
 
-    def print_line(self, event):
+    def clicked(self, event):
         """ print group name and number of items in bin. """
         group = event.artist._mt_group
         n = event.artist._mt_n
-        print "%4i %s" % (n, group)
+        dt = num2date(event.artist._mt_bin)
+        print "%4i %s events in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S"))
 

@@ -87,6 +87,12 @@ class BasePlotType(object):
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("BasePlotType can't plot. Use a derived class instead")
 
+
+    def clicked(self, event):
+        """ this is called if an element of this plottype was clicked. Implement in sub class. """
+        pass
+
+
     def plot(self, axis, ith_plot, total_plots, limits):
         self.limits = limits
 

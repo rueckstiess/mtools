@@ -302,7 +302,7 @@ class MPlotQueriesTool(LogFileTool):
 
         # get PlotType and let it print that event
         plot_type = event.artist._mt_plot_type
-        plot_type.print_line(event)
+        plot_type.clicked(event)
 
 
     def toggle_artist(self, artist):
