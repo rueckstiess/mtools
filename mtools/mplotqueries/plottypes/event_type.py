@@ -53,7 +53,7 @@ class RSStatePlotType(EventPlotType):
     plot_type_str = 'rsstate'
 
     # force group() to always use lastword method to group by
-    group_by = 'lastword'
+    # group_by = 'lastword'
 
     colors = ['m', 'y', 'r', 'g', 'g', 'k', 'b', 'c']
     states = ['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2', 'RECOVERING', 'ROLLBACK', 'ARBITER']
@@ -72,17 +72,18 @@ class RSStatePlotType(EventPlotType):
         return False
 
 
-    def lastword(self, logevent):
+    def group_by(self, logevent):
         """ group by the last token of the log line (PRIMARY, SECONDARY, ...) """
         return logevent.split_tokens[-1]
 
 
     @classmethod
     def color_map(cls, group):
+        print "Group", group
         """ change default color behavior to map certain states always to the same colors (similar to MMS). """
         try:
             state_idx = cls.states.index(group)
         except ValueError:
             # on any unexpected state, return black
-            return 'k'
+            state_idx = 5
         return cls.colors[state_idx], cls.markers[0]
