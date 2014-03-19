@@ -9,5 +9,5 @@ def test_log2code():
     fixed, variable = l2cc(logline1)
     assert fixed
     print  fixed.matches["r2.4.9"]
-    assert fixed.matches["r2.4.9"] == [('src/mongo/db/repl/rs.cpp', 789, None, ' log(')]
+    assert fixed.matches["r2.4.9"] == [('src/mongo/db/repl/rs.cpp', 790, 0, ' log(')]
 
