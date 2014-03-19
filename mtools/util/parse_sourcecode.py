@@ -51,6 +51,9 @@ def get_all_versions():
     # remove developer versions
     versions = [v for v in versions if re.search(r'\.[02468]\.', v)]
 
+    # add master logs
+    versions.append('master')
+
     return versions
 
 
@@ -177,9 +180,12 @@ def extract_logs(log_code_lines, current_version):
                     # output_verbose(current_version, filename, lineno, line, statement, matches, False, "contains 'query:'")
                     continue
 
-                loglevel = re.match(r'LOG\(([0-9])\)', statement)
+                loglevel = re.search(r'LOG\(\s*([0-9])\s*\)', line)
                 if loglevel:
                     loglevel = int(loglevel.group(1))
+
+                if trigger == ' log(':
+                    loglevel = 0
 
                 pattern = tuple(matches)
 
@@ -187,6 +193,10 @@ def extract_logs(log_code_lines, current_version):
                 if not pattern in log_code_lines:
                     log_code_lines[pattern] = LogCodeLine(pattern, pattern_id)
                     pattern_id += 1
+
+                # clean up values
+                lineno = lineno+1
+                trigger = trigger.strip()
 
                 log_code_lines[pattern].addMatch(current_version, filename, lineno, loglevel, trigger)
                 log_templates.add(pattern)
