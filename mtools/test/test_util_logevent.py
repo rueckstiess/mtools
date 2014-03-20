@@ -3,6 +3,7 @@ from nose.tools import *
 from mtools.util.logevent import LogEvent
 import time
 import datetime
+from dateutil import parser
 
 line_ctime_pre24 = "Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, pdfile version 4.5"
 line_ctime = "Sun Aug  3 21:52:05.995 [initandlisten] db version v2.4.5"
@@ -14,6 +15,11 @@ line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { f
 line_pattern_26_a = """2014-03-18T18:34:30.435+1100 [conn10] query test.new query: { a: 1.0 } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:103 nreturned:0 reslen:20 0ms"""
 line_pattern_26_b = """2014-03-18T18:34:34.360+1100 [conn10] query test.new query: { query: { a: 1.0 }, orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:55 nreturned:0 reslen:20 0ms"""
 line_pattern_26_c = """2014-03-18T18:34:50.777+1100 [conn10] query test.new query: { $query: { a: 1.0 }, $orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:60 nreturned:0 reslen:20 0ms"""
+
+# fake system.profile documents
+profile_doc1 = { "op" : "query", "ns" : "test.foo", "thread": "test.system.profile", "query" : { "test" : 1 }, "ntoreturn" : 0, "ntoskip" : 0, "nscanned" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : 461, "w" :0 }, "timeAcquiringMicros" : { "r" : 4, "w" : 3 } }, "nreturned" : 0, "responseLength" : 20, "millis" : 0, "ts" : parser.parse("2014-03-20T04:04:21.231Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
+profile_doc2 = { "op" : "query", "ns" : "test.foo", "thread": "test.system.profile", "query" : { "query" : { "test" : 1 }, "orderby" : { "field" : 1 } }, "ntoreturn" : 0, "ntoskip" : 0, "nscanned" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : 534, "w" : 0 }, "timeAcquiringMicros" : { "r" : 5, "w" : 4 } }, "nreturned" : 0, "responseLength" : 20, "millis" : 0, "ts" : parser.parse("2014-03-20T04:04:33.775Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
+profile_doc3 = { "op" : "query", "ns" : "test.foo", "thread": "test.system.profile", "query" : { "$query" : { "test" : 1 }, "$orderby" : { "field" : 1 } }, "ntoreturn" : 0, "ntoskip" : 0, "nscanned" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : 436, "w" : 0 }, "timeAcquiringMicros" : { "r" : 5, "w" : 8 } }, "nreturned" : 0, "responseLength" : 20, "millis" : 0, "ts" : parser.parse("2014-03-20T04:04:52.791Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
 
 def test_logevent_datetime_parsing():
     """ Check that all four timestamp formats are correctly parsed. """
@@ -75,6 +81,29 @@ def test_logevent_sort_pattern_parsing():
 
     le = LogEvent(line_pattern_26_c)
     assert(le.sort_pattern) == '{"b": 1}'
+
+
+def test_logevent_profile_pattern_parsing():
+    le = LogEvent(profile_doc1)
+    assert(le.pattern == '{"test": 1}')
+
+    le = LogEvent(profile_doc2)
+    assert(le.pattern == '{"test": 1}')
+        
+    le = LogEvent(profile_doc3)
+    assert(le.pattern == '{"test": 1}')
+
+
+def test_logevent_profile_sort_pattern_parsing():
+    le = LogEvent(profile_doc1)
+    assert(le.sort_pattern == None)
+
+    le = LogEvent(profile_doc2)
+    assert(le.sort_pattern == '{"field": 1}')
+        
+    le = LogEvent(profile_doc3)
+    assert(le.sort_pattern == '{"field": 1}')
+
 
 
 def test_logevent_extract_new_and_old_numYields():

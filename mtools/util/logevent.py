@@ -630,17 +630,19 @@ class LogEvent(object):
         # query pattern for system.profile events, all three cases (see SERVER-13245)
         if 'query' in doc:
             if 'query' in doc['query'] and isinstance(doc['query']['query'], dict):
-                self._pattern = str(doc['query']['query'])
+                self._pattern = str(doc['query']['query']).replace("'", '"')
             elif '$query' in doc['query']:
-                self._pattern = str(doc['query']['$query'])
+                self._pattern = str(doc['query']['$query']).replace("'", '"')
             else:
-                self._pattern = str(doc['query'])
+                self._pattern = str(doc['query']).replace("'", '"')
 
             # sort pattern
             if 'orderby' in doc['query'] and isinstance(doc['query']['orderby'], dict):
-                self._sort_pattern = str(doc['query']['orderby'])    
+                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')    
             elif '$orderby' in doc['query']:
-                self._sort_pattern = str(doc['query']['$orderby'])
+                self._sort_pattern = str(doc['query']['$orderby']).replace("'", '"')
+            else: 
+                self._sort_pattern = None
 
         self._counters_calculated = True
         self._nscanned = doc[u'nscanned'] if 'nscanned' in doc else None
