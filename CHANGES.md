@@ -1,6 +1,8 @@
 Changes to mtools
 =================
 
+#### version 1.1.5
+
 #### version 1.1.4
 
   * performance improvements for log parsing (#187)
