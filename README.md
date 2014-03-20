@@ -1,7 +1,7 @@
 # mtools
 
-[![PyPi version](https://pypip.in/v/mtools/badge.png)](https://crate.io/packages/$REPO/) 
-[![PyPi downloads](https://pypip.in/d/mtools/badge.png)](https://crate.io/packages/$REPO/) 
+[![PyPi version](https://pypip.in/v/mtools/badge.png)](https://crate.io/packages/mtools/) 
+[![PyPi downloads](https://pypip.in/d/mtools/badge.png)](https://crate.io/packages/mtools/) 
 [![Build Status](https://travis-ci.org/rueckstiess/mtools.png?branch=master)](https://travis-ci.org/rueckstiess/mtools)
 
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
