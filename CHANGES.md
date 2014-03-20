@@ -3,6 +3,16 @@ Changes to mtools
 
 #### version 1.1.4
 
+  * performance improvements for log parsing (#187)
+  * mloginfo `--queries` section to aggregate queries (#131)
+  * mplotqueries: scatter plots now show "duration triangles" on double-click (#201)
+  * mplotqueries: a number of bug fixes and stability improvements (#183, #199, #198, #191, #184)
+  * mlaunch: a different `--binarypath` can be specified with `mlaunch start` (#181)
+  * mlaunch: general bug fixes and tests (#178, #179, #176)
+  * mlogfilter: timezone bug fixed (#186)
+  * added sort pattern parsing to LogEvent and added query pattern parsing for system.profile events (#200)
+
+For all changes, see the [closed issues tagged with milestone 1.1.4](https://github.com/rueckstiess/mtools/issues?direction=desc&milestone=9&page=1&sort=updated&state=closed)
 
 #### version 1.1.3
 
