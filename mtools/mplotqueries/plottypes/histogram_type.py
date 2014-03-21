@@ -103,9 +103,7 @@ class HistogramPlotType(BasePlotType):
         # add meta-data for picking
         if len(self.groups) > 1:
             for g, group in enumerate(self.groups.keys()):
-                print "group", group
                 for i in range(len(artists[g])):
-                    print n[g][i]
                     artists[g][i]._mt_plot_type = self
                     artists[g][i]._mt_group = group
                     artists[g][i]._mt_n = n[g][i]
