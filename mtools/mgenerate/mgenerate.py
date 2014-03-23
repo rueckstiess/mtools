@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import json
+import bson
 import sys
 import inspect 
+from multiprocessing import Process, cpu_count
 
 try:
     try:
@@ -17,23 +19,15 @@ except ImportError:
 import mtools.mgenerate.operators as operators
 from mtools.util.cmdlinetool import BaseCmdLineTool
 
-class MGeneratorTool(BaseCmdLineTool):
 
-    def __init__(self):
-        BaseCmdLineTool.__init__(self)
-        
-        self.argparser.description = 'Script to generate pseudo-random data based on template documents.'
-        
-        self.argparser.add_argument('template', action='store', help='template for data generation, JSON or file')
-        self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
-        self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
-        self.argparser.add_argument('--port', action='store', default=27017, help='mongod/s port to import data, default=27017')
-        self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
-        self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
-        self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
-        self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
-        self.argparser.add_argument('--write-concern', '-w', action='store', metavar="W", default=1, help='write concern for inserts, default=1')
+class InsertProcess(Process):
 
+    def __init__(self, number, template, collection, stdout):
+        Process.__init__(self)
+        self.number = number
+        self.template = template
+        self.collection = collection
+        self.stdout = stdout
 
         # add all operators classes from the operators module, pass in _decode method
         self.operators = [c[1](self._decode) for c in inspect.getmembers(operators, inspect.isclass)]
@@ -50,52 +44,32 @@ class MGeneratorTool(BaseCmdLineTool):
                 for name in o.names:
                     self.dict_operators[name] = o
 
-
-    def run(self, arguments=None):
-        BaseCmdLineTool.run(self, arguments)
-
-        if self.args['template'].startswith('{'):
-            # not a file
-            try:
-                template = json.loads(self.args['template'])
-            except ValueError as e:
-                raise SystemExit("can't parse template: %s" % e)
-        else:
-            try:
-                f = open(self.args['template'])
-            except IOError as e:
-                raise SystemExit("can't open file %s: %s" % (self.args['template'], e))
-
-            try:
-                template = json.load(f)
-            except ValueError as e:
-                raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
-
-
-        if not self.args['stdout']:        
-            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'])        
-            col = mc[self.args['database']][self.args['collection']]
-            if self.args['drop']:
-                col.drop()
-
+    def run(self):
         batch = []
-        for n in xrange(self.args['number']):
-            # decode the template
-            doc = self._decode(template)
+        batchsize = 0
 
-            if self.args['stdout']:
+        for n in xrange(self.number):
+            # decode the template
+            doc = self._decode(self.template)
+
+            if self.stdout:
                 print doc
             else:
                 batch.append(doc)
-                if n % 100 == 0:
-                    col.insert(batch)
-                    batch = []
-                    self.update_progress(float(n) / self.args['number'], prefix='inserting data')
+                batchsize += self.bsonsize(doc)
 
-        if not self.args['stdout']:
-            self.update_progress(1.0, prefix='inserting data')
+                if n % 1000 == 0 or batchsize >= 1000000:
+                    self.collection.insert(batch)
+                    batch = []
+                    batchsize = 0
+
+        if not self.stdout:
             if batch:
-                col.insert(batch)
+                self.collection.insert(batch)
+
+    
+    def bsonsize(self, doc):
+        return len(bson.BSON.encode(doc))
 
 
     def _decode_operator(self, data):
@@ -153,6 +127,69 @@ class MGeneratorTool(BaseCmdLineTool):
 
         # everything else, just return the data as is
         return data
+
+
+
+class MGeneratorTool(BaseCmdLineTool):
+
+    def __init__(self):
+        BaseCmdLineTool.__init__(self)
+        
+        self.argparser.description = 'Script to generate pseudo-random data based on template documents.'
+        
+        self.argparser.add_argument('template', action='store', help='template for data generation, JSON or file')
+        self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
+        self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
+        self.argparser.add_argument('--port', action='store', default=27017, help='mongod/s port to import data, default=27017')
+        self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
+        self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
+        self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
+        self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
+        self.argparser.add_argument('--write-concern', '-w', action='store', metavar="W", default=1, help='write concern for inserts, default=1')
+
+
+    def run(self, arguments=None):
+        BaseCmdLineTool.run(self, arguments)
+
+        if self.args['template'].startswith('{'):
+            # not a file
+            try:
+                template = json.loads(self.args['template'])
+            except ValueError as e:
+                raise SystemExit("can't parse template: %s" % e)
+        else:
+            try:
+                f = open(self.args['template'])
+            except IOError as e:
+                raise SystemExit("can't open file %s: %s" % (self.args['template'], e))
+
+            try:
+                template = json.load(f)
+            except ValueError as e:
+                raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
+
+
+        if not self.args['stdout']:        
+            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'])        
+            col = mc[self.args['database']][self.args['collection']]
+            if self.args['drop']:
+                col.drop()
+
+        # divide work over number of cores
+        num_cores = 1 if self.args['stdout'] else cpu_count()
+        num_list = [self.args['number'] // num_cores] * num_cores
+        num_list[0] += self.args['number'] % num_cores
+
+        processes = []
+
+        for n in num_list:
+            p = InsertProcess(n, template, col, self.args['stdout'])
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join()
+
 
 
 if __name__ == '__main__':
