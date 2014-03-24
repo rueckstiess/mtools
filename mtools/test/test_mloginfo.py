@@ -11,8 +11,7 @@ from nose.plugins.skip import Skip, SkipTest
 # from dateutil import parser
 import os
 import sys
-# import re
-# import json
+import re
 
 
 def random_date(start, end):
@@ -65,5 +64,54 @@ class TestMLogInfo(object):
         assert len( [l for l in lines if l.strip().startswith('-----') ] ) == 1
 
 
+    def test_version_norestart(self):
+        # different log file
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
+        self.tool.run('%s' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'version: >= 2.4' in line, lines))
 
 
+    def test_distinct_output(self):
+        # different log file
+        self.tool.run('%s --distinct' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'DISTINCT' in line, lines))
+        assert len(filter(lambda line: re.match(r'\s+\d+\s+\w+', line), lines)) > 10
+
+
+    def test_connections_output(self):
+        # different log file
+        self.tool.run('%s --connections' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'CONNECTIONS' in line, lines))
+
+        assert any(map(lambda line: 'total opened' in line, lines))
+        assert any(map(lambda line: 'total closed' in line, lines))
+        assert any(map(lambda line: 'unique IPs' in line, lines))
+        assert any(map(lambda line: 'socket exceptions' in line, lines))
+
+        assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line), lines)) > 1
+
+
+    def test_queries_output(self):
+        # different log file
+        self.tool.run('%s --queries' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'QUERIES' in line, lines))
+        assert any(map(lambda line: line.startswith('namespace'), lines))
+
+        assert len(filter(lambda line: re.match(r'\w+\.\w+\s+{', line), lines)) >= 1
+
+
+    def test_restarts_output(self):
+        # different log file
+        self.tool.run('%s --restarts' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'RESTARTS' in line, lines))
+        assert any(map(lambda line: 'version 2.2.5' in line, lines))

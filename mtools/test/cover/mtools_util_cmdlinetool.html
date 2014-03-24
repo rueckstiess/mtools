@@ -5,7 +5,7 @@
     
     
     <meta http-equiv='X-UA-Compatible' content='IE=emulateIE7' />
-    <title>Coverage for mtools.util.cmdlinetool: 53%</title>
+    <title>Coverage for mtools.util.cmdlinetool: 64%</title>
     <link rel='stylesheet' href='style.css' type='text/css'>
     
     <script type='text/javascript' src='jquery.min.js'></script>
@@ -21,13 +21,13 @@
 <div id='header'>
     <div class='content'>
         <h1>Coverage for <b>mtools.util.cmdlinetool</b> :
-            <span class='pc_cov'>53%</span>
+            <span class='pc_cov'>64%</span>
         </h1>
         <img id='keyboard_icon' src='keybd_closed.png'>
         <h2 class='stats'>
             90 statements &nbsp;
-            <span class='run hide_run shortkey_r button_toggle_run'>48 run</span>
-            <span class='mis shortkey_m button_toggle_mis'>42 missing</span>
+            <span class='run hide_run shortkey_r button_toggle_run'>58 run</span>
+            <span class='mis shortkey_m button_toggle_mis'>32 missing</span>
             <span class='exc shortkey_x button_toggle_exc'>0 excluded</span>
             
         </h2>
@@ -158,8 +158,8 @@
 <p id='n95' class='pln'><a href='#n95'>95</a></p>
 <p id='n96' class='stm run hide_run'><a href='#n96'>96</a></p>
 <p id='n97' class='pln'><a href='#n97'>97</a></p>
-<p id='n98' class='stm mis'><a href='#n98'>98</a></p>
-<p id='n99' class='stm mis'><a href='#n99'>99</a></p>
+<p id='n98' class='stm run hide_run'><a href='#n98'>98</a></p>
+<p id='n99' class='stm run hide_run'><a href='#n99'>99</a></p>
 <p id='n100' class='pln'><a href='#n100'>100</a></p>
 <p id='n101' class='stm mis'><a href='#n101'>101</a></p>
 <p id='n102' class='pln'><a href='#n102'>102</a></p>
@@ -168,16 +168,16 @@
 <p id='n105' class='pln'><a href='#n105'>105</a></p>
 <p id='n106' class='pln'><a href='#n106'>106</a></p>
 <p id='n107' class='pln'><a href='#n107'>107</a></p>
-<p id='n108' class='stm mis'><a href='#n108'>108</a></p>
+<p id='n108' class='stm run hide_run'><a href='#n108'>108</a></p>
 <p id='n109' class='pln'><a href='#n109'>109</a></p>
-<p id='n110' class='stm mis'><a href='#n110'>110</a></p>
-<p id='n111' class='stm mis'><a href='#n111'>111</a></p>
-<p id='n112' class='stm mis'><a href='#n112'>112</a></p>
-<p id='n113' class='stm mis'><a href='#n113'>113</a></p>
+<p id='n110' class='stm run hide_run'><a href='#n110'>110</a></p>
+<p id='n111' class='stm run hide_run'><a href='#n111'>111</a></p>
+<p id='n112' class='stm run hide_run'><a href='#n112'>112</a></p>
+<p id='n113' class='stm run hide_run'><a href='#n113'>113</a></p>
 <p id='n114' class='pln'><a href='#n114'>114</a></p>
-<p id='n115' class='stm mis'><a href='#n115'>115</a></p>
-<p id='n116' class='stm mis'><a href='#n116'>116</a></p>
-<p id='n117' class='stm mis'><a href='#n117'>117</a></p>
+<p id='n115' class='stm run hide_run'><a href='#n115'>115</a></p>
+<p id='n116' class='stm run hide_run'><a href='#n116'>116</a></p>
+<p id='n117' class='stm run hide_run'><a href='#n117'>117</a></p>
 <p id='n118' class='pln'><a href='#n118'>118</a></p>
 <p id='n119' class='pln'><a href='#n119'>119</a></p>
 <p id='n120' class='pln'><a href='#n120'>120</a></p>
@@ -320,8 +320,8 @@
 <p id='t95' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t96' class='stm run hide_run'>&nbsp; &nbsp; <span class='key'>def</span> <span class='nam'>_datetime_to_epoch</span><span class='op'>(</span><span class='nam'>self</span><span class='op'>,</span> <span class='nam'>dt</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t97' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&quot;&quot;&quot; converts the datetime to unix epoch (properly). &quot;&quot;&quot;</span><span class='strut'>&nbsp;</span></p>
-<p id='t98' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>dt</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t99' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>int</span><span class='op'>(</span><span class='op'>(</span><span class='nam'>dt</span> <span class='op'>-</span> <span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>fromtimestamp</span><span class='op'>(</span><span class='num'>0</span><span class='op'>,</span> <span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>.</span><span class='nam'>total_seconds</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t98' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>dt</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t99' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>int</span><span class='op'>(</span><span class='op'>(</span><span class='nam'>dt</span> <span class='op'>-</span> <span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>datetime</span><span class='op'>.</span><span class='nam'>fromtimestamp</span><span class='op'>(</span><span class='num'>0</span><span class='op'>,</span> <span class='nam'>tzutc</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>.</span><span class='nam'>total_seconds</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t100' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t101' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>return</span> <span class='num'>0</span><span class='strut'>&nbsp;</span></p>
 <p id='t102' class='pln'><span class='strut'>&nbsp;</span></p>
@@ -330,16 +330,16 @@
 <p id='t105' class='pln'><span class='str'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; The progress value is a value between 0.0 and 1.0. If a prefix is present, it </span><span class='strut'>&nbsp;</span></p>
 <p id='t106' class='pln'><span class='str'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; will be printed before the progress bar. </span><span class='strut'>&nbsp;</span></p>
 <p id='t107' class='pln'><span class='str'>&nbsp; &nbsp; &nbsp; &nbsp; &quot;&quot;&quot;</span><span class='strut'>&nbsp;</span></p>
-<p id='t108' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>total_length</span> <span class='op'>=</span> <span class='num'>40</span><span class='strut'>&nbsp;</span></p>
+<p id='t108' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>total_length</span> <span class='op'>=</span> <span class='num'>40</span><span class='strut'>&nbsp;</span></p>
 <p id='t109' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t110' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>progress</span> <span class='op'>==</span> <span class='num'>1.</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t111' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\r&#39;</span> <span class='op'>+</span> <span class='str'>&#39; &#39;</span><span class='op'>*</span><span class='op'>(</span><span class='nam'>total_length</span> <span class='op'>+</span> <span class='nam'>len</span><span class='op'>(</span><span class='nam'>prefix</span><span class='op'>)</span> <span class='op'>+</span> <span class='num'>50</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t112' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\n&#39;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t113' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>flush</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t110' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>progress</span> <span class='op'>==</span> <span class='num'>1.</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t111' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\r&#39;</span> <span class='op'>+</span> <span class='str'>&#39; &#39;</span><span class='op'>*</span><span class='op'>(</span><span class='nam'>total_length</span> <span class='op'>+</span> <span class='nam'>len</span><span class='op'>(</span><span class='nam'>prefix</span><span class='op'>)</span> <span class='op'>+</span> <span class='num'>50</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t112' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\n&#39;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t113' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>flush</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t114' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>else</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t115' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>bar_length</span> <span class='op'>=</span> <span class='nam'>int</span><span class='op'>(</span><span class='nam'>round</span><span class='op'>(</span><span class='nam'>total_length</span><span class='op'>*</span><span class='nam'>progress</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t116' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\r%s [%s%s] %.1f %% &#39;</span> <span class='op'>%</span> <span class='op'>(</span><span class='nam'>prefix</span><span class='op'>,</span> <span class='str'>&#39;=&#39;</span><span class='op'>*</span><span class='nam'>bar_length</span><span class='op'>,</span> <span class='str'>&#39; &#39;</span><span class='op'>*</span><span class='op'>(</span><span class='nam'>total_length</span><span class='op'>-</span><span class='nam'>bar_length</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>progress</span><span class='op'>*</span><span class='num'>100</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t117' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>flush</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t115' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>bar_length</span> <span class='op'>=</span> <span class='nam'>int</span><span class='op'>(</span><span class='nam'>round</span><span class='op'>(</span><span class='nam'>total_length</span><span class='op'>*</span><span class='nam'>progress</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t116' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>write</span><span class='op'>(</span><span class='str'>&#39;\r%s [%s%s] %.1f %% &#39;</span> <span class='op'>%</span> <span class='op'>(</span><span class='nam'>prefix</span><span class='op'>,</span> <span class='str'>&#39;=&#39;</span><span class='op'>*</span><span class='nam'>bar_length</span><span class='op'>,</span> <span class='str'>&#39; &#39;</span><span class='op'>*</span><span class='op'>(</span><span class='nam'>total_length</span><span class='op'>-</span><span class='nam'>bar_length</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>progress</span><span class='op'>*</span><span class='num'>100</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t117' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>sys</span><span class='op'>.</span><span class='nam'>stdout</span><span class='op'>.</span><span class='nam'>flush</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t118' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t119' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t120' class='pln'><span class='strut'>&nbsp;</span></p>

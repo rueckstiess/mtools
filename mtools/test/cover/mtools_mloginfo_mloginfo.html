@@ -5,7 +5,7 @@
     
     
     <meta http-equiv='X-UA-Compatible' content='IE=emulateIE7' />
-    <title>Coverage for mtools.mloginfo.mloginfo: 74%</title>
+    <title>Coverage for mtools.mloginfo.mloginfo: 88%</title>
     <link rel='stylesheet' href='style.css' type='text/css'>
     
     <script type='text/javascript' src='jquery.min.js'></script>
@@ -21,13 +21,13 @@
 <div id='header'>
     <div class='content'>
         <h1>Coverage for <b>mtools.mloginfo.mloginfo</b> :
-            <span class='pc_cov'>74%</span>
+            <span class='pc_cov'>88%</span>
         </h1>
         <img id='keyboard_icon' src='keybd_closed.png'>
         <h2 class='stats'>
             43 statements &nbsp;
-            <span class='run hide_run shortkey_r button_toggle_run'>32 run</span>
-            <span class='mis shortkey_m button_toggle_mis'>11 missing</span>
+            <span class='run hide_run shortkey_r button_toggle_run'>38 run</span>
+            <span class='mis shortkey_m button_toggle_mis'>5 missing</span>
             <span class='exc shortkey_x button_toggle_exc'>0 excluded</span>
             
         </h2>
@@ -109,10 +109,10 @@
 <p id='n46' class='pln'><a href='#n46'>46</a></p>
 <p id='n47' class='pln'><a href='#n47'>47</a></p>
 <p id='n48' class='stm run hide_run'><a href='#n48'>48</a></p>
-<p id='n49' class='stm mis'><a href='#n49'>49</a></p>
+<p id='n49' class='stm run hide_run'><a href='#n49'>49</a></p>
 <p id='n50' class='stm mis'><a href='#n50'>50</a></p>
-<p id='n51' class='stm mis'><a href='#n51'>51</a></p>
-<p id='n52' class='stm mis'><a href='#n52'>52</a></p>
+<p id='n51' class='stm run hide_run'><a href='#n51'>51</a></p>
+<p id='n52' class='stm run hide_run'><a href='#n52'>52</a></p>
 <p id='n53' class='stm mis'><a href='#n53'>53</a></p>
 <p id='n54' class='stm mis'><a href='#n54'>54</a></p>
 <p id='n55' class='pln'><a href='#n55'>55</a></p>
@@ -122,9 +122,9 @@
 <p id='n59' class='pln'><a href='#n59'>59</a></p>
 <p id='n60' class='stm run hide_run'><a href='#n60'>60</a></p>
 <p id='n61' class='stm run hide_run'><a href='#n61'>61</a></p>
-<p id='n62' class='stm mis'><a href='#n62'>62</a></p>
-<p id='n63' class='stm mis'><a href='#n63'>63</a></p>
-<p id='n64' class='stm mis'><a href='#n64'>64</a></p>
+<p id='n62' class='stm run hide_run'><a href='#n62'>62</a></p>
+<p id='n63' class='stm run hide_run'><a href='#n63'>63</a></p>
+<p id='n64' class='stm run hide_run'><a href='#n64'>64</a></p>
 <p id='n65' class='pln'><a href='#n65'>65</a></p>
 <p id='n66' class='pln'><a href='#n66'>66</a></p>
 <p id='n67' class='stm run hide_run'><a href='#n67'>67</a></p>
@@ -181,10 +181,10 @@
 <p id='t46' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t47' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># if version is unknown, go by date</span><span class='strut'>&nbsp;</span></p>
 <p id='t48' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>version</span> <span class='op'>==</span> <span class='str'>&#39;unknown&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t49' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile</span><span class='op'>.</span><span class='nam'>datetime_format</span> <span class='op'>==</span> <span class='str'>&#39;ctime-pre2.4&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t49' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile</span><span class='op'>.</span><span class='nam'>datetime_format</span> <span class='op'>==</span> <span class='str'>&#39;ctime-pre2.4&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t50' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>version</span> <span class='op'>=</span> <span class='str'>&#39;&lt; 2.4 (no milliseconds)&#39;</span><span class='strut'>&nbsp;</span></p>
-<p id='t51' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>elif</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile</span><span class='op'>.</span><span class='nam'>datetime_format</span> <span class='op'>==</span> <span class='str'>&#39;ctime&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t52' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>version</span> <span class='op'>=</span> <span class='str'>&#39;&gt;= 2.4 (milliseconds present)&#39;</span><span class='strut'>&nbsp;</span></p>
+<p id='t51' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>elif</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile</span><span class='op'>.</span><span class='nam'>datetime_format</span> <span class='op'>==</span> <span class='str'>&#39;ctime&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t52' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>version</span> <span class='op'>=</span> <span class='str'>&#39;&gt;= 2.4 (milliseconds present)&#39;</span><span class='strut'>&nbsp;</span></p>
 <p id='t53' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>elif</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>logfile</span><span class='op'>.</span><span class='nam'>datetime_format</span><span class='op'>.</span><span class='nam'>startswith</span><span class='op'>(</span><span class='str'>&#39;iso8601-&#39;</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t54' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>version</span> <span class='op'>=</span> <span class='str'>&#39;&gt;= 2.6 (iso8601 format)&#39;</span><span class='strut'>&nbsp;</span></p>
 <p id='t55' class='pln'><span class='strut'>&nbsp;</span></p>
@@ -194,9 +194,9 @@
 <p id='t59' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='com'># now run all sections</span><span class='strut'>&nbsp;</span></p>
 <p id='t60' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>for</span> <span class='nam'>section</span> <span class='key'>in</span> <span class='nam'>self</span><span class='op'>.</span><span class='nam'>sections</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
 <p id='t61' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>section</span><span class='op'>.</span><span class='nam'>active</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t62' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>print</span><span class='strut'>&nbsp;</span></p>
-<p id='t63' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>print</span> <span class='nam'>section</span><span class='op'>.</span><span class='nam'>name</span><span class='op'>.</span><span class='nam'>upper</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t64' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>section</span><span class='op'>.</span><span class='nam'>run</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t62' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>print</span><span class='strut'>&nbsp;</span></p>
+<p id='t63' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>print</span> <span class='nam'>section</span><span class='op'>.</span><span class='nam'>name</span><span class='op'>.</span><span class='nam'>upper</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t64' class='stm run hide_run'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>section</span><span class='op'>.</span><span class='nam'>run</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
 <p id='t65' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t66' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t67' class='stm run hide_run'><span class='key'>if</span> <span class='nam'>__name__</span> <span class='op'>==</span> <span class='str'>&#39;__main__&#39;</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
