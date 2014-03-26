@@ -20,7 +20,7 @@ class QuerySection(BaseSection):
 
         # add --queries flag to argparser
         self.mloginfo.argparser_sectiongroup.add_argument('--queries', action='store_true', help='outputs statistics about query patterns')
-
+        self.mloginfo.argparser_sectiongroup.add_argument('--sort', action='store', default='sum', choices=['namespace', 'pattern', 'count', 'min', 'max', 'mean', 'sum'])
 
     @property
     def active(self):
@@ -80,7 +80,7 @@ class QuerySection(BaseSection):
 
             table_rows.append(stats)
 
-        table_rows = sorted(table_rows, key=itemgetter('sum'), reverse=True)
+        table_rows = sorted(table_rows, key=itemgetter(self.mloginfo.args['sort']), reverse=True)
         print_table(table_rows, titles, uppercase_headers=False)
         print 
 
