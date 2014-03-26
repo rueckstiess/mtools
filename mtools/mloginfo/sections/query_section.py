@@ -20,7 +20,7 @@ class QuerySection(BaseSection):
 
         # add --queries flag to argparser
         self.mloginfo.argparser_sectiongroup.add_argument('--queries', action='store_true', help='outputs statistics about query patterns')
-        self.mloginfo.argparser_sectiongroup.add_argument('--sort', action='store', default='sum', choices=['namespace', 'pattern', 'count', 'min', 'max', 'mean', 'sum'])
+        self.mloginfo.argparser_sectiongroup.add_argument('--sort', action='store', default='sum', choices=['namespace', 'pattern', 'count', 'min', 'max', 'mean', '95%', 'sum'])
 
     @property
     def active(self):
@@ -56,7 +56,7 @@ class QuerySection(BaseSection):
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
-        titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)']
+        titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
         table_rows = []
         for g in grouping:
             # calculate statistics for this group
@@ -71,6 +71,7 @@ class QuerySection(BaseSection):
             stats['min'] = min( group_events ) if group_events else '-'
             stats['max'] = max( group_events ) if group_events else '-'
             stats['mean'] = 0
+            stats['95%'] = np.percentile(group_events, 95)
             stats['sum'] = sum( group_events ) if group_events else '-'
             stats['mean'] = stats['sum'] / stats['count'] if group_events else '-'
 
@@ -80,7 +81,12 @@ class QuerySection(BaseSection):
 
             table_rows.append(stats)
 
-        table_rows = sorted(table_rows, key=itemgetter(self.mloginfo.args['sort']), reverse=True)
+        # sort order depending on field names
+        reverse = True
+        if self.mloginfo.args['sort'] in ['namespace', 'pattern']:
+            reverse = False
+
+        table_rows = sorted(table_rows, key=itemgetter(self.mloginfo.args['sort']), reverse=reverse)
         print_table(table_rows, titles, uppercase_headers=False)
         print 
 
