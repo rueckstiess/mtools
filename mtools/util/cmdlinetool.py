@@ -67,7 +67,7 @@ class BaseCmdLineTool(object):
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
-
+        self.argparser.add_argument('--no-progressbar', action='store_true', default=False, help='disables progress bar')
         self.is_stdin = not sys.stdin.isatty()
         
 
@@ -91,6 +91,8 @@ class BaseCmdLineTool(object):
                 self.args = vars(self.argparser.parse_args(args=arguments.split()))
             else:
                 self.args = vars(self.argparser.parse_args())
+
+        self.progress_bar_enabled = not (self.args['no_progressbar'] or self.is_stdin)
 
     
     def _datetime_to_epoch(self, dt):

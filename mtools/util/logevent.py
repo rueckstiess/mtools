@@ -52,7 +52,7 @@ class LogEvent(object):
         if isinstance(doc_or_str, str):
             # create from string, remove line breaks at end of _line_str
             self.from_string = True
-            self._line_str = doc_or_str.rstrip('\n')
+            self._line_str = doc_or_str.rstrip()
             self._profile_doc = None
             self._reset()
         else:
@@ -106,7 +106,7 @@ class LogEvent(object):
             raise ValueError("can't set line_str for LogEvent created from system.profile documents.")
 
         if line_str != self._line_str:
-            self._line_str = line_str.rstrip('\n')
+            self._line_str = line_str.rstrip()
             self._reset()
 
 

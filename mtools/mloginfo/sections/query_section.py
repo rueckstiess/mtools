@@ -21,9 +21,6 @@ class QuerySection(BaseSection):
         # add --queries flag to argparser
         self.mloginfo.argparser_sectiongroup.add_argument('--queries', action='store_true', help='outputs statistics about query patterns')
 
-        # progress bar
-        self.progress_bar_enabled = not self.mloginfo.is_stdin
-
 
     @property
     def active(self):
@@ -40,12 +37,12 @@ class QuerySection(BaseSection):
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
             progress_total = self.mloginfo._datetime_to_epoch(logfile.end) - progress_start
         else:
-            self.progress_bar_enabled = False
+            self.mloginfo.progress_bar_enabled = False
 
 
         for i, le in enumerate(logfile):
             # update progress bar every 1000 lines
-            if self.progress_bar_enabled and (i % 1000 == 0):
+            if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
                 if le.datetime:
                     progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
@@ -56,7 +53,8 @@ class QuerySection(BaseSection):
         grouping.sort_by_size()
 
         # clear progress bar again
-        self.mloginfo.update_progress(1.0)
+        if self.mloginfo.progress_bar_enabled:
+            self.mloginfo.update_progress(1.0)
 
         titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', 'sum (ms)']
         table_rows = []
