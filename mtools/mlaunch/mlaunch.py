@@ -169,7 +169,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
-        init_parser.add_argument('--auth', action='store_true', default=False, help='enable authentication and create a key file and admin user (admin/mypassword)')
+        init_parser.add_argument('--auth', action='store_true', default=False, help='enable authentication and create a key file and admin user (default=user/password)')
         init_parser.add_argument('--username', action='store', type=str, default='user', help='username to add (requires --auth, default=user)')
         init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --auth, default=password)')
         init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --auth, default=admin)')
