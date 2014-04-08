@@ -65,6 +65,20 @@ class NumberOperator(BaseOperator):
 
 
 
+class IncOperator(BaseOperator):
+
+    dict_format = False
+    string_format = True
+    names = ['$inc']
+    value = -1
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        self.value += 1
+        return self.value
+
+
 class StringOperator(BaseOperator):
 
     dict_format = True
