@@ -27,7 +27,7 @@ class MLogVisTool(LogFileTool):
         out_count = 0
         for line_no, logevent in enumerate(self.args['logfile']):
             # only export lines that have a datetime and duration
-            if logevent.duration and logevent.datetime:
+            if logevent.duration != None and logevent.datetime:
                 out_count += 1
                 # if too many lines include a line_str, the page won't load
                 if with_line_str and out_count > 10000:

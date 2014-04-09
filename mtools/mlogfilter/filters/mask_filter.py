@@ -71,7 +71,7 @@ class MaskFilter(DateTimeFilter):
         # different center points
         if 'mask_center' in self.mlogfilter.args:
             if self.mlogfilter.args['mask_center'] in ['start', 'both']:
-                starts = [(le.datetime - timedelta(milliseconds=le.duration)) if le.duration else le.datetime for le in logevent_list if le.datetime]
+                starts = [(le.datetime - timedelta(milliseconds=le.duration)) if le.duration != None else le.datetime for le in logevent_list if le.datetime]
 
             if self.mlogfilter.args['mask_center'] in ['end', 'both']:
                 ends = [le.datetime for le in logevent_list if le.datetime]

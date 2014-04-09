@@ -137,7 +137,7 @@ class MPlotQueriesTool(LogFileTool):
             for i, logevent in enumerate(logfile):
 
                 # adjust times if --optime-start is enabled
-                if self.args['optime_start'] and logevent.duration and logevent.datetime:
+                if self.args['optime_start'] and logevent.duration != None and logevent.datetime:
                     # create new variable end_datetime in logevent object and store starttime there
                     logevent.end_datetime = logevent.datetime 
                     logevent._datetime = logevent._datetime - timedelta(milliseconds=logevent.duration)

@@ -19,6 +19,6 @@ class FastFilter(BaseFilter):
                 self.fastms = self.mlogfilter.args['fast']
 
     def accept(self, logevent):
-        if self.active and logevent.duration:
+        if self.active and logevent.duration != None:
             return logevent.duration <= self.fastms
         return False
