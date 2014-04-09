@@ -191,7 +191,8 @@ class DateTimeOperator(BaseOperator):
             except Exception as e:
                 raise SystemExit("can't parse date/time format for %s." % input)
 
-            return int(( dt - datetime.utcfromtimestamp(0) ).total_seconds())
+            td = dt - datetime.utcfromtimestamp(0)
+            return int((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6)
         else:
             return int(input)
 

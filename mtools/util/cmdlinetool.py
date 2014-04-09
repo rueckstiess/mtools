@@ -98,7 +98,10 @@ class BaseCmdLineTool(object):
     def _datetime_to_epoch(self, dt):
         """ converts the datetime to unix epoch (properly). """
         if dt:
-            return int((dt - datetime.datetime.fromtimestamp(0, tzutc())).total_seconds())
+            td = (dt - datetime.datetime.fromtimestamp(0, tzutc()))
+            # don't use total_seconds(), that's only available in 2.7
+            total_secs = int((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6)
+            return total_secs
         else: 
             return 0
     
