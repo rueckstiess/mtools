@@ -16,7 +16,7 @@ class DateTimeBoundaries(object):
         # weekday: Mon, Wed, Sat
         ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),                 
         # 11:59:00.123, 1:13:12.004  (also match timezone postfix like Z or +0700 or -05:30)
-        ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?([0-9Z:\+\-]+)?' + '($|\s+)')),                                      
+        # ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?(?P<timezone>[0-9Z:\+\-]+)?' + '($|\s+)')),                                      
         # offsets: +3min, -20s, +7days  (see timeunits above)
         ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))                          
     ])
@@ -83,7 +83,12 @@ class DateTimeBoundaries(object):
                 if dt:
                     dt = parser.parse(s, default=dt, tzinfos=tzutc)
                 else:
-                    dt = parser.parse(s, default=datetime(self.end.year, 1, 1, tzinfo=tzutc()), tzinfos=tzutc)
+                    # check if it's only time, then use the start dt as default, else just use the current year
+                    if re.match('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?(?P<timezone>[0-9Z:\+\-]+)?$', s):
+                        default = self.end if lower_bound else self.start
+                    else:
+                        default = datetime(self.end.year, 1, 1, tzinfo=tzutc())
+                    dt = parser.parse(s, default=default)
             except ValueError as e:
                 raise ValueError("Error in DateTimeBoundaries: can't parse datetime from %s" % s)
 
@@ -91,10 +96,10 @@ class DateTimeBoundaries(object):
             dt = lower_bound or self.end
         
         # time is applied separately (not through the parser) so that string containing only time don't use today as default date (parser behavior)
-        if 'time' in result:
-            dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
-            dct['microsecond'] *= 1000
-            dt = dt.replace(**dct)
+        # if 'time' in result:
+        #     dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
+        #     dct['microsecond'] *= 1000
+        #     dt = dt.replace(**dct)
 
         # apply offset
         if 'offset' in result:
@@ -159,10 +164,10 @@ class DateTimeBoundaries(object):
 
 if __name__ == '__main__':
     
-    dtb = DateTimeBoundaries(parser.parse('June 15 2013 13:00 UTC'), parser.parse('Jan 10 2014 16:21 UTC'))
-    # lower, upper = dtb('Jan 13 -5d', 'Jan 15 -1h')
-    # print lower
-    # print upper
+    dtb = DateTimeBoundaries(parser.parse('Apr 8 2014 13:00-0400'), parser.parse('Apr 10 2014 16:21-0400'))
+    lower, upper = dtb('2014-04-08T13:21-0400', '')
+    print "lower", lower
+    print "upper", upper
 
     print dtb.string2dt("start +3h")
 
