@@ -1,0 +1,247 @@
+2014-04-09T18:22:47.373-0400 [DataFileSync] BackgroundJob starting: DataFileSync
+2014-04-09T18:22:47.373-0400 shardObjTest passed
+2014-04-09T18:22:47.374-0400 isInRangeTest passed
+2014-04-09T18:22:47.374-0400 shardKeyTest passed
+2014-04-09T18:22:47.374-0400 [initandlisten] MongoDB starting : pid=74396 port=27017 dbpath=/Users/tr/Documents/tmp/data/db 64-bit host=enter.local
+2014-04-09T18:22:47.374-0400 [initandlisten] db version v2.6.0
+2014-04-09T18:22:47.375-0400 [initandlisten] git version: 1c1c76aeca21c5983dc178920f5052c298db616c
+2014-04-09T18:22:47.375-0400 [initandlisten] build info: Darwin mci-osx108-8.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2014-04-09T18:22:47.375-0400 [initandlisten] allocator: system
+2014-04-09T18:22:47.375-0400 [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/tr/Documents/tmp/data/db" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/mongod.log", verbosity: 1 } }
+2014-04-09T18:22:47.376-0400 [initandlisten] journal dir=/Users/tr/Documents/tmp/data/db/journal
+2014-04-09T18:22:47.376-0400 [initandlisten] recover : no journal files present, no recovery needed
+2014-04-09T18:22:47.387-0400 [initandlisten] opening db:  local
+2014-04-09T18:22:47.388-0400 [initandlisten] enter repairDatabases (to check pdfile version #)
+2014-04-09T18:22:47.388-0400 [initandlisten] done repairDatabases
+2014-04-09T18:22:47.388-0400 [initandlisten] opening db:  admin
+2014-04-09T18:22:47.388-0400 [initandlisten] query admin.system.roles planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) W:182 r:52 nreturned:0 reslen:20 0ms
+2014-04-09T18:22:47.388-0400 [snapshot] BackgroundJob starting: snapshot
+2014-04-09T18:22:47.388-0400 [ClientCursorMonitor] BackgroundJob starting: ClientCursorMonitor
+2014-04-09T18:22:47.389-0400 [PeriodicTaskRunner] BackgroundJob starting: PeriodicTaskRunner
+2014-04-09T18:22:47.389-0400 [TTLMonitor] BackgroundJob starting: TTLMonitor
+2014-04-09T18:22:47.389-0400 [IndexRebuilder] BackgroundJob starting: IndexRebuilder
+2014-04-09T18:22:47.389-0400 [initandlisten] fd limit hard:1000 soft:1000 max conn: 800
+2014-04-09T18:22:47.390-0400 [IndexRebuilder] checking complete
+2014-04-09T18:22:47.390-0400 [initandlisten] create collection local.startup_log { size: 10485760, capped: true }
+2014-04-09T18:22:47.391-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/local.ns, filling with zeroes...
+2014-04-09T18:22:47.391-0400 [FileAllocator] creating directory /Users/tr/Documents/tmp/data/db/_tmp
+2014-04-09T18:22:47.403-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/local.ns, size: 16MB,  took 0.011 secs
+2014-04-09T18:22:47.421-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.startup_log
+2014-04-09T18:22:47.425-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.system.namespaces
+2014-04-09T18:22:47.426-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/local.0, filling with zeroes...
+2014-04-09T18:22:47.551-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/local.0, size: 64MB,  took 0.125 secs
+2014-04-09T18:22:47.566-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.system.namespaces desiredSize:8192 fromFreeList: 0 eloc: 0:2000
+2014-04-09T18:22:47.569-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.startup_log desiredSize:10485760 fromFreeList: 0 eloc: 0:4000
+2014-04-09T18:22:47.587-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.system.indexes
+2014-04-09T18:22:47.591-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.system.indexes desiredSize:8192 fromFreeList: 0 eloc: 0:a04000
+2014-04-09T18:22:47.604-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.startup_log.$_id_
+2014-04-09T18:22:47.604-0400 [initandlisten] build index on: local.startup_log properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.startup_log" }
+2014-04-09T18:22:47.604-0400 [initandlisten] local.startup_log: clearing plan cache - collection info cache reset
+2014-04-09T18:22:47.605-0400 [initandlisten] allocating new extent
+2014-04-09T18:22:47.607-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.startup_log.$_id_ desiredSize:131072 fromFreeList: 0 eloc: 0:a06000
+2014-04-09T18:22:47.608-0400 [initandlisten] 	 added index to empty collection
+2014-04-09T18:22:47.608-0400 [initandlisten] local.startup_log: clearing plan cache - collection info cache reset
+2014-04-09T18:22:47.609-0400 [initandlisten] command local.$cmd command: create { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0 numYields:0  reslen:37 218ms
+2014-04-09T18:22:47.609-0400 [initandlisten] insert local.startup_log ninserted:1 keyUpdates:0 numYields:0  0ms
+2014-04-09T18:22:47.609-0400 [initandlisten] waiting for connections on port 27017
+2014-04-09T18:22:47.610-0400 [initandlisten] connection accepted from 127.0.0.1:64492 #1 (1 connection now open)
+2014-04-09T18:22:47.610-0400 [conn1] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:22:47.611-0400 [conn1] end connection 127.0.0.1:64492 (0 connections now open)
+2014-04-09T18:22:47.612-0400 [initandlisten] connection accepted from 127.0.0.1:64495 #2 (1 connection now open)
+2014-04-09T18:22:47.612-0400 [conn2] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:22:47.614-0400 [conn2] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 numYields:0  reslen:37 0ms
+2014-04-09T18:22:47.615-0400 [conn2] end connection 127.0.0.1:64495 (0 connections now open)
+2014-04-09T18:23:44.097-0400 [initandlisten] connection accepted from 127.0.0.1:64762 #3 (1 connection now open)
+2014-04-09T18:23:44.097-0400 [conn3] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:23:44.112-0400 [initandlisten] connection accepted from 127.0.0.1:64763 #4 (2 connections now open)
+2014-04-09T18:23:44.112-0400 [conn4] opening db:  test
+2014-04-09T18:23:44.114-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/test.ns, filling with zeroes...
+2014-04-09T18:23:44.114-0400 [initandlisten] connection accepted from 127.0.0.1:64764 #5 (3 connections now open)
+2014-04-09T18:23:44.115-0400 [initandlisten] connection accepted from 127.0.0.1:64765 #6 (4 connections now open)
+2014-04-09T18:23:44.118-0400 [initandlisten] connection accepted from 127.0.0.1:64766 #7 (5 connections now open)
+2014-04-09T18:23:44.126-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/test.ns, size: 16MB,  took 0.012 secs
+2014-04-09T18:23:44.158-0400 [conn4] Database::_addNamespaceToCatalog ns: test.mgendata
+2014-04-09T18:23:44.176-0400 [conn4] Database::_addNamespaceToCatalog ns: test.system.namespaces
+2014-04-09T18:23:44.176-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/test.0, filling with zeroes...
+2014-04-09T18:23:44.269-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/test.0, size: 64MB,  took 0.092 secs
+2014-04-09T18:23:44.283-0400 [conn4] ExtentManager::increaseStorageSize ns:test.system.namespaces desiredSize:8192 fromFreeList: 0 eloc: 0:2000
+2014-04-09T18:23:44.286-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:8192 fromFreeList: 0 eloc: 0:4000
+2014-04-09T18:23:44.302-0400 [conn4] Database::_addNamespaceToCatalog ns: test.system.indexes
+2014-04-09T18:23:44.303-0400 [conn4] ExtentManager::increaseStorageSize ns:test.system.indexes desiredSize:8192 fromFreeList: 0 eloc: 0:6000
+2014-04-09T18:23:44.320-0400 [conn4] Database::_addNamespaceToCatalog ns: test.mgendata.$_id_
+2014-04-09T18:23:44.321-0400 [conn4] build index on: test.mgendata properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "test.mgendata" }
+2014-04-09T18:23:44.321-0400 [conn4] test.mgendata: clearing plan cache - collection info cache reset
+2014-04-09T18:23:44.321-0400 [conn4] allocating new extent
+2014-04-09T18:23:44.323-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata.$_id_ desiredSize:131072 fromFreeList: 0 eloc: 0:8000
+2014-04-09T18:23:44.326-0400 [conn4] 	 added index to empty collection
+2014-04-09T18:23:44.326-0400 [conn4] test.mgendata: clearing plan cache - collection info cache reset
+2014-04-09T18:23:44.326-0400 [conn4] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:213748 213ms
+2014-04-09T18:23:44.327-0400 [conn4] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.330-0400 [conn5] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:54 0ms
+2014-04-09T18:23:44.330-0400 [conn7] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:22 0ms
+2014-04-09T18:23:44.330-0400 [conn6] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:34 0ms
+2014-04-09T18:23:44.330-0400 [conn5] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.330-0400 [conn7] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.331-0400 [conn6] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.395-0400 [conn4] allocating new extent
+2014-04-09T18:23:44.395-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:32768 fromFreeList: 0 eloc: 0:28000
+2014-04-09T18:23:44.401-0400 [conn4] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:6798 6ms
+2014-04-09T18:23:44.401-0400 [conn4] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.403-0400 [conn4] end connection 127.0.0.1:64763 (4 connections now open)
+2014-04-09T18:23:44.403-0400 [conn5] allocating new extent
+2014-04-09T18:23:44.406-0400 [conn5] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:131072 fromFreeList: 0 eloc: 0:30000
+2014-04-09T18:23:44.407-0400 [conn5] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:6334 6ms
+2014-04-09T18:23:44.408-0400 [conn5] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.409-0400 [conn5] end connection 127.0.0.1:64764 (3 connections now open)
+2014-04-09T18:23:44.409-0400 [conn6] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1943 1ms
+2014-04-09T18:23:44.410-0400 [conn6] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.411-0400 [conn7] test.mgendata: clearing collection plan cache - 1000 write operations detected since last refresh.
+2014-04-09T18:23:44.412-0400 [conn7] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2308 2ms
+2014-04-09T18:23:44.412-0400 [conn7] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:23:44.412-0400 [conn6] end connection 127.0.0.1:64765 (2 connections now open)
+2014-04-09T18:23:44.414-0400 [conn7] end connection 127.0.0.1:64766 (1 connection now open)
+2014-04-09T18:23:44.419-0400 [conn3] end connection 127.0.0.1:64762 (0 connections now open)
+2014-04-09T18:23:47.382-0400 [DataFileSync] flushing mmaps took 7ms  for 5 files
+2014-04-09T18:23:47.392-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:56 nreturned:0 reslen:20 0ms
+2014-04-09T18:23:47.393-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:127 nreturned:0 reslen:20 0ms
+2014-04-09T18:23:47.393-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:37 nreturned:0 reslen:20 0ms
+2014-04-09T18:23:47.406-0400 [clientcursormon] mem (MB) res:9 virt:2813
+2014-04-09T18:23:47.406-0400 [clientcursormon]  mapped (incl journal view):320
+2014-04-09T18:23:47.406-0400 [clientcursormon]  connections:0
+2014-04-09T18:24:47.381-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
+2014-04-09T18:24:47.395-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:29 nreturned:0 reslen:20 0ms
+2014-04-09T18:24:47.395-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:45 nreturned:0 reslen:20 0ms
+2014-04-09T18:24:47.396-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:30 nreturned:0 reslen:20 0ms
+2014-04-09T18:25:47.385-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
+2014-04-09T18:25:47.398-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:78 nreturned:0 reslen:20 0ms
+2014-04-09T18:25:47.398-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:63 nreturned:0 reslen:20 0ms
+2014-04-09T18:25:47.399-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
+2014-04-09T18:26:47.387-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
+2014-04-09T18:26:47.402-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:81 nreturned:0 reslen:20 0ms
+2014-04-09T18:26:47.402-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:64 nreturned:0 reslen:20 0ms
+2014-04-09T18:26:47.403-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
+2014-04-09T18:27:47.390-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
+2014-04-09T18:27:47.405-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:42 nreturned:0 reslen:20 0ms
+2014-04-09T18:27:47.406-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:67 nreturned:0 reslen:20 0ms
+2014-04-09T18:27:47.406-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:47 nreturned:0 reslen:20 0ms
+2014-04-09T18:27:47.474-0400 [clientcursormon] mem (MB) res:10 virt:2813
+2014-04-09T18:27:47.474-0400 [clientcursormon]  mapped (incl journal view):320
+2014-04-09T18:27:47.475-0400 [clientcursormon]  connections:0
+2014-04-09T18:28:47.392-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
+2014-04-09T18:28:47.410-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:92 nreturned:0 reslen:20 0ms
+2014-04-09T18:28:47.410-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:69 nreturned:0 reslen:20 0ms
+2014-04-09T18:28:47.410-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:45 nreturned:0 reslen:20 0ms
+2014-04-09T18:29:47.394-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
+2014-04-09T18:29:47.413-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:40 nreturned:0 reslen:20 0ms
+2014-04-09T18:29:47.414-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:65 nreturned:0 reslen:20 0ms
+2014-04-09T18:29:47.414-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
+2014-04-09T18:30:47.396-0400 [DataFileSync] flushing mmaps took 2ms  for 5 files
+2014-04-09T18:30:47.416-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:36 nreturned:0 reslen:20 0ms
+2014-04-09T18:30:47.417-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:74 nreturned:0 reslen:20 0ms
+2014-04-09T18:30:47.417-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:80 nreturned:0 reslen:20 0ms
+2014-04-09T18:31:17.268-0400 [initandlisten] connection accepted from 127.0.0.1:49814 #8 (1 connection now open)
+2014-04-09T18:31:17.268-0400 [conn8] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:17.278-0400 [initandlisten] connection accepted from 127.0.0.1:49815 #9 (2 connections now open)
+2014-04-09T18:31:17.279-0400 [conn9] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:84 0ms
+2014-04-09T18:31:17.279-0400 [conn9] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.279-0400 [initandlisten] connection accepted from 127.0.0.1:49816 #10 (3 connections now open)
+2014-04-09T18:31:17.280-0400 [conn10] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:48 0ms
+2014-04-09T18:31:17.280-0400 [conn10] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.280-0400 [initandlisten] connection accepted from 127.0.0.1:49817 #11 (4 connections now open)
+2014-04-09T18:31:17.281-0400 [conn11] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:30 0ms
+2014-04-09T18:31:17.281-0400 [conn11] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.283-0400 [initandlisten] connection accepted from 127.0.0.1:49818 #12 (5 connections now open)
+2014-04-09T18:31:17.283-0400 [conn12] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:34 0ms
+2014-04-09T18:31:17.284-0400 [conn12] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.336-0400 [journal] lsn set 440157
+2014-04-09T18:31:17.351-0400 [conn9] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2936 2ms
+2014-04-09T18:31:17.352-0400 [conn9] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.352-0400 [conn10] allocating new extent
+2014-04-09T18:31:17.353-0400 [conn10] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:524288 fromFreeList: 0 eloc: 0:50000
+2014-04-09T18:31:17.354-0400 [conn9] end connection 127.0.0.1:49815 (4 connections now open)
+2014-04-09T18:31:17.354-0400 [conn10] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2974 2ms
+2014-04-09T18:31:17.355-0400 [conn10] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.356-0400 [conn11] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1546 1ms
+2014-04-09T18:31:17.356-0400 [conn10] end connection 127.0.0.1:49816 (3 connections now open)
+2014-04-09T18:31:17.357-0400 [conn11] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.357-0400 [conn12] test.mgendata: clearing collection plan cache - 1000 write operations detected since last refresh.
+2014-04-09T18:31:17.357-0400 [conn12] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1141 1ms
+2014-04-09T18:31:17.357-0400 [conn12] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
+2014-04-09T18:31:17.358-0400 [conn11] end connection 127.0.0.1:49817 (2 connections now open)
+2014-04-09T18:31:17.359-0400 [conn12] end connection 127.0.0.1:49818 (1 connection now open)
+2014-04-09T18:31:17.365-0400 [conn8] end connection 127.0.0.1:49814 (0 connections now open)
+2014-04-09T18:31:18.512-0400 [initandlisten] connection accepted from 127.0.0.1:49822 #13 (1 connection now open)
+2014-04-09T18:31:18.513-0400 [conn13] command admin.$cmd command: whatsmyuri { whatsmyuri: 1 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:62 0ms
+2014-04-09T18:31:18.516-0400 [conn13] command admin.$cmd command: getLog { getLog: "startupWarnings" } keyUpdates:0 numYields:0  reslen:70 0ms
+2014-04-09T18:31:18.518-0400 [conn13] command admin.$cmd command: replSetGetStatus { replSetGetStatus: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:76 0ms
+2014-04-09T18:31:18.519-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:19.915-0400 [conn13] query test.system.namespaces planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:81 nreturned:3 reslen:119 0ms
+2014-04-09T18:31:21.378-0400 [conn13] query test.mgendata planSummary: COLLSCAN cursorid:23077696195 ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:135 nreturned:101 reslen:8066 0ms
+2014-04-09T18:31:21.383-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:26.650-0400 [conn13] command test.$cmd command: count { count: "mgendata", query: {}, fields: {} } keyUpdates:0 numYields:0 locks(micros) r:25 reslen:48 0ms
+2014-04-09T18:31:26.651-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:27.875-0400 [conn13] end connection 127.0.0.1:49822 (0 connections now open)
+2014-04-09T18:31:38.369-0400 [initandlisten] connection accepted from 127.0.0.1:49901 #14 (1 connection now open)
+2014-04-09T18:31:38.371-0400 [conn14] command admin.$cmd command: whatsmyuri { whatsmyuri: 1 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:62 0ms
+2014-04-09T18:31:38.373-0400 [conn14] command admin.$cmd command: getLog { getLog: "startupWarnings" } keyUpdates:0 numYields:0  reslen:70 0ms
+2014-04-09T18:31:38.374-0400 [conn14] command admin.$cmd command: replSetGetStatus { replSetGetStatus: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:76 0ms
+2014-04-09T18:31:38.374-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:42.587-0400 [conn14] query test.mgendata planSummary: COLLSCAN cursorid:23211012522 ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:113 nreturned:101 reslen:8066 0ms
+2014-04-09T18:31:42.591-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:31:47.404-0400 [DataFileSync] flushing mmaps took 7ms  for 5 files
+2014-04-09T18:31:47.420-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:37 nreturned:0 reslen:20 0ms
+2014-04-09T18:31:47.420-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:62 nreturned:0 reslen:20 0ms
+2014-04-09T18:31:47.420-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:60 nreturned:0 reslen:20 0ms
+2014-04-09T18:31:54.261-0400 [conn14] query test.mgendata query: { friends: ObjectId('5345c870fe4dce22b18b8059') } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:1656 nreturned:1 reslen:71 1ms
+2014-04-09T18:31:54.261-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:32:05.613-0400 [conn14] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:32:05.618-0400 [conn14] Database::_addNamespaceToCatalog ns: test.mgendata.$friends_1
+2014-04-09T18:32:05.618-0400 [conn14] build index on: test.mgendata properties: { v: 1, key: { friends: 1.0 }, name: "friends_1", ns: "test.mgendata" }
+2014-04-09T18:32:05.618-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
+2014-04-09T18:32:05.619-0400 [conn14] allocating new extent
+2014-04-09T18:32:05.620-0400 [conn14] ExtentManager::increaseStorageSize ns:test.mgendata.$friends_1 desiredSize:131072 fromFreeList: 0 eloc: 0:d0000
+2014-04-09T18:32:05.620-0400 [conn14] 	 building index using bulk method
+2014-04-09T18:32:05.627-0400 [conn14] 	 bulk commit starting
+2014-04-09T18:32:05.627-0400 [conn14] test.mgendata: clearing plan cache - index { friends: 1.0 } set to multi key.
+2014-04-09T18:32:05.634-0400 [conn14] allocating new extent
+2014-04-09T18:32:05.634-0400 [conn14] ExtentManager::increaseStorageSize ns:test.mgendata.$friends_1 desiredSize:524288 fromFreeList: 0 eloc: 0:f0000
+2014-04-09T18:32:05.636-0400 [conn14] 	 done building bottom layer, going to commit
+2014-04-09T18:32:05.636-0400 [conn14] build index done.  scanned 2000 total records. 0.017 secs
+2014-04-09T18:32:05.636-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
+2014-04-09T18:32:05.637-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
+2014-04-09T18:32:05.638-0400 [conn14] command test.$cmd command: createIndexes { createIndexes: "mgendata", indexes: [ { key: { friends: 1.0 }, name: "friends_1" } ] } keyUpdates:0 numYields:0 locks(micros) r:23 w:23716 reslen:113 23ms
+2014-04-09T18:32:05.638-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:32:05.651-0400 [journal] lsn set 495284
+2014-04-09T18:32:47.406-0400 [DataFileSync] flushing mmaps took 6ms  for 5 files
+2014-04-09T18:32:47.424-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:94 nreturned:0 reslen:20 0ms
+2014-04-09T18:32:47.424-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:68 nreturned:0 reslen:20 0ms
+2014-04-09T18:32:47.425-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:65 nreturned:0 reslen:20 0ms
+2014-04-09T18:32:47.553-0400 [clientcursormon] mem (MB) res:12 virt:2814
+2014-04-09T18:32:47.554-0400 [clientcursormon]  mapped (incl journal view):320
+2014-04-09T18:32:47.554-0400 [clientcursormon]  connections:1
+2014-04-09T18:33:08.371-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:33:09.028-0400 [conn14] end connection 127.0.0.1:49901 (0 connections now open)
+2014-04-09T18:33:15.372-0400 [initandlisten] connection accepted from 127.0.0.1:50060 #15 (1 connection now open)
+2014-04-09T18:33:15.372-0400 [conn15] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:33:15.373-0400 [conn15] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 numYields:0  reslen:37 0ms
+2014-04-09T18:33:15.373-0400 [conn15] end connection 127.0.0.1:50060 (0 connections now open)
+2014-04-09T18:33:15.374-0400 [initandlisten] connection accepted from 127.0.0.1:50061 #16 (1 connection now open)
+2014-04-09T18:33:15.374-0400 [conn16] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
+2014-04-09T18:33:15.375-0400 [conn16] terminating, shutdown command received
+2014-04-09T18:33:15.375-0400 [conn16] dbexit: shutdown called
+2014-04-09T18:33:15.375-0400 [conn16] shutdown: going to close listening sockets...
+2014-04-09T18:33:15.375-0400 [conn16] closing listening socket: 9
+2014-04-09T18:33:15.376-0400 [conn16] closing listening socket: 10
+2014-04-09T18:33:15.376-0400 [conn16] removing socket file: /tmp/mongodb-27017.sock
+2014-04-09T18:33:15.376-0400 [conn16] shutdown: going to flush diaglog...
+2014-04-09T18:33:15.376-0400 [conn16] shutdown: going to close sockets...
+2014-04-09T18:33:15.376-0400 [conn16] shutdown: waiting for fs preallocator...
+2014-04-09T18:33:15.376-0400 [conn16] shutdown: lock for final commit...
+2014-04-09T18:33:15.377-0400 [conn16] shutdown: final commit...
+2014-04-09T18:33:15.380-0400 [conn16] shutdown: closing all files...
+2014-04-09T18:33:15.380-0400 [conn16] closeAllFiles() finished
+2014-04-09T18:33:15.380-0400 [conn16] journalCleanup...
+2014-04-09T18:33:15.380-0400 [conn16] removeJournalFiles
+2014-04-09T18:33:15.381-0400 [conn16] removeJournalFiles end
+2014-04-09T18:33:15.381-0400 [conn16] shutdown: removing fs lock...
+2014-04-09T18:33:15.381-0400 [conn16] dbexit: really exiting now
