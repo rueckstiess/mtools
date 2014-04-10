@@ -1,247 +1,653 @@
-2014-04-09T18:22:47.373-0400 [DataFileSync] BackgroundJob starting: DataFileSync
-2014-04-09T18:22:47.373-0400 shardObjTest passed
-2014-04-09T18:22:47.374-0400 isInRangeTest passed
-2014-04-09T18:22:47.374-0400 shardKeyTest passed
-2014-04-09T18:22:47.374-0400 [initandlisten] MongoDB starting : pid=74396 port=27017 dbpath=/Users/tr/Documents/tmp/data/db 64-bit host=enter.local
-2014-04-09T18:22:47.374-0400 [initandlisten] db version v2.6.0
-2014-04-09T18:22:47.375-0400 [initandlisten] git version: 1c1c76aeca21c5983dc178920f5052c298db616c
-2014-04-09T18:22:47.375-0400 [initandlisten] build info: Darwin mci-osx108-8.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
-2014-04-09T18:22:47.375-0400 [initandlisten] allocator: system
-2014-04-09T18:22:47.375-0400 [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/tr/Documents/tmp/data/db" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/mongod.log", verbosity: 1 } }
-2014-04-09T18:22:47.376-0400 [initandlisten] journal dir=/Users/tr/Documents/tmp/data/db/journal
-2014-04-09T18:22:47.376-0400 [initandlisten] recover : no journal files present, no recovery needed
-2014-04-09T18:22:47.387-0400 [initandlisten] opening db:  local
-2014-04-09T18:22:47.388-0400 [initandlisten] enter repairDatabases (to check pdfile version #)
-2014-04-09T18:22:47.388-0400 [initandlisten] done repairDatabases
-2014-04-09T18:22:47.388-0400 [initandlisten] opening db:  admin
-2014-04-09T18:22:47.388-0400 [initandlisten] query admin.system.roles planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) W:182 r:52 nreturned:0 reslen:20 0ms
-2014-04-09T18:22:47.388-0400 [snapshot] BackgroundJob starting: snapshot
-2014-04-09T18:22:47.388-0400 [ClientCursorMonitor] BackgroundJob starting: ClientCursorMonitor
-2014-04-09T18:22:47.389-0400 [PeriodicTaskRunner] BackgroundJob starting: PeriodicTaskRunner
-2014-04-09T18:22:47.389-0400 [TTLMonitor] BackgroundJob starting: TTLMonitor
-2014-04-09T18:22:47.389-0400 [IndexRebuilder] BackgroundJob starting: IndexRebuilder
-2014-04-09T18:22:47.389-0400 [initandlisten] fd limit hard:1000 soft:1000 max conn: 800
-2014-04-09T18:22:47.390-0400 [IndexRebuilder] checking complete
-2014-04-09T18:22:47.390-0400 [initandlisten] create collection local.startup_log { size: 10485760, capped: true }
-2014-04-09T18:22:47.391-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/local.ns, filling with zeroes...
-2014-04-09T18:22:47.391-0400 [FileAllocator] creating directory /Users/tr/Documents/tmp/data/db/_tmp
-2014-04-09T18:22:47.403-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/local.ns, size: 16MB,  took 0.011 secs
-2014-04-09T18:22:47.421-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.startup_log
-2014-04-09T18:22:47.425-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.system.namespaces
-2014-04-09T18:22:47.426-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/local.0, filling with zeroes...
-2014-04-09T18:22:47.551-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/local.0, size: 64MB,  took 0.125 secs
-2014-04-09T18:22:47.566-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.system.namespaces desiredSize:8192 fromFreeList: 0 eloc: 0:2000
-2014-04-09T18:22:47.569-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.startup_log desiredSize:10485760 fromFreeList: 0 eloc: 0:4000
-2014-04-09T18:22:47.587-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.system.indexes
-2014-04-09T18:22:47.591-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.system.indexes desiredSize:8192 fromFreeList: 0 eloc: 0:a04000
-2014-04-09T18:22:47.604-0400 [initandlisten] Database::_addNamespaceToCatalog ns: local.startup_log.$_id_
-2014-04-09T18:22:47.604-0400 [initandlisten] build index on: local.startup_log properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.startup_log" }
-2014-04-09T18:22:47.604-0400 [initandlisten] local.startup_log: clearing plan cache - collection info cache reset
-2014-04-09T18:22:47.605-0400 [initandlisten] allocating new extent
-2014-04-09T18:22:47.607-0400 [initandlisten] ExtentManager::increaseStorageSize ns:local.startup_log.$_id_ desiredSize:131072 fromFreeList: 0 eloc: 0:a06000
-2014-04-09T18:22:47.608-0400 [initandlisten] 	 added index to empty collection
-2014-04-09T18:22:47.608-0400 [initandlisten] local.startup_log: clearing plan cache - collection info cache reset
-2014-04-09T18:22:47.609-0400 [initandlisten] command local.$cmd command: create { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0 numYields:0  reslen:37 218ms
-2014-04-09T18:22:47.609-0400 [initandlisten] insert local.startup_log ninserted:1 keyUpdates:0 numYields:0  0ms
-2014-04-09T18:22:47.609-0400 [initandlisten] waiting for connections on port 27017
-2014-04-09T18:22:47.610-0400 [initandlisten] connection accepted from 127.0.0.1:64492 #1 (1 connection now open)
-2014-04-09T18:22:47.610-0400 [conn1] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:22:47.611-0400 [conn1] end connection 127.0.0.1:64492 (0 connections now open)
-2014-04-09T18:22:47.612-0400 [initandlisten] connection accepted from 127.0.0.1:64495 #2 (1 connection now open)
-2014-04-09T18:22:47.612-0400 [conn2] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:22:47.614-0400 [conn2] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 numYields:0  reslen:37 0ms
-2014-04-09T18:22:47.615-0400 [conn2] end connection 127.0.0.1:64495 (0 connections now open)
-2014-04-09T18:23:44.097-0400 [initandlisten] connection accepted from 127.0.0.1:64762 #3 (1 connection now open)
-2014-04-09T18:23:44.097-0400 [conn3] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:23:44.112-0400 [initandlisten] connection accepted from 127.0.0.1:64763 #4 (2 connections now open)
-2014-04-09T18:23:44.112-0400 [conn4] opening db:  test
-2014-04-09T18:23:44.114-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/test.ns, filling with zeroes...
-2014-04-09T18:23:44.114-0400 [initandlisten] connection accepted from 127.0.0.1:64764 #5 (3 connections now open)
-2014-04-09T18:23:44.115-0400 [initandlisten] connection accepted from 127.0.0.1:64765 #6 (4 connections now open)
-2014-04-09T18:23:44.118-0400 [initandlisten] connection accepted from 127.0.0.1:64766 #7 (5 connections now open)
-2014-04-09T18:23:44.126-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/test.ns, size: 16MB,  took 0.012 secs
-2014-04-09T18:23:44.158-0400 [conn4] Database::_addNamespaceToCatalog ns: test.mgendata
-2014-04-09T18:23:44.176-0400 [conn4] Database::_addNamespaceToCatalog ns: test.system.namespaces
-2014-04-09T18:23:44.176-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/db/test.0, filling with zeroes...
-2014-04-09T18:23:44.269-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/db/test.0, size: 64MB,  took 0.092 secs
-2014-04-09T18:23:44.283-0400 [conn4] ExtentManager::increaseStorageSize ns:test.system.namespaces desiredSize:8192 fromFreeList: 0 eloc: 0:2000
-2014-04-09T18:23:44.286-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:8192 fromFreeList: 0 eloc: 0:4000
-2014-04-09T18:23:44.302-0400 [conn4] Database::_addNamespaceToCatalog ns: test.system.indexes
-2014-04-09T18:23:44.303-0400 [conn4] ExtentManager::increaseStorageSize ns:test.system.indexes desiredSize:8192 fromFreeList: 0 eloc: 0:6000
-2014-04-09T18:23:44.320-0400 [conn4] Database::_addNamespaceToCatalog ns: test.mgendata.$_id_
-2014-04-09T18:23:44.321-0400 [conn4] build index on: test.mgendata properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "test.mgendata" }
-2014-04-09T18:23:44.321-0400 [conn4] test.mgendata: clearing plan cache - collection info cache reset
-2014-04-09T18:23:44.321-0400 [conn4] allocating new extent
-2014-04-09T18:23:44.323-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata.$_id_ desiredSize:131072 fromFreeList: 0 eloc: 0:8000
-2014-04-09T18:23:44.326-0400 [conn4] 	 added index to empty collection
-2014-04-09T18:23:44.326-0400 [conn4] test.mgendata: clearing plan cache - collection info cache reset
-2014-04-09T18:23:44.326-0400 [conn4] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:213748 213ms
-2014-04-09T18:23:44.327-0400 [conn4] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.330-0400 [conn5] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:54 0ms
-2014-04-09T18:23:44.330-0400 [conn7] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:22 0ms
-2014-04-09T18:23:44.330-0400 [conn6] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:34 0ms
-2014-04-09T18:23:44.330-0400 [conn5] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.330-0400 [conn7] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.331-0400 [conn6] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.395-0400 [conn4] allocating new extent
-2014-04-09T18:23:44.395-0400 [conn4] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:32768 fromFreeList: 0 eloc: 0:28000
-2014-04-09T18:23:44.401-0400 [conn4] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:6798 6ms
-2014-04-09T18:23:44.401-0400 [conn4] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.403-0400 [conn4] end connection 127.0.0.1:64763 (4 connections now open)
-2014-04-09T18:23:44.403-0400 [conn5] allocating new extent
-2014-04-09T18:23:44.406-0400 [conn5] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:131072 fromFreeList: 0 eloc: 0:30000
-2014-04-09T18:23:44.407-0400 [conn5] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:6334 6ms
-2014-04-09T18:23:44.408-0400 [conn5] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.409-0400 [conn5] end connection 127.0.0.1:64764 (3 connections now open)
-2014-04-09T18:23:44.409-0400 [conn6] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1943 1ms
-2014-04-09T18:23:44.410-0400 [conn6] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.411-0400 [conn7] test.mgendata: clearing collection plan cache - 1000 write operations detected since last refresh.
-2014-04-09T18:23:44.412-0400 [conn7] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2308 2ms
-2014-04-09T18:23:44.412-0400 [conn7] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:23:44.412-0400 [conn6] end connection 127.0.0.1:64765 (2 connections now open)
-2014-04-09T18:23:44.414-0400 [conn7] end connection 127.0.0.1:64766 (1 connection now open)
-2014-04-09T18:23:44.419-0400 [conn3] end connection 127.0.0.1:64762 (0 connections now open)
-2014-04-09T18:23:47.382-0400 [DataFileSync] flushing mmaps took 7ms  for 5 files
-2014-04-09T18:23:47.392-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:56 nreturned:0 reslen:20 0ms
-2014-04-09T18:23:47.393-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:127 nreturned:0 reslen:20 0ms
-2014-04-09T18:23:47.393-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:37 nreturned:0 reslen:20 0ms
-2014-04-09T18:23:47.406-0400 [clientcursormon] mem (MB) res:9 virt:2813
-2014-04-09T18:23:47.406-0400 [clientcursormon]  mapped (incl journal view):320
-2014-04-09T18:23:47.406-0400 [clientcursormon]  connections:0
-2014-04-09T18:24:47.381-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
-2014-04-09T18:24:47.395-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:29 nreturned:0 reslen:20 0ms
-2014-04-09T18:24:47.395-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:45 nreturned:0 reslen:20 0ms
-2014-04-09T18:24:47.396-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:30 nreturned:0 reslen:20 0ms
-2014-04-09T18:25:47.385-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
-2014-04-09T18:25:47.398-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:78 nreturned:0 reslen:20 0ms
-2014-04-09T18:25:47.398-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:63 nreturned:0 reslen:20 0ms
-2014-04-09T18:25:47.399-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
-2014-04-09T18:26:47.387-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
-2014-04-09T18:26:47.402-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:81 nreturned:0 reslen:20 0ms
-2014-04-09T18:26:47.402-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:64 nreturned:0 reslen:20 0ms
-2014-04-09T18:26:47.403-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
-2014-04-09T18:27:47.390-0400 [DataFileSync] flushing mmaps took 4ms  for 5 files
-2014-04-09T18:27:47.405-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:42 nreturned:0 reslen:20 0ms
-2014-04-09T18:27:47.406-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:67 nreturned:0 reslen:20 0ms
-2014-04-09T18:27:47.406-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:47 nreturned:0 reslen:20 0ms
-2014-04-09T18:27:47.474-0400 [clientcursormon] mem (MB) res:10 virt:2813
-2014-04-09T18:27:47.474-0400 [clientcursormon]  mapped (incl journal view):320
-2014-04-09T18:27:47.475-0400 [clientcursormon]  connections:0
-2014-04-09T18:28:47.392-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
-2014-04-09T18:28:47.410-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:92 nreturned:0 reslen:20 0ms
-2014-04-09T18:28:47.410-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:69 nreturned:0 reslen:20 0ms
-2014-04-09T18:28:47.410-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:45 nreturned:0 reslen:20 0ms
-2014-04-09T18:29:47.394-0400 [DataFileSync] flushing mmaps took 3ms  for 5 files
-2014-04-09T18:29:47.413-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:40 nreturned:0 reslen:20 0ms
-2014-04-09T18:29:47.414-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:65 nreturned:0 reslen:20 0ms
-2014-04-09T18:29:47.414-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:43 nreturned:0 reslen:20 0ms
-2014-04-09T18:30:47.396-0400 [DataFileSync] flushing mmaps took 2ms  for 5 files
-2014-04-09T18:30:47.416-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:36 nreturned:0 reslen:20 0ms
-2014-04-09T18:30:47.417-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:74 nreturned:0 reslen:20 0ms
-2014-04-09T18:30:47.417-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:80 nreturned:0 reslen:20 0ms
-2014-04-09T18:31:17.268-0400 [initandlisten] connection accepted from 127.0.0.1:49814 #8 (1 connection now open)
-2014-04-09T18:31:17.268-0400 [conn8] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:17.278-0400 [initandlisten] connection accepted from 127.0.0.1:49815 #9 (2 connections now open)
-2014-04-09T18:31:17.279-0400 [conn9] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:84 0ms
-2014-04-09T18:31:17.279-0400 [conn9] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.279-0400 [initandlisten] connection accepted from 127.0.0.1:49816 #10 (3 connections now open)
-2014-04-09T18:31:17.280-0400 [conn10] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:48 0ms
-2014-04-09T18:31:17.280-0400 [conn10] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.280-0400 [initandlisten] connection accepted from 127.0.0.1:49817 #11 (4 connections now open)
-2014-04-09T18:31:17.281-0400 [conn11] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:30 0ms
-2014-04-09T18:31:17.281-0400 [conn11] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.283-0400 [initandlisten] connection accepted from 127.0.0.1:49818 #12 (5 connections now open)
-2014-04-09T18:31:17.283-0400 [conn12] insert test.mgendata ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:34 0ms
-2014-04-09T18:31:17.284-0400 [conn12] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.336-0400 [journal] lsn set 440157
-2014-04-09T18:31:17.351-0400 [conn9] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2936 2ms
-2014-04-09T18:31:17.352-0400 [conn9] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.352-0400 [conn10] allocating new extent
-2014-04-09T18:31:17.353-0400 [conn10] ExtentManager::increaseStorageSize ns:test.mgendata desiredSize:524288 fromFreeList: 0 eloc: 0:50000
-2014-04-09T18:31:17.354-0400 [conn9] end connection 127.0.0.1:49815 (4 connections now open)
-2014-04-09T18:31:17.354-0400 [conn10] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:2974 2ms
-2014-04-09T18:31:17.355-0400 [conn10] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.356-0400 [conn11] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1546 1ms
-2014-04-09T18:31:17.356-0400 [conn10] end connection 127.0.0.1:49816 (3 connections now open)
-2014-04-09T18:31:17.357-0400 [conn11] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.357-0400 [conn12] test.mgendata: clearing collection plan cache - 1000 write operations detected since last refresh.
-2014-04-09T18:31:17.357-0400 [conn12] insert test.mgendata ninserted:249 keyUpdates:0 numYields:0 locks(micros) w:1141 1ms
-2014-04-09T18:31:17.357-0400 [conn12] command test.$cmd command: getLastError { getlasterror: 1 } keyUpdates:0 numYields:0  reslen:94 0ms
-2014-04-09T18:31:17.358-0400 [conn11] end connection 127.0.0.1:49817 (2 connections now open)
-2014-04-09T18:31:17.359-0400 [conn12] end connection 127.0.0.1:49818 (1 connection now open)
-2014-04-09T18:31:17.365-0400 [conn8] end connection 127.0.0.1:49814 (0 connections now open)
-2014-04-09T18:31:18.512-0400 [initandlisten] connection accepted from 127.0.0.1:49822 #13 (1 connection now open)
-2014-04-09T18:31:18.513-0400 [conn13] command admin.$cmd command: whatsmyuri { whatsmyuri: 1 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:62 0ms
-2014-04-09T18:31:18.516-0400 [conn13] command admin.$cmd command: getLog { getLog: "startupWarnings" } keyUpdates:0 numYields:0  reslen:70 0ms
-2014-04-09T18:31:18.518-0400 [conn13] command admin.$cmd command: replSetGetStatus { replSetGetStatus: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:76 0ms
-2014-04-09T18:31:18.519-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:19.915-0400 [conn13] query test.system.namespaces planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:81 nreturned:3 reslen:119 0ms
-2014-04-09T18:31:21.378-0400 [conn13] query test.mgendata planSummary: COLLSCAN cursorid:23077696195 ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:135 nreturned:101 reslen:8066 0ms
-2014-04-09T18:31:21.383-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:26.650-0400 [conn13] command test.$cmd command: count { count: "mgendata", query: {}, fields: {} } keyUpdates:0 numYields:0 locks(micros) r:25 reslen:48 0ms
-2014-04-09T18:31:26.651-0400 [conn13] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:27.875-0400 [conn13] end connection 127.0.0.1:49822 (0 connections now open)
-2014-04-09T18:31:38.369-0400 [initandlisten] connection accepted from 127.0.0.1:49901 #14 (1 connection now open)
-2014-04-09T18:31:38.371-0400 [conn14] command admin.$cmd command: whatsmyuri { whatsmyuri: 1 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:62 0ms
-2014-04-09T18:31:38.373-0400 [conn14] command admin.$cmd command: getLog { getLog: "startupWarnings" } keyUpdates:0 numYields:0  reslen:70 0ms
-2014-04-09T18:31:38.374-0400 [conn14] command admin.$cmd command: replSetGetStatus { replSetGetStatus: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:76 0ms
-2014-04-09T18:31:38.374-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:42.587-0400 [conn14] query test.mgendata planSummary: COLLSCAN cursorid:23211012522 ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:113 nreturned:101 reslen:8066 0ms
-2014-04-09T18:31:42.591-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:31:47.404-0400 [DataFileSync] flushing mmaps took 7ms  for 5 files
-2014-04-09T18:31:47.420-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:37 nreturned:0 reslen:20 0ms
-2014-04-09T18:31:47.420-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:62 nreturned:0 reslen:20 0ms
-2014-04-09T18:31:47.420-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:60 nreturned:0 reslen:20 0ms
-2014-04-09T18:31:54.261-0400 [conn14] query test.mgendata query: { friends: ObjectId('5345c870fe4dce22b18b8059') } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:1656 nreturned:1 reslen:71 1ms
-2014-04-09T18:31:54.261-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:32:05.613-0400 [conn14] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:32:05.618-0400 [conn14] Database::_addNamespaceToCatalog ns: test.mgendata.$friends_1
-2014-04-09T18:32:05.618-0400 [conn14] build index on: test.mgendata properties: { v: 1, key: { friends: 1.0 }, name: "friends_1", ns: "test.mgendata" }
-2014-04-09T18:32:05.618-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
-2014-04-09T18:32:05.619-0400 [conn14] allocating new extent
-2014-04-09T18:32:05.620-0400 [conn14] ExtentManager::increaseStorageSize ns:test.mgendata.$friends_1 desiredSize:131072 fromFreeList: 0 eloc: 0:d0000
-2014-04-09T18:32:05.620-0400 [conn14] 	 building index using bulk method
-2014-04-09T18:32:05.627-0400 [conn14] 	 bulk commit starting
-2014-04-09T18:32:05.627-0400 [conn14] test.mgendata: clearing plan cache - index { friends: 1.0 } set to multi key.
-2014-04-09T18:32:05.634-0400 [conn14] allocating new extent
-2014-04-09T18:32:05.634-0400 [conn14] ExtentManager::increaseStorageSize ns:test.mgendata.$friends_1 desiredSize:524288 fromFreeList: 0 eloc: 0:f0000
-2014-04-09T18:32:05.636-0400 [conn14] 	 done building bottom layer, going to commit
-2014-04-09T18:32:05.636-0400 [conn14] build index done.  scanned 2000 total records. 0.017 secs
-2014-04-09T18:32:05.636-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
-2014-04-09T18:32:05.637-0400 [conn14] test.mgendata: clearing plan cache - collection info cache reset
-2014-04-09T18:32:05.638-0400 [conn14] command test.$cmd command: createIndexes { createIndexes: "mgendata", indexes: [ { key: { friends: 1.0 }, name: "friends_1" } ] } keyUpdates:0 numYields:0 locks(micros) r:23 w:23716 reslen:113 23ms
-2014-04-09T18:32:05.638-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:32:05.651-0400 [journal] lsn set 495284
-2014-04-09T18:32:47.406-0400 [DataFileSync] flushing mmaps took 6ms  for 5 files
-2014-04-09T18:32:47.424-0400 [TTLMonitor] query admin.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:94 nreturned:0 reslen:20 0ms
-2014-04-09T18:32:47.424-0400 [TTLMonitor] query local.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:68 nreturned:0 reslen:20 0ms
-2014-04-09T18:32:47.425-0400 [TTLMonitor] query test.system.indexes query: { expireAfterSeconds: { $exists: true } } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:65 nreturned:0 reslen:20 0ms
-2014-04-09T18:32:47.553-0400 [clientcursormon] mem (MB) res:12 virt:2814
-2014-04-09T18:32:47.554-0400 [clientcursormon]  mapped (incl journal view):320
-2014-04-09T18:32:47.554-0400 [clientcursormon]  connections:1
-2014-04-09T18:33:08.371-0400 [conn14] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:33:09.028-0400 [conn14] end connection 127.0.0.1:49901 (0 connections now open)
-2014-04-09T18:33:15.372-0400 [initandlisten] connection accepted from 127.0.0.1:50060 #15 (1 connection now open)
-2014-04-09T18:33:15.372-0400 [conn15] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:33:15.373-0400 [conn15] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 numYields:0  reslen:37 0ms
-2014-04-09T18:33:15.373-0400 [conn15] end connection 127.0.0.1:50060 (0 connections now open)
-2014-04-09T18:33:15.374-0400 [initandlisten] connection accepted from 127.0.0.1:50061 #16 (1 connection now open)
-2014-04-09T18:33:15.374-0400 [conn16] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0 numYields:0  reslen:178 0ms
-2014-04-09T18:33:15.375-0400 [conn16] terminating, shutdown command received
-2014-04-09T18:33:15.375-0400 [conn16] dbexit: shutdown called
-2014-04-09T18:33:15.375-0400 [conn16] shutdown: going to close listening sockets...
-2014-04-09T18:33:15.375-0400 [conn16] closing listening socket: 9
-2014-04-09T18:33:15.376-0400 [conn16] closing listening socket: 10
-2014-04-09T18:33:15.376-0400 [conn16] removing socket file: /tmp/mongodb-27017.sock
-2014-04-09T18:33:15.376-0400 [conn16] shutdown: going to flush diaglog...
-2014-04-09T18:33:15.376-0400 [conn16] shutdown: going to close sockets...
-2014-04-09T18:33:15.376-0400 [conn16] shutdown: waiting for fs preallocator...
-2014-04-09T18:33:15.376-0400 [conn16] shutdown: lock for final commit...
-2014-04-09T18:33:15.377-0400 [conn16] shutdown: final commit...
-2014-04-09T18:33:15.380-0400 [conn16] shutdown: closing all files...
-2014-04-09T18:33:15.380-0400 [conn16] closeAllFiles() finished
-2014-04-09T18:33:15.380-0400 [conn16] journalCleanup...
-2014-04-09T18:33:15.380-0400 [conn16] removeJournalFiles
-2014-04-09T18:33:15.381-0400 [conn16] removeJournalFiles end
-2014-04-09T18:33:15.381-0400 [conn16] shutdown: removing fs lock...
-2014-04-09T18:33:15.381-0400 [conn16] dbexit: really exiting now
+2014-04-09T23:16:20.437-0400 [initandlisten] MongoDB starting : pid=4037 port=27019 dbpath=/Users/tr/Documents/tmp/data/shard01/rs1/db 64-bit host=enter.local
+2014-04-09T23:16:20.437-0400 [initandlisten] db version v2.6.0
+2014-04-09T23:16:20.437-0400 [initandlisten] git version: 1c1c76aeca21c5983dc178920f5052c298db616c
+2014-04-09T23:16:20.438-0400 [initandlisten] build info: Darwin mci-osx108-8.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2014-04-09T23:16:20.438-0400 [initandlisten] allocator: system
+2014-04-09T23:16:20.438-0400 [initandlisten] options: { net: { port: 27019 }, processManagement: { fork: true }, replication: { replSet: "shard01" }, security: { keyFile: "/Users/tr/Documents/tmp/data/keyfile" }, storage: { dbPath: "/Users/tr/Documents/tmp/data/shard01/rs1/db" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/shard01/rs1/mongod.log" } }
+2014-04-09T23:16:20.438-0400 [initandlisten] journal dir=/Users/tr/Documents/tmp/data/shard01/rs1/db/journal
+2014-04-09T23:16:20.439-0400 [initandlisten] recover : no journal files present, no recovery needed
+2014-04-09T23:16:20.449-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.ns, filling with zeroes...
+2014-04-09T23:16:20.450-0400 [FileAllocator] creating directory /Users/tr/Documents/tmp/data/shard01/rs1/db/_tmp
+2014-04-09T23:16:20.463-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.ns, size: 16MB,  took 0.012 secs
+2014-04-09T23:16:20.484-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.0, filling with zeroes...
+2014-04-09T23:16:20.559-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.0, size: 64MB,  took 0.074 secs
+2014-04-09T23:16:20.589-0400 [initandlisten] build index on: local.startup_log properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.startup_log" }
+2014-04-09T23:16:20.596-0400 [initandlisten] 	 added index to empty collection
+2014-04-09T23:16:20.596-0400 [initandlisten] command local.$cmd command: create { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0 numYields:0  reslen:37 147ms
+2014-04-09T23:16:20.597-0400 [initandlisten] waiting for connections on port 27019
+2014-04-09T23:16:20.603-0400 [rsStart] replSet can't get local.system.replset config from self or any seed (EMPTYCONFIG)
+2014-04-09T23:16:20.604-0400 [rsStart] replSet info you may need to run replSetInitiate -- rs.initiate() in the shell -- if that is not already done
+2014-04-09T23:16:21.435-0400 [initandlisten] connection accepted from 127.0.0.1:52059 #1 (1 connection now open)
+2014-04-09T23:16:21.447-0400 [conn1] note: no users configured in admin.system.users, allowing localhost access
+2014-04-09T23:16:21.450-0400 [conn1] end connection 127.0.0.1:52059 (0 connections now open)
+2014-04-09T23:16:21.533-0400 [initandlisten] connection accepted from 127.0.0.1:52068 #2 (1 connection now open)
+2014-04-09T23:16:21.534-0400 [conn2] replSet replSetInitiate admin command received from client
+2014-04-09T23:16:21.540-0400 [conn2] replSet replSetInitiate config object parses ok, 3 members specified
+2014-04-09T23:16:21.605-0400 [rsStart] replSet can't get local.system.replset config from self or any seed (EMPTYCONFIG)
+2014-04-09T23:16:21.857-0400 [conn2] replSet replSetInitiate all members seem up
+2014-04-09T23:16:21.858-0400 [conn2] ******
+2014-04-09T23:16:21.858-0400 [conn2] creating replication oplog of size: 192MB...
+2014-04-09T23:16:21.858-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.1, filling with zeroes...
+2014-04-09T23:16:22.271-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/local.1, size: 256MB,  took 0.412 secs
+2014-04-09T23:16:22.287-0400 [conn2] ******
+2014-04-09T23:16:22.287-0400 [conn2] replSet info saving a newer config version to local.system.replset: { _id: "shard01", version: 1, members: [ { _id: 0, host: "enter.local:27019" }, { _id: 1, host: "enter.local:27020" }, { _id: 2, host: "enter.local:27021" } ] }
+2014-04-09T23:16:22.290-0400 [conn2] build index on: local.system.replset properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.system.replset" }
+2014-04-09T23:16:22.291-0400 [conn2] 	 added index to empty collection
+2014-04-09T23:16:22.291-0400 [conn2] replSet saveConfigLocally done
+2014-04-09T23:16:22.292-0400 [conn2] replSet replSetInitiate config now saved locally.  Should come online in about a minute.
+2014-04-09T23:16:22.292-0400 [conn2] command admin.$cmd command: replSetInitiate { replSetInitiate: { _id: "shard01", members: [ { host: "enter.local:27019", _id: 0, votes: 1 }, { host: "enter.local:27020", _id: 1, votes: 1 }, { host: "enter.local:27021", _id: 2, votes: 1 } ] } } keyUpdates:0 numYields:0 locks(micros) W:439906 reslen:112 757ms
+2014-04-09T23:16:22.293-0400 [conn2] end connection 127.0.0.1:52068 (0 connections now open)
+2014-04-09T23:16:22.605-0400 [rsStart] replSet I am enter.local:27019
+2014-04-09T23:16:22.684-0400 [rsStart] build index on: local.me properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.me" }
+2014-04-09T23:16:22.690-0400 [rsStart] 	 added index to empty collection
+2014-04-09T23:16:22.690-0400 [rsStart] replSet STARTUP2
+2014-04-09T23:16:22.692-0400 [rsSync] replSet SECONDARY
+2014-04-09T23:16:24.042-0400 [initandlisten] connection accepted from 10.0.1.135:52127 #3 (1 connection now open)
+2014-04-09T23:16:24.043-0400 [conn3]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:24.047-0400 [initandlisten] connection accepted from 10.0.1.135:52131 #4 (2 connections now open)
+2014-04-09T23:16:24.047-0400 [conn4]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:24.048-0400 [conn4] end connection 10.0.1.135:52131 (1 connection now open)
+2014-04-09T23:16:24.608-0400 [rsHealthPoll] replSet member enter.local:27020 is up
+2014-04-09T23:16:24.608-0400 [rsHealthPoll] replSet member enter.local:27021 is up
+2014-04-09T23:16:24.609-0400 [rsMgr] replSet not electing self, not all members up and we have been up less than 5 minutes
+2014-04-09T23:16:24.610-0400 [rsMgr] replSet not electing self, not all members up and we have been up less than 5 minutes
+2014-04-09T23:16:24.739-0400 [initandlisten] connection accepted from 10.0.1.135:52136 #5 (2 connections now open)
+2014-04-09T23:16:24.740-0400 [conn5]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:24.866-0400 [initandlisten] connection accepted from 10.0.1.135:52137 #6 (3 connections now open)
+2014-04-09T23:16:24.866-0400 [conn6]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:25.060-0400 [initandlisten] connection accepted from 10.0.1.135:52138 #7 (4 connections now open)
+2014-04-09T23:16:25.060-0400 [conn7]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:25.062-0400 [conn7] end connection 10.0.1.135:52138 (3 connections now open)
+2014-04-09T23:16:26.072-0400 [initandlisten] connection accepted from 10.0.1.135:52142 #8 (4 connections now open)
+2014-04-09T23:16:26.073-0400 [conn8]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:26.075-0400 [conn8] end connection 10.0.1.135:52142 (3 connections now open)
+2014-04-09T23:16:26.609-0400 [rsHealthPoll] replset info enter.local:27021 thinks that we are down
+2014-04-09T23:16:26.609-0400 [rsHealthPoll] replset info enter.local:27020 thinks that we are down
+2014-04-09T23:16:26.610-0400 [rsHealthPoll] replSet member enter.local:27021 is now in state STARTUP2
+2014-04-09T23:16:26.610-0400 [rsHealthPoll] replSet member enter.local:27020 is now in state STARTUP2
+2014-04-09T23:16:26.611-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:16:26.612-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:16:27.084-0400 [initandlisten] connection accepted from 10.0.1.135:52146 #9 (4 connections now open)
+2014-04-09T23:16:27.085-0400 [conn9]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:27.086-0400 [conn9] end connection 10.0.1.135:52146 (3 connections now open)
+2014-04-09T23:16:28.092-0400 [initandlisten] connection accepted from 10.0.1.135:52150 #10 (4 connections now open)
+2014-04-09T23:16:28.093-0400 [conn10]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:28.094-0400 [conn10] end connection 10.0.1.135:52150 (3 connections now open)
+2014-04-09T23:16:29.102-0400 [initandlisten] connection accepted from 10.0.1.135:52152 #11 (4 connections now open)
+2014-04-09T23:16:29.103-0400 [conn11]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:29.104-0400 [conn11] end connection 10.0.1.135:52152 (3 connections now open)
+2014-04-09T23:16:30.112-0400 [initandlisten] connection accepted from 10.0.1.135:52154 #12 (4 connections now open)
+2014-04-09T23:16:30.113-0400 [conn12]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:30.114-0400 [conn12] end connection 10.0.1.135:52154 (3 connections now open)
+2014-04-09T23:16:31.123-0400 [initandlisten] connection accepted from 10.0.1.135:52156 #13 (4 connections now open)
+2014-04-09T23:16:31.123-0400 [conn13]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:31.124-0400 [conn13] end connection 10.0.1.135:52156 (3 connections now open)
+2014-04-09T23:16:32.265-0400 [initandlisten] connection accepted from 10.0.1.135:52158 #14 (4 connections now open)
+2014-04-09T23:16:32.266-0400 [conn14]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:32.267-0400 [conn14] end connection 10.0.1.135:52158 (3 connections now open)
+2014-04-09T23:16:32.616-0400 [rsMgr] replSet info electSelf 0
+2014-04-09T23:16:32.701-0400 [rsMgr] replSet PRIMARY
+2014-04-09T23:16:33.273-0400 [initandlisten] connection accepted from 10.0.1.135:52159 #15 (4 connections now open)
+2014-04-09T23:16:33.274-0400 [conn15]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:34.292-0400 [initandlisten] connection accepted from 127.0.0.1:52161 #16 (5 connections now open)
+2014-04-09T23:16:34.293-0400 [conn16] end connection 127.0.0.1:52161 (4 connections now open)
+2014-04-09T23:16:34.302-0400 [initandlisten] connection accepted from 127.0.0.1:52173 #17 (5 connections now open)
+2014-04-09T23:16:34.303-0400 [conn17] end connection 127.0.0.1:52173 (4 connections now open)
+2014-04-09T23:16:34.313-0400 [initandlisten] connection accepted from 127.0.0.1:52182 #18 (5 connections now open)
+2014-04-09T23:16:34.330-0400 [initandlisten] connection accepted from 10.0.1.135:52184 #19 (6 connections now open)
+2014-04-09T23:16:34.332-0400 [conn18] end connection 127.0.0.1:52182 (5 connections now open)
+2014-04-09T23:16:34.336-0400 [conn19] end connection 10.0.1.135:52184 (4 connections now open)
+2014-04-09T23:16:34.341-0400 [initandlisten] connection accepted from 10.0.1.135:52194 #20 (5 connections now open)
+2014-04-09T23:16:34.341-0400 [conn20]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:34.342-0400 [initandlisten] connection accepted from 10.0.1.135:52195 #21 (6 connections now open)
+2014-04-09T23:16:34.343-0400 [conn20] first cluster operation detected, adding sharding hook to enable versioning and authentication to remote servers
+2014-04-09T23:16:34.343-0400 [conn21]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:34.597-0400 [initandlisten] connection accepted from 127.0.0.1:52204 #22 (7 connections now open)
+2014-04-09T23:16:34.597-0400 [conn22] end connection 127.0.0.1:52204 (6 connections now open)
+2014-04-09T23:16:34.608-0400 [initandlisten] connection accepted from 127.0.0.1:52213 #23 (7 connections now open)
+2014-04-09T23:16:34.610-0400 [initandlisten] connection accepted from 10.0.1.135:52215 #24 (8 connections now open)
+2014-04-09T23:16:34.611-0400 [conn23] end connection 127.0.0.1:52213 (7 connections now open)
+2014-04-09T23:16:34.615-0400 [conn24] end connection 10.0.1.135:52215 (6 connections now open)
+2014-04-09T23:16:36.451-0400 [initandlisten] connection accepted from 10.0.1.135:52224 #25 (7 connections now open)
+2014-04-09T23:16:36.452-0400 [conn25]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:36.452-0400 [initandlisten] connection accepted from 10.0.1.135:52225 #26 (8 connections now open)
+2014-04-09T23:16:36.453-0400 [conn26]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:40.754-0400 [conn5] end connection 10.0.1.135:52136 (7 connections now open)
+2014-04-09T23:16:40.755-0400 [initandlisten] connection accepted from 10.0.1.135:52230 #27 (8 connections now open)
+2014-04-09T23:16:40.755-0400 [conn27]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:40.879-0400 [conn6] end connection 10.0.1.135:52137 (7 connections now open)
+2014-04-09T23:16:40.880-0400 [initandlisten] connection accepted from 10.0.1.135:52231 #28 (8 connections now open)
+2014-04-09T23:16:40.880-0400 [conn28]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.317-0400 [initandlisten] connection accepted from 10.0.1.135:52233 #29 (9 connections now open)
+2014-04-09T23:16:41.318-0400 [conn29]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.326-0400 [initandlisten] connection accepted from 10.0.1.135:52234 #30 (10 connections now open)
+2014-04-09T23:16:41.326-0400 [conn30]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.328-0400 [conn30] end connection 10.0.1.135:52234 (9 connections now open)
+2014-04-09T23:16:41.342-0400 [conn29] end connection 10.0.1.135:52233 (8 connections now open)
+2014-04-09T23:16:41.636-0400 [initandlisten] connection accepted from 10.0.1.135:52236 #31 (9 connections now open)
+2014-04-09T23:16:41.637-0400 [conn31]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.645-0400 [initandlisten] connection accepted from 10.0.1.135:52237 #32 (10 connections now open)
+2014-04-09T23:16:41.645-0400 [conn32]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.647-0400 [conn32] end connection 10.0.1.135:52237 (9 connections now open)
+2014-04-09T23:16:41.659-0400 [conn31] end connection 10.0.1.135:52236 (8 connections now open)
+2014-04-09T23:16:41.777-0400 [initandlisten] connection accepted from 10.0.1.135:52238 #33 (9 connections now open)
+2014-04-09T23:16:41.778-0400 [conn33]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.779-0400 [initandlisten] connection accepted from 10.0.1.135:52239 #34 (10 connections now open)
+2014-04-09T23:16:41.780-0400 [conn34]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.953-0400 [initandlisten] connection accepted from 10.0.1.135:52240 #35 (11 connections now open)
+2014-04-09T23:16:41.953-0400 [conn35]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:41.955-0400 [initandlisten] connection accepted from 10.0.1.135:52241 #36 (12 connections now open)
+2014-04-09T23:16:41.956-0400 [conn36]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:16:42.620-0400 [rsHealthPoll] replSet member enter.local:27021 is now in state RECOVERING
+2014-04-09T23:16:42.623-0400 [rsHealthPoll] replSet member enter.local:27020 is now in state SECONDARY
+2014-04-09T23:16:42.835-0400 [slaveTracking] build index on: local.slaves properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.slaves" }
+2014-04-09T23:16:42.835-0400 [slaveTracking] 	 added index to empty collection
+2014-04-09T23:16:44.622-0400 [rsHealthPoll] replSet member enter.local:27021 is now in state SECONDARY
+2014-04-09T23:17:10.775-0400 [conn27] end connection 10.0.1.135:52230 (11 connections now open)
+2014-04-09T23:17:10.776-0400 [initandlisten] connection accepted from 10.0.1.135:52262 #37 (13 connections now open)
+2014-04-09T23:17:10.776-0400 [conn37]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:17:10.901-0400 [conn28] end connection 10.0.1.135:52231 (11 connections now open)
+2014-04-09T23:17:10.902-0400 [initandlisten] connection accepted from 10.0.1.135:52263 #38 (12 connections now open)
+2014-04-09T23:17:10.903-0400 [conn38]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:17:20.467-0400 [clientcursormon] mem (MB) res:10 virt:3196
+2014-04-09T23:17:20.467-0400 [clientcursormon]  mapped (incl journal view):672
+2014-04-09T23:17:20.467-0400 [clientcursormon]  connections:12
+2014-04-09T23:17:20.468-0400 [clientcursormon]  replication threads:32
+2014-04-09T23:17:40.798-0400 [conn37] end connection 10.0.1.135:52262 (11 connections now open)
+2014-04-09T23:17:40.799-0400 [initandlisten] connection accepted from 10.0.1.135:52274 #39 (13 connections now open)
+2014-04-09T23:17:40.800-0400 [conn39]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:17:40.926-0400 [conn38] end connection 10.0.1.135:52263 (11 connections now open)
+2014-04-09T23:17:40.926-0400 [initandlisten] connection accepted from 10.0.1.135:52275 #40 (12 connections now open)
+2014-04-09T23:17:40.927-0400 [conn40]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:18:10.822-0400 [conn39] end connection 10.0.1.135:52274 (11 connections now open)
+2014-04-09T23:18:10.822-0400 [initandlisten] connection accepted from 10.0.1.135:52288 #41 (12 connections now open)
+2014-04-09T23:18:10.823-0400 [conn41]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:18:10.949-0400 [conn40] end connection 10.0.1.135:52275 (11 connections now open)
+2014-04-09T23:18:10.950-0400 [initandlisten] connection accepted from 10.0.1.135:52289 #42 (12 connections now open)
+2014-04-09T23:18:10.950-0400 [conn42]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:18:40.496-0400 [initandlisten] connection accepted from 10.0.1.135:52301 #43 (13 connections now open)
+2014-04-09T23:18:40.496-0400 [conn43]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:18:40.844-0400 [conn41] end connection 10.0.1.135:52288 (12 connections now open)
+2014-04-09T23:18:40.844-0400 [initandlisten] connection accepted from 10.0.1.135:52302 #44 (14 connections now open)
+2014-04-09T23:18:40.845-0400 [conn44]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:18:40.970-0400 [conn42] end connection 10.0.1.135:52289 (12 connections now open)
+2014-04-09T23:18:40.971-0400 [initandlisten] connection accepted from 10.0.1.135:52303 #45 (14 connections now open)
+2014-04-09T23:18:40.971-0400 [conn45]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:10.865-0400 [conn44] end connection 10.0.1.135:52302 (12 connections now open)
+2014-04-09T23:19:10.865-0400 [initandlisten] connection accepted from 10.0.1.135:52315 #46 (14 connections now open)
+2014-04-09T23:19:10.866-0400 [conn46]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:10.993-0400 [conn45] end connection 10.0.1.135:52303 (12 connections now open)
+2014-04-09T23:19:10.993-0400 [initandlisten] connection accepted from 10.0.1.135:52316 #47 (13 connections now open)
+2014-04-09T23:19:10.993-0400 [conn47]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:26.368-0400 [initandlisten] connection accepted from 10.0.1.135:52325 #48 (14 connections now open)
+2014-04-09T23:19:26.368-0400 [conn48]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:26.369-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/test.ns, filling with zeroes...
+2014-04-09T23:19:26.380-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/test.ns, size: 16MB,  took 0.011 secs
+2014-04-09T23:19:26.406-0400 [FileAllocator] allocating new datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/test.0, filling with zeroes...
+2014-04-09T23:19:26.518-0400 [FileAllocator] done allocating datafile /Users/tr/Documents/tmp/data/shard01/rs1/db/test.0, size: 64MB,  took 0.11 secs
+2014-04-09T23:19:26.543-0400 [conn48] build index on: test.docs properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "test.docs" }
+2014-04-09T23:19:26.544-0400 [conn48] 	 added index to empty collection
+2014-04-09T23:19:26.550-0400 [conn48] build index on: test.docs properties: { v: 1, key: { foo: "hashed" }, name: "foo_hashed", ns: "test.docs" }
+2014-04-09T23:19:26.551-0400 [conn48] 	 added index to empty collection
+2014-04-09T23:19:26.551-0400 [conn48] insert test.system.indexes query: { ns: "test.docs", key: { foo: "hashed" }, name: "foo_hashed" } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:182206 182ms
+2014-04-09T23:19:26.551-0400 [conn48] command test.$cmd command: insert { insert: "system.indexes", documents: [ { ns: "test.docs", key: { foo: "hashed" }, name: "foo_hashed" } ], ordered: true, metadata: { shardName: "shard01", shardVersion: [ Timestamp 0|0, ObjectId('000000000000000000000000') ], session: 0 } } ntoreturn:1 keyUpdates:0 numYields:0 locks(micros) w:209 reslen:140 182ms
+2014-04-09T23:19:26.702-0400 [conn20] remote client 10.0.1.135:52194 initialized this host (shard01/enter.local:27019,enter.local:27020,enter.local:27021) as shard shard01
+2014-04-09T23:19:26.704-0400 [conn20] remotely refreshing metadata for test.docs with requested shard version 1|1||53460dbe4aaa0fc95616708e, current shard version is 0|0||000000000000000000000000, current metadata version is 0|0||000000000000000000000000
+2014-04-09T23:19:26.704-0400 [conn20] SyncClusterConnection connecting to [enter.local:27025]
+2014-04-09T23:19:26.705-0400 [conn20] SyncClusterConnection connecting to [enter.local:27026]
+2014-04-09T23:19:26.706-0400 [conn20] SyncClusterConnection connecting to [enter.local:27027]
+2014-04-09T23:19:26.709-0400 [conn20] collection test.docs was previously unsharded, new metadata loaded with shard version 1|1||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:26.709-0400 [conn20] collection version was loaded at version 1|1||53460dbe4aaa0fc95616708e, took 4ms
+2014-04-09T23:19:26.776-0400 [conn15] moveChunk waiting for full cleanup after move
+2014-04-09T23:19:26.776-0400 [conn15] received moveChunk request: { moveChunk: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", to: "shard02/enter.local:27022,enter.local:27023,enter.local:27024", fromShard: "shard01", toShard: "shard02", min: { foo: 0 }, max: { foo: MaxKey }, maxChunkSizeBytes: 67108864, shardId: "test.docs-foo_0", configdb: "enter.local:27025,enter.local:27026,enter.local:27027", secondaryThrottle: false, waitForDelete: true, maxTimeMS: 0 }
+2014-04-09T23:19:26.785-0400 [LockPinger] creating distributed lock ping thread for enter.local:27025,enter.local:27026,enter.local:27027 and process enter.local:27019:1397099966:1022657369 (sleeping for 30000ms)
+2014-04-09T23:19:26.785-0400 [LockPinger] SyncClusterConnection connecting to [enter.local:27025]
+2014-04-09T23:19:26.786-0400 [LockPinger] SyncClusterConnection connecting to [enter.local:27026]
+2014-04-09T23:19:26.786-0400 [LockPinger] SyncClusterConnection connecting to [enter.local:27027]
+2014-04-09T23:19:27.053-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:19:26 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:19:27.193-0400 [conn15] distributed lock 'test.docs/enter.local:27019:1397099966:1022657369' acquired, ts : 53460dbe7bad85a712a6c3fb
+2014-04-09T23:19:27.193-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:27-53460dbf7bad85a712a6c3fc", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099967193), what: "moveChunk.start", ns: "test.docs", details: { min: { foo: 0 }, max: { foo: MaxKey }, from: "shard01", to: "shard02" } }
+2014-04-09T23:19:27.342-0400 [conn15] remotely refreshing metadata for test.docs based on current shard version 1|1||53460dbe4aaa0fc95616708e, current metadata version is 1|1||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:27.342-0400 [conn15] metadata of collection test.docs already up to date (shard version : 1|1||53460dbe4aaa0fc95616708e, took 0ms)
+2014-04-09T23:19:27.342-0400 [conn15] moveChunk request accepted at version 1|1||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:27.343-0400 [conn15] moveChunk number of documents: 0
+2014-04-09T23:19:27.343-0400 [conn15] starting new replica set monitor for replica set shard02 with seeds enter.local:27022,enter.local:27023,enter.local:27024
+2014-04-09T23:19:27.343-0400 [ReplicaSetMonitorWatcher] starting
+2014-04-09T23:19:27.351-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.352-0400 [initandlisten] connection accepted from 10.0.1.135:52345 #49 (15 connections now open)
+2014-04-09T23:19:27.353-0400 [conn49]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:27.353-0400 [initandlisten] connection accepted from 10.0.1.135:52346 #50 (16 connections now open)
+2014-04-09T23:19:27.354-0400 [conn50]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:27.354-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.359-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.367-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.384-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.417-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.482-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "ready", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.611-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "catchup", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:27.869-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "catchup", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:28.383-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "catchup", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:29.220-0400 [conn26] received moveChunk request: { moveChunk: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", to: "shard02/enter.local:27022,enter.local:27023,enter.local:27024", fromShard: "shard01", toShard: "shard02", min: { foo: MinKey }, max: { foo: 0 }, maxChunkSizeBytes: 67108864, shardId: "test.docs-foo_MinKey", configdb: "enter.local:27025,enter.local:27026,enter.local:27027", secondaryThrottle: true, waitForDelete: false, maxTimeMS: 0 }
+2014-04-09T23:19:29.221-0400 [conn26] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:29-53460dc17bad85a712a6c3fd", server: "enter.local", clientAddr: "10.0.1.135:52225", time: new Date(1397099969221), what: "moveChunk.from", ns: "test.docs", details: { min: { foo: MinKey }, max: { foo: 0 }, step 1 of 6: 0, note: "aborted" } }
+2014-04-09T23:19:29.280-0400 [initandlisten] connection accepted from 10.0.1.135:52347 #51 (17 connections now open)
+2014-04-09T23:19:29.280-0400 [conn51]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:29.408-0400 [conn15] moveChunk data transfer progress: { active: true, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "steady", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 } my mem used: 0
+2014-04-09T23:19:29.409-0400 [conn15] About to check if it is safe to enter critical section
+2014-04-09T23:19:29.409-0400 [conn15] About to enter migrate critical section
+2014-04-09T23:19:29.409-0400 [conn15] moveChunk setting version to: 2|0||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:29.564-0400 [conn51] received moveChunk request: { moveChunk: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", to: "shard02/enter.local:27022,enter.local:27023,enter.local:27024", fromShard: "shard01", toShard: "shard02", min: { foo: MinKey }, max: { foo: 0 }, maxChunkSizeBytes: 67108864, shardId: "test.docs-foo_MinKey", configdb: "enter.local:27025,enter.local:27026,enter.local:27027", secondaryThrottle: true, waitForDelete: false, maxTimeMS: 0 }
+2014-04-09T23:19:29.564-0400 [conn51] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:29-53460dc17bad85a712a6c3fe", server: "enter.local", clientAddr: "10.0.1.135:52347", time: new Date(1397099969564), what: "moveChunk.from", ns: "test.docs", details: { min: { foo: MinKey }, max: { foo: 0 }, step 1 of 6: 0, note: "aborted" } }
+2014-04-09T23:19:29.568-0400 [conn15] moveChunk migrate commit accepted by TO-shard: { active: false, ns: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", min: { foo: 0 }, max: { foo: MaxKey }, shardKeyPattern: { foo: "hashed" }, state: "done", counts: { cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 }, ok: 1.0 }
+2014-04-09T23:19:29.568-0400 [conn15] moveChunk updating self version to: 2|1||53460dbe4aaa0fc95616708e through { foo: MinKey } -> { foo: 0 } for collection 'test.docs'
+2014-04-09T23:19:29.568-0400 [conn15] SyncClusterConnection connecting to [enter.local:27025]
+2014-04-09T23:19:29.569-0400 [conn15] SyncClusterConnection connecting to [enter.local:27026]
+2014-04-09T23:19:29.570-0400 [conn15] SyncClusterConnection connecting to [enter.local:27027]
+2014-04-09T23:19:29.694-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:29-53460dc17bad85a712a6c3ff", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099969694), what: "moveChunk.commit", ns: "test.docs", details: { min: { foo: 0 }, max: { foo: MaxKey }, from: "shard01", to: "shard02", cloned: 0, clonedBytes: 0, catchup: 0, steady: 0 } }
+2014-04-09T23:19:29.709-0400 [conn15] MigrateFromStatus::done About to acquire global write lock to exit critical section
+2014-04-09T23:19:29.709-0400 [conn15] MigrateFromStatus::done Global lock acquired
+2014-04-09T23:19:29.709-0400 [conn15] doing delete inline for cleanup of chunk data
+2014-04-09T23:19:29.710-0400 [conn15] Deleter starting delete for: test.docs from { foo: 0 } -> { foo: MaxKey }, with opId: 578
+2014-04-09T23:19:29.710-0400 [conn15] rangeDeleter deleted 0 documents for test.docs from { foo: 0 } -> { foo: MaxKey }
+2014-04-09T23:19:29.710-0400 [conn15] MigrateFromStatus::done About to acquire global write lock to exit critical section
+2014-04-09T23:19:29.710-0400 [conn15] MigrateFromStatus::done Global lock acquired
+2014-04-09T23:19:29.710-0400 [conn15] SyncClusterConnection connecting to [enter.local:27025]
+2014-04-09T23:19:29.711-0400 [conn15] SyncClusterConnection connecting to [enter.local:27026]
+2014-04-09T23:19:29.712-0400 [conn15] SyncClusterConnection connecting to [enter.local:27027]
+2014-04-09T23:19:29.833-0400 [conn15] distributed lock 'test.docs/enter.local:27019:1397099966:1022657369' unlocked. 
+2014-04-09T23:19:29.833-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:29-53460dc17bad85a712a6c400", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099969833), what: "moveChunk.from", ns: "test.docs", details: { min: { foo: 0 }, max: { foo: MaxKey }, step 1 of 6: 0, step 2 of 6: 566, step 3 of 6: 7, step 4 of 6: 2058, step 5 of 6: 300, step 6 of 6: 0 } }
+2014-04-09T23:19:29.840-0400 [conn15] command admin.$cmd command: moveChunk { moveChunk: "test.docs", from: "shard01/enter.local:27019,enter.local:27020,enter.local:27021", to: "shard02/enter.local:27022,enter.local:27023,enter.local:27024", fromShard: "shard01", toShard: "shard02", min: { foo: 0 }, max: { foo: MaxKey }, maxChunkSizeBytes: 67108864, shardId: "test.docs-foo_0", configdb: "enter.local:27025,enter.local:27026,enter.local:27027", secondaryThrottle: false, waitForDelete: true, maxTimeMS: 0 } ntoreturn:1 keyUpdates:0 numYields:0 locks(micros) W:276 r:285 w:48 reslen:37 3063ms
+2014-04-09T23:19:29.841-0400 [conn15] received splitChunk request: { splitChunk: "test.docs", keyPattern: { foo: "hashed" }, min: { foo: MinKey }, max: { foo: 0 }, from: "shard01", splitKeys: [ { foo: -8854437155380584768 }, { foo: -8485502273906393736 }, { foo: -8116567392432202704 }, { foo: -7747632510958011672 }, { foo: -7378697629483820640 }, { foo: -7009762748009629608 }, { foo: -6640827866535438576 }, { foo: -6271892985061247544 }, { foo: -5902958103587056512 }, { foo: -5534023222112865480 }, { foo: -5165088340638674448 }, { foo: -4796153459164483416 }, { foo: -4427218577690292384 }, { foo: -4058283696216101352 }, { foo: -3689348814741910320 }, { foo: -3320413933267719288 }, { foo: -2951479051793528256 }, { foo: -2582544170319337224 }, { foo: -2213609288845146192 }, { foo: -1844674407370955160 }, { foo: -1475739525896764128 }, { foo: -1106804644422573096 }, { foo: -737869762948382064 }, { foo: -368934881474191032 } ], shardId: "test.docs-foo_MinKey", configdb: "enter.local:27025,enter.local:27026,enter.local:27027" }
+2014-04-09T23:19:30.110-0400 [conn15] distributed lock 'test.docs/enter.local:27019:1397099966:1022657369' acquired, ts : 53460dc17bad85a712a6c401
+2014-04-09T23:19:30.112-0400 [conn15] remotely refreshing metadata for test.docs based on current shard version 2|0||53460dbe4aaa0fc95616708e, current metadata version is 2|0||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:30.112-0400 [conn15] updating metadata for test.docs from shard version 2|0||53460dbe4aaa0fc95616708e to shard version 2|1||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:30.113-0400 [conn15] collection version was loaded at version 2|1||53460dbe4aaa0fc95616708e, took 0ms
+2014-04-09T23:19:30.113-0400 [conn15] splitChunk accepted at version 2|1||53460dbe4aaa0fc95616708e
+2014-04-09T23:19:30.248-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c402", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970248), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 1, of: 25, chunk: { min: { foo: MinKey }, max: { foo: -8854437155380584768 }, lastmod: Timestamp 2000|2, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.255-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c403", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970255), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 2, of: 25, chunk: { min: { foo: -8854437155380584768 }, max: { foo: -8485502273906393736 }, lastmod: Timestamp 2000|3, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.260-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c404", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970260), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 3, of: 25, chunk: { min: { foo: -8485502273906393736 }, max: { foo: -8116567392432202704 }, lastmod: Timestamp 2000|4, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.265-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c405", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970265), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 4, of: 25, chunk: { min: { foo: -8116567392432202704 }, max: { foo: -7747632510958011672 }, lastmod: Timestamp 2000|5, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.270-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c406", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970270), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 5, of: 25, chunk: { min: { foo: -7747632510958011672 }, max: { foo: -7378697629483820640 }, lastmod: Timestamp 2000|6, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.276-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c407", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970276), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 6, of: 25, chunk: { min: { foo: -7378697629483820640 }, max: { foo: -7009762748009629608 }, lastmod: Timestamp 2000|7, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.281-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c408", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970281), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 7, of: 25, chunk: { min: { foo: -7009762748009629608 }, max: { foo: -6640827866535438576 }, lastmod: Timestamp 2000|8, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.286-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c409", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970286), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 8, of: 25, chunk: { min: { foo: -6640827866535438576 }, max: { foo: -6271892985061247544 }, lastmod: Timestamp 2000|9, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.291-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40a", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970291), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 9, of: 25, chunk: { min: { foo: -6271892985061247544 }, max: { foo: -5902958103587056512 }, lastmod: Timestamp 2000|10, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.296-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40b", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970296), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 10, of: 25, chunk: { min: { foo: -5902958103587056512 }, max: { foo: -5534023222112865480 }, lastmod: Timestamp 2000|11, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.302-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40c", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970302), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 11, of: 25, chunk: { min: { foo: -5534023222112865480 }, max: { foo: -5165088340638674448 }, lastmod: Timestamp 2000|12, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.308-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40d", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970308), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 12, of: 25, chunk: { min: { foo: -5165088340638674448 }, max: { foo: -4796153459164483416 }, lastmod: Timestamp 2000|13, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.314-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40e", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970314), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 13, of: 25, chunk: { min: { foo: -4796153459164483416 }, max: { foo: -4427218577690292384 }, lastmod: Timestamp 2000|14, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.320-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c40f", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970320), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 14, of: 25, chunk: { min: { foo: -4427218577690292384 }, max: { foo: -4058283696216101352 }, lastmod: Timestamp 2000|15, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.326-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c410", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970326), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 15, of: 25, chunk: { min: { foo: -4058283696216101352 }, max: { foo: -3689348814741910320 }, lastmod: Timestamp 2000|16, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.332-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c411", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970332), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 16, of: 25, chunk: { min: { foo: -3689348814741910320 }, max: { foo: -3320413933267719288 }, lastmod: Timestamp 2000|17, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.339-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c412", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970339), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 17, of: 25, chunk: { min: { foo: -3320413933267719288 }, max: { foo: -2951479051793528256 }, lastmod: Timestamp 2000|18, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.345-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c413", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970345), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 18, of: 25, chunk: { min: { foo: -2951479051793528256 }, max: { foo: -2582544170319337224 }, lastmod: Timestamp 2000|19, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.352-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c414", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970352), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 19, of: 25, chunk: { min: { foo: -2582544170319337224 }, max: { foo: -2213609288845146192 }, lastmod: Timestamp 2000|20, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.358-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c415", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970358), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 20, of: 25, chunk: { min: { foo: -2213609288845146192 }, max: { foo: -1844674407370955160 }, lastmod: Timestamp 2000|21, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.364-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c416", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970364), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 21, of: 25, chunk: { min: { foo: -1844674407370955160 }, max: { foo: -1475739525896764128 }, lastmod: Timestamp 2000|22, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.369-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c417", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970369), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 22, of: 25, chunk: { min: { foo: -1475739525896764128 }, max: { foo: -1106804644422573096 }, lastmod: Timestamp 2000|23, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.375-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c418", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970375), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 23, of: 25, chunk: { min: { foo: -1106804644422573096 }, max: { foo: -737869762948382064 }, lastmod: Timestamp 2000|24, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.380-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c419", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970380), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 24, of: 25, chunk: { min: { foo: -737869762948382064 }, max: { foo: -368934881474191032 }, lastmod: Timestamp 2000|25, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.386-0400 [conn15] about to log metadata event: { _id: "enter.local-2014-04-10T03:19:30-53460dc27bad85a712a6c41a", server: "enter.local", clientAddr: "10.0.1.135:52159", time: new Date(1397099970386), what: "multi-split", ns: "test.docs", details: { before: { min: { foo: MinKey }, max: { foo: 0 }, lastmod: Timestamp 2000|1, lastmodEpoch: ObjectId('000000000000000000000000') }, number: 25, of: 25, chunk: { min: { foo: -368934881474191032 }, max: { foo: 0 }, lastmod: Timestamp 2000|26, lastmodEpoch: ObjectId('53460dbe4aaa0fc95616708e') } } }
+2014-04-09T23:19:30.526-0400 [conn15] distributed lock 'test.docs/enter.local:27019:1397099966:1022657369' unlocked. 
+2014-04-09T23:19:30.526-0400 [conn15] command admin.$cmd command: splitChunk { $msg: "query not recording (too large)" } ntoreturn:1 keyUpdates:0 numYields:0 locks(micros) w:72 reslen:37 685ms
+2014-04-09T23:19:40.888-0400 [conn46] end connection 10.0.1.135:52315 (16 connections now open)
+2014-04-09T23:19:40.888-0400 [initandlisten] connection accepted from 10.0.1.135:52380 #52 (17 connections now open)
+2014-04-09T23:19:40.889-0400 [conn52]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:41.011-0400 [conn47] end connection 10.0.1.135:52316 (16 connections now open)
+2014-04-09T23:19:41.012-0400 [initandlisten] connection accepted from 10.0.1.135:52381 #53 (17 connections now open)
+2014-04-09T23:19:41.012-0400 [conn53]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:19:57.477-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:19:57 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:20:10.908-0400 [conn52] end connection 10.0.1.135:52380 (16 connections now open)
+2014-04-09T23:20:10.908-0400 [initandlisten] connection accepted from 10.0.1.135:52392 #54 (17 connections now open)
+2014-04-09T23:20:10.909-0400 [conn54]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:20:11.032-0400 [conn53] end connection 10.0.1.135:52381 (16 connections now open)
+2014-04-09T23:20:11.033-0400 [initandlisten] connection accepted from 10.0.1.135:52393 #55 (17 connections now open)
+2014-04-09T23:20:11.033-0400 [conn55]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:20:20.526-0400 [clientcursormon] mem (MB) res:12 virt:3364
+2014-04-09T23:20:20.526-0400 [clientcursormon]  mapped (incl journal view):832
+2014-04-09T23:20:20.526-0400 [clientcursormon]  connections:17
+2014-04-09T23:20:20.527-0400 [clientcursormon]  replication threads:32
+2014-04-09T23:20:27.741-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:20:27 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:20:40.929-0400 [conn54] end connection 10.0.1.135:52392 (16 connections now open)
+2014-04-09T23:20:40.930-0400 [initandlisten] connection accepted from 10.0.1.135:52407 #56 (17 connections now open)
+2014-04-09T23:20:40.930-0400 [conn56]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:20:41.052-0400 [conn55] end connection 10.0.1.135:52393 (16 connections now open)
+2014-04-09T23:20:41.053-0400 [initandlisten] connection accepted from 10.0.1.135:52408 #57 (17 connections now open)
+2014-04-09T23:20:41.054-0400 [conn57]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:20:58.006-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:20:57 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:21:10.951-0400 [conn56] end connection 10.0.1.135:52407 (16 connections now open)
+2014-04-09T23:21:10.952-0400 [initandlisten] connection accepted from 10.0.1.135:52420 #58 (17 connections now open)
+2014-04-09T23:21:10.953-0400 [conn58]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:21:11.076-0400 [conn57] end connection 10.0.1.135:52408 (16 connections now open)
+2014-04-09T23:21:11.076-0400 [initandlisten] connection accepted from 10.0.1.135:52421 #59 (18 connections now open)
+2014-04-09T23:21:11.077-0400 [conn59]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:21:28.406-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:21:28 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:21:34.354-0400 [conn21] command admin.$cmd command: writebacklisten { writebacklisten: ObjectId('53460d074aaa0fc956167075') } ntoreturn:1 keyUpdates:0 numYields:0  reslen:44 300010ms
+2014-04-09T23:21:40.973-0400 [conn58] end connection 10.0.1.135:52420 (16 connections now open)
+2014-04-09T23:21:40.974-0400 [initandlisten] connection accepted from 10.0.1.135:52437 #60 (17 connections now open)
+2014-04-09T23:21:40.975-0400 [conn60]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:21:41.098-0400 [conn59] end connection 10.0.1.135:52421 (16 connections now open)
+2014-04-09T23:21:41.099-0400 [initandlisten] connection accepted from 10.0.1.135:52438 #61 (17 connections now open)
+2014-04-09T23:21:41.099-0400 [conn61]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:21:58.826-0400 [LockPinger] cluster enter.local:27025,enter.local:27026,enter.local:27027 pinged successfully at Wed Apr  9 23:21:58 2014 by distributed lock pinger 'enter.local:27025,enter.local:27026,enter.local:27027/enter.local:27019:1397099966:1022657369', sleeping for 30000ms
+2014-04-09T23:22:01.327-0400 [initandlisten] connection accepted from 127.0.0.1:52449 #62 (18 connections now open)
+2014-04-09T23:22:01.328-0400 [conn62] end connection 127.0.0.1:52449 (17 connections now open)
+2014-04-09T23:22:01.338-0400 [initandlisten] connection accepted from 127.0.0.1:52458 #63 (18 connections now open)
+2014-04-09T23:22:01.345-0400 [initandlisten] connection accepted from 10.0.1.135:52460 #64 (19 connections now open)
+2014-04-09T23:22:01.347-0400 [conn63] end connection 127.0.0.1:52458 (18 connections now open)
+2014-04-09T23:22:01.351-0400 [conn64] end connection 10.0.1.135:52460 (17 connections now open)
+2014-04-09T23:22:03.459-0400 [initandlisten] connection accepted from 127.0.0.1:52471 #65 (18 connections now open)
+2014-04-09T23:22:03.460-0400 [conn65] end connection 127.0.0.1:52471 (17 connections now open)
+2014-04-09T23:22:03.470-0400 [initandlisten] connection accepted from 127.0.0.1:52480 #66 (18 connections now open)
+2014-04-09T23:22:03.477-0400 [initandlisten] connection accepted from 10.0.1.135:52482 #67 (19 connections now open)
+2014-04-09T23:22:03.479-0400 [conn66] end connection 127.0.0.1:52480 (18 connections now open)
+2014-04-09T23:22:03.483-0400 [conn67] end connection 10.0.1.135:52482 (17 connections now open)
+2014-04-09T23:22:03.490-0400 [conn48] end connection 10.0.1.135:52325 (16 connections now open)
+2014-04-09T23:22:03.490-0400 [conn51] end connection 10.0.1.135:52347 (16 connections now open)
+2014-04-09T23:22:03.490-0400 [conn20] end connection 10.0.1.135:52194 (16 connections now open)
+2014-04-09T23:22:03.490-0400 [conn43] end connection 10.0.1.135:52301 (16 connections now open)
+2014-04-09T23:22:03.490-0400 [conn15] end connection 10.0.1.135:52159 (16 connections now open)
+2014-04-09T23:22:03.490-0400 [conn3] end connection 10.0.1.135:52127 (15 connections now open)
+2014-04-09T23:22:03.498-0400 [conn26] end connection 10.0.1.135:52225 (10 connections now open)
+2014-04-09T23:22:03.498-0400 [conn25] end connection 10.0.1.135:52224 (10 connections now open)
+2014-04-09T23:22:03.500-0400 [initandlisten] connection accepted from 127.0.0.1:52493 #68 (10 connections now open)
+2014-04-09T23:22:03.501-0400 [conn68]  authenticate db: admin { authenticate: 1, user: "user", nonce: "xxx", key: "xxx" }
+2014-04-09T23:22:03.502-0400 [conn68] Failed to authenticate user@admin with mechanism MONGODB-CR: AuthenticationFailed UserNotFound Could not find user user@admin
+2014-04-09T23:22:03.502-0400 [conn68] terminating, shutdown command received
+2014-04-09T23:22:03.502-0400 [conn68] dbexit: shutdown called
+2014-04-09T23:22:03.502-0400 [conn68] shutdown: going to close listening sockets...
+2014-04-09T23:22:03.503-0400 [conn68] closing listening socket: 9
+2014-04-09T23:22:03.503-0400 [conn68] closing listening socket: 10
+2014-04-09T23:22:03.503-0400 [conn68] removing socket file: /tmp/mongodb-27019.sock
+2014-04-09T23:22:03.503-0400 [conn68] shutdown: going to flush diaglog...
+2014-04-09T23:22:03.503-0400 [conn68] shutdown: going to close sockets...
+2014-04-09T23:22:03.504-0400 [conn68] shutdown: waiting for fs preallocator...
+2014-04-09T23:22:03.504-0400 [conn61] end connection 10.0.1.135:52438 (9 connections now open)
+2014-04-09T23:22:03.504-0400 [conn68] shutdown: lock for final commit...
+2014-04-09T23:22:03.505-0400 [conn34] end connection 10.0.1.135:52239 (9 connections now open)
+2014-04-09T23:22:03.505-0400 [conn36] end connection 10.0.1.135:52241 (9 connections now open)
+2014-04-09T23:22:03.506-0400 [conn68] shutdown: final commit...
+2014-04-09T23:22:03.506-0400 [conn50] end connection 10.0.1.135:52346 (9 connections now open)
+2014-04-09T23:22:03.507-0400 [conn60] end connection 10.0.1.135:52437 (9 connections now open)
+2014-04-09T23:22:03.507-0400 [conn49] end connection 10.0.1.135:52345 (9 connections now open)
+2014-04-09T23:22:03.514-0400 [conn68] shutdown: closing all files...
+2014-04-09T23:22:03.514-0400 [conn68] closeAllFiles() finished
+2014-04-09T23:22:03.514-0400 [conn68] journalCleanup...
+2014-04-09T23:22:03.514-0400 [conn68] removeJournalFiles
+2014-04-09T23:22:03.515-0400 [conn68] shutdown: removing fs lock...
+2014-04-09T23:22:03.515-0400 [conn68] dbexit: really exiting now
+2014-04-09T23:22:48.502-0400 ***** SERVER RESTARTED *****
+2014-04-09T23:22:48.507-0400 [initandlisten] MongoDB starting : pid=4201 port=27019 dbpath=/Users/tr/Documents/tmp/data/shard01/rs1/db 64-bit host=enter.local
+2014-04-09T23:22:48.508-0400 [initandlisten] db version v2.6.0
+2014-04-09T23:22:48.508-0400 [initandlisten] git version: 1c1c76aeca21c5983dc178920f5052c298db616c
+2014-04-09T23:22:48.508-0400 [initandlisten] build info: Darwin mci-osx108-8.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2014-04-09T23:22:48.508-0400 [initandlisten] allocator: system
+2014-04-09T23:22:48.508-0400 [initandlisten] options: { net: { port: 27019 }, processManagement: { fork: true }, replication: { replSet: "shard01" }, security: { keyFile: "/Users/tr/Documents/tmp/data/keyfile" }, storage: { dbPath: "/Users/tr/Documents/tmp/data/shard01/rs1/db" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/shard01/rs1/mongod.log" } }
+2014-04-09T23:22:48.509-0400 [initandlisten] journal dir=/Users/tr/Documents/tmp/data/shard01/rs1/db/journal
+2014-04-09T23:22:48.510-0400 [initandlisten] recover : no journal files present, no recovery needed
+2014-04-09T23:22:48.592-0400 [initandlisten] waiting for connections on port 27019
+2014-04-09T23:22:48.632-0400 [rsStart] replSet I am enter.local:27019
+2014-04-09T23:22:48.641-0400 [rsStart] replSet STARTUP2
+2014-04-09T23:22:48.642-0400 [rsSync] replSet SECONDARY
+2014-04-09T23:22:49.363-0400 [initandlisten] connection accepted from 127.0.0.1:52558 #1 (1 connection now open)
+2014-04-09T23:22:49.364-0400 [conn1] note: no users configured in admin.system.users, allowing localhost access
+2014-04-09T23:22:49.365-0400 [conn1] end connection 127.0.0.1:52558 (0 connections now open)
+2014-04-09T23:22:49.517-0400 [initandlisten] connection accepted from 10.0.1.135:52580 #2 (1 connection now open)
+2014-04-09T23:22:49.518-0400 [conn2]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:49.593-0400 [initandlisten] connection accepted from 127.0.0.1:52597 #3 (2 connections now open)
+2014-04-09T23:22:49.594-0400 [conn3] end connection 127.0.0.1:52597 (1 connection now open)
+2014-04-09T23:22:49.597-0400 [initandlisten] connection accepted from 10.0.1.135:52606 #4 (2 connections now open)
+2014-04-09T23:22:49.598-0400 [conn4]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:49.605-0400 [initandlisten] connection accepted from 127.0.0.1:52615 #5 (3 connections now open)
+2014-04-09T23:22:49.606-0400 [conn5] end connection 127.0.0.1:52615 (2 connections now open)
+2014-04-09T23:22:49.617-0400 [initandlisten] connection accepted from 127.0.0.1:52624 #6 (3 connections now open)
+2014-04-09T23:22:49.624-0400 [initandlisten] connection accepted from 10.0.1.135:52626 #7 (4 connections now open)
+2014-04-09T23:22:49.625-0400 [conn6] end connection 127.0.0.1:52624 (3 connections now open)
+2014-04-09T23:22:49.631-0400 [conn7] end connection 10.0.1.135:52626 (2 connections now open)
+2014-04-09T23:22:50.636-0400 [rsHealthPoll] replset info enter.local:27021 thinks that we are down
+2014-04-09T23:22:50.636-0400 [rsHealthPoll] replset info enter.local:27020 thinks that we are down
+2014-04-09T23:22:50.636-0400 [rsHealthPoll] replSet member enter.local:27021 is up
+2014-04-09T23:22:50.637-0400 [rsHealthPoll] replSet member enter.local:27020 is up
+2014-04-09T23:22:50.637-0400 [rsHealthPoll] replSet member enter.local:27021 is now in state SECONDARY
+2014-04-09T23:22:50.638-0400 [rsHealthPoll] replSet member enter.local:27020 is now in state SECONDARY
+2014-04-09T23:22:50.638-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:22:50.639-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:22:50.749-0400 [initandlisten] connection accepted from 10.0.1.135:52638 #8 (3 connections now open)
+2014-04-09T23:22:50.750-0400 [conn8]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:50.864-0400 [initandlisten] connection accepted from 10.0.1.135:52640 #9 (4 connections now open)
+2014-04-09T23:22:50.864-0400 [conn9]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:56.643-0400 [rsMgr] replSet info electSelf 0
+2014-04-09T23:22:56.649-0400 [rsMgr] replSet PRIMARY
+2014-04-09T23:22:56.766-0400 [initandlisten] connection accepted from 10.0.1.135:52647 #10 (5 connections now open)
+2014-04-09T23:22:56.766-0400 [conn10]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:56.767-0400 [initandlisten] connection accepted from 10.0.1.135:52648 #11 (6 connections now open)
+2014-04-09T23:22:56.768-0400 [conn11]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:56.878-0400 [initandlisten] connection accepted from 10.0.1.135:52649 #12 (7 connections now open)
+2014-04-09T23:22:56.879-0400 [conn12]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:56.881-0400 [initandlisten] connection accepted from 10.0.1.135:52650 #13 (8 connections now open)
+2014-04-09T23:22:56.881-0400 [conn13]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:22:59.960-0400 [initandlisten] connection accepted from 127.0.0.1:52657 #14 (9 connections now open)
+2014-04-09T23:22:59.961-0400 [conn14] end connection 127.0.0.1:52657 (8 connections now open)
+2014-04-09T23:22:59.971-0400 [initandlisten] connection accepted from 127.0.0.1:52666 #15 (9 connections now open)
+2014-04-09T23:22:59.977-0400 [initandlisten] connection accepted from 10.0.1.135:52668 #16 (10 connections now open)
+2014-04-09T23:22:59.979-0400 [conn15] end connection 127.0.0.1:52666 (9 connections now open)
+2014-04-09T23:22:59.983-0400 [conn16] end connection 10.0.1.135:52668 (8 connections now open)
+2014-04-09T23:23:04.762-0400 [conn8] end connection 10.0.1.135:52638 (7 connections now open)
+2014-04-09T23:23:04.762-0400 [initandlisten] connection accepted from 10.0.1.135:52679 #17 (8 connections now open)
+2014-04-09T23:23:04.763-0400 [conn17]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:04.876-0400 [conn9] end connection 10.0.1.135:52640 (7 connections now open)
+2014-04-09T23:23:04.876-0400 [initandlisten] connection accepted from 10.0.1.135:52680 #18 (8 connections now open)
+2014-04-09T23:23:04.877-0400 [conn18]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:07.962-0400 [initandlisten] connection accepted from 127.0.0.1:52686 #19 (9 connections now open)
+2014-04-09T23:23:07.962-0400 [conn19] end connection 127.0.0.1:52686 (8 connections now open)
+2014-04-09T23:23:07.973-0400 [initandlisten] connection accepted from 127.0.0.1:52695 #20 (9 connections now open)
+2014-04-09T23:23:07.980-0400 [initandlisten] connection accepted from 10.0.1.135:52697 #21 (10 connections now open)
+2014-04-09T23:23:07.982-0400 [conn20] end connection 127.0.0.1:52695 (9 connections now open)
+2014-04-09T23:23:07.986-0400 [conn21] end connection 10.0.1.135:52697 (8 connections now open)
+2014-04-09T23:23:11.668-0400 [initandlisten] connection accepted from 127.0.0.1:52708 #22 (9 connections now open)
+2014-04-09T23:23:11.669-0400 [conn22] end connection 127.0.0.1:52708 (8 connections now open)
+2014-04-09T23:23:11.679-0400 [initandlisten] connection accepted from 127.0.0.1:52717 #23 (9 connections now open)
+2014-04-09T23:23:11.686-0400 [initandlisten] connection accepted from 10.0.1.135:52719 #24 (10 connections now open)
+2014-04-09T23:23:11.687-0400 [conn23] end connection 127.0.0.1:52717 (9 connections now open)
+2014-04-09T23:23:11.692-0400 [conn24] end connection 10.0.1.135:52719 (8 connections now open)
+2014-04-09T23:23:11.702-0400 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2014-04-09T23:23:11.703-0400 [signalProcessingThread] now exiting
+2014-04-09T23:23:11.703-0400 [signalProcessingThread] dbexit: 
+2014-04-09T23:23:11.703-0400 [signalProcessingThread] shutdown: going to close listening sockets...
+2014-04-09T23:23:11.703-0400 [signalProcessingThread] closing listening socket: 10
+2014-04-09T23:23:11.708-0400 [conn2] end connection 10.0.1.135:52580 (7 connections now open)
+2014-04-09T23:23:11.709-0400 [conn4] end connection 10.0.1.135:52606 (6 connections now open)
+2014-04-09T23:23:11.710-0400 [signalProcessingThread] closing listening socket: 11
+2014-04-09T23:23:11.711-0400 [signalProcessingThread] removing socket file: /tmp/mongodb-27019.sock
+2014-04-09T23:23:11.712-0400 [signalProcessingThread] shutdown: going to flush diaglog...
+2014-04-09T23:23:11.712-0400 [signalProcessingThread] shutdown: going to close sockets...
+2014-04-09T23:23:11.712-0400 [signalProcessingThread] shutdown: waiting for fs preallocator...
+2014-04-09T23:23:11.712-0400 [signalProcessingThread] shutdown: lock for final commit...
+2014-04-09T23:23:11.713-0400 [signalProcessingThread] shutdown: final commit...
+2014-04-09T23:23:11.727-0400 [conn17] end connection 10.0.1.135:52679 (5 connections now open)
+2014-04-09T23:23:11.728-0400 [conn11] end connection 10.0.1.135:52648 (5 connections now open)
+2014-04-09T23:23:11.728-0400 [conn13] end connection 10.0.1.135:52650 (5 connections now open)
+2014-04-09T23:23:11.729-0400 [conn18] end connection 10.0.1.135:52680 (5 connections now open)
+2014-04-09T23:23:11.750-0400 [signalProcessingThread] shutdown: closing all files...
+2014-04-09T23:23:11.751-0400 [signalProcessingThread] closeAllFiles() finished
+2014-04-09T23:23:11.752-0400 [signalProcessingThread] journalCleanup...
+2014-04-09T23:23:11.752-0400 [signalProcessingThread] removeJournalFiles
+2014-04-09T23:23:11.752-0400 [signalProcessingThread] shutdown: removing fs lock...
+2014-04-09T23:23:11.753-0400 [signalProcessingThread] dbexit: really exiting now
+2014-04-09T23:23:16.155-0400 ***** SERVER RESTARTED *****
+2014-04-09T23:23:16.160-0400 [initandlisten] MongoDB starting : pid=4243 port=27019 dbpath=/Users/tr/Documents/tmp/data/shard01/rs1/db 64-bit host=enter.local
+2014-04-09T23:23:16.160-0400 [initandlisten] db version v2.6.0
+2014-04-09T23:23:16.160-0400 [initandlisten] git version: 1c1c76aeca21c5983dc178920f5052c298db616c
+2014-04-09T23:23:16.160-0400 [initandlisten] build info: Darwin mci-osx108-8.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2014-04-09T23:23:16.160-0400 [initandlisten] allocator: system
+2014-04-09T23:23:16.160-0400 [initandlisten] options: { net: { port: 27019 }, processManagement: { fork: true }, replication: { replSet: "shard01" }, security: { keyFile: "/Users/tr/Documents/tmp/data/keyfile" }, storage: { dbPath: "/Users/tr/Documents/tmp/data/shard01/rs1/db" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/shard01/rs1/mongod.log" } }
+2014-04-09T23:23:16.162-0400 [initandlisten] journal dir=/Users/tr/Documents/tmp/data/shard01/rs1/db/journal
+2014-04-09T23:23:16.162-0400 [initandlisten] recover : no journal files present, no recovery needed
+2014-04-09T23:23:16.184-0400 [initandlisten] waiting for connections on port 27019
+2014-04-09T23:23:16.192-0400 [rsStart] replSet I am enter.local:27019
+2014-04-09T23:23:16.200-0400 [rsStart] replSet STARTUP2
+2014-04-09T23:23:16.201-0400 [rsSync] replSet SECONDARY
+2014-04-09T23:23:16.634-0400 [initandlisten] connection accepted from 127.0.0.1:52788 #1 (1 connection now open)
+2014-04-09T23:23:16.635-0400 [conn1] note: no users configured in admin.system.users, allowing localhost access
+2014-04-09T23:23:16.638-0400 [conn1] end connection 127.0.0.1:52788 (0 connections now open)
+2014-04-09T23:23:16.743-0400 [initandlisten] connection accepted from 10.0.1.135:52809 #2 (1 connection now open)
+2014-04-09T23:23:16.744-0400 [conn2]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:16.822-0400 [initandlisten] connection accepted from 127.0.0.1:52827 #3 (2 connections now open)
+2014-04-09T23:23:16.824-0400 [initandlisten] connection accepted from 10.0.1.135:52832 #4 (3 connections now open)
+2014-04-09T23:23:16.825-0400 [conn4]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:16.828-0400 [conn3] end connection 127.0.0.1:52827 (2 connections now open)
+2014-04-09T23:23:16.830-0400 [initandlisten] connection accepted from 10.0.1.135:52842 #5 (3 connections now open)
+2014-04-09T23:23:16.831-0400 [conn5]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:16.832-0400 [conn5] end connection 10.0.1.135:52842 (2 connections now open)
+2014-04-09T23:23:16.835-0400 [initandlisten] connection accepted from 127.0.0.1:52845 #6 (3 connections now open)
+2014-04-09T23:23:16.836-0400 [conn6] end connection 127.0.0.1:52845 (2 connections now open)
+2014-04-09T23:23:16.847-0400 [initandlisten] connection accepted from 127.0.0.1:52854 #7 (3 connections now open)
+2014-04-09T23:23:16.854-0400 [initandlisten] connection accepted from 10.0.1.135:52856 #8 (4 connections now open)
+2014-04-09T23:23:16.856-0400 [conn7] end connection 127.0.0.1:52854 (3 connections now open)
+2014-04-09T23:23:16.861-0400 [conn8] end connection 10.0.1.135:52856 (2 connections now open)
+2014-04-09T23:23:18.196-0400 [rsHealthPoll] replset info enter.local:27020 thinks that we are down
+2014-04-09T23:23:18.196-0400 [rsHealthPoll] replset info enter.local:27021 thinks that we are down
+2014-04-09T23:23:18.196-0400 [rsHealthPoll] replSet member enter.local:27020 is up
+2014-04-09T23:23:18.197-0400 [rsHealthPoll] replSet member enter.local:27021 is up
+2014-04-09T23:23:18.197-0400 [rsHealthPoll] replSet member enter.local:27020 is now in state SECONDARY
+2014-04-09T23:23:18.198-0400 [rsHealthPoll] replSet member enter.local:27021 is now in state SECONDARY
+2014-04-09T23:23:18.198-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:23:18.199-0400 [rsMgr] not electing self, enter.local:27021 would veto with 'I don't think enter.local:27019 is electable'
+2014-04-09T23:23:18.253-0400 [initandlisten] connection accepted from 10.0.1.135:52868 #9 (3 connections now open)
+2014-04-09T23:23:18.254-0400 [conn9]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:18.309-0400 [initandlisten] connection accepted from 10.0.1.135:52870 #10 (4 connections now open)
+2014-04-09T23:23:18.310-0400 [conn10]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:24.204-0400 [rsMgr] replSet info electSelf 0
+2014-04-09T23:23:24.208-0400 [rsMgr] replSet PRIMARY
+2014-04-09T23:23:24.264-0400 [initandlisten] connection accepted from 10.0.1.135:52878 #11 (5 connections now open)
+2014-04-09T23:23:24.264-0400 [conn11]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:24.265-0400 [initandlisten] connection accepted from 10.0.1.135:52879 #12 (6 connections now open)
+2014-04-09T23:23:24.266-0400 [conn12]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:24.322-0400 [initandlisten] connection accepted from 10.0.1.135:52880 #13 (7 connections now open)
+2014-04-09T23:23:24.323-0400 [conn13]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:24.325-0400 [initandlisten] connection accepted from 10.0.1.135:52881 #14 (8 connections now open)
+2014-04-09T23:23:24.326-0400 [conn14]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:32.268-0400 [conn9] end connection 10.0.1.135:52868 (7 connections now open)
+2014-04-09T23:23:32.269-0400 [initandlisten] connection accepted from 10.0.1.135:52887 #15 (8 connections now open)
+2014-04-09T23:23:32.269-0400 [conn15]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:23:32.321-0400 [conn10] end connection 10.0.1.135:52870 (7 connections now open)
+2014-04-09T23:23:32.321-0400 [initandlisten] connection accepted from 10.0.1.135:52888 #16 (8 connections now open)
+2014-04-09T23:23:32.322-0400 [conn16]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:02.290-0400 [conn15] end connection 10.0.1.135:52887 (7 connections now open)
+2014-04-09T23:24:02.291-0400 [initandlisten] connection accepted from 10.0.1.135:52899 #17 (8 connections now open)
+2014-04-09T23:24:02.291-0400 [conn17]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:02.341-0400 [conn16] end connection 10.0.1.135:52888 (7 connections now open)
+2014-04-09T23:24:02.342-0400 [initandlisten] connection accepted from 10.0.1.135:52900 #18 (8 connections now open)
+2014-04-09T23:24:02.342-0400 [conn18]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:16.197-0400 [clientcursormon] mem (MB) res:25 virt:3354
+2014-04-09T23:24:16.197-0400 [clientcursormon]  mapped (incl journal view):832
+2014-04-09T23:24:16.197-0400 [clientcursormon]  connections:8
+2014-04-09T23:24:16.198-0400 [clientcursormon]  replication threads:32
+2014-04-09T23:24:16.758-0400 [initandlisten] connection accepted from 10.0.1.135:52911 #19 (9 connections now open)
+2014-04-09T23:24:16.758-0400 [conn19]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:16.836-0400 [initandlisten] connection accepted from 10.0.1.135:52927 #20 (10 connections now open)
+2014-04-09T23:24:16.836-0400 [conn20]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:32.306-0400 [conn17] end connection 10.0.1.135:52899 (9 connections now open)
+2014-04-09T23:24:32.307-0400 [initandlisten] connection accepted from 10.0.1.135:52940 #21 (10 connections now open)
+2014-04-09T23:24:32.308-0400 [conn21]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:24:32.358-0400 [conn18] end connection 10.0.1.135:52900 (9 connections now open)
+2014-04-09T23:24:32.358-0400 [initandlisten] connection accepted from 10.0.1.135:52941 #22 (10 connections now open)
+2014-04-09T23:24:32.359-0400 [conn22]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:02.319-0400 [conn21] end connection 10.0.1.135:52940 (9 connections now open)
+2014-04-09T23:25:02.319-0400 [initandlisten] connection accepted from 10.0.1.135:52952 #23 (10 connections now open)
+2014-04-09T23:25:02.320-0400 [conn23]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:02.370-0400 [conn22] end connection 10.0.1.135:52941 (9 connections now open)
+2014-04-09T23:25:02.371-0400 [initandlisten] connection accepted from 10.0.1.135:52953 #24 (10 connections now open)
+2014-04-09T23:25:02.371-0400 [conn24]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:32.339-0400 [conn23] end connection 10.0.1.135:52952 (9 connections now open)
+2014-04-09T23:25:32.339-0400 [initandlisten] connection accepted from 10.0.1.135:52964 #25 (11 connections now open)
+2014-04-09T23:25:32.340-0400 [conn25]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:32.391-0400 [conn24] end connection 10.0.1.135:52953 (9 connections now open)
+2014-04-09T23:25:32.392-0400 [initandlisten] connection accepted from 10.0.1.135:52965 #26 (10 connections now open)
+2014-04-09T23:25:32.392-0400 [conn26]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:32.422-0400 [initandlisten] connection accepted from 10.0.1.135:52966 #27 (11 connections now open)
+2014-04-09T23:25:32.422-0400 [conn27]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:32.425-0400 [conn27] first cluster operation detected, adding sharding hook to enable versioning and authentication to remote servers
+2014-04-09T23:25:32.426-0400 [initandlisten] connection accepted from 10.0.1.135:52967 #28 (12 connections now open)
+2014-04-09T23:25:32.428-0400 [conn28]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:42.054-0400 [initandlisten] connection accepted from 10.0.1.135:52980 #29 (13 connections now open)
+2014-04-09T23:25:42.054-0400 [conn29]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:42.070-0400 [initandlisten] connection accepted from 10.0.1.135:52985 #30 (14 connections now open)
+2014-04-09T23:25:42.071-0400 [conn30]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:25:42.071-0400 [conn30] remote client 10.0.1.135:52985 initialized this host as shard shard01
+2014-04-09T23:25:42.071-0400 [conn30] remotely refreshing metadata for test.docs with requested shard version 2|26||53460dbe4aaa0fc95616708e, current shard version is 0|0||000000000000000000000000, current metadata version is 0|0||000000000000000000000000
+2014-04-09T23:25:42.072-0400 [conn30] SyncClusterConnection connecting to [enter.local:27025]
+2014-04-09T23:25:42.072-0400 [conn30] SyncClusterConnection connecting to [enter.local:27026]
+2014-04-09T23:25:42.072-0400 [conn30] SyncClusterConnection connecting to [enter.local:27027]
+2014-04-09T23:25:42.075-0400 [conn30] collection test.docs was previously unsharded, new metadata loaded with shard version 2|26||53460dbe4aaa0fc95616708e
+2014-04-09T23:25:42.075-0400 [conn30] collection version was loaded at version 2|51||53460dbe4aaa0fc95616708e, took 3ms
+2014-04-09T23:26:02.356-0400 [conn25] end connection 10.0.1.135:52964 (13 connections now open)
+2014-04-09T23:26:02.356-0400 [initandlisten] connection accepted from 10.0.1.135:52996 #31 (15 connections now open)
+2014-04-09T23:26:02.357-0400 [conn31]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:26:02.411-0400 [conn26] end connection 10.0.1.135:52965 (13 connections now open)
+2014-04-09T23:26:02.412-0400 [initandlisten] connection accepted from 10.0.1.135:52997 #32 (15 connections now open)
+2014-04-09T23:26:02.413-0400 [conn32]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:26:32.377-0400 [conn31] end connection 10.0.1.135:52996 (13 connections now open)
+2014-04-09T23:26:32.378-0400 [initandlisten] connection accepted from 10.0.1.135:53008 #33 (15 connections now open)
+2014-04-09T23:26:32.378-0400 [conn33]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:26:32.430-0400 [conn32] end connection 10.0.1.135:52997 (13 connections now open)
+2014-04-09T23:26:32.431-0400 [initandlisten] connection accepted from 10.0.1.135:53009 #34 (15 connections now open)
+2014-04-09T23:26:32.432-0400 [conn34]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:27:02.396-0400 [conn33] end connection 10.0.1.135:53008 (13 connections now open)
+2014-04-09T23:27:02.397-0400 [initandlisten] connection accepted from 10.0.1.135:53020 #35 (15 connections now open)
+2014-04-09T23:27:02.398-0400 [conn35]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:27:02.450-0400 [conn34] end connection 10.0.1.135:53009 (13 connections now open)
+2014-04-09T23:27:02.451-0400 [initandlisten] connection accepted from 10.0.1.135:53021 #36 (15 connections now open)
+2014-04-09T23:27:02.452-0400 [conn36]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:27:32.415-0400 [conn35] end connection 10.0.1.135:53020 (13 connections now open)
+2014-04-09T23:27:32.415-0400 [initandlisten] connection accepted from 10.0.1.135:53032 #37 (15 connections now open)
+2014-04-09T23:27:32.416-0400 [conn37]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:27:32.471-0400 [conn36] end connection 10.0.1.135:53021 (13 connections now open)
+2014-04-09T23:27:32.471-0400 [initandlisten] connection accepted from 10.0.1.135:53033 #38 (14 connections now open)
+2014-04-09T23:27:32.472-0400 [conn38]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:28:02.437-0400 [conn37] end connection 10.0.1.135:53032 (13 connections now open)
+2014-04-09T23:28:02.438-0400 [initandlisten] connection accepted from 10.0.1.135:53044 #39 (15 connections now open)
+2014-04-09T23:28:02.439-0400 [conn39]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:28:02.493-0400 [conn38] end connection 10.0.1.135:53033 (13 connections now open)
+2014-04-09T23:28:02.494-0400 [initandlisten] connection accepted from 10.0.1.135:53045 #40 (15 connections now open)
+2014-04-09T23:28:02.495-0400 [conn40]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:28:32.461-0400 [conn39] end connection 10.0.1.135:53044 (13 connections now open)
+2014-04-09T23:28:32.462-0400 [initandlisten] connection accepted from 10.0.1.135:53062 #41 (15 connections now open)
+2014-04-09T23:28:32.462-0400 [conn41]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:28:32.516-0400 [conn40] end connection 10.0.1.135:53045 (13 connections now open)
+2014-04-09T23:28:32.517-0400 [initandlisten] connection accepted from 10.0.1.135:53063 #42 (15 connections now open)
+2014-04-09T23:28:32.517-0400 [conn42]  authenticate db: local { authenticate: 1, nonce: "xxx", user: "__system", key: "xxx" }
+2014-04-09T23:28:37.998-0400 [initandlisten] connection accepted from 127.0.0.1:53069 #43 (15 connections now open)
+2014-04-09T23:28:37.999-0400 [conn43] end connection 127.0.0.1:53069 (14 connections now open)
+2014-04-09T23:28:38.010-0400 [initandlisten] connection accepted from 127.0.0.1:53078 #44 (15 connections now open)
+2014-04-09T23:28:38.017-0400 [initandlisten] connection accepted from 10.0.1.135:53080 #45 (16 connections now open)
+2014-04-09T23:28:38.019-0400 [conn44] end connection 127.0.0.1:53078 (15 connections now open)
+2014-04-09T23:28:38.024-0400 [conn45] end connection 10.0.1.135:53080 (14 connections now open)
+2014-04-09T23:28:38.032-0400 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2014-04-09T23:28:38.034-0400 [signalProcessingThread] now exiting
+2014-04-09T23:28:38.034-0400 [signalProcessingThread] dbexit: 
+2014-04-09T23:28:38.036-0400 [signalProcessingThread] shutdown: going to close listening sockets...
+2014-04-09T23:28:38.036-0400 [signalProcessingThread] closing listening socket: 10
+2014-04-09T23:28:38.038-0400 [conn30] end connection 10.0.1.135:52985 (13 connections now open)
+2014-04-09T23:28:38.038-0400 [conn29] end connection 10.0.1.135:52980 (13 connections now open)
+2014-04-09T23:28:38.038-0400 [conn27] end connection 10.0.1.135:52966 (13 connections now open)
+2014-04-09T23:28:38.038-0400 [conn19] end connection 10.0.1.135:52911 (12 connections now open)
+2014-04-09T23:28:38.038-0400 [conn2] end connection 10.0.1.135:52809 (12 connections now open)
+2014-04-09T23:28:38.039-0400 [conn4] end connection 10.0.1.135:52832 (12 connections now open)
+2014-04-09T23:28:38.039-0400 [conn20] end connection 10.0.1.135:52927 (12 connections now open)
+2014-04-09T23:28:38.039-0400 [signalProcessingThread] closing listening socket: 11
+2014-04-09T23:28:38.045-0400 [signalProcessingThread] removing socket file: /tmp/mongodb-27019.sock
+2014-04-09T23:28:38.046-0400 [signalProcessingThread] shutdown: going to flush diaglog...
+2014-04-09T23:28:38.046-0400 [signalProcessingThread] shutdown: going to close sockets...
+2014-04-09T23:28:38.046-0400 [conn14] end connection 10.0.1.135:52881 (6 connections now open)
+2014-04-09T23:28:38.046-0400 [signalProcessingThread] shutdown: waiting for fs preallocator...
+2014-04-09T23:28:38.046-0400 [conn42] end connection 10.0.1.135:53063 (6 connections now open)
+2014-04-09T23:28:38.050-0400 [signalProcessingThread] shutdown: lock for final commit...
+2014-04-09T23:28:38.051-0400 [conn41] end connection 10.0.1.135:53062 (5 connections now open)
+2014-04-09T23:28:38.059-0400 [conn12] end connection 10.0.1.135:52879 (5 connections now open)
+2014-04-09T23:28:38.059-0400 [signalProcessingThread] shutdown: final commit...
+2014-04-09T23:28:38.073-0400 [signalProcessingThread] shutdown: closing all files...
+2014-04-09T23:28:38.074-0400 [signalProcessingThread] closeAllFiles() finished
+2014-04-09T23:28:38.074-0400 [signalProcessingThread] journalCleanup...
+2014-04-09T23:28:38.075-0400 [signalProcessingThread] removeJournalFiles
+2014-04-09T23:28:38.075-0400 [signalProcessingThread] shutdown: removing fs lock...
+2014-04-09T23:28:38.076-0400 [signalProcessingThread] dbexit: really exiting now

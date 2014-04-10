@@ -21,6 +21,7 @@ class LogFile(InputSource):
         self._num_lines = None
         self._restarts = None
         self._binary = None
+        self._timezone = None
 
         self._datetime_format = None
         self._year_rollover = None
@@ -41,6 +42,13 @@ class LogFile(InputSource):
         if not self._end:
             self._calculate_bounds()
         return self._end
+
+    @property
+    def timezone(self):
+        """ lazy evaluation of timezone of logfile. """
+        if not self._timezone:
+            self._calculate_bounds()
+        return self._timezone
 
     @property
     def filesize(self):
@@ -200,6 +208,7 @@ class LogFile(InputSource):
             logevent = LogEvent(line)
             if logevent.datetime:
                 self._start = logevent.datetime
+                self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
                 self._datetime_nextpos = logevent._datetime_nextpos
                 break

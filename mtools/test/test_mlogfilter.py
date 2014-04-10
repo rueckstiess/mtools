@@ -74,6 +74,29 @@ class TestMLogFilter(object):
             assert(le.datetime >= random_start and le.datetime <= random_end)
 
 
+    def test_from_to_26_log(self):
+        logfile_26_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        logfile_26 = LogFile(open(logfile_26_path, 'r'))
+
+        random_start = random_date(logfile_26.start, logfile_26.end)
+        random_end = random_date(random_start, logfile_26.end)
+
+        print random_start, random_end
+        print logfile_26.start, logfile_26.end
+
+        self.tool.run('%s --from %s --to %s'%(logfile_26_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) > 0
+
+        at_least_one = False
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
+            at_least_one = True
+            assert(le.datetime >= random_start and le.datetime <= random_end)
+        assert at_least_one
+
     def test_from_to_stdin(self):
 
         year = datetime.now().year
