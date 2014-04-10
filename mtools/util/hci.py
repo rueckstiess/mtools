@@ -64,11 +64,11 @@ class DateTimeBoundaries(object):
             elif constant == 'start':
                 dt = self.start
             elif constant == 'today':
-                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc())
+                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             elif constant == 'yesterday':
-                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tzutc()) - timedelta(days=1)
+                dt = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
             elif constant == 'now':
-                dt = datetime.now().replace(tzinfo=tzutc())
+                dt = datetime.now()
 
         elif 'weekday' in result:
                 weekday = result['weekday'].group(0).strip()
@@ -87,13 +87,21 @@ class DateTimeBoundaries(object):
                     if re.match('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?(?P<timezone>[0-9Z:\+\-]+)?$', s):
                         default = self.end if lower_bound else self.start
                     else:
-                        default = datetime(self.end.year, 1, 1, tzinfo=tzutc())
+                        default = datetime(self.end.year, 1, 1, 0, 0, 0)
+                    default = default.replace(second=0, microsecond=0)
+
                     dt = parser.parse(s, default=default)
+
             except ValueError as e:
                 raise ValueError("Error in DateTimeBoundaries: can't parse datetime from %s" % s)
 
         if not dt:
             dt = lower_bound or self.end
+
+        # if no timezone specified, use the one from the logfile
+        if dt.tzinfo == None:
+            dt = dt.replace(tzinfo=self.start.tzinfo)
+
         
         # time is applied separately (not through the parser) so that string containing only time don't use today as default date (parser behavior)
         # if 'time' in result:
