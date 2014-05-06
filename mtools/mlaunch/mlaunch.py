@@ -919,6 +919,10 @@ class MLaunchTool(BaseCmdLineTool):
             argument was accepted, then it is accepted as well. Example ['--slowms', '1000'] both arguments
             would be accepted for a mongod.
         """
+
+        if self.args['binarypath']:
+            binary = os.path.join( self.args['binarypath'], binary)
+
         # get the help list of the binary
         ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
