@@ -7,7 +7,6 @@ from mtools.util import OrderedDict
 
 from operator import itemgetter
 
-import numpy as np
 
 class QuerySection(BaseSection):
     """ 
