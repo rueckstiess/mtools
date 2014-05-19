@@ -25,6 +25,11 @@ class BaseFilter(object):
         """
         pass
 
+    def teardown(self):
+        """ hook to teardown anything necessary for the filter at completion
+        """
+        pass
+
     def accept(self, logevent):
         """ overwrite this method in subclass and return True if the provided 
             logevent should be accepted (causing output), or False if not.

@@ -96,6 +96,7 @@ class LogEvent(object):
         self._numYields = None
         self._r = None
         self._w = None
+        self._conn = None
 
         self.merge_marker_str = ''
 
@@ -291,8 +292,17 @@ class LogEvent(object):
             if match:
                 self._thread = match.group(1)
 
+            if self._thread is not None and not self._thread.startswith('conn'):
+                match = re.match(r'^.* \[.*\] connection accepted from .* #([0-9]+) .*' , self.line_str)
+                if match:
+                    self._conn = 'conn' + match.group(1)
         return self._thread
 
+    @property
+    def conn(self):
+        """ extract conn name if available (lazy) """
+        self.thread
+        return self._conn
 
     @property
     def operation(self):
