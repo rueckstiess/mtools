@@ -920,7 +920,7 @@ class MLaunchTool(BaseCmdLineTool):
             would be accepted for a mongod.
         """
 
-        if self.args['binarypath']:
+        if self.args and self.args['binarypath']:
             binary = os.path.join( self.args['binarypath'], binary)
 
         # get the help list of the binary
