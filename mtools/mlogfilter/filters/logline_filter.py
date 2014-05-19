@@ -1,6 +1,6 @@
 from mtools.util.logevent import LogEvent
 from mtools.util.pattern import json2pattern
-
+import re
 from base_filter import BaseFilter
 
 class LogLineFilter(BaseFilter):
@@ -41,8 +41,9 @@ class LogLineFilter(BaseFilter):
             return False
         if self.operation and logevent.operation != self.operation:
             return False
-        if self.thread and logevent.thread != self.thread:
-            return False
+        if self.thread:
+            if logevent.thread != self.thread and logevent.conn != self.thread:
+                return False
         if self.pattern and logevent.pattern != self.pattern:
             return False
         return True
