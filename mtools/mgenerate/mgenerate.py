@@ -140,7 +140,7 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('template', action='store', help='template for data generation, JSON or file')
         self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
         self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
-        self.argparser.add_argument('--port', action='store', default=27017, help='mongod/s port to import data, default=27017')
+        self.argparser.add_argument('--port', action='store', default=27017, type=int, help='mongod/s port to import data, default=27017')
         self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
         self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
         self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
