@@ -65,6 +65,26 @@ class NumberOperator(BaseOperator):
 
 
 
+class FloatOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$float']
+    defaults = OrderedDict([ ('min', 0.0), ('max', 1.0) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # decode min and max first
+        minval = self._decode(options['min'])
+        maxval = self._decode(options['max'])
+        assert minval <= maxval
+
+        val = random() * (maxval - minval) + minval
+        return val
+
+
+
 class IncOperator(BaseOperator):
 
     dict_format = False
