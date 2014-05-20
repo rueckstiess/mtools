@@ -5,4 +5,3 @@ from logline_filter import LogLineFilter
 from tablescan_filter import TableScanFilter
 from word_filter import WordFilter
 from mask_filter import MaskFilter
-from threads_filter import ThreadsFilter

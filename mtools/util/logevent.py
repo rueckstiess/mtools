@@ -292,15 +292,21 @@ class LogEvent(object):
             if match:
                 self._thread = match.group(1)
 
-            if self._thread is not None and not self._thread.startswith('conn'):
-                match = re.match(r'^.* \[.*\] connection accepted from .* #([0-9]+) .*' , self.line_str)
-                if match:
-                    self._conn = 'conn' + match.group(1)
+            if self._thread is not None:
+                if self._thread in ['initandlisten', 'mongosMain']:
+                    if split_tokens[-5][0] == '#':
+                        self._conn = 'conn' + split_tokens[-5][1:]
+                elif self._thread.startswith('conn'):
+                    self._conn = self._thread
         return self._thread
 
     @property
     def conn(self):
-        """ extract conn name if available (lazy) """
+        """
+        extract conn name if available (lazy)
+        this value is None for all lines except the log lines related to connections ,
+        that is lines matching '\[conn[0-9]+\]' or '\[(initandlisten|mongosMain)\] .* connection accepted from'
+        """
         self.thread
         return self._conn
 
