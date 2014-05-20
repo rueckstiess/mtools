@@ -111,3 +111,8 @@ If this doesn't work for you, you can install a binary or install from source co
 installation instructions on the [NumPy](http://numpy.scipy.org/) page.
 
 
+#### All Requirements
+
+The full list of requirements (some of which are already included in the Python standard library) can be found in the [requirements.txt](./requirements.txt) file.
+
+
