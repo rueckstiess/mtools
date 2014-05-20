@@ -24,7 +24,7 @@ In that case, you need to add `sudo` in front of the command.
 
 ##### Issues with XCode 5.1 (clang 3.4)
 
-If you install mtools on OS X Mavericks with the latest update to clang 3.4, you may see installation errors due to the compilation of psutil's C-extension. See github issue #203 for details and a work-around. 
+If you install mtools prior to version 1.1.4 on OS X Mavericks with the latest update to clang 3.4, you may see installation errors due to the compilation of psutil's C-extension. See github issue #203 for details and a work-around. The issue is fixed in version 1.1.5 and above.
 
 
 #### Installation From Source
