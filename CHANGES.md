@@ -2,6 +2,7 @@ Changes to mtools
 =================
 
 #### version 1.1.5
+  * Changed logline filter to match the accept connection line for a thread(#218)
 
 #### version 1.1.4
 
