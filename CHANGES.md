@@ -3,6 +3,16 @@ Changes to mtools
 
 #### version 1.1.5
 
+  * added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)
+  * mlaunch: fixed bug when using `--binarypath` and passing arguments through to mongod/mongos (#217)
+  * mlaunch: fixed help text for default username and password (#207)
+  * mlogfilter: "iso8601-local" timestmap format now working with `--from` and `--to` (#209)
+  * mplotqueries: fixed bug where "0ms" lines couldn't be plotted with durline plots (#208)
+  * mgenerate: made it multi-threaded for performance boost (#204)
+  * mgenerate: fixed bug when using custom port number (#217)
+  * removed backward breaking `total_seconds()` from logevent parsing (#210)
+
+
 #### version 1.1.4
 
   * performance improvements for log parsing (#187)
