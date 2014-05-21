@@ -294,7 +294,7 @@ class LogEvent(object):
 
             if self._thread is not None:
                 if self._thread in ['initandlisten', 'mongosMain']:
-                    if split_tokens[-5][0] == '#':
+                    if len(split_tokens) >= 5 and  split_tokens[-5][0] == '#':
                         self._conn = 'conn' + split_tokens[-5][1:]
                 elif self._thread.startswith('conn'):
                     self._conn = self._thread
