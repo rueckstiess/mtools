@@ -6,7 +6,8 @@ class BaseSection(object):
 
     filterArgs = []
     name = 'base'
-    active = False
+    description = 'description of this section'
+    
 
     def __init__(self, mloginfo):
         """ constructor. save command line arguments and set active to False
@@ -14,8 +15,13 @@ class BaseSection(object):
         """
         # mloginfo object, use it to get access to argparser and other class variables
         self.mloginfo = mloginfo
+        
+    
+    def _add_subparser_arguments(self, subparser):
+        """ add additional subparser arguments in this method if required. """
+        pass
 
-
+    
     def run(self):
         pass
 

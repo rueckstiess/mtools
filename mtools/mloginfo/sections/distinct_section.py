@@ -13,19 +13,9 @@ class DistinctSection(BaseSection):
     """
     
     name = "distinct"
+    description = 'distinct list of all log line by message type'
+
     log2code = Log2CodeConverter()
-
-
-    def __init__(self, mloginfo):
-        BaseSection.__init__(self, mloginfo)
-
-        # add --restarts flag to argparser
-        self.mloginfo.argparser_sectiongroup.add_argument('--distinct', action='store_true', help='outputs distinct list of all log line by message type (slow)')
-
-    @property
-    def active(self):
-        """ return boolean if this section is active. """
-        return self.mloginfo.args['distinct']
 
 
     def run(self):

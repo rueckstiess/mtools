@@ -10,18 +10,7 @@ class ConnectionSection(BaseSection):
     """
     
     name = "connections"
-
-    def __init__(self, mloginfo):
-        BaseSection.__init__(self, mloginfo)
-
-        # add --restarts flag to argparser
-        self.mloginfo.argparser_sectiongroup.add_argument('--connections', action='store_true', help='outputs information about opened and closed connections')
-
-
-    @property
-    def active(self):
-        """ return boolean if this section is active. """
-        return self.mloginfo.args['connections']
+    description = "information about opened and closed connections"
 
 
     def run(self):
