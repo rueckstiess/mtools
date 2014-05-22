@@ -6,6 +6,7 @@
 
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
 
+![mtools box](./mtools.png)
 
 What's in the box?
 ------------------
