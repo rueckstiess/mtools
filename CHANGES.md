@@ -1,6 +1,8 @@
 Changes to mtools
 =================
 
+#### version 1.1.6dev
+
 #### version 1.1.5
 
   * added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)
