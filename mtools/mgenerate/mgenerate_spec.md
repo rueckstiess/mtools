@@ -5,6 +5,18 @@ This is a spec to add a new script `mgenerate` to the mtools family. It will gen
 > ##### Example
 >     mgenerate <JSON or file> --num 10000 --port 27017
 > 
+> #### Generate 2 documents with a datetime type
+>     mgenerate '{ "d" : "$datetime" }' --num 2
+>     mongo
+>     > db.mgendata.find()
+>     {
+>       "_id": ObjectId("537ce37634181152d390f7ef"),
+>       "d": ISODate("1990-10-08T08:07:29Z")
+>     }
+>     {
+>       "_id": ObjectId("537ce37634181152d390f7f0"),
+>       "d": ISODate("1999-11-10T13:26:06Z")
+>     }
 
 
 ## Parsing the JSON document
