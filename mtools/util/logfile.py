@@ -5,6 +5,7 @@ from math import ceil
 from datetime import datetime
 import time
 import re
+import os
 
 class LogFile(InputSource):
     """ wrapper class for log files, either as open file streams of from stdin. """
@@ -90,6 +91,13 @@ class LogFile(InputSource):
         return self._restarts
 
     @property
+    def rsstate(self):
+        """ lazy evaluation of all restarts. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._rsstate
+
+    @property
     def binary(self):
         """ lazy evaluation of the binary name. """
         if not self._num_lines:
@@ -158,6 +166,7 @@ class LogFile(InputSource):
 
             yield le
 
+    states = ['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2', 'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN']
 
     def __len__(self):
         """ return the number of lines in a log file. """
@@ -168,9 +177,33 @@ class LogFile(InputSource):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
         self._restarts = []
+        self._rsstate = []
 
         l = 0
         for l, line in enumerate(self.filehandle):
+
+            # if "is now in state" in line and next(state for state in states if line.endswith(state)):
+            if "is now in state" in line:
+                tokens = line.split()
+                host = tokens[7]
+                state = tokens[-1]
+                state = (host, state , LogEvent(line))
+                self._rsstate.append(state)
+                continue
+
+            if "[rsMgr] replSet" in line:
+                tokens = line.split()
+                host = os.path.basename(self.name)
+                try:
+                    state = next(state for state in self.states if tokens[-1] == state)
+                except StopIteration:
+                    state = ' '.join(tokens[6:])
+
+
+                if state is not None:
+                    state = (host, state, LogEvent(line))
+                    self._rsstate.append(state)
+                    continue
 
             # find version string
             if "version" in line:
