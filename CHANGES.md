@@ -3,8 +3,10 @@ Changes to mtools
 
 #### version 1.1.6dev
 
+  * mlogfilter: `--thread` now also matches "connection accepted" lines for that connection (#218, #219)
+
+
 #### version 1.1.5
-  * Changed logline filter to match the accept connection line for a thread(#218)
 
   * added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)
   * mlaunch: fixed bug when using `--binarypath` and passing arguments through to mongod/mongos (#217)
