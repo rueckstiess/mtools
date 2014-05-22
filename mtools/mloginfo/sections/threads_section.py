@@ -60,23 +60,6 @@ class ThreadsSection(BaseSection):
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
 
-        # old style arguments
-        # self.mloginfo.argparser_sectiongroup.add_argument('--threads', action='store_true',
-        #                                                   help='split file into separate files per threads')
-        # self.mloginfo.argparser_sectiongroup.add_argument('--flatten', action='store_true', default=True,
-        #                                                   help='split the log into separate files for every thread.')
-        # self.mloginfo.argparser_sectiongroup.add_argument('--no-flatten', action='store_false', dest='flatten',
-        #                                                   help='split the log into separate files for every thread.')
-        # self.mloginfo.argparser_sectiongroup.add_argument('--bucketsize', action='store', default=1,
-        #                                                   help='the bucket size in seconds (defaults to 1).')
-        # self.mloginfo.argparser_sectiongroup.add_argument('--out', action='store', default='./threads/',
-        #                                                   help='the output directory defaults to ./threads.')
-
-    @property
-    def active(self):
-        """ return boolean if this section is active. """
-        return self.mloginfo.args['threads']
-
     def teardown(self):
         """
         teardown event for a filter. Since the log files may not contain all the events for a thread,
@@ -250,9 +233,6 @@ class ThreadsSection(BaseSection):
             and group by matched pattern.
         """
 
-        # old style
-        # if not self.active:
-        #   return
         self.conns = defaultdict(lambda: 0)
         self.bucketsize = int(self.mloginfo.args['bucketsize'])
         self.flatten = self.mloginfo.args['flatten']

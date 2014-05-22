@@ -4,6 +4,7 @@ Changes to mtools
 #### version 1.1.6dev
 
   * mlogfilter: `--thread` now also matches "connection accepted" lines for that connection (#218, #219)
+  * mloginfo: threads command (#220)
 
 
 #### version 1.1.5
