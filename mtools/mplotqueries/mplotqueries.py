@@ -129,6 +129,8 @@ class MPlotQueriesTool(LogFileTool):
                     progress_total = self._datetime_to_epoch(logfile.end) - progress_start
                 else:
                     self.progress_bar_enabled = False
+                    progress_start = 0
+                    progress_total = 1
                 
                 if progress_total == 0:
                     # protect from division by zero errors

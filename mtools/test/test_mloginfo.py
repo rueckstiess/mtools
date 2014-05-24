@@ -115,3 +115,29 @@ class TestMLogInfo(object):
         lines = output.splitlines()
         assert any(map(lambda line: 'RESTARTS' in line, lines))
         assert any(map(lambda line: 'version 2.2.5' in line, lines))
+
+    def test_rsstate_225(self):
+        pattern = r'^Aug 05'
+        expected = 13
+        self._test_rsstate(self.logfile_path, pattern, expected)
+
+    def test_rsstate_26(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        pattern = r'^Apr 09'
+        expected = 17
+        self._test_rsstate(logfile_path, pattern, expected)
+
+    def test_rsstate_mongos(self):
+        # different log file
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        pattern = r'  no rs state changes found'
+        expected = 1
+        self._test_rsstate(logfile_path, pattern, expected)
+
+    def _test_rsstate(self, logfile_path, pattern, expected):
+        """ utility test runner for rsstate
+        """
+        self.tool.run('%s --rsstate' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len(filter(lambda line: re.match(pattern, line), lines)) == expected

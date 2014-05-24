@@ -1,5 +1,6 @@
 from base_section import BaseSection
-
+from mtools.util.print_table import print_table
+from mtools.util import OrderedDict
 
 class RsStateSection(BaseSection):
     """ This section determines if there were any Replica Set state changes in the log file and prints out
@@ -21,10 +22,19 @@ class RsStateSection(BaseSection):
         return self.mloginfo.args['rsstate']
 
     def run(self):
-
         """ run this section and print out information. """
+
+        titles = ['date', 'host', 'state/message']
+        table_rows = []
+
         for host, state, logevent in self.mloginfo.logfile.rsstate:
-            print "   %s : %s => %s" % (logevent.datetime.strftime("%b %d %H:%M:%S"), host, state)
+            stats = OrderedDict()
+            stats['date'] = logevent.datetime.strftime("%b %d %H:%M:%S")
+            stats['host'] = host
+            stats['state/message'] = state
+            table_rows.append(stats)
+
+        print_table(table_rows, titles, uppercase_headers=False)
 
         if len(self.mloginfo.logfile.rsstate) == 0:
             print "  no rs state changes found"

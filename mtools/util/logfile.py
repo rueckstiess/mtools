@@ -185,25 +185,33 @@ class LogFile(InputSource):
             # if "is now in state" in line and next(state for state in states if line.endswith(state)):
             if "is now in state" in line:
                 tokens = line.split()
-                host = tokens[7]
-                state = tokens[-1]
-                state = (host, state , LogEvent(line))
+                # 2.6
+                if tokens[1].endswith(']'):
+                    pos = 4
+                else:
+                    pos = 7
+                host = tokens[pos]
+                rsstate = tokens[-1]
+                state = (host, rsstate , LogEvent(line))
                 self._rsstate.append(state)
                 continue
 
             if "[rsMgr] replSet" in line:
                 tokens = line.split()
                 host = os.path.basename(self.name)
-                try:
-                    state = next(state for state in self.states if tokens[-1] == state)
-                except StopIteration:
-                    state = ' '.join(tokens[6:])
+                if tokens[-1] in self.states:
+                    rsstate = tokens[-1]
+                else:
+                    # 2.6
+                    if tokens[1].endswith(']'):
+                        pos = 2
+                    else:
+                        pos = 6
+                    rsstate = ' '.join(tokens[pos:])
 
-
-                if state is not None:
-                    state = (host, state, LogEvent(line))
-                    self._rsstate.append(state)
-                    continue
+                state = (host, rsstate, LogEvent(line))
+                self._rsstate.append(state)
+                continue
 
             # find version string
             if "version" in line:
