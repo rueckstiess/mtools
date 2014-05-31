@@ -1227,8 +1227,9 @@ class MLaunchTool(BaseCmdLineTool):
         self.startup_info[str(port)] = command_str
 
 
-
-
-if __name__ == '__main__':
+def main():
     tool = MLaunchTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

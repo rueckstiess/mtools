@@ -282,7 +282,9 @@ class MLogFilterTool(LogFileTool):
                         break
 
 
-if __name__ == '__main__':
-
+def main():
     tool = MLogFilterTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

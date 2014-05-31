@@ -64,6 +64,9 @@ class MLogInfoTool(LogFileTool):
                     section.run()
 
 
-if __name__ == '__main__':
+def main():
     tool = MLogInfoTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

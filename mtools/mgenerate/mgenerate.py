@@ -191,7 +191,9 @@ class MGeneratorTool(BaseCmdLineTool):
             p.join()
 
 
-
-if __name__ == '__main__':
+def main():
     tool = MGeneratorTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())
