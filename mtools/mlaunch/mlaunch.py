@@ -1669,8 +1669,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         try:
             con[database].add_user(name, password=password, roles=roles, **opts)
-        except OperationFailure:
-            pass
+        except OperationFailure as e:
+            raise e
         except TypeError as e:
             if pymongo_version < (2, 5, 0):
                 con[database].add_user(name, password=password, **opts)
