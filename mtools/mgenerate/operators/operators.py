@@ -8,6 +8,9 @@ from dateutil import parser
 
 import time
 import string
+import Queue
+
+from threadsafe import *
 
 
 class BaseOperator(object):
@@ -84,19 +87,27 @@ class FloatOperator(BaseOperator):
         return val
 
 
+@threadsafe_generator
+def _count():
+    i = -1
+    while True:
+        i += 1
+        yield i
 
 class IncOperator(BaseOperator):
 
     dict_format = False
     string_format = True
     names = ['$inc']
-    value = -1
+
+    counter = _count()
 
     def __call__(self, options=None):
         options = self._parse_options(options)
 
-        self.value += 1
-        return self.value
+        i = self.counter.next()
+        print i
+        return i
 
 
 class StringOperator(BaseOperator):
