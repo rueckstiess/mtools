@@ -22,9 +22,11 @@ try `sudo easy_install pip` from the command line first, or follow the instructi
 Depending on your user rights, it may complain about not having permissions to install the module. 
 In that case, you need to add `sudo` in front of the command.
 
+Note that some mtools scripts have [additional dependencies](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md#additional-dependencies), listed below.
+
 ##### Issues with XCode 5.1 (clang 3.4)
 
-If you install mtools prior to version 1.1.4 on OS X Mavericks with the latest update to clang 3.4, you may see installation errors due to the compilation of psutil's C-extension. See github issue #203 for details and a work-around. The issue is fixed in version 1.1.5 and above.
+If you install mtools prior to version 1.1.4 on OS X Mavericks with the latest update to clang 3.4, you may see installation errors due to the compilation of psutil's C-extension. See github [issue #203](https://github.com/rueckstiess/mtools/issues/203) for details and a work-around. The issue is fixed in version 1.1.5 and above.
 
 
 #### Installation From Source
