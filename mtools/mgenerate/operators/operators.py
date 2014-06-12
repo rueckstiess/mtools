@@ -8,9 +8,7 @@ from dateutil import parser
 
 import time
 import string
-import Queue
-
-from threadsafe import *
+import itertools
 
 
 class BaseOperator(object):
@@ -21,7 +19,6 @@ class BaseOperator(object):
 
     def __init__(self, decode_method):
         self._decode = decode_method
-
 
     def _parse_options(self, options={}):
         parsed = self.defaults.copy()
@@ -87,27 +84,25 @@ class FloatOperator(BaseOperator):
         return val
 
 
-@threadsafe_generator
-def _count():
-    i = -1
-    while True:
-        i += 1
-        yield i
-
 class IncOperator(BaseOperator):
 
-    dict_format = False
+    dict_format = True
     string_format = True
     names = ['$inc']
-
-    counter = _count()
+    defaults = OrderedDict([ ('start', 0), ('step', 1) ])
+    
+    def __init__(self, decode_method):
+        self.counter = None
+        BaseOperator.__init__(self, decode_method)
 
     def __call__(self, options=None):
         options = self._parse_options(options)
+        
+        # initialize counter on first use (not threadsafe!)
+        if self.counter == None:
+            self.counter = itertools.count(options['start'], options['step'])
 
-        i = self.counter.next()
-        print i
-        return i
+        return self.counter.next()
 
 
 class StringOperator(BaseOperator):
@@ -202,6 +197,42 @@ class ArrayOperator(BaseOperator):
 
         # build array of 'of' elements, but don't evaluate them yet
         return [ options['of'] ] * number
+
+
+class CoordinateOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$coordinates', '$coord']
+    defaults = OrderedDict([ ('long_lim', [-180, 180]), ('lat_lim', [-90, 90]) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # evaluate limits
+        long_lim = self._decode(options['long_lim'])
+        lat_lim = self._decode(options['lat_lim'])
+
+        # return coordinate by using random numbers between limits
+        return [ {"$float": long_lim }, {"$float": lat_lim }]
+
+
+class PointOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$point']
+    defaults = OrderedDict([ ('long_lim', [-180, 180]), ('lat_lim', [-90, 90]) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # evaluate limits
+        long_lim = self._decode(options['long_lim'])
+        lat_lim = self._decode(options['lat_lim'])
+
+        # return coordinate by using random numbers between limits
+        return { "type": "Point", "coordinates": { "$coord": [long_lim, lat_lim] } }
 
 
 class DateTimeOperator(BaseOperator):

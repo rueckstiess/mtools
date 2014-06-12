@@ -35,6 +35,8 @@ class DateTimeEncoder(json.JSONEncoder):
 
 class InsertProcess(Process):
 
+    operator_classes = inspect.getmembers(operators, inspect.isclass)
+
     def __init__(self, number, template, collection, args):
         Process.__init__(self)
         self.number = number
@@ -43,7 +45,7 @@ class InsertProcess(Process):
         self.args = args
 
         # add all operators classes from the operators module, pass in _decode method
-        self.operators = [c[1](self._decode) for c in inspect.getmembers(operators, inspect.isclass)]
+        self.operators = [c[1](self._decode) for c in self.operator_classes]
         
         self.string_operators = {}
         self.dict_operators = {}
@@ -162,7 +164,7 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
         self.argparser.add_argument('--pretty', action='store_true', default=False, help="if set, prettyfies the output to stdout (indented), requires --stdout")
         self.argparser.add_argument('--write-concern', '-w', action='store', metavar="W", default=1, help='write concern for inserts, default=1')
-
+        self.argparser.add_argument('--processes', '-p', action='store', type=int, default=0, help='specify number of processes (# cpus by default)')
 
     def run(self, arguments=None):
         BaseCmdLineTool.run(self, arguments)
@@ -194,7 +196,13 @@ class MGeneratorTool(BaseCmdLineTool):
             col = None
 
         # divide work over number of cores
-        num_cores = 1 if self.args['stdout'] else cpu_count()
+        if self.args['stdout']:
+            num_cores = 1
+        elif self.args['processes'] > 0:
+            num_cores = self.args['processes']
+        else:
+            num_cores = cpu_count()
+
         num_list = [self.args['number'] // num_cores] * num_cores
         num_list[0] += self.args['number'] % num_cores
 
