@@ -28,9 +28,9 @@ Note that some mtools scripts have [additional dependencies](https://github.com/
 
 If you install mtools prior to version 1.1.4 on OS X Mavericks with the latest update to clang 3.4, you may see installation errors due to the compilation of psutil's C-extension. See github [issue #203](https://github.com/rueckstiess/mtools/issues/203) for details and a work-around. The issue is fixed in version 1.1.5 and above.
 
-##### Example Installation for Ubuntu Desktop 12.04 64-bit
+#### Installation Walk-Through for Ubuntu Desktop 12.04
 
-Follow [this tutorial](https://github.com/rueckstiess/mtools/wiki/mtools-Installation-on-Ubuntu-12.04) for step-by-step instructions to install mtools and all dependencies on Ubuntu Desktop 12.04.
+Follow [this tutorial](https://github.com/rueckstiess/mtools/wiki/mtools-Installation-on-Ubuntu-12.04) for step-by-step instructions to install mtools and all dependencies on Ubuntu Desktop 12.04 64-bit.
  
 #### Installation From Source
 
