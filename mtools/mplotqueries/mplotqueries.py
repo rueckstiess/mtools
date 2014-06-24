@@ -60,7 +60,7 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'others' group")
         self.argparser.add_argument('--no-others', action='store_true', default=False, help="if this flag is used, the 'others' group (see --group-limit) will be discarded.")
         self.argparser.add_argument('--optime-start', action='store_true', default=False, help="plot operations with a duration when they started instead (by subtracting the duration). The default is to plot them when they finish (at the time they are logged).")
-        self.argparser.add_argument('--y-limits', action='store', default=None, type=int, nargs=2, metavar='VAL', help="if set, limits the y-axis view to [min, max], requires exactly 2 values.")
+        self.argparser.add_argument('--ylimits', action='store', default=None, type=int, nargs=2, metavar='VAL', help="if set, limits the y-axis view to [min, max], requires exactly 2 values.")
         self.legend = None
 
         # progress bar
@@ -359,8 +359,8 @@ class MPlotQueriesTool(LogFileTool):
 
             plt.autoscale(True, axis='y', tight=True)
             # honor forced limits
-            if self.args['y_limits']:
-                plt.gca().set_ylim( self.args['y_limits'] )
+            if self.args['ylimits']:
+                plt.gca().set_ylim( self.args['ylimits'] )
 
             plt.gcf().canvas.draw()
 
@@ -426,9 +426,9 @@ class MPlotQueriesTool(LogFileTool):
                 legend_line._mt_legend_item = i
 
         # overwrite y-axis limits if set
-        if self.args['y_limits'] != None:
-            print self.args['y_limits']
-            axis.set_ylim( self.args['y_limits'])
+        if self.args['ylimits'] != None:
+            print self.args['ylimits']
+            axis.set_ylim( self.args['ylimits'])
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
