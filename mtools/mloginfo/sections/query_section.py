@@ -71,7 +71,7 @@ class QuerySection(BaseSection):
             stats['min'] = min( group_events ) if group_events else '-'
             stats['max'] = max( group_events ) if group_events else '-'
             stats['mean'] = 0
-            stats['95%'] = np.percentile(group_events, 95)
+            stats['95%'] = np.percentile(group_events, 95) if group_events else '-'
             stats['sum'] = sum( group_events ) if group_events else '-'
             stats['mean'] = stats['sum'] / stats['count'] if group_events else '-'
 
