@@ -32,9 +32,18 @@ class MLogInfoTool(LogFileTool):
                 print ' ------------------------------------------'
                 print
 
+            if self.logfile.datetime_format == 'ctime-pre2.4':
+                # no milliseconds when datetime format doesn't support it
+                start_time = self.logfile.start.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown"
+                end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown"
+            else:
+                # include milliseconds
+                start_time = self.logfile.start.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
+                end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
+
             print "     source: %s" % self.logfile.name
-            print "      start: %s" % (self.logfile.start.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
-            print "        end: %s" % (self.logfile.end.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
+            print "      start: %s" % (start_time)
+            print "        end: %s" % (end_time)
 
             # TODO: add timezone if iso8601 format
             print "date format: %s" % self.logfile.datetime_format
