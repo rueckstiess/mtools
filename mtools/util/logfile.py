@@ -110,9 +110,10 @@ class LogFile(InputSource):
 
         # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
         line = self.filehandle.readline()
+        line = line.rstrip('\n')
+
         if line == '':
             raise StopIteration
-        line = line.rstrip('\n')
 
         le = LogEvent(line)
         
