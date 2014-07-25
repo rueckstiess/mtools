@@ -96,8 +96,6 @@ class MLaunchTool(BaseCmdLineTool):
     def __init__(self):
         BaseCmdLineTool.__init__(self)
 
-        self.hostname = socket.gethostname()
-
         # arguments
         self.args = None
 
@@ -166,6 +164,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+        init_parser.add_argument('--hostname', action='store', default=socket.gethostname(), help='override hostname for replica set configuration')
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
@@ -1119,7 +1118,7 @@ class MLaunchTool(BaseCmdLineTool):
             
         for name in config_names:
             self._construct_config(self.dir, nextport, name)
-            config_string.append('%s:%i'%(self.hostname, nextport))
+            config_string.append('%s:%i'%(self.args['hostname'], nextport))
             nextport += 1
         
         # multiple mongos use <datadir>/mongos/ as subdir for log files
@@ -1151,7 +1150,7 @@ class MLaunchTool(BaseCmdLineTool):
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
-            host = '%s:%i'%(self.hostname, portstart+i)
+            host = '%s:%i'%(self.args['hostname'], portstart+i)
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
 
         # launch arbiter if True
@@ -1159,7 +1158,7 @@ class MLaunchTool(BaseCmdLineTool):
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
             
-            host = '%s:%i'%(self.hostname, portstart+self.args['nodes'])
+            host = '%s:%i'%(self.args['hostname'], portstart+self.args['nodes'])
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'arbiterOnly': True})
 
         return name + '/' + ','.join([c['host'] for c in self.config_docs[name]['members']])
@@ -1178,7 +1177,7 @@ class MLaunchTool(BaseCmdLineTool):
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
-        host = '%s:%i'%(self.hostname, port)
+        host = '%s:%i'%(self.args['hostname'], port)
 
         return host
 
