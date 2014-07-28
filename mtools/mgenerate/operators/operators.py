@@ -203,7 +203,7 @@ class CoordinateOperator(BaseOperator):
 
     dict_format = True
     string_format = True
-    names = ['$coordinates', '$coord']
+    names = ['$coordinates', '$coordinate', '$coord']
     defaults = OrderedDict([ ('long_lim', [-180, 180]), ('lat_lim', [-90, 90]) ])
 
     def __call__(self, options=None):
