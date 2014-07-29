@@ -221,7 +221,7 @@ class MLaunchTool(BaseCmdLineTool):
         getattr(self, self.args['command'])()
 
 
-    # -- below are the main commands: init, start, stop, list
+    # -- below are the main commands: init, start, stop, list, kill
 
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
@@ -833,6 +833,8 @@ class MLaunchTool(BaseCmdLineTool):
             in_dict['protocol_version'] = 1
             self.loaded_args = in_dict
             self.startup_info = {}
+            # hostname was added recently
+            self.loaded_args['hostname'] = socket.gethostname()
 
         elif in_dict['protocol_version'] == 2:
             self.startup_info = in_dict['startup_info']
