@@ -12,8 +12,9 @@ import warnings
 import psutil
 import signal
 
-from collections import defaultdict
-from operator import itemgetter
+from collections import defaultdict, OrderedDict
+
+from operator import itemgetter, eq
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
@@ -479,7 +480,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # mongos
         for node in sorted(self.get_tagged(['mongos'])):
-            doc = {'process':'mongos', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
+            doc = OrderedDict([ ('process','mongos'), ('port',node), ('status','running' if self.cluster_running[node] else 'down') ])
             print_docs.append( doc )
         
         if len(self.get_tagged(['mongos'])) > 0:
@@ -487,7 +488,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # configs
         for node in sorted(self.get_tagged(['config'])):
-            doc = {'process':'config server', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
+            doc = OrderedDict([ ('process','config server'), ('port',node), ('status','running' if self.cluster_running[node] else 'down') ])
             print_docs.append( doc )
         
         if len(self.get_tagged(['config'])) > 0:
@@ -509,12 +510,12 @@ class MLaunchTool(BaseCmdLineTool):
                 primary = self.get_tagged(tags + ['primary', 'running'])
                 if len(primary) > 0:
                     node = list(primary)[0]
-                    print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'primary'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
                 
                 # secondaries
                 secondaries = self.get_tagged(tags + ['secondary', 'running'])
                 for node in sorted(secondaries):
-                    print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'secondary'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
                 
                 # data-bearing nodes that are down or not in the replica set yet
                 mongods = self.get_tagged(tags + ['mongod'])
@@ -522,26 +523,34 @@ class MLaunchTool(BaseCmdLineTool):
 
                 nodes = sorted(mongods - primary - secondaries - arbiters)
                 for node in nodes:
-                    print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'})
+                    print_docs.append( OrderedDict([ ('process', padding+'mongod'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
 
                 # arbiters
                 for node in arbiters:
-                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'arbiter'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
 
             else:
                 nodes = self.get_tagged(tags + ['mongod'])
                 if len(nodes) > 0:
                     node = nodes.pop()
-                    print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'single'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
             if shard:
                 print_docs.append(None)
 
 
-        if self.args['verbose']:
-            # print tags as well
-            for doc in filter(lambda x: type(x) == dict, print_docs):               
+        processes = self._get_processes()
+
+        # print tags as well
+        for doc in filter(lambda x: type(x) == OrderedDict, print_docs):               
+            try:
+                doc['pid'] = processes[doc['port']]
+            except KeyError:
+                doc['pid'] = '-'
+
+            if self.args['verbose']:
                 tags = self.get_tags_of_port(doc['port'])
                 doc['tags'] = ', '.join(tags)
+
 
         print_docs.append( None )   
         print         
@@ -1033,7 +1042,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _get_processes(self):
-        all_ports = self.get_tagged('all')
+        all_ports = self.get_tagged('running')
         
         process_dict = {}
 
@@ -1042,16 +1051,15 @@ class MLaunchTool(BaseCmdLineTool):
             if p.name not in ['mongos', 'mongod']:
                 continue
 
-            # find first TCP listening port
-            ports = [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN']
-            if len(ports) > 0:
-                port = min(ports)
-            else:
-                continue
-                
+            port = None
+            for possible_port in self.startup_info:
+                if all(map(eq, p.cmdline, self.startup_info[possible_port].split())):
+                    port = int(possible_port)
+                    break
+
             # only consider processes belonging to this environment
             if port in all_ports:
-                process_dict[port] = p
+                process_dict[port] = p.pid
 
         return process_dict
 
