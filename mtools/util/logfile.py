@@ -172,29 +172,36 @@ class LogFile(InputSource):
         l = 0
         for l, line in enumerate(self.filehandle):
 
-            # find version string
-            if "version" in line:
-
-                restart = None
-                # differentiate between different variations
-                if "mongos" in line or "MongoS" in line:
-                    self._binary = 'mongos'
-                elif "db version v" in line:
-                    self._binary = 'mongod'
-
-                else: 
-                    continue
-
-                version = re.search(r'(\d\.\d\.\d+)', line)
-                if version:
-                    version = version.group(1)
-                    restart = (version, LogEvent(line))
-                    self._restarts.append(restart)
+            # find version string (fast check to eliminate most lines)
+            if "version" in line[:100]:
+                logevent = LogEvent(line)
+                restart = self._check_for_restart(logevent)
+                if restart:
+                    self._restarts.append((restart, logevent))
 
         self._num_lines = l+1
 
         # reset logfile
         self.filehandle.seek(0)
+
+
+    def _check_for_restart(self, logevent):
+        if logevent.thread == 'mongosMain':
+            self._binary = 'mongos'
+        
+        elif logevent.thread == 'initandlisten' and "db version v" in logevent.line_str:
+            self._binary = 'mongod'
+
+        else:
+            return False
+
+        version = re.search(r'(\d\.\d\.\d+)', logevent.line_str)
+                
+        if version:
+            version = version.group(1)
+            return version
+        else:
+            return False
 
 
     def _calculate_bounds(self):
