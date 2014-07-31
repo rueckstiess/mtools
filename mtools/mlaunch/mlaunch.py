@@ -190,6 +190,14 @@ class MLaunchTool(BaseCmdLineTool):
         stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
         stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
+
+        # restart command
+        restart_parser = subparsers.add_parser('restart', help='stops, then restarts MongoDB instances.',
+            description='stops running MongoDB instances with the shutdown command. Then restarts the stopped instances.')
+        restart_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
+        restart_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        restart_parser.add_argument('--dir', action='store', default='./data', help='base directory to restart nodes (default=./data/)')
+        restart_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         
         # list command
         list_parser = subparsers.add_parser('list', help='list MongoDB instances of this environment.',
@@ -556,7 +564,13 @@ class MLaunchTool(BaseCmdLineTool):
                 doc['tags'] = ', '.join(tags)
 
             if self.args['startup']:
-                doc['startup command'] = startup[str(doc['port'])]
+                try:
+                    # first try running process (startup may be modified via start command)
+                    doc['startup command'] = ' '.join(psutil.Process(processes[doc['port']]).cmdline)
+                except KeyError:
+                    # if not running, use stored startup_info
+                    doc['startup command'] = startup[str(doc['port'])]
+
 
 
         print_docs.append( None )   
@@ -603,6 +617,22 @@ class MLaunchTool(BaseCmdLineTool):
         self.discover()
 
     
+    def restart(self):
+        # stop nodes via stop command
+        self.stop()
+
+        # there is a very brief period in which nodes are not reachable anymore, but the
+        # port is not torn down fully yet and an immediate start command would fail. This 
+        # very short sleep prevents that case, and it is practically not noticable by users
+        time.sleep(0.1)
+
+        # refresh discover
+        self.discover()
+
+        # start nodes again via start command
+        self.start()
+
+
     # --- below are api helper methods, can be called after creating an MLaunchTool() object
 
 
@@ -1050,7 +1080,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _get_processes(self):
         all_ports = self.get_tagged('running')
-        
+
         process_dict = {}
 
         for p in psutil.process_iter():
@@ -1060,7 +1090,12 @@ class MLaunchTool(BaseCmdLineTool):
 
             port = None
             for possible_port in self.startup_info:
-                if all(map(eq, p.cmdline, self.startup_info[possible_port].split())):
+                # compare ports based on command line argument
+                startup = self.startup_info[possible_port].split()
+                p_port = p.cmdline[p.cmdline.index('--port')+1]
+                startup_port = startup[startup.index('--port')+1]
+
+                if str(p_port) == str(startup_port):
                     port = int(possible_port)
                     break
 
