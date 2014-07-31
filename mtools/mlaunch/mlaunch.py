@@ -12,7 +12,8 @@ import warnings
 import psutil
 import signal
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
+from mtools.util import OrderedDict
 
 from operator import itemgetter, eq
 
@@ -194,7 +195,9 @@ class MLaunchTool(BaseCmdLineTool):
         list_parser = subparsers.add_parser('list', help='list MongoDB instances of this environment.',
             description='list MongoDB instances of this environment.')
         list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
-        list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        list_parser.add_argument('--tags', action='store_true', default=False, help='outputs the tags for each instance. Tags can be used to target instances for start/stop/kill.')
+        list_parser.add_argument('--startup', action='store_true', default=False, help='outputs the startup command lines for each instance.')
+        list_parser.add_argument('--verbose', action='store_true', default=False, help='alias for --tags.')
 
         # list command
         kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances of this environment.',
@@ -539,6 +542,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         processes = self._get_processes()
+        startup = self.startup_info
 
         # print tags as well
         for doc in filter(lambda x: type(x) == OrderedDict, print_docs):               
@@ -547,9 +551,12 @@ class MLaunchTool(BaseCmdLineTool):
             except KeyError:
                 doc['pid'] = '-'
 
-            if self.args['verbose']:
+            if self.args['verbose'] or self.args['tags']:
                 tags = self.get_tags_of_port(doc['port'])
                 doc['tags'] = ', '.join(tags)
+
+            if self.args['startup']:
+                doc['startup command'] = startup[str(doc['port'])]
 
 
         print_docs.append( None )   
@@ -1208,7 +1215,7 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
-        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
