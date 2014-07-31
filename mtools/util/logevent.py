@@ -210,14 +210,20 @@ class LogEvent(object):
         self._datetime_nextpos = nextpos
         self._year_rollover = rollover
 
-        # fast check if timezone changed. if it has, trigger datetime evaluation
+        # fast check if timestamp format changed. if it has, trigger datetime evaluation
         if format.startswith('ctime'):
             if len(self.split_tokens) < 4 or self.split_tokens[self._datetime_nextpos-4] not in self.weekdays:
                 _ = self.datetime
                 return False
             return True
         else:
+            if len(self.split_tokens) == 0:
+                # empty line, no need to parse datetime
+                self._datetime_calculated = True
+                return False
+
             if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
+                # not the timestamp format that was hinted
                 _ = self.datetime
                 return False
             return True

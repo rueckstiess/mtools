@@ -124,7 +124,6 @@ class LogFile(InputSource):
                 self._datetime_format = None
                 self._datetime_nextpos = None
         elif le.datetime:
-            # print "not hinting"
             # gather new hint info from another logevent
             self._datetime_format = le.datetime_format
             self._datetime_nextpos = le._datetime_nextpos  
