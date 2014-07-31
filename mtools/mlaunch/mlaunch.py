@@ -555,7 +555,7 @@ class MLaunchTool(BaseCmdLineTool):
         # print tags as well
         for doc in filter(lambda x: type(x) == OrderedDict, print_docs):               
             try:
-                doc['pid'] = processes[doc['port']]
+                doc['pid'] = processes[doc['port']].pid
             except KeyError:
                 doc['pid'] = '-'
 
@@ -566,7 +566,7 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['startup']:
                 try:
                     # first try running process (startup may be modified via start command)
-                    doc['startup command'] = ' '.join(psutil.Process(processes[doc['port']]).cmdline)
+                    doc['startup command'] = ' '.join(processes[doc['port']].cmdline)
                 except KeyError:
                     # if not running, use stored startup_info
                     doc['startup command'] = startup[str(doc['port'])]
@@ -1101,7 +1101,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             # only consider processes belonging to this environment
             if port in all_ports:
-                process_dict[port] = p.pid
+                process_dict[port] = p
 
         return process_dict
 
