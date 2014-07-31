@@ -59,7 +59,8 @@ class MLogInfoTool(LogFileTool):
                     version = '< 2.4 (no milliseconds)'
                 elif self.logfile.datetime_format == 'ctime':
                     version = '>= 2.4 (milliseconds present)'
-                elif self.logfile.datetime_format.startswith('iso8601-'):
+                elif self.logfile.datetime_format == "iso8601-utc" or \
+                     self.logfile.datetime_format == "iso8601-local":
                     version = '>= 2.6 (iso8601 format)'
 
             print "    version: %s" % version,

@@ -56,8 +56,13 @@ class QuerySection(BaseSection):
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
+        # no queries in the log file
+        if len(grouping) < 1:
+            raise SystemExit('nothing to print.')
+
         titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
         table_rows = []
+
         for g in grouping:
             # calculate statistics for this group
             namespace, pattern = g
