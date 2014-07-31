@@ -79,7 +79,7 @@ class TestMLogFilter(object):
         logfile_26 = LogFile(open(logfile_26_path, 'r'))
 
         random_start = random_date(logfile_26.start, logfile_26.end)
-        random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end)
+        random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end+timedelta(minutes=1))
 
         print random_start, random_end
         print logfile_26.start, logfile_26.end
