@@ -45,6 +45,7 @@ class TestMLogInfo(object):
             results[key.strip()] = val.strip()
 
         assert results['source'].endswith('mongod_225.log')
+        assert results['host'] == 'capslock.local:27017'
         assert results['start'].endswith('Aug 05 20:21:42')
         assert results['end'].endswith('Aug 05 21:04:52')
         assert results['date format'] == 'ctime-pre2.4'

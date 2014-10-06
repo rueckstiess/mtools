@@ -228,8 +228,8 @@ class LogFile(InputSource):
 
             if "[rsMgr] replSet" in line:
                 tokens = line.split()
-                if self.hostname:
-                    host = self.hostname + ':' + self.port
+                if self._hostname:
+                    host = self._hostname + ':' + self._port 
                 else:
                     host = os.path.basename(self.name)
                 host += ' (self)'
