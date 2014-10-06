@@ -13,10 +13,11 @@ import inspect
 from copy import copy
 from mtools import __version__
 from datetime import timedelta
+from dateutil.tz import tzutc, tzoffset
 
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.dates import DateFormatter, date2num
+    from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
     from matplotlib import __version__ as mpl_version
@@ -383,6 +384,27 @@ class MPlotQueriesTool(LogFileTool):
 
         xlabel = 'time'
         ylabel = ''
+
+        # use timezone of first log file (may not always be what user wants but must make a choice)
+        tz = self.args['logfile'][0].timezone
+        tzformat = '%b %d\n%H:%M:%S' if tz == tzutc() else '%b %d\n%H:%M:%S%z'
+
+        locator = AutoDateLocator(tz=tz, minticks=5, maxticks=10)
+        formatter = AutoDateFormatter(locator, tz=tz)
+
+        formatter.scaled = {
+           365.0  : '%Y',
+           30.    : '%b %Y',
+           1.0    : '%b %d %Y',
+           1./24. : '%b %d %Y\n%H:%M:%S',
+           1./(24.*60.): '%b %d %Y\n%H:%M:%S',
+        }
+
+        # add timezone to format if not UTC
+        if tz != tzutc():
+            formatter.scaled[1./24.] = '%b %d %Y\n%H:%M:%S%z'
+            formatter.scaled[1./(24.*60.)] = '%b %d %Y\n%H:%M:%S%z'
+
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
             self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances), (xlim_min, xlim_max) ))
             if hasattr(plot_inst, 'xlabel'):
@@ -392,11 +414,9 @@ class MPlotQueriesTool(LogFileTool):
         self.print_shortcuts()
 
         axis.set_xlabel(xlabel)
-        axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=10)
-        axis.xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
-
-        for label in axis.get_xticklabels():  # make the xtick labels pickable
-            label.set_picker(True)
+        axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=9)
+        axis.xaxis.set_major_locator(locator)
+        axis.xaxis.set_major_formatter(formatter)
             
         axis.set_xlim(date2num([xlim_min, xlim_max]))
 
