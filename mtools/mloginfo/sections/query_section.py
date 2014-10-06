@@ -17,18 +17,12 @@ class QuerySection(BaseSection):
     """
     
     name = "queries"
+    description = 'statistics on query shapes per namespace'
 
-    def __init__(self, mloginfo):
-        BaseSection.__init__(self, mloginfo)
-
-        # add --queries flag to argparser
-        self.mloginfo.argparser_sectiongroup.add_argument('--queries', action='store_true', help='outputs statistics about query patterns')
-        self.mloginfo.argparser_sectiongroup.add_argument('--sort', action='store', default='sum', choices=['namespace', 'pattern', 'count', 'min', 'max', 'mean', '95%', 'sum'])
-
-    @property
-    def active(self):
-        """ return boolean if this section is active. """
-        return self.mloginfo.args['queries']
+    
+    def _add_subparser_arguments(self, subparser):
+        """ add additional subparser arguments in this method if required. """
+        subparser.add_argument('--sort', action='store', help='field to sort table rows', default='sum', choices=['namespace', 'pattern', 'count', 'min', 'max', 'mean', '95%', 'sum'])
 
 
     def run(self):

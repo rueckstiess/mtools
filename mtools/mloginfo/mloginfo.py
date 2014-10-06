@@ -2,29 +2,45 @@
 
 from mtools.util.logfile import LogFile
 from mtools.util.logevent import LogEvent
-from mtools.util.cmdlinetool import LogFileTool
+from mtools.util.cmdlinetool import BaseCmdLineTool, InputSourceAction
 
+import sys
 import inspect
+import argparse
 import mtools.mloginfo.sections as sections
 
 
 
-class MLogInfoTool(LogFileTool):
+class MLogInfoTool(BaseCmdLineTool):
 
     def __init__(self):
         """ Constructor: add description to argparser. """
-        LogFileTool.__init__(self, multiple_logfiles=True, stdin_allowed=False)
-
-        self.argparser.description = 'Extracts general information from logfile and prints it to stdout.'
-        self.argparser.add_argument('--verbose', action='store_true', help='show more verbose output (depends on info section)')
-        self.argparser_sectiongroup = self.argparser.add_argument_group('info sections', 'Below commands activate additional info sections for the log file.')
+        BaseCmdLineTool.__init__(self)
 
         # add all filter classes from the filters module
-        self.sections = [c[1](self) for c in inspect.getmembers(sections, inspect.isclass)]
+        self.sections = dict( [ (c[1].name, c[1](self)) for c in inspect.getmembers(sections, inspect.isclass) ] )
+
+        # initialize arpparser
+        self.argparser.description = 'Extracts general information from logfile and prints it to stdout.'
+        self.argparser.add_argument('--verbose', action='store_true', help='show more verbose output (depends on info section)')
+        
+        # for backwards compatibility, if only a logfile is specified without a command, still print out the basic info
+        # only add command subparsers if there are at least 2 additional arguments (command, logfile) or if --help is invoked
+        if len(sys.argv) != 2 or sys.argv[1] in self.sections.keys() + ['--help', '--version']:
+            # create command sub-parsers
+            subparsers = self.argparser.add_subparsers(title='commands', dest='command')
+
+            for section in self.sections.values():
+                subparser = subparsers.add_parser(section.name, help=section.description, description=section.description)
+                section._add_subparser_arguments(subparser)
+
+        # add logfile action manually at the end
+        self.argparser.add_argument('logfile', action='store', type=InputSourceAction(), nargs='+', help='logfile(s) to parse')
+
 
     def run(self, arguments=None):
         """ Print out useful information about the log file. """
-        LogFileTool.run(self, arguments)
+        BaseCmdLineTool.run(self, arguments)
 
         for i, self.logfile in enumerate(self.args['logfile']):
             if i > 0:
@@ -66,12 +82,12 @@ class MLogInfoTool(LogFileTool):
             print "    version: %s" % version,
             print
 
-            # now run all sections
-            for section in self.sections:
-                if section.active:
-                    print
-                    print section.name.upper()
-                    section.run()
+            # now run requested section
+            if 'command' in self.args:
+                section = self.sections[ self.args['command'] ]
+                print
+                print section.name.upper()
+                section.run()
 
 
 if __name__ == '__main__':
