@@ -56,3 +56,22 @@ class TestUtilLogFile(object):
         logfile = LogFile(self.file_year_rollover)
         assert logfile.datetime_format == "ctime"
         assert logfile.year_rollover == logfile.end
+
+
+    def test_hostname_port(self):
+        # mongod
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        mongod_26 = open(logfile_path, 'r')
+
+        logfile = LogFile(mongod_26)
+        assert logfile.hostname == 'enter.local'
+        assert logfile.port == '27019'
+
+        # mongos
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        mongos = open(logfile_path, 'r')
+
+        logfile2 = LogFile(mongos)
+        print logfile2.hostname
+        assert logfile2.hostname == 'jimoleary.local'
+        assert logfile2.port == '27017'

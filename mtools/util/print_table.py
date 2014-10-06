@@ -1,6 +1,7 @@
 def print_table( rows, override_headers=None, uppercase_headers=True ):
     """ rows needs to be a list of dictionaries, all with the same keys. """
-    
+    if len(rows) == 0:
+        return
     keys = rows[0].keys()
     headers = override_headers or keys
     if uppercase_headers:
@@ -14,7 +15,7 @@ def print_table( rows, override_headers=None, uppercase_headers=True ):
     for row in rows:
         if type(row) == str:
             print row
-        elif row == None:
+        elif row is None:
             print
         else:
             print template.format(**row)
