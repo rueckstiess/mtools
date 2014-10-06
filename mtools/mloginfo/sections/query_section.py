@@ -6,8 +6,11 @@ from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
 
 from operator import itemgetter
+from collections import namedtuple
 
 import numpy as np
+
+LogTuple = namedtuple('LogTuple', ['namespace', 'pattern', 'duration'])
 
 class QuerySection(BaseSection):
     """ 
@@ -39,7 +42,6 @@ class QuerySection(BaseSection):
         else:
             self.mloginfo.progress_bar_enabled = False
 
-
         for i, le in enumerate(logfile):
             # update progress bar every 1000 lines
             if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
@@ -48,7 +50,8 @@ class QuerySection(BaseSection):
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if le.operation in ['query', 'update', 'remove']:
-                grouping.add(le)
+                lt = LogTuple(namespace=le.namespace, pattern=le.pattern, duration=le.duration)
+                grouping.add(lt)
 
         grouping.sort_by_size()
 
