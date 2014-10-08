@@ -1,6 +1,8 @@
 Changes to mtools
 =================
 
+#### version 1.1.7
+
 #### version 1.1.6
 
   * mlogfilter: `--thread` now also matches "connection accepted" lines for that connection (#218, #219)
