@@ -281,7 +281,6 @@ class MLogFilterTool(LogFileTool):
                     if sys.stdin.isatty():
                         break
 
-
 if __name__ == '__main__':
 
     tool = MLogFilterTool()

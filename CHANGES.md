@@ -1,6 +1,25 @@
 Changes to mtools
 =================
 
+#### version 1.1.6
+
+  * mlogfilter: `--thread` now also matches "connection accepted" lines for that connection (#218, #219)
+  * mlogfilter: fixed bug that would print milliseconds in timestamp twice in 2.6 format for UTC timezone (#241)
+  * mlaunch: allow overriding hostname for replica set setup (#256)
+  * mlaunch: added a `restart` command (#253)
+  * mlaunch: added `--startup` to `list` command to show all startup strings (#257) 
+  * mlaunch: aliased `--verbose` (now depricated) as `--tags` (#257)
+  * mloginfo: added `--rsstate` option to show all replica set state changes in log file. Added by @jimoleary (#228)
+  * mloginfo: fixed issues with 95-percentile calculation. Added by @gianpaj (#238)
+  * mloginfo: show host name and port if available (#247)
+  * mloginfo: fixed bug where empty lines can't be parsed (#213)
+  * mloginfo: show milliseconds for start/end (#245)
+  * mloginfo: made numpy dependency optional for mloginfo. Added by @brondsem (#216)
+  * mplotqueries: option to write output to image file instead of interactive mode. Added by @dpercy (#266)
+  * mplotqueries: show correct timezone for time axis (#274)
+  * mplotqueries: added option to allow fixing y-axis to specific min/max values (#214)
+
+
 #### version 1.1.5
 
   * added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)

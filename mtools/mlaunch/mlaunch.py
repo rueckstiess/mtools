@@ -13,7 +13,9 @@ import psutil
 import signal
 
 from collections import defaultdict
-from operator import itemgetter
+from mtools.util import OrderedDict
+
+from operator import itemgetter, eq
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
@@ -96,8 +98,6 @@ class MLaunchTool(BaseCmdLineTool):
     def __init__(self):
         BaseCmdLineTool.__init__(self)
 
-        self.hostname = socket.gethostname()
-
         # arguments
         self.args = None
 
@@ -166,6 +166,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+        init_parser.add_argument('--hostname', action='store', default=socket.gethostname(), help='override hostname for replica set configuration')
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
@@ -189,12 +190,22 @@ class MLaunchTool(BaseCmdLineTool):
         stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
         stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
+
+        # restart command
+        restart_parser = subparsers.add_parser('restart', help='stops, then restarts MongoDB instances.',
+            description='stops running MongoDB instances with the shutdown command. Then restarts the stopped instances.')
+        restart_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
+        restart_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        restart_parser.add_argument('--dir', action='store', default='./data', help='base directory to restart nodes (default=./data/)')
+        restart_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         
         # list command
         list_parser = subparsers.add_parser('list', help='list MongoDB instances of this environment.',
             description='list MongoDB instances of this environment.')
         list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
-        list_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
+        list_parser.add_argument('--tags', action='store_true', default=False, help='outputs the tags for each instance. Tags can be used to target instances for start/stop/kill.')
+        list_parser.add_argument('--startup', action='store_true', default=False, help='outputs the startup command lines for each instance.')
+        list_parser.add_argument('--verbose', action='store_true', default=False, help='alias for --tags.')
 
         # list command
         kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances of this environment.',
@@ -222,7 +233,7 @@ class MLaunchTool(BaseCmdLineTool):
         getattr(self, self.args['command'])()
 
 
-    # -- below are the main commands: init, start, stop, list
+    # -- below are the main commands: init, start, stop, list, kill
 
     def init(self):
         """ sub-command init. Branches out to sharded, replicaset or single node methods. """
@@ -480,7 +491,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # mongos
         for node in sorted(self.get_tagged(['mongos'])):
-            doc = {'process':'mongos', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
+            doc = OrderedDict([ ('process','mongos'), ('port',node), ('status','running' if self.cluster_running[node] else 'down') ])
             print_docs.append( doc )
         
         if len(self.get_tagged(['mongos'])) > 0:
@@ -488,7 +499,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # configs
         for node in sorted(self.get_tagged(['config'])):
-            doc = {'process':'config server', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'}
+            doc = OrderedDict([ ('process','config server'), ('port',node), ('status','running' if self.cluster_running[node] else 'down') ])
             print_docs.append( doc )
         
         if len(self.get_tagged(['config'])) > 0:
@@ -510,12 +521,12 @@ class MLaunchTool(BaseCmdLineTool):
                 primary = self.get_tagged(tags + ['primary', 'running'])
                 if len(primary) > 0:
                     node = list(primary)[0]
-                    print_docs.append( {'process':padding+'primary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'primary'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
                 
                 # secondaries
                 secondaries = self.get_tagged(tags + ['secondary', 'running'])
                 for node in sorted(secondaries):
-                    print_docs.append( {'process':padding+'secondary', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'secondary'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
                 
                 # data-bearing nodes that are down or not in the replica set yet
                 mongods = self.get_tagged(tags + ['mongod'])
@@ -523,26 +534,44 @@ class MLaunchTool(BaseCmdLineTool):
 
                 nodes = sorted(mongods - primary - secondaries - arbiters)
                 for node in nodes:
-                    print_docs.append( {'process':padding+'mongod', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'})
+                    print_docs.append( OrderedDict([ ('process', padding+'mongod'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
 
                 # arbiters
                 for node in arbiters:
-                    print_docs.append( {'process':padding+'arbiter', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'arbiter'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
 
             else:
                 nodes = self.get_tagged(tags + ['mongod'])
                 if len(nodes) > 0:
                     node = nodes.pop()
-                    print_docs.append( {'process':padding+'single', 'port':node, 'status': 'running' if self.cluster_running[node] else 'down'} )
+                    print_docs.append( OrderedDict([ ('process', padding+'single'), ('port', node), ('status', 'running' if self.cluster_running[node] else 'down') ]) )
             if shard:
                 print_docs.append(None)
 
 
-        if self.args['verbose']:
-            # print tags as well
-            for doc in filter(lambda x: type(x) == dict, print_docs):               
+        processes = self._get_processes()
+        startup = self.startup_info
+
+        # print tags as well
+        for doc in filter(lambda x: type(x) == OrderedDict, print_docs):               
+            try:
+                doc['pid'] = processes[doc['port']].pid
+            except KeyError:
+                doc['pid'] = '-'
+
+            if self.args['verbose'] or self.args['tags']:
                 tags = self.get_tags_of_port(doc['port'])
                 doc['tags'] = ', '.join(tags)
+
+            if self.args['startup']:
+                try:
+                    # first try running process (startup may be modified via start command)
+                    doc['startup command'] = ' '.join(processes[doc['port']].cmdline)
+                except KeyError:
+                    # if not running, use stored startup_info
+                    doc['startup command'] = startup[str(doc['port'])]
+
+
 
         print_docs.append( None )   
         print         
@@ -588,6 +617,22 @@ class MLaunchTool(BaseCmdLineTool):
         self.discover()
 
     
+    def restart(self):
+        # stop nodes via stop command
+        self.stop()
+
+        # there is a very brief period in which nodes are not reachable anymore, but the
+        # port is not torn down fully yet and an immediate start command would fail. This 
+        # very short sleep prevents that case, and it is practically not noticable by users
+        time.sleep(0.1)
+
+        # refresh discover
+        self.discover()
+
+        # start nodes again via start command
+        self.start()
+
+
     # --- below are api helper methods, can be called after creating an MLaunchTool() object
 
 
@@ -834,6 +879,8 @@ class MLaunchTool(BaseCmdLineTool):
             in_dict['protocol_version'] = 1
             self.loaded_args = in_dict
             self.startup_info = {}
+            # hostname was added recently
+            self.loaded_args['hostname'] = socket.gethostname()
 
         elif in_dict['protocol_version'] == 2:
             self.startup_info = in_dict['startup_info']
@@ -1032,8 +1079,8 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _get_processes(self):
-        all_ports = self.get_tagged('all')
-        
+        all_ports = self.get_tagged('running')
+
         process_dict = {}
 
         for p in psutil.process_iter():
@@ -1041,13 +1088,17 @@ class MLaunchTool(BaseCmdLineTool):
             if p.name not in ['mongos', 'mongod']:
                 continue
 
-            # find first TCP listening port
-            ports = [con.laddr[1] for con in p.get_connections(kind='tcp') if con.status=='LISTEN']
-            if len(ports) > 0:
-                port = min(ports)
-            else:
-                continue
-                
+            port = None
+            for possible_port in self.startup_info:
+                # compare ports based on command line argument
+                startup = self.startup_info[possible_port].split()
+                p_port = p.cmdline[p.cmdline.index('--port')+1]
+                startup_port = startup[startup.index('--port')+1]
+
+                if str(p_port) == str(startup_port):
+                    port = int(possible_port)
+                    break
+
             # only consider processes belonging to this environment
             if port in all_ports:
                 process_dict[port] = p
@@ -1119,7 +1170,7 @@ class MLaunchTool(BaseCmdLineTool):
             
         for name in config_names:
             self._construct_config(self.dir, nextport, name)
-            config_string.append('%s:%i'%(self.hostname, nextport))
+            config_string.append('%s:%i'%(self.args['hostname'], nextport))
             nextport += 1
         
         # multiple mongos use <datadir>/mongos/ as subdir for log files
@@ -1151,7 +1202,7 @@ class MLaunchTool(BaseCmdLineTool):
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
         
-            host = '%s:%i'%(self.hostname, portstart+i)
+            host = '%s:%i'%(self.args['hostname'], portstart+i)
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
 
         # launch arbiter if True
@@ -1159,7 +1210,7 @@ class MLaunchTool(BaseCmdLineTool):
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
             
-            host = '%s:%i'%(self.hostname, portstart+self.args['nodes'])
+            host = '%s:%i'%(self.args['hostname'], portstart+self.args['nodes'])
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'arbiterOnly': True})
 
         return name + '/' + ','.join([c['host'] for c in self.config_docs[name]['members']])
@@ -1178,7 +1229,7 @@ class MLaunchTool(BaseCmdLineTool):
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
-        host = '%s:%i'%(self.hostname, port)
+        host = '%s:%i'%(self.args['hostname'], port)
 
         return host
 
@@ -1199,7 +1250,7 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
-        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend %s %s --fork"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str

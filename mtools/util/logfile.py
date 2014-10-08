@@ -5,6 +5,7 @@ from math import ceil
 from datetime import datetime
 import time
 import re
+import os
 
 class LogFile(InputSource):
     """ wrapper class for log files, either as open file streams of from stdin. """
@@ -22,6 +23,9 @@ class LogFile(InputSource):
         self._restarts = None
         self._binary = None
         self._timezone = None
+        self._hostname = None
+        self._port = None
+        self._rsstate = None
 
         self._datetime_format = None
         self._year_rollover = None
@@ -90,11 +94,32 @@ class LogFile(InputSource):
         return self._restarts
 
     @property
+    def rsstate(self):
+        """ lazy evaluation of all restarts. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._rsstate
+
+    @property
     def binary(self):
         """ lazy evaluation of the binary name. """
         if not self._num_lines:
             self._iterate_lines()
         return self._binary
+
+    @property
+    def hostname(self):
+        """ lazy evaluation of the binary name. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._hostname
+
+    @property
+    def port(self):
+        """ lazy evaluation of the binary name. """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._port
 
     @property
     def versions(self):
@@ -124,7 +149,6 @@ class LogFile(InputSource):
                 self._datetime_format = None
                 self._datetime_nextpos = None
         elif le.datetime:
-            # print "not hinting"
             # gather new hint info from another logevent
             self._datetime_format = le.datetime_format
             self._datetime_nextpos = le._datetime_nextpos  
@@ -158,6 +182,7 @@ class LogFile(InputSource):
 
             yield le
 
+    states = ['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2', 'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN']
 
     def __len__(self):
         """ return the number of lines in a log file. """
@@ -168,33 +193,83 @@ class LogFile(InputSource):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
         self._restarts = []
+        self._rsstate = []
 
         l = 0
         for l, line in enumerate(self.filehandle):
 
-            # find version string
-            if "version" in line:
+            # find version string (fast check to eliminate most lines)
+            if "version" in line[:100]:
+                logevent = LogEvent(line)
+                restart = self._check_for_restart(logevent)
+                if restart:
+                    self._restarts.append((restart, logevent))
 
-                restart = None
-                # differentiate between different variations
-                if "mongos" in line or "MongoS" in line:
-                    self._binary = 'mongos'
-                elif "db version v" in line:
-                    self._binary = 'mongod'
+            if "starting :" in line or "starting:" in line:
+                # look for hostname, port
+                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)', line)
+                if match:
+                    self._hostname = match.group('host')
+                    self._port = match.group('port')
 
-                else: 
-                    continue
+            # if "is now in state" in line and next(state for state in states if line.endswith(state)):
+            if "is now in state" in line:
+                tokens = line.split()
+                # 2.6
+                if tokens[1].endswith(']'):
+                    pos = 4
+                else:
+                    pos = 7
+                host = tokens[pos]
+                rsstate = tokens[-1]
+                state = (host, rsstate, LogEvent(line))
+                self._rsstate.append(state)
+                continue
 
-                version = re.search(r'(\d\.\d\.\d+)', line)
-                if version:
-                    version = version.group(1)
-                    restart = (version, LogEvent(line))
-                    self._restarts.append(restart)
+            if "[rsMgr] replSet" in line:
+                tokens = line.split()
+                if self._hostname:
+                    host = self._hostname + ':' + self._port 
+                else:
+                    host = os.path.basename(self.name)
+                host += ' (self)'
+                if tokens[-1] in self.states:
+                    rsstate = tokens[-1]
+                else:
+                    # 2.6
+                    if tokens[1].endswith(']'):
+                        pos = 2
+                    else:
+                        pos = 6
+                    rsstate = ' '.join(tokens[pos:])
+
+                state = (host, rsstate, LogEvent(line))
+                self._rsstate.append(state)
+                continue
 
         self._num_lines = l+1
 
         # reset logfile
         self.filehandle.seek(0)
+
+
+    def _check_for_restart(self, logevent):
+        if logevent.thread == 'mongosMain':
+            self._binary = 'mongos'
+        
+        elif logevent.thread == 'initandlisten' and "db version v" in logevent.line_str:
+            self._binary = 'mongod'
+
+        else:
+            return False
+
+        version = re.search(r'(\d\.\d\.\d+)', logevent.line_str)
+                
+        if version:
+            version = version.group(1)
+            return version
+        else:
+            return False
 
 
     def _calculate_bounds(self):

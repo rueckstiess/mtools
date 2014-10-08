@@ -79,7 +79,7 @@ class TestMLogFilter(object):
         logfile_26 = LogFile(open(logfile_26_path, 'r'))
 
         random_start = random_date(logfile_26.start, logfile_26.end)
-        random_end = random_date(random_start, logfile_26.end)
+        random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end+timedelta(minutes=1))
 
         print random_start, random_end
         print logfile_26.start, logfile_26.end
@@ -215,12 +215,43 @@ class TestMLogFilter(object):
         lines = output.splitlines()
         assert any('=== a line without a datetime ===' in l for l in lines)
 
-    def test_thread(self):
-        self.tool.run('%s --thread initandlisten'%self.logfile_path)
+    def _test_thread(self,path,thread):
+        self.tool.run('%s --thread mongosMain'%path )
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
-            assert(le.thread == 'initandlisten')
+            assert(le.thread == thread)
+            md = re.match("^.* connection accepted from [0-9\.:]+ #(?P<conn>[0-9]+) " , le.line_str)
+            if md is None:
+                assert(le.conn is None)
+            else:
+                assert(le.conn == "conn" + md.group('conn'))
+
+    def _test_thread_conn1(self,path,thread):
+        self.tool.run('%s --thread conn1'%path )
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            md = re.match("^.* connection accepted from [0-9\.:]+ #(?P<conn>[0-9]+) " , le.line_str)
+            assert(le.conn == 'conn1')
+            if md is None:
+                assert(le.thread == 'conn1')
+            else:
+                assert(le.thread == thread)
+
+    def test_thread(self):
+        self._test_thread(self.logfile_path,'initandlisten')
+
+    def test_thread_conn1(self):
+        self._test_thread_conn1(self.logfile_path,'initandlisten')
+
+    def test_thread_mongos(self):
+        mongos_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        self._test_thread(mongos_path,'mongosMain')
+
+    def test_thread_mongos_conn1(self):
+        mongos_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        self._test_thread_conn1(mongos_path,'mongosMain')
 
     def test_no_timestamp_format(self):
         self.tool.run('%s --timestamp-format none --timezone 5'%self.logfile_path)

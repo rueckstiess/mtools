@@ -7,6 +7,7 @@ import argparse
 try:
     import matplotlib.pyplot as plt
 
+    from matplotlib import __version__ as mpl_version
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
     from matplotlib.patches import Polygon
@@ -71,7 +72,9 @@ class ScatterPlotType(BasePlotType):
         group = event.artist._mt_group
         indices = event.ind
 
-        if not event.mouseevent.dblclick:
+        # double click only supported on 1.2 or later
+        major, minor, _ = mpl_version.split('.')
+        if (int(major), int(minor)) < (1, 2) or not event.mouseevent.dblclick:
             for i in indices:
                 print self.groups[group][i].line_str
 

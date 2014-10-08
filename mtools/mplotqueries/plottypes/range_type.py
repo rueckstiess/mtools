@@ -65,7 +65,7 @@ class RangePlotType(BasePlotType):
         artists = []
 
         for x_left, x_right in zip(x_lefts, x_rights):
-            width = max(0.001, x_right-x_left)
+            width = max(0.0001, x_right-x_left)
             artist = axis.barh(y_bottom-0.5*height, width=width, height=0.7*height, left=x_left, color=color, alpha=0.7, edgecolor='white', picker=5, linewidth=1, align='center')[0]
             
             artist._mt_plot_type = self

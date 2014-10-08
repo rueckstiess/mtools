@@ -46,6 +46,6 @@ def all_tools(fn):
 def test_import_all():
     """ Import all tools from mtools module.
         The tools that have external dependencies will only be imported if the dependencies are fulfilled. 
-        This test just passes by defaultbecause the imports are tested implicitly by loading this file.
+        This test just passes by default because the imports are tested implicitly by loading this file.
     """
     pass

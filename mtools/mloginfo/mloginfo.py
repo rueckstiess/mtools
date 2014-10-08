@@ -32,9 +32,19 @@ class MLogInfoTool(LogFileTool):
                 print ' ------------------------------------------'
                 print
 
+            if self.logfile.datetime_format == 'ctime-pre2.4':
+                # no milliseconds when datetime format doesn't support it
+                start_time = self.logfile.start.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown"
+                end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown"
+            else:
+                # include milliseconds
+                start_time = self.logfile.start.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
+                end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
+
             print "     source: %s" % self.logfile.name
-            print "      start: %s" % (self.logfile.start.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
-            print "        end: %s" % (self.logfile.end.strftime("%Y %b %d %H:%M:%S") if self.logfile.start else "unknown")
+            print "       host: %s" % (self.logfile.hostname + ':' + self.logfile.port if self.logfile.hostname else "unknown")
+            print "      start: %s" % (start_time)
+            print "        end: %s" % (end_time)
 
             # TODO: add timezone if iso8601 format
             print "date format: %s" % self.logfile.datetime_format
@@ -50,7 +60,8 @@ class MLogInfoTool(LogFileTool):
                     version = '< 2.4 (no milliseconds)'
                 elif self.logfile.datetime_format == 'ctime':
                     version = '>= 2.4 (milliseconds present)'
-                elif self.logfile.datetime_format.startswith('iso8601-'):
+                elif self.logfile.datetime_format == "iso8601-utc" or \
+                     self.logfile.datetime_format == "iso8601-local":
                     version = '>= 2.6 (iso8601 format)'
 
             print "    version: %s" % version,

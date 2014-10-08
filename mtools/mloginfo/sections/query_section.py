@@ -6,8 +6,14 @@ from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
 
 from operator import itemgetter
+from collections import namedtuple
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
+LogTuple = namedtuple('LogTuple', ['namespace', 'pattern', 'duration'])
 
 class QuerySection(BaseSection):
     """ 
@@ -39,7 +45,6 @@ class QuerySection(BaseSection):
         else:
             self.mloginfo.progress_bar_enabled = False
 
-
         for i, le in enumerate(logfile):
             # update progress bar every 1000 lines
             if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
@@ -48,7 +53,8 @@ class QuerySection(BaseSection):
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
             if le.operation in ['query', 'update', 'remove']:
-                grouping.add(le)
+                lt = LogTuple(namespace=le.namespace, pattern=le.pattern, duration=le.duration)
+                grouping.add(lt)
 
         grouping.sort_by_size()
 
@@ -56,8 +62,13 @@ class QuerySection(BaseSection):
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
+        # no queries in the log file
+        if len(grouping) < 1:
+            raise SystemExit('nothing to print.')
+
         titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
         table_rows = []
+
         for g in grouping:
             # calculate statistics for this group
             namespace, pattern = g
@@ -71,7 +82,10 @@ class QuerySection(BaseSection):
             stats['min'] = min( group_events ) if group_events else '-'
             stats['max'] = max( group_events ) if group_events else '-'
             stats['mean'] = 0
-            stats['95%'] = np.percentile(group_events, 95)
+            if np:
+                stats['95%'] = np.percentile(group_events, 95) if group_events else '-'
+            else:
+                stats['95%'] = 'n/a'
             stats['sum'] = sum( group_events ) if group_events else '-'
             stats['mean'] = stats['sum'] / stats['count'] if group_events else '-'
 

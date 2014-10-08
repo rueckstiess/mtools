@@ -45,6 +45,7 @@ class TestMLogInfo(object):
             results[key.strip()] = val.strip()
 
         assert results['source'].endswith('mongod_225.log')
+        assert results['host'] == 'capslock.local:27017'
         assert results['start'].endswith('Aug 05 20:21:42')
         assert results['end'].endswith('Aug 05 21:04:52')
         assert results['date format'] == 'ctime-pre2.4'
@@ -115,3 +116,46 @@ class TestMLogInfo(object):
         lines = output.splitlines()
         assert any(map(lambda line: 'RESTARTS' in line, lines))
         assert any(map(lambda line: 'version 2.2.5' in line, lines))
+
+
+    def test_corrupt(self):
+        # load different logfile
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26_corrupt.log')
+        self.tool.run('%s --queries' % logfile_path)
+
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'QUERIES' in line, lines))
+        assert any(map(lambda line: line.startswith('namespace'), lines))
+
+        assert len(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+{', line), lines)) >= 1
+
+
+    def test_rsstate_225(self):
+        pattern = r'^Aug 05'
+        expected = 13
+        self._test_rsstate(self.logfile_path, pattern, expected)
+
+    
+    def test_rsstate_26(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        pattern = r'^Apr 09'
+        expected = 17
+        self._test_rsstate(logfile_path, pattern, expected)
+
+    
+    def test_rsstate_mongos(self):
+        # different log file
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        pattern = r'  no rs state changes found'
+        expected = 1
+        self._test_rsstate(logfile_path, pattern, expected)
+
+    
+    def _test_rsstate(self, logfile_path, pattern, expected):
+        """ utility test runner for rsstate
+        """
+        self.tool.run('%s --rsstate' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len(filter(lambda line: re.match(pattern, line), lines)) == expected

@@ -13,10 +13,11 @@ import inspect
 from copy import copy
 from mtools import __version__
 from datetime import timedelta
+from dateutil.tz import tzutc, tzoffset
 
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.dates import DateFormatter, date2num
+    from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
     from matplotlib import __version__ as mpl_version
@@ -60,6 +61,8 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--group-limit', metavar='N', type=int, default=None, help="specify an upper limit of the number of groups. Groups are sorted by number of data points. If limit is specified, only the top N will be listed separately, the rest are grouped together in an 'others' group")
         self.argparser.add_argument('--no-others', action='store_true', default=False, help="if this flag is used, the 'others' group (see --group-limit) will be discarded.")
         self.argparser.add_argument('--optime-start', action='store_true', default=False, help="plot operations with a duration when they started instead (by subtracting the duration). The default is to plot them when they finish (at the time they are logged).")
+        self.argparser.add_argument('--ylimits', action='store', default=None, type=int, nargs=2, metavar='VAL', help="if set, limits the y-axis view to [min, max], requires exactly 2 values.")
+        self.argparser.add_argument('--output-file', metavar='FILE', action='store', default=None, help="Save the plot to a file instead of displaying it in a window")
 
         self.legend = None
 
@@ -129,6 +132,8 @@ class MPlotQueriesTool(LogFileTool):
                     progress_total = self._datetime_to_epoch(logfile.end) - progress_start
                 else:
                     self.progress_bar_enabled = False
+                    progress_start = 0
+                    progress_total = 1
                 
                 if progress_total == 0:
                     # protect from division by zero errors
@@ -358,6 +363,10 @@ class MPlotQueriesTool(LogFileTool):
                 plt.gca().set_yscale('linear')
 
             plt.autoscale(True, axis='y', tight=True)
+            # honor forced limits
+            if self.args['ylimits']:
+                plt.gca().set_ylim( self.args['ylimits'] )
+
             plt.gcf().canvas.draw()
 
 
@@ -365,6 +374,11 @@ class MPlotQueriesTool(LogFileTool):
         # check if there is anything to plot
         if len(self.plot_instances) == 0:
             raise SystemExit('no data to plot.')
+
+        if self.args['output_file'] is not None:
+            # --output-file means don't depend on X,
+            # so switch to a pure-image backend before doing any plotting.
+            plt.switch_backend('agg')
 
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
@@ -379,20 +393,40 @@ class MPlotQueriesTool(LogFileTool):
 
         xlabel = 'time'
         ylabel = ''
+
+        # use timezone of first log file (may not always be what user wants but must make a choice)
+        tz = self.args['logfile'][0].timezone
+        tzformat = '%b %d\n%H:%M:%S' if tz == tzutc() else '%b %d\n%H:%M:%S%z'
+
+        locator = AutoDateLocator(tz=tz, minticks=5, maxticks=10)
+        formatter = AutoDateFormatter(locator, tz=tz)
+
+        formatter.scaled = {
+           365.0  : '%Y',
+           30.    : '%b %Y',
+           1.0    : '%b %d %Y',
+           1./24. : '%b %d %Y\n%H:%M:%S',
+           1./(24.*60.): '%b %d %Y\n%H:%M:%S',
+        }
+
+        # add timezone to format if not UTC
+        if tz != tzutc():
+            formatter.scaled[1./24.] = '%b %d %Y\n%H:%M:%S%z'
+            formatter.scaled[1./(24.*60.)] = '%b %d %Y\n%H:%M:%S%z'
+
         for i, plot_inst in enumerate(sorted(self.plot_instances, key=lambda pi: pi.sort_order)):
             self.artists.extend(plot_inst.plot(axis, i, len(self.plot_instances), (xlim_min, xlim_max) ))
             if hasattr(plot_inst, 'xlabel'):
                 xlabel = plot_inst.xlabel
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
-        self.print_shortcuts()
+        if self.args['output_file'] is None:
+            self.print_shortcuts()
 
         axis.set_xlabel(xlabel)
-        axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=10)
-        axis.xaxis.set_major_formatter(DateFormatter('%b %d\n%H:%M:%S'))
-
-        for label in axis.get_xticklabels():  # make the xtick labels pickable
-            label.set_picker(True)
+        axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=9)
+        axis.xaxis.set_major_locator(locator)
+        axis.xaxis.set_major_formatter(formatter)
             
         axis.set_xlim(date2num([xlim_min, xlim_max]))
 
@@ -421,10 +455,17 @@ class MPlotQueriesTool(LogFileTool):
                 legend_line.set_picker(10)
                 legend_line._mt_legend_item = i
 
+        # overwrite y-axis limits if set
+        if self.args['ylimits'] != None:
+            print self.args['ylimits']
+            axis.set_ylim( self.args['ylimits'])
+
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
-        plt.show()
-
+        if self.args['output_file'] is not None:
+            plt.savefig(self.args['output_file'])
+        else:
+            plt.show()
 
 if __name__ == '__main__':
     tool = MPlotQueriesTool()

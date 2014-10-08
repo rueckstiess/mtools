@@ -4,6 +4,7 @@ import json
 import bson
 import sys
 import inspect 
+from datetime import datetime
 from multiprocessing import Process, cpu_count
 
 try:
@@ -20,17 +21,31 @@ import mtools.mgenerate.operators as operators
 from mtools.util.cmdlinetool import BaseCmdLineTool
 
 
+class DateTimeEncoder(json.JSONEncoder):
+    """ custom datetime encoder for json output. """
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        try:
+            res = json.JSONEncoder.default(self, obj)
+        except TypeError:
+            res = str(obj)
+        return res
+
+
 class InsertProcess(Process):
 
-    def __init__(self, number, template, collection, stdout):
+    operator_classes = inspect.getmembers(operators, inspect.isclass)
+
+    def __init__(self, number, template, collection, args):
         Process.__init__(self)
         self.number = number
         self.template = template
         self.collection = collection
-        self.stdout = stdout
+        self.args = args
 
         # add all operators classes from the operators module, pass in _decode method
-        self.operators = [c[1](self._decode) for c in inspect.getmembers(operators, inspect.isclass)]
+        self.operators = [c[1](self._decode) for c in self.operator_classes]
         
         self.string_operators = {}
         self.dict_operators = {}
@@ -52,8 +67,10 @@ class InsertProcess(Process):
             # decode the template
             doc = self._decode(self.template)
 
-            if self.stdout:
-                print doc
+            if not self.collection:
+                indent = 4 if self.args['pretty'] else None
+                print json.dumps(doc, cls=DateTimeEncoder, indent=indent, ensure_ascii=False) 
+
             else:
                 batch.append(doc)
                 batchsize += self.bsonsize(doc)
@@ -63,7 +80,7 @@ class InsertProcess(Process):
                     batch = []
                     batchsize = 0
 
-        if not self.stdout:
+        if self.collection:
             if batch:
                 self.collection.insert(batch)
 
@@ -145,8 +162,9 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
         self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
         self.argparser.add_argument('--stdout', action='store_true', default=False, help='prints data to stdout instead of inserting to mongod/s instance.')
+        self.argparser.add_argument('--pretty', action='store_true', default=False, help="if set, prettyfies the output to stdout (indented), requires --stdout")
         self.argparser.add_argument('--write-concern', '-w', action='store', metavar="W", default=1, help='write concern for inserts, default=1')
-
+        self.argparser.add_argument('--processes', '-p', action='store', type=int, default=0, help='specify number of processes (# cpus by default)')
 
     def run(self, arguments=None):
         BaseCmdLineTool.run(self, arguments)
@@ -174,16 +192,24 @@ class MGeneratorTool(BaseCmdLineTool):
             col = mc[self.args['database']][self.args['collection']]
             if self.args['drop']:
                 col.drop()
+        else:
+            col = None
 
         # divide work over number of cores
-        num_cores = 1 if self.args['stdout'] else cpu_count()
+        if self.args['stdout']:
+            num_cores = 1
+        elif self.args['processes'] > 0:
+            num_cores = self.args['processes']
+        else:
+            num_cores = cpu_count()
+
         num_list = [self.args['number'] // num_cores] * num_cores
         num_list[0] += self.args['number'] % num_cores
 
         processes = []
 
         for n in num_list:
-            p = InsertProcess(n, template, col, self.args['stdout'])
+            p = InsertProcess(n, template, col, self.args)
             p.start()
             processes.append(p)
 

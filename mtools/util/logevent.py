@@ -96,6 +96,7 @@ class LogEvent(object):
         self._numYields = None
         self._r = None
         self._w = None
+        self._conn = None
 
         self.merge_marker_str = ''
 
@@ -209,14 +210,20 @@ class LogEvent(object):
         self._datetime_nextpos = nextpos
         self._year_rollover = rollover
 
-        # fast check if timezone changed. if it has, trigger datetime evaluation
+        # fast check if timestamp format changed. if it has, trigger datetime evaluation
         if format.startswith('ctime'):
             if len(self.split_tokens) < 4 or self.split_tokens[self._datetime_nextpos-4] not in self.weekdays:
                 _ = self.datetime
                 return False
             return True
         else:
+            if len(self.split_tokens) == 0:
+                # empty line, no need to parse datetime
+                self._datetime_calculated = True
+                return False
+
             if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
+                # not the timestamp format that was hinted
                 _ = self.datetime
                 return False
             return True
@@ -291,8 +298,23 @@ class LogEvent(object):
             if match:
                 self._thread = match.group(1)
 
+            if self._thread is not None:
+                if self._thread in ['initandlisten', 'mongosMain']:
+                    if len(split_tokens) >= 5 and  split_tokens[-5][0] == '#':
+                        self._conn = 'conn' + split_tokens[-5][1:]
+                elif self._thread.startswith('conn'):
+                    self._conn = self._thread
         return self._thread
 
+    @property
+    def conn(self):
+        """
+        extract conn name if available (lazy)
+        this value is None for all lines except the log lines related to connections ,
+        that is lines matching '\[conn[0-9]+\]' or '\[(initandlisten|mongosMain)\] .* connection accepted from'
+        """
+        self.thread
+        return self._conn
 
     @property
     def operation(self):
@@ -559,11 +581,11 @@ class LogEvent(object):
                 dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
         elif format == 'iso8601-local':
             dt_string = self.datetime.isoformat()
-            if not self.datetime.utcoffset():
+            if self.datetime.utcoffset() == None:
                 dt_string += '+00:00'
             ms_str = str(int(self.datetime.microsecond * 1000)).zfill(3)[:3]
             # change isoformat string to have 3 digit milliseconds and no : in offset
-            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string)
+            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string, count=1)
         elif format == 'iso8601-utc':
             if self.datetime.utcoffset():
                 dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
