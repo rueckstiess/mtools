@@ -56,7 +56,8 @@ except ImportError:
     kws = {}
 
 # import version from mtools/version.py
-exec(open('mtools/version.py').read())
+with open('mtools/version.py') as f:
+    exec(f.read())
 
 # read README.md for long_description content
 with open('README.md') as f:
