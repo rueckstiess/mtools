@@ -62,6 +62,8 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--no-others', action='store_true', default=False, help="if this flag is used, the 'others' group (see --group-limit) will be discarded.")
         self.argparser.add_argument('--optime-start', action='store_true', default=False, help="plot operations with a duration when they started instead (by subtracting the duration). The default is to plot them when they finish (at the time they are logged).")
         self.argparser.add_argument('--ylimits', action='store', default=None, type=int, nargs=2, metavar='VAL', help="if set, limits the y-axis view to [min, max], requires exactly 2 values.")
+        self.argparser.add_argument('--output-file', metavar='FILE', action='store', default=None, help="Save the plot to a file instead of displaying it in a window")
+
         self.legend = None
 
         # progress bar
@@ -373,6 +375,11 @@ class MPlotQueriesTool(LogFileTool):
         if len(self.plot_instances) == 0:
             raise SystemExit('no data to plot.')
 
+        if self.args['output_file'] is not None:
+            # --output-file means don't depend on X,
+            # so switch to a pure-image backend before doing any plotting.
+            plt.switch_backend('agg')
+
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
         axis = plt.subplot(111)
@@ -413,7 +420,8 @@ class MPlotQueriesTool(LogFileTool):
                 xlabel = plot_inst.xlabel
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
-        self.print_shortcuts()
+        if self.args['output_file'] is None:
+            self.print_shortcuts()
 
         axis.set_xlabel(xlabel)
         axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=9)
@@ -454,7 +462,10 @@ class MPlotQueriesTool(LogFileTool):
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
-        plt.show()
+        if self.args['output_file'] is not None:
+            plt.savefig(self.args['output_file'])
+        else:
+            plt.show()
 
 if __name__ == '__main__':
     tool = MPlotQueriesTool()
