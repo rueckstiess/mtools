@@ -15,6 +15,7 @@ Changes to mtools
   * mloginfo: fixed bug where empty lines can't be parsed (#213)
   * mloginfo: show milliseconds for start/end (#245)
   * mloginfo: made numpy dependency optional for mloginfo. Added by @brondsem (#216)
+  * mplotqueries: option to write output to image file instead of interactive mode. Added by @dpercy (#266)
   * mplotqueries: show correct timezone for time axis (#274)
   * mplotqueries: added option to allow fixing y-axis to specific min/max values (#214)
 
