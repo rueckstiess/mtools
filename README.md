@@ -29,6 +29,10 @@ creates a self-contained html file that shows an interactive visualization in a 
 a script to quickly spin up local test environments, including replica sets and sharded systems (requires pymongo)
 
 
+[mgenerate](https://github.com/rueckstiess/mtools/wiki/mgenerate) <br>
+generates structured pseudo-random data based on a template for testing and reproduction
+
+
 You can find the manual and many usage examples on the [mtools wiki pages](https://github.com/rueckstiess/mtools/wiki).
 
 
