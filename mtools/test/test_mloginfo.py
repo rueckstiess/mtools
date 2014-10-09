@@ -33,16 +33,10 @@ class TestMLogInfo(object):
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_225.log')
         self.logfile = LogFile(open(self.logfile_path, 'r'))
 
-
     def test_basic(self):
         self.tool.run('%s' % self.logfile_path)
         output = sys.stdout.getvalue()
-        results = {}
-        for line in output.splitlines():
-            if line.strip() == '':
-                continue
-            key, val = line.split(':', 1)
-            results[key.strip()] = val.strip()
+        results = self._parse_output(output)
 
         assert results['source'].endswith('mongod_225.log')
         assert results['host'] == 'capslock.local:27017'
@@ -52,6 +46,9 @@ class TestMLogInfo(object):
         assert results['length'] == '497'
         assert results['binary'] == 'mongod'
         assert results['version'] == '2.2.5'
+        assert results['rsname'] == 'replset'
+        assert results['rsversion'] ==  'unknown'
+        assert results['rsmembers'] == '[ { host: "capslock.local:27017", _id: 0 }, { host: "capslock.local:27018", _id: 1 }, { host: "capslock.local:27019", _id: 2, arbiterOnly: true } ]'
 
 
     def test_multiple_files(self):
@@ -159,3 +156,51 @@ class TestMLogInfo(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert len(filter(lambda line: re.match(pattern, line), lines)) == expected
+
+    def test_rsinfo(self):
+        self._test_rsinfo(self.logfile_path,
+                          rsname='replset',
+                          rsversion='unknown',
+                          rsmembers='[ { host: "capslock.local:27017", _id: 0 }, { host: "capslock.local:27018", _id: 1 }, { host: "capslock.local:27019", _id: 2, arbiterOnly: true } ]')
+
+    
+    def test_rsstate_26(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        self._test_rsinfo(logfile_path,
+                          rsname='shard01',
+                          rsversion='1',
+                          rsmembers='[ { _id: 0, host: "enter.local:27019" }, { _id: 1, host: "enter.local:27020" }, { _id: 2, host: "enter.local:27021" } ]')
+
+    
+    def test_rsstate_24(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod-2411.log')
+        self._test_rsinfo(logfile_path,
+                          rsname='repl1',
+                          rsversion='unknown',
+                          rsmembers='[ { host: "hostname.local:37018", _id: 0, votes: 1 }, { host: "hostname.local:37019", _id: 1, votes: 1 }, { host: "hostname.local:37020", _id: 2, arbiterOnly: true } ]')
+
+    
+    def test_rsstate_mongos(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
+        self._test_rsinfo(logfile_path,rsname=None, rsversion=None,rsmembers=None)
+
+    
+    def _test_rsinfo(self, logfile_path, **expected):
+        """ utility test runner for rsstate
+        """
+        self.tool.run('%s' % logfile_path)
+        output = sys.stdout.getvalue()
+        results = self._parse_output(output)
+        for key, value in expected.iteritems():
+            print "results[",key,"] == " , value
+            assert results.get(key) == value
+        
+    def _parse_output(self, output):
+        results = {}
+        for line in output.splitlines():
+            if line.strip() == '':
+                continue
+            key, val = line.split(':', 1)
+            results[key.strip()] = val.strip()
+        return results
+
