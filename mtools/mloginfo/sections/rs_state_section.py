@@ -27,7 +27,7 @@ class RsStateSection(BaseSection):
         titles = ['date', 'host', 'state/message']
         table_rows = []
 
-        for host, state, logevent in self.mloginfo.logfile.rsstate:
+        for host, state, logevent in self.mloginfo.logfile.rs_state:
             stats = OrderedDict()
             stats['date'] = logevent.datetime.strftime("%b %d %H:%M:%S")
             stats['host'] = host
@@ -36,5 +36,5 @@ class RsStateSection(BaseSection):
 
         print_table(table_rows, titles, uppercase_headers=False)
 
-        if len(self.mloginfo.logfile.rsstate) == 0:
+        if len(self.mloginfo.logfile.rs_state) == 0:
             print "  no rs state changes found"

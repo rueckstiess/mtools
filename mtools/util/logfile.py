@@ -25,7 +25,7 @@ class LogFile(InputSource):
         self._timezone = None
         self._hostname = None
         self._port = None
-        self._rsstate = None
+        self._rs_state = None
 
         self._repl_set = None
         self._repl_set_members = None
@@ -98,11 +98,11 @@ class LogFile(InputSource):
         return self._restarts
 
     @property
-    def rsstate(self):
+    def rs_state(self):
         """ lazy evaluation of all restarts. """
         if not self._num_lines:
             self._iterate_lines()
-        return self._rsstate
+        return self._rs_state
 
     @property
     def binary(self):
@@ -218,7 +218,7 @@ class LogFile(InputSource):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
         self._restarts = []
-        self._rsstate = []
+        self._rs_state = []
 
         l = 0
         for l, line in enumerate(self.filehandle):
@@ -264,9 +264,9 @@ class LogFile(InputSource):
                 else:
                     pos = 7
                 host = tokens[pos]
-                rsstate = tokens[-1]
-                state = (host, rsstate, LogEvent(line))
-                self._rsstate.append(state)
+                rs_state = tokens[-1]
+                state = (host, rs_state, LogEvent(line))
+                self._rs_state.append(state)
                 continue
 
             if "[rsMgr] replSet" in line:
@@ -277,17 +277,17 @@ class LogFile(InputSource):
                     host = os.path.basename(self.name)
                 host += ' (self)'
                 if tokens[-1] in self.states:
-                    rsstate = tokens[-1]
+                    rs_state = tokens[-1]
                 else:
                     # 2.6
                     if tokens[1].endswith(']'):
                         pos = 2
                     else:
                         pos = 6
-                    rsstate = ' '.join(tokens[pos:])
+                    rs_state = ' '.join(tokens[pos:])
 
-                state = (host, rsstate, LogEvent(line))
-                self._rsstate.append(state)
+                state = (host, rs_state, LogEvent(line))
+                self._rs_state.append(state)
                 continue
 
 
