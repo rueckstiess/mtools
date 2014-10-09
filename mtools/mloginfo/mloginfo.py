@@ -43,6 +43,10 @@ class MLogInfoTool(LogFileTool):
 
             print "     source: %s" % self.logfile.name
             print "       host: %s" % (self.logfile.hostname + ':' + self.logfile.port if self.logfile.hostname else "unknown")
+            if self.logfile.replSet:
+                print "     rsname: %s" % self.logfile.replSet
+                print "  rsmembers: %s" % (self.logfile.replSetMembers  if self.logfile.replSetMembers else "unknown")
+                print "  rsversion: %s" % (self.logfile.replSetVersion  if self.logfile.replSetVersion else "unknown")
             print "      start: %s" % (start_time)
             print "        end: %s" % (end_time)
 

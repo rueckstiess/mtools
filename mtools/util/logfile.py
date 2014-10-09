@@ -27,6 +27,10 @@ class LogFile(InputSource):
         self._port = None
         self._rsstate = None
 
+        self.replSet = None
+        self.replSetMembers = None
+        self.replSetVersion = None
+        
         self._datetime_format = None
         self._year_rollover = None
 
@@ -212,6 +216,24 @@ class LogFile(InputSource):
                     self._hostname = match.group('host')
                     self._port = match.group('port')
 
+            if "[initandlisten] options:" in line:
+                match = re.search('replSet: "(?P<replSet>\S+)"', line)
+                if match:
+                    self.replSet = match.group('replSet')
+
+            if "command admin.$cmd command: { replSetInitiate:" in line:
+                match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)
+                if match:
+                    self.replSet = match.group('replSet')
+                    self.replSetMembers = match.group('replSetMembers')
+
+            if "replSet info saving a newer config version to local.system.replset: " in line:
+                match = re.search('{ _id: "(?P<replSet>\S+)", version: (?P<replSetVersion>\d+), members: (?P<replSetMembers>[^]]+ ])', line)
+                if match:
+                    self.replSet = match.group('replSet')
+                    self.replSetMembers = match.group('replSetMembers')
+                    self.replSetVersion = match.group('replSetVersion')
+    
             # if "is now in state" in line and next(state for state in states if line.endswith(state)):
             if "is now in state" in line:
                 tokens = line.split()
@@ -246,6 +268,7 @@ class LogFile(InputSource):
                 state = (host, rsstate, LogEvent(line))
                 self._rsstate.append(state)
                 continue
+
 
         self._num_lines = l+1
 
