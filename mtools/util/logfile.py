@@ -27,9 +27,9 @@ class LogFile(InputSource):
         self._port = None
         self._rsstate = None
 
-        self.replSet = None
-        self.replSetMembers = None
-        self.replSetVersion = None
+        self._repl_set = None
+        self._repl_set_members = None
+        self._repl_set_version = None
         
         self._datetime_format = None
         self._year_rollover = None
@@ -134,6 +134,27 @@ class LogFile(InputSource):
                 versions.append(v)
         return versions
 
+    @property
+    def repl_set(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set
+
+    @property
+    def repl_set_members(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set_members
+
+    @property
+    def repl_set_version(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set_version
+
     def next(self):
         """ get next line, adjust for year rollover and hint datetime format. """
 
@@ -219,20 +240,20 @@ class LogFile(InputSource):
             if "[initandlisten] options:" in line:
                 match = re.search('replSet: "(?P<replSet>\S+)"', line)
                 if match:
-                    self.replSet = match.group('replSet')
+                    self._repl_set = match.group('replSet')
 
             if "command admin.$cmd command: { replSetInitiate:" in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)
                 if match:
-                    self.replSet = match.group('replSet')
-                    self.replSetMembers = match.group('replSetMembers')
+                    self._repl_set = match.group('replSet')
+                    self._repl_set_members = match.group('replSetMembers')
 
             if "replSet info saving a newer config version to local.system.replset: " in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", version: (?P<replSetVersion>\d+), members: (?P<replSetMembers>[^]]+ ])', line)
                 if match:
-                    self.replSet = match.group('replSet')
-                    self.replSetMembers = match.group('replSetMembers')
-                    self.replSetVersion = match.group('replSetVersion')
+                    self._repl_set = match.group('replSet')
+                    self._repl_set_members = match.group('replSetMembers')
+                    self._repl_set_version = match.group('replSetVersion')
     
             # if "is now in state" in line and next(state for state in states if line.endswith(state)):
             if "is now in state" in line:
