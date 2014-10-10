@@ -64,7 +64,7 @@ class QuerySection(BaseSection):
 
         # no queries in the log file
         if len(grouping) < 1:
-            raise SystemExit('nothing to print.')
+            return
 
         titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
         table_rows = []
