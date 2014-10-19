@@ -50,7 +50,7 @@ class MLogInfoTool(LogFileTool):
             print "date format: %s" % self.logfile.datetime_format
             print "     length: %s" % len(self.logfile)
             print "     binary: %s" % (self.logfile.binary or "unknown")
-            
+
 
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
@@ -66,6 +66,11 @@ class MLogInfoTool(LogFileTool):
 
             print "    version: %s" % version,
             print
+
+            if self.logfile.abnormal_terminations:
+                print "  hardstops: True"
+                # enable hardstops if there are any
+                self.args['hardstops'] = True
 
             # now run all sections
             for section in self.sections:

@@ -2,10 +2,9 @@ from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 
 from math import ceil 
-from datetime import datetime
-import time
 import re
 import os
+from mtools.mloginfo.sections.abnormal_termination_section import AbnormalTermination
 
 class LogFile(InputSource):
     """ wrapper class for log files, either as open file streams of from stdin. """
@@ -32,6 +31,8 @@ class LogFile(InputSource):
 
         # make sure bounds are calculated before starting to iterate, including potential year rollovers
         self._calculate_bounds()
+
+        self._abnormal_terminations = None
 
     @property
     def start(self):
@@ -76,6 +77,13 @@ class LogFile(InputSource):
         if self._year_rollover == None:
             self._calculate_bounds()
         return self._year_rollover
+
+    @property
+    def abnormal_terminations(self):
+        """ lazy evaluation of abnormal terminations in file. """
+        if not self._abnormal_terminations:
+            self._iterate_lines()
+        return self._abnormal_terminations
 
     @property
     def num_lines(self):
@@ -188,16 +196,22 @@ class LogFile(InputSource):
         """ return the number of lines in a log file. """
         return self.num_lines
 
-
     def _iterate_lines(self):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
         self._restarts = []
         self._rsstate = []
+        self._abnormal_terminations = []
 
+        last = None
         l = 0
         for l, line in enumerate(self.filehandle):
-
+            # todo make more rigorous / skip non matching lines
+            if last and AbnormalTermination.is_start(line) and not AbnormalTermination.is_stop(last):
+                self._abnormal_terminations.append(AbnormalTermination(last, line, l+1))
+            else:
+                if AbnormalTermination.matches(line):
+                    last = line.strip()
             # find version string (fast check to eliminate most lines)
             if "version" in line[:100]:
                 logevent = LogEvent(line)
@@ -229,7 +243,7 @@ class LogFile(InputSource):
             if "[rsMgr] replSet" in line:
                 tokens = line.split()
                 if self._hostname:
-                    host = self._hostname + ':' + self._port 
+                    host = self._hostname + ':' + self._port
                 else:
                     host = os.path.basename(self.name)
                 host += ' (self)'
@@ -251,7 +265,6 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
-
 
     def _check_for_restart(self, logevent):
         if logevent.thread == 'mongosMain':
