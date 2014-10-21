@@ -1,8 +1,7 @@
 from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
-from datetime import datetime, timedelta, MINYEAR, MAXYEAR
+from datetime import datetime, timedelta, MAXYEAR
 from dateutil.tz import tzutc
-from mtools.util.logevent import LogEvent
 
 from base_filter import BaseFilter
 
@@ -132,6 +131,8 @@ class DateTimeFilter(BaseFilter):
         if self.fromReached and self.seek_to:
             if self.seek_to != -1:
                 self.toReached = self.mlogfilter.args['logfile'][0].filehandle.tell() >= self.seek_to
+            if self.toReached:
+                return False
             return True
         else:
             # slow version has to check each datetime

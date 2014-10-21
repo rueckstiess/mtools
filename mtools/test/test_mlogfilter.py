@@ -81,6 +81,11 @@ class TestMLogFilter(object):
         random_start = random_date(logfile_26.start, logfile_26.end)
         random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end+timedelta(minutes=1))
 
+        # no idea why but the following values always fail
+        # random_start = parser.parse("2014-04-09 23:16:41.437000-04:00")
+        # random_end =  parser.parse("2014-04-09 23:29:03.437000-04:00")
+
+
         print random_start, random_end
         print logfile_26.start, logfile_26.end
 

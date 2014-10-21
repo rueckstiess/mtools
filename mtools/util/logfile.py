@@ -2,8 +2,6 @@ from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 
 from math import ceil 
-from datetime import datetime
-import time
 import re
 import os
 
@@ -14,7 +12,7 @@ class LogFile(InputSource):
         """ provide logfile as open file stream or stdin. """
         self.filehandle = filehandle
         self.name = filehandle.name
-        
+
         self.from_stdin = filehandle.name == "<stdin>"
         self._start = None
         self._end = None
@@ -140,7 +138,7 @@ class LogFile(InputSource):
         line = line.rstrip('\n')
 
         le = LogEvent(line)
-        
+
         # hint format and nextpos from previous line
         if self._datetime_format and self._datetime_nextpos != None:
             ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
@@ -151,7 +149,7 @@ class LogFile(InputSource):
         elif le.datetime:
             # gather new hint info from another logevent
             self._datetime_format = le.datetime_format
-            self._datetime_nextpos = le._datetime_nextpos  
+            self._datetime_nextpos = le._datetime_nextpos
 
         return le
 
@@ -311,24 +309,26 @@ class LogFile(InputSource):
 
         return True
 
+    def _jump_back(self, pos,prev):
+        """ internal helper function jump forward or back (if prev=True) a line in a log file
+            based on the current seek position.
+        """
+        self.filehandle.seek(pos, 0)
+        jump_back = min(self.filehandle.tell(), 15000)
+        self.filehandle.seek(-jump_back, 1)
+        buff = self.filehandle.read(jump_back)
+
+        newline_pos = buff.rfind('\n')
+        if prev:
+            newline_pos = buff[:newline_pos].rfind('\n')
+        return [newline_pos, jump_back]
 
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
         curr_pos = self.filehandle.tell()
-        line = None
-
-        # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.filehandle.tell(), 15000)
-        self.filehandle.seek(-jump_back, 1)
-        buff = self.filehandle.read(jump_back)
-        self.filehandle.seek(curr_pos, 0)
-
-        newline_pos = buff.rfind('\n')
-        if prev:
-            newline_pos = buff[:newline_pos].rfind('\n')
-
+        newline_pos, jump_back = self._jump_back(curr_pos, prev)
         # move back to last newline char
         if newline_pos == -1:
             self.filehandle.seek(0)
@@ -336,10 +336,14 @@ class LogFile(InputSource):
 
         self.filehandle.seek(newline_pos - jump_back + 1, 1)
 
-        # roll forward until we found a line with a datetime
+        # roll forward or backward until we found a line with a datetime
         try:
             logevent = self.next()
             while not logevent.datetime:
+                newline_pos, jump_back = self._jump_back(newline_pos, prev)
+
+                if newline_pos == -1:
+                    return None
                 logevent = self.next()
 
             return logevent
