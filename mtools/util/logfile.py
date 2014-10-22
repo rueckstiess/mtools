@@ -327,8 +327,7 @@ class LogFile(InputSource):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.filehandle.tell()
-        newline_pos, jump_back = self._jump_back(curr_pos, prev)
+        newline_pos, jump_back = self._jump_back(self.filehandle.tell(), prev)
         # move back to last newline char
         if newline_pos == -1:
             self.filehandle.seek(0)
@@ -385,13 +384,15 @@ class LogFile(InputSource):
                 le = self._find_curr_line()
                 if not le:
                     break
-                                
+
                 if le.datetime >= start_dt:
                     step_size = -abs(step_size)
                 else:
                     step_size = abs(step_size)
 
             if not le:
+                # find nothing => self.seek_to = size
+                self.filehandle.seek(self.filesize)
                 return
 
             # now walk backwards until we found a truely smaller line
