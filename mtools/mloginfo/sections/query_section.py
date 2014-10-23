@@ -66,7 +66,7 @@ class QuerySection(BaseSection):
         if len(grouping) < 1:
             raise SystemExit('nothing to print.')
 
-        titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
+        titles = ['namespace', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)', 'pattern']
         table_rows = []
 
         for g in grouping:
@@ -77,7 +77,6 @@ class QuerySection(BaseSection):
 
             stats = OrderedDict()
             stats['namespace'] = namespace
-            stats['pattern'] = pattern
             stats['count'] = len( group_events )
             stats['min'] = min( group_events ) if group_events else '-'
             stats['max'] = max( group_events ) if group_events else '-'
@@ -93,6 +92,7 @@ class QuerySection(BaseSection):
                 stats['example'] = grouping[g][0]
                 titles.append('example')
 
+            stats['pattern'] = pattern
             table_rows.append(stats)
 
         # sort order depending on field names
