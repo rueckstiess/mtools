@@ -1,0 +1,67 @@
+Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local
+Fri Oct 10 17:22:07.025 [initandlisten] 
+Fri Oct 10 17:22:07.025 [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+Fri Oct 10 17:22:07.025 [initandlisten] db version v2.4.11
+Fri Oct 10 17:22:07.025 [initandlisten] git version: fa13d1ee8da0f112f588570b4070f73d7af2f7fd
+Fri Oct 10 17:22:07.025 [initandlisten] build info: Darwin bs-osx-106-x86-64-2.10gen.cc 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+Fri Oct 10 17:22:07.025 [initandlisten] allocator: system
+Fri Oct 10 17:22:07.025 [initandlisten] options: { logpath: "Desktop/test-mlogfilter-issue-50.log" }
+Fri Oct 10 17:22:07.027 [initandlisten] journal dir=/data/db/journal
+Fri Oct 10 17:22:07.027 [initandlisten] recover : no journal files present, no recovery needed
+Fri Oct 10 17:22:07.230 [websvr] admin web console waiting for connections on port 28017
+Fri Oct 10 17:22:07.231 [initandlisten] waiting for connections on port 27017
+Fri Oct 10 17:22:11.838 [signalProcessingThread] got signal 2 (Interrupt: 2), will terminate after current cmd ends
+Fri Oct 10 17:22:11.838 [signalProcessingThread] now exiting
+Fri Oct 10 17:22:11.838 dbexit: 
+Fri Oct 10 17:22:11.838 [signalProcessingThread] shutdown: going to close listening sockets...
+Fri Oct 10 17:22:11.838 [signalProcessingThread] closing listening socket: 10
+Fri Oct 10 17:22:11.838 [signalProcessingThread] closing listening socket: 11
+Fri Oct 10 17:22:11.838 [signalProcessingThread] closing listening socket: 12
+Fri Oct 10 17:22:11.838 [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: going to flush diaglog...
+Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: going to close sockets...
+Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: waiting for fs preallocator...
+Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: lock for final commit...
+Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: final commit...
+Fri Oct 10 17:22:11.841 [signalProcessingThread] shutdown: closing all files...
+Fri Oct 10 17:22:11.841 [signalProcessingThread] closeAllFiles() finished
+Fri Oct 10 17:22:11.841 [signalProcessingThread] journalCleanup...
+Fri Oct 10 17:22:11.841 [signalProcessingThread] removeJournalFiles
+Fri Oct 10 17:22:11.841 [signalProcessingThread] shutdown: removing fs lock...
+Fri Oct 10 17:22:11.841 dbexit: really exiting now
+
+
+***** SERVER RESTARTED *****
+
+
+Fri Oct 10 17:22:48.175 [initandlisten] MongoDB starting : pid=93249 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local
+Fri Oct 10 17:22:48.175 [initandlisten] 
+Fri Oct 10 17:22:48.175 [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+Fri Oct 10 17:22:48.175 [initandlisten] db version v2.4.11
+Fri Oct 10 17:22:48.175 [initandlisten] git version: fa13d1ee8da0f112f588570b4070f73d7af2f7fd
+Fri Oct 10 17:22:48.175 [initandlisten] build info: Darwin bs-osx-106-x86-64-2.10gen.cc 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+Fri Oct 10 17:22:48.175 [initandlisten] allocator: system
+Fri Oct 10 17:22:48.175 [initandlisten] options: { logappend: true, logpath: "Desktop/test-mlogfilter-issue-50.log" }
+Fri Oct 10 17:22:48.176 [initandlisten] journal dir=/data/db/journal
+Fri Oct 10 17:22:48.176 [initandlisten] recover : no journal files present, no recovery needed
+Fri Oct 10 17:22:48.298 [websvr] admin web console waiting for connections on port 28017
+Fri Oct 10 17:22:48.299 [initandlisten] waiting for connections on port 27017
+Fri Oct 10 17:48:52.642 [signalProcessingThread] got signal 2 (Interrupt: 2), will terminate after current cmd ends
+Fri Oct 10 17:48:52.644 [signalProcessingThread] now exiting
+Fri Oct 10 17:48:52.644 dbexit: 
+Fri Oct 10 17:48:52.644 [signalProcessingThread] shutdown: going to close listening sockets...
+Fri Oct 10 17:48:52.644 [signalProcessingThread] closing listening socket: 10
+Fri Oct 10 17:48:52.644 [signalProcessingThread] closing listening socket: 11
+Fri Oct 10 17:48:52.644 [signalProcessingThread] closing listening socket: 12
+Fri Oct 10 17:48:52.644 [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+Fri Oct 10 17:48:52.645 [signalProcessingThread] shutdown: going to flush diaglog...
+Fri Oct 10 17:48:52.645 [signalProcessingThread] shutdown: going to close sockets...
+Fri Oct 10 17:48:52.645 [signalProcessingThread] shutdown: waiting for fs preallocator...
+Fri Oct 10 17:48:52.645 [signalProcessingThread] shutdown: lock for final commit...
+Fri Oct 10 17:48:52.645 [signalProcessingThread] shutdown: final commit...
+Fri Oct 10 17:48:52.647 [signalProcessingThread] shutdown: closing all files...
+Fri Oct 10 17:48:52.647 [signalProcessingThread] closeAllFiles() finished
+Fri Oct 10 17:48:52.647 [signalProcessingThread] journalCleanup...
+Fri Oct 10 17:48:52.647 [signalProcessingThread] removeJournalFiles
+Fri Oct 10 17:48:53.648 [signalProcessingThread] shutdown: removing fs lock...
+Fri Oct 10 17:48:55.648 dbexit: really exiting now
