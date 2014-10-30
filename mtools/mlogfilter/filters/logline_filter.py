@@ -10,12 +10,41 @@ class LogLineFilter(BaseFilter):
     """ 
     """
     filterArgs = [
-        ('--component', {'action':'store', 'nargs':'*', 'metavar':'CM', 'help':'only output log lines matching operations on CM (multiple values are allowed).'}),
-        ('--level',     {'action':'store', 'nargs':'*', 'metavar':'LL', 'help':'only output log lines matching operations on LL (multiple values are allowed).'}),
-        ('--namespace', {'action':'store', 'metavar':'NS', 'help':'only output log lines matching operations on NS.'}),
-        ('--operation', {'action':'store', 'metavar':'OP', 'help':'only output log lines matching operations of type OP.'}),
-        ('--thread',    {'action':'store', 'help':'only output log lines of thread THREAD.'}),
-        ('--pattern',   {'action':'store', 'help':'only output log lines that query with the pattern PATTERN (queries, getmores, updates, removes)'})
+        ('--component', {
+            'action':'store', 
+            'nargs':'*', 
+            'choices': ['-', 'ACCESS', 'COMMANDS', 'INDEXING', 'NETWORK', 'QUERY', 'REPLSETS', 
+                       'SHARDING', 'STORAGE', 'JOURNAL', 'WRITES', 'S2', 'TOTAL'],
+            'metavar':'CM', 
+            'help':'only output log lines with component CM (multiple values are allowed).'
+        }),
+        ('--level',     {
+            'action':'store', 
+            'nargs':'*', 
+            'metavar':'LL', 
+            'choices': ['D', 'F', 'E', 'W', 'I', 'U'], 
+            'help':'only output log lines  with loglevel LL (multiple values are allowed).'
+        }),
+        ('--namespace', {
+            'action':'store', 
+            'metavar':'NS', 
+            'help':'only output log lines on namespace NS.'
+        }),
+        ('--operation', {
+            'action':'store', 
+            'metavar':'OP', 
+            'choices': ['insert', 'update', 'remove', 'query', 'command', 'getmore'], 
+            'help':'only output log lines of type OP.'
+        }),
+        ('--thread', {
+            'action':'store', 
+            'help':'only output log lines of thread THREAD.'
+        }),
+        ('--pattern', {
+            'action':'store', 
+            'help':'only output log lines that query with the pattern PATTERN' \
+                   ' (only applies to queries, getmores, updates, removes)'
+        })
     ]
 
     def __init__(self, mlogfilter):
