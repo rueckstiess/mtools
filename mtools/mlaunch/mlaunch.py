@@ -1092,8 +1092,11 @@ class MLaunchTool(BaseCmdLineTool):
             for possible_port in self.startup_info:
                 # compare ports based on command line argument
                 startup = self.startup_info[possible_port].split()
-                p_port = p.cmdline[p.cmdline.index('--port')+1]
-                startup_port = startup[startup.index('--port')+1]
+                try:
+                    p_port = p.cmdline[p.cmdline.index('--port')+1]
+                    startup_port = startup[startup.index('--port')+1]
+                except ValueError:
+                    continue
 
                 if str(p_port) == str(startup_port):
                     port = int(possible_port)
