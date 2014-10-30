@@ -45,6 +45,7 @@ class LogEvent(object):
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', \
         'Oct', 'Nov', 'Dec']
 
+    log_operations = ['query', 'insert', 'update', 'remove', 'getmore', 'command']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
     log_components = ['-',
                       'ACCESS',
@@ -378,7 +379,7 @@ class LogEvent(object):
 
         op = split_tokens[self._datetime_nextpos + 1]
 
-        if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
+        if op in self.log_operations:
             self._operation = op
             self._namespace = split_tokens[self._datetime_nextpos + 2]
 

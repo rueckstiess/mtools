@@ -13,8 +13,7 @@ class LogLineFilter(BaseFilter):
         ('--component', {
             'action':'store', 
             'nargs':'*', 
-            'choices': ['-', 'ACCESS', 'COMMANDS', 'INDEXING', 'NETWORK', 'QUERY', 'REPLSETS', 
-                       'SHARDING', 'STORAGE', 'JOURNAL', 'WRITES', 'S2', 'TOTAL'],
+            'choices': LogEvent.log_components,
             'metavar':'CM', 
             'help':'only output log lines with component CM (multiple values are allowed).'
         }),
@@ -22,7 +21,7 @@ class LogLineFilter(BaseFilter):
             'action':'store', 
             'nargs':'*', 
             'metavar':'LL', 
-            'choices': ['D', 'F', 'E', 'W', 'I', 'U'], 
+            'choices': LogEvent.log_levels, 
             'help':'only output log lines  with loglevel LL (multiple values are allowed).'
         }),
         ('--namespace', {
@@ -33,7 +32,7 @@ class LogLineFilter(BaseFilter):
         ('--operation', {
             'action':'store', 
             'metavar':'OP', 
-            'choices': ['insert', 'update', 'remove', 'query', 'command', 'getmore'], 
+            'choices': LogEvent.log_operations, 
             'help':'only output log lines of type OP.'
         }),
         ('--thread', {
