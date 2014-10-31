@@ -30,8 +30,11 @@ class TestMLogFilter(object):
         """ start up method to create mlaunch tool and find free port. """
         self.tool = MLogFilterTool()
 
+        self._test_base()
+
+    def _test_base(self,filename='mongod_225.log'):
         # load logfile(s)
-        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_225.log')
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
         self.logfile = LogFile(open(self.logfile_path, 'r'))
 
 
@@ -389,5 +392,71 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             assert line.startswith("2013-")
 
+    @raises(SystemExit)
+    def test_invalid_level(self):
+        self._test_base('mongod_278.log')
+        self.tool.run('--level C %s '%self.logfile_path)
+
+    @raises(SystemExit)
+    def test_invalid_component(self):
+        self._test_base('mongod_278.log')
+        self.tool.run('--component FAKE %s '%self.logfile_path)
+
+    def _test_levels(self, level, expected=1):
+        self._test_base('mongod_278.log')
+        self.tool.run(' %s --level %s' % (self.logfile_path, level))
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) == expected
+
+    def _test_components(self, component, expected=1):
+        self._test_base('mongod_278.log')
+        self.tool.run(' %s --component %s' % (self.logfile_path, component))
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) == expected
+
+
+def _add_component_test(cls, name, component, expected):
+    """
+    meta program new tests
+    """
+    def test_method(self):
+        self._test_components(component,expected)
+    test_method.__doc__ = name
+    test_method.__name__ = name
+    setattr(cls,test_method.__name__,test_method)
+
+_add_component_test(TestMLogFilter, 'test_total_component', 'TOTAL', 1)
+_add_component_test(TestMLogFilter, 'test_s2_component', 'S2', 1)
+_add_component_test(TestMLogFilter, 'test_all_component', " ".join(LogEvent.log_components), 25)
+_add_component_test(TestMLogFilter, 'test_dash_component', '-', 10)
+_add_component_test(TestMLogFilter, 'test_access_component', 'ACCESS', 1)
+_add_component_test(TestMLogFilter, 'test_commands_component', 'COMMANDS', 1)
+_add_component_test(TestMLogFilter, 'test_indexing_component', 'INDEXING', 1)
+_add_component_test(TestMLogFilter, 'test_network_component', 'NETWORK', 1)
+_add_component_test(TestMLogFilter, 'test_query_component', 'QUERY', 1)
+_add_component_test(TestMLogFilter, 'test_replsets_component', 'REPLSETS', 1)
+_add_component_test(TestMLogFilter, 'test_sharding_component', 'SHARDING', 1)
+_add_component_test(TestMLogFilter, 'test_storage_component', 'STORAGE', 4)
+_add_component_test(TestMLogFilter, 'test_journal_component', 'JOURNAL', 1)
+_add_component_test(TestMLogFilter, 'test_writes_component', 'WRITES', 1)
+
+
+def _add_level_test(cls, name, level, expected=1):
+    """
+    meta program new tests
+    """
+    def test_method(self):
+        self._test_levels(level, expected)
+    test_method.__doc__ = name
+    test_method.__name__ = name
+    setattr(cls,test_method.__name__,test_method)
+
+_add_level_test(TestMLogFilter, 'test_all_levels', " ".join(LogEvent.log_levels), 25)
+_add_level_test(TestMLogFilter, 'test_D_levels', 'D')
+_add_level_test(TestMLogFilter, 'test_F_levels', 'F')
+_add_level_test(TestMLogFilter, 'test_E_levels', 'E')
+_add_level_test(TestMLogFilter, 'test_W_levels', 'W')
+_add_level_test(TestMLogFilter, 'test_I_levels', 'I', 20)
+_add_level_test(TestMLogFilter, 'test_U_levels', 'U')
 
 # output = sys.stdout.getvalue().strip()
