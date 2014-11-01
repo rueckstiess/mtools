@@ -392,15 +392,29 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             assert line.startswith("2013-")
 
+    def test_level_225(self):
+        """ mlogfilter: test that mlogfilter works levels on older logs """
+
+        self.tool.run('%s --level D '%self.logfile_path)
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) == 0
+
+    def test_component_225(self):
+        """ mlogfilter: test that mlogfilter works components on older logs """
+
+        self.tool.run('%s --component ACCESS '%self.logfile_path)
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) == 0
+
     @raises(SystemExit)
     def test_invalid_level(self):
         self._test_base('mongod_278.log')
-        self.tool.run('--level C %s '%self.logfile_path)
+        self.tool.run(' %s --level C'%self.logfile_path)
 
     @raises(SystemExit)
     def test_invalid_component(self):
         self._test_base('mongod_278.log')
-        self.tool.run('--component FAKE %s '%self.logfile_path)
+        self.tool.run(' %s --component FAKE'%self.logfile_path)
 
     def _test_levels(self, level, expected=1):
         self._test_base('mongod_278.log')
