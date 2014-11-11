@@ -99,6 +99,7 @@ class LogEvent(object):
         self._conn = None
 
         self.merge_marker_str = ''
+        self._pos=None # pos in file for cmp operators, work work with stdin
 
     def set_line_str(self, line_str):
         """ line_str is only writeable if LogEvent was created from a string, not from a system.profile documents. """
@@ -480,6 +481,36 @@ class LogEvent(object):
 
         return self._w
 
+    @property
+    def pos(self):
+        """
+        This is real position in the stream, may not work for stdin
+        """
+        return self._pos
+
+    @pos.setter
+    def pos(self,pos):
+        self._pos = pos
+
+    def __eq__(self, other):
+        if other and self.pos == other.pos:
+            return True
+        return False
+
+    def __ne__(self, other):
+        return self.pos != other.pos
+
+    def __lt__(self, other):
+        return self.pos < other.pos
+
+    def __le__(self, other):
+        return self.pos <= other.pos
+
+    def __gt__(self, other):
+        return self.pos > other.pos
+
+    def __ge__(self, other):
+        return self.pos >= other.pos
 
     def _extract_counters(self):
         """ Helper method to extract counters like nscanned, nreturned, etc.

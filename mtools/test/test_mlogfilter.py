@@ -35,6 +35,139 @@ class TestMLogFilter(object):
         self.logfile = LogFile(open(self.logfile_path, 'r'))
 
 
+    def _test_from_to_line(self, frm, to, first, last, path='test-mlogfilter-issue-50.log'):
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', path)
+        self.logfile = LogFile(open(self.logfile_path, 'r'))
+
+        args = ""
+        if frm:
+            args = " %s --from %s " % (args , parser.parse(frm).isoformat())
+        if to:
+            args = " %s --to %s " % (args , parser.parse(to).isoformat())
+
+
+        self.tool.run('%s %s'%(self.logfile_path, args))
+        output = sys.stdout.getvalue()
+
+        lines = output.splitlines()
+        if first:
+            assert(lines[0] == first)
+        if last:
+            assert(lines[-1] == last)
+
+    # adding boundary tests
+    def test_to_middle(self):
+        self._test_from_to_line(None,
+                            "Fri Oct 10 17:22:11.841",
+                            "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                            "Fri Oct 10 17:22:11.839 [signalProcessingThread] shutdown: final commit...")
+
+    def test_to_greater_than_file(self):
+        self._test_from_to_line(None,
+                                "2014-10-10 17:50:00.000000-00:00",
+                                "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                "Fri Oct 10 17:48:55.648 dbexit: really exiting now")
+
+    def test_to_second_last_line(self):
+        self._test_from_to_line(None,
+                                 "2014-10-10 17:48:54.000000-00:00",
+                                 "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                 "Fri Oct 10 17:48:53.648 [signalProcessingThread] shutdown: removing fs lock...")
+
+    def test_to_third_last_line(self):
+        self._test_from_to_line(None,
+                                "2014-10-10 17:48:53.000000-00:00",
+                                "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                "Fri Oct 10 17:48:52.647 [signalProcessingThread] removeJournalFiles")
+
+    def test_from_before_start_line(self):
+        self._test_from_to_line("2014-10-10 17:00:00.000000-00:00",
+                                None,
+                                "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                "Fri Oct 10 17:48:55.648 dbexit: really exiting now",
+                        )
+
+    def test_from_start_line(self):
+        self._test_from_to_line("2014-10-10 17:22:06.000000-00:00",
+                                None,
+                                "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                "Fri Oct 10 17:48:55.648 dbexit: really exiting now",
+                        )
+
+    def test_from_exact_start_line(self):
+        self._test_from_to_line("2014-10-10 17:22:06.024000-00:00",
+                                None,
+                                "Fri Oct 10 17:22:06.024 [initandlisten] MongoDB starting : pid=93153 port=27017 dbpath=/data/db/ 64-bit host=Gianfranco-10gen.local",
+                                "Fri Oct 10 17:48:55.648 dbexit: really exiting now",
+                        )
+
+    def test_from_after_start_line(self):
+        self._test_from_to_line("2014-10-10 17:22:06.025000-00:00",
+                                None,
+                                "Fri Oct 10 17:22:07.025 [initandlisten]",
+                                "Fri Oct 10 17:48:55.648 dbexit: really exiting now",
+                        )
+
+    def _test_from(self, date , first, last , path='test-mlogfilter-issue-50.log'):
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', path)
+        self.logfile = LogFile(open(self.logfile_path, 'r'))
+
+        frm = parser.parse(date)
+        self.tool.run('%s --from %s'%(self.logfile_path, frm.isoformat()))
+        output = sys.stdout.getvalue()
+
+        lines = output.splitlines()
+        if first:
+            assert(lines[0] == first)
+        if last:
+            assert(lines[-1] == last)
+
+
+    def test_looper(self):
+        random_start = parser.parse("2014-08-05 21:04:16+00:00")
+        self.tool.run('%s --from %s'%(self.logfile_path, random_start.isoformat()))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
+            assert(le.datetime >= random_start)
+
+    def test_from_to_wedged(self):
+        """
+        This results in the final while getting stuck on the line without a date time
+        Mon Aug  5 20:55:20 [initandlisten] connection accepted from 10.0.0.12:52703 #143 (3 connections now open)
+        === a line without a datetime ===
+        Mon Aug  5 20:55:42 [initandlisten] connection accepted from 10.0.0.12:52710 #144 (4 connections now open)
+
+        """
+
+        random_start = parser.parse("2014-08-05 20:51:58+00:00")
+        random_end  = parser.parse("2014-08-05 20:55:23+00:00")
+
+        self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
+            assert(le.datetime >= random_start and le.datetime <= random_end)
+
+    def test_from_to_single(self):
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'single.log')
+        self.logfile = LogFile(open(self.logfile_path, 'r'))
+
+        random_start = parser.parse("2014-08-05 20:51:58+00:00")
+        random_end  = parser.parse("2014-08-05 20:55:23+00:00")
+
+        self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
+            assert(le.datetime >= random_start and le.datetime <= random_end)
+
     def test_msToString(self):
         assert(self.tool._msToString(100) == '0hr 0min 0secs 100ms')
         assert(self.tool._msToString(1000) == '0hr 0min 1secs 0ms')
@@ -43,6 +176,7 @@ class TestMLogFilter(object):
 
     def test_from(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
+        # random_start = parser.parse('2014-08-05 20:25:30+00:00')
         self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
@@ -73,7 +207,6 @@ class TestMLogFilter(object):
                 continue
             assert(le.datetime >= random_start and le.datetime <= random_end)
 
-
     def test_from_to_26_log(self):
         logfile_26_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
         logfile_26 = LogFile(open(logfile_26_path, 'r'))
@@ -88,13 +221,45 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
 
+        # round down
+        start = random_start - timedelta(microseconds=random_start.microsecond)
         at_least_one = False
         for line in output.splitlines():
             le = LogEvent(line)
             if not le.datetime:
                 continue
             at_least_one = True
-            assert(le.datetime >= random_start and le.datetime <= random_end)
+            assert(le.datetime >= start and le.datetime <= random_end)
+        assert at_least_one
+
+    def test_from_to_26_fail_log(self):
+        """
+        This test used to always fail so explicitly added
+        """
+        logfile_26_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        logfile_26 = LogFile(open(logfile_26_path, 'r'))
+
+        # rounding error !
+        random_start = parser.parse("2014-04-09 23:16:41.437000-04:00")
+        random_end =  parser.parse("2014-04-09 23:29:03.437000-04:00")
+
+
+        print random_start, random_end
+        print logfile_26.start, logfile_26.end
+
+        self.tool.run('%s --from %s --to %s'%(logfile_26_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        output = sys.stdout.getvalue()
+        assert len(output.splitlines()) > 0
+
+        start = random_start - timedelta(microseconds=random_start.microsecond)
+
+        at_least_one = False
+        for line in output.splitlines():
+            le = LogEvent(line)
+            if not le.datetime:
+                continue
+            at_least_one = True
+            assert(le.datetime >= start and le.datetime <= random_end)
         assert at_least_one
 
     def test_from_to_stdin(self):
@@ -327,6 +492,7 @@ class TestMLogFilter(object):
         event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
         event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
+        # mask_size = 45 # randrange(10, 60)
         mask_size = randrange(10, 60)
         padding = timedelta(seconds=mask_size/2)
 

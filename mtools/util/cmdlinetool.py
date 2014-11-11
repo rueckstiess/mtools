@@ -69,7 +69,7 @@ class BaseCmdLineTool(object):
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
         self.argparser.add_argument('--no-progressbar', action='store_true', default=False, help='disables progress bar')
         self.is_stdin = not sys.stdin.isatty()
-        
+
 
     def run(self, arguments=None, get_unknowns=False):
         """ Init point to execute the script. If `arguments` string is given, will evaluate the 

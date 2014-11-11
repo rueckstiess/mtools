@@ -2,8 +2,6 @@ from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 
 from math import ceil 
-from datetime import datetime
-import time
 import re
 import os
 
@@ -134,13 +132,15 @@ class LogFile(InputSource):
         """ get next line, adjust for year rollover and hint datetime format. """
 
         # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
+        pos = self.tell()
         line = self.filehandle.readline()
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
 
         le = LogEvent(line)
-        
+        le.pos = pos
+
         # hint format and nextpos from previous line
         if self._datetime_format and self._datetime_nextpos != None:
             ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
@@ -290,8 +290,8 @@ class LogFile(InputSource):
 
         # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
-        self._filesize = self.filehandle.tell()
-        self.filehandle.seek(-min(self._filesize, 30000), 2)
+        self._filesize = self.tell()
+        self.filehandle.seek(-self.min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
             logevent = LogEvent(line)
@@ -311,16 +311,14 @@ class LogFile(InputSource):
 
         return True
 
-
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.filehandle.tell()
-        line = None
+        curr_pos = self.tell()
 
         # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.filehandle.tell(), 15000)
+        jump_back = self.min(curr_pos, 15000)
         self.filehandle.seek(-jump_back, 1)
         buff = self.filehandle.read(jump_back)
         self.filehandle.seek(curr_pos, 0)
@@ -347,6 +345,55 @@ class LogFile(InputSource):
             # reached end of file
             return None
 
+    def tell(self):
+        """  get the current file handle pos unless stdin
+        """
+        return self.filehandle.tell() if not self.from_stdin else None
+
+    def min(self, *args):
+        """  min implementation to handle / filter None
+        """
+        return min(i for i in args if i is not None)
+
+    def _prev(self):
+        """ internal helper function that finds the previous line in a log file
+            based on the current seek position. Not really prev, only used for
+            last.
+        """
+        newline_pos = -1
+        curr_pos = self.tell()
+
+        # jump back 15k characters (at most) and find last newline char
+        jump_back = self.min(curr_pos, 15000)
+        self.filehandle.seek(-jump_back, 1)
+        buff = self.filehandle.read(jump_back)
+        self.filehandle.seek(curr_pos, 0)
+
+        pos = 1
+        while pos < jump_back and buff[-pos] == '\n':
+            pos += 1
+        while pos < jump_back and buff[-pos] != '\n':
+            pos += 1
+
+        try:
+            if buff[-pos] == '\n':
+                newline_pos = pos
+            else:
+                self.filehandle.seek(0)
+                return None
+        except IndexError:
+            print "test"
+
+        if newline_pos != -1:
+            self.filehandle.seek(-newline_pos + 1, 1)
+            # not going to tack the skipped newlines
+            # just jump back to correct position
+            pos = self.tell()
+            logevent = self.next()
+            self.filehandle.seek(pos, 0)
+        else:
+            logevent = None
+        return logevent
 
     def fast_forward(self, start_dt):
         """ Fast-forward a log file to the given start_dt datetime object using binary search.
@@ -359,15 +406,23 @@ class LogFile(InputSource):
 
         else:
             # fast bisection path
-            min_mark = 0
+            # min_mark = 0
             max_mark = self.filesize
             step_size = max_mark
 
             # check if start_dt is already smaller than first datetime
             self.filehandle.seek(0)
-            le = self.next()
-            if le.datetime and le.datetime >= start_dt:
+            first = self.next()
+            if first.datetime and first.datetime >= start_dt:
                 self.filehandle.seek(0)
+                return
+
+            # check if start_dt is already greater than last datetime
+            self.filehandle.seek(self.filesize)
+            # check the last line, if there is a ts then test it otherwise go on
+            last = self._prev()
+            if last and last.datetime and last.datetime <= start_dt:
+                self.filehandle.seek(self.filesize + 1)
                 return
 
             le = None
@@ -390,10 +445,15 @@ class LogFile(InputSource):
             if not le:
                 return
 
-            # now walk backwards until we found a truely smaller line
-            while le and self.filehandle.tell() >= 2 and le.datetime >= start_dt:
-                self.filehandle.seek(-2, 1)
+            p = None
+            count = 2
+            # now walk backwards until we found a truly smaller line
+            while le and self.tell() and self.tell() >= 2 and le.datetime >= start_dt:
+                # add a guard against infinite loops, slowly walk further back
+                if p and p == le:
+                    count += 1
+                else:
+                    count = 2
+                self.filehandle.seek(-count, 1)
                 le = self._find_curr_line(prev=True)
-
-
-
+                p = le
