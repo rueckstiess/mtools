@@ -132,14 +132,14 @@ class LogFile(InputSource):
         """ get next line, adjust for year rollover and hint datetime format. """
 
         # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
-        pos = self.filehandle.tell()
+        pos = self.tell()
         line = self.filehandle.readline()
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
 
         le = LogEvent(line)
-        le.pos=pos
+        le.pos = pos
 
         # hint format and nextpos from previous line
         if self._datetime_format and self._datetime_nextpos != None:
@@ -290,8 +290,8 @@ class LogFile(InputSource):
 
         # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
-        self._filesize = self.filehandle.tell()
-        self.filehandle.seek(-min(self._filesize, 30000), 2)
+        self._filesize = self.tell()
+        self.filehandle.seek(-self.min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
             logevent = LogEvent(line)
@@ -311,15 +311,14 @@ class LogFile(InputSource):
 
         return True
 
-
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.filehandle.tell()
+        curr_pos = self.tell()
 
         # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.filehandle.tell(), 15000)
+        jump_back = self.min(curr_pos, 15000)
         self.filehandle.seek(-jump_back, 1)
         buff = self.filehandle.read(jump_back)
         self.filehandle.seek(curr_pos, 0)
@@ -346,16 +345,26 @@ class LogFile(InputSource):
             # reached end of file
             return None
 
+    def tell(self):
+        """  get the current file handle pos unless stdin
+        """
+        return self.filehandle.tell() if not self.from_stdin else None
+
+    def min(self, *args):
+        """  min implementation to handle / filter None
+        """
+        return min(i for i in args if i is not None)
+
     def _prev(self):
         """ internal helper function that finds the previous line in a log file
             based on the current seek position. Not really prev, only used for
             last.
         """
         newline_pos = -1
-        curr_pos = self.filehandle.tell()
+        curr_pos = self.tell()
 
         # jump back 15k characters (at most) and find last newline char
-        jump_back = min(self.filehandle.tell(), 15000)
+        jump_back = self.min(curr_pos, 15000)
         self.filehandle.seek(-jump_back, 1)
         buff = self.filehandle.read(jump_back)
         self.filehandle.seek(curr_pos, 0)
@@ -379,7 +388,7 @@ class LogFile(InputSource):
             self.filehandle.seek(-newline_pos + 1, 1)
             # not going to tack the skipped newlines
             # just jump back to correct position
-            pos = self.filehandle.tell()
+            pos = self.tell()
             logevent = self.next()
             self.filehandle.seek(pos, 0)
         else:
@@ -439,7 +448,7 @@ class LogFile(InputSource):
             p = None
             count = 2
             # now walk backwards until we found a truly smaller line
-            while le and self.filehandle.tell() >= 2 and le.datetime >= start_dt:
+            while le and self.tell() and self.tell() >= 2 and le.datetime >= start_dt:
                 # add a guard against infinite loops, slowly walk further back
                 if p and p == le:
                     count += 1
