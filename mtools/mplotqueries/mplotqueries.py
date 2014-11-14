@@ -466,7 +466,11 @@ class MPlotQueriesTool(LogFileTool):
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
         if self.args['output_file'] is not None:
-            plt.savefig(self.args['output_file'])
+            try:
+                plt.savefig(self.args['output_file'])
+            except Exception as e:
+                print "Error: %s" % e
+                raise SystemExit
         else:
             plt.show()
 
