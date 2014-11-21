@@ -6,9 +6,9 @@ import mtools
 from nose.tools import *
 from nose.plugins.skip import Skip, SkipTest
 
-# from random import randrange
-# from datetime import timedelta, datetime
-# from dateutil import parser
+from random import randrange
+from datetime import timedelta, datetime
+from dateutil import parser
 import os
 import sys
 import re
@@ -28,9 +28,11 @@ class TestMLogInfo(object):
     def setup(self):
         """ startup method to create mloginfo tool. """
         self.tool = MLogInfoTool()
+        self._test_init()
 
+    def _test_init(self,filename='mongod_225.log'):
         # load logfile(s)
-        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_225.log')
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
         self.logfile = LogFile(open(self.logfile_path, 'r'))
 
 
@@ -53,6 +55,31 @@ class TestMLogInfo(object):
         assert results['binary'] == 'mongod'
         assert results['version'] == '2.2.5'
 
+    def test_28(self):
+        self._test_init('mongod_278.log')
+        self.tool.run('%s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        results = {}
+        for line in output.splitlines():
+            if line.strip() == '':
+                continue
+            key, val = line.split(':', 1)
+            results[key.strip()] = val.strip()
+
+        assert results['source'].endswith('mongod_278.log')
+        assert results['host'] == 'capslock.local:27017'
+        assert results['start'].endswith('2014 Oct 31 13:00:03.914')
+        assert results['end'].endswith('2014 Oct 31 13:00:04.461')
+        assert results['date format'] == 'iso8601-local'
+        assert results['length'] == '25'
+        assert results['binary'] == 'mongod'
+        assert results['version'] == '2.7.8'
+
+    def test_28_no_restart(self):
+        self._test_init('mongod_278_partial.log')
+        self.tool.run('%s' % self.logfile_path)
+        lines = sys.stdout.getvalue().splitlines()
+        assert any(map(lambda line: '>= 2.8 (iso8601 format, level, component)' in line, lines))
 
     def test_multiple_files(self):
         self.tool.run('%s %s' % (self.logfile_path, self.logfile_path))
@@ -71,7 +98,7 @@ class TestMLogInfo(object):
         self.tool.run('%s' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert any(map(lambda line: 'version: >= 2.4' in line, lines))
+        assert any(map(lambda line: 'version: = 2.4.x (milliseconds present)' in line, lines))
 
 
     def test_distinct_output(self):
