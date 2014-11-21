@@ -45,6 +45,21 @@ class LogEvent(object):
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', \
         'Oct', 'Nov', 'Dec']
 
+    log_operations = ['query', 'insert', 'update', 'remove', 'getmore', 'command']
+    log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
+    log_components = ['-',
+                      'ACCESS',
+                      'COMMANDS',
+                      'INDEXING',
+                      'NETWORK',
+                      'QUERY',
+                      'REPLSETS',
+                      'SHARDING',
+                      'STORAGE',
+                      'JOURNAL',
+                      'WRITES',
+                      'S2',
+                      'TOTAL']
 
     def __init__(self, doc_or_str):
         self._year_rollover = False
@@ -97,6 +112,10 @@ class LogEvent(object):
         self._r = None
         self._w = None
         self._conn = None
+
+        self._level_calculated = False
+        self._level = None
+        self._component = None
 
         self.merge_marker_str = ''
 
@@ -184,6 +203,10 @@ class LogEvent(object):
 
                     # separate datetime str and linestr
                     self._line_str = ' '.join(self.split_tokens[self._datetime_nextpos:])
+
+                    if self.level:
+                        self._datetime_nextpos += 2
+
                     self._reformat_timestamp(self._datetime_format)
                     break
 
@@ -356,7 +379,7 @@ class LogEvent(object):
 
         op = split_tokens[self._datetime_nextpos + 1]
 
-        if op in ['query', 'insert', 'update', 'remove', 'getmore', 'command']:
+        if op in self.log_operations:
             self._operation = op
             self._namespace = split_tokens[self._datetime_nextpos + 2]
 
@@ -480,7 +503,6 @@ class LogEvent(object):
 
         return self._w
 
-
     def _extract_counters(self):
         """ Helper method to extract counters like nscanned, nreturned, etc.
             from the logevent.
@@ -510,6 +532,35 @@ class LogEvent(object):
                         # token not parsable, skip
                         break
 
+    @property
+    def level(self):
+        """ extract log level if available (lazy) """
+        if not self._level_calculated:
+            self._level_calculated = True
+            self._extract_level()
+        return self._level
+
+    @property
+    def component(self):
+        """ extract log component if available (lazy) """
+        self.level
+        return self._component
+
+    def _extract_level(self):
+        """
+        extract level and component if available (lazy)
+        """
+
+        if self._level is None:
+            split_tokens = self.split_tokens
+            x = self.log_levels.index(split_tokens[1]) if split_tokens[1] in self.log_levels else None
+
+            if x is not None:
+                self._level = split_tokens[1]
+                self._component = split_tokens[2]
+            else:
+                self._level = False
+                self._component = False
 
 
     def parse_all(self):

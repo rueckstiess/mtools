@@ -30,6 +30,8 @@ class LogFile(InputSource):
         self._datetime_format = None
         self._year_rollover = None
 
+        self._has_level= None
+        
         # make sure bounds are calculated before starting to iterate, including potential year rollovers
         self._calculate_bounds()
 
@@ -69,6 +71,13 @@ class LogFile(InputSource):
         if not self._datetime_format:
             self._calculate_bounds()
         return self._datetime_format
+
+    @property
+    def has_level(self):
+        """ lazy evaluation of the whether the logfile has any level lines. """
+        if self._has_level is None:
+            self._iterate_lines()
+        return self._has_level
 
     @property
     def year_rollover(self):
@@ -197,6 +206,9 @@ class LogFile(InputSource):
 
         l = 0
         for l, line in enumerate(self.filehandle):
+
+            if self._has_level is None and line[28:31].strip() in LogEvent.log_levels and line[31:39].strip() in LogEvent.log_components:
+                self._has_level = True
 
             # find version string (fast check to eliminate most lines)
             if "version" in line[:100]:

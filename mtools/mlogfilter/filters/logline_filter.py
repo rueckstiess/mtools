@@ -3,24 +3,65 @@ from mtools.util.pattern import json2pattern
 import re
 from base_filter import BaseFilter
 
+def custom_parse_array(value):
+    return list(set(value.split()))
+
 class LogLineFilter(BaseFilter):
     """ 
     """
     filterArgs = [
-        ('--namespace', {'action':'store', 'metavar':'NS', 'help':'only output log lines matching operations on NS.'}),
-        ('--operation', {'action':'store', 'metavar':'OP', 'help':'only output log lines matching operations of type OP.'}),
-        ('--thread',    {'action':'store', 'help':'only output log lines of thread THREAD.'}),
-        ('--pattern',   {'action':'store', 'help':'only output log lines that query with the pattern PATTERN (queries, getmores, updates, removes)'})
+        ('--component', {
+            'action':'store', 
+            'nargs':'*', 
+            'choices': LogEvent.log_components,
+            'metavar':'CM', 
+            'help':'only output log lines with component CM (multiple values are allowed).'
+        }),
+        ('--level',     {
+            'action':'store', 
+            'nargs':'*', 
+            'metavar':'LL', 
+            'choices': LogEvent.log_levels, 
+            'help':'only output log lines  with loglevel LL (multiple values are allowed).'
+        }),
+        ('--namespace', {
+            'action':'store', 
+            'metavar':'NS', 
+            'help':'only output log lines on namespace NS.'
+        }),
+        ('--operation', {
+            'action':'store', 
+            'metavar':'OP', 
+            'choices': LogEvent.log_operations, 
+            'help':'only output log lines of type OP.'
+        }),
+        ('--thread', {
+            'action':'store', 
+            'help':'only output log lines of thread THREAD.'
+        }),
+        ('--pattern', {
+            'action':'store', 
+            'help':'only output log lines that query with the pattern PATTERN' \
+                   ' (only applies to queries, getmores, updates, removes)'
+        })
     ]
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
 
-        self.namespace = None
-        self.operation = None
-        self.thread = None
-        self.pattern = None
+        self.components = None
+        self.levels     = None
+        self.namespace  = None
+        self.operation  = None
+        self.thread     = None
+        self.pattern    = None
 
+        if 'component' in self.mlogfilter.args and self.mlogfilter.args['component']:
+            self.components = custom_parse_array(self.mlogfilter.args['component'])
+            self.active = True
+        if 'level' in self.mlogfilter.args and self.mlogfilter.args['level']:
+            self.levels = custom_parse_array(self.mlogfilter.args['level'])
+            self.active = True
         if 'namespace' in self.mlogfilter.args and self.mlogfilter.args['namespace']:
             self.namespace = self.mlogfilter.args['namespace']
             self.active = True
@@ -37,6 +78,10 @@ class LogLineFilter(BaseFilter):
     def accept(self, logevent):
         # if several filters are active, all have to agree
         res = False
+        if self.components and logevent.component not in self.components:
+            return False
+        if self.levels and logevent.level not in self.levels:
+            return False
         if self.namespace and logevent.namespace != self.namespace:
             return False
         if self.operation and logevent.operation != self.operation:

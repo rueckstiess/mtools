@@ -395,7 +395,7 @@ class MPlotQueriesTool(LogFileTool):
         ylabel = ''
 
         # use timezone of first log file (may not always be what user wants but must make a choice)
-        tz = self.args['logfile'][0].timezone
+        tz = self.logfiles[0].timezone
         tzformat = '%b %d\n%H:%M:%S' if tz == tzutc() else '%b %d\n%H:%M:%S%z'
 
         locator = AutoDateLocator(tz=tz, minticks=5, maxticks=10)
