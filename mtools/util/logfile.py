@@ -310,7 +310,7 @@ class LogFile(InputSource):
 
 
     def _check_for_restart(self, logevent):
-        if logevent.thread == 'mongosMain':
+        if logevent.thread == 'mongosMain' and 'MongoS' in logevent.line_str:
             self._binary = 'mongos'
         
         elif logevent.thread == 'initandlisten' and "db version v" in logevent.line_str:
