@@ -26,10 +26,13 @@ try:
         from pymongo import MongoClient as Connection
         from pymongo import MongoReplicaSetClient as ReplicaSetConnection
         from pymongo import version_tuple as pymongo_version
+        from bson import SON
     except ImportError:
         from pymongo import Connection
         from pymongo import ReplicaSetConnection
         from pymongo import version_tuple as pymongo_version
+        from bson import SON
+
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
@@ -301,6 +304,7 @@ class MLaunchTool(BaseCmdLineTool):
                     else:
                         print "adding shards."
 
+                shard_conns_and_names = zip(self.shard_connection_str, shard_names)
                 while True:
                     try:
                         nshards = con['config']['shards'].count()
@@ -309,9 +313,9 @@ class MLaunchTool(BaseCmdLineTool):
                     if nshards >= shards_to_add:
                         break
 
-                    for conn_str in self.shard_connection_str:
+                    for conn_str, name in shard_conns_and_names:
                         try:
-                            res = con['admin'].command({'addShard': conn_str})
+                            res = con['admin'].command( SON([('addShard', conn_str), ('name', name)]) )
                         except Exception as e:
                             if self.args['verbose']:
                                 print e, ', will retry in a moment.'
@@ -320,7 +324,7 @@ class MLaunchTool(BaseCmdLineTool):
                         if res['ok']:
                             if self.args['verbose']:
                                 print "shard %s added successfully"%conn_str
-                                self.shard_connection_str.remove(conn_str)
+                                shard_conns_and_names.remove( (conn_str, name) )
                                 break
                         else:
                             if self.args['verbose']:
