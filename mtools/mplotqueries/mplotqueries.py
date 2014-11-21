@@ -381,7 +381,13 @@ class MPlotQueriesTool(LogFileTool):
         if self.args['output_file'] is None:
             # --output-file means don't depend on X,
             # so switch to a non-pure-image backend if no output file is given before doing any plotting.
-            plt.switch_backend('GTKAgg')
+            try:
+                ## default backend unix (debian)
+                plt.switch_backend('GTKAgg')
+            except Exception as e:
+                ## pygtk is not installed
+                ## default backend for osx: qt4agg
+                plt.switch_backend('qt4agg')
 
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
