@@ -25,9 +25,11 @@ try:
     try:
         from pymongo import MongoClient as Connection
         from pymongo import MongoReplicaSetClient as ReplicaSetConnection
+        from pymongo import version_tuple as pymongo_version
     except ImportError:
         from pymongo import Connection
         from pymongo import ReplicaSetConnection
+        from pymongo import version_tuple as pymongo_version
     from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
@@ -1076,6 +1078,12 @@ class MLaunchTool(BaseCmdLineTool):
             con[database].add_user(name, password=password, roles=roles)
         except OperationFailure as e:
             pass
+        except TypeError as e:
+            if pymongo_version < (2, 5, 0):
+                con[database].add_user(name, password=password)
+                warnings.warn('Your pymongo version is too old to support auth roles. Added a legacy user with root access. To support roles, you need to upgrade to pymongo >= 2.5.0')
+            else: 
+                raise e
 
 
     def _get_processes(self):
