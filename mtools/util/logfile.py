@@ -25,8 +25,12 @@ class LogFile(InputSource):
         self._timezone = None
         self._hostname = None
         self._port = None
-        self._rsstate = None
+        self._rs_state = None
 
+        self._repl_set = None
+        self._repl_set_members = None
+        self._repl_set_version = None
+        
         self._datetime_format = None
         self._year_rollover = None
 
@@ -103,11 +107,11 @@ class LogFile(InputSource):
         return self._restarts
 
     @property
-    def rsstate(self):
+    def rs_state(self):
         """ lazy evaluation of all restarts. """
         if not self._num_lines:
             self._iterate_lines()
-        return self._rsstate
+        return self._rs_state
 
     @property
     def binary(self):
@@ -138,6 +142,27 @@ class LogFile(InputSource):
             if len(versions) == 0 or v != versions[-1]:
                 versions.append(v)
         return versions
+
+    @property
+    def repl_set(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set
+
+    @property
+    def repl_set_members(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set_members
+
+    @property
+    def repl_set_version(self):
+        """ return the replSet(if available). """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set_version
 
     def next(self):
         """ get next line, adjust for year rollover and hint datetime format. """
@@ -202,7 +227,7 @@ class LogFile(InputSource):
         """ count number of lines (can be expensive). """
         self._num_lines = 0
         self._restarts = []
-        self._rsstate = []
+        self._rs_state = []
 
         l = 0
         for l, line in enumerate(self.filehandle):
@@ -224,6 +249,24 @@ class LogFile(InputSource):
                     self._hostname = match.group('host')
                     self._port = match.group('port')
 
+            if "[initandlisten] options:" in line:
+                match = re.search('replSet: "(?P<replSet>\S+)"', line)
+                if match:
+                    self._repl_set = match.group('replSet')
+
+            if "command admin.$cmd command: { replSetInitiate:" in line:
+                match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)
+                if match:
+                    self._repl_set = match.group('replSet')
+                    self._repl_set_members = match.group('replSetMembers')
+
+            if "replSet info saving a newer config version to local.system.replset: " in line:
+                match = re.search('{ _id: "(?P<replSet>\S+)", version: (?P<replSetVersion>\d+), members: (?P<replSetMembers>[^]]+ ])', line)
+                if match:
+                    self._repl_set = match.group('replSet')
+                    self._repl_set_members = match.group('replSetMembers')
+                    self._repl_set_version = match.group('replSetVersion')
+    
             # if "is now in state" in line and next(state for state in states if line.endswith(state)):
             if "is now in state" in line:
                 tokens = line.split()
@@ -233,9 +276,9 @@ class LogFile(InputSource):
                 else:
                     pos = 7
                 host = tokens[pos]
-                rsstate = tokens[-1]
-                state = (host, rsstate, LogEvent(line))
-                self._rsstate.append(state)
+                rs_state = tokens[-1]
+                state = (host, rs_state, LogEvent(line))
+                self._rs_state.append(state)
                 continue
 
             if "[rsMgr] replSet" in line:
@@ -246,18 +289,19 @@ class LogFile(InputSource):
                     host = os.path.basename(self.name)
                 host += ' (self)'
                 if tokens[-1] in self.states:
-                    rsstate = tokens[-1]
+                    rs_state = tokens[-1]
                 else:
                     # 2.6
                     if tokens[1].endswith(']'):
                         pos = 2
                     else:
                         pos = 6
-                    rsstate = ' '.join(tokens[pos:])
+                    rs_state = ' '.join(tokens[pos:])
 
-                state = (host, rsstate, LogEvent(line))
-                self._rsstate.append(state)
+                state = (host, rs_state, LogEvent(line))
+                self._rs_state.append(state)
                 continue
+
 
         self._num_lines = l+1
 
