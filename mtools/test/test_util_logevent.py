@@ -15,6 +15,8 @@ line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { f
 line_pattern_26_a = """2014-03-18T18:34:30.435+1100 [conn10] query test.new query: { a: 1.0 } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:103 nreturned:0 reslen:20 0ms"""
 line_pattern_26_b = """2014-03-18T18:34:34.360+1100 [conn10] query test.new query: { query: { a: 1.0 }, orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:55 nreturned:0 reslen:20 0ms"""
 line_pattern_26_c = """2014-03-18T18:34:50.777+1100 [conn10] query test.new query: { $query: { a: 1.0 }, $orderby: { b: 1.0 } } planSummary: EOF ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:0 locks(micros) r:60 nreturned:0 reslen:20 0ms"""
+line_command_26_a = """2014-11-21T18:20:20.263+0800 [conn9] command admin.$cmd command: replSetGetStatus { replSetGetStatus: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:76 0ms"""
+line_command_26_b = """2014-11-21T18:20:57.076+0800 [conn9] command test.$cmd command: aggregate { aggregate: "mgendata", pipeline: [ { $group: { _id: "$bar", avg: { $avg: "$foo" } } } ], cursor: {} } keyUpdates:0 numYields:0 locks(micros) r:6783 reslen:229 11ms"""
 
 # fake system.profile documents
 profile_doc1 = { "op" : "query", "ns" : "test.foo", "thread": "test.system.profile", "query" : { "test" : 1 }, "ntoreturn" : 0, "ntoskip" : 0, "nscanned" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : 461, "w" :0 }, "timeAcquiringMicros" : { "r" : 4, "w" : 3 } }, "nreturned" : 0, "responseLength" : 20, "millis" : 0, "ts" : parser.parse("2014-03-20T04:04:21.231Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
@@ -69,6 +71,18 @@ def test_logevent_pattern_parsing():
 
     le = LogEvent(line_pattern_26_c)
     assert(le.pattern) == '{"a": 1}'
+
+
+def test_logevent_command_parsing():
+
+    le = LogEvent(line_command_26_a)
+    assert(le.command) == 'replSetGetStatus'
+
+    le = LogEvent(line_command_26_b)
+    assert(le.command) == 'aggregate'
+
+    le = LogEvent(line_getmore)
+    assert(le.command) == None
 
 
 def test_logevent_sort_pattern_parsing():

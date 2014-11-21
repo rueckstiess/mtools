@@ -271,6 +271,13 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.operation == 'insert')
 
+    def test_multiple_operations(self):
+        self.tool.run('%s --operation insert query'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            assert(le.operation in ['insert', 'query'])
+
     def test_invalid_timezone_args(self):
         try:
             self.tool.run('%s --timezone 1 2 3'%self.logfile_path)
@@ -298,6 +305,13 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.pattern == '{"_id": 1, "host": 1, "ns": 1}')
+
+    def test_command(self):
+        self.tool.run('%s --command dropDatabase deleteIndexes'%self.logfile_path)
+        output = sys.stdout.getvalue()
+        for line in output.splitlines():
+            le = LogEvent(line)
+            assert(le.command in ['dropDatabase', 'deleteIndexes'])
 
     def test_word(self):
         self.tool.run('%s --word lock'%self.logfile_path)

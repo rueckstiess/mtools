@@ -22,39 +22,48 @@ class LogLineFilter(BaseFilter):
             'nargs':'*', 
             'metavar':'LL', 
             'choices': LogEvent.log_levels, 
-            'help':'only output log lines  with loglevel LL (multiple values are allowed).'
+            'help':'only output log lines with loglevel LL (multiple values are allowed).'
         }),
         ('--namespace', {
             'action':'store', 
+            'nargs':'*', 
             'metavar':'NS', 
-            'help':'only output log lines on namespace NS.'
+            'help':'only output log lines on namespace NS (multiple values are allowed).'
         }),
         ('--operation', {
             'action':'store', 
+            'nargs':'*', 
             'metavar':'OP', 
             'choices': LogEvent.log_operations, 
-            'help':'only output log lines of type OP.'
+            'help':'only output log lines of type OP (multiple values are allowed).'
         }),
         ('--thread', {
+            'nargs':'*', 
             'action':'store', 
-            'help':'only output log lines of thread THREAD.'
+            'help':'only output log lines of thread THREAD (multiple values are allowed).'
         }),
         ('--pattern', {
             'action':'store', 
-            'help':'only output log lines that query with the pattern PATTERN' \
-                   ' (only applies to queries, getmores, updates, removes)'
+            'help':'only output log lines with a query pattern PATTERN' \
+                   ' (only applies to queries, getmores, updates, removes).'
+        }),
+        ('--command', {
+            'nargs':'*', 
+            'action':'store', 
+            'help':'only output log lines which are commands of the given type. Examples: "distinct", "isMaster", "replSetGetStatus" (multiple values are allowed).'
         })
     ]
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
 
-        self.components = None
-        self.levels     = None
-        self.namespace  = None
-        self.operation  = None
-        self.thread     = None
-        self.pattern    = None
+        self.components  = None
+        self.levels      = None
+        self.namespaces  = None
+        self.operations  = None
+        self.threads     = None
+        self.commands    = None
+        self.pattern     = None
 
         if 'component' in self.mlogfilter.args and self.mlogfilter.args['component']:
             self.components = custom_parse_array(self.mlogfilter.args['component'])
@@ -63,13 +72,16 @@ class LogLineFilter(BaseFilter):
             self.levels = custom_parse_array(self.mlogfilter.args['level'])
             self.active = True
         if 'namespace' in self.mlogfilter.args and self.mlogfilter.args['namespace']:
-            self.namespace = self.mlogfilter.args['namespace']
+            self.namespaces = custom_parse_array(self.mlogfilter.args['namespace'])
             self.active = True
         if 'operation' in self.mlogfilter.args and self.mlogfilter.args['operation']:
-            self.operation = self.mlogfilter.args['operation']
+            self.operations = custom_parse_array(self.mlogfilter.args['operation'])
             self.active = True
+        if 'command' in self.mlogfilter.args and self.mlogfilter.args['command']:
+            self.commands = custom_parse_array(self.mlogfilter.args['command'])
+            self.active = True    
         if 'thread' in self.mlogfilter.args and self.mlogfilter.args['thread']:
-            self.thread = self.mlogfilter.args['thread']
+            self.threads = custom_parse_array(self.mlogfilter.args['thread'])
             self.active = True
         if 'pattern' in self.mlogfilter.args and self.mlogfilter.args['pattern']:
             self.pattern = json2pattern(self.mlogfilter.args['pattern'])
@@ -82,12 +94,14 @@ class LogLineFilter(BaseFilter):
             return False
         if self.levels and logevent.level not in self.levels:
             return False
-        if self.namespace and logevent.namespace != self.namespace:
+        if self.namespaces and logevent.namespace not in self.namespaces:
             return False
-        if self.operation and logevent.operation != self.operation:
+        if self.commands and logevent.command not in self.commands:
             return False
-        if self.thread:
-            if logevent.thread != self.thread and logevent.conn != self.thread:
+        if self.operations and logevent.operation not in self.operations:
+            return False
+        if self.threads:
+            if logevent.thread not in self.threads and logevent.conn not in self.threads:
                 return False
         if self.pattern and logevent.pattern != self.pattern:
             return False

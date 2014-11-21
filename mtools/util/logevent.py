@@ -101,6 +101,9 @@ class LogEvent(object):
         self._pattern = None
         self._sort_pattern = None
 
+        self._command_calculated = False
+        self._command = None
+
         self._counters_calculated = False
         self._nscanned = None
         self._ntoreturn = None
@@ -412,6 +415,26 @@ class LogEvent(object):
 
 
     @property
+    def command(self):
+        """ extract query pattern from operations """
+        
+        if not self._command_calculated:
+
+            self._command_calculated = True
+            if self.operation == 'command':
+                try: 
+                    command_idx = self.split_tokens.index('command:')
+                    command = self.split_tokens[command_idx+1]
+                    if command == '{':
+                        # workaround for <= 2.2 log files, where command was not listed separately
+                        command = self.split_tokens[command_idx+2][:-1]
+                    self._command = command
+                except ValueError:
+                    pass
+
+        return self._command
+
+    @property
     def nscanned(self):
         """ extract nscanned counter if available (lazy) """
 
@@ -610,7 +633,6 @@ class LogEvent(object):
             return json2pattern(search_str)
         else:
             return None
-
 
 
     def _reformat_timestamp(self, format, force=False):
