@@ -16,6 +16,9 @@ class MLogVisTool(LogFileTool):
         self.argparser.description = 'mongod/mongos log file visualizer (browser edition). Extracts \
             information from each line of the log file and outputs a html file that can be viewed in \
             a browser. Automatically opens a browser tab and shows the file.'
+        self.argparser.add_argument('--no-browser', action='store_true', help='only creates .html file, but does not open the browser.')
+        self.argparser.add_argument('--out', '-o', action='store', default=None, help='filename to output. Default is <original logfile>.html')
+
 
     def _export(self, with_line_str=True):
         fields = ['_id', 'datetime', 'operation', 'thread', 'namespace', 'nscanned', 'nreturned', 'duration', 'numYields', 'w', 'r']
@@ -56,6 +59,11 @@ class MLogVisTool(LogFileTool):
         if logname == '<stdin>':
             logname = 'stdin'
 
+        if self.args['out'] != None:
+            outputname = self.args['out']
+        else:
+            outputname = logname + '.html'
+
         os.chdir(mlogvis_dir)
 
         data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
@@ -67,7 +75,7 @@ class MLogVisTool(LogFileTool):
 
         outf = '{"type": "duration", "logfilename": "' + logname + '", "data":[' + json_docs + ']}'
 
-        dstfilelocation = os.path.join(os.getcwd(), '%s.html'%logname)
+        dstfilelocation = os.path.join(os.getcwd(), '%s'%outputname)
 
         print "copying %s to %s" % (srcfilelocation, dstfilelocation)
 
@@ -80,9 +88,9 @@ class MLogVisTool(LogFileTool):
         dstfile.write(replaced_contents)
         dstfile.close()
 
-        print "serving visualization on file://"+dstfilelocation
-
-        webbrowser.open("file://"+dstfilelocation)
+        if not self.args['no_browser']:
+            print "serving visualization on file://"+dstfilelocation
+            webbrowser.open("file://"+dstfilelocation)
 
 
 if __name__ == '__main__':
