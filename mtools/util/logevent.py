@@ -28,6 +28,9 @@ class LogEvent(object):
         thread: the thread name (e.g. "conn1234") as string
         operation: insert, update, remove, query, command, getmore, None
         namespace: the namespace of the operation, or None
+        command: the type of command, if the operation was a "command"
+        pattern: the query pattern for queries, updates, counts, etc
+        ...
 
         Certain operations also add the number of affected/scanned documents.
         If applicable, the following variables are also set, otherwise the
@@ -112,6 +115,7 @@ class LogEvent(object):
         self._ninserted = None
         self._ndeleted = None
         self._numYields = None
+        self._planSummary = None
         self._r = None
         self._w = None
         self._conn = None
@@ -507,6 +511,17 @@ class LogEvent(object):
         return self._numYields
 
     @property
+    def planSummary(self):
+        """ extract numYields counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._planSummary
+
+
+    @property
     def r(self):
         """ extract read lock (r) counter if available (lazy) """
 
@@ -533,7 +548,7 @@ class LogEvent(object):
 
         # extract counters (if present)
         counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated', 'ndeleted', 'r', 'w', 'numYields']
+            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary']
 
         split_tokens = self.split_tokens
 
@@ -552,6 +567,12 @@ class LogEvent(object):
                                     self._numYields = int((split_tokens[t+1+self.datetime_nextpos+2]).replace(',', ''))
                                 except ValueError:
                                     pass
+                            if counter == 'planSummary' and token.startswith('planSummary'):
+                                try:
+                                    self._planSummary = split_tokens[t+1+self.datetime_nextpos+2]
+                                except ValueError:
+                                    pass
+
                         # token not parsable, skip
                         break
 
