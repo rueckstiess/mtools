@@ -313,6 +313,16 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.command in ['dropDatabase', 'deleteIndexes'])
 
+    def test_planSummary(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26_corrupt.log')
+        self.tool.run('%s --planSummary IXSCAN'%logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert(len(lines) > 0)
+        for line in lines:
+            le = LogEvent(line)
+            assert(le.planSummary == "IXSCAN")
+
     def test_word(self):
         self.tool.run('%s --word lock'%self.logfile_path)
         output = sys.stdout.getvalue()

@@ -51,19 +51,26 @@ class LogLineFilter(BaseFilter):
             'nargs':'*', 
             'action':'store', 
             'help':'only output log lines which are commands of the given type. Examples: "distinct", "isMaster", "replSetGetStatus" (multiple values are allowed).'
+        }),
+        ('--planSummary', {
+            'nargs':'*', 
+            'metavar': 'PS',
+            'action':'store', 
+            'help':'only output log lines which match the given plan summary values (multiple values are allowed).'
         })
     ]
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
 
-        self.components  = None
-        self.levels      = None
-        self.namespaces  = None
-        self.operations  = None
-        self.threads     = None
-        self.commands    = None
-        self.pattern     = None
+        self.components    = None
+        self.levels        = None
+        self.namespaces    = None
+        self.operations    = None
+        self.threads       = None
+        self.commands      = None
+        self.pattern       = None
+        self.planSummaries = None
 
         if 'component' in self.mlogfilter.args and self.mlogfilter.args['component']:
             self.components = custom_parse_array(self.mlogfilter.args['component'])
@@ -86,6 +93,9 @@ class LogLineFilter(BaseFilter):
         if 'pattern' in self.mlogfilter.args and self.mlogfilter.args['pattern']:
             self.pattern = json2pattern(self.mlogfilter.args['pattern'])
             self.active = True
+        if 'planSummary' in self.mlogfilter.args and self.mlogfilter.args['planSummary']:
+            self.planSummaries = custom_parse_array(self.mlogfilter.args['planSummary'])
+            self.active = True
 
     def accept(self, logevent):
         # if several filters are active, all have to agree
@@ -105,4 +115,7 @@ class LogLineFilter(BaseFilter):
                 return False
         if self.pattern and logevent.pattern != self.pattern:
             return False
+        if self.planSummaries and logevent.planSummary not in self.planSummaries:
+            return False
+        
         return True
