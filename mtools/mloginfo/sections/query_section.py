@@ -13,7 +13,11 @@ try:
 except ImportError:
     np = None
 
-LogTuple = namedtuple('LogTuple', ['namespace', 'pattern', 'duration'])
+LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern', 'duration'])
+
+def op_or_cmd(le):
+    return le.operation if le.operation != 'command' else le.command
+
 
 class QuerySection(BaseSection):
     """ 
@@ -36,7 +40,7 @@ class QuerySection(BaseSection):
 
     def run(self):
         """ run this section and print out information. """
-        grouping = Grouping(group_by=lambda x: (x.namespace, x.pattern))
+        grouping = Grouping(group_by=lambda x: (x.namespace, x.operation, x.pattern))
         logfile = self.mloginfo.logfile
 
         if logfile.start and logfile.end:
@@ -52,8 +56,8 @@ class QuerySection(BaseSection):
                     progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
-            if le.operation in ['query', 'update', 'remove']:
-                lt = LogTuple(namespace=le.namespace, pattern=le.pattern, duration=le.duration)
+            if le.operation in ['query', 'getmore', 'update', 'remove'] or le.command in ['count', 'findandmodify']:
+                lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le), pattern=le.pattern, duration=le.duration)
                 grouping.add(lt)
 
         grouping.sort_by_size()
@@ -66,17 +70,18 @@ class QuerySection(BaseSection):
         if len(grouping) < 1:
             raise SystemExit('nothing to print.')
 
-        titles = ['namespace', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
+        titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
         table_rows = []
 
         for g in grouping:
             # calculate statistics for this group
-            namespace, pattern = g
+            namespace, op, pattern = g
 
             group_events = [le.duration for le in grouping[g] if le.duration != None]
 
             stats = OrderedDict()
             stats['namespace'] = namespace
+            stats['operation'] = op
             stats['pattern'] = pattern
             stats['count'] = len( group_events )
             stats['min'] = min( group_events ) if group_events else '-'

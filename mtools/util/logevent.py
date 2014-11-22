@@ -395,7 +395,7 @@ class LogEvent(object):
         if not self._pattern:
 
             # trigger evaluation of operation
-            if self.operation in ['query', 'getmore', 'update', 'remove']:
+            if self.operation in ['query', 'getmore', 'update', 'remove'] or self.command in ['count', 'findandmodify']:
                 self._pattern = self._find_pattern('query: ')
 
         return self._pattern
