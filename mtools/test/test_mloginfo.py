@@ -126,7 +126,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
 
-        assert len(filter(lambda line: re.match(r'\w+\.\w+\s+{', line), lines)) >= 1
+        assert len(filter(lambda line: re.match(r'\w+\.\w+\s+(query|update|getmore)\s+{', line), lines)) >= 1
 
 
     def test_restarts_output(self):
@@ -148,7 +148,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
 
-        assert len(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+{', line), lines)) >= 1
+        assert len(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{', line), lines)) >= 1
 
 
     def test_rsstate_225(self):
