@@ -280,6 +280,8 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("1-9", "toggle visibility of top 10 individual plots 1-9")
         print "    %8s  %s" % ("0", "toggle visibility of all plots")
         print "    %8s  %s" % ("-", "toggle visibility of legend")
+        print "    %8s  %s" % ("[/]", "decrease/increase opacity by 10%")
+        print "    %8s  %s" % ("{/}", "decrease/increase opacity by 1%")
         print "    %8s  %s" % ("g", "toggle grid")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
@@ -317,6 +319,47 @@ class MPlotQueriesTool(LogFileTool):
             plt.gcf().canvas.draw()
         except Exception:
             pass
+
+
+    def _init_opacities(self):
+        for artist in self.artists:
+            if not hasattr(artist, '_mt_opacity'):
+                artist._mt_opacity = artist.get_alpha()
+
+    def _any_opacities_to_increase(self, amount):
+        for artist in self.artists:
+            if artist._mt_opacity < 0.99:
+                return True
+        return False
+
+    def _any_opacities_to_decrease(self, amount):
+        for artist in self.artists:
+            if artist._mt_opacity > 0.01:
+                return True
+        return False
+
+    def set_opacities(self):
+        for artist in self.artists:
+            if artist._mt_opacity > 1.0:
+                artist.set_alpha(1.0)
+            elif artist._mt_opacity < 0.01:
+                artist.set_alpha(0.01)
+            else:
+                artist.set_alpha(artist._mt_opacity)
+
+    def increase_opacity(self, amount):
+        self._init_opacities()
+        if self._any_opacities_to_increase(amount):
+            for artist in self.artists:
+                artist._mt_opacity = artist._mt_opacity + amount
+            self.set_opacities()
+
+    def decrease_opacity(self, amount):
+        self._init_opacities()
+        if self._any_opacities_to_decrease(amount):
+            for artist in self.artists:
+                artist._mt_opacity = artist._mt_opacity - amount
+            self.set_opacities()
 
 
     def onpress(self, event):
@@ -367,6 +410,23 @@ class MPlotQueriesTool(LogFileTool):
             if self.args['ylimits']:
                 plt.gca().set_ylim( self.args['ylimits'] )
 
+            plt.gcf().canvas.draw()
+
+        # opacity
+        if event.key == '[':
+            self.decrease_opacity(0.10)
+            plt.gcf().canvas.draw()
+
+        if event.key == '{':
+            self.decrease_opacity(0.01)
+            plt.gcf().canvas.draw()
+
+        if event.key == ']':
+            self.increase_opacity(0.10)
+            plt.gcf().canvas.draw()
+
+        if event.key == '}':
+            self.increase_opacity(0.01)
             plt.gcf().canvas.draw()
 
 
