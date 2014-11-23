@@ -68,6 +68,7 @@ class QuerySection(BaseSection):
 
         # no queries in the log file
         if len(grouping) < 1:
+            print 'no queries found.'
             return
 
         titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
