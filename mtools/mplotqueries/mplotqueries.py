@@ -281,6 +281,7 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("0", "toggle visibility of all plots")
         print "    %8s  %s" % ("-", "toggle visibility of legend")
         print "    %8s  %s" % ("g", "toggle grid")
+        print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
         print "    %8s  %s" % ("q", "quit mplotqueries")
@@ -317,6 +318,15 @@ class MPlotQueriesTool(LogFileTool):
             plt.gcf().canvas.draw()
         except Exception:
             pass
+
+
+    def toggle_marker_edges(self):
+        for artist in self.artists:
+            if artist.get_markeredgewidth() != 0:
+                artist._mt_markeredgewidth = artist.get_markeredgewidth()
+                artist.set_markeredgewidth(0)
+            else:
+                artist.set_markeredgewidth(artist._mt_markeredgewidth)
 
 
     def onpress(self, event):
@@ -367,6 +377,10 @@ class MPlotQueriesTool(LogFileTool):
             if self.args['ylimits']:
                 plt.gca().set_ylim( self.args['ylimits'] )
 
+            plt.gcf().canvas.draw()
+
+        if event.key == 'e':
+            self.toggle_marker_edges()
             plt.gcf().canvas.draw()
 
 
