@@ -326,13 +326,13 @@ class MPlotQueriesTool(LogFileTool):
             if not hasattr(artist, '_mt_opacity'):
                 artist._mt_opacity = artist.get_alpha()
 
-    def _any_opacities_to_increase(self, amount):
+    def _any_opacities_to_increase(self):
         for artist in self.artists:
             if artist._mt_opacity < 0.99:
                 return True
         return False
 
-    def _any_opacities_to_decrease(self, amount):
+    def _any_opacities_to_decrease(self):
         for artist in self.artists:
             if artist._mt_opacity > 0.01:
                 return True
@@ -349,14 +349,14 @@ class MPlotQueriesTool(LogFileTool):
 
     def increase_opacity(self, amount):
         self._init_opacities()
-        if self._any_opacities_to_increase(amount):
+        if self._any_opacities_to_increase():
             for artist in self.artists:
                 artist._mt_opacity = artist._mt_opacity + amount
             self.set_opacities()
 
     def decrease_opacity(self, amount):
         self._init_opacities()
-        if self._any_opacities_to_decrease(amount):
+        if self._any_opacities_to_decrease():
             for artist in self.artists:
                 artist._mt_opacity = artist._mt_opacity - amount
             self.set_opacities()
