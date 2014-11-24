@@ -280,8 +280,8 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("1-9", "toggle visibility of top 10 individual plots 1-9")
         print "    %8s  %s" % ("0", "toggle visibility of all plots")
         print "    %8s  %s" % ("-", "toggle visibility of legend")
-        print "    %8s  %s" % ("[/]", "decrease/increase opacity by 10%")
-        print "    %8s  %s" % ("{/}", "decrease/increase opacity by 1%")
+        print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
+        print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
         print "    %8s  %s" % ("g", "toggle grid")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
@@ -326,13 +326,13 @@ class MPlotQueriesTool(LogFileTool):
             if not hasattr(artist, '_mt_opacity'):
                 artist._mt_opacity = artist.get_alpha()
 
-    def _any_opacities_to_increase(self, amount):
+    def _any_opacities_to_increase(self):
         for artist in self.artists:
             if artist._mt_opacity < 0.99:
                 return True
         return False
 
-    def _any_opacities_to_decrease(self, amount):
+    def _any_opacities_to_decrease(self):
         for artist in self.artists:
             if artist._mt_opacity > 0.01:
                 return True
@@ -349,14 +349,14 @@ class MPlotQueriesTool(LogFileTool):
 
     def increase_opacity(self, amount):
         self._init_opacities()
-        if self._any_opacities_to_increase(amount):
+        if self._any_opacities_to_increase():
             for artist in self.artists:
                 artist._mt_opacity = artist._mt_opacity + amount
             self.set_opacities()
 
     def decrease_opacity(self, amount):
         self._init_opacities()
-        if self._any_opacities_to_decrease(amount):
+        if self._any_opacities_to_decrease():
             for artist in self.artists:
                 artist._mt_opacity = artist._mt_opacity - amount
             self.set_opacities()
