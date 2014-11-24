@@ -51,6 +51,7 @@ class MPlotQueriesTool(LogFileTool):
         self.plot_types = [c[1] for c in inspect.getmembers(plottypes, inspect.isclass)]
         self.plot_types = dict((pt.plot_type_str, pt) for pt in self.plot_types)
         self.plot_instances = []
+        self.plot_instance = None
 
         # main parser arguments
         self.argparser.add_argument('--logscale', action='store_true', help='plot y-axis in logarithmic scale (default=off)')
@@ -121,7 +122,7 @@ class MPlotQueriesTool(LogFileTool):
             multiple_files = True
             self.args['group'] = 'filename'
         
-        plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
+        self.plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
 
         for logfile in self.logfiles:
             
@@ -154,7 +155,7 @@ class MPlotQueriesTool(LogFileTool):
                     self.update_progress(float(progress_curr-progress_start) / progress_total, 'parsing %s'%logfile.name)
 
                 # offer plot_instance and see if it can plot it
-                if plot_instance.accept_line(logevent):
+                if self.plot_instance.accept_line(logevent):
                     
                     # if logevent doesn't have datetime, skip
                     if logevent.datetime == None:
@@ -163,7 +164,7 @@ class MPlotQueriesTool(LogFileTool):
                     if logevent.namespace == None:
                         logevent._namespace = "None"
 
-                    plot_instance.add_line(logevent)
+                    self.plot_instance.add_line(logevent)
 
                 if multiple_files:
                     # amend logevent object with filename for group by filename
@@ -171,13 +172,13 @@ class MPlotQueriesTool(LogFileTool):
 
 
             # store start and end for each logfile (also works for system.profile and stdin stream)
-            plot_instance.date_range = (logfile.start, logfile.end)
+            self.plot_instance.date_range = (logfile.start, logfile.end)
 
         # clear progress bar
         if self.logfiles and self.progress_bar_enabled:
             self.update_progress(1.0)
 
-        self.plot_instances.append(plot_instance)
+        self.plot_instances.append(self.plot_instance)
 
 
     def group(self):
@@ -268,7 +269,7 @@ class MPlotQueriesTool(LogFileTool):
             print "Deleted overlays."          
 
 
-    def print_shortcuts(self):
+    def print_shortcuts(self, scatter=False):
         print "\nkeyboard shortcuts (focus must be on figure window):\n"
 
         print "    %8s  %s" % ("p", "switch to pan mode")
@@ -280,11 +281,12 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("1-9", "toggle visibility of top 10 individual plots 1-9")
         print "    %8s  %s" % ("0", "toggle visibility of all plots")
         print "    %8s  %s" % ("-", "toggle visibility of legend")
-        print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
-        print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
-        print "    %8s  %s" % ("</>", "decrease / increase marker size")
+        if scatter:
+            print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
+            print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
+            print "    %8s  %s" % ("</>", "decrease / increase marker size")
+            print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("g", "toggle grid")
-        print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
         print "    %8s  %s" % ("q", "quit mplotqueries")
@@ -463,33 +465,36 @@ class MPlotQueriesTool(LogFileTool):
             plt.gcf().canvas.draw()
 
         # opacity
-        if event.key == '[':
-            self.decrease_opacity(0.10)
-            plt.gcf().canvas.draw()
+        if isinstance(self.plot_instance, plottypes.ScatterPlotType):
+            if event.key == '[':
+                self.decrease_opacity(0.10)
+                plt.gcf().canvas.draw()
 
-        if event.key == '{':
-            self.decrease_opacity(0.01)
-            plt.gcf().canvas.draw()
+            if event.key == '{':
+                self.decrease_opacity(0.01)
+                plt.gcf().canvas.draw()
 
-        if event.key == ']':
-            self.increase_opacity(0.10)
-            plt.gcf().canvas.draw()
+            if event.key == ']':
+                self.increase_opacity(0.10)
+                plt.gcf().canvas.draw()
 
-        if event.key == '}':
-            self.increase_opacity(0.01)
-            plt.gcf().canvas.draw()
+            if event.key == '}':
+                self.increase_opacity(0.01)
+                plt.gcf().canvas.draw()
 
-        if event.key == 'e':
-            self.toggle_marker_edges()
-            plt.gcf().canvas.draw()
+            # edge on/off
+            if event.key == 'e':
+                self.toggle_marker_edges()
+                plt.gcf().canvas.draw()
 
-        if event.key == '<':
-            self.decrease_marker_size()
-            plt.gcf().canvas.draw()
+            # marker size
+            if event.key == '<':
+                self.decrease_marker_size()
+                plt.gcf().canvas.draw()
 
-        if event.key == '>':
-            self.increase_marker_size()
-            plt.gcf().canvas.draw()
+            if event.key == '>':
+                self.increase_marker_size()
+                plt.gcf().canvas.draw()
 
 
     def plot(self):
@@ -543,7 +548,7 @@ class MPlotQueriesTool(LogFileTool):
             if hasattr(plot_inst, 'ylabel'):
                 ylabel = plot_inst.ylabel
         if self.args['output_file'] is None:
-            self.print_shortcuts()
+            self.print_shortcuts(scatter=isinstance(self.plot_instance, plottypes.ScatterPlotType))
 
         axis.set_xlabel(xlabel)
         axis.set_xticklabels(axis.get_xticks(), rotation=90, fontsize=9)
