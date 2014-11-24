@@ -282,7 +282,9 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("-", "toggle visibility of legend")
         print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
         print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
+        print "    %8s  %s" % ("</>", "decrease / increase marker size")
         print "    %8s  %s" % ("g", "toggle grid")
+        print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
         print "    %8s  %s" % ("q", "quit mplotqueries")
@@ -361,6 +363,54 @@ class MPlotQueriesTool(LogFileTool):
                 artist._mt_opacity = artist._mt_opacity - amount
             self.set_opacities()
 
+    def toggle_marker_edges(self):
+        for artist in self.artists:
+            if artist.get_markeredgewidth() != 0:
+                artist._mt_markeredgewidth = artist.get_markeredgewidth()
+                artist.set_markeredgewidth(0)
+            else:
+                artist.set_markeredgewidth(artist._mt_markeredgewidth)
+
+    def _init_markersizes(self):
+        for artist in self.artists:
+            if not hasattr(artist, '_mt_markersize'):
+                artist._mt_markersize = artist.get_markersize()
+
+    def _any_markersizes_to_increase(self):
+        for artist in self.artists:
+            if artist._mt_markersize < 10.0:
+                return True
+        return False
+
+    def _any_markersizes_to_decrease(self):
+        for artist in self.artists:
+            if artist._mt_markersize > 1.0:
+                return True
+        return False
+
+    def set_markersizes(self):
+        for artist in self.artists:
+            if artist._mt_markersize > 10.0:
+                artist.set_markersize(10.0)
+            elif artist._mt_markersize < 1.01:
+                artist.set_markersize(1.0)
+            else:
+                artist.set_markersize(artist._mt_markersize)
+
+    def increase_marker_size(self, amount = 1):
+        self._init_markersizes()
+        if self._any_markersizes_to_increase():
+            for artist in self.artists:
+                artist._mt_markersize = artist._mt_markersize + amount
+            self.set_markersizes()
+
+    def decrease_marker_size(self, amount = 1):
+        self._init_markersizes()
+        if self._any_markersizes_to_decrease():
+            for artist in self.artists:
+                artist._mt_markersize = artist._mt_markersize - amount
+            self.set_markersizes()
+
 
     def onpress(self, event):
         # number keys
@@ -427,6 +477,16 @@ class MPlotQueriesTool(LogFileTool):
 
         if event.key == '}':
             self.increase_opacity(0.01)
+
+        if event.key == 'e':
+            self.toggle_marker_edges()
+
+        if event.key == '<':
+            self.decrease_marker_size()
+            plt.gcf().canvas.draw()
+
+        if event.key == '>':
+            self.increase_marker_size()
             plt.gcf().canvas.draw()
 
 
