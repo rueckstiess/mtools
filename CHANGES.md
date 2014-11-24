@@ -3,6 +3,19 @@ Changes to mtools
 
 #### version 1.1.7
 
+  * mtools now understands 2.8 style log format, with severity and components. Added by @jimoleary (#269)
+  * mlogfilter: added `--command`, `--planSummary`, `--component` and `--level` filters and allow multiple values for most filters (#239)
+  * mloginfo: show host information and replica set name if available (#247)
+  * mloginfo: added new section `--rsinfo` that prints replica set config information. Added by @jimoleary (#290)
+  * mloginfo: now includes `count` and `findAndModify` commands in the statistics and adds operation column (#310)
+  * mloginfo: version detection works for enterprise edition with SSL. Added by @gianpaj (#289)
+  * mplotqueries: ability to adjust graphical properties of scatter plots, like opacity, marker size and edge. Added by @devkev (#309)
+  * mlaunch: legacy mode for adding users with pymongo version < 2.5 (#221)
+  * mlaunch: named shards now have correct name for single instances (#291)
+  * mlaunch: `list` command was broken when other non-mtools instances were running. Added by @devkev (#297)
+  * mlogvis: added options `--no-browser` and `--out` for mlogvis (#306)  
+
+
 #### version 1.1.6
 
   * mlogfilter: `--thread` now also matches "connection accepted" lines for that connection (#218, #219)
