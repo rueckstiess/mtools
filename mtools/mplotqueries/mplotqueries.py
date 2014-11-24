@@ -282,7 +282,7 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("-", "toggle visibility of legend")
         print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
         print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
-        print "    %8s  %s" % ("< / >", "decrease / increase marker size")
+        print "    %8s  %s" % ("</>", "decrease / increase marker size")
         print "    %8s  %s" % ("g", "toggle grid")
         print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
