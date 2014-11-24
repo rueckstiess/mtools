@@ -283,6 +283,7 @@ class MPlotQueriesTool(LogFileTool):
         print "    %8s  %s" % ("[/]", "decrease / increase opacity by 10%")
         print "    %8s  %s" % ("{/}", "decrease / increase opacity by 1%")
         print "    %8s  %s" % ("g", "toggle grid")
+        print "    %8s  %s" % ("e", "toggle marker edges")
         print "    %8s  %s" % ("c", "toggle 'created with' footnote")
         print "    %8s  %s" % ("s", "save figure")
         print "    %8s  %s" % ("q", "quit mplotqueries")
@@ -361,6 +362,14 @@ class MPlotQueriesTool(LogFileTool):
                 artist._mt_opacity = artist._mt_opacity - amount
             self.set_opacities()
 
+    def toggle_marker_edges(self):
+        for artist in self.artists:
+            if artist.get_markeredgewidth() != 0:
+                artist._mt_markeredgewidth = artist.get_markeredgewidth()
+                artist.set_markeredgewidth(0)
+            else:
+                artist.set_markeredgewidth(artist._mt_markeredgewidth)
+
 
     def onpress(self, event):
         # number keys
@@ -427,6 +436,9 @@ class MPlotQueriesTool(LogFileTool):
 
         if event.key == '}':
             self.increase_opacity(0.01)
+
+        if event.key == 'e':
+            self.toggle_marker_edges()
             plt.gcf().canvas.draw()
 
 
