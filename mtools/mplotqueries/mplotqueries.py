@@ -477,9 +477,11 @@ class MPlotQueriesTool(LogFileTool):
 
         if event.key == '}':
             self.increase_opacity(0.01)
+            plt.gcf().canvas.draw()
 
         if event.key == 'e':
             self.toggle_marker_edges()
+            plt.gcf().canvas.draw()
 
         if event.key == '<':
             self.decrease_marker_size()
