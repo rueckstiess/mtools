@@ -59,7 +59,7 @@ class ScatterPlotType(BasePlotType):
         if self.logscale:
             axis.semilogy()
 
-        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.7, \
+        artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.8, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
@@ -136,14 +136,14 @@ class DurationLineType(ScatterPlotType):
         if self.logscale:
             axis.semilogy()
 
-        # artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.7, \
+        # artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.8, \
         #     markersize=7, picker=5, label=group)[0]
         
         artists = []
         labels = set()
 
         for i, (xs, xe, ye) in enumerate(zip(x_start, x_end, y)):
-            artist = axis.plot_date([xs, xe], [0, ye], '-', color=color, alpha=0.7, linewidth=2,
+            artist = axis.plot_date([xs, xe], [0, ye], '-', color=color, alpha=0.8, linewidth=2,
             markersize=7, picker=5, label=None if group in labels else group)[0]
             
             labels.add(group)
@@ -192,7 +192,7 @@ class NScannedNPlotType(ScatterPlotType):
             nreturned = 1.0
 
         y = [ getattr(logevent, 'nscanned') / nreturned for logevent in self.groups[group] ]
-        artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.5, \
+        artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.8, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
