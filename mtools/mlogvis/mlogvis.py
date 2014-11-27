@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from mtools.util.logevent import LogEvent
+from mtools.util.logfile import LogFile
 from mtools.util.cmdlinetool import LogFileTool
 import mtools
 
@@ -18,6 +19,7 @@ class MLogVisTool(LogFileTool):
             a browser. Automatically opens a browser tab and shows the file.'
         self.argparser.add_argument('--no-browser', action='store_true', help='only creates .html file, but does not open the browser.')
         self.argparser.add_argument('--out', '-o', action='store', default=None, help='filename to output. Default is <original logfile>.html')
+        self.argparser.add_argument('--file', action='store', default=None, help='path for logfile. Default is None.')
 
 
     def _export(self, with_line_str=True):
@@ -54,8 +56,13 @@ class MLogVisTool(LogFileTool):
         # store in current local folder
         mlogvis_dir = '.'
 
+        if self.args['file'] and os.path.isfile(self.args['file']):
+            self.args['logfile'] = LogFile(open(self.args['file'], 'r'))
+            self.is_stdin = False
+
         # change stdin logfile name and remove the < >
         logname = self.args['logfile'].name
+
         if logname == '<stdin>':
             logname = 'stdin'
 
