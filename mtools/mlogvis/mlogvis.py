@@ -29,7 +29,7 @@ class MLogVisTool(LogFileTool):
         first_row = True
         result_str = ''
         out_count = 0
-        line_max = int(self.args['line-max'])
+        line_max = int(self.args['line_max'])
         for line_no, logevent in enumerate(self.args['logfile']):
             # only export lines that have a datetime and duration
             if logevent.duration != None and logevent.datetime:
