@@ -1,6 +1,9 @@
 Changes to mtools
 =================
 
+#### version 1.1.8
+
+
 #### version 1.1.7
 
   * mtools now understands 2.8 style log format, with severity and components. Added by @jimoleary (#269)
