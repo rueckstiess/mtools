@@ -50,19 +50,9 @@ class LogEvent(object):
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore', 'command']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
-    log_components = ['-',
-                      'ACCESS',
-                      'COMMANDS',
-                      'INDEXING',
-                      'NETWORK',
-                      'QUERY',
-                      'REPLSETS',
-                      'SHARDING',
-                      'STORAGE',
-                      'JOURNAL',
-                      'WRITES',
-                      'S2',
-                      'TOTAL']
+    log_components = ['-','ACCESS','COMMAND','CONTROL','GEO', \
+                      'INDEX','NETWORK','QUERY','REPL','SHARDING', \
+                      'STORAGE','JOURNAL','WRITE','TOTAL']
 
     def __init__(self, doc_or_str):
         self._year_rollover = False
