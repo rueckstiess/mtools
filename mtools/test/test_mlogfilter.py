@@ -398,10 +398,10 @@ class TestMLogFilter(object):
         # load year rollover logfile
         yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
 
-        self.tool.run('%s --from Jan 1 2014 --timestamp-format iso8601-utc' % yro_logfile_path)
+        self.tool.run('%s --from Jan 1 2015 --timestamp-format iso8601-utc' % yro_logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            assert line.startswith("2014-")
+            assert line.startswith("2015-")
 
 
     def test_year_rollover_2(self):
@@ -414,7 +414,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
         for line in output.splitlines():
-            assert line.startswith("2013-")
+            assert line.startswith("2014-")
 
     def test_level_225(self):
         """ mlogfilter: test that mlogfilter works levels on older logs """
@@ -464,19 +464,19 @@ def _add_component_test(cls, name, component, expected):
     setattr(cls,test_method.__name__,test_method)
 
 _add_component_test(TestMLogFilter, 'test_total_component', 'TOTAL', 1)
-_add_component_test(TestMLogFilter, 'test_s2_component', 'S2', 1)
+_add_component_test(TestMLogFilter, 'test_s2_component', 'GEO', 1)
 _add_component_test(TestMLogFilter, 'test_all_component', " ".join(LogEvent.log_components), 25)
 _add_component_test(TestMLogFilter, 'test_dash_component', '-', 10)
 _add_component_test(TestMLogFilter, 'test_access_component', 'ACCESS', 1)
-_add_component_test(TestMLogFilter, 'test_commands_component', 'COMMANDS', 1)
-_add_component_test(TestMLogFilter, 'test_indexing_component', 'INDEXING', 1)
+_add_component_test(TestMLogFilter, 'test_commands_component', 'COMMAND', 1)
+_add_component_test(TestMLogFilter, 'test_indexing_component', 'INDEX', 1)
 _add_component_test(TestMLogFilter, 'test_network_component', 'NETWORK', 1)
 _add_component_test(TestMLogFilter, 'test_query_component', 'QUERY', 1)
-_add_component_test(TestMLogFilter, 'test_replsets_component', 'REPLSETS', 1)
+_add_component_test(TestMLogFilter, 'test_replsets_component', 'REPL', 1)
 _add_component_test(TestMLogFilter, 'test_sharding_component', 'SHARDING', 1)
 _add_component_test(TestMLogFilter, 'test_storage_component', 'STORAGE', 4)
 _add_component_test(TestMLogFilter, 'test_journal_component', 'JOURNAL', 1)
-_add_component_test(TestMLogFilter, 'test_writes_component', 'WRITES', 1)
+_add_component_test(TestMLogFilter, 'test_writes_component', 'WRITE', 1)
 
 
 def _add_level_test(cls, name, level, expected=1):
