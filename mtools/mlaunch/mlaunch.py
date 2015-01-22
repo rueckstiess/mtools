@@ -992,6 +992,10 @@ class MLaunchTool(BaseCmdLineTool):
                     continue
                 accepted_arguments.append(argument)
 
+        # add undocumented option
+        if binary == "mongod":
+            accepted_arguments.append('--wiredTigerEngineConfigString')
+
         # filter valid arguments
         result = []
         for i, arg in enumerate(arguments):
