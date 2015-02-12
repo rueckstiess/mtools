@@ -106,6 +106,7 @@ class LogEvent(object):
         self._ndeleted = None
         self._numYields = None
         self._planSummary = None
+        self._writeConflicts = None
         self._r = None
         self._w = None
         self._conn = None
@@ -450,6 +451,17 @@ class LogEvent(object):
 
 
     @property
+    def writeConflicts(self):
+        """ extract ntoreturn counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._writeConflicts
+
+
+    @property
     def nreturned(self):
         """ extract nreturned counter if available (lazy) """
 
@@ -538,7 +550,7 @@ class LogEvent(object):
 
         # extract counters (if present)
         counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary']
+            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary', 'writeConflicts', 'keyUpdates']
 
         split_tokens = self.split_tokens
 
