@@ -8,7 +8,6 @@ import os
 from dateutil.tz import tzutc
 
 from mtools.version import __version__
-from mtools.util.profile_collection import ProfileCollection
 from mtools.util.logfile import LogFile
 
 try:
@@ -17,6 +16,8 @@ try:
     except ImportError:
         from pymongo import Connection
         from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+
+    from mtools.util.profile_collection import ProfileCollection
 
     class InputSourceAction(argparse.FileType):
         """ This class extends the FileType class from the argparse module. It will try to open
