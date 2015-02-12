@@ -43,10 +43,6 @@ except ImportError:
         'mtools.mloginfo',        
         'mtools.mlogvis',
         'mtools.mplotqueries',
-        'mtools.mlogversion',
-        'mtools.mlogdistinct',
-        'mtools.mlogmerge',
-        'mtools.mlog2json',
         'mtools.mgenerate',
         'mtools.test',
         'mtools.util',
@@ -83,12 +79,8 @@ setup(
         "console_scripts": [
             "mgenerate=mtools.mgenerate.mgenerate:main",
             "mlaunch=mtools.mlaunch.mlaunch:main",
-            "mlog2json=mtools.mlog2json.mlog2json:main",
-            "mlogdistinct=mtools.mlogdistinct.mlogdistinct:main",
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
-            "mlogmerge=mtools.mlogmerge.mlogmerge:main",
-            "mlogversion=mtools.mlogversion.mlogversion:main",
             "mlogvis=mtools.mlogvis.mlogvis:main",
             "mplotqueries=mtools.mplotqueries.mplotqueries:main"
         ],
