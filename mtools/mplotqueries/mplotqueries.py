@@ -594,8 +594,9 @@ class MPlotQueriesTool(LogFileTool):
         else:
             plt.show()
 
-if __name__ == '__main__':
+def main():
     tool = MPlotQueriesTool()
     tool.run()
 
-
+if __name__ == '__main__':
+    sys.exit(main())

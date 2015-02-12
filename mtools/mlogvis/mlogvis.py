@@ -92,7 +92,9 @@ class MLogVisTool(LogFileTool):
             print "serving visualization on file://"+dstfilelocation
             webbrowser.open("file://"+dstfilelocation)
 
-
-if __name__ == '__main__':
+def main():
     tool = MLogVisTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

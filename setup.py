@@ -63,7 +63,6 @@ with open('mtools/version.py') as f:
 with open('README.md') as f:
     long_description = f.read()
 
-
 if sys.platform == 'darwin' and 'clang' in platform.python_compiler().lower():
     from distutils.sysconfig import get_config_vars
     res = get_config_vars()
@@ -80,8 +79,20 @@ setup(
     package_data = {
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
-    scripts=['scripts/mlaunch', 'scripts/mlogfilter', 'scripts/mlogvis', 'scripts/mplotqueries', 'scripts/mloginfo', \
-             'scripts/mlogversion', 'scripts/mlogmerge', 'scripts/mlog2json', 'scripts/mlogdistinct', 'scripts/mgenerate'],
+    entry_points={
+        "console_scripts": [
+            "mgenerate=mtools.mgenerate.mgenerate:main",
+            "mlaunch=mtools.mlaunch.mlaunch:main",
+            "mlog2json=mtools.mlog2json.mlog2json:main",
+            "mlogdistinct=mtools.mlogdistinct.mlogdistinct:main",
+            "mlogfilter=mtools.mlogfilter.mlogfilter:main",
+            "mloginfo=mtools.mloginfo.mloginfo:main",
+            "mlogmerge=mtools.mlogmerge.mlogmerge:main",
+            "mlogversion=mtools.mlogversion.mlogversion:main",
+            "mlogvis=mtools.mlogvis.mlogvis:main",
+            "mplotqueries=mtools.mplotqueries.mplotqueries:main"
+        ],
+    },
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
