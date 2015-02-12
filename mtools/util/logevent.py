@@ -423,7 +423,7 @@ class LogEvent(object):
                     if command == '{':
                         # workaround for <= 2.2 log files, where command was not listed separately
                         command = self.split_tokens[command_idx+2][:-1]
-                    self._command = command
+                    self._command = command.lower()
                 except ValueError:
                     pass
 
