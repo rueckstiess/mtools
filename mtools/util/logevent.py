@@ -369,13 +369,24 @@ class LogEvent(object):
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
-            # force evaluation of datetime to get access to datetime_offset
-            _ = self.datetime
+            # force evaluation of thread to get access to datetime_offset and to 
+            # protect from changes due to line truncation
+            _ = self.thread
 
         if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
             return
 
         op = split_tokens[self._datetime_nextpos + 1]
+
+        if op == 'warning:':
+            # check if this log line got truncated
+            if ("warning: log line attempted" in self._line_str) and \
+               ("over max size") in self._line_str:
+               self._datetime_nextpos = split_tokens.index('...')
+               op = split_tokens[self._datetime_nextpos + 1]
+            else: 
+                # unknown warning, bail out
+                return 
 
         if op in self.log_operations:
             self._operation = op
@@ -554,8 +565,8 @@ class LogEvent(object):
 
         split_tokens = self.split_tokens
 
-        # trigger thread evaluation to get access to offset
-        if self.thread:
+        # trigger operation evaluation to get access to offset
+        if self.operation:
             for t, token in enumerate(split_tokens[self.datetime_nextpos+2:]):
                 for counter in counters:
                     if token.startswith('%s:'%counter):
