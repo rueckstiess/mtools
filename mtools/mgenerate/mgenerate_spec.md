@@ -121,7 +121,7 @@ Will not insert the key/value pair. A percentage of missing values can be specif
 
 
 ###### Missing Percentage
-`{ "$missing" : { "percentage" : 30, "ifnot" : VALUE } }` <br>
+`{ "$missing" : { "percent" : 30, "ifnot" : VALUE } }` <br>
 
 Will cause the key/value pair to be missing 30% of the time, and otherwise set the VALUE for the given key.
 
