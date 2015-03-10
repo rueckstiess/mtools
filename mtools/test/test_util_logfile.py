@@ -58,6 +58,23 @@ class TestUtilLogFile(object):
         assert logfile.year_rollover == logfile.end
 
 
+    def test_storage_engine_detection(self):
+        """ LogFile: test if the correct storage engine is detected """
+
+        logfile = LogFile(self.file_year_rollover)
+        assert logfile.storage_engine == None
+
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        mmapv1 = open(logfile_path, 'r')
+        logfile = LogFile(mmapv1)
+        assert logfile.storage_engine == 'mmapv1'
+
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'wiredtiger.log')
+        wiredtiger = open(logfile_path, 'r')
+        logfile = LogFile(wiredtiger)
+        assert logfile.storage_engine == 'wiredTiger'
+        
+
     def test_hostname_port(self):
         # mongod
         logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')

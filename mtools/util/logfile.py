@@ -31,6 +31,8 @@ class LogFile(InputSource):
         self._repl_set_members = None
         self._repl_set_version = None
         
+        self._storage_engine = None
+        
         self._datetime_format = None
         self._year_rollover = None
 
@@ -145,24 +147,32 @@ class LogFile(InputSource):
 
     @property
     def repl_set(self):
-        """ return the replSet(if available). """
+        """ return the replSet (if available). """
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set
 
     @property
     def repl_set_members(self):
-        """ return the replSet(if available). """
+        """ return the replSet (if available). """
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set_members
 
     @property
     def repl_set_version(self):
-        """ return the replSet(if available). """
+        """ return the replSet (if available). """
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set_version
+
+    @property
+    def storage_engine(self):
+        """ return storage engine if available """
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._storage_engine
+    
 
     def next(self):
         """ get next line, adjust for year rollover and hint datetime format. """
@@ -253,6 +263,12 @@ class LogFile(InputSource):
                 match = re.search('replSet: "(?P<replSet>\S+)"', line)
                 if match:
                     self._repl_set = match.group('replSet')
+
+                match = re.search('engine: "(?P<engine>\S+)"', line)
+                if match:
+                    self._storage_engine = match.group('engine')
+                else:
+                    self._storage_engine = 'mmapv1'
 
             if "command admin.$cmd command: { replSetInitiate:" in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)

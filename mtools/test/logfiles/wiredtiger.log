@@ -1,0 +1,26 @@
+2015-03-10T14:21:24.484+1100 I CONTROL  [initandlisten] MongoDB starting : pid=36239 port=27017 dbpath=/Users/tr/Documents/tmp/data/db 64-bit host=enter.local
+2015-03-10T14:21:24.485+1100 I CONTROL  [initandlisten] db version v3.0.0
+2015-03-10T14:21:24.485+1100 I CONTROL  [initandlisten] git version: a841fd6394365954886924a35076691b4d149168
+2015-03-10T14:21:24.485+1100 I CONTROL  [initandlisten] build info: Darwin bs-osx108-1 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2015-03-10T14:21:24.485+1100 I CONTROL  [initandlisten] allocator: system
+2015-03-10T14:21:24.486+1100 I CONTROL  [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/Users/tr/Documents/tmp/data/db", engine: "wiredTiger" }, systemLog: { destination: "file", logAppend: true, path: "/Users/tr/Documents/tmp/data/mongod.log" } }
+2015-03-10T14:21:24.487+1100 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=8G,session_max=20000,eviction=(threads_max=4),statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),checkpoint=(wait=60,log_size=2GB),statistics_log=(wait=0),
+2015-03-10T14:21:24.699+1100 I NETWORK  [initandlisten] waiting for connections on port 27017
+2015-03-10T14:21:24.739+1100 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:63449 #1 (1 connection now open)
+2015-03-10T14:21:24.740+1100 I NETWORK  [conn1] end connection 127.0.0.1:63449 (0 connections now open)
+2015-03-10T14:21:24.741+1100 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:63450 #2 (1 connection now open)
+2015-03-10T14:21:24.742+1100 I NETWORK  [conn2] end connection 127.0.0.1:63450 (0 connections now open)
+2015-03-10T14:21:29.843+1100 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:63451 #3 (1 connection now open)
+2015-03-10T14:21:29.844+1100 I NETWORK  [conn3] end connection 127.0.0.1:63451 (0 connections now open)
+2015-03-10T14:21:29.845+1100 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:63452 #4 (1 connection now open)
+2015-03-10T14:21:29.846+1100 I COMMAND  [conn4] terminating, shutdown command received
+2015-03-10T14:21:29.846+1100 I CONTROL  [conn4] now exiting
+2015-03-10T14:21:29.846+1100 I NETWORK  [conn4] shutdown: going to close listening sockets...
+2015-03-10T14:21:29.846+1100 I NETWORK  [conn4] closing listening socket: 7
+2015-03-10T14:21:29.846+1100 I NETWORK  [conn4] closing listening socket: 8
+2015-03-10T14:21:29.847+1100 I NETWORK  [conn4] removing socket file: /tmp/mongodb-27017.sock
+2015-03-10T14:21:29.847+1100 I NETWORK  [conn4] shutdown: going to flush diaglog...
+2015-03-10T14:21:29.847+1100 I NETWORK  [conn4] shutdown: going to close sockets...
+2015-03-10T14:21:29.847+1100 I STORAGE  [conn4] WiredTigerKVEngine shutting down
+2015-03-10T14:21:30.202+1100 I STORAGE  [conn4] shutdown: removing fs lock...
+2015-03-10T14:21:30.202+1100 I CONTROL  [conn4] dbexit:  rc: 0
