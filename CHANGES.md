@@ -6,7 +6,7 @@ Changes to mtools
   * mloginfo: storage engine is now listed for log files (#330)
   * mplotqueries: x-axis bounds corrected when parsing multiple files (#322)
   * mlogfilter: truncated log lines ("too long ...") recognized and parsed as much as possible (#133)
-  * better cross-platform script support, especially for window susers (#230)
+  * better cross-platform script support, especially for windows users (#230)
   * logging components are updated to match final version of MongoDB 3.0 (#328, #327)
   * removed hard dependency on pymongo, only required if mlaunch is used (#337)
   * removed deprecated scripts like mlogversion, mlogdistinct (#336)
