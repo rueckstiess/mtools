@@ -18,6 +18,7 @@ class MLogVisTool(LogFileTool):
             a browser. Automatically opens a browser tab and shows the file.'
         self.argparser.add_argument('--no-browser', action='store_true', help='only creates .html file, but does not open the browser.')
         self.argparser.add_argument('--out', '-o', action='store', default=None, help='filename to output. Default is <original logfile>.html')
+        self.argparser.add_argument('--line-max', action='store', default=10000, help='max count of datapoints at which actual log line strings are not printed any more.')
 
 
     def _export(self, with_line_str=True):
@@ -33,8 +34,8 @@ class MLogVisTool(LogFileTool):
             if logevent.duration != None and logevent.datetime:
                 out_count += 1
                 # if too many lines include a line_str, the page won't load
-                if with_line_str and out_count > 10000:
-                    print "Warning: more than 10,000 data points detected. Skipping actual log line strings for faster plotting."
+                if with_line_str and out_count > self.args['line_max']:
+                    print "Warning: more than %i data points detected. Skipping actual log line strings for faster plotting." % self.args['line_max']
                     return False
                 # write log line out as json
                 if not first_row:
@@ -92,7 +93,9 @@ class MLogVisTool(LogFileTool):
             print "serving visualization on file://"+dstfilelocation
             webbrowser.open("file://"+dstfilelocation)
 
-
-if __name__ == '__main__':
+def main():
     tool = MLogVisTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

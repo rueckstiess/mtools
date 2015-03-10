@@ -51,7 +51,6 @@ class MLogInfoTool(LogFileTool):
             print "     length: %s" % len(self.logfile)
             print "     binary: %s" % (self.logfile.binary or "unknown")
             
-
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
             # if version is unknown, go by date
@@ -63,12 +62,12 @@ class MLogInfoTool(LogFileTool):
                 elif self.logfile.datetime_format == "iso8601-utc" or \
                      self.logfile.datetime_format == "iso8601-local":
                     if self.logfile.has_level:
-                        version = '>= 2.8 (iso8601 format, level, component)'
+                        version = '>= 3.0 (iso8601 format, level, component)'
                     else:
                         version = '= 2.6.x (iso8601 format)'
 
-            print "    version: %s" % version,
-            print
+            print "    version: %s" % version
+            print "    storage: %s" % (self.logfile.storage_engine or 'unknown')
 
             # now run all sections
             for section in self.sections:
@@ -78,6 +77,9 @@ class MLogInfoTool(LogFileTool):
                     section.run()
 
 
-if __name__ == '__main__':
+def main():
     tool = MLogInfoTool()
     tool.run()
+
+if __name__ == '__main__':
+    sys.exit(main())

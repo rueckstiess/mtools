@@ -67,12 +67,13 @@ class TestMLogInfo(object):
         assert results['length'] == '25'
         assert results['binary'] == 'mongod'
         assert results['version'] == '2.7.8'
+        assert results['storage'] == 'mmapv1'
 
     def test_28_no_restart(self):
         self._test_init('mongod_278_partial.log')
         self.tool.run('%s' % self.logfile_path)
         lines = sys.stdout.getvalue().splitlines()
-        assert any(map(lambda line: '>= 2.8 (iso8601 format, level, component)' in line, lines))
+        assert any(map(lambda line: '>= 3.0 (iso8601 format, level, component)' in line, lines))
 
     def test_multiple_files(self):
         self.tool.run('%s %s' % (self.logfile_path, self.logfile_path))

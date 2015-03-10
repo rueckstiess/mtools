@@ -8,7 +8,6 @@ import os
 from dateutil.tz import tzutc
 
 from mtools.version import __version__
-from mtools.util.profile_collection import ProfileCollection
 from mtools.util.logfile import LogFile
 
 try:
@@ -17,6 +16,8 @@ try:
     except ImportError:
         from pymongo import Connection
         from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+
+    from mtools.util.profile_collection import ProfileCollection
 
     class InputSourceAction(argparse.FileType):
         """ This class extends the FileType class from the argparse module. It will try to open
@@ -48,13 +49,19 @@ try:
                     if host == 'localhost' or re.match('\d+\.\d+\.\d+\.\d+', host):
                         return ProfileCollection(host, port, database, collection)
 
-                raise argparse.ArgumentTypeError("can't parse %s as file or MongoDB connection string." % string)
+                raise argparse.ArgumentTypeError("can't open %s as file or MongoDB connection string." % string)
 
 
 except ImportError:
 
     class InputSourceAction(argparse.FileType):
-        pass
+        def __call__(self, string):
+            try:
+                # catch filetype and return LogFile object
+                filehandle = argparse.FileType.__call__(self, string)
+                return LogFile(filehandle)
+            except argparse.ArgumentTypeError as e:
+                raise argparse.ArgumentTypeError("can't open %s" % string)
 
 
 class BaseCmdLineTool(object):

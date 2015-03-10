@@ -172,7 +172,9 @@ class MPlotQueriesTool(LogFileTool):
 
 
             # store start and end for each logfile (also works for system.profile and stdin stream)
-            self.plot_instance.date_range = (logfile.start, logfile.end)
+            range_min = min(self.plot_instance.date_range[0], logfile.start)
+            range_max = max(self.plot_instance.date_range[1], logfile.end)
+            self.plot_instance.date_range = (range_min, range_max)
 
         # clear progress bar
         if self.logfiles and self.progress_bar_enabled:
@@ -594,8 +596,9 @@ class MPlotQueriesTool(LogFileTool):
         else:
             plt.show()
 
-if __name__ == '__main__':
+def main():
     tool = MPlotQueriesTool()
     tool.run()
 
-
+if __name__ == '__main__':
+    sys.exit(main())

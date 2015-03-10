@@ -104,8 +104,7 @@ Installation instructions for matplotlib can be found under the [matplotlib Inst
 
 *required for matplotlib (in mplotqueries)*
 
-[NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations.
-Try installing NumPy with pip, by doing:
+[NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations. Version 1.8.0 or higher is required for mtools. Try installing NumPy with pip, by doing:
 
     pip install numpy
 

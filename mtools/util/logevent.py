@@ -50,19 +50,9 @@ class LogEvent(object):
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore', 'command']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
-    log_components = ['-',
-                      'ACCESS',
-                      'COMMANDS',
-                      'INDEXING',
-                      'NETWORK',
-                      'QUERY',
-                      'REPLSETS',
-                      'SHARDING',
-                      'STORAGE',
-                      'JOURNAL',
-                      'WRITES',
-                      'S2',
-                      'TOTAL']
+    log_components = ['-','ACCESS','COMMAND','CONTROL','GEO', \
+                      'INDEX','NETWORK','QUERY','REPL','SHARDING', \
+                      'STORAGE','JOURNAL','WRITE','TOTAL']
 
     def __init__(self, doc_or_str):
         self._year_rollover = False
@@ -116,6 +106,7 @@ class LogEvent(object):
         self._ndeleted = None
         self._numYields = None
         self._planSummary = None
+        self._writeConflicts = None
         self._r = None
         self._w = None
         self._conn = None
@@ -378,13 +369,24 @@ class LogEvent(object):
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
-            # force evaluation of datetime to get access to datetime_offset
-            _ = self.datetime
+            # force evaluation of thread to get access to datetime_offset and to 
+            # protect from changes due to line truncation
+            _ = self.thread
 
         if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
             return
 
         op = split_tokens[self._datetime_nextpos + 1]
+
+        if op == 'warning:':
+            # check if this log line got truncated
+            if ("warning: log line attempted" in self._line_str) and \
+               ("over max size") in self._line_str:
+               self._datetime_nextpos = split_tokens.index('...')
+               op = split_tokens[self._datetime_nextpos + 1]
+            else: 
+                # unknown warning, bail out
+                return 
 
         if op in self.log_operations:
             self._operation = op
@@ -432,7 +434,7 @@ class LogEvent(object):
                     if command == '{':
                         # workaround for <= 2.2 log files, where command was not listed separately
                         command = self.split_tokens[command_idx+2][:-1]
-                    self._command = command
+                    self._command = command.lower()
                 except ValueError:
                     pass
 
@@ -457,6 +459,17 @@ class LogEvent(object):
             self._extract_counters()
 
         return self._ntoreturn
+
+
+    @property
+    def writeConflicts(self):
+        """ extract ntoreturn counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._writeConflicts
 
 
     @property
@@ -548,12 +561,12 @@ class LogEvent(object):
 
         # extract counters (if present)
         counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary']
+            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary', 'writeConflicts', 'keyUpdates']
 
         split_tokens = self.split_tokens
 
-        # trigger thread evaluation to get access to offset
-        if self.thread:
+        # trigger operation evaluation to get access to offset
+        if self.operation:
             for t, token in enumerate(split_tokens[self.datetime_nextpos+2:]):
                 for counter in counters:
                     if token.startswith('%s:'%counter):
