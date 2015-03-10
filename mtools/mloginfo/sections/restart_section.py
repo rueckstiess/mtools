@@ -1,6 +1,9 @@
 from base_section import BaseSection
 
-from mtools.util.profile_collection import ProfileCollection
+try: 
+    from mtools.util.profile_collection import ProfileCollection
+except ImportError:
+    ProfileCollection = None
 
 class RestartSection(BaseSection):
     """ This section determines if there were any restarts in the log file and prints out
