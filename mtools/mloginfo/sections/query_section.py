@@ -1,6 +1,5 @@
 from base_section import BaseSection
 
-from mtools.util.profile_collection import ProfileCollection
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
