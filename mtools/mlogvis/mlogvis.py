@@ -18,7 +18,7 @@ class MLogVisTool(LogFileTool):
             a browser. Automatically opens a browser tab and shows the file.'
         self.argparser.add_argument('--no-browser', action='store_true', help='only creates .html file, but does not open the browser.')
         self.argparser.add_argument('--out', '-o', action='store', default=None, help='filename to output. Default is <original logfile>.html')
-        self.argparser.add_argument('--line-max', action='store', default='10000', help='max count of datapoints at which actual log line strings are not plotted any more.')
+        self.argparser.add_argument('--line-max', action='store', default='10000', help='max count of datapoints at which actual log line strings are not printed any more.')
 
 
     def _export(self, with_line_str=True):
