@@ -37,7 +37,7 @@ class DistinctSection(BaseSection):
             and group by matched pattern.
         """
 
-        if isinstance(self.mloginfo.logfile, ProfileCollection):
+        if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
             print
             print "    not available for system.profile collections"
             print

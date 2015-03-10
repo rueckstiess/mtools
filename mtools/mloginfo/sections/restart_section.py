@@ -28,7 +28,7 @@ class RestartSection(BaseSection):
 
     def run(self):
 
-        if isinstance(self.mloginfo.logfile, ProfileCollection):
+        if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
             print
             print "    not available for system.profile collections"
             print

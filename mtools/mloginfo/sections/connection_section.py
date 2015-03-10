@@ -29,7 +29,7 @@ class ConnectionSection(BaseSection):
 
     def run(self):
         """ run this section and print out information. """
-        if isinstance(self.mloginfo.logfile, ProfileCollection):
+        if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
             print
             print "    not available for system.profile collections"
             print
