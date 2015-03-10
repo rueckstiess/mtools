@@ -10,8 +10,8 @@ try:
     from setuptools import setup, find_packages
 
     # test for 2.7-included packages, add to requirements if not available
-    install_requires = ['psutil']
-    test_requires = ['nose>=1.0', 'psutil', 'pymongo>=2.4']
+    install_requires = ['psutil>=2.0']
+    test_requires = ['nose>=1.0', 'psutil>=2.0', 'pymongo>=2.4']
     try:
         import argparse
     except ImportError:

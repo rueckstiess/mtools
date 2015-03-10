@@ -241,9 +241,6 @@ class MLaunchTool(BaseCmdLineTool):
         # branch out in sub-commands
         getattr(self, self.args['command'])()
 
-    def _read_key_file():
-        with open(os.path.join(self.dir, 'keyfile'), 'r') as f:
-            return ''.join(f.readlines())
 
     # -- below are the main commands: init, start, stop, list, kill
     def init(self):
@@ -1121,7 +1118,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         for p in psutil.process_iter():
             # skip all but mongod / mongos
-            if p.name not in ['mongos', 'mongod']:
+            if p.name() not in ['mongos', 'mongod']:
                 continue
 
             port = None
@@ -1129,7 +1126,7 @@ class MLaunchTool(BaseCmdLineTool):
                 # compare ports based on command line argument
                 startup = self.startup_info[possible_port].split()
                 try:
-                    p_port = p.cmdline[p.cmdline.index('--port')+1]
+                    p_port = p.cmdline()[p.cmdline().index('--port')+1]
                     startup_port = startup[startup.index('--port')+1]
                 except ValueError:
                     continue
@@ -1315,6 +1312,11 @@ class MLaunchTool(BaseCmdLineTool):
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
+
+    
+    def _read_key_file():
+        with open(os.path.join(self.dir, 'keyfile'), 'r') as f:
+            return ''.join(f.readlines())
 
 
 def main():
