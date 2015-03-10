@@ -4,6 +4,7 @@ from mtools.util.grouping import Grouping
 
 import re
 from datetime import MINYEAR, MAXYEAR, datetime, timedelta
+from dateutil.tz import tzutc
 import types
 
 try:
@@ -24,8 +25,7 @@ class BasePlotType(object):
     sort_order = 0
     plot_type_str = 'base'
     default_group_by = None
-    date_range = (datetime(MAXYEAR, 12, 31), datetime(MINYEAR, 1, 1))
-
+    date_range = (datetime(MAXYEAR, 12, 31, tzinfo=tzutc()), datetime(MINYEAR, 1, 1, tzinfo=tzutc()))
 
     def __init__(self, args=None, unknown_args=None):
         self.args = args
