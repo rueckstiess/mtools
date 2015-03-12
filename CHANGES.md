@@ -15,7 +15,7 @@ Changes to mtools
   * removed deprecated scripts like mlogversion, mlogdistinct (#336)
   * command in LogEvent is now always lowercase (#335)
   * LogEvent now has writeConflicts property (#334)
-  * documented matplotlib minimum version 1.8.0 (#332)
+  * documented numpy minimum version 1.8.0 (#332)
 
 
 #### version 1.1.7
