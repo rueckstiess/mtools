@@ -97,7 +97,7 @@ In that case, you need to add `sudo` in front of the command.
 [matplotlib](http://matplotlib.org/) is a python 2D plotting library which produces 
 figures and graphs in a variety of formats and interactive environments across platforms.
 
-Installation instructions for matplotlib can be found under the [matplotlib Installation Guide](https://github.com/rueckstiess/mtools/wiki/matplotlib-Installation-Guide) page.
+Installation instructions for matplotlib can be found under the [matplotlib Installation Guide for Mac OS X](https://github.com/rueckstiess/mtools/wiki/matplotlib-Installation-Guide-for-Mac-OS-X) page.
 
 
 #### NumPy
