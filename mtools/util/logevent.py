@@ -242,11 +242,13 @@ class LogEvent(object):
                 # empty line, no need to parse datetime
                 self._datetime_calculated = True
                 return False
-
-            if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
-                # not the timestamp format that was hinted
-                _ = self.datetime
-                return False
+            try:
+                if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
+                    # not the timestamp format that was hinted
+                    _ = self.datetime
+                    return False
+            except:
+                pass
             return True
 
 
