@@ -1,1 +1,1 @@
-from operators import ChooseOperator, MissingOperator, NumberOperator, FloatOperator, ObjectIdOperator, ArrayOperator, DateTimeOperator, StringOperator, IncOperator, CoordinateOperator, PointOperator
+from operators import AgeOperator, ChooseOperator, MissingOperator, NumberOperator, FloatOperator, GaussOperator, ObjectIdOperator, ArrayOperator, DateTimeOperator, StringOperator, ZipfOperator, IncOperator, ConcatOperator, CoordinateOperator, PointOperator
