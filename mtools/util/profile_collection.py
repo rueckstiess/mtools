@@ -19,16 +19,17 @@ class ProfileCollection(InputSource):
     datetime_format = "ISODate()"
 
     def __init__(self, host='localhost', port=27017, database='test', collection='system.profile'):
-        """ constructor for ProfileCollection. Takes host, port, database and collection as parameters. 
+        """ constructor for ProfileCollection. Takes host, port, database and collection as parameters.
             All are optional and have default values.
         """
 
         # store parameters
-        self.host = host
-        self.port = port
+        self.hostname = host       # to match LogFile's behavior, the variable is called `hostname`
+        self.port = str(port)      # to match LogFile's behavior, self.port is string
         self.database = database
         self.collection = collection
         self.name = "%s.%s" % (database, collection)
+        self.storage_engine = None
 
         # property variables
         self._start = None
@@ -44,9 +45,21 @@ class ProfileCollection(InputSource):
             binary = 'mongos' if mc.is_mongos else 'mongod'
             self.binary = "%s (running on %s:%i)" % (binary, host, port)
 
+            try:
+                status = mc.admin.command({"serverStatus: 1"})
+                if 'storageEngine' in status:
+                    self.storage_engine = status['storageEngine']
+                else:
+                    self.storage_engine = 'mmapv1'
+            except:
+                self.storage_engine = None
+
         except (ConnectionFailure, AutoReconnect) as e:
             raise SystemExit("can't connect to database, please check if a mongod instance is running on %s:%s." % (host, port))
-        
+
+
+
+
         self.coll_handle = mc[database][collection]
 
         if self.coll_handle.count() == 0:
@@ -106,7 +119,7 @@ class ProfileCollection(InputSource):
     def _calculate_bounds(self):
         """ calculate beginning and end of log events. """
 
-        # get start datetime 
+        # get start datetime
         first = self.coll_handle.find_one(None, sort=[ ("ts", ASCENDING) ])
         last = self.coll_handle.find_one(None, sort=[ ("ts", DESCENDING) ])
 
