@@ -371,7 +371,7 @@ class LogEvent(object):
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
-            # force evaluation of thread to get access to datetime_offset and to
+            # force evaluation of thread to get access to datetime_offset and to 
             # protect from changes due to line truncation
             _ = self.thread
 
@@ -386,9 +386,9 @@ class LogEvent(object):
                ("over max size") in self._line_str:
                self._datetime_nextpos = split_tokens.index('...')
                op = split_tokens[self._datetime_nextpos + 1]
-            else:
+            else: 
                 # unknown warning, bail out
-                return
+                return 
 
         if op in self.log_operations:
             self._operation = op
@@ -408,7 +408,7 @@ class LogEvent(object):
 
         return self._pattern
 
-
+    
     @property
     def sort_pattern(self):
         """ extract query pattern from operations """
@@ -425,12 +425,12 @@ class LogEvent(object):
     @property
     def command(self):
         """ extract query pattern from operations """
-
+        
         if not self._command_calculated:
 
             self._command_calculated = True
             if self.operation == 'command':
-                try:
+                try: 
                     command_idx = self.split_tokens.index('command:')
                     command = self.split_tokens[command_idx+1]
                     if command == '{':
@@ -744,8 +744,6 @@ class LogEvent(object):
         self._duration_calculated = True
         self._duration = doc[u'millis']
 
-        # @TODO emulate _command_calculated
-
         self._datetime_calculated = True
         self._datetime = doc[u'ts']
         if self._datetime.tzinfo == None:
@@ -771,10 +769,10 @@ class LogEvent(object):
 
             # sort pattern
             if 'orderby' in doc['query'] and isinstance(doc['query']['orderby'], dict):
-                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')
+                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')    
             elif '$orderby' in doc['query']:
                 self._sort_pattern = str(doc['query']['$orderby']).replace("'", '"')
-            else:
+            else: 
                 self._sort_pattern = None
 
         self._counters_calculated = True
@@ -785,21 +783,11 @@ class LogEvent(object):
         self._ninserted = doc[u'ninserted'] if 'ninserted' in doc else None
         self._ndeleted = doc[u'ndeleted'] if 'ndeleted' in doc else None
         self._numYields = doc[u'numYield'] if 'numYield' in doc else None
+        self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
+        self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
 
-        if 'lockStats' in doc:
-            # MongoDB 2.6 and before
-            self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
-            self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
-            self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
-            self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
-
-        elif 'locks' in doc:
-            # @TODO MongoDB 3.0
-            self._r = None
-            self._w = None
-            self._r_acquiring = None
-            self._w_acquiring = None
-
+        self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
+        self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
 
         # build a fake line_str
         payload = ''
@@ -812,11 +800,7 @@ class LogEvent(object):
 
         scanned = 'nscanned:%i'%self._nscanned if 'nscanned' in doc else ''
         yields = 'numYields:%i'%self._numYields if 'numYield' in doc else ''
-        if self.w == None and self.r == None:
-            locks = ''
-        else:
-            locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
-
+        locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
         duration = '%ims' % self.duration if self.duration != None else ''
 
         self._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(
