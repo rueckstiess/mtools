@@ -10,6 +10,8 @@ from dateutil import parser
 import time
 import string
 import itertools
+import calendar
+import struct
 
 
 class BaseOperator(object):
@@ -35,16 +37,6 @@ class BaseOperator(object):
                 parsed[k] = v.encode('utf-8')
         return parsed
 
-
-
-class ObjectIdOperator(BaseOperator):
-
-    names = ['$objectid', '$oid']
-    string_format = True
-
-    def __call__(self, options=None):
-        self._parse_options(options)
-        return ObjectId()
 
 
 class NumberOperator(BaseOperator):
@@ -335,5 +327,36 @@ class DateTimeOperator(BaseOperator):
         # generate random epoch number
         epoch = randint(mintime, maxtime)
         return datetime.fromtimestamp(epoch)
+
+
+
+class ObjectIdOperator(DateTimeOperator):
+    """ with no parameters, just generate a new ObjectId. If min and/or max
+        are provided, handle like DateTimeOperator and replace the timestamp
+        portion in the ObjectId with the random date and time.
+    """
+
+    names = ['$objectid', '$oid']
+    defaults = OrderedDict([ ('min', None), ('max', None) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        mintime = self._decode(options['min'])
+        maxtime = self._decode(options['max'])
+
+        if (mintime == None and maxtime == None):
+            return ObjectId()
+
+        # decode min and max and convert time formats to epochs
+        mintime = self._parse_dt(mintime or 0)
+        maxtime = self._parse_dt(maxtime or time.time())
+        assert mintime <= maxtime
+
+        # generate random epoch number
+        epoch = randint(mintime, maxtime)
+        oid = struct.pack(">i", int(epoch))+ ObjectId().binary[4:]
+
+        return ObjectId(oid)
 
 
