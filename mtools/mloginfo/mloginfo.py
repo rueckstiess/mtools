@@ -4,6 +4,7 @@ from mtools.util.logfile import LogFile
 from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 
+import sys
 import inspect
 import mtools.mloginfo.sections as sections
 
@@ -50,7 +51,7 @@ class MLogInfoTool(LogFileTool):
             print "date format: %s" % self.logfile.datetime_format
             print "     length: %s" % len(self.logfile)
             print "     binary: %s" % (self.logfile.binary or "unknown")
-            
+
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
             # if version is unknown, go by date

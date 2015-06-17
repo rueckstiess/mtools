@@ -4,6 +4,7 @@ from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 import mtools
 
+import sys
 import os
 import webbrowser
 
@@ -47,7 +48,7 @@ class MLogVisTool(LogFileTool):
                 logevent._id = line_no
                 result_str += logevent.to_json(fields)
         return result_str
-        
+
 
     def run(self, arguments=None):
         LogFileTool.run(self, arguments)
@@ -69,7 +70,7 @@ class MLogVisTool(LogFileTool):
 
         data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
         srcfilelocation = os.path.join(data_path, 'index.html')
-        
+
         json_docs = self._export(True)
         if not json_docs:
             json_docs = self._export(False)
