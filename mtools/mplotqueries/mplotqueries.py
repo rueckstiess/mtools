@@ -564,6 +564,9 @@ class MPlotQueriesTool(LogFileTool):
             ylabel += ' (log scale)'
         axis.set_ylabel(ylabel)
 
+        # enable grid
+        axis.grid(True)
+
         # title and mtools link
         axis.set_title(self.args['title'] or ', '.join([l.name for l in self.logfiles if l.name != '<stdin>']))
         plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.95)
