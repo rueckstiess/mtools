@@ -54,9 +54,9 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
             return False
         try:
             # make connection and ping host
-            con = Connection(host)
-            if not con.alive():
-                raise Exception
+            con = Connection(host,serverSelectionTimeoutMS=100)
+            con.admin.command('ping')
+
             if to_start:
                 if queue:
                     queue.put_nowait((port, True))
@@ -77,7 +77,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
     """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
     host = 'localhost:%i'%port
     try:
-        mc = Connection(host)
+        mc = Connection(host,serverSelectionTimeoutMS=100)
         try:
             if username and password and authdb:
                 if authdb != "admin":
@@ -790,7 +790,7 @@ class MLaunchTool(BaseCmdLineTool):
     def is_running(self, port):
         """ returns if a host on a specific port is running. """
         try:
-            con = Connection('localhost:%s' % port)
+            con = Connection('localhost:%s' % port,serverSelectionTimeoutMS=100)
             con.admin.command('ping')
             return True
         except (AutoReconnect, ConnectionFailure):
@@ -1314,7 +1314,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.startup_info[str(port)] = command_str
 
     
-    def _read_key_file():
+    def _read_key_file(self):
         with open(os.path.join(self.dir, 'keyfile'), 'r') as f:
             return ''.join(f.readlines())
 
