@@ -186,12 +186,7 @@ class NScannedNPlotType(ScatterPlotType):
 
         color, marker = self.color_map(group)
 
-        # duration plots require y coordinate and use plot_date
-        nreturned = float(logevent.nreturned)
-        if nreturned == 0.0:
-            nreturned = 1.0
-
-        y = [ getattr(logevent, 'nscanned') / nreturned for logevent in self.groups[group] ]
+        y = [ getattr(logevent, 'nscanned') / (float(getattr(logevent, 'nreturned')) if getattr(logevent, 'nreturned') != 0 else 1.0) for logevent in self.groups[group] ]
         artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.8, \
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
