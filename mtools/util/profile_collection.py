@@ -1,6 +1,7 @@
 from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 from dateutil.tz import tzutc
+from pprint import pprint
 
 try:
     try:
@@ -18,13 +19,13 @@ class ProfileCollection(InputSource):
 
     datetime_format = "ISODate()"
 
-    def __init__(self, host='localhost', port=27017, database='test', collection='system.profile'):
-        """ constructor for ProfileCollection. Takes host, port, database and collection as parameters. 
+    def __init__(self, hostname='localhost', port=27017, database='test', collection='system.profile'):
+        """ constructor for ProfileCollection. Takes hostname, port, database and collection as parameters.
             All are optional and have default values.
         """
 
         # store parameters
-        self.host = host
+        self.hostname = hostname
         self.port = port
         self.database = database
         self.collection = collection
@@ -39,14 +40,20 @@ class ProfileCollection(InputSource):
 
         # test if database can be reached and collection exists
         try:
-            mc = Connection(host=host, port=port)
+            mc = Connection(host=hostname, port=port)
+            server_info = mc.server_info()
             self.versions = [ mc.server_info()[u'version'] ]
             binary = 'mongos' if mc.is_mongos else 'mongod'
-            self.binary = "%s (running on %s:%i)" % (binary, host, port)
+            try:
+                self.storage_engine = mc[database].command('serverStatus')[u'storageEngine'][u'name']
+            except KeyError:
+                self.storage_engine = 'mmapv1'
+                
+            self.binary = "%s (running on %s:%i)" % (binary, hostname, port)
 
         except (ConnectionFailure, AutoReconnect) as e:
-            raise SystemExit("can't connect to database, please check if a mongod instance is running on %s:%s." % (host, port))
-        
+            raise SystemExit("can't connect to database, please check if a mongod instance is running on %s:%s." % (hostname, port))
+
         self.coll_handle = mc[database][collection]
 
         if self.coll_handle.count() == 0:
@@ -88,7 +95,7 @@ class ProfileCollection(InputSource):
 
 
     def __iter__(self):
-        """ iteration over ProfileCollection object will return a LogEvent object for each document. """
+        """ iteration over host object will return a LogEvent object for each document. """
 
         self.cursor = self.coll_handle.find().sort([ ("ts", ASCENDING) ])
 
@@ -106,7 +113,7 @@ class ProfileCollection(InputSource):
     def _calculate_bounds(self):
         """ calculate beginning and end of log events. """
 
-        # get start datetime 
+        # get start datetime
         first = self.coll_handle.find_one(None, sort=[ ("ts", ASCENDING) ])
         last = self.coll_handle.find_one(None, sort=[ ("ts", DESCENDING) ])
 

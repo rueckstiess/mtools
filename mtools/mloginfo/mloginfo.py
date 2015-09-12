@@ -4,6 +4,7 @@ from mtools.util.logfile import LogFile
 from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
 
+import sys
 import inspect
 import mtools.mloginfo.sections as sections
 
@@ -42,7 +43,7 @@ class MLogInfoTool(LogFileTool):
                 end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
 
             print "     source: %s" % self.logfile.name
-            print "       host: %s" % (self.logfile.hostname + ':' + self.logfile.port if self.logfile.hostname else "unknown")
+            print "       host: %s" % (self.logfile.hostname + ':' + str(self.logfile.port) if self.logfile.hostname else "unknown")
             print "      start: %s" % (start_time)
             print "        end: %s" % (end_time)
 
@@ -50,7 +51,7 @@ class MLogInfoTool(LogFileTool):
             print "date format: %s" % self.logfile.datetime_format
             print "     length: %s" % len(self.logfile)
             print "     binary: %s" % (self.logfile.binary or "unknown")
-            
+
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
             # if version is unknown, go by date

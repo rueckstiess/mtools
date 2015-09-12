@@ -1,8 +1,20 @@
 Changes to mtools
 =================
 
+#### version 1.1.9
+
+  * mplotqueries: pin python-dateutil to version 2.2 because of problems with matplotlib (#377)
+  * mplotqueries: fixed scaling issues with nscanned/n plots @devkev (#243, #379)
+  * mlaunch: support for PyMongo 3.x @gormanb (#351)
+  * better handling of invalid log lines due to line breaks @gianpaj (#375)
+  * mloginfo: fixed bugs when reading from system.profile collection (#353)
+  * mloginfo: includes geoNear commands in statistics (#344)
+  * mgenerate: added more operators, like `$concat`, `$normal`, `$zipf` (#360)
+  * fixed false positives in the test suite
+
+
 #### version 1.1.8
-  
+
   * mloginfo: storage engine is now listed for log files (#330)
   * mplotqueries: x-axis bounds corrected when parsing multiple files (#322)
   * mlogfilter: truncated log lines ("too long ...") recognized and parsed as much as possible (#133)
@@ -36,7 +48,7 @@ Changes to mtools
   * mlogfilter: fixed bug that would print milliseconds in timestamp twice in 2.6 format for UTC timezone (#241)
   * mlaunch: allow overriding hostname for replica set setup (#256)
   * mlaunch: added a `restart` command (#253)
-  * mlaunch: added `--startup` to `list` command to show all startup strings (#257) 
+  * mlaunch: added `--startup` to `list` command to show all startup strings (#257)
   * mlaunch: aliased `--verbose` (now depricated) as `--tags` (#257)
   * mloginfo: added `--rsstate` option to show all replica set state changes in log file. Added by @jimoleary (#228)
   * mloginfo: fixed issues with 95-percentile calculation. Added by @gianpaj (#238)
@@ -81,7 +93,7 @@ For all changes, see the [closed issues tagged with milestone 1.1.4](https://git
   * all log-parsing tools are now timezone aware. If no timezone is specified (all log files <= 2.4.x), then UTC is assumed (#174)
   * added new tool `mgenerate` to create structured randomized data for issue reproduction
   * mlaunch: Added a `kill` command to send SIGTERM or any other signal to all or a subset of instances (#168)
-  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles. Thanks, @sl33nyc (#156) 
+  * mlaunch: username + password is added for environments with `--authentication`. Configurable username, password, database, roles. Thanks, @sl33nyc (#156)
   * mlaunch: start command can receive new arguments to pass through to mongos/d, and a different `--binarypath` (#151)
   * mlaunch: now checks in advance if port range is free, and warns if not (#166)
   * mlaunch: `--version` was removed by accident in 1.1.2. It's back now (#160)
@@ -100,7 +112,7 @@ For all changes, see the [closed issues tagged with milestone 1.1.3](https://git
   * mplotqueries: log parsing performance improvements for most plots
   * mlogvis: log parsing performance improvements
   * all tools: replaced shebang with `#!/usr/bin/env python`, to support non-standard python installations
-  
+
 
 #### version 1.1.1
 
@@ -115,7 +127,7 @@ For all changes, see the [closed issues tagged with milestone 1.1.3](https://git
 
 ###### Simpler Structure
 
-Simplified tool structure. A lot of the mini-scripts have been combined. There are only 5 scripts left: mlogfilter, mloginfo, mplotqueries, mlogvis, mlaunch. No features have been cut, they are all still available within the 5 scripts, but may have moved. 
+Simplified tool structure. A lot of the mini-scripts have been combined. There are only 5 scripts left: mlogfilter, mloginfo, mplotqueries, mlogvis, mlaunch. No features have been cut, they are all still available within the 5 scripts, but may have moved.
 
 ###### New Features
 
@@ -133,12 +145,12 @@ Simplified tool structure. A lot of the mini-scripts have been combined. There a
 **mplotqueries**
 * can now group on arbitrary regular expressions
 * has a new group limits feature, to group all but the top x groups together
-* range plots support gaps 
+* range plots support gaps
 * better color scheme
 * shows progress bar during log file parsing
 
 **mlaunch**
-* support multiple mongos 
+* support multiple mongos
 
 
 ###### And Many Bug Fixes

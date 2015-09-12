@@ -37,6 +37,18 @@ try:
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
+# wrapper around Connection (itself conditionally a MongoClient or
+# pymongo.Connection) to specify timeout if pymongo >= 3.0
+class MongoConnection(Connection):
+    def __init__(self, *args, **kwargs):
+        if pymongo_version[0] >= 3:
+            if not 'serverSelectionTimeoutMS' in kwargs:
+                kwargs['serverSelectionTimeoutMS'] = 1
+        else:
+            if 'serverSelectionTimeoutMS' in kwargs:
+                kwargs.remove('serverSelectionTimeoutMS')
+
+        Connection.__init__(self, *args, **kwargs)
 
 def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
@@ -54,9 +66,9 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
             return False
         try:
             # make connection and ping host
-            con = Connection(host)
-            if not con.alive():
-                raise Exception
+            con = MongoConnection(host)
+            con.admin.command('ping')
+
             if to_start:
                 if queue:
                     queue.put_nowait((port, True))
@@ -77,7 +89,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
     """ send the shutdown command to a mongod or mongos on given port. This function can be called as a separate thread. """
     host = 'localhost:%i'%port
     try:
-        mc = Connection(host)
+        mc = MongoConnection(host)
         try:
             if username and password and authdb:
                 if authdb != "admin":
@@ -297,7 +309,7 @@ class MLaunchTool(BaseCmdLineTool):
             if first_init:
                 # add shards
                 mongos = sorted(self.get_tagged(['mongos']))
-                con = Connection('localhost:%i'%mongos[0])
+                con = MongoConnection('localhost:%i'%mongos[0])
 
                 shards_to_add = len(self.shard_connection_str)
                 nshards = con['config']['shards'].count()
@@ -771,7 +783,8 @@ class MLaunchTool(BaseCmdLineTool):
             port = i+current_port
 
             try:
-                mc = Connection( 'localhost:%i'%port )
+                mc = MongoConnection('localhost:%i'%port)
+                mc.admin.command('ping')
                 running = True
 
             except ConnectionFailure:
@@ -790,7 +803,7 @@ class MLaunchTool(BaseCmdLineTool):
     def is_running(self, port):
         """ returns if a host on a specific port is running. """
         try:
-            con = Connection('localhost:%s' % port)
+            con = MongoConnection('localhost:%s' % port)
             con.admin.command('ping')
             return True
         except (AutoReconnect, ConnectionFailure):
@@ -1079,7 +1092,7 @@ class MLaunchTool(BaseCmdLineTool):
         if not self.args['replicaset']:
             return 
 
-        con = Connection('localhost:%i'%port)
+        con = MongoConnection('localhost:%i'%port)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
         except OperationFailure, e:
@@ -1098,7 +1111,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _add_user(self, port, name, password, database, roles):
-        con = Connection('localhost:%i'%port)
+        con = MongoConnection('localhost:%i'%port)
         try:
             con[database].add_user(name, password=password, roles=roles)
         except OperationFailure as e:
@@ -1314,7 +1327,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.startup_info[str(port)] = command_str
 
     
-    def _read_key_file():
+    def _read_key_file(self):
         with open(os.path.join(self.dir, 'keyfile'), 'r') as f:
             return ''.join(f.readlines())
 

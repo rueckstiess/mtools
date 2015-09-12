@@ -10,15 +10,15 @@ class DateTimeBoundaries(object):
     timeunits = ['secs', 'sec', 's', 'mins', 'min', 'm', 'months', 'month', 'mo', 'hours', 'hour', 'h', 'days', 'day', 'd', 'weeks','week', 'w', 'years', 'year', 'y']
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-    dtRegexes = OrderedDict([ 
+    dtRegexes = OrderedDict([
         # special constants
-        ('constant', re.compile('(now|start|end|today|yesterday)' + '($|\s+)')),                        
+        ('constant', re.compile('(now|start|end|today|yesterday)' + '($|\s+)')),
         # weekday: Mon, Wed, Sat
-        ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),                 
+        ('weekday',  re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),
         # 11:59:00.123, 1:13:12.004  (also match timezone postfix like Z or +0700 or -05:30)
-        # ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?(?P<timezone>[0-9Z:\+\-]+)?' + '($|\s+)')),                                      
+        # ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' + '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)?(?P<timezone>[0-9Z:\+\-]+)?' + '($|\s+)')),
         # offsets: +3min, -20s, +7days  (see timeunits above)
-        ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))                          
+        ('offset',   re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' + '|'.join(timeunits) +')'+'($|\s+)'))
     ])
 
     def __init__(self, start, end):
@@ -31,7 +31,7 @@ class DateTimeBoundaries(object):
         self.start = start
         if not self.start.tzinfo:
             self.start = self.start.replace(tzinfo=tzutc())
-        
+
         self.end = end
         if not self.end.tzinfo:
             self.end = self.end.replace(tzinfo=tzutc())
@@ -39,7 +39,7 @@ class DateTimeBoundaries(object):
 
     def string2dt(self, s, lower_bound=None):
         original_s = s
-        
+
         result = {}
         dt = None
 
@@ -76,7 +76,7 @@ class DateTimeBoundaries(object):
                 most_recent_date = self.end.replace(hour=0, minute=0, second=0, microsecond=0)
                 offset = (most_recent_date.weekday() - self.weekdays.index(weekday)) % 7
                 dt = most_recent_date - timedelta(days=offset)
-            
+
         # if anything remains unmatched, try parsing it with dateutil's parser
         if s.strip() != '':
             try:
@@ -102,7 +102,7 @@ class DateTimeBoundaries(object):
         if dt.tzinfo == None:
             dt = dt.replace(tzinfo=self.start.tzinfo)
 
-        
+
         # time is applied separately (not through the parser) so that string containing only time don't use today as default date (parser behavior)
         # if 'time' in result:
         #     dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
@@ -133,7 +133,7 @@ class DateTimeBoundaries(object):
             elif dct['unit'] in ['y', 'year', 'years']:
                 dct['unit'] = 'days'
                 mult = 365.24
-            
+
             if dct['operator'] == '-':
                 mult *= -1
 
@@ -142,7 +142,7 @@ class DateTimeBoundaries(object):
         # if parsed datetime is out of bounds and no year specified, try to adjust year
         year_present = re.search('\d{4,4}', original_s)
 
-        if not year_present:
+        if not year_present and not 'constant' in result:
             if dt < self.start and dt.replace(year=dt.year+1) >= self.start and dt.replace(year=dt.year+1) <= self.end:
                 dt = dt.replace(year=dt.year+1)
             elif dt > self.end and dt.replace(year=dt.year-1) >= self.start and dt.replace(year=dt.year-1) <= self.end:
@@ -163,7 +163,7 @@ class DateTimeBoundaries(object):
         # limit from and to at the real boundaries
         if to_dt > self.end:
             to_dt = self.end
-        
+
         if from_dt < self.start:
             from_dt = self.start
 
@@ -171,11 +171,10 @@ class DateTimeBoundaries(object):
 
 
 if __name__ == '__main__':
-    
+
     dtb = DateTimeBoundaries(parser.parse('Apr 8 2014 13:00-0400'), parser.parse('Apr 10 2014 16:21-0400'))
     lower, upper = dtb('2014-04-08T13:21-0400', '')
     print "lower", lower
     print "upper", upper
 
     print dtb.string2dt("start +3h")
-

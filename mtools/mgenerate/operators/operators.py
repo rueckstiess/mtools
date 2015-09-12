@@ -1,7 +1,8 @@
 from bson import ObjectId
 from mtools.util import OrderedDict
 
-from random import choice, random, randint
+from random import choice, random, randint, gauss
+from numpy.random import zipf
 
 from datetime import datetime
 from dateutil import parser
@@ -9,6 +10,8 @@ from dateutil import parser
 import time
 import string
 import itertools
+import calendar
+import struct
 
 
 class BaseOperator(object):
@@ -36,16 +39,6 @@ class BaseOperator(object):
 
 
 
-class ObjectIdOperator(BaseOperator):
-
-    names = ['$objectid', '$oid']
-    string_format = True
-
-    def __call__(self, options=None):
-        self._parse_options(options)
-        return ObjectId()
-
-
 class NumberOperator(BaseOperator):
 
     dict_format = True
@@ -63,6 +56,48 @@ class NumberOperator(BaseOperator):
 
         return randint(minval, maxval)
 
+
+class GaussOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$gauss', '$normal']
+    defaults = OrderedDict([ ('mean', 0.0), ('std', 1.0) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # decode mean and standard deviation
+        mu = self._decode(options['mean'])
+        sigma = self._decode(options['std'])
+
+        val = gauss(mu, sigma)
+        return val
+
+
+class ZipfOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$zipf', '$zeta']
+    defaults = OrderedDict([ ('alpha', 2.0) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # decode distribution parameter
+        alpha = self._decode(options['alpha'])
+
+        val = zipf(alpha) - 1
+        return val
+
+
+class AgeOperator(GaussOperator):
+    dict_format = False
+    names = ['$age']
+
+    def __call__(self, options=None):
+        return int(GaussOperator.__call__(self, options=[36, 10]))
 
 
 class FloatOperator(BaseOperator):
@@ -90,14 +125,14 @@ class IncOperator(BaseOperator):
     string_format = True
     names = ['$inc']
     defaults = OrderedDict([ ('start', 0), ('step', 1) ])
-    
+
     def __init__(self, decode_method):
         self.counter = None
         BaseOperator.__init__(self, decode_method)
 
     def __call__(self, options=None):
         options = self._parse_options(options)
-        
+
         # initialize counter on first use (not threadsafe!)
         if self.counter == None:
             self.counter = itertools.count(options['start'], options['step'])
@@ -169,13 +204,13 @@ class ChooseOperator(BaseOperator):
             return choice(options['from'])
         else:
             assert len(weights) == len(options['from'])
-            
+
             total_weight = 0
             acc_weight_items = []
             for item, weight in zip(options['from'], weights):
                 total_weight += weight
                 acc_weight_items.append( (total_weight, item) )
-            
+
             pick = random() * total_weight
             for weight, item in acc_weight_items:
                 if weight >= pick:
@@ -197,6 +232,29 @@ class ArrayOperator(BaseOperator):
 
         # build array of 'of' elements, but don't evaluate them yet
         return [ options['of'] ] * number
+
+
+class ConcatOperator(BaseOperator):
+
+    dict_format = True
+    names = ['$concat']
+    defaults = OrderedDict([ ('items', []), ('sep', '') ])
+
+    def __call__(self, options=None):
+
+        # options can be arbitrary long list, store as "items" in options dictionary
+        if isinstance(options, list):
+            options = {'items': options}
+
+        options = self._parse_options(options)
+
+        # evaluate items
+        items = self._decode(options['items'])
+        # separator
+        sep = self._decode(options['sep'])
+
+        # return concatenated string
+        return sep.join(str(i) for i in items)
 
 
 class CoordinateOperator(BaseOperator):
@@ -269,5 +327,36 @@ class DateTimeOperator(BaseOperator):
         # generate random epoch number
         epoch = randint(mintime, maxtime)
         return datetime.fromtimestamp(epoch)
+
+
+
+class ObjectIdOperator(DateTimeOperator):
+    """ with no parameters, just generate a new ObjectId. If min and/or max
+        are provided, handle like DateTimeOperator and replace the timestamp
+        portion in the ObjectId with the random date and time.
+    """
+
+    names = ['$objectid', '$oid']
+    defaults = OrderedDict([ ('min', None), ('max', None) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        mintime = self._decode(options['min'])
+        maxtime = self._decode(options['max'])
+
+        if (mintime == None and maxtime == None):
+            return ObjectId()
+
+        # decode min and max and convert time formats to epochs
+        mintime = self._parse_dt(mintime or 0)
+        maxtime = self._parse_dt(maxtime or time.time())
+        assert mintime <= maxtime
+
+        # generate random epoch number
+        epoch = randint(mintime, maxtime)
+        oid = struct.pack(">i", int(epoch))+ ObjectId().binary[4:]
+
+        return ObjectId(oid)
 
 

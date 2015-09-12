@@ -1,4 +1,4 @@
-# nose tests require multiprocessing package, see 
+# nose tests require multiprocessing package, see
 # https://groups.google.com/forum/#!msg/nose-users/fnJ-kAUbYHQ/_UsLN786ygcJ
 import multiprocessing
 import sys
@@ -24,23 +24,23 @@ try:
         test_requires.append('ordereddict')
 
     # add dateutil if not installed already
-    try: 
+    try:
         import dateutil
     except ImportError:
-        install_requires.append('python-dateutil')
-        test_requires.append('python-dateutil')
+        install_requires.append('python-dateutil==2.2')
+        test_requires.append('python-dateutil==2.2')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
 
 except ImportError:
     from distutils.core import setup
-    
+
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
         'mtools.mlaunch',
         'mtools.mlogfilter',
-        'mtools.mloginfo',        
+        'mtools.mloginfo',
         'mtools.mlogvis',
         'mtools.mplotqueries',
         'mtools.mgenerate',
@@ -69,7 +69,7 @@ if sys.platform == 'darwin' and 'clang' in platform.python_compiler().lower():
             res[key] = flags
 
 setup(
-    name='mtools', 
+    name='mtools',
     version=__version__,
     packages=packages,
     package_data = {
