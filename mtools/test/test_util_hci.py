@@ -47,7 +47,7 @@ def test_dtb_keywords():
     start = datetime(2012, 10, 14, tzinfo=tzutc())
     end = datetime(2050, 1, 1, tzinfo=tzutc())
     dtb = DateTimeBoundaries(start, end)
-    
+
     # start and end
     from_dt, to_dt = dtb('start', 'end')
     assert from_dt == start
@@ -75,7 +75,7 @@ def test_dtb_string2dt():
     assert dtb.string2dt('2013') == datetime(2013, 1, 1, 0, 0, tzinfo=tzutc())
     assert dtb.string2dt('Aug 2011') == datetime(2011, 8, 1, 0, 0, tzinfo=tzutc())
     assert dtb.string2dt('29 Sep 1978') == datetime(1978, 9, 29, 0, 0, tzinfo=tzutc())
-    
+
     # no year given, choose end year if still in log file, otherwise year before
     assert dtb.string2dt('20 Mar') == datetime(2015, 3, 20, 0, 0, tzinfo=tzutc())
     assert dtb.string2dt('20 Aug') == datetime(2014, 8, 20, 0, 0, tzinfo=tzutc())
@@ -116,7 +116,7 @@ def test_dtb_string2dt():
     # assert dtb.string2dt('13:06:15 -16sec') == datetime(2014, 1, 1, 13, 5, 59, tzinfo=tzutc())
     # assert dtb.string2dt('13:06:15.214 +1h') == datetime(2014, 1, 1, 14, 6, 15, 214000, tzinfo=tzutc())
     assert dtb.string2dt('Wed 13:06:15 -1day') == datetime(2015, 6, 9, 13, 6, 15, tzinfo=tzutc())
-    
+
     print dtb.string2dt('start +3h')
     assert dtb.string2dt('start +3h') == start + timedelta(hours=3)
 
@@ -144,13 +144,5 @@ def test_dtb_string2dt():
 
 
 if __name__ == '__main__':
-    
+
    test_dtb_string2dt()
-
-
-
-
-
-
-
-
