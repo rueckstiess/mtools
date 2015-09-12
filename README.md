@@ -1,7 +1,7 @@
 # mtools
 
-[![PyPi version](https://pypip.in/v/mtools/badge.png)](https://crate.io/packages/mtools/) 
-[![PyPi downloads](https://pypip.in/d/mtools/badge.png)](https://crate.io/packages/mtools/) 
+[![PyPi version](https://pypip.in/v/mtools/badge.png)](https://crate.io/packages/mtools/)
+[![PyPi downloads](https://pypip.in/d/mtools/badge.png)](https://crate.io/packages/mtools/)
 [![Build Status](https://travis-ci.org/rueckstiess/mtools.png?branch=master)](https://travis-ci.org/rueckstiess/mtools)
 
 **mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
@@ -42,15 +42,17 @@ Requirements and Installation Instructions
 The mtools collection is written in Python, and most of the tools only make
 use the standard packages shipped with Python version 2.6.x and 2.7.x, and should run out of the box.
 
-Some of the tools have additional dependencies, which are listed under the 
-specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation 
+mtools is not currently compatible with Python 3. 
+
+Some of the tools have additional dependencies, which are listed under the
+specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation
 instructions for these modules.
 
 
 Recent Changes
 --------------
 
-The current version of mtools is 1.1.9-dev. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
+The current version of mtools is 1.1.9. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
 
 
 Contribute to mtools
@@ -61,7 +63,5 @@ If you'd like to contribute to mtools, please read the [contributor page](tutori
 Disclaimer
 ----------
 
-This software is not supported by [MongoDB, Inc.](http://www.mongodb.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk. 
-Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/rueckstiess/mtools/issues?state=open) section here on github. 
-
-
+This software is not supported by [MongoDB, Inc.](http://www.mongodb.com) under any of their commercial support subscriptions or otherwise. Any usage of mtools is at your own risk.
+Bug reports, feature requests and questions can be posted in the [Issues](https://github.com/rueckstiess/mtools/issues?state=open) section here on github.
