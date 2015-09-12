@@ -371,7 +371,7 @@ class LogEvent(object):
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
-            # force evaluation of thread to get access to datetime_offset and to 
+            # force evaluation of thread to get access to datetime_offset and to
             # protect from changes due to line truncation
             _ = self.thread
 
@@ -386,9 +386,9 @@ class LogEvent(object):
                ("over max size") in self._line_str:
                self._datetime_nextpos = split_tokens.index('...')
                op = split_tokens[self._datetime_nextpos + 1]
-            else: 
+            else:
                 # unknown warning, bail out
-                return 
+                return
 
         if op in self.log_operations:
             self._operation = op
@@ -408,7 +408,7 @@ class LogEvent(object):
 
         return self._pattern
 
-    
+
     @property
     def sort_pattern(self):
         """ extract query pattern from operations """
@@ -425,12 +425,12 @@ class LogEvent(object):
     @property
     def command(self):
         """ extract query pattern from operations """
-        
+
         if not self._command_calculated:
 
             self._command_calculated = True
             if self.operation == 'command':
-                try: 
+                try:
                     command_idx = self.split_tokens.index('command:')
                     command = self.split_tokens[command_idx+1]
                     if command == '{':
@@ -736,6 +736,8 @@ class LogEvent(object):
 
     def _parse_document(self):
         """ Parses a system.profile document and copies all the values to the member variables. """
+        self._reset()
+
         doc = self._profile_doc
 
         self._split_tokens_calculated = True
@@ -758,6 +760,11 @@ class LogEvent(object):
         self._operation = doc[u'op']
         self._namespace = doc[u'ns']
 
+        self._command_calculated = True
+        if self.operation == 'command':
+            self._command = doc[u'command'].keys()[0]
+
+
         # query pattern for system.profile events, all three cases (see SERVER-13245)
         if 'query' in doc:
             if 'query' in doc['query'] and isinstance(doc['query']['query'], dict):
@@ -769,10 +776,10 @@ class LogEvent(object):
 
             # sort pattern
             if 'orderby' in doc['query'] and isinstance(doc['query']['orderby'], dict):
-                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')    
+                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')
             elif '$orderby' in doc['query']:
                 self._sort_pattern = str(doc['query']['$orderby']).replace("'", '"')
-            else: 
+            else:
                 self._sort_pattern = None
 
         self._counters_calculated = True
@@ -783,11 +790,18 @@ class LogEvent(object):
         self._ninserted = doc[u'ninserted'] if 'ninserted' in doc else None
         self._ndeleted = doc[u'ndeleted'] if 'ndeleted' in doc else None
         self._numYields = doc[u'numYield'] if 'numYield' in doc else None
-        self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
-        self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
 
-        self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
-        self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
+        if u'lockStats' in doc:
+            self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
+            self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
+            self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
+            self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
+            locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
+        elif u'locks' in doc:
+            locks = json.dumps(doc[u'locks'])
+        else:
+            locks = ''
+
 
         # build a fake line_str
         payload = ''
@@ -800,7 +814,6 @@ class LogEvent(object):
 
         scanned = 'nscanned:%i'%self._nscanned if 'nscanned' in doc else ''
         yields = 'numYields:%i'%self._numYields if 'numYield' in doc else ''
-        locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
         duration = '%ims' % self.duration if self.duration != None else ''
 
         self._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(

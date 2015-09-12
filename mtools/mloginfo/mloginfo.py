@@ -43,7 +43,7 @@ class MLogInfoTool(LogFileTool):
                 end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
 
             print "     source: %s" % self.logfile.name
-            print "       host: %s" % (self.logfile.hostname + ':' + self.logfile.port if self.logfile.hostname else "unknown")
+            print "       host: %s" % (self.logfile.hostname + ':' + str(self.logfile.port) if self.logfile.hostname else "unknown")
             print "      start: %s" % (start_time)
             print "        end: %s" % (end_time)
 
