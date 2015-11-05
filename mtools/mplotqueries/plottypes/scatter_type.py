@@ -3,6 +3,7 @@ from operator import itemgetter
 from datetime import timedelta
 
 import argparse
+import re
 
 try:
     import matplotlib.pyplot as plt
@@ -32,10 +33,15 @@ class ScatterPlotType(BasePlotType):
         # parse arguments further to get --yaxis argument
         argparser = argparse.ArgumentParser("mplotqueries --type scatter")
         argparser.add_argument('--yaxis', '-y', action='store', metavar='FIELD', default='duration')
+        argparser.add_argument('--yaxis-regex-mode', action='store_true', default=False)
         args = vars(argparser.parse_args(unknown_args))
 
         self.field = args['yaxis']
-        if args['yaxis'] == 'duration':
+        self.regex_mode = args['yaxis_regex_mode']
+
+        if self.regex_mode:
+            self.ylabel = 'regex: "%s"' % self.field
+        elif args['yaxis'] == 'duration':
             self.ylabel = 'duration in ms'
         else:
             self.ylabel = args['yaxis']
@@ -45,7 +51,10 @@ class ScatterPlotType(BasePlotType):
 
     def accept_line(self, logevent):
         """ return True if the log line has the nominated yaxis field. """
-        return (getattr(logevent, self.field) != None)
+        if self.regex_mode:
+            return bool(re.search(self.field, logevent.line_str))
+        else:
+            return getattr(logevent, self.field) != None
 
     def plot_group(self, group, idx, axis):
         # create x-coordinates for all log lines in this group
@@ -54,8 +63,11 @@ class ScatterPlotType(BasePlotType):
         color, marker = self.color_map(group)
 
         # duration plots require y coordinate and use plot_date
-        y = [ getattr(logevent, self.field) for logevent in self.groups[group] ]
-        
+        if self.regex_mode:
+            y = [ float(re.search(self.field, logevent.line_str).group(1)) for logevent in self.groups[group] ]
+        else:
+            y = [ getattr(logevent, self.field) for logevent in self.groups[group] ]
+
         if self.logscale:
             axis.semilogy()
 
@@ -63,12 +75,12 @@ class ScatterPlotType(BasePlotType):
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
-        artist._mt_group = group 
+        artist._mt_group = group
 
         return artist
 
     def clicked(self, event):
-        """ this is called if an element of this plottype was clicked. Implement in sub class. """        
+        """ this is called if an element of this plottype was clicked. Implement in sub class. """
         group = event.artist._mt_group
         indices = event.ind
 
