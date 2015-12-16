@@ -1130,8 +1130,14 @@ class MLaunchTool(BaseCmdLineTool):
         process_dict = {}
 
         for p in psutil.process_iter():
+            # deal with zombie process errors in OSX
+            try:
+                name = p.name()
+            except psutil.NoSuchProcess:
+                continue
+
             # skip all but mongod / mongos
-            if p.name() not in ['mongos', 'mongod']:
+            if name not in ['mongos', 'mongod']:
                 continue
 
             port = None
