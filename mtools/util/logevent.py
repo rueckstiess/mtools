@@ -684,7 +684,7 @@ class LogEvent(object):
         # get start of json query pattern
         trigger = "query: {"
         start_idx = self.line_str.find(trigger)-1
-        if start_idx == -1:
+        if start_idx == -2:
             # no query pattern found
             return None
 
