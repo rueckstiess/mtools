@@ -592,7 +592,7 @@ class MLaunchTool(BaseCmdLineTool):
             if self.args['startup']:
                 try:
                     # first try running process (startup may be modified via start command)
-                    doc['startup command'] = ' '.join(processes[doc['port']].cmdline)
+                    doc['startup command'] = ' '.join(processes[doc['port']].cmdline())
                 except KeyError:
                     # if not running, use stored startup_info
                     doc['startup command'] = startup[str(doc['port'])]
