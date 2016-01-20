@@ -28,7 +28,7 @@ class TestUtilLogFile(object):
         for i, le in enumerate(logfile):
             assert isinstance(le, LogEvent)
 
-        assert length == i+1 
+        assert length == i+1
         assert length == 1836
 
 
@@ -36,9 +36,9 @@ class TestUtilLogFile(object):
         """ LogFile: test .start and .end property work correctly """
 
         logfile = LogFile(self.file_year_rollover)
-        
-        assert logfile.start == datetime(2014, 12, 30, 00, 13, 01, 661000, tzutc())
-        assert logfile.end == datetime(2015, 01, 02, 23, 27, 11, 720000, tzutc())
+
+        assert logfile.start == datetime(2015, 12, 30, 00, 13, 01, 661000, tzutc())
+        assert logfile.end == datetime(2016, 01, 02, 23, 27, 11, 720000, tzutc())
 
 
     def test_timezone(self):
@@ -73,7 +73,7 @@ class TestUtilLogFile(object):
         wiredtiger = open(logfile_path, 'r')
         logfile = LogFile(wiredtiger)
         assert logfile.storage_engine == 'wiredTiger'
-        
+
 
     def test_hostname_port(self):
         # mongod
