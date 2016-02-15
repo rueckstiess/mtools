@@ -3,7 +3,7 @@
 import json
 import bson
 import sys
-import inspect 
+import inspect
 from datetime import datetime
 from multiprocessing import Process, cpu_count
 
@@ -46,7 +46,7 @@ class InsertProcess(Process):
 
         # add all operators classes from the operators module, pass in _decode method
         self.operators = [c[1](self._decode) for c in self.operator_classes]
-        
+
         self.string_operators = {}
         self.dict_operators = {}
 
@@ -69,7 +69,7 @@ class InsertProcess(Process):
 
             if not self.collection:
                 indent = 4 if self.args['pretty'] else None
-                print json.dumps(doc, cls=DateTimeEncoder, indent=indent, ensure_ascii=False) 
+                print json.dumps(doc, cls=DateTimeEncoder, indent=indent, ensure_ascii=False)
 
             else:
                 batch.append(doc)
@@ -84,7 +84,7 @@ class InsertProcess(Process):
             if batch:
                 self.collection.insert(batch)
 
-    
+
     def bsonsize(self, doc):
         return len(bson.BSON.encode(doc))
 
@@ -124,7 +124,7 @@ class InsertProcess(Process):
     def _decode(self, data):
 
         # if dict, check if it's a dict-format command
-        if isinstance(data, dict): 
+        if isinstance(data, dict):
             if data.keys()[0] in self.dict_operators:
                 return self._decode_operator(data)
             else:
@@ -151,9 +151,9 @@ class MGeneratorTool(BaseCmdLineTool):
 
     def __init__(self):
         BaseCmdLineTool.__init__(self)
-        
+
         self.argparser.description = 'Script to generate pseudo-random data based on template documents.'
-        
+
         self.argparser.add_argument('template', action='store', help='template for data generation, JSON or file')
         self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
         self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
@@ -187,8 +187,8 @@ class MGeneratorTool(BaseCmdLineTool):
                 raise SystemExit("can't parse template in %s: %s" % (self.args['template'], e))
 
 
-        if not self.args['stdout']:        
-            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'])        
+        if not self.args['stdout']:
+            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'], connect=False)        
             col = mc[self.args['database']][self.args['collection']]
             if self.args['drop']:
                 col.drop()

@@ -139,6 +139,25 @@ class IncOperator(BaseOperator):
 
         return self.counter.next()
 
+class PickOperator(BaseOperator):
+
+    dict_format = True
+    string_format = False
+    names = ['$pick']
+    defaults = OrderedDict([ ('array', []), ('element', 0) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # decode choices and weights
+        array = self._decode(options['array'])
+        element = self._decode(options['element'])
+
+        if len(array) <= element:
+            return '$missing'
+
+        return array[element]
+
 
 class StringOperator(BaseOperator):
 
@@ -197,17 +216,18 @@ class ChooseOperator(BaseOperator):
 
         options = self._parse_options(options)
 
-        # decode ratio
+        # decode choices and weights
+        choices = options['from']
         weights = self._decode(options['weights'])
         if not weights:
             # pick one choice, uniformly distributed, but don't evaluate yet
-            return choice(options['from'])
+            return choice(choices)
         else:
-            assert len(weights) == len(options['from'])
+            assert len(weights) == len(choices)
 
             total_weight = 0
             acc_weight_items = []
-            for item, weight in zip(options['from'], weights):
+            for item, weight in zip(choices, weights):
                 total_weight += weight
                 acc_weight_items.append( (total_weight, item) )
 
@@ -358,5 +378,3 @@ class ObjectIdOperator(DateTimeOperator):
         oid = struct.pack(">i", int(epoch))+ ObjectId().binary[4:]
 
         return ObjectId(oid)
-
-
