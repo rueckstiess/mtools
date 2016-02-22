@@ -27,6 +27,8 @@ try:
         from pymongo import MongoReplicaSetClient as ReplicaSetConnection
         from pymongo import version_tuple as pymongo_version
         from bson import SON
+        from StringIO import StringIO
+        from distutils.version import LooseVersion, StrictVersion
     except ImportError:
         from pymongo import Connection
         from pymongo import ReplicaSetConnection
@@ -172,6 +174,7 @@ class MLaunchTool(BaseCmdLineTool):
         me_group.add_argument('--single', action='store_true', help='creates a single stand-alone mongod instance')
         me_group.add_argument('--replicaset', action='store_true', help='creates replica set with several mongod instances')
 
+
         # replica set arguments
         init_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
         init_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
@@ -181,6 +184,8 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--sharded', '--shards', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
         init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
+        init_parser.add_argument('--config-replicaset',default=False, action='store_true', help='creates the config servers in a replica set [CSRS](relevant from > 3.2.0)')
+
 
         # verbose, port, binary path
         init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
@@ -266,7 +271,23 @@ class MLaunchTool(BaseCmdLineTool):
         else:
             first_init = True
 
-        # check if authentication is enabled, make key file       
+        # Check if config replicaset is applicable to this version
+        if self.args['config_replicaset']:
+
+                binary="mongod"
+                if self.args and self.args['binarypath']:
+                    binary = os.path.join( self.args['binarypath'], binary)
+                ret = subprocess.Popen(['%s --version'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+                out, err = ret.communicate()
+
+                buf = StringIO(out)
+                current_version = buf.readline().rstrip('\n')[-5:]
+                print "current version is %s"%current_version
+                if LooseVersion(current_version) < LooseVersion("3.2.0"):
+                    errmsg = " \n * You can use '--config-replicaset' with version 3.2.0 and above , current version %s does not support this flag .\n" % current_version
+                    raise SystemExit(errmsg)
+
+        # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
@@ -289,6 +310,7 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit(errmsg)
 
         if self.args['sharded']:
+
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
@@ -297,10 +319,15 @@ class MLaunchTool(BaseCmdLineTool):
 
             # initiate replica sets if init is called for the first time
             if first_init:
+                if self.args['config_replicaset']:
+                    # Initiate config servers in a replicaset
+                    members = sorted(self.get_tagged(["config"]))
+                    self._initiate_replset(members[0], "configRepl")
                 for shard in shard_names:
                     # initiate replica set on first member
                     members = sorted(self.get_tagged([shard]))
                     self._initiate_replset(members[0], shard)
+
 
             # add mongos
             mongos = sorted(self.get_tagged(['mongos', 'down']))
@@ -689,6 +716,7 @@ class MLaunchTool(BaseCmdLineTool):
         # some shortcut variables
         is_sharded = 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None
         is_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
+        is_config_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['config_replicaset']
         is_single = 'single' in self.loaded_args and self.loaded_args['single']
         has_arbiter = 'arbiter' in self.loaded_args and self.loaded_args['arbiter']
 
@@ -779,6 +807,33 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         # find all config servers
+        if is_config_replicaset:
+                # get replica set states
+                rs_name = "configRepl"
+                port_range = range(current_port, current_port + 3)
+
+
+                try:
+                    mrsc = ReplicaSetConnection( ','.join( 'localhost:%i'%i for i in port_range ), replicaSet=rs_name )
+                    # primary, secondaries, arbiters
+                    if mrsc.primary:
+                        self.cluster_tags['primary'].append( mrsc.primary[1] )
+                    self.cluster_tags['secondary'].extend( map(itemgetter(1), mrsc.secondaries) )
+
+
+                    # secondaries in cluster_tree (order is now important)
+                    self.cluster_tree.setdefault( 'secondary', [] )
+                    for i, secondary in enumerate(sorted(map(itemgetter(1), mrsc.secondaries))):
+                        if len(self.cluster_tree['secondary']) <= i:
+                            self.cluster_tree['secondary'].append([])
+                        self.cluster_tree['secondary'][i].append(secondary)
+
+                except (ConnectionFailure, ConfigurationError):
+                    pass
+
+        # add config server to cluster tree
+        self.cluster_tree.setdefault( 'config', [] ).append( port )
+
         for i in range(num_config):
             port = i+current_port
 
@@ -823,7 +878,7 @@ class MLaunchTool(BaseCmdLineTool):
         nodes = set(self.cluster_tags['all'])
 
         for tag in tags:
-            if re.match(r'\w+ \d{1,2}', tag):
+            if re.match(r"\w+ \d{1,2}", tag):
                 # special case for tuple tags: mongos, config, shard, secondary. These can contain a number
                 tag, number = tag.split()
 
@@ -1222,11 +1277,17 @@ class MLaunchTool(BaseCmdLineTool):
         # start up config server(s)
         config_string = []
         config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
-            
-        for name in config_names:
-            self._construct_config(self.dir, nextport, name)
-            config_string.append('%s:%i'%(self.args['hostname'], nextport))
-            nextport += 1
+        if self.args['config_replicaset']:
+            print ("creating config replicaset...")
+            #for name in config_names:
+             #   datapath = self._create_paths(self.dir, name)
+
+            config_string.append(self._construct_config(self.dir, nextport, "configRepl", True))
+        else:  
+            for name in config_names:
+                self._construct_config(self.dir, nextport, name)
+                config_string.append('%s:%i'%(self.args['hostname'], nextport))
+                nextport += 1
         
         # multiple mongos use <datadir>/mongos/ as subdir for log files
         if num_mongos > 1:
@@ -1248,14 +1309,14 @@ class MLaunchTool(BaseCmdLineTool):
             nextport += 1
 
 
-    def _construct_replset(self, basedir, portstart, name):
+    def _construct_replset(self, basedir, portstart, name, extra='',conf_string=[]):
         """ construct command line strings for a replicaset, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
 
         for i in range(self.args['nodes']):
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
-            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name)
+            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, extra=extra)
         
             host = '%s:%i'%(self.args['hostname'], portstart+i)
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
@@ -1272,10 +1333,14 @@ class MLaunchTool(BaseCmdLineTool):
 
 
 
-    def _construct_config(self, basedir, port, name=None):
+    def _construct_config(self, basedir, port, name=None, isReplSet=False):
         """ construct command line strings for a config server """
-        datapath = self._create_paths(basedir, name)
-        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
+        
+        if isReplSet:
+            return self._construct_replset(basedir, port, name, extra='--configsvr')
+        else:
+            datapath = self._create_paths(basedir, name)
+            self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
 
 
 
