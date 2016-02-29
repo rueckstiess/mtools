@@ -28,7 +28,7 @@ try:
         from pymongo import version_tuple as pymongo_version
         from bson import SON
         from StringIO import StringIO
-        from distutils.version import LooseVersion, StrictVersion
+        from distutils.version import LooseVersion
     except ImportError:
         from pymongo import Connection
         from pymongo import ReplicaSetConnection
@@ -282,7 +282,6 @@ class MLaunchTool(BaseCmdLineTool):
 
                 buf = StringIO(out)
                 current_version = buf.readline().rstrip('\n')[-5:]
-                print "current version is %s"%current_version
                 if LooseVersion(current_version) < LooseVersion("3.2.0"):
                     errmsg = " \n * You can use '--config-replicaset' with version 3.2.0 and above , current version %s does not support this flag .\n" % current_version
                     raise SystemExit(errmsg)
