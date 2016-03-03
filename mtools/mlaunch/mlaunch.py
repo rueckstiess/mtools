@@ -1308,12 +1308,16 @@ class MLaunchTool(BaseCmdLineTool):
             nextport += 1
 
 
-    def _construct_replset(self, basedir, portstart, name, extra='',conf_string=[]):
+    def _construct_replset(self, basedir, portstart, name, extra=''):
         """ construct command line strings for a replicaset, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
-
-        for i in range(self.args['nodes']):
+        # Corner case for csrs to calculate the number of nodes by number of configservers
+        if extra == '--configsvr':
+            num_nodes = range(self.args['config'])
+        else:
+            num_nodes = range(self.args['nodes'])
+        for i in num_nodes:
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, extra=extra)
         
