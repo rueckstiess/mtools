@@ -184,7 +184,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--sharded', '--shards', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
         init_parser.add_argument('--config', action='store', default=1, type=int, metavar='NUM', choices=[1, 3], help='adds NUM config servers to sharded setup (requires --sharded, NUM must be 1 or 3, default=1)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
-        init_parser.add_argument('--config-replicaset',default=False, action='store_true', help='creates the config servers in a replica set [CSRS](relevant from > 3.2.0)')
+        init_parser.add_argument('--csrs',default=False, action='store_true', help='creates the config servers in a replica set [CSRS](relevant from > 3.2.0)')
 
 
         # verbose, port, binary path
@@ -272,7 +272,7 @@ class MLaunchTool(BaseCmdLineTool):
             first_init = True
 
         # Check if config replicaset is applicable to this version
-        if self.args['config_replicaset']:
+        if self.args['csrs']:
 
                 binary="mongod"
                 if self.args and self.args['binarypath']:
@@ -318,7 +318,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             # initiate replica sets if init is called for the first time
             if first_init:
-                if self.args['config_replicaset']:
+                if self.args['csrs']:
                     # Initiate config servers in a replicaset
                     members = sorted(self.get_tagged(["config"]))
                     self._initiate_replset(members[0], "configRepl")
@@ -715,7 +715,7 @@ class MLaunchTool(BaseCmdLineTool):
         # some shortcut variables
         is_sharded = 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None
         is_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
-        is_config_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['config_replicaset']
+        is_csrs = 'replicaset' in self.loaded_args and self.loaded_args['csrs']
         is_single = 'single' in self.loaded_args and self.loaded_args['single']
         has_arbiter = 'arbiter' in self.loaded_args and self.loaded_args['arbiter']
 
@@ -806,10 +806,10 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         # find all config servers
-        if is_config_replicaset:
+        if is_csrs:
                 # get replica set states
                 rs_name = "configRepl"
-                port_range = range(current_port, current_port + 3)
+                port_range = range(current_port, current_port + num_config )
 
 
                 try:
@@ -1276,7 +1276,7 @@ class MLaunchTool(BaseCmdLineTool):
         # start up config server(s)
         config_string = []
         config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
-        if self.args['config_replicaset']:
+        if self.args['csrs']:
             print ("creating config replicaset...")
             #for name in config_names:
              #   datapath = self._create_paths(self.dir, name)
