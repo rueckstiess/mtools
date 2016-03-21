@@ -1,6 +1,12 @@
 Changes to mtools
 =================
 
+#### version 1.2.0
+
+  * mlaunch: support config servers as replica sets (CSRS) (#399, #401)
+  * mlaunch: fix various `mlaunch list` errors (#396)
+  * fix log file testing errors (#393)
+
 #### version 1.1.9
 
   * mplotqueries: pin python-dateutil to version 2.2 because of problems with matplotlib (#377)
