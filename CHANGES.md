@@ -1,6 +1,8 @@
 Changes to mtools
 =================
 
+#### version 1.2.1
+
 #### version 1.2.0
 
   * mlaunch: support config servers as replica sets (CSRS) (#399, #401)
