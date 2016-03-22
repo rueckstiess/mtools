@@ -183,7 +183,7 @@ class MLaunchTool(BaseCmdLineTool):
         # sharded clusters
         init_parser.add_argument('--sharded', '--shards', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
         init_parser.add_argument('--config', action='store', default=-1, type=int, metavar='NUM', help='adds NUM config servers to sharded setup (requires --sharded, default=1, with --csrs default=3)')
-        init_parser.add_argument('--csrs', default=False, action='store_true', help='deploy config servers as a replica set (requires MongoDB >= 3.2.4)')
+        init_parser.add_argument('--csrs', default=False, action='store_true', help='deploy config servers as a replica set (requires MongoDB >= 3.2.0)')
         init_parser.add_argument('--mongos', action='store', default=1, type=int, metavar='NUM', help='starts NUM mongos processes (requires --sharded, default=1)')
 
 
@@ -289,8 +289,8 @@ class MLaunchTool(BaseCmdLineTool):
 
             buf = StringIO(out)
             current_version = buf.readline().rstrip('\n')[-5:]
-            if LooseVersion(current_version) < LooseVersion("3.2.4"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.4 or greater, the current version is %s.\n" % current_version
+            if LooseVersion(current_version) < LooseVersion("3.2.0"):
+                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
                 raise SystemExit(errmsg)
 
         # check if authentication is enabled, make key file
@@ -722,7 +722,7 @@ class MLaunchTool(BaseCmdLineTool):
         # some shortcut variables
         is_sharded = 'sharded' in self.loaded_args and self.loaded_args['sharded'] != None
         is_replicaset = 'replicaset' in self.loaded_args and self.loaded_args['replicaset']
-        is_csrs = 'replicaset' in self.loaded_args and self.loaded_args['csrs']
+        is_csrs = 'csrs' in self.loaded_args and self.loaded_args['csrs']
         is_single = 'single' in self.loaded_args and self.loaded_args['single']
         has_arbiter = 'arbiter' in self.loaded_args and self.loaded_args['arbiter']
 
