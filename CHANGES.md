@@ -3,6 +3,8 @@ Changes to mtools
 
 #### version 1.2.1
 
+  * mlaunch: fix bug for CSRS feature that prevents older mlaunch configurations to start (#402)
+
 #### version 1.2.0
 
   * mlaunch: support config servers as replica sets (CSRS) (#399, #401)
