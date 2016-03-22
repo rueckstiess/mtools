@@ -1,6 +1,9 @@
 Changes to mtools
 =================
 
+#### version 1.2.2
+
+
 #### version 1.2.1
 
   * mlaunch: fix bug for CSRS feature that prevents older mlaunch configurations to start (#402)
