@@ -12,6 +12,7 @@ import string
 import itertools
 import calendar
 import struct
+import base64
 
 
 class BaseOperator(object):
@@ -311,6 +312,28 @@ class PointOperator(BaseOperator):
 
         # return coordinate by using random numbers between limits
         return { "type": "Point", "coordinates": { "$coord": [long_lim, lat_lim] } }
+
+
+class BinaryOperator(BaseOperator):
+
+    dict_format = True
+    string_format = True
+    names = ['$bin']
+    defaults = OrderedDict([ ('length', 10), ('type', 0) ])
+
+    def __call__(self, options=None):
+        options = self._parse_options(options)
+
+        # evaluate limits
+        length = self._decode(options['length'])
+        bintype = options['type']
+
+        # return coordinate by using random numbers between limits
+        assert length > 0
+        randomString = ''.join( choice(string.ascii_letters + string.digits) for i in xrange(length) )
+        bindata = base64.b64encode(randomString)
+
+        return { "$binary": bindata, "$type": bintype }
 
 
 class DateTimeOperator(BaseOperator):
