@@ -1,4 +1,4 @@
-from bson import ObjectId
+from bson import ObjectId, Binary
 from mtools.util import OrderedDict
 
 from random import choice, random, randint, gauss
@@ -326,14 +326,13 @@ class BinaryOperator(BaseOperator):
 
         # evaluate limits
         length = self._decode(options['length'])
-        bintype = options['type']
+        bintype = self._decode(options['type'])
 
         # return coordinate by using random numbers between limits
         assert length > 0
-        randomString = ''.join( choice(string.ascii_letters + string.digits) for i in xrange(length) )
-        bindata = base64.b64encode(randomString)
+        bindata = ''.join( choice(string.ascii_letters + string.digits) for i in xrange(length) )
 
-        return { "$binary": bindata, "$type": bintype }
+        return Binary(bindata, bintype)
 
 
 class DateTimeOperator(BaseOperator):

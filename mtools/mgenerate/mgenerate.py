@@ -37,11 +37,10 @@ class InsertProcess(Process):
 
     operator_classes = inspect.getmembers(operators, inspect.isclass)
 
-    def __init__(self, number, template, collection, args):
+    def __init__(self, number, template, args):
         Process.__init__(self)
         self.number = number
         self.template = template
-        self.collection = collection
         self.args = args
 
         # add all operators classes from the operators module, pass in _decode method
@@ -63,30 +62,21 @@ class InsertProcess(Process):
         batch = []
         batchsize = 0
 
-        for n in xrange(self.number):
-            # decode the template
-            doc = self._decode(self.template)
+        if self.number == 0:
+            return
 
-            if not self.collection:
-                indent = 4 if self.args['pretty'] else None
+        # create iterable of documents
+        docs = (self._decode(self.template) for n in xrange(self.number))
+
+        if not self.args['stdout']:
+            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'])
+            collection = mc[self.args['database']][self.args['collection']]
+            collection.insert_many(docs, ordered=False)
+
+        else:
+            indent = 4 if self.args['pretty'] else None
+            for doc in docs:
                 print json.dumps(doc, cls=DateTimeEncoder, indent=indent, ensure_ascii=False)
-
-            else:
-                batch.append(doc)
-                batchsize += self.bsonsize(doc)
-
-                if n % 1000 == 0 or batchsize >= 1000000:
-                    self.collection.insert(batch)
-                    batch = []
-                    batchsize = 0
-
-        if self.collection:
-            if batch:
-                self.collection.insert(batch)
-
-
-    def bsonsize(self, doc):
-        return len(bson.BSON.encode(doc))
 
 
     def _decode_operator(self, data):
@@ -188,7 +178,7 @@ class MGeneratorTool(BaseCmdLineTool):
 
 
         if not self.args['stdout']:
-            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'], connect=False)        
+            mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'], connect=False)
             col = mc[self.args['database']][self.args['collection']]
             if self.args['drop']:
                 col.drop()
@@ -209,7 +199,7 @@ class MGeneratorTool(BaseCmdLineTool):
         processes = []
 
         for n in num_list:
-            p = InsertProcess(n, template, col, self.args)
+            p = InsertProcess(n, template, self.args)
             p.start()
             processes.append(p)
 
