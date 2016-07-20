@@ -1198,15 +1198,25 @@ class MLaunchTool(BaseCmdLineTool):
         return process_dict
 
 
-    def _wait_for_primary(self, max_wait=120):
+    def _wait_for_primary(self):
 
-        for i in range(max_wait):
-            self.discover()
+        hosts = [x['host'] for x in self.config_docs['replset']['members']]
+        rs_name = self.config_docs['replset']['_id']
+        mrsc = Connection( hosts, replicaSet=rs_name )
 
-            if "primary" in self.cluster_tags and self.cluster_tags['primary']:
-                return True
+        if mrsc.is_primary:
+            # update cluster tags now that we have a primary
+            self.cluster_tags['primary'].append( mrsc.primary[1] )
+            self.cluster_tags['secondary'].extend( map(itemgetter(1), mrsc.secondaries) )
+            self.cluster_tags['arbiter'].extend( map(itemgetter(1), mrsc.arbiters) )
 
-            time.sleep(1)
+            # secondaries in cluster_tree (order is now important)
+            self.cluster_tree.setdefault( 'secondary', [] )
+            for i, secondary in enumerate(sorted(map(itemgetter(1), mrsc.secondaries))):
+                if len(self.cluster_tree['secondary']) <= i:
+                    self.cluster_tree['secondary'].append([])
+                self.cluster_tree['secondary'][i].append(secondary)
+            return True
 
         return False
 
