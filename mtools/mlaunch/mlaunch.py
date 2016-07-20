@@ -1302,7 +1302,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         self.config_docs[name] = {'_id':name, 'members':[]}
         # Corner case for csrs to calculate the number of nodes by number of configservers
-        if extra == '--configsvr':
+        if  '--configsvr' in extra:
             num_nodes = range(self.args['config'])
         else:
             num_nodes = range(self.args['nodes'])
@@ -1314,7 +1314,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
 
         # launch arbiter if True
-        if self.args['arbiter'] and extra != '--configsvr':
+        if self.args['arbiter'] and  '--configsvr' not in extra:
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
 
