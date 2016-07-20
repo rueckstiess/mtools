@@ -1198,7 +1198,7 @@ class MLaunchTool(BaseCmdLineTool):
         return process_dict
 
 
-    def _wait_for_primary(self, max_wait=120):
+    def _wait_for_primary(self):
 
         hosts = [x['host'] for x in self.config_docs['replset']['members']]
         rs_name = self.config_docs['replset']['_id']
