@@ -1304,7 +1304,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
 
         # launch arbiter if True
-        if self.args['arbiter']:
+        if self.args['arbiter'] and extra != '--configsvr':
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
 
