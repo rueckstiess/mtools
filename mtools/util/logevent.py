@@ -5,6 +5,7 @@ import re
 import json
 
 from mtools.util.pattern import json2pattern
+from mtools.util.pattern import query_json2pattern
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -404,7 +405,11 @@ class LogEvent(object):
 
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore', 'update', 'remove'] or self.command in ['count', 'findandmodify']:
-                self._pattern = self._find_pattern('query: ')
+                self._sort_pattern = self._find_pattern('orderby: ', False)
+                if self._sort_pattern is None:
+                    self._pattern = self._get_query()
+                else:
+                    self._pattern = self._get_query() + ", order by: " + self._sort_pattern
 
         return self._pattern
 
@@ -417,7 +422,7 @@ class LogEvent(object):
 
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore']:
-                self._sort_pattern = self._find_pattern('orderby: ')
+                self._sort_pattern = self._find_pattern('orderby: ', False)
 
         return self._sort_pattern
 
@@ -644,7 +649,7 @@ class LogEvent(object):
         r = self.r
 
 
-    def _find_pattern(self, trigger):
+    def _find_pattern(self, trigger, replace_value):
 
         # get start of json query pattern
         start_idx = self.line_str.rfind(trigger)
@@ -665,11 +670,42 @@ class LogEvent(object):
             if brace_counter == 0:
                 break
         search_str = search_str[:stop_idx+1].strip()
+
         if search_str:
-            return json2pattern(search_str)
+            if replace_value:
+              return json2pattern(search_str)
+            else:
+              return search_str
         else:
             return None
 
+    def _get_query(self):
+
+        # get start of json query pattern
+        trigger = "query: {"
+        start_idx = self.line_str.find(trigger)-1
+        if start_idx == -2:
+            # no query pattern found
+            return None
+
+        stop_idx = 0
+        brace_counter = 0
+        search_str = self.line_str[start_idx+len(trigger):]
+
+        for match in re.finditer(r'{|}', search_str):
+            stop_idx = match.start()
+            if search_str[stop_idx] == '{':
+                brace_counter += 1
+            else:
+                brace_counter -= 1
+            if brace_counter == 0:
+                break
+        search_str = search_str[:stop_idx+1].strip()
+
+        if search_str:
+            return query_json2pattern(search_str)
+        else:
+            return None
 
     def _reformat_timestamp(self, format, force=False):
         if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:

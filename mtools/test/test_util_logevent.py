@@ -69,10 +69,10 @@ def test_logevent_pattern_parsing():
     assert(le.pattern) == '{"a": 1}'
 
     le = LogEvent(line_pattern_26_b)
-    assert(le.pattern) == '{"a": 1}'
+    assert(le.pattern) == '{"a": 1}, order by: { b: 1.0 }'
 
     le = LogEvent(line_pattern_26_c)
-    assert(le.pattern) == '{"a": 1}'
+    assert(le.pattern) == '{"a": 1}, order by: { b: 1.0 }'
 
 
 def test_logevent_command_parsing():
@@ -93,10 +93,10 @@ def test_logevent_sort_pattern_parsing():
     assert(le.sort_pattern) == None
 
     le = LogEvent(line_pattern_26_b)
-    assert(le.sort_pattern) == '{"b": 1}'
+    assert(le.sort_pattern) == '{ b: 1.0 }'
 
     le = LogEvent(line_pattern_26_c)
-    assert(le.sort_pattern) == '{"b": 1}'
+    assert(le.sort_pattern) == '{ b: 1.0 }'
 
 
 def test_logevent_profile_pattern_parsing():

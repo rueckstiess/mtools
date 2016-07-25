@@ -22,9 +22,9 @@ def _decode_pattern_dict(data):
             key = key.encode('utf-8')
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:
                 return 1
-            if key == '$nin':
+            if key in ['$nin', '$near']:
                 value = 1
-            if key in ['query', '$query']:
+            if key in ['$query']:
                 return _decode_pattern_dict(value)
 
         if isinstance(value, list):
@@ -58,7 +58,7 @@ def shell2json(s):
 
     return s
 
-def json2pattern(s):
+def get_json_from_pattern(s):
     """ converts JSON format (even mongo shell notation without quoted key names) to a query pattern """
     # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ' , s)
@@ -69,10 +69,33 @@ def json2pattern(s):
     # now convert to dictionary, converting unicode to ascii 
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
-        return json.dumps(doc, sort_keys=True, separators=(', ', ': ') )
+        return doc
     except ValueError:
         return None
 
+def json2pattern(s):
+    try:
+        doc = get_json_from_pattern(s)
+        if doc is None:
+            return None
+        else:
+            return json.dumps(doc, sort_keys=True, separators=(', ', ': ') )
+    except ValueError:
+        return None
+
+def query_json2pattern(s):
+    try:
+        doc = get_json_from_pattern(s)
+        if doc is None:
+            return None
+        else:
+            if 'query' in doc:
+                query = doc['query']
+            else:
+                query = doc
+            return json.dumps(query, sort_keys=True, separators=(', ', ': ') )
+    except ValueError:
+        return None
 
 if __name__ == '__main__':
     
