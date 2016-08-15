@@ -69,11 +69,17 @@ class TestUtilLogFile(object):
         logfile = LogFile(mmapv1)
         assert logfile.storage_engine == 'mmapv1'
 
+        # test for 3.0 WT detection
         logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'wiredtiger.log')
         wiredtiger = open(logfile_path, 'r')
         logfile = LogFile(wiredtiger)
         assert logfile.storage_engine == 'wiredTiger'
 
+        # test for 3.2 WT detection
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_328.log')
+        wiredtiger = open(logfile_path, 'r')
+        logfile = LogFile(wiredtiger)
+        assert logfile.storage_engine == 'wiredTiger'
 
     def test_hostname_port(self):
         # mongod

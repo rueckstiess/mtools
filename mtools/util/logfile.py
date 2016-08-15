@@ -259,6 +259,10 @@ class LogFile(InputSource):
                     self._hostname = match.group('host')
                     self._port = match.group('port')
 
+            ''' For 3.0 the "[initandlisten] options:" long entry contained the "engine" field
+                if WiredTiger was the storage engine. There were only two engines, MMAPv1
+                and WiredTiger
+            '''
             if "[initandlisten] options:" in line:
                 match = re.search('replSet: "(?P<replSet>\S+)"', line)
                 if match:
@@ -269,6 +273,13 @@ class LogFile(InputSource):
                     self._storage_engine = match.group('engine')
                 else:
                     self._storage_engine = 'mmapv1'
+
+            ''' For 3.2 the "[initandlisten] options:" no longer contains the "engine" field
+                So now we have to look for the "[initandlisten] wiredtiger_open config:"
+                which was present in 3.0, but would now tell us definatively that wiredTiger is being used
+            '''
+            if "[initandlisten] wiredtiger_open config:" in line:
+                self._storage_engine =  'wiredTiger'
 
             if "command admin.$cmd command: { replSetInitiate:" in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)
@@ -290,7 +301,7 @@ class LogFile(InputSource):
                 if tokens[1].endswith(']'):
                     pos = 4
                 else:
-                    pos = 7
+                    pos = 5
                 host = tokens[pos]
                 rs_state = tokens[-1]
                 state = (host, rs_state, LogEvent(line))
