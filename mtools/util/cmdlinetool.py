@@ -75,7 +75,15 @@ class BaseCmdLineTool(object):
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version', version="mtools version %s" % __version__)
         self.argparser.add_argument('--no-progressbar', action='store_true', default=False, help='disables progress bar')
-        self.is_stdin = not sys.stdin.isatty()
+        """ PyCharm and other debuggers apparently run script in a non-TTY process.
+            For now, just ignore the fact that we are debugging
+        """
+        if __debug__:
+            self.is_stdin = False
+        else:
+            self.is_stdin = not sys.stdin.isatty()
+
+
 
 
     def run(self, arguments=None, get_unknowns=False):

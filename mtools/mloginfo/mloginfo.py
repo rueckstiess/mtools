@@ -81,6 +81,7 @@ class MLogInfoTool(LogFileTool):
 def main():
     tool = MLogInfoTool()
     tool.run()
+    return 0 # we need to return an integer
 
 if __name__ == '__main__':
     sys.exit(main())
