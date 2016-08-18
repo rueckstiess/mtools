@@ -1258,10 +1258,10 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
             if self.args['single']:
-                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard) )
+                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr') )
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard) )
+                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, extra='--shardsvr') )
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -1336,10 +1336,11 @@ class MLaunchTool(BaseCmdLineTool):
 
 
 
-    def _construct_single(self, basedir, port, name=None):
+    def _construct_single(self, basedir, port, name=None, extra=''):
         """ construct command line strings for a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
-        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
+
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra=extra)
 
         host = '%s:%i'%(self.args['hostname'], port)
 
