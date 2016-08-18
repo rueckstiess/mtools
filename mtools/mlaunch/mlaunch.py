@@ -1339,7 +1339,6 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_single(self, basedir, port, name=None, extra=''):
         """ construct command line strings for a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
-
         self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra=extra)
 
         host = '%s:%i'%(self.args['hostname'], port)
