@@ -327,10 +327,14 @@ class MLaunchTool(BaseCmdLineTool):
             if first_init:
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
+                    if self.args['verbose']:
+                        print 'Initiating config server replica set.'
                     members = sorted(self.get_tagged(["config"]))
                     self._initiate_replset(members[0], "configRepl")
                 for shard in shard_names:
                     # initiate replica set on first member
+                    if self.args['verbose']:
+                        print 'Initiating shard replica set %s.' % shard
                     members = sorted(self.get_tagged([shard]))
                     self._initiate_replset(members[0], shard)
 
@@ -1126,7 +1130,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _initiate_replset(self, port, name, maxwait=30):
         # initiate replica set
-        if not self.args['replicaset']:
+        if not self.args['replicaset'] and name != 'configRepl':
+            if self.args['verbose']:
+                print 'Skipping replica set initialization for %s' % name
             return
 
         con = MongoConnection('localhost:%i'%port)
