@@ -273,25 +273,18 @@ class MLaunchTool(BaseCmdLineTool):
 
         # number of default config servers
         if self.args['config'] == -1:
-            if self.args['csrs']:
-                self.args['config'] = 3
-            else:
-                self.args['config'] = 1
+            self.args['config'] = 1
 
         # Check if config replicaset is applicable to this version
+        current_version = self.getMongoDVersion()
         if self.args['csrs']:
-            binary = "mongod"
-
-            if self.args and self.args['binarypath']:
-                binary = os.path.join(self.args['binarypath'], binary)
-            ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            out, err = ret.communicate()
-
-            buf = StringIO(out)
-            current_version = buf.readline().rstrip('\n')[-5:]
             if LooseVersion(current_version) < LooseVersion("3.2.0"):
                 errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
                 raise SystemExit(errmsg)
+
+        if LooseVersion(current_version) >= LooseVersion("3.3.0"):
+            # add the 'csrs' parameter as default
+            self.args['csrs'] = True
 
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
@@ -327,10 +320,14 @@ class MLaunchTool(BaseCmdLineTool):
             if first_init:
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
+                    if self.args['verbose']:
+                        print 'Initiating config server replica set.'
                     members = sorted(self.get_tagged(["config"]))
                     self._initiate_replset(members[0], "configRepl")
                 for shard in shard_names:
                     # initiate replica set on first member
+                    if self.args['verbose']:
+                        print 'Initiating shard replica set %s.' % shard
                     members = sorted(self.get_tagged([shard]))
                     self._initiate_replset(members[0], shard)
 
@@ -456,6 +453,16 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             print "done."
 
+    # Get the "mongod" version, useful for checking for support or non-support of features
+    def getMongoDVersion(self):
+        binary = "mongod"
+        if self.args and self.args['binarypath']:
+            binary = os.path.join(self.args['binarypath'], binary)
+        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        out, err = ret.communicate()
+        buf = StringIO(out)
+        current_version = buf.readline().rstrip('\n')[-5:]
+        return current_version
 
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
@@ -1126,7 +1133,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _initiate_replset(self, port, name, maxwait=30):
         # initiate replica set
-        if not self.args['replicaset']:
+        if not self.args['replicaset'] and name != 'configRepl':
+            if self.args['verbose']:
+                print 'Skipping replica set initialization for %s' % name
             return
 
         con = MongoConnection('localhost:%i'%port)
