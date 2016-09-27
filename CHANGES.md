@@ -13,7 +13,6 @@ Changes to mtools
    * mlaunch: Allow --setParameter options (#445)
    * mloginfo: fixed showing the host in `rsstate` (#410) 
    * mloginfo: fixed check for WT engine (#426)
-   * Enabled mtools utilities to be run under debugger
 
 #### version 1.2.1
 
