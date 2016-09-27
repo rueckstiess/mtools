@@ -98,6 +98,20 @@ is a number starting at 0. For example, version `1.2rc2` is the 3rd release cand
 Github milestones and git tags are named with a prefix `v`, for example `v1.0.1`.
 
 
+### Releasing a new version
+
+1. Create a release branch, named `release-x.y.z` where `x.y.z` is the version to be released.
+2. Increase the version in `./mtools/version.py` from `x.y.z-dev` to `x.y.z`.
+3. Run tests via `nosetests` and make sure they pass
+4. Update README.md and CHANGES.md accordingly
+5. Any other cleanup tasks
+6. (optional) leave the release branch for a few days to give others a chance to test it before releasing
+7. Run `python setup.py sdist upload` to publish the new version to pip (if you have permissions, otherwise ask someone who does, e.g. @rueckstiess).
+8. Merge the release branch into `master`
+9. Merge the release branch into `develop`
+10. Delete the `release-x.y.z` branch
+11. Bump the version on the develop branch (in `./mtools/version.py`) to `x.y.(z+1)-dev`.
+
 ### Testing
 
 mtools uses the [nose testing framework](https://github.com/nose-devs/nose). You can install it with `sudo pip install nose` or 
