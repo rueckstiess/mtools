@@ -16,8 +16,10 @@ class BasePlotType(object):
 
     # 14 most distinguishable colors, according to 
     # http://stackoverflow.com/questions/309149/generate-distinctly-different-rgb-colors-in-graphs
-    colors = ['#000000','#00FF00','#0000FF','#FF0000','#01FFFE','#FFA6FE','#FFDB66','#006401', \
-              '#010067','#95003A','#007DB5','#FF00F6','#FFEEE8','#774D00']
+    colors = ['#0000FF','#FF00F6','#01FFFE','#BDBDBD','#3F3F3F','#FF0000','#00FF00', \
+	          '#FFA6FE','#FFDB66','#006401','#010067','#95003A','#007DB5','#FFEEE8', \
+              '#774D00']
+
     color_index = 0
     markers = ['o', 's', '<', 'D']
     marker_index = 0
