@@ -461,7 +461,8 @@ class MLaunchTool(BaseCmdLineTool):
         ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
         buf = StringIO(out)
-        current_version = buf.readline().rstrip('\n')[-5:]
+        m = re.search(' v(\S+)', buf.readline())
+        current_version = m.group(0)
         return current_version
 
     def stop(self):
