@@ -179,6 +179,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
         init_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
         init_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
+        init_parser.add_argument('--priority', action='store_true', default=False, help='make lowest-port member primary')
 
         # sharded clusters
         init_parser.add_argument('--sharded', '--shards', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
@@ -1321,7 +1322,16 @@ class MLaunchTool(BaseCmdLineTool):
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, extra=extra)
 
             host = '%s:%i'%(self.args['hostname'], portstart+i)
-            self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
+            member_config = {
+                '_id': len(self.config_docs[name]['members']),
+                'host': host,
+            }
+
+            # First node gets increased priority.
+            if i == 0 and self.args['priority']:
+                member_config['priority'] = 10
+
+            self.config_docs[name]['members'].append(member_config)
 
         # launch arbiter if True
         if self.args['arbiter'] and  '--configsvr' not in extra:
