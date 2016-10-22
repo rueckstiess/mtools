@@ -646,6 +646,9 @@ class MLaunchTool(BaseCmdLineTool):
         print_docs.append( None )
         print
         print_table(print_docs)
+        if self.loaded_args.get('auth'):
+            print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
+                                       self.loaded_args.get('password')))
 
 
     def kill(self):
