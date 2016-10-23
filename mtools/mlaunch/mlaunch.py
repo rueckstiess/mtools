@@ -288,7 +288,8 @@ class MLaunchTool(BaseCmdLineTool):
             out, err = ret.communicate()
 
             buf = StringIO(out)
-            current_version = buf.readline().rstrip('\n')[-5:]
+            temp_current_version = buf.readline().rstrip('\n')
+            current_version = temp_current_version[temp_current_version.index('version v') + 9:]
             if LooseVersion(current_version) < LooseVersion("3.2.0"):
                 errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
                 raise SystemExit(errmsg)
