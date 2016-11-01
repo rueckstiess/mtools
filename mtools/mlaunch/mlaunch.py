@@ -123,7 +123,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # arguments
         self.args = None
-
+        self.mongo_version = None
         # startup parameters for each port
         self.startup_info = {}
 
@@ -271,26 +271,34 @@ class MLaunchTool(BaseCmdLineTool):
         else:
             first_init = True
 
+        # Mongodb version discovery
+        binary = "mongod"
+
+        if self.args and self.args['binarypath']:
+            binary = os.path.join(self.args['binarypath'], binary)
+        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        out, err = ret.communicate()    
+
+        buf = StringIO(out)
+        temp_current_version = buf.readline().rstrip('\n')
+        self.mongo_version = temp_current_version[temp_current_version.index('version v') + 9:]
         # number of default config servers
         if self.args['config'] == -1:
             self.args['config'] = 1
 
+
+
         # Check if config replicaset is applicable to this version
         current_version = self.getMongoDVersion()
         if self.args['csrs']:
-            binary = "mongod"
 
-            if self.args and self.args['binarypath']:
-                binary = os.path.join(self.args['binarypath'], binary)
-            ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-            out, err = ret.communicate()
-
-            buf = StringIO(out)
-            temp_current_version = buf.readline().rstrip('\n')
-            current_version = temp_current_version[temp_current_version.index('version v') + 9:]
-            if LooseVersion(current_version) < LooseVersion("3.2.0"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
+            if LooseVersion(self.mongo_version) < LooseVersion("3.2.0"):
+                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % self.mongo_version
                 raise SystemExit(errmsg)
+        else:
+            if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0"):
+                self.args['csrs'] = True
+                self.args['config'] = 3
 
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
             # add the 'csrs' parameter as default
@@ -320,14 +328,20 @@ class MLaunchTool(BaseCmdLineTool):
 
         if self.args['sharded']:
 
+
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
             nodes = self.get_tagged(['mongod', 'down'])
-            self._start_on_ports(nodes, wait=True, overrideAuth=True)
+
+
+
+            self._start_on_ports(nodes, wait=True, overrideAuth=True,)
+
 
             # initiate replica sets if init is called for the first time
             if first_init:
+
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
                     if self.args['verbose']:
@@ -1396,6 +1410,10 @@ class MLaunchTool(BaseCmdLineTool):
         if self.unknown_args:
             config = '--configsvr' in extra
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
+
+
+        if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' not in extra:
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + '--shardsvr'
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
