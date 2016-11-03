@@ -461,7 +461,11 @@ class MLaunchTool(BaseCmdLineTool):
         ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
         buf = StringIO(out)
-        current_version = buf.readline().rstrip('\n')[-5:]
+        current_version = buf.readline().rstrip('\n')
+        if current_version.rindex('v') > 0:
+            current_version = current_version.rpartition('v')[2]
+        if self.args['verbose']:
+            print "Detected mongod version: %s" % current_version
         return current_version
 
     def stop(self):
