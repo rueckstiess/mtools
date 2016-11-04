@@ -454,6 +454,9 @@ class MLaunchTool(BaseCmdLineTool):
             print "done."
 
     # Get the "mongod" version, useful for checking for support or non-support of features
+    # Normally we expect to get back something like "db version v3.4.0", but with release candidates
+    # we get abck something like "db version v3.4.0-rc2". This code exact the "major.minor.revision"
+    # part of the string
     def getMongoDVersion(self):
         binary = "mongod"
         if self.args and self.args['binarypath']:
@@ -462,8 +465,17 @@ class MLaunchTool(BaseCmdLineTool):
         out, err = ret.communicate()
         buf = StringIO(out)
         current_version = buf.readline().rstrip('\n')
+        # remove prefix "db version v"
         if current_version.rindex('v') > 0:
             current_version = current_version.rpartition('v')[2]
+
+        # remove suffix making assumption that all release candidates equal revision 0
+        try:
+            if current_version.rindex('-') > 0: # release candidate?
+                current_version = current_version.rpartition('-')[0]
+        except Exception:
+            pass
+
         if self.args['verbose']:
             print "Detected mongod version: %s" % current_version
         return current_version
