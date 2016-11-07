@@ -1413,7 +1413,12 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' not in extra:
-            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + '--shardsvr'
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' --shardsvr'
+        elif LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' in extra:
+            # Remove mmapv1 or inMemeory for CSRS usage.
+            if '--storageEngine' in extra and ('mmapv1' in extra or 'inMemory' in extra):
+                print "Warning! the provided storageEngine is not supported for CSRS...Using wiredTiger"
+                extra = re.sub(r'--storageEngine|mmapv1|inMemory','',extra)
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
