@@ -1,8 +1,21 @@
 Changes to mtools
 =================
 
+#### version 1.2.3-dev
+   * mlaunch: fixed parsing of the `mongod` version (#451)
+
+
 #### version 1.2.2
 
+   * mgenerate: create operator for binary data  (#405)
+   * mlaunch: added `csrs` parameter if version > 3.3 
+   * mlaunch: Allow one node config server with --csrs and make the default be one node (#438) 
+   * mlaunch: added `shardsrv` parameter automatically (#430)
+   * mlaunch: fixed `auth` not working for replica sets (#380)
+   * mlaunch: Make sure that when CSRS is deployed, --arbiter will not have an affect on it (#418)
+   * mlaunch: Allow --setParameter options (#445)
+   * mloginfo: fixed showing the host in `rsstate` (#410) 
+   * mloginfo: fixed check for WT engine (#426)
 
 #### version 1.2.1
 
