@@ -272,16 +272,8 @@ class MLaunchTool(BaseCmdLineTool):
             first_init = True
 
         # Mongodb version discovery
-        binary = "mongod"
 
-        if self.args and self.args['binarypath']:
-            binary = os.path.join(self.args['binarypath'], binary)
-        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        out, err = ret.communicate()    
-
-        buf = StringIO(out)
-        temp_current_version = buf.readline().rstrip('\n')
-        self.mongo_version = temp_current_version[temp_current_version.index('version v') + 9:]
+        self.mongo_version = self.getMongoDVersion()
         # number of default config servers
         if self.args['config'] == -1:
             if self.args['csrs']:
@@ -472,6 +464,34 @@ class MLaunchTool(BaseCmdLineTool):
             print "done."
 
 
+    # Get the "mongod" version, useful for checking for support or non-support of features
+    # Normally we expect to get back something like "db version v3.4.0", but with release candidates
+    # we get abck something like "db version v3.4.0-rc2". This code exact the "major.minor.revision"
+    # part of the string
+    def getMongoDVersion(self):
+        binary = "mongod"
+        if self.args and self.args['binarypath']:
+            binary = os.path.join(self.args['binarypath'], binary)
+        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        out, err = ret.communicate()
+        buf = StringIO(out)
+        current_version = buf.readline().rstrip('\n')
+        # remove prefix "db version v"
+        if current_version.rindex('v') > 0:
+            current_version = current_version.rpartition('v')[2]
+
+        # remove suffix making assumption that all release candidates equal revision 0
+        try:
+            if current_version.rindex('-') > 0: # release candidate?
+                current_version = current_version.rpartition('-')[0]
+        except Exception:
+            pass
+
+        if self.args['verbose']:
+            print "Detected mongod version: %s" % current_version
+        return current_version
+
+
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
@@ -540,9 +560,10 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
-        mongod_matches = mongod_matches.intersection(matches)
+        config_matches = self.get_tagged(['config'])
+        self._start_on_ports(config_matches, wait=True)
+        mongod_matches = self.get_tagged(['mongod']).difference(config_matches)
+        #mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
@@ -1067,7 +1088,9 @@ class MLaunchTool(BaseCmdLineTool):
                     continue
                 accepted_arguments.append(argument)
 
+
         # add undocumented option
+        accepted_arguments.append('--setParameter')
         if binary == "mongod":
             accepted_arguments.append('--wiredTigerEngineConfigString')
 
