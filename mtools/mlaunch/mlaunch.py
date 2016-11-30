@@ -123,7 +123,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # arguments
         self.args = None
-
+        self.mongo_version = None
         # startup parameters for each port
         self.startup_info = {}
 
@@ -272,20 +272,28 @@ class MLaunchTool(BaseCmdLineTool):
         else:
             first_init = True
 
+        # Mongodb version discovery
+
+        self.mongo_version = self.getMongoDVersion()
         # number of default config servers
         if self.args['config'] == -1:
-            self.args['config'] = 1
+            if self.args['csrs']:
+                self.args['config'] = 3
+            else:
+                self.args['config'] = 1
+
+
 
         # Check if config replicaset is applicable to this version
-        current_version = self.getMongoDVersion()
         if self.args['csrs']:
-            if LooseVersion(current_version) < LooseVersion("3.2.0"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
-                raise SystemExit(errmsg)
 
-        if LooseVersion(current_version) >= LooseVersion("3.3.0"):
-            # add the 'csrs' parameter as default
-            self.args['csrs'] = True
+            if LooseVersion(self.mongo_version) < LooseVersion("3.2.0"):
+                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % self.mongo_version
+                raise SystemExit(errmsg)
+        else:
+            if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0"):
+                self.args['csrs'] = True
+                self.args['config'] = 3
 
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
@@ -311,24 +319,26 @@ class MLaunchTool(BaseCmdLineTool):
 
         if self.args['sharded']:
 
+
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
             nodes = self.get_tagged(['mongod', 'down'])
-            self._start_on_ports(nodes, wait=True, overrideAuth=True)
+
+
+
+            self._start_on_ports(nodes, wait=True, overrideAuth=True,)
+
 
             # initiate replica sets if init is called for the first time
             if first_init:
+
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
-                    if self.args['verbose']:
-                        print 'Initiating config server replica set.'
                     members = sorted(self.get_tagged(["config"]))
                     self._initiate_replset(members[0], "configRepl")
                 for shard in shard_names:
                     # initiate replica set on first member
-                    if self.args['verbose']:
-                        print 'Initiating shard replica set %s.' % shard
                     members = sorted(self.get_tagged([shard]))
                     self._initiate_replset(members[0], shard)
 
@@ -458,6 +468,7 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             print "done."
 
+
     # Get the "mongod" version, useful for checking for support or non-support of features
     # Normally we expect to get back something like "db version v3.4.0", but with release candidates
     # we get abck something like "db version v3.4.0-rc2". This code exact the "major.minor.revision"
@@ -484,6 +495,7 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             print "Detected mongod version: %s" % current_version
         return current_version
+
 
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
@@ -553,9 +565,10 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
-        mongod_matches = mongod_matches.intersection(matches)
+        config_matches = self.get_tagged(['config'])
+        self._start_on_ports(config_matches, wait=True)
+        mongod_matches = self.get_tagged(['mongod']).difference(config_matches)
+        #mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
@@ -1083,7 +1096,8 @@ class MLaunchTool(BaseCmdLineTool):
                     continue
                 accepted_arguments.append(argument)
 
-        # add undocumented options
+
+        # add undocumented option
         accepted_arguments.append('--setParameter')
         if binary == "mongod":
             accepted_arguments.append('--wiredTigerEngineConfigString')
@@ -1158,9 +1172,7 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _initiate_replset(self, port, name, maxwait=30):
         # initiate replica set
-        if not self.args['replicaset'] and name != 'configRepl':
-            if self.args['verbose']:
-                print 'Skipping replica set initialization for %s' % name
+        if not self.args['replicaset']:
             return
 
         con = MongoConnection('localhost:%i'%port)
@@ -1254,7 +1266,6 @@ class MLaunchTool(BaseCmdLineTool):
 
         return False
 
-
     # --- below are command line constructor methods, that build the command line strings to be called
 
     def _construct_cmdlines(self):
@@ -1292,10 +1303,10 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
             if self.args['single']:
-                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr') )
+                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard) )
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, extra='--shardsvr') )
+                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard) )
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
@@ -1379,10 +1390,10 @@ class MLaunchTool(BaseCmdLineTool):
 
 
 
-    def _construct_single(self, basedir, port, name=None, extra=''):
+    def _construct_single(self, basedir, port, name=None):
         """ construct command line strings for a single node, either for shards or as a stand-alone. """
         datapath = self._create_paths(basedir, name)
-        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra=extra)
+        self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None)
 
         host = '%s:%i'%(self.args['hostname'], port)
 
@@ -1403,6 +1414,15 @@ class MLaunchTool(BaseCmdLineTool):
         if self.unknown_args:
             config = '--configsvr' in extra
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
+
+
+        if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' not in extra:
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' --shardsvr'
+        elif LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' in extra:
+            # Remove mmapv1 or inMemeory for CSRS usage.
+            if '--storageEngine' in extra and ('mmapv1' in extra or 'inMemory' in extra):
+                print "Warning! the provided storageEngine is not supported for CSRS...Using wiredTiger"
+                extra = re.sub(r'--storageEngine|mmapv1|inMemory','',extra)
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
