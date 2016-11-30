@@ -451,6 +451,10 @@ class MLaunchTool(BaseCmdLineTool):
                 print "restarting cluster to enable auth..."
             self.restart()
 
+        if self.args['auth']:
+            print 'Username "%s", password "%s"' % (
+                self.args['username'], self.args['password'])
+
         if self.args['verbose']:
             print "done."
 
@@ -659,6 +663,9 @@ class MLaunchTool(BaseCmdLineTool):
         print_docs.append( None )
         print
         print_table(print_docs)
+        if self.loaded_args.get('auth'):
+            print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
+                                       self.loaded_args.get('password')))
 
 
     def kill(self):
