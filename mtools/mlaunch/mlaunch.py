@@ -123,7 +123,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # arguments
         self.args = None
-
+        self.mongo_version = None
         # startup parameters for each port
         self.startup_info = {}
 
@@ -245,6 +245,10 @@ class MLaunchTool(BaseCmdLineTool):
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
+        # protect from old .mlaunch_startup configs
+        if 'csrs' not in self.args:
+            self.args['csrs'] = False
+
         # conditions on argument combinations
         if self.args['command'] == 'init' and 'single' in self.args and self.args['single']:
             if self.args['arbiter']:
@@ -272,16 +276,26 @@ class MLaunchTool(BaseCmdLineTool):
         else:
             first_init = True
 
+        # Mongodb version discovery
+
+        self.mongo_version = self.getMongoDVersion()
         # number of default config servers
         if self.args['config'] == -1:
             self.args['config'] = 1
 
+
+
         # Check if config replicaset is applicable to this version
         current_version = self.getMongoDVersion()
         if self.args['csrs']:
-            if LooseVersion(current_version) < LooseVersion("3.2.0"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
+
+            if LooseVersion(self.mongo_version) < LooseVersion("3.2.0"):
+                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % self.mongo_version
                 raise SystemExit(errmsg)
+        else:
+            if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0"):
+                self.args['csrs'] = True
+                self.args['config'] = 3
 
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
             # add the 'csrs' parameter as default
@@ -311,14 +325,20 @@ class MLaunchTool(BaseCmdLineTool):
 
         if self.args['sharded']:
 
+
             shard_names = self._get_shard_names(self.args)
 
             # start mongod (shard and config) nodes and wait
             nodes = self.get_tagged(['mongod', 'down'])
-            self._start_on_ports(nodes, wait=True, overrideAuth=True)
+
+
+
+            self._start_on_ports(nodes, wait=True, overrideAuth=True,)
+
 
             # initiate replica sets if init is called for the first time
             if first_init:
+
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
                     if self.args['verbose']:
@@ -485,6 +505,34 @@ class MLaunchTool(BaseCmdLineTool):
             print "Detected mongod version: %s" % current_version
         return current_version
 
+    # Get the "mongod" version, useful for checking for support or non-support of features
+    # Normally we expect to get back something like "db version v3.4.0", but with release candidates
+    # we get abck something like "db version v3.4.0-rc2". This code exact the "major.minor.revision"
+    # part of the string
+    def getMongoDVersion(self):
+        binary = "mongod"
+        if self.args and self.args['binarypath']:
+            binary = os.path.join(self.args['binarypath'], binary)
+        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        out, err = ret.communicate()
+        buf = StringIO(out)
+        current_version = buf.readline().rstrip('\n')
+        # remove prefix "db version v"
+        if current_version.rindex('v') > 0:
+            current_version = current_version.rpartition('v')[2]
+
+        # remove suffix making assumption that all release candidates equal revision 0
+        try:
+            if current_version.rindex('-') > 0: # release candidate?
+                current_version = current_version.rpartition('-')[0]
+        except Exception:
+            pass
+
+        if self.args['verbose']:
+            print "Detected mongod version: %s" % current_version
+        return current_version
+
+
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
@@ -553,9 +601,10 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit('no nodes started.')
 
         # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
-        mongod_matches = mongod_matches.intersection(matches)
+        config_matches = self.get_tagged(['config'])
+        self._start_on_ports(config_matches, wait=True)
+        mongod_matches = self.get_tagged(['mongod']).difference(config_matches)
+        #mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
         # now start mongos
@@ -1083,7 +1132,7 @@ class MLaunchTool(BaseCmdLineTool):
                     continue
                 accepted_arguments.append(argument)
 
-        # add undocumented options
+        # add undocumented option
         accepted_arguments.append('--setParameter')
         if binary == "mongod":
             accepted_arguments.append('--wiredTigerEngineConfigString')
@@ -1403,6 +1452,15 @@ class MLaunchTool(BaseCmdLineTool):
         if self.unknown_args:
             config = '--configsvr' in extra
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
+
+
+        if LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' not in extra:
+            extra = self._filter_valid_arguments(self.unknown_args, "mongod") + ' --shardsvr'
+        elif LooseVersion(self.mongo_version) >= LooseVersion("3.4.0") and self.args['sharded'] and '--configsvr' in extra:
+            # Remove mmapv1 or inMemeory for CSRS usage.
+            if '--storageEngine' in extra and ('mmapv1' in extra or 'inMemory' in extra):
+                print "Warning! the provided storageEngine is not supported for CSRS...Using wiredTiger"
+                extra = re.sub(r'--storageEngine|mmapv1|inMemory','',extra)
 
         path = self.args['binarypath'] or ''
         command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
