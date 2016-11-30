@@ -244,6 +244,10 @@ class MLaunchTool(BaseCmdLineTool):
         # argparser is set up, now call base class run()
         BaseCmdLineTool.run(self, arguments, get_unknowns=True)
 
+        # protect from old .mlaunch_startup configs
+        if 'csrs' not in self.args:
+            self.args['csrs'] = False
+
         # conditions on argument combinations
         if self.args['command'] == 'init' and 'single' in self.args and self.args['single']:
             if self.args['arbiter']:
