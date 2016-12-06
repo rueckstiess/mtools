@@ -278,13 +278,14 @@ class MLaunchTool(BaseCmdLineTool):
 
         # Check if config replicaset is applicable to this version
         current_version = self.getMongoDVersion()
-        if self.args['csrs']:
-            if LooseVersion(current_version) < LooseVersion("3.2.0"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
-                raise SystemExit(errmsg)
 
+        # Exit with error if --csrs is set and MongoDB < 3.2.0
+        if self.args['csrs'] and LooseVersion(current_version) < LooseVersion("3.2.0"):
+            errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
+            raise SystemExit(errmsg)
+
+        # add the 'csrs' parameter as default for MongoDB >= 3.3.0
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
-            # add the 'csrs' parameter as default
             self.args['csrs'] = True
 
         # check if authentication is enabled, make key file
@@ -847,6 +848,14 @@ class MLaunchTool(BaseCmdLineTool):
         # add config server to cluster tree
         self.cluster_tree.setdefault( 'config', [] ).append( port )
 
+        # If not CSRS, set the number of config servers to be 1 or 3
+        # This is needed, otherwise `mlaunch init --sharded 2 --replicaset --config 2` on <3.3.0 will crash
+        if not self.args.get('csrs'):
+            if num_config >= 3:
+                num_config = 3
+            else:
+                num_config = 1
+
         for i in range(num_config):
             port = i+current_port
 
@@ -1275,7 +1284,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         elif self.args['replicaset']:
             # construct startup strings for a non-sharded replica set
-            self._construct_replset(self.dir, self.args['port'], self.args['name'])
+            self._construct_replset(self.dir, self.args['port'], self.args['name'], range(self.args['nodes']), self.args['arbiter'])
 
         # discover current setup
         self.discover()
@@ -1295,14 +1304,21 @@ class MLaunchTool(BaseCmdLineTool):
                 self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr') )
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, extra='--shardsvr') )
+                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, num_nodes=range(self.args['nodes']), arbiter=self.args['arbiter'], extra='--shardsvr') )
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
 
         # start up config server(s)
         config_string = []
-        config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
+
+        # SCCC config servers
+        if not self.args['csrs'] and self.args['config'] >= 3:
+            config_names = ['config1', 'config2', 'config3']
+        else:
+            config_names = ['config']
+
+        # CSRS config servers
         if self.args['csrs']:
             config_string.append(self._construct_config(self.dir, nextport, "configRepl", True))
         else:
@@ -1331,15 +1347,12 @@ class MLaunchTool(BaseCmdLineTool):
             nextport += 1
 
 
-    def _construct_replset(self, basedir, portstart, name, extra=''):
+    def _construct_replset(self, basedir, portstart, name, num_nodes, arbiter, extra=''):
         """ construct command line strings for a replicaset, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
-        # Corner case for csrs to calculate the number of nodes by number of configservers
-        if  '--configsvr' in extra:
-            num_nodes = range(self.args['config'])
-        else:
-            num_nodes = range(self.args['nodes'])
+
+        # Construct individual replica set nodes
         for i in num_nodes:
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, extra=extra)
@@ -1357,7 +1370,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.config_docs[name]['members'].append(member_config)
 
         # launch arbiter if True
-        if self.args['arbiter'] and  '--configsvr' not in extra:
+        if arbiter:
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
 
@@ -1372,7 +1385,7 @@ class MLaunchTool(BaseCmdLineTool):
         """ construct command line strings for a config server """
 
         if isReplSet:
-            return self._construct_replset(basedir, port, name, extra='--configsvr')
+            return self._construct_replset(basedir=basedir, portstart=port, name=name, num_nodes=range(self.args['config']), arbiter=False, extra='--configsvr')
         else:
             datapath = self._create_paths(basedir, name)
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')
