@@ -553,9 +553,12 @@ class MLaunchTool(BaseCmdLineTool):
         if len(matches) == 0:
             raise SystemExit('no nodes started.')
 
-        # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
+        # start config servers first
+        config_matches = self.get_tagged(['config']).intersection(matches)
+        self._start_on_ports(config_matches, wait=True)
+
+        # start shards next
+        mongod_matches = self.get_tagged(['mongod']) - self.get_tagged(['config'])
         mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
@@ -715,7 +718,7 @@ class MLaunchTool(BaseCmdLineTool):
         # there is a very brief period in which nodes are not reachable anymore, but the
         # port is not torn down fully yet and an immediate start command would fail. This
         # very short sleep prevents that case, and it is practically not noticable by users
-        time.sleep(0.1)
+        time.sleep(1)
 
         # refresh discover
         self.discover()
