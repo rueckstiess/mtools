@@ -850,7 +850,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # If not CSRS, set the number of config servers to be 1 or 3
         # This is needed, otherwise `mlaunch init --sharded 2 --replicaset --config 2` on <3.3.0 will crash
-        if not self.args.get('csrs'):
+        if not self.args.get('csrs') and self.args['command'] == 'init':
             if num_config >= 3:
                 num_config = 3
             else:
