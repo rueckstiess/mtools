@@ -279,8 +279,8 @@ class MLaunchTool(BaseCmdLineTool):
         # Check if config replicaset is applicable to this version
         current_version = self.getMongoDVersion()
 
-        # Exit with error if --csrs is set and MongoDB < 3.2.0
-        if self.args['csrs'] and LooseVersion(current_version) < LooseVersion("3.2.0"):
+        # Exit with error if --csrs is set and MongoDB < 3.1.0
+        if self.args['csrs'] and LooseVersion(current_version) < LooseVersion("3.1.0"):
             errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
             raise SystemExit(errmsg)
 
@@ -656,8 +656,8 @@ class MLaunchTool(BaseCmdLineTool):
         matches = self._get_ports_from_args(self.args, 'running')
         processes = self._get_processes()
 
-        # convert signal to int
-        sig = self.args.get('signal') or 15
+        # convert signal to int, default is SIGTERM for graceful shutdown
+        sig = self.args.get('signal') or 'SIGTERM'
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -689,16 +689,16 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def restart(self):
+
+        # get all running processes
+        processes = self._get_processes()
+        procs = [processes[k] for k in processes.keys()]
+
         # stop nodes via stop command
         self.stop()
 
-        # there is a very brief period in which nodes are not reachable anymore, but the
-        # port is not torn down fully yet and an immediate start command would fail. This
-        # very short sleep prevents that case, and it is practically not noticable by users
-        time.sleep(1)
-
-        # refresh discover
-        self.discover()
+        # wait until all processes terminate
+        psutil.wait_procs(procs)
 
         # start nodes again via start command
         self.start()
@@ -1067,7 +1067,7 @@ class MLaunchTool(BaseCmdLineTool):
             line = line.lstrip()
             if line.startswith('-'):
                 argument = line.split()[0]
-                # exception: don't allow --oplogSize, --storageEngine, --smallfiles, and --nojournal for config servers
+                # exception: don't allow unsupported config server arguments
                 if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
@@ -1294,13 +1294,13 @@ class MLaunchTool(BaseCmdLineTool):
         # start up config server(s)
         config_string = []
 
-        # SCCC config servers
+        # SCCC config servers (MongoDB <3.3.0)
         if not self.args['csrs'] and self.args['config'] >= 3:
             config_names = ['config1', 'config2', 'config3']
         else:
             config_names = ['config']
 
-        # CSRS config servers
+        # CSRS config servers (MongoDB >=3.1.0)
         if self.args['csrs']:
             config_string.append(self._construct_config(self.dir, nextport, "configRepl", True))
         else:
