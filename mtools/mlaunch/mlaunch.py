@@ -1127,19 +1127,21 @@ class MLaunchTool(BaseCmdLineTool):
                 # this is to set up sharded clusters without auth first, then relaunch with auth
                 command_str = re.sub(r'--keyFile \S+', '', command_str)
 
-            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+            try:
+                ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
-            binary = command_str.split()[0]
-            if '--configsvr' in command_str:
-                binary = 'config server'
+                binary = command_str.split()[0]
+                if '--configsvr' in command_str:
+                    binary = 'config server'
 
-            if self.args['verbose']:
-                print "launching: %s" % command_str
-            else:
-                print "launching: %s on port %s" % (binary, port)
+                if self.args['verbose']:
+                    print "launching: %s" % command_str
+                else:
+                    print "launching: %s on port %s" % (binary, port)
 
-            if ret > 0:
-                raise SystemExit("can't start process, return code %i. tried to launch: %s"% (ret, command_str))
+            except subprocess.CalledProcessError, e:
+                print e.output
+                raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
             self.wait_for(ports)
