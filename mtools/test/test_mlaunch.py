@@ -5,7 +5,7 @@ import time
 import os
 import json
 import sys
-import json
+import unittest
 
 from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
@@ -191,12 +191,9 @@ class TestMLaunch(object):
         mc = MongoClient('localhost:%i' % self.port)
         mc.test.smokeWait.insert({}, w=2, wtimeout=10*60*1000)
 
-
+    @unittest.skip('incompatible with 3.4 CSRS')
     def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
-
-        # Skipped, incompatible with 3.4 CSRS
-        raise SkipTest
 
         # start mongo process on free test port 
         self.run_tool("init --sharded 2 --single")
@@ -220,11 +217,9 @@ class TestMLaunch(object):
         return len( filter( None, [ all( [kw in line for kw in keywords] ) for line in output] ) )
 
 
+    @unittest.skip('incompatible with 3.4 CSRS')
     def test_verbose_sharded(self):
         """ mlaunch: test verbose output when creating sharded cluster """
-
-        # Skipped, incompatible with 3.4 CSRS
-        raise SkipTest
 
         self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 2 --verbose")
 
@@ -456,13 +451,11 @@ class TestMLaunch(object):
         assert all( self.tool.is_running(node) for node in nodes )
 
     
+    @unittest.skip('tags implementation not up to date')
     @timed(180)
     @attr('slow')
     def test_kill_partial(self):
         """ mlaunch: test killing and restarting tagged groups on different tags """
-
-        # Skipped, tags implementation not up to date
-        raise SkipTest
 
         # key is tag for command line, value is tag for get_tagged
         tags = ['shard01', 'shard 1', 'mongos', 'config 1', str(self.port)] 
@@ -538,11 +531,9 @@ class TestMLaunch(object):
         assert loglevel[u'logLevel'] == 0
 
 
+    @unittest.skip('currently not a useful test')
     def test_start_stop_single_repeatedly(self):
         """ mlaunch: test starting and stopping single node in short succession """ 
-
-        # Skipped, currently not a useful test
-        raise SkipTest
 
         # repeatedly start single node
         self.run_tool("init --single")
@@ -571,11 +562,9 @@ class TestMLaunch(object):
         self.run_tool("init --replicaset")
 
 
+    @unittest.skip('currently not a useful test')
     def test_start_stop_replicaset_repeatedly(self):
         """ mlaunch: test starting and stopping replica set in short succession """ 
-
-        # Skipped, currently not a useful test
-        raise SkipTest
 
         # repeatedly start replicaset nodes
         self.run_tool("init --replicaset")
@@ -687,11 +676,9 @@ class TestMLaunch(object):
             assert 'different environment already exists' in e.message
 
 
+    @unittest.skip('mlaunch protocol upgrade is not needed at this point')
     def test_upgrade_v1_to_v2(self):
         """ mlaunch: test upgrade from protocol version 1 to 2. """
-
-        # Skipped, assume upgrade is not needed
-        raise SkipTest
 
         startup_options = {"name": "replset", "replicaset": True, "dir": "./data", "authentication": False, "single": False, "arbiter": False, "mongos": 1, "binarypath": None, "sharded": None, "nodes": 3, "config": 1, "port": 33333, "restart": False, "verbose": False}
 
