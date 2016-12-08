@@ -1090,8 +1090,8 @@ class MLaunchTool(BaseCmdLineTool):
             line = line.lstrip()
             if line.startswith('-'):
                 argument = line.split()[0]
-                # exception: don't allow --oplogSize, --storageEngine, and --smallfiles for config servers
-                if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles']:
+                # exception: don't allow --oplogSize, --storageEngine, --smallfiles, and --nojournal for config servers
+                if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
 
