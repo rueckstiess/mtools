@@ -490,33 +490,10 @@ class MLaunchTool(BaseCmdLineTool):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
             will be shut down.
+            Currently this is an alias for kill()
         """
-        self.discover()
 
-        matches = self._get_ports_from_args(self.args, 'running')
-        if len(matches) == 0:
-            raise SystemExit('no nodes stopped.')
-
-        for port in matches:
-            if self.args['verbose']:
-                print "shutting down localhost:%s" % port
-
-            username = self.loaded_args['username'] if self.loaded_args['auth'] else None
-            password = self.loaded_args['password'] if self.loaded_args['auth'] else None
-            authdb = self.loaded_args['auth_db'] if self.loaded_args['auth'] else None
-            shutdown_host(port, username, password, authdb)
-
-        # wait until nodes are all shut down
-        self.wait_for(matches, to_start=False)
-        print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
-
-        # there is a very brief period in which nodes are not reachable anymore, but the
-        # port is not torn down fully yet and an immediate start command would fail. This
-        # very short sleep prevents that case, and it is practically not noticable by users
-        time.sleep(0.1)
-
-        # refresh discover
-        self.discover()
+        self.kill()
 
 
     def start(self):
@@ -680,7 +657,7 @@ class MLaunchTool(BaseCmdLineTool):
         processes = self._get_processes()
 
         # convert signal to int
-        sig = self.args['signal']
+        sig = self.args.get('signal') or 15
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
