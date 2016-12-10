@@ -4,7 +4,6 @@ Changes to mtools
 #### version 1.2.3-dev
    * mlaunch: fixed parsing of the `mongod` version (#451)
 
-
 #### version 1.2.2
 
    * mgenerate: create operator for binary data  (#405)
