@@ -101,7 +101,7 @@ class TestMLaunch(unittest.TestCase):
         ''' mlaunch should start 1 node '''
         self.run_tool('init --single')
         cmdlist = [
-            {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork'}
+            set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork'])
         ]
         self.cmdlist_assert(cmdlist)
 
@@ -109,7 +109,7 @@ class TestMLaunch(unittest.TestCase):
         ''' mlaunch should start 3 nodes replicaset '''
         self.run_tool('init --replicaset')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork'} ] * 3
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork']) ] * 3
         )
         self.cmdlist_assert(cmdlist)
 
@@ -117,7 +117,7 @@ class TestMLaunch(unittest.TestCase):
         ''' mlaunch should start 7 nodes replicaset '''
         self.run_tool('init --replicaset --nodes 7')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork'} ] * 7
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork']) ] * 7
         )
         self.cmdlist_assert(cmdlist)
 
@@ -125,7 +125,7 @@ class TestMLaunch(unittest.TestCase):
         ''' mlaunch should start 6 nodes + 1 arbiter replicaset '''
         self.run_tool('init --replicaset --nodes 6 --arbiter')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork'} ] * 7
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork']) ] * 7
         )
         self.cmdlist_assert(cmdlist)
 
@@ -134,14 +134,14 @@ class TestMLaunch(unittest.TestCase):
         self.run_tool('init --sharded 2 --single')
         if LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
             cmdlist = (
-                [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--replSet', '--configsvr'} ]
-              + [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 2
-              + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ] )
+                [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--replSet', '--configsvr']) ]
+              + [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 2
+              + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ] )
         else:
             cmdlist = (
-                [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ]
-              + [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 2
-              + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ] )
+                [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ]
+              + [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 2
+              + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ] )
         self.cmdlist_assert(cmdlist)
 
     def test_sharded_replicaset_sccc_1(self):
@@ -149,9 +149,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --replicaset')
         cmdlist = (
-            [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ]
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ]
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -160,9 +160,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --replicaset --config 2')
         cmdlist = (
-            [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ]
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ]
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -171,9 +171,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --replicaset --config 3')
         cmdlist = (
-            [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ] * 3
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ] * 3
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -182,9 +182,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --replicaset --config 4')
         cmdlist = (
-            [ {'mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ] * 3
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ] * 3
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -193,9 +193,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --config 1 --csrs')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ]
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ]
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -204,9 +204,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --config 2 --csrs')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ] * 2
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ] * 2
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -215,9 +215,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --config 3 --csrs')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ] * 3
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ] * 3
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -226,9 +226,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --config 4 --csrs')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ] * 4
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ] * 4
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -237,9 +237,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --csrs --storageEngine mmapv1')
         cmdlist = (
-            [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr'} ]
-          + [ {'mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--storageEngine', '--shardsvr'} ] * 6
-          + [ {'mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--configsvr']) ]
+          + [ set(['mongod', '--replSet', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--storageEngine', '--shardsvr']) ] * 6
+          + [ set(['mongos', '--logpath', '--port', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -248,9 +248,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 1 --replicaset --nodes 1 --oplogSize 19')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork'} ]
-          + [ {'mongod', '--port', '--replSet', '--shardsvr', '--logpath', '--dbpath', '--oplogSize', '--logappend', '--fork'} ]
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork']) ]
+          + [ set(['mongod', '--port', '--replSet', '--shardsvr', '--logpath', '--dbpath', '--oplogSize', '--logappend', '--fork']) ]
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -259,9 +259,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 1 --replicaset --nodes 1 --oplogSize 19 --csrs')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--replSet', '--shardsvr', '--logpath', '--dbpath', '--oplogSize', '--logappend', '--fork'} ]
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--replSet', '--shardsvr', '--logpath', '--dbpath', '--oplogSize', '--logappend', '--fork']) ]
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -270,9 +270,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --single --config 1 --mongos 2')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork'} ]
-          + [ {'mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork'} ] * 2
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ] * 2
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork']) ]
+          + [ set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork']) ] * 2
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ] * 2
         )
         self.cmdlist_assert(cmdlist)
 
@@ -281,9 +281,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --single --config 1 --mongos 2 --csrs')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork'} ] * 2
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ] * 2
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork']) ] * 2
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ] * 2
         )
         self.cmdlist_assert(cmdlist)
 
@@ -292,9 +292,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_sccc()
         self.run_tool('init --sharded 2 --replicaset --config 3 --mongos 3')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork'} ] * 3
-          + [ {'mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet'} ] * 6
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ] * 3
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork']) ] * 3
+          + [ set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet']) ] * 6
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ] * 3
         )
         self.cmdlist_assert(cmdlist)
 
@@ -303,9 +303,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_csrs()
         self.run_tool('init --sharded 2 --replicaset --config 3 --mongos 3 --csrs')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ] * 3
-          + [ {'mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet'} ] * 6
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ] * 3
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ] * 3
+          + [ set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet']) ] * 6
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ] * 3
         )
         self.cmdlist_assert(cmdlist)
 
@@ -317,9 +317,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --single')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork'} ] * 2
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork']) ] * 2
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -328,9 +328,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --replicaset')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet'} ] * 6
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet']) ] * 6
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -339,9 +339,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --replicaset --nodes 7')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet'} ] * 14
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet']) ] * 14
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -350,9 +350,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --replicaset --nodes 7 --config 5')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ] * 5
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet'} ] * 14
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ] * 5
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet']) ] * 14
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
@@ -361,10 +361,10 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --replicaset --nodes 2 --arbiter --config 4 --mongos 2')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ] * 4
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet'} ] * 4
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet'} ] * 2
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ] * 2
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ] * 4
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--replSet']) ] * 4
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--logappend', '--fork', '--replSet']) ] * 2
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ] * 2
         )
         self.cmdlist_assert(cmdlist)
 
@@ -373,9 +373,9 @@ class TestMLaunch(unittest.TestCase):
         self.check_3_4()
         self.run_tool('init --sharded 2 --single --storageEngine mmapv1')
         cmdlist = (
-            [ {'mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet'} ]
-          + [ {'mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--storageEngine'} ] * 2
-          + [ {'mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork'} ]
+            [ set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr', '--logappend', '--fork', '--replSet']) ]
+          + [ set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr', '--logappend', '--fork', '--storageEngine']) ] * 2
+          + [ set(['mongos', '--port', '--logpath', '--configdb', '--logappend', '--fork']) ]
         )
         self.cmdlist_assert(cmdlist)
 
