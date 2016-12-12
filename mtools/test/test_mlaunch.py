@@ -39,7 +39,7 @@ class TestMLaunch(object):
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port """
-        self.tool = MLaunchTool()
+        self.tool = MLaunchTool(test=True)
 
         # if the test data path exists, remove it
         if os.path.exists(self.base_dir):
