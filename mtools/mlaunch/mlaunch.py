@@ -179,6 +179,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--nodes', action='store', metavar='NUM', type=int, default=3, help='adds NUM data nodes to replica set (requires --replicaset, default=3)')
         init_parser.add_argument('--arbiter', action='store_true', default=False, help='adds arbiter to replica set (requires --replicaset)')
         init_parser.add_argument('--name', action='store', metavar='NAME', default='replset', help='name for replica set (default=replset)')
+        init_parser.add_argument('--priority', action='store_true', default=False, help='make lowest-port member primary')
 
         # sharded clusters
         init_parser.add_argument('--sharded', '--shards', action='store', nargs='+', metavar='N', help='creates a sharded setup consisting of several singles or replica sets. Provide either list of shard names or number of shards.')
@@ -277,13 +278,14 @@ class MLaunchTool(BaseCmdLineTool):
 
         # Check if config replicaset is applicable to this version
         current_version = self.getMongoDVersion()
-        if self.args['csrs']:
-            if LooseVersion(current_version) < LooseVersion("3.2.0"):
-                errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
-                raise SystemExit(errmsg)
 
+        # Exit with error if --csrs is set and MongoDB < 3.1.0
+        if self.args['csrs'] and LooseVersion(current_version) < LooseVersion("3.1.0"):
+            errmsg = " \n * The '--csrs' option requires MongoDB version 3.2.0 or greater, the current version is %s.\n" % current_version
+            raise SystemExit(errmsg)
+
+        # add the 'csrs' parameter as default for MongoDB >= 3.3.0
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
-            # add the 'csrs' parameter as default
             self.args['csrs'] = True
 
         # check if authentication is enabled, make key file
@@ -450,10 +452,17 @@ class MLaunchTool(BaseCmdLineTool):
                 print "restarting cluster to enable auth..."
             self.restart()
 
+        if self.args['auth']:
+            print 'Username "%s", password "%s"' % (
+                self.args['username'], self.args['password'])
+
         if self.args['verbose']:
             print "done."
 
     # Get the "mongod" version, useful for checking for support or non-support of features
+    # Normally we expect to get back something like "db version v3.4.0", but with release candidates
+    # we get abck something like "db version v3.4.0-rc2". This code exact the "major.minor.revision"
+    # part of the string
     def getMongoDVersion(self):
         binary = "mongod"
         if self.args and self.args['binarypath']:
@@ -461,40 +470,30 @@ class MLaunchTool(BaseCmdLineTool):
         ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
         buf = StringIO(out)
-        current_version = buf.readline().rstrip('\n')[-5:]
+        current_version = buf.readline().rstrip('\n')
+        # remove prefix "db version v"
+        if current_version.rindex('v') > 0:
+            current_version = current_version.rpartition('v')[2]
+
+        # remove suffix making assumption that all release candidates equal revision 0
+        try:
+            if current_version.rindex('-') > 0: # release candidate?
+                current_version = current_version.rpartition('-')[0]
+        except Exception:
+            pass
+
+        if self.args['verbose']:
+            print "Detected mongod version: %s" % current_version
         return current_version
 
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
             Each tag has a set of nodes associated with it, and only the nodes matching all tags (intersection)
             will be shut down.
+            Currently this is an alias for kill()
         """
-        self.discover()
 
-        matches = self._get_ports_from_args(self.args, 'running')
-        if len(matches) == 0:
-            raise SystemExit('no nodes stopped.')
-
-        for port in matches:
-            if self.args['verbose']:
-                print "shutting down localhost:%s" % port
-
-            username = self.loaded_args['username'] if self.loaded_args['auth'] else None
-            password = self.loaded_args['password'] if self.loaded_args['auth'] else None
-            authdb = self.loaded_args['auth_db'] if self.loaded_args['auth'] else None
-            shutdown_host(port, username, password, authdb)
-
-        # wait until nodes are all shut down
-        self.wait_for(matches, to_start=False)
-        print "%i node%s stopped." % (len(matches), '' if len(matches) == 1 else 's')
-
-        # there is a very brief period in which nodes are not reachable anymore, but the
-        # port is not torn down fully yet and an immediate start command would fail. This
-        # very short sleep prevents that case, and it is practically not noticable by users
-        time.sleep(0.1)
-
-        # refresh discover
-        self.discover()
+        self.kill()
 
 
     def start(self):
@@ -531,9 +530,12 @@ class MLaunchTool(BaseCmdLineTool):
         if len(matches) == 0:
             raise SystemExit('no nodes started.')
 
-        # start mongod and config servers first
-        mongod_matches = self.get_tagged(['mongod'])
-        mongod_matches = mongod_matches.union(self.get_tagged(['config']))
+        # start config servers first
+        config_matches = self.get_tagged(['config']).intersection(matches)
+        self._start_on_ports(config_matches, wait=True)
+
+        # start shards next
+        mongod_matches = self.get_tagged(['mongod']) - self.get_tagged(['config'])
         mongod_matches = mongod_matches.intersection(matches)
         self._start_on_ports(mongod_matches, wait=True)
 
@@ -642,6 +644,9 @@ class MLaunchTool(BaseCmdLineTool):
         print_docs.append( None )
         print
         print_table(print_docs)
+        if self.loaded_args.get('auth'):
+            print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
+                                       self.loaded_args.get('password')))
 
 
     def kill(self):
@@ -651,8 +656,8 @@ class MLaunchTool(BaseCmdLineTool):
         matches = self._get_ports_from_args(self.args, 'running')
         processes = self._get_processes()
 
-        # convert signal to int
-        sig = self.args['signal']
+        # convert signal to int, default is SIGTERM for graceful shutdown
+        sig = self.args.get('signal') or 'SIGTERM'
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -684,16 +689,16 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def restart(self):
+
+        # get all running processes
+        processes = self._get_processes()
+        procs = [processes[k] for k in processes.keys()]
+
         # stop nodes via stop command
         self.stop()
 
-        # there is a very brief period in which nodes are not reachable anymore, but the
-        # port is not torn down fully yet and an immediate start command would fail. This
-        # very short sleep prevents that case, and it is practically not noticable by users
-        time.sleep(0.1)
-
-        # refresh discover
-        self.discover()
+        # wait until all processes terminate
+        psutil.wait_procs(procs)
 
         # start nodes again via start command
         self.start()
@@ -822,6 +827,14 @@ class MLaunchTool(BaseCmdLineTool):
 
         # add config server to cluster tree
         self.cluster_tree.setdefault( 'config', [] ).append( port )
+
+        # If not CSRS, set the number of config servers to be 1 or 3
+        # This is needed, otherwise `mlaunch init --sharded 2 --replicaset --config 2` on <3.3.0 will crash
+        if not self.args.get('csrs') and self.args['command'] == 'init':
+            if num_config >= 3:
+                num_config = 3
+            else:
+                num_config = 1
 
         for i in range(num_config):
             port = i+current_port
@@ -1054,8 +1067,8 @@ class MLaunchTool(BaseCmdLineTool):
             line = line.lstrip()
             if line.startswith('-'):
                 argument = line.split()[0]
-                # exception: don't allow --oplogSize for config servers
-                if config and argument == '--oplogSize':
+                # exception: don't allow unsupported config server arguments
+                if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
 
@@ -1114,19 +1127,21 @@ class MLaunchTool(BaseCmdLineTool):
                 # this is to set up sharded clusters without auth first, then relaunch with auth
                 command_str = re.sub(r'--keyFile \S+', '', command_str)
 
-            ret = subprocess.call([command_str], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+            try:
+                ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
-            binary = command_str.split()[0]
-            if '--configsvr' in command_str:
-                binary = 'config server'
+                binary = command_str.split()[0]
+                if '--configsvr' in command_str:
+                    binary = 'config server'
 
-            if self.args['verbose']:
-                print "launching: %s" % command_str
-            else:
-                print "launching: %s on port %s" % (binary, port)
+                if self.args['verbose']:
+                    print "launching: %s" % command_str
+                else:
+                    print "launching: %s on port %s" % (binary, port)
 
-            if ret > 0:
-                raise SystemExit("can't start process, return code %i. tried to launch: %s"% (ret, command_str))
+            except subprocess.CalledProcessError, e:
+                print e.output
+                raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
             self.wait_for(ports)
@@ -1251,7 +1266,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         elif self.args['replicaset']:
             # construct startup strings for a non-sharded replica set
-            self._construct_replset(self.dir, self.args['port'], self.args['name'])
+            self._construct_replset(self.dir, self.args['port'], self.args['name'], range(self.args['nodes']), self.args['arbiter'])
 
         # discover current setup
         self.discover()
@@ -1271,14 +1286,21 @@ class MLaunchTool(BaseCmdLineTool):
                 self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr') )
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, extra='--shardsvr') )
+                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, num_nodes=range(self.args['nodes']), arbiter=self.args['arbiter'], extra='--shardsvr') )
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
 
         # start up config server(s)
         config_string = []
-        config_names = ['config1', 'config2', 'config3'] if self.args['config'] == 3 else ['config']
+
+        # SCCC config servers (MongoDB <3.3.0)
+        if not self.args['csrs'] and self.args['config'] >= 3:
+            config_names = ['config1', 'config2', 'config3']
+        else:
+            config_names = ['config']
+
+        # CSRS config servers (MongoDB >=3.1.0)
         if self.args['csrs']:
             config_string.append(self._construct_config(self.dir, nextport, "configRepl", True))
         else:
@@ -1307,24 +1329,30 @@ class MLaunchTool(BaseCmdLineTool):
             nextport += 1
 
 
-    def _construct_replset(self, basedir, portstart, name, extra=''):
+    def _construct_replset(self, basedir, portstart, name, num_nodes, arbiter, extra=''):
         """ construct command line strings for a replicaset, either for sharded cluster or by itself. """
 
         self.config_docs[name] = {'_id':name, 'members':[]}
-        # Corner case for csrs to calculate the number of nodes by number of configservers
-        if  '--configsvr' in extra:
-            num_nodes = range(self.args['config'])
-        else:
-            num_nodes = range(self.args['nodes'])
+
+        # Construct individual replica set nodes
         for i in num_nodes:
             datapath = self._create_paths(basedir, '%s/rs%i'%(name, i+1))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+i, replset=name, extra=extra)
 
             host = '%s:%i'%(self.args['hostname'], portstart+i)
-            self.config_docs[name]['members'].append({'_id':len(self.config_docs[name]['members']), 'host':host, 'votes':int(len(self.config_docs[name]['members']) < 7 - int(self.args['arbiter']))})
+            member_config = {
+                '_id': len(self.config_docs[name]['members']),
+                'host': host,
+            }
+
+            # First node gets increased priority.
+            if i == 0 and self.args['priority']:
+                member_config['priority'] = 10
+
+            self.config_docs[name]['members'].append(member_config)
 
         # launch arbiter if True
-        if self.args['arbiter'] and  '--configsvr' not in extra:
+        if arbiter:
             datapath = self._create_paths(basedir, '%s/arb'%(name))
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), portstart+self.args['nodes'], replset=name)
 
@@ -1339,7 +1367,7 @@ class MLaunchTool(BaseCmdLineTool):
         """ construct command line strings for a config server """
 
         if isReplSet:
-            return self._construct_replset(basedir, port, name, extra='--configsvr')
+            return self._construct_replset(basedir=basedir, portstart=port, name=name, num_nodes=range(self.args['config']), arbiter=False, extra='--configsvr')
         else:
             datapath = self._create_paths(basedir, name)
             self._construct_mongod(os.path.join(datapath, 'db'), os.path.join(datapath, 'mongod.log'), port, replset=None, extra='--configsvr')

@@ -1,6 +1,17 @@
 Changes to mtools
 =================
 
+#### version 1.2.3
+
+   * mlaunch: support for MongoDB 3.4 (#466)
+   * mlaunch: MongoDB 3.3+ only supports CSRS for mongos --configdb parameter (#431)
+   * mlaunch: CSRS feature breaks older configurations (#402)
+   * mlaunch: improved parsing of the `mongod` version for RCs (#451)
+   * mlaunch: New init --priority option forces first member primary
+   * mlaunch: init & list now print username and password if auth enabled (#469)
+   * mlaunch: --stop is now an alias of --kill to simplify auth shutdown (#363, #369, #333)
+
+Thanks to @kevinadi, @Pash10g, @Steve-Hand, @vmenajr, and @ajdavis for contributions to this release!
 
 #### version 1.2.2
 
