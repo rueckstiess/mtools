@@ -192,7 +192,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
-        init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
+        init_parser.add_argument('--dir', action='store', default='/data', help='base directory to create db and log paths (default=/data/)')
         init_parser.add_argument('--hostname', action='store', default=socket.gethostname(), help='override hostname for replica set configuration')
 
         # authentication, users, roles
@@ -208,7 +208,7 @@ class MLaunchTool(BaseCmdLineTool):
             description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
         start_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
         start_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-        start_parser.add_argument('--dir', action='store', default='./data', help='base directory to start nodes (default=./data/)')
+        start_parser.add_argument('--dir', action='store', default='/data', help='base directory to start nodes (default=/data/)')
         start_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
         # stop command
@@ -216,20 +216,20 @@ class MLaunchTool(BaseCmdLineTool):
             description='stops running MongoDB instances with the shutdown command. Example: "mlaunch stop shard 2 secondary" will stop all secondary nodes of shard 2.')
         stop_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be stopped. Provide additional tags to narrow down the set of nodes to stop.')
         stop_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-        stop_parser.add_argument('--dir', action='store', default='./data', help='base directory to stop nodes (default=./data/)')
+        stop_parser.add_argument('--dir', action='store', default='/data', help='base directory to stop nodes (default=/data/)')
 
         # restart command
         restart_parser = subparsers.add_parser('restart', help='stops, then restarts MongoDB instances.',
             description='stops running MongoDB instances with the shutdown command. Then restarts the stopped instances.')
         restart_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all non-running nodes will be restarted. Provide additional tags to narrow down the set of nodes to start.')
         restart_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
-        restart_parser.add_argument('--dir', action='store', default='./data', help='base directory to restart nodes (default=./data/)')
+        restart_parser.add_argument('--dir', action='store', default='/data', help='base directory to restart nodes (default=/data/)')
         restart_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
 
         # list command
         list_parser = subparsers.add_parser('list', help='list MongoDB instances of this environment.',
             description='list MongoDB instances of this environment.')
-        list_parser.add_argument('--dir', action='store', default='./data', help='base directory to list nodes (default=./data/)')
+        list_parser.add_argument('--dir', action='store', default='/data', help='base directory to list nodes (default=/data/)')
         list_parser.add_argument('--tags', action='store_true', default=False, help='outputs the tags for each instance. Tags can be used to target instances for start/stop/kill.')
         list_parser.add_argument('--startup', action='store_true', default=False, help='outputs the startup command lines for each instance.')
         list_parser.add_argument('--verbose', action='store_true', default=False, help='alias for --tags.')
@@ -238,7 +238,7 @@ class MLaunchTool(BaseCmdLineTool):
         kill_parser = subparsers.add_parser('kill', help='kills (or sends another signal to) MongoDB instances of this environment.',
             description='kills (or sends another signal to) MongoDB instances of this environment.')
         kill_parser.add_argument('tags', metavar='TAG', action='store', nargs='*', default=[], help='without tags, all running nodes will be killed. Provide additional tags to narrow down the set of nodes to kill.')
-        kill_parser.add_argument('--dir', action='store', default='./data', help='base directory to kill nodes (default=./data/)')
+        kill_parser.add_argument('--dir', action='store', default='/data', help='base directory to kill nodes (default=/data/)')
         kill_parser.add_argument('--signal', action='store', default=15, help='signal to send to processes, default=15 (SIGTERM)')
         kill_parser.add_argument('--verbose', action='store_true', default=False, help='outputs more verbose information.')
 
@@ -303,7 +303,7 @@ class MLaunchTool(BaseCmdLineTool):
         ports_avail = self.wait_for(all_ports, 1, 1, to_start=False)
 
         if not all(map(itemgetter(1), ports_avail)):
-            dir_addon = ' --dir %s'%self.relative_dir if self.relative_dir != './data' else ''
+            dir_addon = ' --dir %s'%self.relative_dir if self.relative_dir != '/data' else ''
             errmsg = '\nThe following ports are not available: %s\n\n' % ', '.join( [ str(p[0]) for p in ports_avail if not p[1] ] )
             errmsg += " * If you want to restart nodes from this environment, use 'mlaunch start%s' instead.\n" % dir_addon
             errmsg += " * If the ports are used by a different mlaunch environment, stop those first with 'mlaunch stop --dir <env>'.\n"
