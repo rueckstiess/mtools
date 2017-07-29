@@ -202,6 +202,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --auth, default=password)')
         init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --auth, default=admin)')
         init_parser.add_argument('--auth-roles', action='store', default=self._default_auth_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(self._default_auth_roles))
+        init_parser.add_argument('--no-initial-user', action='store_false', default=True, dest='initial-user', help='create an initial user if auth is enabled (default=true)')
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.',
@@ -401,7 +402,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.wait_for(nodes)
 
         # now that nodes are running, add admin user if authentication enabled
-        if self.args['auth'] and first_init:
+        if self.args['auth'] and self.args['initial-user'] and first_init:
             self.discover()
             nodes = []
 
@@ -452,7 +453,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print "restarting cluster to enable auth..."
             self.restart()
 
-        if self.args['auth']:
+        if self.args['auth'] and self.args['initial-user']:
             print 'Username "%s", password "%s"' % (
                 self.args['username'], self.args['password'])
 
