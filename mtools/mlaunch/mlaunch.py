@@ -1128,7 +1128,11 @@ class MLaunchTool(BaseCmdLineTool):
                 command_str = re.sub(r'--keyFile \S+', '', command_str)
 
             try:
-                ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
+                if os.name == 'nt':
+                    # print "command str ", filter(None, command_str.split(' ')), "."
+                    ret = subprocess.check_call(filter(None, command_str.split(' ')), shell=True)
+                else:
+                    ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
                 binary = command_str.split()[0]
                 if '--configsvr' in command_str:
@@ -1400,9 +1404,11 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
-	if os.name == 'nt':
-	    command_str = "start /b %s %s --dbpath %s --logpath %s --port %i --logappend %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)	
-	else:
+        if os.name == 'nt':
+            newDBPath=dbpath.replace('\\', '\\\\')
+            newLogPath=logpath.replace('\\', '\\\\')
+            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i --logappend %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)	
+        else:
             command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
