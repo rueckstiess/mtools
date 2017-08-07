@@ -289,7 +289,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.args['csrs'] = True
 
         # check if authentication is enabled, make key file
-        if self.args['auth'] and first_init:
+        if self.args['auth'] and first_init and os.name != 'nt':
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
@@ -1432,9 +1432,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         path = self.args['binarypath'] or ''
 	if os.name == 'nt':
+            newLogPath=logpath.replace('\\', '\\\\')
             command_str = "start /b %s --logpath %s --port %i --configdb %s --logappend %s %s "%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 	else:
-            command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+            command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
