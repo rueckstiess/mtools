@@ -658,6 +658,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         # convert signal to int, default is SIGTERM for graceful shutdown
         sig = self.args.get('signal') or 'SIGTERM'
+        if os.name == 'nt':
+            sig = signal.CTRL_BREAK_EVENT        
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -668,12 +670,12 @@ class MLaunchTool(BaseCmdLineTool):
                     sig = getattr(signal, sig)
                 except AttributeError as e:
                     raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
-
         for port in processes:
             # only send signal to matching processes
             if port in matches:
                 p = processes[port]
                 p.send_signal(sig)
+                print " %s on port %i, pid=%i" % (p.name, port, p.pid)
                 if self.args['verbose']:
                     print " %s on port %i, pid=%i" % (p.name, port, p.pid)
 
@@ -1203,8 +1205,12 @@ class MLaunchTool(BaseCmdLineTool):
                 continue
 
             # skip all but mongod / mongos
-            if name not in ['mongos', 'mongod']:
-                continue
+            if os.name == 'nt':
+                if name not in ['mongos.exe', 'mongod.exe']:
+                    continue
+            else:
+                if name not in ['mongos', 'mongod']:
+                    continue
 
             port = None
             for possible_port in self.startup_info:
