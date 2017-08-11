@@ -289,11 +289,12 @@ class MLaunchTool(BaseCmdLineTool):
             self.args['csrs'] = True
 
         # check if authentication is enabled, make key file
-        if self.args['auth'] and first_init and os.name != 'nt':
+        if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
-            os.system('chmod 600 %s/keyfile'%self.dir)
+            if os.name != 'nt':
+                os.system('chmod 600 %s/keyfile'%self.dir)
 
         # construct startup strings
         self._construct_cmdlines()
@@ -1133,6 +1134,8 @@ class MLaunchTool(BaseCmdLineTool):
                 if os.name == 'nt':
                     # print "command str ", filter(None, command_str.split(' ')), "."
                     ret = subprocess.check_call(filter(None, command_str.split(' ')), shell=True)
+                    # create sub process on windows doesn't wait for output, wait a few seconds for mongod instance up
+                    time.sleep(5)
                 else:
                     ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
