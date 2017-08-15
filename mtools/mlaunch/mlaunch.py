@@ -676,7 +676,6 @@ class MLaunchTool(BaseCmdLineTool):
             if port in matches:
                 p = processes[port]
                 p.send_signal(sig)
-                print " %s on port %i, pid=%i" % (p.name, port, p.pid)
                 if self.args['verbose']:
                     print " %s on port %i, pid=%i" % (p.name, port, p.pid)
 
