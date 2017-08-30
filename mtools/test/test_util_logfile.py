@@ -16,6 +16,7 @@ class TestUtilLogFile(object):
         # load logfile(s)
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
         self.file_year_rollover = open(self.logfile_path, 'r')
+        self.current_year = datetime.now().year
 
 
     def test_len(self):
@@ -37,8 +38,8 @@ class TestUtilLogFile(object):
 
         logfile = LogFile(self.file_year_rollover)
 
-        assert logfile.start == datetime(2015, 12, 30, 00, 13, 01, 661000, tzutc())
-        assert logfile.end == datetime(2016, 01, 02, 23, 27, 11, 720000, tzutc())
+        assert logfile.start == datetime(self.current_year - 1, 12, 30, 00, 13, 01, 661000, tzutc())
+        assert logfile.end == datetime(self.current_year, 01, 02, 23, 27, 11, 720000, tzutc())
 
 
     def test_timezone(self):
