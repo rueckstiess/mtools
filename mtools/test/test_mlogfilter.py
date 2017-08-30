@@ -36,6 +36,7 @@ class TestMLogFilter(object):
         # load logfile(s)
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
         self.logfile = LogFile(open(self.logfile_path, 'r'))
+        self.current_year = datetime.now().year
 
 
     def test_msToString(self):
@@ -211,7 +212,7 @@ class TestMLogFilter(object):
 
     def test_accept_nodate(self):
         self.tool.is_stdin = True
-        self.tool.run('%s --from Aug 5 2015 20:53:50 --to +5min'%self.logfile_path)
+        self.tool.run('%s --from Aug 5 %d 20:53:50 --to +5min' % (self.logfile_path, self.current_year -1))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
@@ -398,10 +399,10 @@ class TestMLogFilter(object):
         # load year rollover logfile
         yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
 
-        self.tool.run('%s --from Jan 1 2016 --timestamp-format iso8601-utc' % yro_logfile_path)
+        self.tool.run('%s --from Jan 1 %d --timestamp-format iso8601-utc' % (yro_logfile_path, self.current_year))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            assert line.startswith("2016-")
+            assert line.startswith('%d-' % self.current_year)
 
 
     def test_year_rollover_2(self):
@@ -414,7 +415,7 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
         for line in output.splitlines():
-            assert line.startswith("2015-")
+            assert line.startswith('%d-' % (self.current_year -1) )
 
     def test_level_225(self):
         """ mlogfilter: test that mlogfilter works levels on older logs """
