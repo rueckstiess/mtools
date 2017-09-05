@@ -692,7 +692,7 @@ class LogEvent(object):
             dt_string = self.datetime.isoformat()
             if self.datetime.utcoffset() == None:
                 dt_string += '+00:00'
-            ms_str = str(int(self.datetime.microsecond * 1000)).zfill(3)[:3]
+            ms_str = str(int(self.datetime.microsecond / 1000)).zfill(3)[:3]
             # change isoformat string to have 3 digit milliseconds and no : in offset
             dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string, count=1)
         elif format == 'iso8601-utc':
@@ -700,7 +700,7 @@ class LogEvent(object):
                 dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
             else:
                 dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
+            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)[:3] + 'Z'
 
         # set new string and format
         self._datetime_str = dt_string
