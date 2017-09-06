@@ -1439,10 +1439,10 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
 
         path = self.args['binarypath'] or ''
-	      if os.name == 'nt':
+        if os.name == 'nt':
             newLogPath=logpath.replace('\\', '\\\\')
             command_str = "start /b %s --logpath %s --port %i --configdb %s --logappend %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
-	      else:
+        else:
             command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
