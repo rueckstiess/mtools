@@ -118,7 +118,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 class MLaunchTool(BaseCmdLineTool):
 
-    def __init__(self):
+    def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
 
         # arguments
@@ -137,6 +137,9 @@ class MLaunchTool(BaseCmdLineTool):
 
         # shard connection strings
         self.shard_connection_str = []
+
+        # indicate if running in testing mode
+        self.test = test
 
 
     def run(self, arguments=None):
@@ -288,6 +291,18 @@ class MLaunchTool(BaseCmdLineTool):
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
             self.args['csrs'] = True
 
+        # construct startup strings
+        self._construct_cmdlines()
+
+        # write out parameters
+        if self.args['verbose']:
+            print "writing .mlaunch_startup file."
+        self._store_parameters()
+
+        # exit if running in testing mode
+        if self.test:
+            sys.exit(0)
+
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
@@ -295,8 +310,6 @@ class MLaunchTool(BaseCmdLineTool):
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
             os.system('chmod 600 %s/keyfile'%self.dir)
 
-        # construct startup strings
-        self._construct_cmdlines()
 
         # if not all ports are free, complain and suggest alternatives.
         all_ports = self.get_tagged(['all'])
@@ -438,10 +451,6 @@ class MLaunchTool(BaseCmdLineTool):
             authdb = self.args['auth_db'] if self.args['auth'] else None
             shutdown_host(port, username, password, authdb)
 
-        # write out parameters
-        if self.args['verbose']:
-            print "writing .mlaunch_startup file."
-        self._store_parameters()
 
         # discover again, to get up-to-date info
         self.discover()
@@ -465,7 +474,7 @@ class MLaunchTool(BaseCmdLineTool):
     # part of the string
     def getMongoDVersion(self):
         binary = "mongod"
-        if self.args and self.args['binarypath']:
+        if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
         ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
