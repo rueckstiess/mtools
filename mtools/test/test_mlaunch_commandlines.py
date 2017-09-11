@@ -105,7 +105,15 @@ class TestMLaunch(unittest.TestCase):
         ]
         self.cmdlist_assert(cmdlist)
 
-    def test_replicaset(self):
+    def test_single_storage(self):
+        ''' mlaunch should start 1 node with specified storage '''
+        self.run_tool('init --single --storageEngine mmapv1')
+        cmdlist = [
+            set(['mongod', '--dbpath', '--logpath', '--port', '--logappend', '--fork', '--storageEngine'])
+        ]
+        self.cmdlist_assert(cmdlist)
+
+    def test_replicaset_3(self):
         ''' mlaunch should start 3 nodes replicaset '''
         self.run_tool('init --replicaset')
         cmdlist = (
@@ -113,7 +121,7 @@ class TestMLaunch(unittest.TestCase):
         )
         self.cmdlist_assert(cmdlist)
 
-    def test_replicaset(self):
+    def test_replicaset_7(self):
         ''' mlaunch should start 7 nodes replicaset '''
         self.run_tool('init --replicaset --nodes 7')
         cmdlist = (
@@ -121,7 +129,7 @@ class TestMLaunch(unittest.TestCase):
         )
         self.cmdlist_assert(cmdlist)
 
-    def test_replicaset(self):
+    def test_replicaset_6_1(self):
         ''' mlaunch should start 6 nodes + 1 arbiter replicaset '''
         self.run_tool('init --replicaset --nodes 6 --arbiter')
         cmdlist = (
