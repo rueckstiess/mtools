@@ -14,7 +14,7 @@ from pprint import pprint
 from distutils.version import LooseVersion
 
 
-class TestMLaunch(unittest.TestCase):
+class TestMLaunch(object):
 
     # Setup & teardown functions
 
@@ -32,6 +32,7 @@ class TestMLaunch(unittest.TestCase):
 
     # Helper functions
 
+    @raises(SystemExit)
     def run_tool(self, arg_str):
         ''' wrapper to call self.tool.run() with or without auth '''
         # name data directory according to test method name
@@ -41,8 +42,7 @@ class TestMLaunch(unittest.TestCase):
         # add data directory to arguments for all commands
         arg_str += ' --dir %s' % self.data_dir
 
-        with self.assertRaises(SystemExit):
-            self.tool.run(arg_str)
+        self.tool.run(arg_str)
 
     def read_config(self):
         ''' read the generated mlaunch startup file, get the command lines '''
@@ -75,24 +75,24 @@ class TestMLaunch(unittest.TestCase):
         ''' assert helper for command lines '''
         cfg, cmdlist = self.read_config()
         cmdset = [set(x) for x in self.cmdlist_filter(cmdlist)]
-        self.assertEqual(len(cmdlist), len(cmdlisttest), 'number of command lines is {0}, should be {1}'.format(len(cmdlisttest), len(cmdlist)))
+        assert len(cmdlist) == len(cmdlisttest)
         for cmd in zip(cmdset, cmdlisttest):
-            self.assertSetEqual(cmd[0], cmd[1])
+            assert set(cmd[0]) == set(cmd[1])
 
     def check_csrs(self):
         ''' check if CSRS is supported, skip test if unsupported '''
         if LooseVersion(self.mongod_version) < LooseVersion('3.1.0'):
-            self.skipTest('CSRS not supported by MongoDB < 3.1.0')
+            raise SkipTest('CSRS not supported by MongoDB < 3.1.0')
 
     def check_sccc(self):
         ''' check if SCCC is supported, skip test if unsupported '''
         if LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
-            self.skipTest('SCCC not supported by MongoDB >= 3.3.0')
+            raise SkipTest('SCCC not supported by MongoDB >= 3.3.0')
 
     def check_3_4(self):
         ''' check for MongoDB 3.4, skip test otherwise '''
         if LooseVersion(self.mongod_version) < LooseVersion('3.4.0'):
-            self.skipTest('MongoDB version is < 3.4.0')
+            raise SkipTest('MongoDB version is < 3.4.0')
 
 
     # Tests
