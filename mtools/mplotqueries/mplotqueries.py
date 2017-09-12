@@ -16,6 +16,9 @@ from datetime import timedelta
 from dateutil.tz import tzutc, tzoffset
 
 try:
+    import matplotlib as mpl
+    # set default backend to a non X backend otherwise it is really hard to start it in cron
+    mpl.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib.lines import Line2D
@@ -504,10 +507,16 @@ class MPlotQueriesTool(LogFileTool):
         if len(self.plot_instances) == 0:
             raise SystemExit('no data to plot.')
 
-        if self.args['output_file'] is not None:
+        if self.args['output_file'] is None:
             # --output-file means don't depend on X,
-            # so switch to a pure-image backend before doing any plotting.
-            plt.switch_backend('agg')
+            # so switch to a non-pure-image backend if no output file is given before doing any plotting.
+            try:
+                ## default backend unix (debian)
+                plt.switch_backend('qt4agg')
+            except Exception as e:
+                ## pygtk is not installed
+                ## default backend for osx: qt4agg
+                plt.switch_backend('GTKAgg')
 
         self.artists = []
         plt.figure(figsize=(12,8), dpi=100, facecolor='w', edgecolor='w')
@@ -595,7 +604,11 @@ class MPlotQueriesTool(LogFileTool):
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
         if self.args['output_file'] is not None:
-            plt.savefig(self.args['output_file'])
+            try:
+                plt.savefig(self.args['output_file'])
+            except Exception as e:
+                print "Error: %s" % e
+                raise SystemExit
         else:
             plt.show()
 
