@@ -55,7 +55,7 @@ class QuerySection(BaseSection):
                     progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     self.mloginfo.update_progress(float(progress_curr-progress_start) / progress_total)
 
-            if le.operation in ['query', 'getmore', 'update', 'remove'] or le.command in ['count', 'findandmodify', 'geonear']:
+            if le.operation in ['query', 'getmore', 'update', 'remove'] or le.command in ['count', 'findandmodify', 'geonear', 'find' ]:
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le), pattern=le.pattern, duration=le.duration)
                 grouping.add(lt)
 
