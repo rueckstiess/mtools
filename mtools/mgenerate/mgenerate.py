@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
 import json
-import bson
 import sys
 import inspect
 from datetime import datetime
 from multiprocessing import Process, cpu_count
+#import bson
 
 try:
     try:
         from pymongo import MongoClient as Connection
     except ImportError:
         from pymongo import Connection
-    from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
+    #from pymongo.errors import ConnectionFailure, AutoReconnect, OperationFailure, ConfigurationError
 except ImportError:
     raise ImportError("Can't import pymongo. See http://api.mongodb.org/python/current/ for instructions on how to install pymongo.")
 
@@ -59,9 +59,6 @@ class InsertProcess(Process):
                     self.dict_operators[name] = o
 
     def run(self):
-        batch = []
-        batchsize = 0
-
         if self.number == 0:
             return
 
@@ -70,6 +67,11 @@ class InsertProcess(Process):
 
         if not self.args['stdout']:
             mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'])
+            if self.args['username'] != '':
+                try:
+                    mc.self.args['database'].authenticate(name=self.args['username'], password=self.args['password'], source=self.args['database'], mechanism=self.args['mechanism'])
+                except:
+                    mc.admin.authenticate(name=self.args['username'], password=self.args['password'], source='admin', mechanism=self.args['mechanism'])
             collection = mc[self.args['database']][self.args['collection']]
             collection.insert_many(docs, ordered=False)
 
@@ -148,6 +150,9 @@ class MGeneratorTool(BaseCmdLineTool):
         self.argparser.add_argument('--number', '-n', action='store', type=int, metavar='NUM', default=1, help='number of documents to insert.')
         self.argparser.add_argument('--host', action='store', default='localhost', help='mongod/s host to import data, default=localhost')
         self.argparser.add_argument('--port', action='store', default=27017, type=int, help='mongod/s port to import data, default=27017')
+        self.argparser.add_argument('--username', action='store', default='', help='mongod/s username, default=\'\'')
+        self.argparser.add_argument('--password', action='store', default='', help='mongod/s password, default=\'\'')
+        self.argparser.add_argument('--mechanism', action='store', default='SCRAM-SHA-1', help='mongod/s authentication mechanism, default=SCRAM-SHA-1')
         self.argparser.add_argument('--database', '-d', action='store', metavar='D', default='test', help='database D to insert data, default=test')
         self.argparser.add_argument('--collection', '-c', action='store', metavar='C', default='mgendata', help='collection C to import data, default=mgendata')
         self.argparser.add_argument('--drop', action='store_true', default=False, help='drop collection before inserting data')
@@ -179,6 +184,11 @@ class MGeneratorTool(BaseCmdLineTool):
 
         if not self.args['stdout']:
             mc = Connection(host=self.args['host'], port=self.args['port'], w=self.args['write_concern'], connect=False)
+            if self.args['username'] != '':
+                try:
+                    mc.self.args['database'].authenticate(name=self.args['username'], password=self.args['password'], source=self.args['database'], mechanism=self.args['mechanism'])
+                except:
+                    mc.admin.authenticate(name=self.args['username'], password=self.args['password'], source='admin', mechanism=self.args['mechanism'])
             col = mc[self.args['database']][self.args['collection']]
             if self.args['drop']:
                 col.drop()
