@@ -478,6 +478,8 @@ class MLaunchTool(BaseCmdLineTool):
             binary = os.path.join(self.args['binarypath'], binary)
         ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
+        if ret.returncode:
+            raise OSError(out or err)
         buf = StringIO(out)
         current_version = buf.readline().rstrip('\n')
         # remove prefix "db version v"
