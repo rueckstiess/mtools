@@ -4,7 +4,7 @@ python:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install .
-  - pip install -r requirements.txt --allow-insecure matplotlib --allow-all-external
+  - pip install -r requirements.txt --allow-insecure matplotlib
 # command to run tests, e.g. python setup.py test
 script: nosetests
 sudo: false
