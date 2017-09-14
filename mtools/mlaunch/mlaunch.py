@@ -1055,15 +1055,19 @@ class MLaunchTool(BaseCmdLineTool):
             would be accepted for a mongod.
         """
 
+        # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join( self.args['binarypath'], binary)
-
-        # get the help list of the binary
-        ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        if os.name == 'nt':
+            print 'launch '
+            ret = subprocess.Popen('%s --help'%binary, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        else:
+            ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        
+        
         out, err = ret.communicate()
 
         accepted_arguments = []
-
         # extract all arguments starting with a '-'
         for line in [option for option in out.split('\n')]:
             line = line.lstrip()
@@ -1073,7 +1077,7 @@ class MLaunchTool(BaseCmdLineTool):
                 if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
-
+        
         # add undocumented options
         accepted_arguments.append('--setParameter')
         if binary == "mongod":
@@ -1131,7 +1135,6 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
-                    # print "command str ", filter(None, command_str.split(' ')), "."
                     ret = subprocess.check_call(filter(None, command_str.split(' ')), shell=True)
                     # create sub process on windows doesn't wait for output, wait a few seconds for mongod instance up
                     time.sleep(5)
