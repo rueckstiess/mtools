@@ -309,7 +309,8 @@ class MLaunchTool(BaseCmdLineTool):
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
-            os.system('chmod 600 %s/keyfile'%self.dir)
+            if os.name != 'nt':
+                os.system('chmod 600 %s/keyfile'%self.dir)
 
 
         # if not all ports are free, complain and suggest alternatives.
@@ -670,6 +671,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         # convert signal to int, default is SIGTERM for graceful shutdown
         sig = self.args.get('signal') or 'SIGTERM'
+        if os.name == 'nt':
+            sig = signal.CTRL_BREAK_EVENT        
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -680,7 +683,6 @@ class MLaunchTool(BaseCmdLineTool):
                     sig = getattr(signal, sig)
                 except AttributeError as e:
                     raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
-
         for port in processes:
             # only send signal to matching processes
             if port in matches:
@@ -1065,15 +1067,19 @@ class MLaunchTool(BaseCmdLineTool):
             would be accepted for a mongod.
         """
 
+        # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join( self.args['binarypath'], binary)
-
-        # get the help list of the binary
-        ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        if os.name == 'nt':
+            print 'launch '
+            ret = subprocess.Popen('%s --help'%binary, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        else:
+            ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        
+        
         out, err = ret.communicate()
 
         accepted_arguments = []
-
         # extract all arguments starting with a '-'
         for line in [option for option in out.split('\n')]:
             line = line.lstrip()
@@ -1083,7 +1089,7 @@ class MLaunchTool(BaseCmdLineTool):
                 if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
-
+        
         # add undocumented options
         accepted_arguments.append('--setParameter')
         if binary == "mongod":
@@ -1140,7 +1146,12 @@ class MLaunchTool(BaseCmdLineTool):
                 command_str = re.sub(r'--keyFile \S+', '', command_str)
 
             try:
-                ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
+                if os.name == 'nt':
+                    ret = subprocess.check_call(filter(None, command_str.split(' ')), shell=True)
+                    # create sub process on windows doesn't wait for output, wait a few seconds for mongod instance up
+                    time.sleep(5)
+                else:
+                    ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
                 binary = command_str.split()[0]
                 if '--configsvr' in command_str:
@@ -1211,8 +1222,12 @@ class MLaunchTool(BaseCmdLineTool):
                 continue
 
             # skip all but mongod / mongos
-            if name not in ['mongos', 'mongod']:
-                continue
+            if os.name == 'nt':
+                if name not in ['mongos.exe', 'mongod.exe']:
+                    continue
+            else:
+                if name not in ['mongos', 'mongod']:
+                    continue
 
             port = None
             for possible_port in self.startup_info:
@@ -1412,7 +1427,12 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
         path = self.args['binarypath'] or ''
-        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+        if os.name == 'nt':
+            newDBPath=dbpath.replace('\\', '\\\\')
+            newLogPath=logpath.replace('\\', '\\\\')
+            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i --logappend %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)	
+        else:
+            command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
@@ -1434,7 +1454,11 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
 
         path = self.args['binarypath'] or ''
-        command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+        if os.name == 'nt':
+            newLogPath=logpath.replace('\\', '\\\\')
+            command_str = "start /b %s --logpath %s --port %i --configdb %s --logappend %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
+        else:
+            command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
