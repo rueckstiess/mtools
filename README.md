@@ -39,8 +39,8 @@ You can find the manual and many usage examples on the [mtools wiki pages](https
 Requirements and Installation Instructions
 ------------------------------------------
 
-The mtools collection is written in Python, and most of the tools only make
-use the standard packages shipped with Python version 2.6.x and 2.7.x, and should run out of the box.
+The mtools collection is written in Python, and most of the tools only
+use the standard packages shipped with Python version 2.7.x.
 
 mtools is not currently compatible with Python 3. 
 
