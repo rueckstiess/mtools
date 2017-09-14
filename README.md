@@ -4,7 +4,7 @@
 [![PyPi downloads](https://img.shields.io/pypi/dm/mtools.svg)](https://pypi.python.org/pypi/mtools/)
 [![Build Status](https://img.shields.io/travis/rueckstiess/mtools/master.svg)](https://travis-ci.org/rueckstiess/mtools)
 
-**mtools** is a collection of helper scripts to parse and filter MongoDB log files (mongod, mongos), visualize log files and quickly set up complex MongoDB test environments on a local machine.
+**mtools** is a collection of helper scripts to parse, filter, and visualize MongoDB log files (`mongod`, `mongos`). mtools also includes `mlaunch`, a utility to quickly set up complex MongoDB test environments on a local machine.
 
 ![mtools box](./mtools.png)
 
@@ -47,6 +47,8 @@ mtools is not currently compatible with Python 3.
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the [INSTALL.md](./INSTALL.md) file for installation
 instructions for these modules.
+
+The mtools utilities are only tested with currently supported (non End-of-Life) versions of the MongoDB server. As of September 2017, that includes MongoDB 3.0 or newer.
 
 
 Recent Changes
