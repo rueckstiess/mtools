@@ -1,7 +1,6 @@
 # mtools
 
 [![PyPI version](https://img.shields.io/pypi/v/mtools.svg)](https://pypi.python.org/pypi/mtools/)
-[![PyPi downloads](https://img.shields.io/pypi/dm/mtools.svg)](https://pypi.python.org/pypi/mtools/)
 [![Build Status](https://img.shields.io/travis/rueckstiess/mtools/master.svg)](https://travis-ci.org/rueckstiess/mtools)
 
 **mtools** is a collection of helper scripts to parse, filter, and visualize MongoDB log files (`mongod`, `mongos`). mtools also includes `mlaunch`, a utility to quickly set up complex MongoDB test environments on a local machine.
