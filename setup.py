@@ -10,7 +10,7 @@ try:
     from setuptools import setup, find_packages
 
     # test for 2.7-included packages, add to requirements if not available
-    install_requires = ['psutil>=2.0']
+    install_requires = []
 
     # Additional dependencies from requirements.txt that should be installed for
     # full mtools feature support. These are optional dependencies to simplify
