@@ -11,7 +11,21 @@ try:
 
     # test for 2.7-included packages, add to requirements if not available
     install_requires = ['psutil>=2.0']
-    test_requires = ['nose>=1.0', 'psutil>=2.0', 'pymongo>=2.4']
+
+    # Additional dependencies from requirements.txt that should be installed for
+    # full mtools feature support. These are optional dependencies to simplify
+    # the default install experience, particularly where a build toolchain is
+    # required.
+    extras_requires = {
+        "all": ['matplotlib>=1.3.1', 'numpy>=1.8.0', 'pymongo>=3.3'],
+        "mlaunch": ['pymongo>=3.3'],
+        "mlogfilter": [],
+        "mloginfo": ['numpy>=1.8.0'],
+        "mlogvis": [],
+        "mplotqueries": ['matplotlib>=1.3.1', 'numpy>=1.8.0'],
+    }
+
+    test_requires = ['nose>=1.3.0', 'psutil>=2.0', 'pymongo>=3.3']
     try:
         import argparse
     except ImportError:
@@ -90,6 +104,7 @@ setup(
     url='https://github.com/rueckstiess/mtools',
     description='Useful scripts to parse and visualize MongoDB log files, launch test environments and reproduce issues.',
     long_description=long_description,
+    extras_require=extras_requires,
     tests_require=test_requires,
     test_suite = 'nose.collector',
     **kws
