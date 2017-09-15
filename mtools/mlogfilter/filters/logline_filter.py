@@ -93,6 +93,8 @@ class LogLineFilter(BaseFilter):
         if 'pattern' in self.mlogfilter.args and self.mlogfilter.args['pattern']:
             self.pattern = json2pattern(self.mlogfilter.args['pattern'])
             self.active = True
+            if self.pattern is None:
+                 raise SystemExit("ERROR: cannot parse pattern \"%s\" as a JSON string" % self.mlogfilter.args['pattern'])
         if 'planSummary' in self.mlogfilter.args and self.mlogfilter.args['planSummary']:
             self.planSummaries = custom_parse_array(self.mlogfilter.args['planSummary'])
             self.active = True
