@@ -21,11 +21,11 @@ try `sudo easy_install pip` from the command line first, or follow the instructi
 
 Depending on your user rights, `pip` may complain about not having permissions to install into the system directory.
 
-In that case, you either need to add `sudo` in front of the `pip` command to install into a system directory, or append`--user` to install into your home directory.
+In that case, you either need to add `sudo` in front of the `pip` command to install into a system directory, or append `--user` to install into your home directory.
 
 Note that some mtools scripts have [additional dependencies](https://github.com/rueckstiess/mtools/blob/master/INSTALL.md#additional-dependencies) as listed below.
 
-#### Installation From Source
+#### Installation from source
 
 If `pip` is not available and you want to install mtools from source, you can get the source code
 by cloning the [mtools github repository](https://github.com/rueckstiess/mtools):
@@ -44,14 +44,25 @@ This will install mtools into your Python's site-packages folder, create links t
 scripts and set everything up. You should now be able to use all the scripts directly
 from the command line.
 
+#### Development Mode source installation
+
 If you want to contribute to mtools development or test beta and release candidate versions,
-you should install mtools in "development mode". Instead of the last command, run
+you should install mtools from source checkout in "Development Mode".
+
+If you are currently in the top-level of an mtools source directory, run either of:
 
     sudo pip install -e'.[all]'
 
-More information about switching to development mode can be found on the page [mtools Development Mode](https://github.com/rueckstiess/mtools/wiki/Development-Mode-for-mtools).
+    sudo python setup.py develop
 
-### Additional Dependencies
+The `pip` install is recommended as a convenience for installing additional dependencies.
+
+Instead of `.` (current directory), you can also provide a full path to your checkout:
+    sudo pip install -e'/path/to/cloned/repo[all]'
+
+More information about switching to Development Mode can be found on the page [mtools Development Mode](https://github.com/rueckstiess/mtools/wiki/Development-Mode-for-mtools).
+
+### Additional dependencies
 
 To install all additional dependencies for full feature support, run:
 
@@ -86,7 +97,6 @@ figures and graphs in a variety of formats and interactive environments across p
 
 [NumPy](http://numpy.scipy.org/) is a Python module for scientific computing and numerical calculations.
 
-
-#### All Requirements
+### All requirements
 
 The full list of requirements (some of which are already included in the Python standard library) can be found in the [requirements.txt](./requirements.txt) file.
