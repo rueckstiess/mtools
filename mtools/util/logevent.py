@@ -378,7 +378,7 @@ class LogEvent(object):
         if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
             return
 
-        op = split_tokens[self._datetime_nextpos + 1]
+        op = split_tokens[self._datetime_nextpos + 1].lower()
 
         if op == 'warning:':
             # check if this log line got truncated

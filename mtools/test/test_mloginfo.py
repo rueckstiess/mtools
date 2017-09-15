@@ -85,6 +85,31 @@ class TestMLogInfo(object):
         assert len( [l for l in lines if l.strip().startswith('end') ] ) == 2
         assert len( [l for l in lines if l.strip().startswith('-----') ] ) == 1
 
+    def test_30_ctime(self):
+        self._test_init('mongod_306_ctime.log')
+        self.tool.run('%s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        results = {}
+        for line in output.splitlines():
+            if line.strip() == '':
+                continue
+            key, val = line.split(':', 1)
+            results[key.strip()] = val.strip()
+
+        assert results['source'].endswith('mongod_306_ctime.log')
+        assert results['start'].endswith('2017 Jul 13 16:14:35.324')
+        assert results['end'].endswith('2017 Jul 13 16:14:35.324')
+        assert results['date format'] == 'ctime'
+
+    def test_30_ctime_queries(self):
+        self._test_init('mongod_306_ctime.log')
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_306_ctime.log')
+        self.tool.run('%s --queries' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'QUERIES' in line, lines))
+        assert not (any(map(lambda line: line.startswith('no queries found'), lines)))
+        assert any(map(lambda line: line.startswith('namespace'), lines))
 
     def test_version_norestart(self):
         # different log file
@@ -92,7 +117,7 @@ class TestMLogInfo(object):
         self.tool.run('%s' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert any(map(lambda line: 'version: = 2.4.x (milliseconds present)' in line, lines))
+        assert any(map(lambda line: 'version: >= 2.4.x ctime (milliseconds present)' in line, lines))
 
 
     def test_distinct_output(self):
