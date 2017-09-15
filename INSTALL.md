@@ -32,11 +32,11 @@ by cloning the [mtools github repository](https://github.com/rueckstiess/mtools)
 
     git clone git://github.com/rueckstiess/mtools.git
 
-Or download the tarball from <https://pypi.python.org/pypi/mtools> and extract it with
+Or download the tarball from <https://pypi.python.org/pypi/mtools> and extract it with:
 
     tar xzvf mtools-<version>.tar.gz
 
-Then `cd` into the mtools directory and run
+Then `cd` into the mtools directory and run:
 
     sudo python setup.py install
 
@@ -47,18 +47,18 @@ from the command line.
 #### Development Mode source installation
 
 If you want to contribute to mtools development or test beta and release candidate versions,
-you should install mtools from source checkout in "Development Mode".
+you should install mtools from a source checkout in "Development Mode" using either of:
 
-If you are currently in the top-level of an mtools source directory, run either of:
-
-    sudo pip install -e'.[all]'
-
-    sudo python setup.py develop
-
-The `pip` install is recommended as a convenience for installing additional dependencies.
-
-Instead of `.` (current directory), you can also provide a full path to your checkout:
+ * `pip` (recommended as a convenience for installing additional dependencies)
+```
     sudo pip install -e'/path/to/cloned/repo[all]'
+```
+
+ * `setup.py`
+
+```
+    sudo python setup.py develop
+```
 
 More information about switching to Development Mode can be found on the page [mtools Development Mode](https://github.com/rueckstiess/mtools/wiki/Development-Mode-for-mtools).
 
