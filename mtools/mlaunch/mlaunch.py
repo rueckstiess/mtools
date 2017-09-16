@@ -132,6 +132,9 @@ class MLaunchTool(BaseCmdLineTool):
         self.cluster_tags = defaultdict(list)
         self.cluster_running = {}
 
+        # memoize ignored arguments passed to different binaries
+        self.ignored_arguments = {}
+
         # config docs for replica sets (key is replica set name)
         self.config_docs = {}
 
@@ -1102,6 +1105,11 @@ class MLaunchTool(BaseCmdLineTool):
                 # check if the binary accepts this argument or special case -vvv for any number of v
                 if arg in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
+                else:
+                    # warn once for each combination of binary and unknown arg
+                    if self.ignored_arguments.get(binary+arg) is None:
+                        self.ignored_arguments[binary+arg] = True
+                        print "warning: ignoring unknown argument %s for %s" % (arg, binary)
             elif i > 0 and arguments[i-1] in result:
                 # if it doesn't start with a '-', it could be the value of the last argument, e.g. `--slowms 1000`
                 result.append(arg)
