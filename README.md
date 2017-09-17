@@ -53,7 +53,7 @@ The current version of mtools is 1.2.3. See [CHANGES.md](./CHANGES.md) for a lis
 
 Contribute to mtools
 --------------------
-If you'd like to contribute to mtools, please read the [contributor page](tutorials/contributing.md) for instructions.
+If you'd like to contribute to mtools, please read the [contributor page](https://github.com/rueckstiess/mtools/wiki/Development:-contributing-to-mtools) for instructions.
 
 
 Disclaimer
