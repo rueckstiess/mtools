@@ -201,6 +201,12 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.duration >= 145 and le.duration <= 500)
 
+    @raises(SystemExit)
+    def test_invalid_log(self):
+        # load text file
+        invalid_logfile_path = os.path.join(os.path.dirname(mtools.__file__), '../', 'requirements.txt')
+        self.tool.run('%s' % invalid_logfile_path)
+
     def test_scan(self):
         # load tablescan logfile
         scn_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'collscans.log')
