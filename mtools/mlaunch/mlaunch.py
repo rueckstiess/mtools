@@ -132,6 +132,9 @@ class MLaunchTool(BaseCmdLineTool):
         self.cluster_tags = defaultdict(list)
         self.cluster_running = {}
 
+        # memoize ignored arguments passed to different binaries
+        self.ignored_arguments = {}
+
         # config docs for replica sets (key is replica set name)
         self.config_docs = {}
 
@@ -166,11 +169,21 @@ class MLaunchTool(BaseCmdLineTool):
         # create command sub-parsers
         subparsers = self.argparser.add_subparsers(dest='command')
         self.argparser._action_groups[0].title = 'commands'
-        self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch <command> --help'
+        self.argparser._action_groups[0].description = \
+            'init is the default command and can be omitted. To get help on individual commands, run ' \
+            'mlaunch <command> --help. Command line arguments which are not handled by mlaunch will be passed ' \
+            'through to mongod/mongos if those options are listed in the --help output for the current binary. ' \
+            'For example: --storageEngine, --logappend, or --config.'
 
         # init command
-        init_parser = subparsers.add_parser('init', help='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters.',
-            description='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters')
+        init_parser = subparsers.add_parser('init',
+            help = 'initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters.',
+            description = \
+            'Initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters. ' \
+            'Command line arguments which are not handled by mlaunch will be passed ' \
+            'through to mongod/mongos if those options are listed in the --help output for the current binary. ' \
+            'For example: --storageEngine, --logappend, or --config.'
+        )
 
         # either single or replica set
         me_group = init_parser.add_mutually_exclusive_group(required=True)
@@ -1102,6 +1115,11 @@ class MLaunchTool(BaseCmdLineTool):
                 # check if the binary accepts this argument or special case -vvv for any number of v
                 if arg in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
+                else:
+                    # warn once for each combination of binary and unknown arg
+                    if self.ignored_arguments.get(binary+arg) is None:
+                        self.ignored_arguments[binary+arg] = True
+                        print "warning: ignoring unknown argument %s for %s" % (arg, binary)
             elif i > 0 and arguments[i-1] in result:
                 # if it doesn't start with a '-', it could be the value of the last argument, e.g. `--slowms 1000`
                 result.append(arg)
