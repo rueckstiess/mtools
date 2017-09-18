@@ -362,8 +362,6 @@ class LogFile(InputSource):
         if self._bounds_calculated:
             # Assume no need to recalc bounds for lifetime of a Logfile object
             return
-        else:
-            self._bounds_calculated = True
 
         if self.from_stdin: 
             return False
@@ -411,6 +409,7 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._bounds_calculated = True
 
         return True
 
