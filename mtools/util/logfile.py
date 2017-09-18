@@ -16,6 +16,7 @@ class LogFile(InputSource):
         self.name = filehandle.name
         
         self.from_stdin = filehandle.name == "<stdin>"
+        self._bounds_calculated = False
         self._start = None
         self._end = None
         self._filesize = None
@@ -358,18 +359,35 @@ class LogFile(InputSource):
     def _calculate_bounds(self):
         """ calculate beginning and end of logfile. """
 
+        if self._bounds_calculated:
+            # Assume no need to recalc bounds for lifetime of a Logfile object
+            return
+
         if self.from_stdin: 
             return False
 
-        # get start datetime 
+        # we should be able to find a valid log line within max_start_lines
+        max_start_lines = 10
+        lines_checked = 0
+
+        # get start datetime
         for line in self.filehandle:
             logevent = LogEvent(line)
+            lines_checked += 1
             if logevent.datetime:
                 self._start = logevent.datetime
                 self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
                 self._datetime_nextpos = logevent._datetime_nextpos
                 break
+            if lines_checked > max_start_lines:
+                break
+
+        # sanity check before attempting to find end date
+        if (self._start is None):
+            raise SystemExit(
+                "Error: <%s> does not appear to be a supported MongoDB log file format" % self.filehandle.name
+            )
 
         # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
@@ -391,6 +409,7 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._bounds_calculated = True
 
         return True
 
