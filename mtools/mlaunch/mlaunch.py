@@ -491,7 +491,7 @@ class MLaunchTool(BaseCmdLineTool):
         binary = "mongod"
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        ret = subprocess.Popen([binary, '--version'], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False)
         out, err = ret.communicate()
         if ret.returncode:
             raise OSError(out or err)
@@ -1083,13 +1083,8 @@ class MLaunchTool(BaseCmdLineTool):
         # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join( self.args['binarypath'], binary)
-        if os.name == 'nt':
-            print 'launch '
-            ret = subprocess.Popen('%s --help'%binary, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        else:
-            ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
-        
-        
+        ret = subprocess.Popen([binary, '--help'], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False)
+
         out, err = ret.communicate()
 
         accepted_arguments = []
@@ -1102,7 +1097,7 @@ class MLaunchTool(BaseCmdLineTool):
                 if config and argument in ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']:
                     continue
                 accepted_arguments.append(argument)
-        
+
         # add undocumented options
         accepted_arguments.append('--setParameter')
         if binary == "mongod":
