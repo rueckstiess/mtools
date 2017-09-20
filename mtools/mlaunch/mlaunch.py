@@ -209,7 +209,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
-        init_parser.add_argument('--hostname', action='store', default=socket.gethostname(), help='override hostname for replica set configuration')
+        init_parser.add_argument('--hostname', action='store', default='localhost', help='override hostname for replica set configuration')
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
