@@ -493,7 +493,7 @@ class LogEvent(object):
 
     @property
     def nreturned(self):
-        """ extract nreturned, nReturned, or nMatches counter if available (lazy) """
+        """ extract nreturned, nReturned, or nMatched counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
