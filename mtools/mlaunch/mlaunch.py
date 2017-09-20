@@ -1145,6 +1145,21 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
 
+    def _get_last_error_log(self, command_str):
+        logpath = re.search(r'--logpath ([^\s]+)', command_str)
+        loglines = ''
+        try:
+            with open(logpath.group(1), 'r') as logfile:
+                for line in logfile:
+                    if not line.startswith('----- BEGIN BACKTRACE -----'):
+                        loglines += line
+                    else:
+                        break
+        except IOError:
+            pass
+        return loglines
+
+
     def _start_on_ports(self, ports, wait=False, overrideAuth=False):
         threads = []
 
@@ -1177,6 +1192,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             except subprocess.CalledProcessError, e:
                 print e.output
+                print >>sys.stderr, self._get_last_error_log(command_str)
                 raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
@@ -1443,9 +1459,9 @@ class MLaunchTool(BaseCmdLineTool):
         if os.name == 'nt':
             newDBPath=dbpath.replace('\\', '\\\\')
             newLogPath=logpath.replace('\\', '\\\\')
-            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i --logappend %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)	
+            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)
         else:
-            command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+            command_str = "%s %s --dbpath %s --logpath %s --port %i --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
@@ -1469,9 +1485,9 @@ class MLaunchTool(BaseCmdLineTool):
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
             newLogPath=logpath.replace('\\', '\\\\')
-            command_str = "start /b %s --logpath %s --port %i --configdb %s --logappend %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
+            command_str = "start /b %s --logpath %s --port %i --configdb %s %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
         else:
-            command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+            command_str = "%s --logpath %s --port %i --configdb %s %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
