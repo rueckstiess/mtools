@@ -1145,6 +1145,21 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
 
+    def _get_last_error_log(self, command_str):
+        logpath = re.search(r'--logpath ([^\s]+)', command_str)
+        loglines = ''
+        try:
+            with open(logpath.group(1), 'r') as logfile:
+                for line in logfile:
+                    if not line.startswith('----- BEGIN BACKTRACE -----'):
+                        loglines += line
+                    else:
+                        break
+        except IOError:
+            pass
+        return loglines
+
+
     def _start_on_ports(self, ports, wait=False, overrideAuth=False):
         threads = []
 
@@ -1177,6 +1192,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             except subprocess.CalledProcessError, e:
                 print e.output
+                print >>sys.stderr, self._get_last_error_log(command_str)
                 raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
