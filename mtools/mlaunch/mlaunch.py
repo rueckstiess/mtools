@@ -1443,9 +1443,9 @@ class MLaunchTool(BaseCmdLineTool):
         if os.name == 'nt':
             newDBPath=dbpath.replace('\\', '\\\\')
             newLogPath=logpath.replace('\\', '\\\\')
-            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i --logappend %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)	
+            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)
         else:
-            command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+            command_str = "%s %s --dbpath %s --logpath %s --port %i --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
@@ -1469,9 +1469,9 @@ class MLaunchTool(BaseCmdLineTool):
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
             newLogPath=logpath.replace('\\', '\\\\')
-            command_str = "start /b %s --logpath %s --port %i --configdb %s --logappend %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
+            command_str = "start /b %s --logpath %s --port %i --configdb %s %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
         else:
-            command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+            command_str = "%s --logpath %s --port %i --configdb %s %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
