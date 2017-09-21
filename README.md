@@ -48,7 +48,7 @@ The mtools utilities are only tested with currently supported (non End-of-Life) 
 Recent Changes
 --------------
 
-The current version of mtools is 1.2.3. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
+The current version of mtools is 1.3.0. See [CHANGES.md](./CHANGES.md) for a list of recent changes from previous versions of mtools.
 
 
 Contribute to mtools

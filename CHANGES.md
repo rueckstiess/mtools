@@ -1,6 +1,39 @@
 Changes to mtools
 =================
 
+#### version 1.3.0
+
+   * remove support for Python 2.6 (#469): https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6
+   * deprecate support for End-of-Life versions of MongoDB (currently <3.0)
+   * deprecate `mgenerate` in favour of `mgeneratejs` (#494)
+   * add `pip` options to install/upgrade optional deps (PyMongo, numpy, ...) (#450, #464)
+   * log tools should check if the file passed is a valid log file (#429)
+   * allow analysis of log files with ctime format (#428)
+   * add support for `find` commands in query section & log event processing (#465)
+   * util/logevent.py: fixed incorrect timestamp processing (#490)
+   * util/logevent.py: support WriteResult counters like nModified, nInserted (#386)
+   * util/pattern.py line 15 wrong indentation level (#478)
+   * mlaunch: support on Windows! (#488)
+   * mlaunch: when a `mongod` fails to start, print log messages to stderr (#361)
+   * mlaunch: fix tests for compat with MongoDB 3.0+ (#192)
+   * mlaunch: --help should mention it accepts arbitrary `mongod`/`mongos` flags (#356)
+   * mlaunch: print error message for invalid options, rather than silently ignoring (#355)
+   * mlaunch: --no-initial-user option for servers with auth (#487)
+   * mlaunch: better error if --binarypath is wrong (#491)
+   * mlaunch: changed default hostname to localhost (#510)
+   * mlaunch: if unspecified, set wiredTigerCacheSizeGB to 1 (#517)
+   * mlogfilter: error if invalid pattern provided (#483)
+   * mlogfilter: calculate current year so rollover test will also work next year (#489)
+   * mlogfilter: loops forever for some datetimes (#507)
+   * mlogfilter: --component and --planSummary values should be case-insensitive (#505)
+   * mloginfo: --queries should output progress to stderr (#255)
+   * mplotqueries:  add chart --type docsExamined/n (#509)
+   * mplotqueries:  default colors could be better (#453)
+   * wiki: fix documentation mentioning "development mode" (#231)
+
+Thanks to @kevinadi, @zhaoyi0113, @ajdavis, @geuscht-m, @TomerYakir, @devkev, and @stennie for
+contributions to this release!
+
 #### version 1.2.3
 
    * mlaunch: support for MongoDB 3.4 (#466)
