@@ -4,7 +4,12 @@ class TableScanFilter(BaseFilter):
     """ accepts only if the line contains a nscanned:[0-9] nreturned:[0-9] where the ratio of nscanned:nreturned is > 100 and nscanned > 10000
     """
     filterArgs = [
-        ('--scan', {'action':'store_true', 'help':'only output lines which appear to be table scans (if nscanned>10000 and ratio of nscanned to nreturned>100)'})
+        ('--scan', {
+            'action':'store_true',
+            'help':
+                'only output lines which have poor index usage (nscanned>10000 and ratio of nscanned to nreturned>100); ' \
+                'to see confirmed collection scans, use --planSummary COLLSCAN.'
+        })
     ]
 
     def __init__(self, mlogfilter):
