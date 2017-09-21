@@ -76,8 +76,14 @@ class TestMLaunch(object):
         cfg, cmdlist = self.read_config()
         cmdset = [set(x) for x in self.cmdlist_filter(cmdlist)]
         assert len(cmdlist) == len(cmdlisttest)
-        for cmd in zip(cmdset, cmdlisttest):
-            assert set(cmd[0]) == set(cmd[1])
+        for observed, expected in zip(cmdset, cmdlisttest):
+            # if mongod, account for some extra observed parameter (e.g. wiredTigerCacheSizeGB)
+            if 'mongod' in expected:
+                assert expected.issubset(observed)
+                assert expected.intersection(observed) == expected
+            # if mongos, expected must match observed
+            else:
+                assert expected == observed
 
     def check_csrs(self):
         ''' check if CSRS is supported, skip test if unsupported '''

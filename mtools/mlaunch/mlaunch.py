@@ -1455,6 +1455,10 @@ class MLaunchTool(BaseCmdLineTool):
             config = '--configsvr' in extra
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
+        # set WiredTiger cache size to 1 GB by default
+        if '--wiredTigerCacheSizeGB' not in extra and self._filter_valid_arguments(['--wiredTigerCacheSizeGB'], 'mongod'):
+            extra += ' --wiredTigerCacheSizeGB 1 '
+
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
             newDBPath=dbpath.replace('\\', '\\\\')
