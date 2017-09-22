@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 import re
 import os
+import sys
 
 class LogFile(InputSource):
     """ wrapper class for log files, either as open file streams of from stdin. """
@@ -16,6 +17,7 @@ class LogFile(InputSource):
         self.name = filehandle.name
         
         self.from_stdin = filehandle.name == "<stdin>"
+        self._bounds_calculated = False
         self._start = None
         self._end = None
         self._filesize = None
@@ -35,6 +37,9 @@ class LogFile(InputSource):
         
         self._datetime_format = None
         self._year_rollover = None
+
+        # Track previous file position for loop detection in _find_curr_line()
+        self.prev_pos = None
 
         self._has_level= None
         
@@ -358,18 +363,35 @@ class LogFile(InputSource):
     def _calculate_bounds(self):
         """ calculate beginning and end of logfile. """
 
+        if self._bounds_calculated:
+            # Assume no need to recalc bounds for lifetime of a Logfile object
+            return
+
         if self.from_stdin: 
             return False
 
-        # get start datetime 
+        # we should be able to find a valid log line within max_start_lines
+        max_start_lines = 10
+        lines_checked = 0
+
+        # get start datetime
         for line in self.filehandle:
             logevent = LogEvent(line)
+            lines_checked += 1
             if logevent.datetime:
                 self._start = logevent.datetime
                 self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
                 self._datetime_nextpos = logevent._datetime_nextpos
                 break
+            if lines_checked > max_start_lines:
+                break
+
+        # sanity check before attempting to find end date
+        if (self._start is None):
+            raise SystemExit(
+                "Error: <%s> does not appear to be a supported MongoDB log file format" % self.filehandle.name
+            )
 
         # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
@@ -391,22 +413,38 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._bounds_calculated = True
 
         return True
-
 
     def _find_curr_line(self, prev=False):
         """ internal helper function that finds the current (or previous if prev=True) line in a log file
             based on the current seek position.
         """
-        curr_pos = self.filehandle.tell()
         line = None
+
+        curr_pos = self.filehandle.tell()
 
         # jump back 15k characters (at most) and find last newline char
         jump_back = min(self.filehandle.tell(), 15000)
         self.filehandle.seek(-jump_back, 1)
         buff = self.filehandle.read(jump_back)
         self.filehandle.seek(curr_pos, 0)
+
+        if prev and self.prev_pos is not None and self.prev_pos == curr_pos:
+            # Number of characters to show before/after the log offset
+            error_context = 300
+            self.filehandle.seek(-error_context, 1)
+            buff = self.filehandle.read(curr_pos)
+            print >>sys.stderr, \
+                "Fatal log parsing loop detected trying to find previous log line " \
+                "near offset %s in %s:" % (curr_pos, self.name), "\n\n", \
+                "-" * 60, "\n", \
+                buff[:error_context], "\n<--- (current log parsing offset) \n", buff[error_context:error_context*2], "\n", \
+                "-" * 60, "\n"
+            raise SystemExit("Cannot parse %s with requested options" % self.filehandle.name)
+        else:
+            self.prev_pos = curr_pos
 
         newline_pos = buff.rfind('\n')
         if prev:
@@ -473,10 +511,8 @@ class LogFile(InputSource):
             if not le:
                 return
 
-            # now walk backwards until we found a truely smaller line
-            while le and self.filehandle.tell() >= 2 and le.datetime >= start_dt:
+            # now walk backwards until we found a truly smaller line
+            while self.filehandle.tell() >= 2 and (le.datetime is None or le.datetime >= start_dt):
                 self.filehandle.seek(-2, 1)
+
                 le = self._find_curr_line(prev=True)
-
-
-

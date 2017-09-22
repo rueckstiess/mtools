@@ -6,9 +6,9 @@ import datetime
 from dateutil import parser
 
 line_ctime_pre24 = "Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, pdfile version 4.5"
-line_ctime = "Sun Aug  3 21:52:05.995 [initandlisten] db version v2.4.5"
-line_iso8601_local = "2013-08-03T21:52:05.995+1000 [initandlisten] db version v2.5.2-pre-"
-line_iso8601_utc = "2013-08-03T11:52:05.995Z [initandlisten] db version v2.5.2-pre-"
+line_ctime = "Sun Aug  3 21:52:05.095 [initandlisten] db version v2.4.5"
+line_iso8601_local = "2013-08-03T21:52:05.095+1000 [initandlisten] db version v2.5.2-pre-"
+line_iso8601_utc = "2013-08-03T11:52:05.095Z [initandlisten] db version v2.5.2-pre-"
 line_getmore = "Mon Aug  5 20:26:32 [conn9] getmore local.oplog.rs query: { ts: { $gte: new Date(5908578361554239489) } } cursorid:1870634279361287923 ntoreturn:0 keyUpdates:0 numYields: 107 locks(micros) r:85093 nreturned:13551 reslen:230387 144ms"
 line_253_numYields = "2013-10-21T12:07:27.057+1100 [conn2] query test.docs query: { foo: 234333.0 } ntoreturn:0 ntoskip:0 keyUpdates:0 numYields:1 locks(micros) r:239078 nreturned:0 reslen:20 145ms"
 line_246_numYields = "Mon Oct 21 12:14:21.888 [conn4] query test.docs query: { foo: 23432.0 } ntoreturn:0 ntoskip:0 nscanned:316776 keyUpdates:0 numYields: 2405 locks(micros) r:743292 nreturned:2 reslen:2116 451ms"
@@ -40,7 +40,7 @@ def test_logevent_datetime_parsing():
 
     le =  LogEvent(line_ctime)
     le_str = le.line_str
-    assert(str(le.datetime) == '%s-08-03 21:52:05.995000+00:00'%this_year)
+    assert(str(le.datetime) == '%s-08-03 21:52:05.095000+00:00'%this_year)
     assert(le._datetime_format == 'ctime')
     assert(le.line_str[4:] == le_str[4:])
     # make sure all datetime objects are timezone aware
@@ -48,7 +48,7 @@ def test_logevent_datetime_parsing():
 
     le =  LogEvent(line_iso8601_utc)
     le_str = le.line_str
-    assert(str(le.datetime) == '2013-08-03 11:52:05.995000+00:00')
+    assert(str(le.datetime) == '2013-08-03 11:52:05.095000+00:00')
     assert(le._datetime_format == 'iso8601-utc')
     assert(le.line_str[4:] == le_str[4:])
     # make sure all datetime objects are timezone aware
@@ -56,7 +56,7 @@ def test_logevent_datetime_parsing():
 
     le =  LogEvent(line_iso8601_local)
     le_str = le.line_str
-    assert(str(le.datetime) == '2013-08-03 21:52:05.995000+10:00')
+    assert(str(le.datetime) == '2013-08-03 21:52:05.095000+10:00')
     assert(le._datetime_format == 'iso8601-local')
     assert(le.line_str[4:] == le_str[4:])
     # make sure all datetime objects are timezone aware

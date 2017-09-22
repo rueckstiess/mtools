@@ -181,7 +181,6 @@ class NScannedNPlotType(ScatterPlotType):
     plot_type_str = 'nscanned/n'
     default_group_by = 'namespace'
 
-
     def __init__(self, args=None, unknown_args=None):
         # Only call baseplot type constructor, we don't need argparser
         BasePlotType.__init__(self, args, unknown_args)
@@ -208,5 +207,35 @@ class NScannedNPlotType(ScatterPlotType):
         return artist
 
 
+class DocsExaminedPlotType(ScatterPlotType):
 
+    plot_type_str = 'docsExamined/n'
+    default_group_by = 'namespace'
+
+    def __init__(self, args=None, unknown_args=None):
+        # Only call baseplot type constructor, we don't need argparser
+        BasePlotType.__init__(self, args, unknown_args)
+
+        self.ylabel = 'docsExamined / n ratio'
+
+    def accept_line(self, logevent):
+        """ return True if the log line has a duration. """
+        # For backward compatibility the relevant logevent attribute is currently nscannedObject.
+        # This will have the value of nscannedObjects or equivalent docsExamined metric.
+        return getattr(logevent, 'nscannedObjects') and getattr(logevent, 'nreturned')
+
+    def plot_group(self, group, idx, axis):
+        # create x-coordinates for all log lines in this group
+        x = date2num( [ logevent.datetime for logevent in self.groups[group] ] )
+
+        color, marker = self.color_map(group)
+
+        y = [ getattr(logevent, 'nscannedObjects') / (float(getattr(logevent, 'nreturned')) if getattr(logevent, 'nreturned') != 0 else 1.0) for logevent in self.groups[group] ]
+        artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.8, \
+            markersize=7, picker=5, label=group)[0]
+        # add meta-data for picking
+        artist._mt_plot_type = self
+        artist._mt_group = group
+
+        return artist
 

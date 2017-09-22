@@ -12,7 +12,7 @@ def _decode_pattern_list(data):
             item = _decode_pattern_dict(item)
         rv.append(item)
 
-        rv = sorted(rv)
+    rv = sorted(rv)
     return rv
 
 def _decode_pattern_dict(data):

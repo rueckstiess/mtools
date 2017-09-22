@@ -120,13 +120,13 @@ class BaseCmdLineTool(object):
         total_length = 40
 
         if progress == 1.:
-            sys.stdout.write('\r' + ' '*(total_length + len(prefix) + 50))
-            sys.stdout.write('\n')
-            sys.stdout.flush()
+            sys.stderr.write('\r' + ' '*(total_length + len(prefix) + 50))
+            sys.stderr.write('\n')
+            sys.stderr.flush()
         else:
             bar_length = int(round(total_length*progress))
-            sys.stdout.write('\r%s [%s%s] %.1f %% ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
-            sys.stdout.flush()
+            sys.stderr.write('\r%s [%s%s] %.1f %% ' % (prefix, '='*bar_length, ' '*(total_length-bar_length), progress*100))
+            sys.stderr.flush()
 
 
 

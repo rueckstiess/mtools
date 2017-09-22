@@ -5,7 +5,7 @@ import time
 import os
 import json
 import sys
-import json
+import unittest
 
 from mtools.mlaunch.mlaunch import MLaunchTool, shutdown_host
 from pymongo import MongoClient
@@ -39,7 +39,7 @@ class TestMLaunch(object):
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port """
-        self.tool = MLaunchTool()
+        self.tool = MLaunchTool(test=True)
 
         # if the test data path exists, remove it
         if os.path.exists(self.base_dir):
@@ -61,7 +61,7 @@ class TestMLaunch(object):
         self.tool.wait_for(ports, to_start=False)
 
         # quick sleep to avoid spurious test failures
-        time.sleep(0.1)
+        time.sleep(1)
 
         # if the test data path exists, remove it
         if os.path.exists(self.base_dir):
@@ -107,7 +107,7 @@ class TestMLaunch(object):
         assert not os.path.exists(self.data_dir)
 
         # test that mongod is not running on this port anymore (raises ConnectionFailure)
-        mc = MongoClient('localhost:%i' % self.port)
+        mc = MongoClient('localhost:%i' % self.port, serverSelectionTimeoutMS=100).server_info()
 
 
     def test_argv_run(self):
@@ -191,7 +191,7 @@ class TestMLaunch(object):
         mc = MongoClient('localhost:%i' % self.port)
         mc.test.smokeWait.insert({}, w=2, wtimeout=10*60*1000)
 
-
+    @unittest.skip('incompatible with 3.4 CSRS')
     def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
@@ -217,6 +217,7 @@ class TestMLaunch(object):
         return len( filter( None, [ all( [kw in line for kw in keywords] ) for line in output] ) )
 
 
+    @unittest.skip('incompatible with 3.4 CSRS')
     def test_verbose_sharded(self):
         """ mlaunch: test verbose output when creating sharded cluster """
 
@@ -336,10 +337,10 @@ class TestMLaunch(object):
 
 
     def test_large_replicaset_arbiter(self):
-        """ mlaunch: start large replica set of 12 nodes with arbiter """
+        """ mlaunch: start large replica set of 7 nodes with arbiter """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.run_tool("init --replicaset --nodes 11 --arbiter")
+        self.run_tool("init --replicaset --nodes 6 --arbiter")
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -349,30 +350,25 @@ class TestMLaunch(object):
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs4'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs5'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs6'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs7'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs8'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs9'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs10'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs11'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/arb'))
 
         # create mongo client for the next tests
         mc = MongoClient('localhost:%i' % self.port)
 
-        # get rs.conf() and check for 12 members, exactly one arbiter
+        # get rs.conf() and check for 7 members, exactly one arbiter
         conf = mc['local']['system.replset'].find_one()
-        assert len(conf['members']) == 12
+        assert len(conf['members']) == 7
         assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
 
-        # check that 12 nodes are discovered
-        assert len(self.tool.get_tagged('all')) == 12
+        # check that 7 nodes are discovered
+        assert len(self.tool.get_tagged('all')) == 7
 
 
     def test_large_replicaset_noarbiter(self):
-        """ mlaunch: start large replica set of 12 nodes without arbiter """
+        """ mlaunch: start large replica set of 7 nodes without arbiter """
 
         # start mongo process on free test port (don't need journal for this test)
-        self.run_tool("init --replicaset --nodes 12")
+        self.run_tool("init --replicaset --nodes 7")
 
         # check if data directories exist
         assert os.path.exists(os.path.join(self.data_dir, 'replset'))
@@ -383,18 +379,13 @@ class TestMLaunch(object):
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs5'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs6'))
         assert os.path.exists(os.path.join(self.data_dir, 'replset/rs7'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs8'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs9'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs10'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs11'))
-        assert os.path.exists(os.path.join(self.data_dir, 'replset/rs12'))
 
         # create mongo client for the next tests
         mc = MongoClient('localhost:%i' % self.port)
 
-        # get rs.conf() and check for 12 members, no arbiters
+        # get rs.conf() and check for 7 members, no arbiters
         conf = mc['local']['system.replset'].find_one()
-        assert len(conf['members']) == 12
+        assert len(conf['members']) == 7
         assert sum(1 for memb in conf['members'] if 'arbiterOnly' in memb and memb['arbiterOnly']) == 0
 
 
@@ -409,8 +400,8 @@ class TestMLaunch(object):
         assert all( not self.tool.is_running(node) for node in nodes )
 
 
-    def test_kill(self):
-        """ mlaunch: test killing all nodes """
+    def test_kill_default(self):
+        """ mlaunch: test killing all nodes with default signal """
 
         # start sharded cluster and kill with default signal (15)
         self.run_tool("init --sharded 2 --single")
@@ -421,8 +412,11 @@ class TestMLaunch(object):
         assert all( not self.tool.is_running(node) for node in nodes )
 
 
+    def test_kill_sigterm(self):
+        """ mlaunch: test killing all nodes with SIGTERM """
+
         # start nodes again, this time, kill with string "SIGTERM"
-        self.run_tool("start")
+        self.run_tool("init --sharded 2 --single")
         self.run_tool("kill --signal SIGTERM")
 
         # make sure all nodes are down
@@ -430,8 +424,11 @@ class TestMLaunch(object):
         assert all( not self.tool.is_running(node) for node in nodes )
 
 
+    def test_kill_sigkill(self):
+        """ mlaunch: test killing all nodes with SIGKILL """
+
         # start nodes again, this time, kill with signal 9 (SIGKILL)
-        self.run_tool("start")
+        self.run_tool("init --sharded 2 --single")
         self.run_tool("kill --signal 9")
 
         # make sure all nodes are down
@@ -446,7 +443,7 @@ class TestMLaunch(object):
         # start mongo process on free test port
         self.run_tool("init --replicaset")
         self.run_tool("stop")
-        time.sleep(1)
+        time.sleep(2)
         self.run_tool("start")
 
         # make sure all nodes are running
@@ -454,6 +451,7 @@ class TestMLaunch(object):
         assert all( self.tool.is_running(node) for node in nodes )
 
     
+    @unittest.skip('tags implementation not up to date')
     @timed(180)
     @attr('slow')
     def test_kill_partial(self):
@@ -533,8 +531,10 @@ class TestMLaunch(object):
         assert loglevel[u'logLevel'] == 0
 
 
+    @unittest.skip('currently not a useful test')
     def test_start_stop_single_repeatedly(self):
         """ mlaunch: test starting and stopping single node in short succession """ 
+
         # repeatedly start single node
         self.run_tool("init --single")
 
@@ -562,8 +562,10 @@ class TestMLaunch(object):
         self.run_tool("init --replicaset")
 
 
+    @unittest.skip('currently not a useful test')
     def test_start_stop_replicaset_repeatedly(self):
         """ mlaunch: test starting and stopping replica set in short succession """ 
+
         # repeatedly start replicaset nodes
         self.run_tool("init --replicaset")
 
@@ -611,7 +613,7 @@ class TestMLaunch(object):
 
         # check if the user roles are correctly set to the default roles
         user = mc.admin.system.users.find_one()
-        assert set(user['roles']) == set(self.tool._default_auth_roles)
+        assert set([x['role'] for x in user['roles']]) == set(self.tool._default_auth_roles)
 
 
     @attr('auth')
@@ -643,7 +645,7 @@ class TestMLaunch(object):
 
         # check if the user roles are correctly set to the default roles
         user = mc.admin.system.users.find_one()
-        assert set(user['roles']) == set(self.tool._default_auth_roles)
+        assert set([x['role'] for x in user['roles']]) == set(self.tool._default_auth_roles)
       
 
     @attr('auth')
@@ -659,7 +661,7 @@ class TestMLaunch(object):
         # check if the user roles are correctly set to the specified roles
         user = mc.admin.system.users.find_one()
         print user
-        assert set(user['roles']) == set(["dbAdminAnyDatabase", "readWriteAnyDatabase", "userAdminAnyDatabase"])
+        assert set([x['role'] for x in user['roles']]) == set(["dbAdminAnyDatabase", "readWriteAnyDatabase", "userAdminAnyDatabase"])
         assert user['user'] == 'corben'
 
 
@@ -674,8 +676,10 @@ class TestMLaunch(object):
             assert 'different environment already exists' in e.message
 
 
+    @unittest.skip('mlaunch protocol upgrade is not needed at this point')
     def test_upgrade_v1_to_v2(self):
         """ mlaunch: test upgrade from protocol version 1 to 2. """
+
         startup_options = {"name": "replset", "replicaset": True, "dir": "./data", "authentication": False, "single": False, "arbiter": False, "mongos": 1, "binarypath": None, "sharded": None, "nodes": 3, "config": 1, "port": 33333, "restart": False, "verbose": False}
 
         # create directory
@@ -714,7 +718,6 @@ class TestMLaunch(object):
         assert self.helper_output_has_line_with(['config server', 'running'], output) == 1
         assert self.helper_output_has_line_with(['shard01'], output) == 1
         assert self.helper_output_has_line_with(['shard02'], output) == 1
-        assert self.helper_output_has_line_with(['primary', 'running'], output) == 2
         assert self.helper_output_has_line_with(['running', 'running'], output) == 9
 
 

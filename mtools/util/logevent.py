@@ -98,12 +98,17 @@ class LogEvent(object):
         self._command = None
 
         self._counters_calculated = False
-        self._nscanned = None
+
+        # TODO: refactor from the legacy names to modern (eg: nscanned => keysExamined). Currently _extract_counters()
+        # maps newer property names into  legacy equivalents for broader log file support.
+        self._nscanned = None         # keysExamined
+        self._nscannedObjects = None  # docsExamined
         self._ntoreturn = None
-        self._nupdated = None
-        self._nreturned = None
-        self._ninserted = None
-        self._ndeleted = None
+        self._nupdated = None         # nModified
+        self._nreturned = None        # nReturned or nMatched (updates)
+        self._ninserted = None        # nInserted
+        self._ndeleted = None         # nDeleted
+
         self._numYields = None
         self._planSummary = None
         self._writeConflicts = None
@@ -378,7 +383,7 @@ class LogEvent(object):
         if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
             return
 
-        op = split_tokens[self._datetime_nextpos + 1]
+        op = split_tokens[self._datetime_nextpos + 1].lower()
 
         if op == 'warning:':
             # check if this log line got truncated
@@ -405,6 +410,8 @@ class LogEvent(object):
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore', 'update', 'remove'] or self.command in ['count', 'findandmodify']:
                 self._pattern = self._find_pattern('query: ')
+            elif self.command == 'find':
+                self._pattern = self._find_pattern('filter: ')
 
         return self._pattern
 
@@ -444,13 +451,23 @@ class LogEvent(object):
 
     @property
     def nscanned(self):
-        """ extract nscanned counter if available (lazy) """
+        """ extract nscanned or keysExamined counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._nscanned
+
+    @property
+    def nscannedObjects(self):
+        """ extract nscannedObjects or docsExamined counter if available (lazy) """
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._nscannedObjects
 
     @property
     def ntoreturn(self):
@@ -476,7 +493,7 @@ class LogEvent(object):
 
     @property
     def nreturned(self):
-        """ extract nreturned counter if available (lazy) """
+        """ extract nreturned, nReturned, or nMatched counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -487,7 +504,7 @@ class LogEvent(object):
 
     @property
     def ninserted(self):
-        """ extract ninserted counter if available (lazy) """
+        """ extract ninserted or nInserted counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -497,7 +514,7 @@ class LogEvent(object):
 
     @property
     def ndeleted(self):
-        """ extract ndeleted counter if available (lazy) """
+        """ extract ndeleted or nDeleted counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -507,7 +524,7 @@ class LogEvent(object):
 
     @property
     def nupdated(self):
-        """ extract nupdated counter if available (lazy) """
+        """ extract nupdated or nModified counter if available (lazy) """
 
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -562,8 +579,20 @@ class LogEvent(object):
         """
 
         # extract counters (if present)
-        counters = ['nscanned', 'ntoreturn', 'nreturned', 'ninserted', \
+        counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned', 'ninserted', \
             'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary', 'writeConflicts', 'keyUpdates']
+
+        # TODO: refactor mtools to use current counter names throughout
+        # Transitionary hack: mapping of current names into prior equivalents
+        counter_equiv = {
+            'docsExamined' : 'nscannedObjects',
+            'keysExamined' : 'nscanned',
+            'nDeleted'     : 'ndeleted',
+            'nInserted'    : 'ninserted',
+            'nMatched'     : 'nreturned',
+            'nModified'    : 'nupdated'
+        }
+        counters.extend(counter_equiv.keys())
 
         split_tokens = self.split_tokens
 
@@ -573,6 +602,8 @@ class LogEvent(object):
                 for counter in counters:
                     if token.startswith('%s:'%counter):
                         try:
+                            # Remap counter to standard name, if applicable
+                            counter = counter_equiv.get(counter, counter)
                             vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space in between (e.g. "numYields: 2")
@@ -634,6 +665,7 @@ class LogEvent(object):
         namespace = self.namespace
         pattern = self.pattern
         nscanned = self.nscanned
+        nscannedObjects = self.nscannedObjects
         ntoreturn = self.ntoreturn
         nreturned = self.nreturned
         ninserted = self.ninserted
@@ -692,7 +724,7 @@ class LogEvent(object):
             dt_string = self.datetime.isoformat()
             if self.datetime.utcoffset() == None:
                 dt_string += '+00:00'
-            ms_str = str(int(self.datetime.microsecond * 1000)).zfill(3)[:3]
+            ms_str = str(int(self.datetime.microsecond / 1000)).zfill(3)[:3]
             # change isoformat string to have 3 digit milliseconds and no : in offset
             dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string, count=1)
         elif format == 'iso8601-utc':
@@ -700,7 +732,7 @@ class LogEvent(object):
                 dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
             else:
                 dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond * 1000)).zfill(3)[:3] + 'Z'
+            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)[:3] + 'Z'
 
         # set new string and format
         self._datetime_str = dt_string

@@ -11,51 +11,53 @@ class LogLineFilter(BaseFilter):
     """
     filterArgs = [
         ('--component', {
-            'action':'store', 
             'nargs':'*', 
+            'action':'store',
+            'type': str.upper,
             'choices': LogEvent.log_components,
             'metavar':'CM', 
             'help':'only output log lines with component CM (multiple values are allowed).'
         }),
         ('--level',     {
-            'action':'store', 
             'nargs':'*', 
+            'action':'store',
             'metavar':'LL', 
             'choices': LogEvent.log_levels, 
             'help':'only output log lines with loglevel LL (multiple values are allowed).'
         }),
         ('--namespace', {
-            'action':'store', 
             'nargs':'*', 
+            'action':'store',
             'metavar':'NS', 
             'help':'only output log lines on namespace NS (multiple values are allowed).'
         }),
         ('--operation', {
-            'action':'store', 
             'nargs':'*', 
+            'action':'store',
             'metavar':'OP', 
             'choices': LogEvent.log_operations, 
             'help':'only output log lines of type OP (multiple values are allowed).'
         }),
         ('--thread', {
             'nargs':'*', 
-            'action':'store', 
+            'action':'store',
             'help':'only output log lines of thread THREAD (multiple values are allowed).'
         }),
         ('--pattern', {
-            'action':'store', 
+            'action':'store',
             'help':'only output log lines with a query pattern PATTERN' \
                    ' (only applies to queries, getmores, updates, removes).'
         }),
         ('--command', {
             'nargs':'*', 
-            'action':'store', 
+            'action':'store',
             'help':'only output log lines which are commands of the given type. Examples: "distinct", "isMaster", "replSetGetStatus" (multiple values are allowed).'
         }),
         ('--planSummary', {
             'nargs':'*', 
+            'action':'store',
+            'type': str.upper,
             'metavar': 'PS',
-            'action':'store', 
             'help':'only output log lines which match the given plan summary values (multiple values are allowed).'
         })
     ]
@@ -93,6 +95,8 @@ class LogLineFilter(BaseFilter):
         if 'pattern' in self.mlogfilter.args and self.mlogfilter.args['pattern']:
             self.pattern = json2pattern(self.mlogfilter.args['pattern'])
             self.active = True
+            if self.pattern is None:
+                 raise SystemExit("ERROR: cannot parse pattern \"%s\" as a JSON string" % self.mlogfilter.args['pattern'])
         if 'planSummary' in self.mlogfilter.args and self.mlogfilter.args['planSummary']:
             self.planSummaries = custom_parse_array(self.mlogfilter.args['planSummary'])
             self.active = True

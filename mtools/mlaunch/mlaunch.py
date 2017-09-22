@@ -118,7 +118,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 class MLaunchTool(BaseCmdLineTool):
 
-    def __init__(self):
+    def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
 
         # arguments
@@ -132,11 +132,17 @@ class MLaunchTool(BaseCmdLineTool):
         self.cluster_tags = defaultdict(list)
         self.cluster_running = {}
 
+        # memoize ignored arguments passed to different binaries
+        self.ignored_arguments = {}
+
         # config docs for replica sets (key is replica set name)
         self.config_docs = {}
 
         # shard connection strings
         self.shard_connection_str = []
+
+        # indicate if running in testing mode
+        self.test = test
 
 
     def run(self, arguments=None):
@@ -163,11 +169,21 @@ class MLaunchTool(BaseCmdLineTool):
         # create command sub-parsers
         subparsers = self.argparser.add_subparsers(dest='command')
         self.argparser._action_groups[0].title = 'commands'
-        self.argparser._action_groups[0].description = 'init is the default command and can be omitted. To get help on individual commands, run mlaunch <command> --help'
+        self.argparser._action_groups[0].description = \
+            'init is the default command and can be omitted. To get help on individual commands, run ' \
+            'mlaunch <command> --help. Command line arguments which are not handled by mlaunch will be passed ' \
+            'through to mongod/mongos if those options are listed in the --help output for the current binary. ' \
+            'For example: --storageEngine, --logappend, or --config.'
 
         # init command
-        init_parser = subparsers.add_parser('init', help='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters.',
-            description='initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters')
+        init_parser = subparsers.add_parser('init',
+            help = 'initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters.',
+            description = \
+            'Initialize a new MongoDB environment and start stand-alone instances, replica sets, or sharded clusters. ' \
+            'Command line arguments which are not handled by mlaunch will be passed ' \
+            'through to mongod/mongos if those options are listed in the --help output for the current binary. ' \
+            'For example: --storageEngine, --logappend, or --config.'
+        )
 
         # either single or replica set
         me_group = init_parser.add_mutually_exclusive_group(required=True)
@@ -193,7 +209,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--port', action='store', type=int, default=27017, help='port for mongod, start of port range in case of replica set or shards (default=27017)')
         init_parser.add_argument('--binarypath', action='store', default=None, metavar='PATH', help='search for mongod/s binaries in the specified PATH.')
         init_parser.add_argument('--dir', action='store', default='./data', help='base directory to create db and log paths (default=./data/)')
-        init_parser.add_argument('--hostname', action='store', default=socket.gethostname(), help='override hostname for replica set configuration')
+        init_parser.add_argument('--hostname', action='store', default='localhost', help='override hostname for replica set configuration')
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase', 'readWriteAnyDatabase', 'userAdminAnyDatabase', 'clusterAdmin']
@@ -202,6 +218,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--password', action='store', type=str, default='password', help='password for given username (requires --auth, default=password)')
         init_parser.add_argument('--auth-db', action='store', type=str, default='admin', metavar='DB', help='database where user will be added (requires --auth, default=admin)')
         init_parser.add_argument('--auth-roles', action='store', default=self._default_auth_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(self._default_auth_roles))
+        init_parser.add_argument('--no-initial-user', action='store_false', default=True, dest='initial-user', help='create an initial user if auth is enabled (default=true)')
 
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.',
@@ -288,15 +305,26 @@ class MLaunchTool(BaseCmdLineTool):
         if LooseVersion(current_version) >= LooseVersion("3.3.0"):
             self.args['csrs'] = True
 
+        # construct startup strings
+        self._construct_cmdlines()
+
+        # write out parameters
+        if self.args['verbose']:
+            print "writing .mlaunch_startup file."
+        self._store_parameters()
+
+        # exit if running in testing mode
+        if self.test:
+            sys.exit(0)
+
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
             os.system('openssl rand -base64 753 > %s/keyfile'%self.dir)
-            os.system('chmod 600 %s/keyfile'%self.dir)
+            if os.name != 'nt':
+                os.system('chmod 600 %s/keyfile'%self.dir)
 
-        # construct startup strings
-        self._construct_cmdlines()
 
         # if not all ports are free, complain and suggest alternatives.
         all_ports = self.get_tagged(['all'])
@@ -401,7 +429,7 @@ class MLaunchTool(BaseCmdLineTool):
         self.wait_for(nodes)
 
         # now that nodes are running, add admin user if authentication enabled
-        if self.args['auth'] and first_init:
+        if self.args['auth'] and self.args['initial-user'] and first_init:
             self.discover()
             nodes = []
 
@@ -438,10 +466,6 @@ class MLaunchTool(BaseCmdLineTool):
             authdb = self.args['auth_db'] if self.args['auth'] else None
             shutdown_host(port, username, password, authdb)
 
-        # write out parameters
-        if self.args['verbose']:
-            print "writing .mlaunch_startup file."
-        self._store_parameters()
 
         # discover again, to get up-to-date info
         self.discover()
@@ -452,7 +476,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print "restarting cluster to enable auth..."
             self.restart()
 
-        if self.args['auth']:
+        if self.args['auth'] and self.args['initial-user']:
             print 'Username "%s", password "%s"' % (
                 self.args['username'], self.args['password'])
 
@@ -465,10 +489,12 @@ class MLaunchTool(BaseCmdLineTool):
     # part of the string
     def getMongoDVersion(self):
         binary = "mongod"
-        if self.args and self.args['binarypath']:
+        if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = subprocess.Popen(['%s --version' % binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        ret = subprocess.Popen([binary, '--version'], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False)
         out, err = ret.communicate()
+        if ret.returncode:
+            raise OSError(out or err)
         buf = StringIO(out)
         current_version = buf.readline().rstrip('\n')
         # remove prefix "db version v"
@@ -658,6 +684,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         # convert signal to int, default is SIGTERM for graceful shutdown
         sig = self.args.get('signal') or 'SIGTERM'
+        if os.name == 'nt':
+            sig = signal.CTRL_BREAK_EVENT        
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -668,7 +696,6 @@ class MLaunchTool(BaseCmdLineTool):
                     sig = getattr(signal, sig)
                 except AttributeError as e:
                     raise SystemExit("can't parse signal '%s', use integer or signal name (SIGxxx)." % sig)
-
         for port in processes:
             # only send signal to matching processes
             if port in matches:
@@ -1053,15 +1080,14 @@ class MLaunchTool(BaseCmdLineTool):
             would be accepted for a mongod.
         """
 
+        # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join( self.args['binarypath'], binary)
+        ret = subprocess.Popen([binary, '--help'], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False)
 
-        # get the help list of the binary
-        ret = subprocess.Popen(['%s --help'%binary], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         out, err = ret.communicate()
 
         accepted_arguments = []
-
         # extract all arguments starting with a '-'
         for line in [option for option in out.split('\n')]:
             line = line.lstrip()
@@ -1084,6 +1110,11 @@ class MLaunchTool(BaseCmdLineTool):
                 # check if the binary accepts this argument or special case -vvv for any number of v
                 if arg in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
+                else:
+                    # warn once for each combination of binary and unknown arg
+                    if self.ignored_arguments.get(binary+arg) is None:
+                        self.ignored_arguments[binary+arg] = True
+                        print "warning: ignoring unknown argument %s for %s" % (arg, binary)
             elif i > 0 and arguments[i-1] in result:
                 # if it doesn't start with a '-', it could be the value of the last argument, e.g. `--slowms 1000`
                 result.append(arg)
@@ -1114,6 +1145,21 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
 
+    def _get_last_error_log(self, command_str):
+        logpath = re.search(r'--logpath ([^\s]+)', command_str)
+        loglines = ''
+        try:
+            with open(logpath.group(1), 'r') as logfile:
+                for line in logfile:
+                    if not line.startswith('----- BEGIN BACKTRACE -----'):
+                        loglines += line
+                    else:
+                        break
+        except IOError:
+            pass
+        return loglines
+
+
     def _start_on_ports(self, ports, wait=False, overrideAuth=False):
         threads = []
 
@@ -1128,7 +1174,12 @@ class MLaunchTool(BaseCmdLineTool):
                 command_str = re.sub(r'--keyFile \S+', '', command_str)
 
             try:
-                ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
+                if os.name == 'nt':
+                    ret = subprocess.check_call(filter(None, command_str.split(' ')), shell=True)
+                    # create sub process on windows doesn't wait for output, wait a few seconds for mongod instance up
+                    time.sleep(5)
+                else:
+                    ret = subprocess.check_output([command_str], stderr=subprocess.STDOUT, shell=True)
 
                 binary = command_str.split()[0]
                 if '--configsvr' in command_str:
@@ -1141,6 +1192,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             except subprocess.CalledProcessError, e:
                 print e.output
+                print >>sys.stderr, self._get_last_error_log(command_str)
                 raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
@@ -1199,8 +1251,12 @@ class MLaunchTool(BaseCmdLineTool):
                 continue
 
             # skip all but mongod / mongos
-            if name not in ['mongos', 'mongod']:
-                continue
+            if os.name == 'nt':
+                if name not in ['mongos.exe', 'mongod.exe']:
+                    continue
+            else:
+                if name not in ['mongos', 'mongod']:
+                    continue
 
             port = None
             for possible_port in self.startup_info:
@@ -1399,8 +1455,17 @@ class MLaunchTool(BaseCmdLineTool):
             config = '--configsvr' in extra
             extra = self._filter_valid_arguments(self.unknown_args, "mongod", config=config) + ' ' + extra
 
+        # set WiredTiger cache size to 1 GB by default
+        if '--wiredTigerCacheSizeGB' not in extra and self._filter_valid_arguments(['--wiredTigerCacheSizeGB'], 'mongod'):
+            extra += ' --wiredTigerCacheSizeGB 1 '
+
         path = self.args['binarypath'] or ''
-        command_str = "%s %s --dbpath %s --logpath %s --port %i --logappend --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
+        if os.name == 'nt':
+            newDBPath=dbpath.replace('\\', '\\\\')
+            newLogPath=logpath.replace('\\', '\\\\')
+            command_str = "start /b %s %s --dbpath %s --logpath %s --port %i %s %s"%(os.path.join(path, 'mongod'), rs_param, newDBPath, newLogPath, port, auth_param, extra)
+        else:
+            command_str = "%s %s --dbpath %s --logpath %s --port %i --fork %s %s"%(os.path.join(path, 'mongod'), rs_param, dbpath, logpath, port, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
@@ -1422,7 +1487,11 @@ class MLaunchTool(BaseCmdLineTool):
             extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
 
         path = self.args['binarypath'] or ''
-        command_str = "%s --logpath %s --port %i --configdb %s --logappend %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
+        if os.name == 'nt':
+            newLogPath=logpath.replace('\\', '\\\\')
+            command_str = "start /b %s --logpath %s --port %i --configdb %s %s %s "%(os.path.join(path, 'mongos'), newLogPath, port, configdb, auth_param, extra)
+        else:
+            command_str = "%s --logpath %s --port %i --configdb %s %s %s --fork"%(os.path.join(path, 'mongos'), logpath, port, configdb, auth_param, extra)
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
