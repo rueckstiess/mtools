@@ -11,8 +11,6 @@ utility to quickly set up complex MongoDB test environments on a local machine.
 .. figure:: ./mtools.png
    :alt: mtools box
 
-   mtools box
-
 What's in the box?
 ------------------
 
