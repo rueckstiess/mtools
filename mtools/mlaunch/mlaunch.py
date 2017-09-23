@@ -146,6 +146,10 @@ class MLaunchTool(BaseCmdLineTool):
         # shard connection strings
         self.shard_connection_str = []
 
+        # ssl configuration to start mongod or mongos, or create a MongoClient
+        self.ssl_server_args = ''
+        self.ssl_pymongo_options = {}
+
         # indicate if running in testing mode
         self.test = test
 
