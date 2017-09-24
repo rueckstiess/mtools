@@ -16,24 +16,24 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-`mlogfilter <https://github.com/rueckstiess/mtools/wiki/mlogfilter>`__ slices
-log files by time, merges log files, filters slow queries, finds table scans,
-shortens log lines, filters by other atributes, convert to JSON
+`mlogfilter <https://github.com/rueckstiess/mtools/wiki/mlogfilter>`__
+   slices log files by time, merges log files, filters slow queries, finds
+   table scans, shortens log lines, filters by other atributes, convert to JSON
 
-`mloginfo <https://github.com/rueckstiess/mtools/wiki/mloginfo>`__ returns info
-about log file, like start and end time, version, binary, special sections like
-restarts, connections, distinct view
+`mloginfo <https://github.com/rueckstiess/mtools/wiki/mloginfo>`__
+   returns info about log file, like start and end time, version, binary,
+   special sections like restarts, connections, distinct view
 
 `mplotqueries <https://github.com/rueckstiess/mtools/wiki/mplotqueries>`__
-visualize logfiles with different types of plots (requires matplotlib)
+   visualize logfiles with different types of plots (requires matplotlib)
 
-`mlogvis <https://github.com/rueckstiess/mtools/wiki/mlogvis>`__ creates a
-self-contained html file that shows an interactive visualization in a web
-browser (as an alternative to mplotqueries)
+`mlogvis <https://github.com/rueckstiess/mtools/wiki/mlogvis>`__
+   creates a self-contained html file that shows an interactive visualization
+   in a web browser (as an alternative to mplotqueries)
 
-`mlaunch <https://github.com/rueckstiess/mtools/wiki/mlaunch>`__ a script to
-quickly spin up local test environments, including replica sets and sharded
-systems (requires pymongo)
+`mlaunch <https://github.com/rueckstiess/mtools/wiki/mlaunch>`__
+   a script to quickly spin up local test environments, including replica sets
+   and sharded systems (requires pymongo)
 
 You can find the manual and many usage examples on the `mtools wiki pages
 <https://github.com/rueckstiess/mtools/wiki>`__.
@@ -74,8 +74,7 @@ This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
 under any of their commercial support subscriptions or otherwise. Any usage of
 mtools is at your own risk. Bug reports, feature requests and questions can be
 posted in the `Issues
-<https://github.com/rueckstiess/mtools/issues?state=open>`__ section here on
-github.
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/mtools.svg
    :target: https://pypi.python.org/pypi/mtools/
