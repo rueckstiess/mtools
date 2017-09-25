@@ -331,7 +331,7 @@ class MLaunchTool(BaseCmdLineTool):
         else:
             first_init = True
 
-        self.ssl_pymongo_options = self._get_ssl_pymongo_options()
+        self.ssl_pymongo_options = self._get_ssl_pymongo_options(self.args)
 
         if (self._get_ssl_server_args()
                 and not self.args['sslAllowConnectionsWithoutCertificates']
@@ -807,6 +807,9 @@ class MLaunchTool(BaseCmdLineTool):
             if not self._load_parameters():
                 raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
+        self.ssl_pymongo_options = self._get_ssl_pymongo_options(
+            self.loaded_args)
+
         # reset cluster_* variables
         self.cluster_tree = {}
         self.cluster_tags = defaultdict(list)
@@ -1199,12 +1202,12 @@ class MLaunchTool(BaseCmdLineTool):
         return s
 
 
-    def _get_ssl_pymongo_options(self):
+    def _get_ssl_pymongo_options(self, args):
         opts = {}
         for parser in self.ssl_args, self.ssl_client_args:
             for action in parser._group_actions:
                 name = action.dest
-                value = self.args.get(name)
+                value = args.get(name)
                 if value:
                     opts['ssl'] = True
 
