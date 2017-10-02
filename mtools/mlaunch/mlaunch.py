@@ -1512,6 +1512,10 @@ class MLaunchTool(BaseCmdLineTool):
             if i == 0 and self.args['priority']:
                 member_config['priority'] = 10
 
+            if i >= 7:
+	        member_config['votes'] = 0
+	        member_config['priority'] = 0
+
             self.config_docs[name]['members'].append(member_config)
 
         # launch arbiter if True
