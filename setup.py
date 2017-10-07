@@ -106,7 +106,7 @@ setup(
     long_description=long_description,
     license='Apache 2.0',
     classifiers=[
-        'Development Status :: 5 - Stable',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
