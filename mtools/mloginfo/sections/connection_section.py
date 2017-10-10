@@ -1,6 +1,7 @@
 from base_section import BaseSection
 from collections import defaultdict
 from datetime import datetime, date, time
+import re
 
 try: 
     from mtools.util.profile_collection import ProfileCollection
@@ -80,9 +81,7 @@ class ConnectionSection(BaseSection):
                     connid = tokens[4].strip('#')
 
                     if dt != None:                  
-                        connections_start[connid] = dt  
-    #                    print "connection id %s start %s" % (connid, connections_start[connid])
-                
+                        connections_start[connid] = dt           
 
             pos = line.find('end connection')
             if pos != -1:
@@ -100,16 +99,12 @@ class ConnectionSection(BaseSection):
                     #The connection id value is stored just before end connection -> [conn385] end connection
                     tokens_conn = line[:pos].split(' ')
                     end_connid = tokens_conn[3].strip('[|conn|]')
-    #                print "End connection id %s " % (end_connid)
 
-                    #Check if the log file recorded start of this connid
+                    #Check if we have the starting of this connid
                     if connections_start[end_connid]:
-    #                    print "connection id end %s" % (connections_start[end_connid])
-
                         if dt != None:
                             dur = dt - connections_start[end_connid]
                             dur_in_sec = dur.seconds
-    #                        print "Duration of connection id %s is %d seconds" % (end_connid, dur_in_sec)
 
                             if dur_in_sec < min_connection_duration:
                                 min_connection_duration = dur_in_sec
