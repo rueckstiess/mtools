@@ -1,6 +1,5 @@
 from base_section import BaseSection
 from collections import defaultdict
-from datetime import datetime, date, time
 import re
 
 try: 
@@ -18,15 +17,14 @@ class ConnectionSection(BaseSection):
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
 
-        # add --restarts flag to argparser
         self.mloginfo.argparser_sectiongroup.add_argument('--connections', action='store_true', help='outputs information about opened and closed connections')
-        self.mloginfo.argparser_sectiongroup.add_argument('--stats', action='store_true', help='outputs helpful statistics for connection duration (min/max/avg)')
+        self.mloginfo.argparser_sectiongroup.add_argument('--connstats', action='store_true', help='outputs helpful statistics for connection duration (min/max/avg)')
 
 
     @property
     def active(self):
         """ return boolean if this section is active. """
-        return self.mloginfo.args['connections']
+        return self.mloginfo.args['connections'] or self.mloginfo.args['connstats']
 
 
     def run(self):
@@ -42,17 +40,23 @@ class ConnectionSection(BaseSection):
         
         socket_exceptions = 0
 
-        genstats = self.mloginfo.args['stats']
+        START_TIME_EMPTY=-11
+        END_TIME_ALREADY_FOUND=-111
+        MIN_DURATION_EMPTY=9999999999
+        MAX_DURATION_EMPTY=-1
+
+        end_connid_pattern  = re.compile(r'\[conn(\d+)\]')
+
+        genstats = self.mloginfo.args['connstats']
         if genstats:
-            genstats = True
-            connections_start = defaultdict(lambda: 0)
+            connections_start = defaultdict(lambda: START_TIME_EMPTY)
             ipwise_sum_durations = defaultdict(lambda:0)
             ipwise_count = defaultdict(lambda:0)
-            ipwise_min_connection_duration = defaultdict(lambda:9999999999)
-            ipwise_max_connection_duration = defaultdict(lambda:-1)
+            ipwise_min_connection_duration = defaultdict(lambda:MIN_DURATION_EMPTY)
+            ipwise_max_connection_duration = defaultdict(lambda:MAX_DURATION_EMPTY)
 
-            min_connection_duration = 9999999999
-            max_connection_duration = -1
+            min_connection_duration = MIN_DURATION_EMPTY
+            max_connection_duration = MAX_DURATION_EMPTY
 
             sum_durations = 0
             fullconn_counts = 0
@@ -60,7 +64,6 @@ class ConnectionSection(BaseSection):
         for logevent in self.mloginfo.logfile:
             line = logevent.line_str
 
- 
             pos = line.find('connection accepted')
             if pos != -1:
                 # connection was opened, increase counter
@@ -72,16 +75,18 @@ class ConnectionSection(BaseSection):
                 ip_opened[ip] += 1
 
                 if genstats:
+                    connid = tokens[4].strip('#')
                     dt = logevent.datetime
 
-                    #initialize using default constructor
-                    ipwise_min_connection_duration[ip]
-                    ipwise_max_connection_duration[ip]
+                    #Sanity checks
+                    if connid.isdigit() == False or dt == None :
+                        continue
 
-                    connid = tokens[4].strip('#')
-
-                    if dt != None:                  
-                        connections_start[connid] = dt           
+                    if connections_start[connid] != START_TIME_EMPTY:
+                        raise NotImplementedError("Multiple start datetimes found for the same connection ID. Consider analysing one log sequence.") 
+    
+                    connections_start[connid] = dt
+      
 
             pos = line.find('end connection')
             if pos != -1:
@@ -94,35 +99,39 @@ class ConnectionSection(BaseSection):
                 ip_closed[ip] += 1
 
                 if genstats:
+                    #The connection id value is stored just before end connection -> [conn385] end connection
+                    end_connid = end_connid_pattern.search(line, re.M | re.I).group(1)
                     dt = logevent.datetime
 
-                    #The connection id value is stored just before end connection -> [conn385] end connection
-                    tokens_conn = line[:pos].split(' ')
-                    end_connid = tokens_conn[3].strip('[|conn|]')
+                    #Sanity checks
+                    if end_connid.isdigit() == False or dt == None or connections_start[end_connid] == START_TIME_EMPTY :
+                        continue
 
-                    #Check if we have the starting of this connid
-                    if connections_start[end_connid]:
-                        if dt != None:
-                            dur = dt - connections_start[end_connid]
-                            dur_in_sec = dur.seconds
+                    if connections_start[end_connid] == END_TIME_ALREADY_FOUND:
+                        raise NotImplementedError("Multiple end datetimes found for the same connection ID %s. Consider analysing one log sequence." % (end_connid)) 
 
-                            if dur_in_sec < min_connection_duration:
-                                min_connection_duration = dur_in_sec
+                    dur = dt - connections_start[end_connid]
+                    dur_in_sec = dur.seconds
 
-                            if dur_in_sec > max_connection_duration:
-                                max_connection_duration = dur_in_sec
+                    if dur_in_sec < min_connection_duration:
+                        min_connection_duration = dur_in_sec
 
-                            if dur_in_sec < ipwise_min_connection_duration[ip]:
-                                ipwise_min_connection_duration[ip] = dur_in_sec
+                    if dur_in_sec > max_connection_duration:
+                        max_connection_duration = dur_in_sec
 
-                            if dur_in_sec > ipwise_max_connection_duration[ip]:
-                                ipwise_max_connection_duration[ip] = dur_in_sec
+                    if dur_in_sec < ipwise_min_connection_duration[ip]:
+                        ipwise_min_connection_duration[ip] = dur_in_sec
 
-                            sum_durations += dur.seconds
-                            fullconn_counts += 1
+                    if dur_in_sec > ipwise_max_connection_duration[ip]:
+                        ipwise_max_connection_duration[ip] = dur_in_sec
 
-                            ipwise_sum_durations[ip] += dur_in_sec
-                            ipwise_count[ip] += 1
+                    sum_durations += dur.seconds
+                    fullconn_counts += 1
+
+                    ipwise_sum_durations[ip] += dur_in_sec
+                    ipwise_count[ip] += 1
+
+                    connections_start[end_connid] = END_TIME_ALREADY_FOUND
 
 
             if "SocketException" in line:
@@ -142,6 +151,10 @@ class ConnectionSection(BaseSection):
         print "     total closed:", total_closed
         print "    no unique IPs:", len(unique_ips)
         print "socket exceptions:", socket_exceptions
+        if genstats and fullconn_counts > 0:
+            print "overall average connection duration(s):", sum_durations/fullconn_counts
+            print "overall minimum connection duration(s):", min_connection_duration
+            print "overall maximum connection duration(s):", max_connection_duration
         print
 
         for ip in sorted(unique_ips, key=lambda x: ip_opened[x], reverse=True):
@@ -151,13 +164,12 @@ class ConnectionSection(BaseSection):
             if genstats:
                 covered_count = ipwise_count[ip] if ip in ipwise_count else 1
                 connection_duration_ip = ipwise_sum_durations[ip] if ip in ipwise_sum_durations else 0
-
-                print "%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i dur-min(s): %-8i dur-max(s): %-8i" % (ip, opened, closed, connection_duration_ip/covered_count, ipwise_min_connection_duration[ip], ipwise_max_connection_duration[ip])
+                ipwise_min_connection_duration_final = ipwise_min_connection_duration[ip] if ipwise_min_connection_duration[ip]!=MIN_DURATION_EMPTY else 0
+                ipwise_max_connection_duration_final = ipwise_max_connection_duration[ip] if ipwise_max_connection_duration[ip]!=MAX_DURATION_EMPTY else 0
+ 
+                print "%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i dur-min(s): %-8i dur-max(s): %-8i" % (ip, opened, closed, connection_duration_ip/covered_count, ipwise_min_connection_duration_final, ipwise_max_connection_duration_final)
             else:
                 print "%-15s  opened: %-8i  closed: %-8i" % (ip, opened, closed)
 
         print
 
-        if genstats and fullconn_counts > 0:
-            print "Average connection duration across all IPs %d seconds, Minimum duration %d , Maximum duration %d" % (sum_durations/fullconn_counts, min_connection_duration, max_connection_duration)
-        

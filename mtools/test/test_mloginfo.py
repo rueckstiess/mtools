@@ -144,6 +144,26 @@ class TestMLogInfo(object):
         assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line), lines)) > 1
 
 
+    def test_connstats_output(self):
+        # different log file
+        self.tool.run('%s --connstats' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'CONNECTIONS' in line, lines))
+
+        assert any(map(lambda line: 'total opened' in line, lines))
+        assert any(map(lambda line: 'total closed' in line, lines))
+        assert any(map(lambda line: 'unique IPs' in line, lines))
+        assert any(map(lambda line: 'socket exceptions' in line, lines))
+        assert any(map(lambda line: 'overall average connection duration(s):' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s):' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s):' in line, lines))
+
+        assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line), lines)) > 1
+
+
+
+
     def test_queries_output(self):
         # different log file
         self.tool.run('%s --queries' % self.logfile_path)
