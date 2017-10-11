@@ -99,8 +99,13 @@ class ConnectionSection(BaseSection):
                 ip_closed[ip] += 1
 
                 if genstats:
+
+                    #Sanity check
+                    if end_connid_pattern.search(line, re.M | re.I) == None :
+                        continue
+
                     #The connection id value is stored just before end connection -> [conn385] end connection
-                    end_connid = end_connid_pattern.search(line, re.M | re.I).group(1)
+                    end_connid = end_connid_pattern.search(line, re.M | re.I).group(1) 
                     dt = logevent.datetime
 
                     #Sanity checks
@@ -151,10 +156,15 @@ class ConnectionSection(BaseSection):
         print "     total closed:", total_closed
         print "    no unique IPs:", len(unique_ips)
         print "socket exceptions:", socket_exceptions
-        if genstats and fullconn_counts > 0:
-            print "overall average connection duration(s):", sum_durations/fullconn_counts
-            print "overall minimum connection duration(s):", min_connection_duration
-            print "overall maximum connection duration(s):", max_connection_duration
+        if genstats :
+            if fullconn_counts > 0:
+                print "overall average connection duration(s):", sum_durations/fullconn_counts
+                print "overall minimum connection duration(s):", min_connection_duration
+                print "overall maximum connection duration(s):", max_connection_duration
+            else: 
+                print "overall average connection duration(s): -"
+                print "overall minimum connection duration(s): -"
+                print "overall maximum connection duration(s): -"
         print
 
         for ip in sorted(unique_ips, key=lambda x: ip_opened[x], reverse=True):

@@ -161,8 +161,85 @@ class TestMLogInfo(object):
 
         assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line), lines)) > 1
 
+    def test_connections_connstats_output(self):
+        # different log file
+        self.tool.run('%s --connections --connstats' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'CONNECTIONS' in line, lines))
 
+        assert any(map(lambda line: 'total opened' in line, lines))
+        assert any(map(lambda line: 'total closed' in line, lines))
+        assert any(map(lambda line: 'unique IPs' in line, lines))
+        assert any(map(lambda line: 'socket exceptions' in line, lines))
+        assert any(map(lambda line: 'overall average connection duration(s):' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s):' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s):' in line, lines))
 
+    def test_connstats_connid_repeated(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_start_connid_repeated.log')
+        try:
+            self.tool.run('%s --connstats' % logfile_path)
+        except NotImplementedError as e:
+            assert "Multiple start datetimes found for the same connection ID" in e.message
+
+    def test_connstats_endconnid_repeated(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_end_connid_repeated.log')
+        try:
+            self.tool.run('%s --connstats' % logfile_path)
+        except NotImplementedError as e:
+            assert "Multiple end datetimes found for the same connection ID" in e.message
+
+    def test_connstats_start_endconnid_repeated(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_start_end_connid_repeated.log')
+        try:
+            self.tool.run('%s --connstats' % logfile_path)
+        except NotImplementedError as e:
+            assert "Multiple start datetimes found for the same connection ID" in e.message
+
+    def test_connstats_connid_not_digit(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_start_connid_notdigit.log')
+
+        self.tool.run('%s --connstats' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        
+        assert any(map(lambda line: 'overall average connection duration(s): 17' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s): 1' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s): 33' in line, lines))
+
+    def test_connstats_end_connid_not_digit(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_end_connid_notdigit.log')
+
+        self.tool.run('%s --connstats' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        
+        assert any(map(lambda line: 'overall average connection duration(s): 1' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s): 1' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s): 1' in line, lines))
+
+    def test_connstats_only_connection_end(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_only_connection_end.log')
+
+        self.tool.run('%s --connstats' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        
+        assert any(map(lambda line: 'overall average connection duration(s): -' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s): -' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s): -' in line, lines))
+
+    def test_connstats_only_connection_accepted(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/connstats', 'mongod_3_4-9_connection_stats_only_connection_accepted.log')
+
+        self.tool.run('%s --connstats' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        
+        assert any(map(lambda line: 'overall average connection duration(s): -' in line, lines))
+        assert any(map(lambda line: 'overall minimum connection duration(s): -' in line, lines))
+        assert any(map(lambda line: 'overall maximum connection duration(s): -' in line, lines))
 
     def test_queries_output(self):
         # different log file
