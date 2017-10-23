@@ -1,6 +1,12 @@
 Changes to mtools
 =================
 
+#### version 1.3.2
+
+ * mloginfo: Add --connections for connection duration metrics (#518)
+
+Thanks to @nishantb10gen for contributions to this release!
+
 #### version 1.3.1
 
   * mlaunch: support SSL parameters (#127)
