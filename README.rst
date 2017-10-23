@@ -57,7 +57,7 @@ or newer.
 Recent Changes
 --------------
 
-The current version of mtools is 1.3.1. See `CHANGES.md <https://github.com/rueckstiess/mtools/blob/develop/CHANGES.md>`__ for a
+The current version of mtools is 1.3.2. See `CHANGES.md <https://github.com/rueckstiess/mtools/blob/develop/CHANGES.md>`__ for a
 list of recent changes from previous versions of mtools.
 
 Contribute to mtools
