@@ -1387,8 +1387,8 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _wait_for_primary(self):
 
-        hosts = [x['host'] for x in self.config_docs['replset']['members']]
-        rs_name = self.config_docs['replset']['_id']
+        hosts = [x['host'] for x in self.config_docs[self.args['name']]['members']]
+        rs_name = self.config_docs[self.args['name']]['_id']
         mrsc = self.client(hosts, replicaSet=rs_name,
                            serverSelectionTimeoutMS=30000)
 
