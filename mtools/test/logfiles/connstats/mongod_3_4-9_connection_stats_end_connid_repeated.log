@@ -1,0 +1,26 @@
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] MongoDB starting : pid=17340 port=27017 dbpath=/Users/nishant/testcase/data 64-bit host=Nishants-MacBook-Pro.local
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] db version v3.4.9
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] git version: 876ebee8c7dd0e2d992f36a848ff4dc50ee6603e
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 0.9.8zh 14 Jan 2016
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] allocator: system
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] modules: none
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] build environment:
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten]     distarch: x86_64
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten]     target_arch: x86_64
+2017-10-10T16:46:52.602+0530 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, storage: { dbPath: "data" }, systemLog: { destination: "file", path: "data/log.file" } }
+2017-10-10T16:46:52.604+0530 I -        [initandlisten] Detected data files in /Users/nishant/testcase/data created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2017-10-10T16:46:52.604+0530 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),checkpoint=(wait=60,log_size=2GB),statistics_log=(wait=0),
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] 
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] 
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] 
+2017-10-10T16:46:53.553+0530 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+2017-10-10T16:46:53.555+0530 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/Users/nishant/testcase/data/diagnostic.data'
+2017-10-10T16:46:53.556+0530 I NETWORK  [thread1] waiting for connections on port 27017
+2017-10-10T16:47:06.585+0530 I NETWORK  [thread1] connection accepted from 127.0.0.1:63573 #1 (1 connection now open)
+2017-10-10T16:47:08.582+0530 I -        [conn1] end connection 127.0.0.1:63573 (1 connection now open)
+2017-10-10T16:47:29.081+0530 I NETWORK  [thread1] connection accepted from 127.0.0.1:63579 #2 (1 connection now open)
+2017-10-10T16:47:30.991+0530 I -        [conn2] end connection 127.0.0.1:63579 (1 connection now open)
+2017-10-10T16:47:35.446+0530 I NETWORK  [thread1] connection accepted from 127.0.0.1:63580 #3 (1 connection now open)
+2017-10-10T16:48:08.656+0530 I -        [conn2] end connection 127.0.0.1:63580 (1 connection now open)

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
-import Queue
 import argparse
-import subprocess
-import threading
-import os, time, sys, re
-import socket
 import json
-import re
-import warnings
+import os
 import psutil
+import Queue
+import re
 import signal
+import socket
+import ssl
+import subprocess
+import sys
+import threading
+import time
+import warnings
 
 from collections import defaultdict
 from mtools.util import OrderedDict
@@ -52,7 +55,9 @@ class MongoConnection(Connection):
 
         Connection.__init__(self, *args, **kwargs)
 
-def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
+
+def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
+                  ssl_pymongo_options=None):
     """ Ping a mongos or mongod every `interval` seconds until it responds, or `timeout` seconds have passed. If `to_start`
         is set to False, will wait for the node to shut down instead. This function can be called as a separate thread.
 
@@ -68,7 +73,7 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None):
             return False
         try:
             # make connection and ping host
-            con = MongoConnection(host)
+            con = MongoConnection(host, **(ssl_pymongo_options or {}))
             con.admin.command('ping')
 
             if to_start:
@@ -140,6 +145,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         # shard connection strings
         self.shard_connection_str = []
+
+        # ssl configuration to start mongod or mongos, or create a MongoClient
+        self.ssl_server_args = ''
+        self.ssl_pymongo_options = {}
 
         # indicate if running in testing mode
         self.test = test
@@ -220,6 +229,39 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--auth-roles', action='store', default=self._default_auth_roles, metavar='ROLE', nargs='*', help='admin user''s privilege roles; note that the clusterAdmin role is required to run the stop command (requires --auth, default="%s")' % ' '.join(self._default_auth_roles))
         init_parser.add_argument('--no-initial-user', action='store_false', default=True, dest='initial-user', help='create an initial user if auth is enabled (default=true)')
 
+        # ssl
+        def is_file(arg):
+            if not os.path.exists(os.path.expanduser(arg)):
+                init_parser.error("The file [%s] does not exist" % arg)
+            return arg
+
+        ssl_args = init_parser.add_argument_group('SSL Options')
+        ssl_args.add_argument('--sslCAFile', help='Certificate Authority file for SSL', type=is_file)
+        ssl_args.add_argument('--sslCRLFile', help='Certificate Revocation List file for SSL', type=is_file)
+        ssl_args.add_argument('--sslAllowInvalidHostnames', action='store_true', help='allow client and server certificates to provide non-matching hostnames')
+        ssl_args.add_argument('--sslAllowInvalidCertificates', action='store_true', help='allow client or server connections with invalid certificates')
+
+        ssl_server_args = init_parser.add_argument_group('Server SSL Options')
+        ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true', help='use ssl on configured ports')
+        ssl_server_args.add_argument('--sslMode', help='set the SSL operation mode', choices='disabled allowSSL preferSSL requireSSL'.split())
+        ssl_server_args.add_argument('--sslPEMKeyFile', help='PEM file for ssl', type=is_file)
+        ssl_server_args.add_argument('--sslPEMKeyPassword', help='PEM file password')
+        ssl_server_args.add_argument('--sslClusterFile', help='key file for internal SSL authentication', type=is_file)
+        ssl_server_args.add_argument('--sslClusterPassword', help='internal authentication key file password')
+        ssl_server_args.add_argument('--sslDisabledProtocols', help='comma separated list of TLS protocols to disable [TLS1_0,TLS1_1,TLS1_2]')
+        ssl_server_args.add_argument('--sslWeakCertificateValidation', action='store_true', help='allow client to connect without presenting a certificate')
+        ssl_server_args.add_argument('--sslAllowConnectionsWithoutCertificates', action='store_true', help='allow client to connect without presenting a certificate')
+        ssl_server_args.add_argument('--sslFIPSMode', action='store_true', help='activate FIPS 140-2 mode')
+
+        ssl_client_args = init_parser.add_argument_group('Client SSL Options')
+        ssl_client_args.add_argument('--sslClientCertificate', help='client certificate file for ssl', type=is_file)
+        ssl_client_args.add_argument('--sslClientPEMKeyFile', help='client PEM file for ssl', type=is_file)
+        ssl_client_args.add_argument('--sslClientPEMKeyPassword', help='client PEM file password')
+
+        self.ssl_args = ssl_args
+        self.ssl_client_args = ssl_client_args
+        self.ssl_server_args = ssl_server_args
+
         # start command
         start_parser = subparsers.add_parser('start', help='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.',
             description='starts existing MongoDB instances. Example: "mlaunch start config" will start all config servers.')
@@ -288,6 +330,15 @@ class MLaunchTool(BaseCmdLineTool):
             first_init = False
         else:
             first_init = True
+
+        self.ssl_pymongo_options = self._get_ssl_pymongo_options(self.args)
+
+        if (self._get_ssl_server_args()
+                and not self.args['sslAllowConnectionsWithoutCertificates']
+                and not self.args['sslClientCertificate']
+                and not self.args['sslClientPEMKeyFile']):
+            sys.stderr.write('warning: server requires certificates but no'
+                             ' --sslClientCertificate provided\n')
 
         # number of default config servers
         if self.args['config'] == -1:
@@ -369,7 +420,7 @@ class MLaunchTool(BaseCmdLineTool):
             if first_init:
                 # add shards
                 mongos = sorted(self.get_tagged(['mongos']))
-                con = MongoConnection('localhost:%i'%mongos[0])
+                con = self.client('localhost:%i' % mongos[0])
 
                 shards_to_add = len(self.shard_connection_str)
                 nshards = con['config']['shards'].count()
@@ -511,6 +562,12 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['verbose']:
             print "Detected mongod version: %s" % current_version
         return current_version
+
+
+    def client(self, host_and_port, **kwargs):
+        kwargs.update(self.ssl_pymongo_options)
+        return MongoConnection(host_and_port, **kwargs)
+
 
     def stop(self):
         """ sub-command stop. This method will parse the list of tags and stop the matching nodes.
@@ -750,6 +807,9 @@ class MLaunchTool(BaseCmdLineTool):
             if not self._load_parameters():
                 raise SystemExit("can't read %s/.mlaunch_startup, use 'mlaunch init ...' first." % self.dir)
 
+        self.ssl_pymongo_options = self._get_ssl_pymongo_options(
+            self.loaded_args)
+
         # reset cluster_* variables
         self.cluster_tree = {}
         self.cluster_tags = defaultdict(list)
@@ -827,7 +887,9 @@ class MLaunchTool(BaseCmdLineTool):
                 rs_name = shard if shard else self.loaded_args['name']
 
                 try:
-                    mrsc = Connection( ','.join( 'localhost:%i'%i for i in port_range ), replicaSet=rs_name )
+                    mrsc = self.client(
+                        ','.join('localhost:%i' % i for i in port_range),
+                        replicaSet=rs_name)
 
                     # primary, secondaries, arbiters
                     # @todo: this is no longer working because MongoClient is now non-blocking
@@ -867,7 +929,7 @@ class MLaunchTool(BaseCmdLineTool):
             port = i+current_port
 
             try:
-                mc = MongoConnection('localhost:%i'%port)
+                mc = self.client('localhost:%i' % port)
                 mc.admin.command('ping')
                 running = True
 
@@ -887,7 +949,7 @@ class MLaunchTool(BaseCmdLineTool):
     def is_running(self, port):
         """ returns if a host on a specific port is running. """
         try:
-            con = MongoConnection('localhost:%s' % port)
+            con = self.client('localhost:%s' % port)
             con.admin.command('ping')
             return True
         except (AutoReconnect, ConnectionFailure):
@@ -943,7 +1005,9 @@ class MLaunchTool(BaseCmdLineTool):
         queue = Queue.Queue()
 
         for port in ports:
-            threads.append(threading.Thread(target=wait_for_host, args=(port, interval, timeout, to_start, queue)))
+            threads.append(threading.Thread(target=wait_for_host, args=(
+                port, interval, timeout, to_start, queue,
+                self.ssl_pymongo_options)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
             print "waiting for nodes %s..." % ('to start' if to_start else 'to shutdown')
@@ -1123,6 +1187,48 @@ class MLaunchTool(BaseCmdLineTool):
         return ' '.join(result)
 
 
+    def _get_ssl_server_args(self):
+        s = ''
+        for parser in self.ssl_args, self.ssl_server_args:
+            for action in parser._group_actions:
+                name = action.dest
+                value = self.args.get(name)
+                if value:
+                    if value is True:
+                        s += ' --%s' % (name,)
+                    else:
+                        s += ' --%s "%s"' % (name, value)
+
+        return s
+
+
+    def _get_ssl_pymongo_options(self, args):
+        opts = {}
+        for parser in self.ssl_args, self.ssl_client_args:
+            for action in parser._group_actions:
+                name = action.dest
+                value = args.get(name)
+                if value:
+                    opts['ssl'] = True
+
+                    if name == 'sslClientCertificate':
+                        opts['ssl_certfile'] = value
+                    elif name == 'sslClientPEMKeyFile':
+                        opts['ssl_keyfile'] = value
+                    elif name == 'sslClientPEMKeyPassword':
+                        opts['ssl_pem_passphrase'] = value
+                    elif name == 'sslAllowInvalidCertificates':
+                        opts['ssl_cert_reqs'] = ssl.CERT_OPTIONAL
+                    elif name == 'sslAllowInvalidHostnames':
+                        opts['ssl_match_hostname'] = False
+                    elif name == 'sslCAFile':
+                        opts['ssl_ca_certs'] = value
+                    elif name == 'sslCRLFile':
+                        opts['ssl_crlfile'] = value
+
+        return opts
+
+
     def _get_shard_names(self, args):
         """ get the shard names based on the self.args['sharded'] parameter. If it's a number, create
             shard names of type shard##, where ## is a 2-digit number. Returns a list [ None ] if
@@ -1206,7 +1312,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print 'Skipping replica set initialization for %s' % name
             return
 
-        con = MongoConnection('localhost:%i'%port)
+        con = self.client('localhost:%i' % port)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
         except OperationFailure, e:
@@ -1225,7 +1331,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
     def _add_user(self, port, name, password, database, roles):
-        con = MongoConnection('localhost:%i'%port)
+        con = self.client('localhost:%i' % port)
         try:
             con[database].add_user(name, password=password, roles=roles)
         except OperationFailure as e:
@@ -1281,9 +1387,10 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _wait_for_primary(self):
 
-        hosts = [x['host'] for x in self.config_docs['replset']['members']]
-        rs_name = self.config_docs['replset']['_id']
-        mrsc = Connection( hosts, replicaSet=rs_name )
+        hosts = [x['host'] for x in self.config_docs[self.args['name']]['members']]
+        rs_name = self.config_docs[self.args['name']]['_id']
+        mrsc = self.client(hosts, replicaSet=rs_name,
+                           serverSelectionTimeoutMS=30000)
 
         if mrsc.is_primary:
             # update cluster tags now that we have a primary
@@ -1405,6 +1512,10 @@ class MLaunchTool(BaseCmdLineTool):
             if i == 0 and self.args['priority']:
                 member_config['priority'] = 10
 
+            if i >= 7:
+	        member_config['votes'] = 0
+	        member_config['priority'] = 0
+
             self.config_docs[name]['members'].append(member_config)
 
         # launch arbiter if True
@@ -1458,6 +1569,8 @@ class MLaunchTool(BaseCmdLineTool):
         # set WiredTiger cache size to 1 GB by default
         if '--wiredTigerCacheSizeGB' not in extra and self._filter_valid_arguments(['--wiredTigerCacheSizeGB'], 'mongod'):
             extra += ' --wiredTigerCacheSizeGB 1 '
+            
+        extra += self._get_ssl_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
@@ -1485,6 +1598,8 @@ class MLaunchTool(BaseCmdLineTool):
 
         if self.unknown_args:
             extra = self._filter_valid_arguments(self.unknown_args, "mongos") + extra
+
+        extra += ' ' + self._get_ssl_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':

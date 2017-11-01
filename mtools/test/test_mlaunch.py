@@ -596,8 +596,21 @@ class TestMLaunch(object):
 
         self.use_auth = False
 
+    @attr('auth')
+    def test_replicaset_with_name(self):
+        """ mlaunch: test calling init on the replica set with given name """
+
+        self.run_tool("init --replicaset --name testrs")
+
+        # create mongo client for the next tests
+        mc = MongoClient('localhost:%i' % self.port)
+
+        # get rs.conf() and check for its name
+        conf = mc['local']['system.replset'].find_one()
+        assert conf['_id'] == 'testrs'
+
     # TODO 
-    # - test functionality of --binarypath, --verbose, --name
+    # - test functionality of --binarypath, --verbose
 
     # All tests that use auth need to be decorated with @attr('auth')
 

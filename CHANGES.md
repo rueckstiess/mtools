@@ -1,6 +1,21 @@
 Changes to mtools
 =================
 
+#### version 1.3.2
+
+ * mloginfo: Add --connstats for connection duration metrics (#518)
+
+Thanks to @nishantb10gen for contributions to this release!
+
+#### version 1.3.1
+
+  * mlaunch: support SSL parameters (#127)
+  * mlaunch: make 8th+ replica set members non-voting (#528)
+  * convert README to reStructuredText (#523)
+  * update metadata in setup.py (#520)
+
+Thanks to @ajdavis, @kallimachos, @kevinadi, and @josefahmad for contributions to this release!
+
 #### version 1.3.0
 
    * remove support for Python 2.6 (#469): https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6

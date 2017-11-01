@@ -69,8 +69,8 @@ except ImportError:
 with open('mtools/version.py') as f:
     exec(f.read())
 
-# read README.md for long_description content
-with open('README.md') as f:
+# read README.rst for long_description content
+with open('README.rst') as f:
     long_description = f.read()
 
 if sys.platform == 'darwin' and 'clang' in platform.python_compiler().lower():
@@ -106,7 +106,7 @@ setup(
     long_description=long_description,
     license='Apache 2.0',
     classifiers=[
-        'Development Status :: 5 - Stable',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
