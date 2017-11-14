@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import re
 import sys
@@ -11,9 +13,12 @@ from mtools.util.logcodeline import LogCodeLine
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
+from distutils.spawn import find_executable
 
-mongodb_path = "/Users/tr/Documents/code/mongo/"
-git_path = "/usr/bin/git"
+# Path to a local git clone from https://github.com/mongodb/mongo.git
+mongodb_path = "/usr/local/src/mongo/"
+
+git_path = find_executable('git')
 pattern_id = 0
 
 def source_files(mongodb_path):
@@ -42,8 +47,8 @@ def get_all_versions():
     (out, error) = pr.communicate()
     versions = out.split()
 
-    # only newer than 1.8.0
-    versions = versions[versions.index("r1.8.0"):]
+    # only newer than 2.4.0
+    versions = versions[versions.index("r2.4.0"):]
 
     # remove release candidates
     versions = [v for v in versions if "rc" not in v]
@@ -58,6 +63,7 @@ def get_all_versions():
 
 
 def switch_version(version):
+    print("Switching to %s" % version)
     pr = subprocess.Popen(git_path + " checkout %s"%version, 
                           cwd = os.path.dirname( mongodb_path ), 
                           shell = True, 
@@ -65,18 +71,18 @@ def switch_version(version):
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
-    print error
+    print(error)
 
 
 def output_verbose(version, filename, lineno, line, statement, matches, accepted, why):
-    print "%10s %s %s:%s" % ("location:", version, filename, lineno)
-    print "%10s %s"       % ("line:", line)
-    print "%10s %s"       % ("statement:", statement)
-    print "%10s %s"       % ("matches:", matches)
-    print "%10s %s"       % ("accepted:", accepted)
-    print "%10s %s"       % ("reason:", why)
-    print "----------------------------"
-    print 
+    print("%10s %s %s:%s" % ("location:", version, filename, lineno))
+    print("%10s %s"       % ("line:", line))
+    print("%10s %s"       % ("statement:", statement))
+    print("%10s %s"       % ("matches:", matches))
+    print("%10s %s"       % ("accepted:", accepted))
+    print("%10s %s"       % ("reason:", why))
+    print("----------------------------")
+    print("\n")
 
 
 def extract_logs(log_code_lines, current_version):
@@ -205,11 +211,7 @@ def extract_logs(log_code_lines, current_version):
 
         f.close()
 
-
     return log_templates
-
-
-
 
 
 if __name__ == '__main__':
@@ -225,7 +227,7 @@ if __name__ == '__main__':
     for v in versions:
         switch_version(v)
         logs = extract_logs(log_code_lines, v)
-        print "version %s, %i lines extracted" %(v[1:], len(logs))
+        print("version %s, %i lines extracted" %(v[1:], len(logs)))
         for l in logs:
             logs_versions[l].append(v)
 
@@ -282,6 +284,6 @@ if __name__ == '__main__':
 
     cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines), open('log2code.pickle', 'wb'), -1)
 
-    print "%i unique log messages imported and written to log2code.pickle"%len(log_code_lines)
+    print("%i unique log messages imported and written to log2code.pickle"%len(log_code_lines))
 
 
