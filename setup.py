@@ -1,6 +1,3 @@
-# nose tests require multiprocessing package, see
-# https://groups.google.com/forum/#!msg/nose-users/fnJ-kAUbYHQ/_UsLN786ygcJ
-import multiprocessing
 import sys
 import platform
 import re
@@ -25,7 +22,6 @@ try:
         "mplotqueries": ['matplotlib>=1.3.1', 'numpy>=1.8.0'],
     }
 
-    test_requires = ['nose>=1.3.0', 'psutil>=2.0', 'pymongo>=3.3']
     try:
         import argparse
     except ImportError:
@@ -114,7 +110,5 @@ setup(
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,
-    tests_require=test_requires,
-    test_suite = 'nose.collector',
     **kws
 )
