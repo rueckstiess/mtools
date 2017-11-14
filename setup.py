@@ -31,14 +31,12 @@ try:
         from collections import OrderedDict
     except ImportError:
         install_requires.append('ordereddict')
-        test_requires.append('ordereddict')
 
     # add dateutil if not installed already
     try:
         import dateutil
     except ImportError:
         install_requires.append('python-dateutil==2.2')
-        test_requires.append('python-dateutil==2.2')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
