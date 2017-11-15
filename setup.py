@@ -9,10 +9,10 @@ try:
     # test for 2.7-included packages, add to requirements if not available
     install_requires = []
 
-    # Additional dependencies from requirements.txt that should be installed for
-    # full mtools feature support. These are optional dependencies to simplify
-    # the default install experience, particularly where a build toolchain is
-    # required.
+    # Additional dependencies from requirements.txt that should be installed
+    # for full mtools feature support. These are optional dependencies to
+    # simplify the default install experience, particularly where a build
+    # toolchain is required.
     extras_requires = {
         "all": ['matplotlib>=1.3.1', 'numpy>=1.8.0', 'pymongo>=3.3', 'psutil>=2.0'],
         "mlaunch": ['pymongo>=3.3', 'psutil>=2.0'],
@@ -46,17 +46,17 @@ except ImportError:
 
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
-        'mtools.mlaunch',
-        'mtools.mlogfilter',
-        'mtools.mloginfo',
-        'mtools.mlogvis',
-        'mtools.mplotqueries',
-        'mtools.mgenerate',
-        'mtools.test',
-        'mtools.util',
-        'mtools.mlogfilter.filters',
-        'mtools.mplotqueries.plottypes',
-        'mtools.mloginfo.sections']
+                'mtools.mlaunch',
+                'mtools.mlogfilter',
+                'mtools.mloginfo',
+                'mtools.mlogvis',
+                'mtools.mplotqueries',
+                'mtools.mgenerate',
+                'mtools.test',
+                'mtools.util',
+                'mtools.mlogfilter.filters',
+                'mtools.mplotqueries.plottypes',
+                'mtools.mloginfo.sections']
     kws = {}
 
 # import version from mtools/version.py
@@ -80,7 +80,7 @@ setup(
     name='mtools',
     version=__version__,
     packages=packages,
-    package_data = {
+    package_data={
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
     entry_points={
@@ -96,7 +96,8 @@ setup(
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
-    description='Useful scripts to parse and visualize MongoDB log files, launch test environments, and reproduce issues.',
+    description=("Useful scripts to parse and visualize MongoDB log files, "
+                 "launch test environments, and reproduce issues."),
     long_description=long_description,
     license='Apache 2.0',
     classifiers=[

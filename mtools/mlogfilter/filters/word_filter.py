@@ -3,12 +3,12 @@ from base_filter import BaseFilter
 
 
 class WordFilter(BaseFilter):
-    """ accepts only if line contains any of the words specified by --word 
-    """
+    """Accepts only if line contains any of the words specified by --word."""
 
     filterArgs = [
-        ('--word', {'action':'store', 'nargs':'*', 'help':'only output lines matching any of WORD'}),
-    ]
+        ('--word', {'action': 'store', 'nargs': '*',
+                    'help': 'only output lines matching any of WORD'}),
+        ]
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
