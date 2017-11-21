@@ -1,8 +1,9 @@
-from datetime import datetime
-from dateutil.tz import tzutc
-import dateutil.parser
-import re
 import json
+import re
+from datetime import datetime
+
+import dateutil.parser
+from dateutil.tz import tzutc
 
 from mtools.util.pattern import json2pattern
 

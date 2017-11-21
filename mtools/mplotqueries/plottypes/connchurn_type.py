@@ -1,7 +1,9 @@
-from mtools.mplotqueries.plottypes.base_type import BasePlotType
 import argparse
 import re
+
 import numpy as np
+
+from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
     from matplotlib.dates import date2num, num2date

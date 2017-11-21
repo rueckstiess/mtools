@@ -1,6 +1,8 @@
-from mtools.mplotqueries.plottypes.base_type import BasePlotType
-from datetime import timedelta
 import argparse
+from datetime import timedelta
+
+from mtools.mplotqueries.plottypes.base_type import BasePlotType
+from mtools.util.log2code import Log2CodeConverter
 
 try:
     from matplotlib.dates import date2num, num2date
@@ -11,8 +13,6 @@ except ImportError:
                       "mlogvis instead, which is a simplified version of "
                       "mplotqueries that visualizes the logfile in a web "
                       "browser.")
-
-from mtools.util.log2code import Log2CodeConverter
 
 
 class RangePlotType(BasePlotType):

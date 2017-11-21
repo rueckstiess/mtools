@@ -1,9 +1,9 @@
-from mtools.mplotqueries.plottypes.base_type import BasePlotType
-from operator import itemgetter
-from datetime import timedelta
-
 import argparse
 import re
+from datetime import timedelta
+from operator import itemgetter
+
+from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
     import matplotlib.pyplot as plt

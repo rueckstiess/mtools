@@ -1,13 +1,12 @@
-from base_section import BaseSection
+from collections import defaultdict
 
+from base_section import BaseSection
 from mtools.util.log2code import Log2CodeConverter
 
 try:
     from mtools.util.profile_collection import ProfileCollection
 except ImportError:
     ProfileCollection = None
-
-from collections import defaultdict
 
 
 class DistinctSection(BaseSection):

@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
+import cPickle
+import glob
+import inspect
 import os
 import sys
 import uuid
-import glob
-import cPickle
-import inspect
+from datetime import timedelta
+
+from dateutil.tz import tzutc
 
 from mtools import __version__
-from datetime import timedelta
-from dateutil.tz import tzutc
+from mtools.util.cmdlinetool import LogFileTool
 
 try:
     import matplotlib.pyplot as plt
@@ -23,8 +25,6 @@ except ImportError:
                       "mlogvis instead, which is a simplified version of "
                       "mplotqueries that visualizes the logfile in a "
                       "web browser.")
-
-from mtools.util.cmdlinetool import LogFileTool
 
 
 class MPlotQueriesTool(LogFileTool):

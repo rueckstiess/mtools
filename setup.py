@@ -1,6 +1,6 @@
-import sys
 import platform
 import re
+import sys
 
 # try importing from setuptools, if unavailable use distutils.core
 try:

@@ -1,6 +1,8 @@
-from mtools.util.hci import DateTimeBoundaries
 from datetime import datetime, timedelta
+
 from dateutil.tz import tzutc
+
+from mtools.util.hci import DateTimeBoundaries
 
 
 def test_dtb_within_boundaries_absolute():

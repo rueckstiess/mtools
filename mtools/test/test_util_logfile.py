@@ -1,10 +1,11 @@
 import os
-import mtools
-
 from datetime import datetime
-from mtools.util.logfile import LogFile
+
+from dateutil.tz import tzoffset, tzutc
+
+import mtools
 from mtools.util.logevent import LogEvent
-from dateutil.tz import tzutc, tzoffset
+from mtools.util.logfile import LogFile
 
 
 class TestUtilLogFile(object):

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from mtools.util.cmdlinetool import LogFileTool
-import mtools
-
-import sys
 import os
+import sys
 import webbrowser
+
+import mtools
+from mtools.util.cmdlinetool import LogFileTool
 
 
 class MLogVisTool(LogFileTool):

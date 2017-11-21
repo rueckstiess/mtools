@@ -1,12 +1,12 @@
+import os
+import re
+import sys
+from datetime import timedelta
+from random import randrange
+
+import mtools
 from mtools.mloginfo.mloginfo import MLogInfoTool
 from mtools.util.logfile import LogFile
-import mtools
-
-from random import randrange
-from datetime import timedelta
-import os
-import sys
-import re
 
 
 def random_date(start, end):

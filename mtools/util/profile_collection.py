@@ -1,6 +1,8 @@
-from mtools.util.logevent import LogEvent
-from mtools.util.input_source import InputSource
 from dateutil.tz import tzutc
+from pymongo import ASCENDING, DESCENDING
+
+from mtools.util.input_source import InputSource
+from mtools.util.logevent import LogEvent
 
 try:
     try:
@@ -12,8 +14,6 @@ except ImportError:
     raise ImportError("Can't import pymongo. "
                       "See http://api.mongodb.org/python/current/ "
                       "for instructions on how to install pymongo.")
-
-from pymongo import ASCENDING, DESCENDING
 
 
 class ProfileCollection(InputSource):

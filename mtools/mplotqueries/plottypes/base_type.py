@@ -1,8 +1,9 @@
+from datetime import MAXYEAR, MINYEAR, datetime
+
+from dateutil.tz import tzutc
+
 from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
-
-from datetime import MINYEAR, MAXYEAR, datetime
-from dateutil.tz import tzutc
 
 try:
     from matplotlib import cm
