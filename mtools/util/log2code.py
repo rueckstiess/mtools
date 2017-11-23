@@ -1,17 +1,20 @@
-import cPickle
+#!/bin/python
+
 import os
 import re
 # import sys
 # import argparse
 from itertools import izip_longest
+import cPickle
 
 import mtools
 
 
 def import_l2c_db():
     """
-    Static import helper function, checks if the log2code.pickle exists first,
-    otherwise raises ImportError.
+    Static import helper function.
+
+    Checks if the log2code.pickle exists first, otherwise raises ImportError.
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
     if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
@@ -71,9 +74,7 @@ class Log2CodeConverter(object):
             return self.log_code_lines[best_match]
 
     def _strip_counters(self, sub_line):
-        """ finds the ending part of the codeline by
-            taking out the counters and durations
-        """
+        """Find the codeline end by taking out the counters and durations."""
         try:
             end = sub_line.rindex('}')
         except ValueError:
@@ -82,9 +83,7 @@ class Log2CodeConverter(object):
             return sub_line[:(end + 1)]
 
     def _strip_datetime(self, sub_line):
-        """ strip out datetime and other parts so that
-            there is no redundancy
-        """
+        """Strip datetime and other parts so that there is no redundancy."""
         try:
             begin = sub_line.index(']')
         except ValueError:
@@ -96,9 +95,10 @@ class Log2CodeConverter(object):
             return sub
 
     def _find_variable(self, pattern, logline):
-        """ return the variable parts of the code
-            given a tuple of strings pattern
-            ie. (this, is, a, pattern) -> 'this is a good pattern' -> [good]
+        """
+        Return the variable parts of the code given a tuple of strings pattern.
+
+        Example: (this, is, a, pattern) -> 'this is a good pattern' -> [good]
         """
         var_subs = []
         # find the beginning of the pattern
@@ -130,9 +130,7 @@ class Log2CodeConverter(object):
         return var_subs
 
     def _variable_parts(self, line, codeline):
-        """returns the variable parts of the codeline,
-            given the static parts
-        """
+        """Return variable parts of the codeline, given the static parts."""
         var_subs = []
         # codeline has pattern and then has the outputs in different versions
         if codeline:
@@ -144,10 +142,7 @@ class Log2CodeConverter(object):
         return var_subs
 
     def __call__(self, line, variable=False):
-        """ returns a tuple of the log2code and variable parts
-            when the class is called
-        """
-
+        """Return tuple of log2code and variable parts when class is called."""
         if variable:
             log2code = self._log2code(line)
             return log2code, self._variable_parts(line, log2code)
@@ -155,8 +150,7 @@ class Log2CodeConverter(object):
             return self._log2code(line), None
 
     def combine(self, pattern, variable):
-        """Combines a pattern and variable parts to be a line string again."""
-
+        """Combine a pattern and variable parts to be a line string again."""
         inter_zip = izip_longest(variable, pattern, fillvalue='')
         interleaved = [elt for pair in inter_zip for elt in pair]
         return ''.join(interleaved)

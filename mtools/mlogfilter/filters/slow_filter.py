@@ -1,11 +1,14 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 
 class SlowFilter(BaseFilter):
     """
-    Accepts only lines that have a duration that is longer than the specified
+    SlowFilter class.
+
+    Accept only lines that have a duration that is longer than the specified
     parameter in ms (default 1000).
     """
+
     filterArgs = [
         ('--slow', {'action': 'store', 'nargs': '?', 'default': False,
                     'type': int, 'help': ('only output lines with query times '
@@ -25,6 +28,12 @@ class SlowFilter(BaseFilter):
                 self.slowms = self.mlogfilter.args['slow']
 
     def accept(self, logevent):
+        """
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         if logevent.duration is not None:
             return logevent.duration >= self.slowms
         return False

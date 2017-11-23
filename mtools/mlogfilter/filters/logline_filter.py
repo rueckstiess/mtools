@@ -1,4 +1,4 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 from mtools.util.logevent import LogEvent
 from mtools.util.pattern import json2pattern
 
@@ -8,8 +8,8 @@ def custom_parse_array(value):
 
 
 class LogLineFilter(BaseFilter):
-    """
-    """
+    """LogLineFilter class."""
+
     filterArgs = [
         ('--component', {
             'nargs': '*',
@@ -122,6 +122,12 @@ class LogLineFilter(BaseFilter):
             self.active = True
 
     def accept(self, logevent):
+        """
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         # if several filters are active, all have to agree
         if self.components and logevent.component not in self.components:
             return False

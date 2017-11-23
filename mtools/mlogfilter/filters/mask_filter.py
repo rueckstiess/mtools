@@ -1,11 +1,13 @@
 from datetime import timedelta
 
-from datetime_filter import DateTimeFilter
+from .datetime_filter import DateTimeFilter
 from mtools.util.cmdlinetool import InputSourceAction
 
 
 class MaskFilter(DateTimeFilter):
     """
+    MaskFilter class.
+
     This filter takes an argument `--mask <LOGFILE>` and another optional
     argument `--mask-size <SECS>`. It will read <LOGFILE> and for each of the
     lines extract the datetimes (let's call these "events"). It will add some
@@ -42,7 +44,9 @@ class MaskFilter(DateTimeFilter):
 
     def __init__(self, mlogfilter):
         """
-        Constructor, init superclass and mark this filter active if `mask`
+        Constructor.
+
+        Init superclass and mark this filter active if `mask`
         argument is present.
         """
         DateTimeFilter.__init__(self, mlogfilter)
@@ -55,10 +59,10 @@ class MaskFilter(DateTimeFilter):
 
     def setup(self):
         """
-        Create mask list consisting of all tuples between which this
-        filter accepts lines.
-        """
+        Create mask list.
 
+        Consists of all tuples between which this filter accepts lines.
+        """
         # get start and end of the mask and set a start_limit
         if not self.mask_source.start:
             raise SystemExit("Can't parse format of %s. Is this a log file or "
@@ -142,7 +146,9 @@ class MaskFilter(DateTimeFilter):
 
     def accept(self, logevent):
         """
-        Overwrite this method in subclass and return True if the provided
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
         logevent should be accepted (causing output), or False if not.
         """
         dt = logevent.datetime
@@ -156,7 +162,9 @@ class MaskFilter(DateTimeFilter):
 
     def skipRemaining(self):
         """
-        Overwrite this method in sublcass and return True if all lines
+        Skip remaining lines.
+
+        Overwrite BaseFilter.skipRemaining() and return True if all lines
         from here to the end of the file should be rejected (no output).
         """
         return self.mask_end_reached

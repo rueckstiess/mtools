@@ -46,9 +46,12 @@ except ImportError:
 
 class MongoConnection(Connection):
     """
+    MongoConnection class.
+
     Wrapper around Connection (itself conditionally a MongoClient or
     pymongo.Connection) to specify timeout if pymongo >= 3.0.
     """
+
     def __init__(self, *args, **kwargs):
         if pymongo_version[0] >= 3:
             if 'serverSelectionTimeoutMS' not in kwargs:
@@ -63,7 +66,9 @@ class MongoConnection(Connection):
 def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
                   ssl_pymongo_options=None):
     """
-    Ping a mongos or mongod every `interval` seconds until it responds, or
+    Ping server and wait for response.
+
+    Ping a mongod or mongos every `interval` seconds until it responds, or
     `timeout` seconds have passed. If `to_start` is set to False, will wait for
     the node to shut down instead. This function can be called as a separate
     thread.
@@ -100,8 +105,9 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
 
 def shutdown_host(port, username=None, password=None, authdb=None):
     """
-    Send the shutdown command to a mongod or mongos on given port. This
-    function can be called as a separate thread.
+    Send the shutdown command to a mongod or mongos on given port.
+
+    This function can be called as a separate thread.
     """
     host = 'localhost:%i' % port
     try:
@@ -165,11 +171,11 @@ class MLaunchTool(BaseCmdLineTool):
 
     def run(self, arguments=None):
         """
-        This is the main run method, called for all sub-commands and
-        parameters. It sets up argument parsing, then calls the sub-command
-        method with the same name.
-        """
+        Main run method.
 
+        Called for all sub-commands and parameters. It sets up argument
+        parsing, then calls the sub-command method with the same name.
+        """
         # set up argument parsing in run, so that subsequent calls
         # to run can call different sub-commands
         self.argparser = argparse.ArgumentParser()
@@ -525,10 +531,10 @@ class MLaunchTool(BaseCmdLineTool):
     # -- below are the main commands: init, start, stop, list, kill
     def init(self):
         """
-        Sub-command init. Branches out to sharded, replicaset or single node
-        methods.
-        """
+        Sub-command init.
 
+        Branches out to sharded, replicaset or single node methods.
+        """
         # check for existing environment. Only allow subsequent
         # 'mlaunch init' if they are identical.
         if self._load_parameters():
@@ -797,13 +803,14 @@ class MLaunchTool(BaseCmdLineTool):
 
     def stop(self):
         """
-        Sub-command stop. This method will parse the list of tags and stop the
-        matching nodes. Each tag has a set of nodes associated with it, and
-        only the nodes matching all tags (intersection) will be shut down.
+        Sub-command stop.
+
+        Parse the list of tags and stop the matching nodes. Each tag has a set
+        of nodes associated with it, and only the nodes matching all tags
+        (intersection) will be shut down.
 
         Currently this is an alias for kill()
         """
-
         self.kill()
 
     def start(self):
@@ -872,9 +879,10 @@ class MLaunchTool(BaseCmdLineTool):
 
     def list(self):
         """
-        Sub-command list. Takes no further parameters. Will discover the
-        current configuration and print a table of all the nodes with status
-        and port.
+        Sub-command list.
+
+        Takes no further parameters. Will discover the current configuration
+        and print a table of all the nodes with status and port.
         """
         self.discover()
         print_docs = []
@@ -1063,10 +1071,10 @@ class MLaunchTool(BaseCmdLineTool):
 
     def discover(self):
         """
-        This method will go out to each of the processes and get their state.
-        It builds the self.cluster_tree, self.cluster_tags,
-        self.cluster_running data structures, needed for sub-commands start,
-        stop, list.
+        Fetch state for each processes.
+
+        Build the self.cluster_tree, self.cluster_tags, self.cluster_running
+        data structures, needed for sub-commands start, stop, list.
         """
         # need self.args['command'] so fail if it's not available
         if (not self.args or 'command' not in self.args or not
@@ -1236,7 +1244,7 @@ class MLaunchTool(BaseCmdLineTool):
         current_port += num_mongos
 
     def is_running(self, port):
-        """ returns if a host on a specific port is running. """
+        """Return True if a host on a specific port is running."""
         try:
             con = self.client('localhost:%s' % port)
             con.admin.command('ping')
@@ -1246,12 +1254,13 @@ class MLaunchTool(BaseCmdLineTool):
 
     def get_tagged(self, tags):
         """
+        Tag format.
+
         The format for the tags list is tuples for tags: mongos, config, shard,
         secondary tags of the form (tag, number), e.g. ('mongos', 2) which
         references the second mongos in the list. For all other tags, it is
         simply the string, e.g. 'primary'.
         """
-
         # if tags is a simple string, make it a list (note: tuples like
         # ('mongos', 2) must be in a surrounding list)
         if not hasattr(tags, '__iter__') and type(tags) == str:
@@ -1284,17 +1293,19 @@ class MLaunchTool(BaseCmdLineTool):
 
     def get_tags_of_port(self, port):
         """
-        Get all tags related to a given port (inverse of what is stored in
-        self.cluster_tags).
+        Get all tags related to a given port.
+
+        This is the inverse of what is stored in self.cluster_tags).
         """
         return(sorted([tag for tag in self.cluster_tags
                        if port in self.cluster_tags[tag]]))
 
     def wait_for(self, ports, interval=1.0, timeout=30, to_start=True):
         """
-        Given a list of ports, spawns up threads that will ping the host on
-        each port concurrently. Returns when all hosts are running (if
-        to_start=True) / shut down (if to_start=False)
+        Spawn threads to ping host using a list of ports.
+
+        Returns when all hosts are running (if to_start=True) / shut down (if
+        to_start=False).
         """
         threads = []
         queue = Queue.Queue()
@@ -1334,7 +1345,8 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _load_parameters(self):
         """
-        Tries to load the .mlaunch_startup file that exists in each datadir.
+        Load the .mlaunch_startup file that exists in each datadir.
+
         Handles different protocol versions.
         """
         datapath = self.dir
@@ -1366,10 +1378,7 @@ class MLaunchTool(BaseCmdLineTool):
         return True
 
     def _store_parameters(self):
-        """
-        Stores the startup parameters and config in the .mlaunch_startup
-        file in the datadir.
-        """
+        """Store startup params and config in datadir/.mlaunch_startup."""
         datapath = self.dir
 
         out_dict = {
@@ -1390,7 +1399,7 @@ class MLaunchTool(BaseCmdLineTool):
             pass
 
     def _create_paths(self, basedir, name=None):
-        """ create datadir and subdir paths. """
+        """Create datadir and subdir paths."""
         if name:
             datapath = os.path.join(basedir, name)
         else:
@@ -1438,13 +1447,13 @@ class MLaunchTool(BaseCmdLineTool):
     def _filter_valid_arguments(self, arguments, binary="mongod",
                                 config=False):
         """
-        Check which of the list of arguments is accepted by the specified
-        binary (mongod, mongos). returns a list of accepted arguments. If an
-        argument does not start with '-' but its preceding argument was
-        accepted, then it is accepted as well. Example ['--slowms', '1000']
-        both arguments would be accepted for a mongod.
-        """
+        Return a list of accepted arguments.
 
+        Check which arguments in list are accepted by the specified binary
+        (mongod, mongos). If an argument does not start with '-' but its
+        preceding argument was accepted, then it is accepted as well. Example
+        ['--slowms', '1000'] both arguments would be accepted for a mongod.
+        """
         # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join(self.args['binarypath'], binary)
@@ -1534,11 +1543,11 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _get_shard_names(self, args):
         """
-        Get the shard names based on the self.args['sharded'] parameter. If
-        it's a number, create shard names of type shard##, where ## is a
+        Get the shard names based on the self.args['sharded'] parameter.
+
+        If it's a number, create shard names of type shard##, where ## is a
         2-digit number. Returns a list [None] if no shards are present.
         """
-
         if 'sharded' in args and args['sharded']:
             if len(args['sharded']) == 1:
                 try:
@@ -1618,7 +1627,7 @@ class MLaunchTool(BaseCmdLineTool):
             self.wait_for(ports)
 
     def _initiate_replset(self, port, name, maxwait=30):
-        # initiate replica set
+        """Initiate replica set."""
         if not self.args['replicaset'] and name != 'configRepl':
             if self.args['verbose']:
                 print('Skipping replica set initialization for %s' % name)
@@ -1731,15 +1740,15 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_cmdlines(self):
         """
-        This is the top-level _construct_* method. From here, it will branch
-        out to the different cases: _construct_sharded, _construct_replicaset,
-        _construct_single. These can themselves call each other (for example
-        sharded needs to create the shards with either replicaset or single
-        node). At the lowest level, the construct_mongod, _mongos, _config will
-        create the actual command line strings and store them in
-        self.startup_info.
-        """
+        Top-level _construct_* method.
 
+        From here, it will branch out to the different cases:
+        _construct_sharded, _construct_replicaset, _construct_single. These can
+        themselves call each other (for example sharded needs to create the
+        shards with either replicaset or single node). At the lowest level, the
+        construct_mongod, _mongos, _config will create the actual command line
+        strings and store them in self.startup_info.
+        """
         if self.args['sharded']:
             # construct startup string for sharded environments
             self._construct_sharded()
@@ -1760,7 +1769,6 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_sharded(self):
         """Construct command line strings for a sharded cluster."""
-
         num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
         shard_names = self._get_shard_names(self.args)
 
@@ -1827,10 +1835,10 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_replset(self, basedir, portstart, name, num_nodes,
                            arbiter, extra=''):
         """
-        Construct command line strings for a replicaset, either for sharded
-        cluster or by itself.
-        """
+        Construct command line strings for a replicaset.
 
+        Handles single set or sharded cluster.
+        """
         self.config_docs[name] = {'_id': name, 'members': []}
 
         # Construct individual replica set nodes
@@ -1877,7 +1885,6 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_config(self, basedir, port, name=None, isreplset=False):
         """Construct command line strings for a config server."""
-
         if isreplset:
             return self._construct_replset(basedir=basedir, portstart=port,
                                            name=name,
@@ -1892,8 +1899,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _construct_single(self, basedir, port, name=None, extra=''):
         """
-        Construct command line strings for a single node, either for shards or
-        as a stand-alone.
+        Construct command line strings for a single node.
+
+        Handles shards and stand-alones.
         """
         datapath = self._create_paths(basedir, name)
         self._construct_mongod(os.path.join(datapath, 'db'),

@@ -1,3 +1,5 @@
+#!/bin/python
+
 import json
 import re
 from datetime import datetime
@@ -9,7 +11,8 @@ from mtools.util.pattern import json2pattern
 
 
 class DateTimeEncoder(json.JSONEncoder):
-    """ custom datetime encoder for json output. """
+    """Custom datetime encoder for json output."""
+
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
@@ -17,28 +20,28 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class LogEvent(object):
-    """ LogEvent extracts information from a mongod/mongos log file line and
-        stores the following properties/variables:
+    """
+    Extract information from log line and store properties/variables.
 
-        line_str: the original line string
-        split_tokens: a list of string tokens after splitting line_str using
-                      whitespace as split points
-        datetime: a datetime object for the logevent. For logfiles created with
-                  version 2.4+, it also contains micro-seconds
-        duration: the duration of a timed operation in ms
-        thread: the thread name (e.g. "conn1234") as string
-        operation: insert, update, remove, query, command, getmore, None
-        namespace: the namespace of the operation, or None
-        command: the type of command, if the operation was a "command"
-        pattern: the query pattern for queries, updates, counts, etc
-        ...
+    line_str: the original line string
+    split_tokens: a list of string tokens after splitting line_str using
+                  whitespace as split points
+    datetime: a datetime object for the logevent. For logfiles created with
+              version 2.4+, it also contains micro-seconds
+    duration: the duration of a timed operation in ms
+    thread: the thread name (e.g. "conn1234") as string
+    operation: insert, update, remove, query, command, getmore, None
+    namespace: the namespace of the operation, or None
+    command: the type of command, if the operation was a "command"
+    pattern: the query pattern for queries, updates, counts, etc
+    ...
 
-        Certain operations also add the number of affected/scanned documents.
-        If applicable, the following variables are also set, otherwise the
-        default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
+    Certain operations also add the number of affected/scanned documents.
+    If applicable, the following variables are also set, otherwise the
+    default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
 
-        For performance reason, all fields are evaluated lazily upon first
-        request.
+    For performance reason, all fields are evaluated lazily upon first
+    request.
     """
 
     # datetime handler for json encoding
@@ -126,10 +129,11 @@ class LogEvent(object):
 
     def set_line_str(self, line_str):
         """
+        Set line_str.
+
         Line_str is only writeable if LogEvent was created from a string,
         not from a system.profile documents.
         """
-
         if not self.from_string:
             raise ValueError("can't set line_str for LogEvent created from "
                              "system.profile documents.")
@@ -140,7 +144,6 @@ class LogEvent(object):
 
     def get_line_str(self):
         """Return line_str depending on source, logfile or system.profile."""
-
         if self.from_string:
             return ' '.join([s for s in [self.merge_marker_str,
                                          self._datetime_str,
@@ -153,8 +156,7 @@ class LogEvent(object):
 
     @property
     def split_tokens(self):
-        """Splits string into tokens (lazy)."""
-
+        """Split string into tokens (lazy)."""
         if not self._split_tokens_calculated:
             # split into items (whitespace split)
             self._split_tokens = self._line_str.split()
@@ -165,7 +167,6 @@ class LogEvent(object):
     @property
     def duration(self):
         """Calculate duration if available (lazy)."""
-
         if not self._duration_calculated:
             self._duration_calculated = True
 
@@ -193,7 +194,6 @@ class LogEvent(object):
     @property
     def datetime(self):
         """Extract datetime if available (lazy)."""
-
         if not self._datetime_calculated:
             self._datetime_calculated = True
 
@@ -266,16 +266,16 @@ class LogEvent(object):
             return True
 
     def _match_datetime_pattern(self, tokens):
-        """ Helper method that takes a list of tokens and tries to match
-            the datetime pattern at the beginning of the token list.
+        """
+        Match the datetime pattern at the beginning of the token list.
 
-            There are several formats that this method needs to understand
-            and distinguish between (see MongoDB's SERVER-7965):
+        There are several formats that this method needs to understand
+        and distinguish between (see MongoDB's SERVER-7965):
 
-            ctime-pre2.4    Wed Dec 31 19:00:00
-            ctime           Wed Dec 31 19:00:00.000
-            iso8601-utc     1970-01-01T00:00:00.000Z
-            iso8601-local   1969-12-31T19:00:00.000+0500
+        ctime-pre2.4    Wed Dec 31 19:00:00
+        ctime           Wed Dec 31 19:00:00.000
+        iso8601-utc     1970-01-01T00:00:00.000Z
+        iso8601-local   1969-12-31T19:00:00.000+0500
         """
         # first check: less than 4 tokens can't be ctime
         assume_iso8601_format = len(tokens) < 4
@@ -320,8 +320,7 @@ class LogEvent(object):
 
     @property
     def thread(self):
-        """ extract thread name if available (lazy) """
-
+        """Extract thread name if available (lazy)."""
         if not self._thread_calculated:
             self._thread_calculated = True
 
@@ -346,8 +345,9 @@ class LogEvent(object):
 
     @property
     def conn(self):
-        """
+        r"""
         Extract conn name if available (lazy).
+
         This value is None for all lines except the log lines related to
         connections, that is lines matching '\[conn[0-9]+\]' or
         '\[(initandlisten|mongosMain)\] .* connection accepted from'.
@@ -358,10 +358,10 @@ class LogEvent(object):
     @property
     def operation(self):
         """
-        Extract operation (query, insert, update, remove, getmore, command)
-        if available (lazy).
-        """
+        Extract operation if available (lazy).
 
+        Operations: query, insert, update, remove, getmore, command
+        """
         if not self._operation_calculated:
             self._operation_calculated = True
             self._extract_operation_and_namespace()
@@ -371,7 +371,6 @@ class LogEvent(object):
     @property
     def namespace(self):
         """Extract namespace if available (lazy)."""
-
         if not self._operation_calculated:
             self._operation_calculated = True
             self._extract_operation_and_namespace()
@@ -381,10 +380,10 @@ class LogEvent(object):
     def _extract_operation_and_namespace(self):
         """
         Helper method to extract both operation and namespace from a logevent.
+
         It doesn't make sense to only extract one as they appear back to back
         in the token list.
         """
-
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
@@ -415,7 +414,6 @@ class LogEvent(object):
     @property
     def pattern(self):
         """Extract query pattern from operations."""
-
         if not self._pattern:
 
             # trigger evaluation of operation
@@ -430,7 +428,6 @@ class LogEvent(object):
     @property
     def sort_pattern(self):
         """Extract query pattern from operations."""
-
         if not self._sort_pattern:
 
             # trigger evaluation of operation
@@ -442,7 +439,6 @@ class LogEvent(object):
     @property
     def command(self):
         """Extract query pattern from operations."""
-
         if not self._command_calculated:
 
             self._command_calculated = True
@@ -463,7 +459,6 @@ class LogEvent(object):
     @property
     def nscanned(self):
         """Extract nscanned or keysExamined counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -473,9 +468,10 @@ class LogEvent(object):
     @property
     def nscannedObjects(self):
         """
-        Extract nscannedObjects or docsExamined counter if available (lazy).
-        """
+        Extract counters if available (lazy).
 
+        Looks for nscannedObjects or docsExamined.
+        """
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -485,7 +481,6 @@ class LogEvent(object):
     @property
     def ntoreturn(self):
         """Extract ntoreturn counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -495,7 +490,6 @@ class LogEvent(object):
     @property
     def writeConflicts(self):
         """Extract ntoreturn counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -505,9 +499,10 @@ class LogEvent(object):
     @property
     def nreturned(self):
         """
-        Extract nreturned, nReturned, or nMatched counter if available (lazy).
-        """
+        Extract counters if available (lazy).
 
+        Looks for nreturned, nReturned, or nMatched counter.
+        """
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -517,7 +512,6 @@ class LogEvent(object):
     @property
     def ninserted(self):
         """Extract ninserted or nInserted counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -527,7 +521,6 @@ class LogEvent(object):
     @property
     def ndeleted(self):
         """Extract ndeleted or nDeleted counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -537,7 +530,6 @@ class LogEvent(object):
     @property
     def nupdated(self):
         """Extract nupdated or nModified counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -547,7 +539,6 @@ class LogEvent(object):
     @property
     def numYields(self):
         """Extract numYields counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -557,7 +548,6 @@ class LogEvent(object):
     @property
     def planSummary(self):
         """Extract numYields counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -567,7 +557,6 @@ class LogEvent(object):
     @property
     def r(self):
         """Extract read lock (r) counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -577,7 +566,6 @@ class LogEvent(object):
     @property
     def w(self):
         """Extract write lock (w) counter if available (lazy)."""
-
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -585,11 +573,7 @@ class LogEvent(object):
         return self._w
 
     def _extract_counters(self):
-        """
-        Helper method to extract counters like nscanned, nreturned, etc. from
-        the logevent.
-        """
-
+        """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
@@ -657,7 +641,6 @@ class LogEvent(object):
 
     def _extract_level(self):
         """Extract level and component if available (lazy)."""
-
         if self._level is None:
             split_tokens = self.split_tokens
             x = (self.log_levels.index(split_tokens[1])
@@ -672,8 +655,9 @@ class LogEvent(object):
 
     def parse_all(self):
         """
-        Triggers the extraction of all information, which would usually just be
-        evaluated lazily.
+        Trigger extraction of all information.
+
+        These values are usually evaluated lazily.
         """
         tokens = self.split_tokens
         duration = self.duration
@@ -694,7 +678,6 @@ class LogEvent(object):
         r = self.r
 
     def _find_pattern(self, trigger):
-
         # get start of json query pattern
         start_idx = self.line_str.rfind(trigger)
         if start_idx == -1:
@@ -766,13 +749,11 @@ class LogEvent(object):
         self._datetime_format = format
 
     def __str__(self):
-        """
-        Default string conversion for a LogEvent object is just its line_str.
-        """
+        """Default string conversion for LogEvent object is its line_str."""
         return str(self.line_str)
 
     def to_dict(self, labels=None):
-        """Converts LogEvent object to a dictionary."""
+        """Convert LogEvent object to a dictionary."""
         output = {}
         if labels is None:
             labels = ['line_str', 'split_tokens', 'datetime', 'operation',
@@ -788,15 +769,12 @@ class LogEvent(object):
         return output
 
     def to_json(self, labels=None):
-        """Converts LogEvent object to valid JSON."""
+        """Convert LogEvent object to valid JSON."""
         output = self.to_dict(labels)
         return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
     def _parse_document(self):
-        """
-        Parses a system.profile document and copies all the values to the
-        member variables.
-        """
+        """Parse system.profile doc, copy all values to member variables."""
         self._reset()
 
         doc = self._profile_doc

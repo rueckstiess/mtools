@@ -19,6 +19,7 @@ except ImportError:
 def opened_closed(logevent):
     """
     Inspect a log line and groups it by connection being openend or closed.
+
     If neither, return False.
     """
     if "connection accepted" in logevent.line_str:
@@ -31,8 +32,10 @@ def opened_closed(logevent):
 
 class ConnectionChurnPlotType(BasePlotType):
     """
-    Plot a histogram plot over all logevents. The bucket size can be
-    specified with the --bucketsize or -b parameter. Unit is in seconds.
+    Plot a histogram plot over all logevents.
+
+    The bucket size can be specified with the --bucketsize or -b parameter.
+    Unit is in seconds.
     """
 
     plot_type_str = 'connchurn'
@@ -144,14 +147,15 @@ class ConnectionChurnPlotType(BasePlotType):
     @classmethod
     def color_map(cls, group):
         """
-        Change default color behavior to map certain states always to the
-        same colors (similar to MMS).
+        Change default color behavior.
+
+        Map certain states always to the same colors (similar to MMS).
         """
         colors = {'opened': 'green', 'closed': 'red', 'total': 'black'}
         return colors[group], cls.markers[0]
 
     def clicked(self, event):
-        """ print group name and number of items in bin. """
+        """Print group name and number of items in bin."""
         group = event.artist._mt_group
         n = event.artist._mt_n
         dt = num2date(event.artist._mt_bin)

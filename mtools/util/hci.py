@@ -1,3 +1,6 @@
+#!/bin/python
+"""Utility for working with datetimes."""
+
 import re
 from datetime import datetime, timedelta
 
@@ -8,6 +11,7 @@ from mtools.util import OrderedDict
 
 
 class DateTimeBoundaries(object):
+    """Object for working with datetime boundaries."""
 
     timeunits = ['secs', 'sec', 's', 'mins', 'min', 'm', 'months', 'month',
                  'mo', 'hours', 'hour', 'h', 'days', 'day', 'd', 'weeks',
@@ -31,11 +35,7 @@ class DateTimeBoundaries(object):
     ])
 
     def __init__(self, start, end):
-        """
-        Initialize the DateTimeBoundaries object with true start and end
-        datetime objects.
-        """
-
+        """Initialize DateTimeBoundaries with true start/end datetime objs."""
         if start > end:
             raise ValueError('Error in DateTimeBoundaries: end cannot '
                              'be before start datetime.')
@@ -50,6 +50,7 @@ class DateTimeBoundaries(object):
             self.end = self.end.replace(tzinfo=tzutc())
 
     def string2dt(self, s, lower_bound=None):
+        """Return datetime from a given string."""
         original_s = s
 
         result = {}
@@ -182,8 +183,7 @@ class DateTimeBoundaries(object):
         return dt
 
     def __call__(self, from_str=None, to_str=None):
-        """Sets the boundaries based on `from` and `to` strings."""
-
+        """Set the boundaries based on `from` and `to` strings."""
         from_dt = self.string2dt(from_str, lower_bound=None)
         to_dt = self.string2dt(to_str, lower_bound=from_dt)
 

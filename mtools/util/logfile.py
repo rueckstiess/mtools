@@ -1,3 +1,5 @@
+#!/bin/python
+
 from __future__ import print_function
 
 import os
@@ -10,9 +12,7 @@ from mtools.util.logevent import LogEvent
 
 
 class LogFile(InputSource):
-    """
-    Wrapper class for log files, either as open file streams of from stdin.
-    """
+    """Log file wrapper class. Handles open file streams or stdin."""
 
     def __init__(self, filehandle):
         """Provide logfile as open file stream or stdin."""
@@ -54,6 +54,7 @@ class LogFile(InputSource):
     def start(self):
         """
         Lazy evaluation of start and end of logfile.
+
         Returns None for stdin input currently.
         """
         if not self._start:
@@ -62,8 +63,11 @@ class LogFile(InputSource):
 
     @property
     def end(self):
-        """Lazy evaluation of start and end of logfile.
-        Returns None for stdin input currently."""
+        """
+        Lazy evaluation of start and end of logfile.
+
+        Returns None for stdin input currently.
+        """
         if not self._end:
             self._calculate_bounds()
         return self._end
@@ -77,8 +81,11 @@ class LogFile(InputSource):
 
     @property
     def filesize(self):
-        """Lazy evaluation of start and end of logfile.
-        Returns None for stdin input currently."""
+        """
+        Lazy evaluation of start and end of logfile.
+
+        Returns None for stdin input currently.
+        """
         if self.from_stdin:
             return None
         if not self._filesize:
@@ -101,7 +108,7 @@ class LogFile(InputSource):
 
     @property
     def year_rollover(self):
-        """Lazy evaluation of the datetime format. """
+        """Lazy evaluation of the datetime format."""
         if self._year_rollover is None:
             self._calculate_bounds()
         return self._year_rollover
@@ -110,6 +117,7 @@ class LogFile(InputSource):
     def num_lines(self):
         """
         Lazy evaluation of the number of lines.
+
         Returns None for stdin input currently.
         """
         if self.from_stdin:
@@ -192,7 +200,6 @@ class LogFile(InputSource):
 
     def next(self):
         """Get next line, adjust for year rollover and hint datetime format."""
-
         # use readline here because next() iterator uses internal readahead
         # buffer so seek position is wrong
         line = self.filehandle.readline()
@@ -221,8 +228,9 @@ class LogFile(InputSource):
 
     def __iter__(self):
         """
-        Iteration over LogFile object will return a LogEvent object for
-        each line (generator).
+        Iterate over LogFile object.
+
+        Return a LogEvent object for each line (generator).
         """
         le = None
 
@@ -388,7 +396,6 @@ class LogFile(InputSource):
 
     def _calculate_bounds(self):
         """Calculate beginning and end of logfile."""
-
         if self._bounds_calculated:
             # Assume no need to recalc bounds for lifetime of a Logfile object
             return
@@ -445,8 +452,10 @@ class LogFile(InputSource):
 
     def _find_curr_line(self, prev=False):
         """
-        Internal helper function that finds the current (or previous if
-        prev=True) line in a log file based on the current seek position.
+        Internal helper function.
+
+        Find the current (or previous if prev=True) line in a log file based on
+        the current seek position.
         """
         curr_pos = self.filehandle.tell()
 
@@ -497,10 +506,11 @@ class LogFile(InputSource):
 
     def fast_forward(self, start_dt):
         """
-        Fast-forward a log file to the given start_dt datetime object using
-        binary search. Only fast for files. Streams need to be forwarded
-        manually, and it will miss the first line that would otherwise match
-        (as it consumes the log line).
+        Fast-forward file to given start_dt datetime obj using binary search.
+
+        Only fast for files. Streams need to be forwarded manually, and it will
+        miss the first line that would otherwise match (as it consumes the log
+        line).
         """
         if self.from_stdin:
             # skip lines until start_dt is reached

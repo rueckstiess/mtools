@@ -1,3 +1,6 @@
+#!/bin/python
+"""Setup file for mtools."""
+
 import platform
 import re
 import sys

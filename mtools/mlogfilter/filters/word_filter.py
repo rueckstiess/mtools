@@ -1,10 +1,10 @@
 import re
 
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 
 class WordFilter(BaseFilter):
-    """Accepts only if line contains any of the words specified by --word."""
+    """Accept only if line contains any of the words specified by --word."""
 
     filterArgs = [
         ('--word', {'action': 'store', 'nargs': '*',
@@ -22,6 +22,12 @@ class WordFilter(BaseFilter):
             self.active = False
 
     def accept(self, logevent):
+        """
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         for word in self.words:
             if re.search(word, logevent.line_str):
                 return True

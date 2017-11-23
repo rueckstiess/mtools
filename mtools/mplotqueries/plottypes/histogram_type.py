@@ -18,8 +18,10 @@ except ImportError:
 
 class HistogramPlotType(BasePlotType):
     """
-    Plot a histogram plot over all logevents. The bucket size can be specified
-    with the --bucketsize or -b parameter. Unit is in seconds.
+    Plot a histogram plot over all logevents.
+
+    The bucket size can be specified with the --bucketsize or -b parameter.
+    Unit is in seconds.
     """
 
     plot_type_str = 'histogram'
@@ -58,8 +60,10 @@ class HistogramPlotType(BasePlotType):
 
     def accept_line(self, logevent):
         """
-        Return True for each line. We bucket everything. Filtering has to be
-        done before passing to this type of plot.
+        Return True for each line.
+
+        We bucket everything. Filtering has to be done before passing to this
+        type of plot.
         """
         return True
 
@@ -75,10 +79,10 @@ class HistogramPlotType(BasePlotType):
 
     def plot(self, axis, ith_plot, total_plots, limits):
         """
-        Plot the histogram as a whole over all groups, rather than individual
-        groups like other plot types.
-        """
+        Plot the histogram as a whole over all groups.
 
+        Do not plot as individual groups like other plot types.
+        """
         print(self.plot_type_str.upper() + " plot")
         print("%5s %9s  %s" % ("id", " #points", "group"))
 

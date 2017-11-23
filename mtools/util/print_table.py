@@ -1,5 +1,7 @@
+#!/bin/python
+
 def print_table(rows, override_headers=None, uppercase_headers=True):
-    """Rows needs to be a list of dictionaries, all with the same keys."""
+    """All rows need to be a list of dictionaries, all with the same keys."""
     if len(rows) == 0:
         return
     keys = rows[0].keys()

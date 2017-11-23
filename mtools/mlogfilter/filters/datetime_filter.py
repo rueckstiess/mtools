@@ -2,7 +2,7 @@ from datetime import MAXYEAR, datetime, timedelta
 
 from dateutil.tz import tzutc
 
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 from mtools.util import OrderedDict
 from mtools.util.hci import DateTimeBoundaries
 
@@ -13,6 +13,8 @@ def custom_parse_dt(value):
 
 class DateTimeFilter(BaseFilter):
     """
+    DateTimeFilter class.
+
     This filter has two parser arguments: --from and --to, both are
     optional. All possible values for --from and --to can be described as:
 
@@ -105,7 +107,6 @@ class DateTimeFilter(BaseFilter):
 
     def setup(self):
         """Get start end end date of logfile before starting to parse."""
-
         if self.mlogfilter.is_stdin:
             # assume this year (we have no other info)
             now = datetime.now()
@@ -150,6 +151,12 @@ class DateTimeFilter(BaseFilter):
             self.seek_to = False
 
     def accept(self, logevent):
+        """
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         if self.fromReached and self.seek_to:
             if self.seek_to != -1:
                 self.toReached = (self.mlogfilter.args['logfile'][0]
@@ -176,4 +183,10 @@ class DateTimeFilter(BaseFilter):
                 return False
 
     def skipRemaining(self):
+        """
+        Skip remaining lines.
+
+        Overwrite BaseFilter.skipRemaining() and return True if all lines
+        from here to the end of the file should be rejected (no output).
+        """
         return self.toReached

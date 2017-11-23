@@ -1,7 +1,9 @@
 class BaseFilter(object):
     """
-    Base Filter class. All filters need to derive from it and implement
-    their version of filterArgs, accept, and optionally skipRemaining.
+    Base Filter class.
+
+    All filters need to derive from it and implement their version of
+    filterArgs, accept, and optionally skipRemaining.
 
     filterArgs needs to be a list of tuples with 2 elements each. The
     first tuple element is the filter argument, e.g. --xyz. The second
@@ -13,8 +15,9 @@ class BaseFilter(object):
 
     def __init__(self, mlogfilter):
         """
-        Constructor. save command line arguments and set active to False
-        by default.
+        Constructor.
+
+        Save command line arguments and set active to False by default.
         """
         self.mlogfilter = mlogfilter
 
@@ -23,6 +26,8 @@ class BaseFilter(object):
 
     def setup(self):
         """
+        Setup function.
+
         Hook to setup anything necessary for the filter before actually
         going through logevents. overwrite in subclass if setup is required.
         """
@@ -30,6 +35,8 @@ class BaseFilter(object):
 
     def accept(self, logevent):
         """
+        Process line.
+
         Overwrite this method in subclass and return True if the provided
         logevent should be accepted (causing output), or False if not.
         """
@@ -37,6 +44,8 @@ class BaseFilter(object):
 
     def skipRemaining(self):
         """
+        Skip remaining lines.
+
         Overwrite this method in sublcass and return True if all lines
         from here to the end of the file should be rejected (no output).
         """

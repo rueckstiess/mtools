@@ -1,3 +1,5 @@
+#!/bin/python
+
 import argparse
 
 from bson.min_key import MinKey
@@ -13,7 +15,9 @@ except ImportError:
 def presplit(host, database, collection, shardkey, shardnumber=None,
              chunkspershard=1, verbose=False):
     """
-    get information about the number of shards, then split chunks and
+    Presplit chunks for sharding.
+
+    Get information about the number of shards, then split chunks and
     distribute over shards. Currently assumes shardkey to be hex string, for
     example ObjectId or UUID.
 
@@ -27,7 +31,6 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
                  if integer, only presplit over the given number of shards
                  (maximum is the number of actual shards)
     """
-
     con = Connection(host)
     namespace = '%s.%s' % (database, collection)
 

@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-from base_section import BaseSection
+from .base_section import BaseSection
 
 try:
     from mtools.util.profile_collection import ProfileCollection
@@ -11,6 +11,8 @@ except ImportError:
 
 class ConnectionSection(BaseSection):
     """
+    ConnectionSection class.
+
     This section goes through the logfile and extracts information about
     opened and closed connections.
     """

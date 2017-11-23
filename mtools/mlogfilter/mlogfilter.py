@@ -69,7 +69,7 @@ class MLogFilterTool(LogFileTool):
                                           "log output"))
 
     def addFilter(self, filterclass):
-        """Adds a filter class to the parser."""
+        """Add a filter class to the parser."""
         if filterclass not in self.filters:
             self.filters.append(filterclass)
 
@@ -82,8 +82,9 @@ class MLogFilterTool(LogFileTool):
 
     def _outputLine(self, logevent, length=None, human=False):
         """
-        Print the final line, with various options (length, human,
-        datetime changes, ...).
+        Print the final line.
+
+        Provides various options (length, human, datetime changes, ...).
         """
         # adapt timezone output if necessary
         if self.args['timestamp_format'] != 'none':
@@ -118,7 +119,7 @@ class MLogFilterTool(LogFileTool):
         return "%ihr %imin %isecs %ims" % (hr, mins, secs, mill)
 
     def _changeMs(self, line):
-        """Changes the ms part in the string if needed."""
+        """Change the ms part in the string if needed."""
         # use the position of the last space instead
         try:
             last_space_pos = line.rindex(' ')
@@ -139,8 +140,9 @@ class MLogFilterTool(LogFileTool):
 
     def _formatNumbers(self, line):
         """
-        Format the numbers so that there are commas inserted,
-        ie. 1200300 becomes 1,200,300.
+        Format the numbers so that there are commas inserted.
+
+        For example: 1200300 becomes 1,200,300.
         """
         # below thousands separator syntax only works for
         # python 2.7, skip for 2.6
@@ -211,11 +213,7 @@ class MLogFilterTool(LogFileTool):
                                                         [min_index]))
 
     def logfile_generator(self):
-        """
-        Generator method that yields each line of the logfile, or the next
-        line in case of several log files.
-        """
-
+        """Yield each line of the file, or the next line if several files."""
         if not self.args['exclude']:
             # ask all filters for a start_limit and fast-forward to the maximum
             start_limits = [f.start_limit for f in self.filters
@@ -240,10 +238,11 @@ class MLogFilterTool(LogFileTool):
 
     def run(self, arguments=None):
         """
-        Parse the logfile and asks each filter if it accepts the line.
-        It will only be printed if all filters accept the line.
-        """
+        Parse the logfile.
 
+        Ask each filter if it accepts the line. It will only be printed if all
+        filters accept the line.
+        """
         # add arguments from filter classes before calling superclass run
         for f in self.filters:
             for fa in f.filterArgs:
