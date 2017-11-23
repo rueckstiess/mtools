@@ -362,10 +362,7 @@ class MPlotQueriesTool(LogFileTool):
         print("")
 
     def onpick(self, event):
-        """
-        This method is called per artist (group), with possibly a list of
-        indices.
-        """
+        """Called per artist (group), with possibly a list of indices."""
         if hasattr(event.artist, '_mt_legend_item'):
             # legend item, instead of data point
             idx = event.artist._mt_legend_item

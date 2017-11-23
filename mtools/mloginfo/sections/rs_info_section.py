@@ -1,8 +1,10 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 
 
 class RsInfoSection(BaseSection):
     """
+    RsInfoSection class.
+
     This section determines if there is any Replica Set infomation like the
     replset name in the log file and prints the available information.
     """
@@ -25,7 +27,6 @@ class RsInfoSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
-
         if self.mloginfo.logfile.repl_set:
             print("    rs name: %s" % self.mloginfo.logfile.repl_set)
             print(" rs members: %s"

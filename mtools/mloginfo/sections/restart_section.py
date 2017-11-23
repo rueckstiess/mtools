@@ -1,4 +1,4 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 
 try:
     from mtools.util.profile_collection import ProfileCollection
@@ -8,6 +8,8 @@ except ImportError:
 
 class RestartSection(BaseSection):
     """
+    RestartSection class.
+
     This section determines if there were any restarts in the log file and
     prints out the times and version of the restarts found. It uses the
     information collected in LogFile so it doesn't have to walk the file
@@ -31,13 +33,12 @@ class RestartSection(BaseSection):
         return self.mloginfo.args['restarts']
 
     def run(self):
-
+        """Run this section and print out information."""
         if ProfileCollection and isinstance(self.mloginfo.logfile,
                                             ProfileCollection):
             print("\n    not available for system.profile collections\n")
             return
 
-        """Run this section and print out information."""
         for version, logevent in self.mloginfo.logfile.restarts:
             print("   %s version %s"
                   % (logevent.datetime.strftime("%b %d %H:%M:%S"), version))

@@ -87,8 +87,9 @@ class ScatterPlotType(BasePlotType):
 
     def clicked(self, event):
         """
-        This is called if an element of this plottype was clicked. Implement
-        in sub class.
+        Call if an element of this plottype is clicked.
+
+        Implement in sub class.
         """
         group = event.artist._mt_group
         indices = event.ind
@@ -207,7 +208,7 @@ class NScannedNPlotType(ScatterPlotType):
         self.ylabel = 'nscanned / n ratio'
 
     def accept_line(self, logevent):
-        """ return True if the log line has a duration. """
+        """Return True if the log line has a duration."""
         return getattr(logevent, 'nscanned') and getattr(logevent, 'nreturned')
 
     def plot_group(self, group, idx, axis):
@@ -241,7 +242,7 @@ class DocsExaminedPlotType(ScatterPlotType):
         self.ylabel = 'docsExamined / n ratio'
 
     def accept_line(self, logevent):
-        """ return True if the log line has a duration. """
+        """Return True if the log line has a duration."""
         # For backward compatibility the relevant logevent attribute is
         # currently nscannedObject.
         # This will have the value of nscannedObjects or equivalent

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from base_section import BaseSection
+from .base_section import BaseSection
 from mtools.util.log2code import Log2CodeConverter
 
 try:
@@ -11,6 +11,8 @@ except ImportError:
 
 class DistinctSection(BaseSection):
     """
+    DistinctSection class.
+
     This section shows a distinct view of all log lines matched with the
     Log2Code matcher. It will output sorted statistics of which logevent
     patterns where matched how often (most frequent first).
@@ -35,11 +37,7 @@ class DistinctSection(BaseSection):
         return self.mloginfo.args['distinct']
 
     def run(self):
-        """
-        Go over each line in the logfile, run through log2code matcher and
-        group by matched pattern.
-        """
-
+        """Run each line through log2code and group by matched pattern."""
         if ProfileCollection and isinstance(self.mloginfo.logfile,
                                             ProfileCollection):
             print("\n    not available for system.profile collections\n")

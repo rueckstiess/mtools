@@ -1,3 +1,5 @@
+#!/bin/python
+
 from dateutil.tz import tzutc
 from pymongo import ASCENDING, DESCENDING
 
@@ -17,17 +19,18 @@ except ImportError:
 
 
 class ProfileCollection(InputSource):
-    """ wrapper class for input source system.profile collection """
+    """Wrapper class for input source system.profile collection."""
 
     datetime_format = "ISODate()"
 
     def __init__(self, hostname='localhost', port=27017, database='test',
                  collection='system.profile'):
         """
-        Constructor for ProfileCollection. Takes hostname, port, database and
-        collection as parameters. All are optional and have default values.
-        """
+        Constructor for ProfileCollection.
 
+        Takes hostname, port, database and collection as parameters. All are
+        optional and have default values.
+        """
         # store parameters
         self.hostname = hostname
         self.port = port
@@ -89,7 +92,7 @@ class ProfileCollection(InputSource):
         return self._num_events
 
     def next(self):
-        """Makes iterators."""
+        """Make iterators."""
         if not self.cursor:
             self.cursor = self.coll_handle.find().sort([("ts", ASCENDING)])
 
@@ -99,11 +102,7 @@ class ProfileCollection(InputSource):
         return le
 
     def __iter__(self):
-        """
-        Iteration over host object will return a LogEvent object for each
-        document.
-        """
-
+        """Iterate over host object. Return LogEvent obj for each document."""
         self.cursor = self.coll_handle.find().sort([("ts", ASCENDING)])
 
         for doc in self.cursor:
@@ -112,12 +111,11 @@ class ProfileCollection(InputSource):
             yield le
 
     def __len__(self):
-        """Returns the number of events in the collection."""
+        """Return the number of events in the collection."""
         return self.num_events
 
     def _calculate_bounds(self):
         """Calculate beginning and end of log events."""
-
         # get start datetime
         first = self.coll_handle.find_one(None, sort=[("ts", ASCENDING)])
         last = self.coll_handle.find_one(None, sort=[("ts", DESCENDING)])
@@ -137,4 +135,4 @@ if __name__ == '__main__':
     pc = ProfileCollection()
 
     for event in pc:
-        print event
+        print(event)

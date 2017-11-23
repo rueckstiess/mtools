@@ -1,11 +1,14 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 
 class TableScanFilter(BaseFilter):
     """
-    Accepts only if the line contains a nscanned:[0-9] nreturned:[0-9] where
+    TableScanFilter class.
+
+    Accept only if the line contains a nscanned:[0-9] nreturned:[0-9] where
     the ratio of nscanned:nreturned is > 100 and nscanned > 10000.
     """
+
     filterArgs = [
         ('--scan', {
             'action': 'store_true',
@@ -23,7 +26,12 @@ class TableScanFilter(BaseFilter):
             self.active = self.mlogfilter.args['scan']
 
     def accept(self, logevent):
+        """
+        Process line.
 
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         ns = logevent.nscanned
         nr = logevent.nreturned
 

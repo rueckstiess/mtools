@@ -1,11 +1,14 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 
 class FastFilter(BaseFilter):
     """
+    FastFilter class.
+
     Accept only lines that have a duration that is shorter than the specified
     parameter in ms.
     """
+
     filterArgs = [
         ('--fast', {'action': 'store', 'nargs': '?', 'default': False,
                     'type': int,
@@ -24,6 +27,12 @@ class FastFilter(BaseFilter):
                 self.fastms = self.mlogfilter.args['fast']
 
     def accept(self, logevent):
+        """
+        Process line.
+
+        Overwrite BaseFilter.accept() and return True if the provided
+        logevent should be accepted (causing output), or False if not.
+        """
         if self.active and logevent.duration is not None:
             return logevent.duration <= self.fastms
         return False

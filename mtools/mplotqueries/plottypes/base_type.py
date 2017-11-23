@@ -96,7 +96,8 @@ class BasePlotType(object):
 
     def clicked(self, event):
         """
-        This is called if an element of this plottype was clicked.
+        Call if an element of this plottype was clicked.
+
         Implement in sub class.
         """
         pass

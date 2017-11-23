@@ -1,11 +1,16 @@
+#!/bin/python
+"""Utility for grouping items and working with grouped items."""
+
 import re
 
 from mtools.util import OrderedDict
 
 
 class Grouping(object):
+    """Grouping object and related functions."""
 
     def __init__(self, iterable=None, group_by=None):
+        """Init object."""
         self.groups = {}
         self.group_by = group_by
 
@@ -15,7 +20,6 @@ class Grouping(object):
 
     def add(self, item, group_by=None):
         """General purpose class to group items by certain criteria."""
-
         key = None
 
         if not group_by:
@@ -44,25 +48,32 @@ class Grouping(object):
         self.groups.setdefault(key, list()).append(item)
 
     def __getitem__(self, key):
+        """Return item corresponding to key."""
         return self.groups[key]
 
     def __iter__(self):
+        """Iterate items in group."""
         for key in self.groups:
             yield key
 
     def __len__(self):
+        """Return length of group."""
         return len(self.groups)
 
     def keys(self):
+        """Return keys in group."""
         return self.groups.keys()
 
     def values(self):
+        """Return values in group."""
         return self.groups.values()
 
     def items(self):
+        """Return items in group."""
         return self.groups.items()
 
     def regroup(self, group_by=None):
+        """Regroup items."""
         if not group_by:
             group_by = self.group_by
 
@@ -87,12 +98,12 @@ class Grouping(object):
                      others_label='others'):
         """
         Sort the groups by the number of elements they contain, descending.
+
         Also has option to limit the number of groups. If this option is
         chosen, the remaining elements are placed into another group with the
         name specified with others_label. if discard_others is True, the others
         group is removed instead.
         """
-
         # sort groups by number of elements
         self.groups = OrderedDict(sorted(self.groups.iteritems(),
                                          key=lambda x: len(x[1]),

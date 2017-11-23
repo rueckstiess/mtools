@@ -21,6 +21,7 @@ pattern_id = 0
 
 
 def source_files(mongodb_path):
+    """Find source files."""
     for root, dirs, files in os.walk(mongodb_path):
         for filename in files:
             # skip files in dbtests folder

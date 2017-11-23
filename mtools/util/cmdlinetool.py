@@ -1,3 +1,6 @@
+#!/bin/python
+"""Command line tool utility."""
+
 import argparse
 import datetime
 import os
@@ -15,8 +18,9 @@ try:
 
     class InputSourceAction(argparse.FileType):
         """
-        This class extends the FileType class from the argparse module. It will
-        try to open the file and pass the handle to a new LogFile object, but
+        Extend the FileType class from the argparse module.
+
+        Try to open the file and pass the handle to a new LogFile object, but
         if that's not possible it will catch the exception and interpret the
         string as a MongoDB URI and try to connect to the database. In that
         case, it will return a ProfileCollection object.
@@ -26,6 +30,7 @@ try:
         """
 
         def __call__(self, string):
+            """Open log file or MongoDB database."""
             try:
                 # catch filetype and return LogFile object
                 filehandle = argparse.FileType.__call__(self, string)
@@ -57,7 +62,10 @@ try:
 except ImportError:
 
     class InputSourceAction(argparse.FileType):
+        """Extend the FileType class from the argparse module."""
+
         def __call__(self, string):
+            """Open log file."""
             try:
                 # catch filetype and return LogFile object
                 filehandle = argparse.FileType.__call__(self, string)
@@ -68,14 +76,17 @@ except ImportError:
 
 class BaseCmdLineTool(object):
     """
-    Base class for any mtools command line tool. Adds --version flag and basic
-    control flow.
+    Base class for any mtools command line tool.
+
+    Adds --version flag and basic control flow.
     """
 
     def __init__(self):
         """
-        Constructor. Any inheriting class should add a description to the
-        argparser and extend it with additional arguments as needed.
+        Constructor.
+
+        Any inheriting class should add a description to the argparser and
+        extend it with additional arguments as needed.
         """
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
@@ -88,10 +99,11 @@ class BaseCmdLineTool(object):
 
     def run(self, arguments=None, get_unknowns=False):
         """
-        Init point to execute the script. If `arguments` string is given, will
-        evaluate the arguments, else evaluates sys.argv. Any inheriting class
-        should extend the run method (but first calling
-        BaseCmdLineTool.run(self)).
+        Init point to execute the script.
+
+        If `arguments` string is given, will evaluate the arguments, else
+        evaluates sys.argv. Any inheriting class should extend the run method
+        (but first calling BaseCmdLineTool.run(self)).
         """
         # redirect PIPE signal to quiet kill script, if not on Windows
         if os.name != 'nt':
@@ -116,7 +128,7 @@ class BaseCmdLineTool(object):
                                           self.is_stdin))
 
     def _datetime_to_epoch(self, dt):
-        """Converts the datetime to unix epoch (properly)."""
+        """Convert the datetime to unix epoch (properly)."""
         if dt:
             td = (dt - datetime.datetime.fromtimestamp(0, tzutc()))
             # don't use total_seconds(), that's only available in 2.7
@@ -129,9 +141,10 @@ class BaseCmdLineTool(object):
 
     def update_progress(self, progress, prefix=''):
         """
-        Use this helper function to print a progress bar for longer-running
-        scripts. The progress value is a value between 0.0 and 1.0. If a prefix
-        is present, it will be printed before the progress bar.
+        Print a progress bar for longer-running scripts.
+
+        The progress value is a value between 0.0 and 1.0. If a prefix is
+        present, it will be printed before the progress bar.
         """
         total_length = 40
 
@@ -152,9 +165,7 @@ class LogFileTool(BaseCmdLineTool):
     """Base class for any mtools tool that acts on logfile(s)."""
 
     def __init__(self, multiple_logfiles=False, stdin_allowed=True):
-        """
-        Constructor. Adds logfile(s) and stdin option to the argument parser.
-        """
+        """Add logfile(s) and stdin option to the argument parser."""
         BaseCmdLineTool.__init__(self)
 
         self.multiple_logfiles = multiple_logfiles

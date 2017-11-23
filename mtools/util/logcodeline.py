@@ -1,9 +1,12 @@
+#!/bin/python
+
 from collections import defaultdict
 
 
 class LogCodeLine(object):
     """
     LogCodeLine represents a logevent pattern extracted from the source code.
+
     The pattern is a tuple of constant strings, variables are cut out.
     LogCodeLine stores "matches" of the same log pattern from different source
     files and different versions of the code.
@@ -25,16 +28,19 @@ class LogCodeLine(object):
 
     def addMatch(self, version, filename, lineno, loglevel, trigger):
         """
-        Adds a match to the LogCodeLine, including the version, filename of the
-        source file, the line number, and the loglevel.
+        Add a match to the LogCodeLine.
+
+        Include the version, filename of the source file, the line number, and
+        the loglevel.
         """
         self.versions.add(version)
         self.matches[version].append((filename, lineno, loglevel, trigger))
 
     def __str__(self):
         """
-        String representation of a LogCodeLine, outputs all matches of the
-        pattern.
+        String representation of a LogCodeLine.
+
+        Outputs all matches of the pattern.
         """
         s = "%s\n" % (" <var> ".join(self.pattern))
         for version in sorted(self.versions):

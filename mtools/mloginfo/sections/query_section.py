@@ -1,7 +1,7 @@
 from collections import namedtuple
 from operator import itemgetter
 
-from base_section import BaseSection
+from .base_section import BaseSection
 from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
@@ -20,8 +20,7 @@ def op_or_cmd(le):
 
 
 class QuerySection(BaseSection):
-    """
-    """
+    """QuerySection class."""
 
     name = "queries"
 

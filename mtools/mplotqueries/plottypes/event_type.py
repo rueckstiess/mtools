@@ -46,6 +46,8 @@ class EventPlotType(BasePlotType):
 
 class RSStatePlotType(EventPlotType):
     """
+    RSStatePlotType object.
+
     This plot type derives from the event plot type (vertical lines), but
     instead of plotting arbitrary events, it will only accept lines that
     indicate a replica set change.
@@ -70,6 +72,8 @@ class RSStatePlotType(EventPlotType):
 
     def accept_line(self, logevent):
         """
+        Return True on match.
+
         Only match log lines containing 'is now in state' (reflects other
         node's state changes) or of type "[rsMgr] replSet PRIMARY" (reflects
         own state changes).
@@ -93,8 +97,9 @@ class RSStatePlotType(EventPlotType):
     def color_map(cls, group):
         print("Group %s" % group)
         """
-        Change default color behavior to map certain states always to the
-        same colors (similar to MMS).
+        Change default color behavior.
+
+        Map certain states always to the same colors (similar to MMS).
         """
         try:
             state_idx = cls.states.index(group)

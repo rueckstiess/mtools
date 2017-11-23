@@ -30,7 +30,7 @@ class MLogInfoTool(LogFileTool):
                                                       inspect.isclass)])
 
     def run(self, arguments=None):
-        """Print out useful information about the log file."""
+        """Print useful information about the log file."""
         LogFileTool.run(self, arguments)
 
         for i, self.logfile in enumerate(self.args['logfile']):
