@@ -57,7 +57,7 @@ class MLogFilterTool(LogFileTool):
             logevent._reformat_timestamp(self.args['timestamp_format'], force=True)
 
         if self.args['json']:
-            print logevent.to_json()
+            print(logevent.to_json())
             return
 
         line = logevent.line_str
@@ -69,7 +69,7 @@ class MLogFilterTool(LogFileTool):
             line = self._changeMs(line)
             line = self._formatNumbers(line)
 
-        print line
+        print(line)
 
 
     def _msToString(self, ms):
@@ -231,14 +231,14 @@ class MLogFilterTool(LogFileTool):
                 self.args['shorten'] = 200
 
         if self.args['verbose']:
-            print "command line arguments"
+            print("command line arguments")
             for a in self.args:
-                print "    %s: %s" % (a, self.args[a])
-            print
-            print "active filters:",
-            print ', '.join([f.__class__.__name__ for f in self.filters])
-            print
-            print '===================='
+                print("    %s: %s" % (a, self.args[a]))
+            print()
+            print("active filters:",)
+            print(', '.join([f.__class__.__name__ for f in self.filters]))
+            print()
+            print('====================')
 
         # handle markers parameter
         if len(self.args['markers']) == 1:

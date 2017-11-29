@@ -16,11 +16,11 @@ def print_table( rows, override_headers=None, uppercase_headers=True ):
 
     for row in rows:
         if type(row) == str:
-            print row
+            print(row)
         elif row is None:
-            print
+            print()
         else:
-            print template.format(**row)
+            print(template.format(**row))
 
 
 if __name__ == '__main__':
@@ -32,5 +32,5 @@ if __name__ == '__main__':
           None,
           {'a': '123', 'b': '654', 'c':'foo'} ]
 
-    print_table(d, ['long title here', 'foo', 'bar']) 
-    
+    print_table(d, ['long title here', 'foo', 'bar'])
+

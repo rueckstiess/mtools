@@ -29,9 +29,9 @@ class MLogInfoTool(LogFileTool):
 
         for i, self.logfile in enumerate(self.args['logfile']):
             if i > 0:
-                print
-                print ' ------------------------------------------'
-                print
+                print()
+                print(' ------------------------------------------')
+                print()
 
             if self.logfile.datetime_format == 'ctime-pre2.4':
                 # no milliseconds when datetime format doesn't support it
@@ -42,15 +42,15 @@ class MLogInfoTool(LogFileTool):
                 start_time = self.logfile.start.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
                 end_time = self.logfile.end.strftime("%Y %b %d %H:%M:%S.%f")[:-3] if self.logfile.start else "unknown"
 
-            print "     source: %s" % self.logfile.name
-            print "       host: %s" % (self.logfile.hostname + ':' + str(self.logfile.port) if self.logfile.hostname else "unknown")
-            print "      start: %s" % (start_time)
-            print "        end: %s" % (end_time)
+            print("     source: %s" % self.logfile.name)
+            print("       host: %s" % (self.logfile.hostname + ':' + str(self.logfile.port) if self.logfile.hostname else "unknown"))
+            print("      start: %s" % (start_time))
+            print("        end: %s" % (end_time))
 
             # TODO: add timezone if iso8601 format
-            print "date format: %s" % self.logfile.datetime_format
-            print "     length: %s" % len(self.logfile)
-            print "     binary: %s" % (self.logfile.binary or "unknown")
+            print("date format: %s" % self.logfile.datetime_format)
+            print("     length: %s" % len(self.logfile))
+            print("     binary: %s" % (self.logfile.binary or "unknown"))
 
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
@@ -67,14 +67,14 @@ class MLogInfoTool(LogFileTool):
                     else:
                         version = '= 2.6.x (iso8601 format)'
 
-            print "    version: %s" % version
-            print "    storage: %s" % (self.logfile.storage_engine or 'unknown')
+            print("    version: %s" % version)
+            print("    storage: %s" % (self.logfile.storage_engine or 'unknown'))
 
             # now run all sections
             for section in self.sections:
                 if section.active:
-                    print
-                    print section.name.upper()
+                    print()
+                    print(section.name.upper())
                     section.run()
 
 

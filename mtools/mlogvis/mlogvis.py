@@ -36,7 +36,7 @@ class MLogVisTool(LogFileTool):
                 out_count += 1
                 # if too many lines include a line_str, the page won't load
                 if with_line_str and out_count > self.args['line_max']:
-                    print "Warning: more than %i data points detected. Skipping actual log line strings for faster plotting." % self.args['line_max']
+                    print("Warning: more than %i data points detected. Skipping actual log line strings for faster plotting." % self.args['line_max'])
                     return False
                 # write log line out as json
                 if not first_row:
@@ -79,7 +79,7 @@ class MLogVisTool(LogFileTool):
 
         dstfilelocation = os.path.join(os.getcwd(), '%s'%outputname)
 
-        print "copying %s to %s" % (srcfilelocation, dstfilelocation)
+        print("copying %s to %s" % (srcfilelocation, dstfilelocation))
 
         srcfile = open(srcfilelocation)
         contents = srcfile.read()
@@ -91,7 +91,7 @@ class MLogVisTool(LogFileTool):
         dstfile.close()
 
         if not self.args['no_browser']:
-            print "serving visualization on file://"+dstfilelocation
+            print("serving visualization on file://"+dstfilelocation)
             webbrowser.open("file://"+dstfilelocation)
 
 def main():

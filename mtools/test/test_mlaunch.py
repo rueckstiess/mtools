@@ -35,7 +35,7 @@ class TestMLaunch(object):
         """ Constructor. """
         self.use_auth = False
         self.data_dir = ''
-        
+
 
     def setup(self):
         """ start up method to create mlaunch tool and find free port """
@@ -47,7 +47,7 @@ class TestMLaunch(object):
 
 
     def teardown(self):
-        """ tear down method after each test, removes data directory """        
+        """ tear down method after each test, removes data directory """
 
         # kill all running processes
         self.tool.discover()
@@ -76,11 +76,11 @@ class TestMLaunch(object):
 
         # add data directory to arguments for all commands
         arg_str += ' --dir %s' % self.data_dir
-        
+
         if arg_str.startswith('init') or arg_str.startswith('--'):
             # add --port and --nojournal to init calls
-            arg_str += ' --port %i --nojournal --smallfiles' % self.port 
-            
+            arg_str += ' --port %i --nojournal --smallfiles' % self.port
+
             if self.use_auth:
                 # add --auth to init calls if flag is set
                 arg_str += ' --auth'
@@ -112,7 +112,7 @@ class TestMLaunch(object):
 
     def test_argv_run(self):
         """ mlaunch: test true command line arguments, instead of passing into tool.run() """
-        
+
         # make command line arguments through sys.argv
         sys.argv = ['mlaunch', 'init', '--single', '--dir', self.base_dir, '--port', str(self.port), '--nojournal']
 
@@ -132,7 +132,7 @@ class TestMLaunch(object):
 
     def test_init_default_arguments(self):
         """ mlaunch: test that 'init' command is default, even when specifying arguments to run() """
-        
+
         self.run_tool("--single")
         assert self.tool.is_running(self.port)
 
@@ -195,9 +195,9 @@ class TestMLaunch(object):
     def test_sharded_status(self):
         """ mlaunch: start cluster with 2 shards of single nodes, 1 config server """
 
-        # start mongo process on free test port 
+        # start mongo process on free test port
         self.run_tool("init --sharded 2 --single")
-    
+
         # check if data directories and logfile exist
         assert os.path.exists(os.path.join(self.data_dir, 'shard01/db'))
         assert os.path.exists(os.path.join(self.data_dir, 'shard02/db'))
@@ -259,7 +259,7 @@ class TestMLaunch(object):
     def test_shard_names(self):
         """ mlaunch: test if sharded cluster with explicit shard names works """
 
-        # start mongo process on free test port 
+        # start mongo process on free test port
         self.run_tool("init --sharded tic tac toe --replicaset")
 
         # create mongo client
@@ -272,7 +272,7 @@ class TestMLaunch(object):
 
     def test_startup_file(self):
         """ mlaunch: create .mlaunch_startup file in data path """
-        
+
         # Also tests utf-8 to byte conversion and json import
 
         self.run_tool("init --single -v")
@@ -289,7 +289,7 @@ class TestMLaunch(object):
 
     def test_single_mongos_explicit(self):
         """ mlaunch: test if single mongos is running on start port and creates <datadir>/mongos.log """
-        
+
         # start 2 shards, 1 config server, 1 mongos
         self.run_tool("init --sharded 2 --single --config 1 --mongos 1")
 
@@ -450,7 +450,7 @@ class TestMLaunch(object):
         nodes = self.tool.get_tagged('all')
         assert all( self.tool.is_running(node) for node in nodes )
 
-    
+
     @unittest.skip('tags implementation not up to date')
     @timed(180)
     @attr('slow')
@@ -458,7 +458,7 @@ class TestMLaunch(object):
         """ mlaunch: test killing and restarting tagged groups on different tags """
 
         # key is tag for command line, value is tag for get_tagged
-        tags = ['shard01', 'shard 1', 'mongos', 'config 1', str(self.port)] 
+        tags = ['shard01', 'shard 1', 'mongos', 'config 1', str(self.port)]
 
         # start large cluster
         self.run_tool("init --sharded 2 --replicaset --config 3 --mongos 3")
@@ -469,7 +469,7 @@ class TestMLaunch(object):
 
         # go through all tags, stop nodes for each tag, confirm only the tagged ones are down, start again
         for tag in tags:
-            print "---------", tag
+            print("---------", tag)
             self.run_tool("kill %s" % tag)
             assert self.tool.get_tagged('down') == self.tool.get_tagged(tag)
             time.sleep(1)
@@ -479,7 +479,7 @@ class TestMLaunch(object):
             assert len(self.tool.get_tagged('down')) == 0
             time.sleep(1)
 
-        # make sure primaries are running again (we just failed them over above). 
+        # make sure primaries are running again (we just failed them over above).
         # while True is ok, because test times out after some time
         while True:
             primaries = self.tool.get_tagged('primary')
@@ -498,7 +498,7 @@ class TestMLaunch(object):
 
         # init environment (sharded, single shards ok)
         self.run_tool("init --single")
-        
+
         # get verbosity of mongod, assert it is 0
         mc = MongoClient(port=self.port)
         loglevel = mc.admin.command(SON([('getParameter', 1), ('logLevel', 1)]))
@@ -519,7 +519,7 @@ class TestMLaunch(object):
 
         # stop and start nodes without unknown args again
         self.run_tool("stop")
-        
+
         # short sleep, because travis seems to be sensitive and sometimes fails otherwise
         time.sleep(1)
 
@@ -533,7 +533,7 @@ class TestMLaunch(object):
 
     @unittest.skip('currently not a useful test')
     def test_start_stop_single_repeatedly(self):
-        """ mlaunch: test starting and stopping single node in short succession """ 
+        """ mlaunch: test starting and stopping single node in short succession """
 
         # repeatedly start single node
         self.run_tool("init --single")
@@ -546,7 +546,7 @@ class TestMLaunch(object):
 
             self.run_tool("start")
 
-    
+
     @raises(SystemExit)
     def test_init_init_replicaset(self):
         """ mlaunch: test calling init a second time on the replica set """
@@ -564,7 +564,7 @@ class TestMLaunch(object):
 
     @unittest.skip('currently not a useful test')
     def test_start_stop_replicaset_repeatedly(self):
-        """ mlaunch: test starting and stopping replica set in short succession """ 
+        """ mlaunch: test starting and stopping replica set in short succession """
 
         # repeatedly start replicaset nodes
         self.run_tool("init --replicaset")
@@ -609,7 +609,7 @@ class TestMLaunch(object):
         conf = mc['local']['system.replset'].find_one()
         assert conf['_id'] == 'testrs'
 
-    # TODO 
+    # TODO
     # - test functionality of --binarypath, --verbose
 
     # All tests that use auth need to be decorated with @attr('auth')
@@ -632,9 +632,9 @@ class TestMLaunch(object):
     @attr('auth')
     def test_adding_default_user(self):
         envs = (
-            "--single", 
-            "--replicaset", 
-            "--sharded 2 --single", 
+            "--single",
+            "--replicaset",
+            "--sharded 2 --single",
             "--sharded 2 --replicaset",
             "--sharded 2 --single --config 3"
         )
@@ -659,7 +659,7 @@ class TestMLaunch(object):
         # check if the user roles are correctly set to the default roles
         user = mc.admin.system.users.find_one()
         assert set([x['role'] for x in user['roles']]) == set(self.tool._default_auth_roles)
-      
+
 
     @attr('auth')
     def test_adding_custom_user(self):
@@ -673,7 +673,7 @@ class TestMLaunch(object):
 
         # check if the user roles are correctly set to the specified roles
         user = mc.admin.system.users.find_one()
-        print user
+        print(user)
         assert set([x['role'] for x in user['roles']]) == set(["dbAdminAnyDatabase", "readWriteAnyDatabase", "userAdminAnyDatabase"])
         assert user['user'] == 'corben'
 
@@ -736,14 +736,14 @@ class TestMLaunch(object):
 
     def helper_which(self, pgm):
         """ equivalent of which command """
-        
+
         path=os.getenv('PATH')
         for p in path.split(os.path.pathsep):
             p=os.path.join(p,pgm)
             if os.path.exists(p) and os.access(p,os.X_OK):
                 return p
 
-    
+
     def test_mlaunch_binary_path_start(self):
         """ mlaunch: test if --binarypath is persistent between init and start """
 
@@ -753,7 +753,7 @@ class TestMLaunch(object):
 
         self.run_tool("init --single --binarypath %s" % path)
         self.run_tool("stop")
-        
+
         self.run_tool("start")
         assert self.tool.loaded_args['binarypath'] == path
         assert self.tool.startup_info[str(self.port)].startswith('%s/mongod' % path)
@@ -770,7 +770,7 @@ class TestMLaunch(object):
     @raises(SystemExit)
     def test_single_and_arbiter(self):
         """ mlaunch: test --single with --arbiter error """
-        
+
         self.run_tool("init --single --arbiter")
 
 
@@ -786,7 +786,7 @@ class TestMLaunch(object):
 
 if __name__ == '__main__':
 
-    # run individual tests with normal print output 
+    # run individual tests with normal print output
     tml = TestMLaunch()
     tml.setup()
     tml.test_kill_partial()

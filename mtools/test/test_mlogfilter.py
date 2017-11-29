@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
@@ -85,8 +87,8 @@ class TestMLogFilter(object):
         random_start = random_date(logfile_26.start, logfile_26.end)
         random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end+timedelta(minutes=1))
 
-        print random_start, random_end
-        print logfile_26.start, logfile_26.end
+        print(random_start, random_end)
+        print(logfile_26.start, logfile_26.end)
 
         self.tool.run('%s --from %s --to %s'%(logfile_26_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()

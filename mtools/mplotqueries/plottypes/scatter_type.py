@@ -88,7 +88,7 @@ class ScatterPlotType(BasePlotType):
         major, minor, _ = mpl_version.split('.')
         if (int(major), int(minor)) < (1, 2) or not event.mouseevent.dblclick:
             for i in indices:
-                print self.groups[group][i].line_str
+                print(self.groups[group][i].line_str)
 
         else:
             # toggle durline
@@ -107,12 +107,12 @@ class ScatterPlotType(BasePlotType):
                 # construct triangle and add to list of durlines
 
                 if self.args['optime_start']:
-                    pts = [ [date2num(logevent.datetime), 0], 
-                            [date2num(logevent.datetime), logevent.duration], 
+                    pts = [ [date2num(logevent.datetime), 0],
+                            [date2num(logevent.datetime), logevent.duration],
                             [date2num(logevent.datetime + timedelta(milliseconds=logevent.duration)), 0] ]
                 else:
-                    pts = [ [date2num(logevent.datetime), 0], 
-                            [date2num(logevent.datetime), logevent.duration], 
+                    pts = [ [date2num(logevent.datetime), 0],
+                            [date2num(logevent.datetime), logevent.duration],
                             [date2num(logevent.datetime - timedelta(milliseconds=logevent.duration)), 0] ]
 
                 poly = Polygon(pts, closed=True, alpha=0.2, linewidth=0, facecolor=event.artist.get_markerfacecolor(), edgecolor=None, zorder=-10000)
@@ -144,25 +144,25 @@ class DurationLineType(ScatterPlotType):
 
         # duration plots require y coordinate and use plot_date
         y = [ getattr(logevent, 'duration') for logevent in self.groups[group] ]
-        
+
         if self.logscale:
             axis.semilogy()
 
         # artist = axis.plot_date(x, y, color=color, markeredgecolor='k', marker=marker, alpha=0.8, \
         #     markersize=7, picker=5, label=group)[0]
-        
+
         artists = []
         labels = set()
 
         for i, (xs, xe, ye) in enumerate(zip(x_start, x_end, y)):
             artist = axis.plot_date([xs, xe], [0, ye], '-', color=color, alpha=0.8, linewidth=2,
             markersize=7, picker=5, label=None if group in labels else group)[0]
-            
+
             labels.add(group)
 
             # add meta-data for picking
             artist._mt_plot_type = self
-            artist._mt_group = group 
+            artist._mt_group = group
             artist._mt_line_id = i
             artists.append(artist)
 
@@ -172,7 +172,7 @@ class DurationLineType(ScatterPlotType):
     def clicked(self, event):
         group = event.artist._mt_group
         line_id = event.artist._mt_line_id
-        print self.groups[group][line_id].line_str
+        print(self.groups[group][line_id].line_str)
 
 
 
@@ -202,7 +202,7 @@ class NScannedNPlotType(ScatterPlotType):
             markersize=7, picker=5, label=group)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
-        artist._mt_group = group 
+        artist._mt_group = group
 
         return artist
 

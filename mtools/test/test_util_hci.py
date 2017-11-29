@@ -112,12 +112,12 @@ def test_dtb_string2dt():
     assert dtb.string2dt('29 Sep 1978 13:06 +59s') == datetime(1978, 9, 29, 13, 6, 59, tzinfo=tzutc())
     assert dtb.string2dt('29 Sep 13:06 +120secs') == datetime(2014, 9, 29, 13, 8, tzinfo=tzutc())
     # assert dtb.string2dt('13:06 -1week') == datetime(2014, 12, 25, 13, 6, tzinfo=tzutc())
-    # print dtb.string2dt('13:06:15 -16sec')
+    # print(dtb.string2dt('13:06:15 -16sec'))
     # assert dtb.string2dt('13:06:15 -16sec') == datetime(2014, 1, 1, 13, 5, 59, tzinfo=tzutc())
     # assert dtb.string2dt('13:06:15.214 +1h') == datetime(2014, 1, 1, 14, 6, 15, 214000, tzinfo=tzutc())
     assert dtb.string2dt('Wed 13:06:15 -1day') == datetime(2015, 6, 9, 13, 6, 15, tzinfo=tzutc())
 
-    print dtb.string2dt('start +3h')
+    print(dtb.string2dt('start +3h'))
     assert dtb.string2dt('start +3h') == start + timedelta(hours=3)
 
     # offset only

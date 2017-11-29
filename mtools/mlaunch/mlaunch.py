@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import json
 import os
@@ -112,7 +114,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
         except AutoReconnect:
             pass
         except OperationFailure:
-            print "Error: cannot authenticate to shut down %s." % host
+            print("Error: cannot authenticate to shut down %s." % host)
             return
 
     except ConnectionFailure:
@@ -361,7 +363,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # write out parameters
         if self.args['verbose']:
-            print "writing .mlaunch_startup file."
+            print("writing .mlaunch_startup file.")
         self._store_parameters()
 
         # exit if running in testing mode
@@ -402,13 +404,13 @@ class MLaunchTool(BaseCmdLineTool):
                 if self.args['csrs']:
                     # Initiate config servers in a replicaset
                     if self.args['verbose']:
-                        print 'Initiating config server replica set.'
+                        print('Initiating config server replica set.')
                     members = sorted(self.get_tagged(["config"]))
                     self._initiate_replset(members[0], "configRepl")
                 for shard in shard_names:
                     # initiate replica set on first member
                     if self.args['verbose']:
-                        print 'Initiating shard replica set %s.' % shard
+                        print('Initiating shard replica set %s.' % shard)
                     members = sorted(self.get_tagged([shard]))
                     self._initiate_replset(members[0], shard)
 
@@ -426,9 +428,9 @@ class MLaunchTool(BaseCmdLineTool):
                 nshards = con['config']['shards'].count()
                 if nshards < shards_to_add:
                     if self.args['replicaset']:
-                        print "adding shards. can take up to 30 seconds..."
+                        print("adding shards. can take up to 30 seconds...")
                     else:
-                        print "adding shards."
+                        print("adding shards.")
 
                 shard_conns_and_names = zip(self.shard_connection_str, shard_names)
                 while True:
@@ -444,17 +446,17 @@ class MLaunchTool(BaseCmdLineTool):
                             res = con['admin'].command( SON([('addShard', conn_str), ('name', name)]) )
                         except Exception as e:
                             if self.args['verbose']:
-                                print e, ', will retry in a moment.'
+                                print(e, ', will retry in a moment.')
                             continue
 
                         if res['ok']:
                             if self.args['verbose']:
-                                print "shard %s added successfully"%conn_str
+                                print("shard %s added successfully"%conn_str)
                                 shard_conns_and_names.remove( (conn_str, name) )
                                 break
                         else:
                             if self.args['verbose']:
-                                print res, '- will retry'
+                                print(res, '- will retry')
 
                     time.sleep(1)
 
@@ -489,7 +491,7 @@ class MLaunchTool(BaseCmdLineTool):
             elif self.args['single']:
                 nodes = self.get_tagged(['single', 'running'])
             elif self.args['replicaset']:
-                print "waiting for primary to add a user."
+                print("waiting for primary to add a user.")
                 if self._wait_for_primary():
                     nodes = self.get_tagged(['primary', 'running'])
                 else:
@@ -505,13 +507,13 @@ class MLaunchTool(BaseCmdLineTool):
                 database=self.args['auth_db'], roles=self.args['auth_roles'])
 
             if self.args['verbose']:
-                print "added user %s on %s database" % (self.args['username'], self.args['auth_db'])
+                print("added user %s on %s database" % (self.args['username'], self.args['auth_db']))
 
 
         # in sharded env, if --mongos 0, kill the dummy mongos
         if self.args['sharded'] and self.args['mongos'] == 0:
             port = self.args['port']
-            print "shutting down temporary mongos on localhost:%s" % port
+            print("shutting down temporary mongos on localhost:%s" % port)
             username = self.args['username'] if self.args['auth'] else None
             password = self.args['password'] if self.args['auth'] else None
             authdb = self.args['auth_db'] if self.args['auth'] else None
@@ -524,15 +526,15 @@ class MLaunchTool(BaseCmdLineTool):
         # for sharded authenticated clusters, restart after first_init to enable auth
         if self.args['sharded'] and self.args['auth'] and first_init:
             if self.args['verbose']:
-                print "restarting cluster to enable auth..."
+                print("restarting cluster to enable auth...")
             self.restart()
 
         if self.args['auth'] and self.args['initial-user']:
-            print 'Username "%s", password "%s"' % (
-                self.args['username'], self.args['password'])
+            print('Username "%s", password "%s"' % (
+                self.args['username'], self.args['password']))
 
         if self.args['verbose']:
-            print "done."
+            print("done.")
 
     # Get the "mongod" version, useful for checking for support or non-support of features
     # Normally we expect to get back something like "db version v3.4.0", but with release candidates
@@ -560,7 +562,7 @@ class MLaunchTool(BaseCmdLineTool):
             pass
 
         if self.args['verbose']:
-            print "Detected mongod version: %s" % current_version
+            print("Detected mongod version: %s" % current_version)
         return current_version
 
 
@@ -588,7 +590,7 @@ class MLaunchTool(BaseCmdLineTool):
             # hack to make environment startable with older protocol versions < 2: try to start nodes via init if all nodes are down
             if len(self.get_tagged(['down'])) == len(self.get_tagged(['all'])):
                 self.args = self.loaded_args
-                print "upgrading mlaunch environment meta-data."
+                print("upgrading mlaunch environment meta-data.")
                 return self.init()
             else:
                 raise SystemExit("These nodes were created with an older version of mlaunch (v1.1.1 or below). To upgrade this environment and make use of the start/stop/list commands, stop all nodes manually, then run 'mlaunch start' again. You only have to do this once.")
@@ -725,7 +727,7 @@ class MLaunchTool(BaseCmdLineTool):
 
 
         print_docs.append( None )
-        print
+        print()
         print_table(print_docs)
         if self.loaded_args.get('auth'):
             print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
@@ -742,7 +744,7 @@ class MLaunchTool(BaseCmdLineTool):
         # convert signal to int, default is SIGTERM for graceful shutdown
         sig = self.args.get('signal') or 'SIGTERM'
         if os.name == 'nt':
-            sig = signal.CTRL_BREAK_EVENT        
+            sig = signal.CTRL_BREAK_EVENT
         if type(sig) == int:
             pass
         elif isinstance(sig, str):
@@ -759,9 +761,9 @@ class MLaunchTool(BaseCmdLineTool):
                 p = processes[port]
                 p.send_signal(sig)
                 if self.args['verbose']:
-                    print " %s on port %i, pid=%i" % (p.name, port, p.pid)
+                    print(" %s on port %i, pid=%i" % (p.name, port, p.pid))
 
-        print "sent signal %s to %i process%s." % (sig, len(matches), '' if len(matches) == 1 else 'es')
+        print("sent signal %s to %i process%s." % (sig, len(matches), '' if len(matches) == 1 else 'es'))
 
         # there is a very brief period in which nodes are not reachable anymore, but the
         # port is not torn down fully yet and an immediate start command would fail. This
@@ -1010,7 +1012,7 @@ class MLaunchTool(BaseCmdLineTool):
                 self.ssl_pymongo_options)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
-            print "waiting for nodes %s..." % ('to start' if to_start else 'to shutdown')
+            print("waiting for nodes %s..." % ('to start' if to_start else 'to shutdown'))
 
         for thread in threads:
             thread.start()
@@ -1101,7 +1103,7 @@ class MLaunchTool(BaseCmdLineTool):
         if not os.path.exists(dbpath):
             os.makedirs(dbpath)
         if self.args['verbose']:
-            print 'creating directory: %s'%dbpath
+            print('creating directory: %s'%dbpath)
 
         return datapath
 
@@ -1113,7 +1115,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
             if re.match('^\d{1,2}$', tag1):
-                print "warning: ignoring numeric value '%s'" % tag1
+                print("warning: ignoring numeric value '%s'" % tag1)
                 continue
 
             if re.match('^\d{1,2}$', tag2):
@@ -1122,7 +1124,7 @@ class MLaunchTool(BaseCmdLineTool):
                     tags.append( '%s %s' % (tag1, tag2) )
                     continue
                 else:
-                    print "warning: ignoring numeric value '%s' after '%s'"  % (tag2, tag1)
+                    print("warning: ignoring numeric value '%s' after '%s'"  % (tag2, tag1))
 
             tags.append( tag1 )
 
@@ -1178,7 +1180,7 @@ class MLaunchTool(BaseCmdLineTool):
                     # warn once for each combination of binary and unknown arg
                     if self.ignored_arguments.get(binary+arg) is None:
                         self.ignored_arguments[binary+arg] = True
-                        print "warning: ignoring unknown argument %s for %s" % (arg, binary)
+                        print("warning: ignoring unknown argument %s for %s" % (arg, binary))
             elif i > 0 and arguments[i-1] in result:
                 # if it doesn't start with a '-', it could be the value of the last argument, e.g. `--slowms 1000`
                 result.append(arg)
@@ -1270,7 +1272,7 @@ class MLaunchTool(BaseCmdLineTool):
         threads = []
 
         if overrideAuth and self.args['verbose']:
-            print "creating cluster without auth for setup, will enable auth at the end..."
+            print("creating cluster without auth for setup, will enable auth at the end...")
 
         for port in ports:
             command_str = self.startup_info[str(port)]
@@ -1292,13 +1294,13 @@ class MLaunchTool(BaseCmdLineTool):
                     binary = 'config server'
 
                 if self.args['verbose']:
-                    print "launching: %s" % command_str
+                    print("launching: %s" % command_str)
                 else:
-                    print "launching: %s on port %s" % (binary, port)
+                    print("launching: %s on port %s" % (binary, port))
 
             except subprocess.CalledProcessError, e:
-                print e.output
-                print >>sys.stderr, self._get_last_error_log(command_str)
+                print(e.output)
+                print(self._get_last_error_log(command_str), file=sys.stderr)
                 raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
 
         if wait:
@@ -1309,7 +1311,7 @@ class MLaunchTool(BaseCmdLineTool):
         # initiate replica set
         if not self.args['replicaset'] and name != 'configRepl':
             if self.args['verbose']:
-                print 'Skipping replica set initialization for %s' % name
+                print('Skipping replica set initialization for %s' % name)
             return
 
         con = self.client('localhost:%i' % port)
@@ -1322,12 +1324,12 @@ class MLaunchTool(BaseCmdLineTool):
                     con['admin'].command({'replSetInitiate':self.config_docs[name]})
                     break
                 except OperationFailure, e:
-                    print e.message, " - will retry"
+                    print(e.message, " - will retry")
                     time.sleep(1)
 
             if self.args['verbose']:
-                print "initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name])
-            print "replica set '%s' initialized." % name
+                print("initializing replica set '%s' with configuration: %s" % (name, self.config_docs[name]))
+            print("replica set '%s' initialized." % name)
 
 
     def _add_user(self, port, name, password, database, roles):
@@ -1477,7 +1479,7 @@ class MLaunchTool(BaseCmdLineTool):
             mongosdir = os.path.join(self.dir, 'mongos')
             if not os.path.exists(mongosdir):
                 if self.args['verbose']:
-                    print "creating directory: %s" % mongosdir
+                    print("creating directory: %s" % mongosdir)
                 os.makedirs(mongosdir)
 
         # start up mongos, but put them to the front of the port range
@@ -1569,7 +1571,7 @@ class MLaunchTool(BaseCmdLineTool):
         # set WiredTiger cache size to 1 GB by default
         if '--wiredTigerCacheSizeGB' not in extra and self._filter_valid_arguments(['--wiredTigerCacheSizeGB'], 'mongod'):
             extra += ' --wiredTigerCacheSizeGB 1 '
-            
+
         extra += self._get_ssl_server_args()
 
         path = self.args['binarypath'] or ''

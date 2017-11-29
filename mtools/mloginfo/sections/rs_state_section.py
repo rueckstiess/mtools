@@ -37,4 +37,4 @@ class RsStateSection(BaseSection):
         print_table(table_rows, titles, uppercase_headers=False)
 
         if len(self.mloginfo.logfile.rs_state) == 0:
-            print "  no rs state changes found"
+            print("  no rs state changes found")

@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     dtb = DateTimeBoundaries(parser.parse('Apr 8 2014 13:00-0400'), parser.parse('Apr 10 2014 16:21-0400'))
     lower, upper = dtb('2014-04-08T13:21-0400', '')
-    print "lower", lower
-    print "upper", upper
+    print("lower", lower)
+    print("upper", upper)
 
-    print dtb.string2dt("start +3h")
+    print(dtb.string2dt("start +3h"))

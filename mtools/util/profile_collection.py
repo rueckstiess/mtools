@@ -48,7 +48,7 @@ class ProfileCollection(InputSource):
                 self.storage_engine = mc[database].command('serverStatus')[u'storageEngine'][u'name']
             except KeyError:
                 self.storage_engine = 'mmapv1'
-                
+
             self.binary = "%s (running on %s:%i)" % (binary, hostname, port)
 
         except (ConnectionFailure, AutoReconnect) as e:
@@ -132,4 +132,4 @@ if __name__ == '__main__':
     pc = ProfileCollection()
 
     for event in pc:
-        print event
+        print(event)

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from mtools.util import OrderedDict
 from mtools.util.log2code import Log2CodeConverter
 from mtools.util.grouping import Grouping
@@ -14,7 +16,7 @@ except ImportError:
 
 class BasePlotType(object):
 
-    # 14 most distinguishable colors, according to 
+    # 14 most distinguishable colors, according to
     # http://stackoverflow.com/questions/309149/generate-distinctly-different-rgb-colors-in-graphs
     colors = ['#0000FF','#FF00F6','#01FFFE','#505050','#909090','#FF0000','#00FF00', \
 	          '#FFA6FE','#FFDB66','#006401','#010067','#95003A','#007DB5','#FFEEE8', \
@@ -52,7 +54,7 @@ class BasePlotType(object):
         self.empty = False
         self.groups.setdefault(key, list()).append(logevent)
 
-    @property 
+    @property
     def logevents(self):
         """ iterator yielding all logevents from groups dictionary. """
         for key in self.groups:
@@ -99,18 +101,18 @@ class BasePlotType(object):
         self.limits = limits
 
         artists = []
-        print self.plot_type_str.upper(), "plot"
-        print "%5s %9s  %s"%("id", " #points", "group")
+        print(self.plot_type_str.upper(), "plot")
+        print("%5s %9s  %s"%("id", " #points", "group"))
 
         for idx, group in enumerate(self.groups):
-            print "%5s %9s  %s"%(idx+1, len(self.groups[group]), group)
+            print("%5s %9s  %s"%(idx+1, len(self.groups[group]), group))
             group_artists = self.plot_group(group, idx+ith_plot, axis)
             if isinstance(group_artists, list):
                 artists.extend(group_artists)
             else:
                 artists.append(group_artists)
 
-        print
+        print()
 
         return artists
 

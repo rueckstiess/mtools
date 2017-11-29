@@ -31,17 +31,17 @@ def source_files(mongodb_path):
                 yield os.path.join(root, filename)
 
 def get_all_versions():
-    pr = subprocess.Popen(git_path + " checkout master", 
-                          cwd = mongodb_path, 
-                          shell = True, 
-                          stdout = subprocess.PIPE, 
+    pr = subprocess.Popen(git_path + " checkout master",
+                          cwd = mongodb_path,
+                          shell = True,
+                          stdout = subprocess.PIPE,
                           stderr = subprocess.PIPE)
     pr.communicate()
 
-    pr = subprocess.Popen(git_path + " tag", 
-                          cwd = mongodb_path, 
-                          shell = True, 
-                          stdout = subprocess.PIPE, 
+    pr = subprocess.Popen(git_path + " tag",
+                          cwd = mongodb_path,
+                          shell = True,
+                          stdout = subprocess.PIPE,
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
@@ -64,10 +64,10 @@ def get_all_versions():
 
 def switch_version(version):
     print("Switching to %s" % version)
-    pr = subprocess.Popen(git_path + " checkout %s"%version, 
-                          cwd = os.path.dirname( mongodb_path ), 
-                          shell = True, 
-                          stdout = subprocess.PIPE, 
+    pr = subprocess.Popen(git_path + " checkout %s"%version,
+                          cwd = os.path.dirname( mongodb_path ),
+                          shell = True,
+                          stdout = subprocess.PIPE,
                           stderr = subprocess.PIPE)
 
     (out, error) = pr.communicate()
@@ -99,7 +99,7 @@ def extract_logs(log_code_lines, current_version):
         lines = f.readlines()
         for lineno, line in enumerate(lines):
             trigger = next((t for t in log_triggers if t in line), None)
-            
+
             if trigger:
                 # extend line to wrap over line breaks until ; at end of line is encountered
                 statement = line
@@ -133,7 +133,7 @@ def extract_logs(log_code_lines, current_version):
 
                 # unescape strings
                 # statement = statement.decode("string-escape")
-                # print statement
+                # print(statement)
 
                 # remove compiler #ifdef .. #endif directives
                 statement = re.sub(r'#ifdef.*?#endif', '', statement, flags=re.DOTALL)
@@ -157,13 +157,13 @@ def extract_logs(log_code_lines, current_version):
 
 
                 # # get all double-quoted strings surrounded by << or ending in ;
-                # print "s:::", statement
+                # print("s:::", statement)
                 # matches = re.findall(r"<\s*\"(.*?)\"\s*(?:<|;)", statement, flags=re.DOTALL)
-                # print matches
+                # print(matches)
 
                 # # remove tabs, double quotes and newlines and strip whitespace from matches
-                # matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip() for m in matches]    
-                # print matches
+                # matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip() for m in matches]
+                # print(matches)
 
                 # remove empty tokens
                 matches = [m for m in matches if m]
@@ -223,7 +223,7 @@ if __name__ == '__main__':
 
     log_code_lines = {}
     logs_versions = defaultdict(list)
-    print "parsing..."
+    print("parsing...")
     for v in versions:
         switch_version(v)
         logs = extract_logs(log_code_lines, v)
@@ -245,7 +245,7 @@ if __name__ == '__main__':
         logs_by_word[lbw] = sorted(logs_by_word[lbw], key=lambda x: len(x), reverse=True)
 
     # for l in sorted(logs_versions):
-    #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
+    #     print(" <var> ".join(l), "found in:", ", ".join(logs_versions[l]))
 
     # write out to mongodb
     write_to_db = True
@@ -278,7 +278,7 @@ if __name__ == '__main__':
                     'loglevel': occ[2],
                     'trigger': occ[3]
                 })
-        
+
         if write_to_db:
             mc['log2code']['instances'].update({'pattern': instance['pattern']}, instance, upsert=True)
 

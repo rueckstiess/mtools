@@ -165,6 +165,6 @@ class LogFileTool(BaseCmdLineTool):
 if __name__ == '__main__':
     tool = LogFileTool(multiple_logfiles=True, stdin_allowed=True)
     tool.run()
-    print tool.args
+    print(tool.args)
     # for line in tool.args['logfile']:
-    #     print line
+    #     print(line)

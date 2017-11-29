@@ -66,11 +66,11 @@ class ConnectionChurnPlotType(BasePlotType):
         n_bins = max(1, int((xmax - xmin)*24.*60.*60./self.bucketsize))
         if n_bins > 1000:
             # warning for too many buckets
-            print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
+            print("warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins)
 
         bins = np.linspace(xmin, xmax, n_bins)
 
-        n, bins, artists = axis.hist(x, bins=bins, align='mid', log=self.logscale, histtype="bar", color=color, 
+        n, bins, artists = axis.hist(x, bins=bins, align='mid', log=self.logscale, histtype="bar", color=color,
             edgecolor="white", alpha=0.8, picker=True, label="# connections %s per bin" % group)
 
         if group == 'closed':
@@ -79,11 +79,11 @@ class ConnectionChurnPlotType(BasePlotType):
                     height = a.get_height()
                     height = -height
                     a.set_height(height)
-                    if height < ymin: 
+                    if height < ymin:
                         ymin = height
-        
-            axis.set_ylim(bottom = ymin*1.1) 
-        
+
+            axis.set_ylim(bottom = ymin*1.1)
+
         elif group == 'opened':
             self.ymax = max([a.get_height() for a in artists])
 
@@ -103,18 +103,18 @@ class ConnectionChurnPlotType(BasePlotType):
 
         total = sorted(opened+closed, key=lambda le: le.datetime)
         x = date2num( [ logevent.datetime for logevent in total ] )
-        
+
         try:
             conns = [int(re.search(r'(\d+) connections? now open', le.line_str).group(1)) for le in total]
         except AttributeError:
             # hack, v2.0.x doesn't have this information
-            axis.set_ylim(top = self.ymax*1.1) 
-            return 
+            axis.set_ylim(top = self.ymax*1.1)
+            return
 
         axis.plot(x, conns, '-', color='black', linewidth=2, alpha=0.8, label='# open connections total')
 
         self.ymax = max(self.ymax, max(conns))
-        axis.set_ylim(top = self.ymax*1.1) 
+        axis.set_ylim(top = self.ymax*1.1)
 
 
     def plot(self, axis, ith_plot, total_plots, limits):
@@ -139,5 +139,5 @@ class ConnectionChurnPlotType(BasePlotType):
         group = event.artist._mt_group
         n = event.artist._mt_n
         dt = num2date(event.artist._mt_bin)
-        print "%4i connections %s in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S"))
+        print("%4i connections %s in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S")))
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 import argparse
 import types
@@ -60,14 +62,13 @@ class HistogramPlotType(BasePlotType):
 
     def plot(self, axis, ith_plot, total_plots, limits):
         """ Plots the histogram as a whole over all groups, rather than individual groups like other plot types. """
-        
-        print self.plot_type_str.upper(), "plot"
-        print "%5s %9s  %s"%("id", " #points", "group")
+
+        print(self.plot_type_str.upper(), "plot")
+        print("%5s %9s  %s"%("id", " #points", "group"))
 
         for idx, group in enumerate(self.groups):
-            print "%5s %9s  %s"%(idx+1, len(self.groups[group]), group)
-        
-        print 
+            print("%5s %9s  %s"%(idx+1, len(self.groups[group]), group))
+            print()
 
         datasets = []
         colors = []
@@ -81,22 +82,22 @@ class HistogramPlotType(BasePlotType):
             datasets.append(x)
             color, marker = self.color_map(group)
             colors.append(color)
-        
+
         if total_plots > 1:
             # if more than one plot, move histogram to twin axis on the right
             twin_axis = axis.twinx()
             twin_axis.set_ylabel(self.ylabel)
-            axis.set_zorder(twin_axis.get_zorder()+1) # put ax in front of ax2 
-            axis.patch.set_visible(False) # hide the 'canvas' 
+            axis.set_zorder(twin_axis.get_zorder()+1) # put ax in front of ax2
+            axis.patch.set_visible(False) # hide the 'canvas'
             axis = twin_axis
 
         n_bins = max(1, int((maxx - minx)*24.*60.*60./self.bucketsize))
         if n_bins > 1000:
             # warning for too many buckets
-            print "warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins
+            print("warning: %i buckets, will take a while to render. consider increasing --bucketsize." % n_bins)
 
         n, bins, artists = axis.hist(datasets, bins=n_bins, align='mid', log=self.logscale, histtype="barstacked" if self.barstacked else "bar", color=colors, edgecolor="none", linewidth=0, alpha=0.8, picker=True, label=map(str, self.groups.keys()))
-        
+
         # scale current y-axis to match min and max values
         axis.set_ylim(np.min(n), np.max(n))
 
@@ -125,5 +126,5 @@ class HistogramPlotType(BasePlotType):
         group = event.artist._mt_group
         n = event.artist._mt_n
         dt = num2date(event.artist._mt_bin)
-        print "%4i %s events in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S"))
+        print("%4i %s events in %s sec beginning at %s" % (n, group, self.bucketsize, dt.strftime("%b %d %H:%M:%S")))
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import cPickle
 import os
 import re
@@ -12,7 +14,7 @@ import mtools
 
 def import_l2c_db():
     """ static import helper function, checks if the log2code.pickle exists first, otherwise
-        raises ImportError. 
+        raises ImportError.
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
     if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
@@ -29,7 +31,7 @@ class Log2CodeConverter(object):
 
     # static import of logdb data structures
     all_versions, log_version, logs_by_word, log_code_lines = import_l2c_db()
-        
+
     def _log2code(self, line):
         tokens = re.split(r'[\s"]', line)
 
@@ -46,7 +48,7 @@ class Log2CodeConverter(object):
                     coverage.append(cov)
                 else:
                     coverage.append(0)
-            
+
             best_cov = max(coverage)
             if not best_cov:
                 continue
@@ -61,14 +63,14 @@ class Log2CodeConverter(object):
                 #     continue
                 # else:
                 #     # duration = time.time() - start_time
-                #     # print duration
+                #     # print(duration)
                 #     continue
-        
+
             best_match = self.logs_by_word[word][coverage.index(best_cov)]
             return self.log_code_lines[best_match]
 
     def _strip_counters(self, sub_line):
-        """ finds the ending part of the codeline by 
+        """ finds the ending part of the codeline by
             taking out the counters and durations
         """
         try:
@@ -94,7 +96,7 @@ class Log2CodeConverter(object):
 
 
     def _find_variable(self, pattern, logline):
-        """ return the variable parts of the code 
+        """ return the variable parts of the code
             given a tuple of strings pattern
             ie. (this, is, a, pattern) -> 'this is a good pattern' -> [good]
         """
@@ -111,7 +113,7 @@ class Log2CodeConverter(object):
             # extract whats in the middle of the two substrings
             between = re.search(pat, logline)
             try:
-                # add what's in between if the search isn't none 
+                # add what's in between if the search isn't none
                 var_subs.append(between.group(1))
             except Exception, e:
                 pass
@@ -127,7 +129,7 @@ class Log2CodeConverter(object):
         return var_subs
 
     def _variable_parts(self, line, codeline):
-        """returns the variable parts of the codeline, 
+        """returns the variable parts of the codeline,
             given the static parts
         """
         var_subs = []
@@ -154,7 +156,7 @@ class Log2CodeConverter(object):
 
     def combine(self, pattern, variable):
         """ combines a pattern and variable parts to be a line string again. """
-        
+
         inter_zip= izip_longest(variable, pattern, fillvalue='')
         interleaved = [elt for pair in inter_zip for elt in pair ]
         return ''.join(interleaved)
@@ -192,13 +194,13 @@ class Log2CodeConverter(object):
 #         else:
 #             logfile = sys.stdin
 
-#         for i, line in enumerate(logfile): 
+#         for i, line in enumerate(logfile):
 #             match = self.log2code(line)
 
 #             if  match:
-#                 print line,
-#                 print self.logs_versions[match]
-#                 print self.log_code_lines[match]
+#                 print(line, end=' ')
+#                 print(self.logs_versions[match])
+#                 print(self.log_code_lines[match])
 
 
 #     def log2code(self, line):
@@ -219,11 +221,11 @@ class Log2CodeConverter(object):
 #                 coverage.append(cov)
 #             else:
 #                 coverage.append(0)
-        
+
 #         best_cov = max(coverage)
 #         if not best_cov:
 #             return None
-        
+
 #         best_match = self.logs_by_word[word][coverage.index(best_cov)]
 #         return best_match
 
@@ -232,25 +234,25 @@ class Log2CodeConverter(object):
 # if __name__ == '__main__':
 #         l2cc = Log2CodeConverter()
 #         lcl = l2cc("""Sun Mar 24 00:44:16.295 [conn7815] moveChunk migrate commit accepted by TO-shard: { active: true, ns: "db.coll", from: "shard001:27017", min: { i: ObjectId('4b7730748156791f310b03a3'), m: "stats", t: new Date(1348272000000) }, max: { i: ObjectId('4b8f826192f9e2154d05dda7'), m: "mongo", t: new Date(1345680000000) }, shardKeyPattern: { i: 1.0, m: 1.0, t: 1.0 }, state: "done", counts: { cloned: 3115, clonedBytes: 35915282, catchup: 0, steady: 0 }, ok: 1.0 }""")
-#         print lcl.versions
+#         print(lcl.versions)
 
         #possible_versions = possible_versions & set(logs_versions[best_match])
 
 
         # if len(possible_versions) != old_num_v:
-        #     print i, line.rstrip()
-        #     print "    best_match:", best_match
-        #     print "    log message only present in versions:", logs_versions[best_match]
-        #     print "    this limits the possible versions to:", possible_versions
-        #     print
+        #     print(i, line.rstrip())
+        #     print("    best_match:", best_match)
+        #     print("    log message only present in versions:", logs_versions[best_match])
+        #     print("    this limits the possible versions to:", possible_versions)
+        #     print()
 
         # if not possible_versions:
         #     raise SystemExit
 
 
-    # print "possible versions:", ", ".join([pv[1:] for pv in possible_versions])
+    # print("possible versions:", ", ".join([pv[1:] for pv in possible_versions]))
     # for pv in possible_versions:
-    #     print pv, possible_versions[pv]
+    #     print(pv, possible_versions[pv])
 
     # plt.bar(range(len(possible_versions.values())), possible_versions.values(), align='center')
     # plt.xticks(range(len(possible_versions.keys())), possible_versions.keys(), size='small', rotation=90)

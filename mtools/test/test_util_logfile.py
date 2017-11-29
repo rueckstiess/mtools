@@ -96,6 +96,6 @@ class TestUtilLogFile(object):
         mongos = open(logfile_path, 'r')
 
         logfile2 = LogFile(mongos)
-        print logfile2.hostname
+        print(logfile2.hostname)
         assert logfile2.hostname == 'jimoleary.local'
         assert logfile2.port == '27017'

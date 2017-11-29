@@ -38,9 +38,9 @@ class DistinctSection(BaseSection):
         """
 
         if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
-            print
-            print "    not available for system.profile collections"
-            print
+            print()
+            print("    not available for system.profile collections")
+            print()
             return
 
 
@@ -83,20 +83,19 @@ class DistinctSection(BaseSection):
                 # everything else is a real non-match
                 non_matches += 1
                 if self.mloginfo.args['verbose']:
-                    print "couldn't match:", logevent
+                    print("couldn't match:", logevent)
 
         # clear progress bar again
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
         if self.mloginfo.args['verbose']:
-            print
+            print()
 
         for cl in sorted(codelines, key=lambda x: codelines[x], reverse=True):
-            print "%8i"%codelines[cl], "  ", " ... ".join(cl)
-
-        print
+            print("%8i"%codelines[cl], "  ", " ... ".join(cl))
+            print()
         if non_matches > 0:
-            print "distinct couldn't match %i lines"%non_matches
+            print("distinct couldn't match %i lines"%non_matches)
             if not self.mloginfo.args['verbose']:
-                print "to show non-matched lines, run with --verbose."
+                print("to show non-matched lines, run with --verbose.")

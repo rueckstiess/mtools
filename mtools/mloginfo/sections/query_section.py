@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from .base_section import BaseSection
 
 from mtools.util.grouping import Grouping
@@ -68,7 +70,7 @@ class QuerySection(BaseSection):
 
         # no queries in the log file
         if len(grouping) < 1:
-            print 'no queries found.'
+            print('no queries found.')
             return
 
         titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)', 'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
@@ -108,5 +110,5 @@ class QuerySection(BaseSection):
 
         table_rows = sorted(table_rows, key=itemgetter(self.mloginfo.args['sort']), reverse=reverse)
         print_table(table_rows, titles, uppercase_headers=False)
-        print
+        print()
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 from datetime import timedelta
 import argparse
@@ -8,7 +10,7 @@ except ImportError:
     raise ImportError("Can't import matplotlib. See https://github.com/rueckstiess/mtools/blob/master/INSTALL.md for \
         instructions how to install matplotlib or try mlogvis instead, which is a simplified version of mplotqueries \
         that visualizes the logfile in a web browser.")
-    
+
 from mtools.util.log2code import Log2CodeConverter
 
 class RangePlotType(BasePlotType):
@@ -61,13 +63,13 @@ class RangePlotType(BasePlotType):
         x_rights.append( date2num( self.groups[group][-1].datetime ) )
 
         color=self.colors[idx%len(self.colors)]
-        
+
         artists = []
 
         for x_left, x_right in zip(x_lefts, x_rights):
             width = max(0.0001, x_right-x_left)
             artist = axis.barh(y_bottom-0.5*height, width=width, height=0.7*height, left=x_left, color=color, alpha=0.8, edgecolor='white', picker=5, linewidth=1, align='center')[0]
-            
+
             artist._mt_plot_type = self
             artist._mt_group = group
             artist._mt_left = x_left
@@ -84,6 +86,6 @@ class RangePlotType(BasePlotType):
 
     def clicked(self, event):
         group = event.artist._mt_group
-        print num2date(event.artist._mt_left).strftime("%a %b %d %H:%M:%S"), '-', num2date(event.artist._mt_right).strftime("%a %b %d %H:%M:%S")
+        print(num2date(event.artist._mt_left).strftime("%a %b %d %H:%M:%S"), '-', num2date(event.artist._mt_right).strftime("%a %b %d %H:%M:%S"))
 
 

@@ -6,19 +6,19 @@ from bson.min_key import MinKey
 import argparse
 
 def presplit(host, database, collection, shardkey, shardnumber=None, chunkspershard=1, verbose=False):
-    """ get information about the number of shards, then split chunks and 
+    """ get information about the number of shards, then split chunks and
         distribute over shards. Currently assumes shardkey to be hex string,
-        for example ObjectId or UUID. 
+        for example ObjectId or UUID.
 
         host: host and port to connect to, e.g. "192.168.0.1:27017", "localhost:30000"
         database: database name to enable sharding
-        collection: collection name to shard 
+        collection: collection name to shard
         shardkey: shardkey to pre-split on (must be hex string, e.g. ObjectId or UUID)
-        shardnumber: if None, automatically presplit over all available shards. 
-            if integer, only presplit over the given number of shards (maximum is 
+        shardnumber: if None, automatically presplit over all available shards.
+            if integer, only presplit over the given number of shards (maximum is
             the number of actual shards)
     """
-    
+
     con = Connection(host)
     namespace = '%s.%s'%(database, collection)
 
@@ -35,7 +35,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None, chunkspersh
     if coll_info and not coll_info['dropped']:
         # if it is sharded already, quit. something is not right.
         if verbose:
-            print "collection already sharded."
+            print("collection already sharded.")
         return
     else:
         con[database][collection].ensure_index(shardkey)
@@ -46,7 +46,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None, chunkspersh
 
     if len(shards) == 1:
         if verbose:
-            print "only one shard found. no pre-splitting required."
+            print("only one shard found. no pre-splitting required.")
         return
 
     # limit number of shards if shardnumber given
@@ -57,27 +57,27 @@ def presplit(host, database, collection, shardkey, shardnumber=None, chunkspersh
     splits_total = len(shards) * chunkspershard
     split_interval = 16**4 / splits_total
     split_points = ["%0.4x"%s for s in range(split_interval, splits_total*split_interval, split_interval)]
-    
+
     # pre-splitting commands
     for s in split_points:
         con['admin'].command(SON([('split',namespace), ('middle', {shardkey: s})]))
-    
+
     split_points = [MinKey()] + split_points
 
     # move chunks to shards (catch the one error where the chunk resides on that shard already)
     for i,s in enumerate(split_points):
         try:
             if verbose:
-                print 'moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i % len(shards)])
+                print('moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i % len(shards)]))
             res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i % len(shards)])]))
         except OperationFailure, e:
             if verbose:
-                print e
+                print(e)
 
     if verbose:
-        print 'chunk distribution:',
+        print('chunk distribution:',)
         chunk_group = con['config']['chunks'].group(key={'shard': 1}, condition={'ns': namespace}, initial={'nChunks':0}, reduce=""" function (doc, out) { out.nChunks++; } """)
-        print ', '.join(["%s: %i"%(ch['shard'], ch['nChunks']) for ch in chunk_group])
+        print(', '.join(["%s: %i"%(ch['shard'], ch['nChunks']) for ch in chunk_group]))
 
 if __name__ == '__main__':
 

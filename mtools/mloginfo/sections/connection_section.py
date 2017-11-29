@@ -30,9 +30,9 @@ class ConnectionSection(BaseSection):
     def run(self):
         """ run this section and print out information. """
         if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
-            print
-            print "    not available for system.profile collections"
-            print
+            print()
+            print("    not available for system.profile collections")
+            print()
             return
 
         ip_opened = defaultdict(lambda: 0)
@@ -152,20 +152,20 @@ class ConnectionSection(BaseSection):
 
 
         # output statistics
-        print "     total opened:", total_opened
-        print "     total closed:", total_closed
-        print "    no unique IPs:", len(unique_ips)
-        print "socket exceptions:", socket_exceptions
+        print("     total opened:", total_opened)
+        print("     total closed:", total_closed)
+        print("    no unique IPs:", len(unique_ips))
+        print("socket exceptions:", socket_exceptions)
         if genstats :
             if fullconn_counts > 0:
-                print "overall average connection duration(s):", sum_durations/fullconn_counts
-                print "overall minimum connection duration(s):", min_connection_duration
-                print "overall maximum connection duration(s):", max_connection_duration
+                print("overall average connection duration(s):", sum_durations/fullconn_counts)
+                print("overall minimum connection duration(s):", min_connection_duration)
+                print("overall maximum connection duration(s):", max_connection_duration)
             else:
-                print "overall average connection duration(s): -"
-                print "overall minimum connection duration(s): -"
-                print "overall maximum connection duration(s): -"
-        print
+                print("overall average connection duration(s): -")
+                print("overall minimum connection duration(s): -")
+                print("overall maximum connection duration(s): -")
+        print()
 
         for ip in sorted(unique_ips, key=lambda x: ip_opened[x], reverse=True):
             opened = ip_opened[ip] if ip in ip_opened else 0
@@ -177,9 +177,8 @@ class ConnectionSection(BaseSection):
                 ipwise_min_connection_duration_final = ipwise_min_connection_duration[ip] if ipwise_min_connection_duration[ip]!=MIN_DURATION_EMPTY else 0
                 ipwise_max_connection_duration_final = ipwise_max_connection_duration[ip] if ipwise_max_connection_duration[ip]!=MAX_DURATION_EMPTY else 0
 
-                print "%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i dur-min(s): %-8i dur-max(s): %-8i" % (ip, opened, closed, connection_duration_ip/covered_count, ipwise_min_connection_duration_final, ipwise_max_connection_duration_final)
+                print("%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i dur-min(s): %-8i dur-max(s): %-8i" % (ip, opened, closed, connection_duration_ip/covered_count, ipwise_min_connection_duration_final, ipwise_max_connection_duration_final))
             else:
-                print "%-15s  opened: %-8i  closed: %-8i" % (ip, opened, closed)
-
-        print
+                print("%-15s  opened: %-8i  closed: %-8i" % (ip, opened, closed))
+            print()
 

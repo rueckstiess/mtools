@@ -29,14 +29,14 @@ class RestartSection(BaseSection):
     def run(self):
 
         if ProfileCollection and isinstance(self.mloginfo.logfile, ProfileCollection):
-            print
-            print "    not available for system.profile collections"
-            print
+            print()
+            print("    not available for system.profile collections")
+            print()
             return
 
         """ run this section and print out information. """
         for version, logevent in self.mloginfo.logfile.restarts:
-            print "   %s version %s" % (logevent.datetime.strftime("%b %d %H:%M:%S"), version)
+            print("   %s version %s" % (logevent.datetime.strftime("%b %d %H:%M:%S"), version))
 
         if len(self.mloginfo.logfile.restarts) == 0:
-            print "  no restarts found"
+            print("  no restarts found")

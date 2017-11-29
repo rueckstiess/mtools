@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import json
 import sys
@@ -64,12 +66,12 @@ class TestMLaunch(object):
     def cmdlist_print(self):
         ''' print the generated command lines to console '''
         cfg, cmdlist = self.read_config()
-        print '\n'
-        print cmdlist
-        print '\n'
+        print('\n')
+        print(cmdlist)
+        print('\n')
         cmdset = self.cmdlist_filter(cmdlist)
         for cmd in cmdset:
-            print cmd
+            print(cmd)
 
     def cmdlist_assert(self, cmdlisttest):
         ''' assert helper for command lines '''
