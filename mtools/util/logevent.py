@@ -4,6 +4,8 @@ import dateutil.parser
 import re
 import json
 
+from six.moves import range
+
 from mtools.util.pattern import json2pattern
 
 
@@ -194,7 +196,7 @@ class LogEvent(object):
             split_tokens = self.split_tokens[:10]
 
             match_found = False
-            for offs in xrange(len(split_tokens)):
+            for offs in range(len(split_tokens)):
                 dt = self._match_datetime_pattern(split_tokens[offs:offs+4])
                 if dt:
                     self._datetime = dt
