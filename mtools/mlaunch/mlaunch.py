@@ -17,6 +17,8 @@ import threading
 import time
 import warnings
 
+import six
+
 from collections import defaultdict
 from mtools.util import OrderedDict
 
@@ -1030,7 +1032,7 @@ class MLaunchTool(BaseCmdLineTool):
     def _convert_u2b(self, obj):
         """ helper method to convert unicode back to plain text. """
         if isinstance(obj, dict):
-            return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in obj.iteritems()])
+            return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in six.iteritems(obj)])
         elif isinstance(obj, list):
             return [self._convert_u2b(element) for element in obj]
         elif isinstance(obj, unicode):

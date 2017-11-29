@@ -1,6 +1,8 @@
 import re
 import json
 
+import six
+
 def _decode_pattern_list(data):
     rv = []
     for item in data:
@@ -17,7 +19,7 @@ def _decode_pattern_list(data):
 
 def _decode_pattern_dict(data):
     rv = {}
-    for key, value in data.iteritems():
+    for key, value in six.iteritems(data):
         if isinstance(key, unicode):
             key = key.encode('utf-8')
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:

@@ -3,6 +3,8 @@ from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
 import mtools
 
+import six
+
 from nose.tools import *
 from nose.plugins.skip import Skip, SkipTest
 
@@ -336,7 +338,7 @@ class TestMLogInfo(object):
         self.tool.run('%s --rsinfo' % logfile_path)
         output = sys.stdout.getvalue()
         results = self._parse_output(output)
-        for key, value in expected.iteritems():
+        for key, value in six.iteritems(expected):
             print("results[",key,"] == " , value)
             assert results.get(key) == value
 

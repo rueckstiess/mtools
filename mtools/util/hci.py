@@ -105,7 +105,7 @@ class DateTimeBoundaries(object):
 
         # time is applied separately (not through the parser) so that string containing only time don't use today as default date (parser behavior)
         # if 'time' in result:
-        #     dct = dict( (k, int(v)) for k,v in result['time'].groupdict(0).iteritems() )
+        #     dct = dict( (k, int(v)) for k,v in six.iteritems(result['time'].groupdict(0)) )
         #     dct['microsecond'] *= 1000
         #     dt = dt.replace(**dct)
 

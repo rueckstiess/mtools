@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import six
+
 from mtools.util import OrderedDict
 import re
 
@@ -95,7 +97,7 @@ class Grouping(object):
         """
 
         # sort groups by number of elements
-        self.groups = OrderedDict( sorted(self.groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
+        self.groups = OrderedDict( sorted(six.iteritems(self.groups), key=lambda x: len(x[1]), reverse=True) )
 
         # if group-limit is provided, combine remaining groups
         if group_limit != None:
