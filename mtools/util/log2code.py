@@ -75,7 +75,7 @@ class Log2CodeConverter(object):
         """
         try:
             end = sub_line.rindex('}')
-        except ValueError, e:
+        except ValueError as e:
             return sub_line
         else:
             return sub_line[:(end + 1)]
@@ -86,7 +86,7 @@ class Log2CodeConverter(object):
         """
         try:
             begin = sub_line.index(']')
-        except ValueError, e:
+        except ValueError as e:
             return sub_line
         else:
             # create a "" in place character for the beginnings..
@@ -115,7 +115,7 @@ class Log2CodeConverter(object):
             try:
                 # add what's in between if the search isn't none
                 var_subs.append(between.group(1))
-            except Exception, e:
+            except Exception:
                 pass
         rest_of_string = logline.rindex(pattern[-1]) + len(pattern[-1])
 

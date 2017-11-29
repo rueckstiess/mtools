@@ -1243,7 +1243,7 @@ class MLaunchTool(BaseCmdLineTool):
                     # --sharded was a number, name shards shard01, shard02, ... (only works with replica sets)
                     n_shards = int(args['sharded'][0])
                     shard_names = ['shard%.2i'%(i+1) for i in range(n_shards)]
-                except ValueError, e:
+                except ValueError:
                     # --sharded was a string, use it as name for the one shard
                     shard_names = args['sharded']
             else:
@@ -1298,7 +1298,7 @@ class MLaunchTool(BaseCmdLineTool):
                 else:
                     print("launching: %s on port %s" % (binary, port))
 
-            except subprocess.CalledProcessError, e:
+            except subprocess.CalledProcessError as e:
                 print(e.output)
                 print(self._get_last_error_log(command_str), file=sys.stderr)
                 raise SystemExit("can't start process, return code %i. tried to launch: %s"% (e.returncode, command_str))
@@ -1317,13 +1317,13 @@ class MLaunchTool(BaseCmdLineTool):
         con = self.client('localhost:%i' % port)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
-        except OperationFailure, e:
+        except OperationFailure as e:
             # not initiated yet
             for i in range(maxwait):
                 try:
                     con['admin'].command({'replSetInitiate':self.config_docs[name]})
                     break
-                except OperationFailure, e:
+                except OperationFailure as e:
                     print(e.message, " - will retry")
                     time.sleep(1)
 

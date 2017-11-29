@@ -85,7 +85,7 @@ class MLogFilterTool(LogFileTool):
         # use the the position of the last space instead
         try:
             last_space_pos = line.rindex(' ')
-        except ValueError, s:
+        except ValueError as s:
             return line
         else:
             end_str = line[last_space_pos:]
@@ -108,7 +108,7 @@ class MLogFilterTool(LogFileTool):
             # find the index of the last } character
             last_index = (line.rindex('}') + 1)
             end = line[last_index:]
-        except ValueError, e:
+        except ValueError as e:
             return line
         else:
             # split the string on numbers to isolate them
@@ -118,7 +118,7 @@ class MLogFilterTool(LogFileTool):
                 try:
                     converted = int(val)
                 #if it's not an int pass and don't change the string
-                except ValueError, e:
+                except ValueError as e:
                     pass
                 else:
                     if converted > 1000:

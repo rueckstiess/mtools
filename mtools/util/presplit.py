@@ -70,7 +70,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None, chunkspersh
             if verbose:
                 print('moving chunk %s in collection %s to shard %s.'%(s, namespace, shard_names[i % len(shards)]))
             res = con['admin'].command(SON([('moveChunk',namespace), ('find', {shardkey: s}), ('to', shard_names[i % len(shards)])]))
-        except OperationFailure, e:
+        except OperationFailure as e:
             if verbose:
                 print(e)
 
