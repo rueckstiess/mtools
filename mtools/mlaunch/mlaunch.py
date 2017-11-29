@@ -1035,7 +1035,7 @@ class MLaunchTool(BaseCmdLineTool):
             return dict([(self._convert_u2b(key), self._convert_u2b(value)) for key, value in six.iteritems(obj)])
         elif isinstance(obj, list):
             return [self._convert_u2b(element) for element in obj]
-        elif isinstance(obj, unicode):
+        elif isinstance(obj, six.text_type):
             return obj.encode('utf-8')
         else:
             return obj

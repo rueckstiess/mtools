@@ -6,7 +6,7 @@ import six
 def _decode_pattern_list(data):
     rv = []
     for item in data:
-        if isinstance(item, unicode):
+        if isinstance(item, six.text_type):
             item = item.encode('utf-8')
         elif isinstance(item, list):
             item = _decode_pattern_list(item)
@@ -20,7 +20,7 @@ def _decode_pattern_list(data):
 def _decode_pattern_dict(data):
     rv = {}
     for key, value in six.iteritems(data):
-        if isinstance(key, unicode):
+        if isinstance(key, six.text_type):
             key = key.encode('utf-8')
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:
                 return 1
