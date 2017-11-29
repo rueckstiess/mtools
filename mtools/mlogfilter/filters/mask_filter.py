@@ -1,4 +1,4 @@
-from datetime_filter import DateTimeFilter
+from .datetime_filter import DateTimeFilter
 from datetime import MINYEAR, timedelta
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
@@ -16,7 +16,7 @@ class MaskFilter(DateTimeFilter):
 
         This feature is very useful to find all correlating lines to certain events.
 
-        For example, find all assertions in a log file, then find all log lines 
+        For example, find all assertions in a log file, then find all log lines
         surrounding these assertions:
 
             grep "assert" mongod.log > assertions.log
@@ -26,7 +26,7 @@ class MaskFilter(DateTimeFilter):
 
 
     filterArgs = [
-       ('--mask', {'action':'store', 'type':InputSourceAction(), 'help':'source (log file or system.profile db) to create the filter mask.'}), 
+       ('--mask', {'action':'store', 'type':InputSourceAction(), 'help':'source (log file or system.profile db) to create the filter mask.'}),
        ('--mask-size', {'action':'store',  'type':int, 'default':60, 'help':'mask size in seconds around each filter point (default: 60 secs, 30 on each side of the event)'}),
        ('--mask-center', {'action':'store',  'choices':['start', 'end', 'both'], 'default':'end', 'help':'mask center point for events with duration (default: end). If both is chosen, all events from start to end are returned.'})
     ]
@@ -43,7 +43,7 @@ class MaskFilter(DateTimeFilter):
 
     def setup(self):
         """ create mask list consisting of all tuples between which this filter accepts lines. """
-        
+
         # get start and end of the mask and set a start_limit
         if not self.mask_source.start:
             raise SystemExit("Can't parse format of %s. Is this a log file or system.profile collection?" % self.mlogfilter.args['mask'])
@@ -56,7 +56,7 @@ class MaskFilter(DateTimeFilter):
         # define start and end of total mask
         self.mask_start = self.mask_source.start - self.mask_half_td
         self.mask_end = self.mask_source.end + self.mask_half_td
-        
+
         # consider --mask-center
         if self.mlogfilter.args['mask_center'] in ['start', 'both']:
             if logevent_list[0].duration:
@@ -89,7 +89,7 @@ class MaskFilter(DateTimeFilter):
             return
 
         start_point = end_point = None
-        
+
         for e in event_list:
             if start_point == None:
                 start_point, end_point = self._pad_event(e)
@@ -120,7 +120,7 @@ class MaskFilter(DateTimeFilter):
 
 
     def accept(self, logevent):
-        """ overwrite this method in subclass and return True if the provided 
+        """ overwrite this method in subclass and return True if the provided
             logevent should be accepted (causing output), or False if not.
         """
         dt = logevent.datetime

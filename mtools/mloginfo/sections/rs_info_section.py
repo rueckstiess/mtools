@@ -1,12 +1,12 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
 
 class RsInfoSection(BaseSection):
-    """ This section determines if there is any Replica Set infomation like the replset name in the log file and prints 
+    """ This section determines if there is any Replica Set infomation like the replset name in the log file and prints
         the available information.
     """
-    
+
     name = "rsinfo"
 
     def __init__(self, mloginfo):

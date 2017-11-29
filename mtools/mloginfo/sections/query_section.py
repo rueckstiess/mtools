@@ -1,4 +1,4 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
@@ -19,9 +19,9 @@ def op_or_cmd(le):
 
 
 class QuerySection(BaseSection):
-    """ 
     """
-    
+    """
+
     name = "queries"
 
     def __init__(self, mloginfo):
@@ -108,5 +108,5 @@ class QuerySection(BaseSection):
 
         table_rows = sorted(table_rows, key=itemgetter(self.mloginfo.args['sort']), reverse=reverse)
         print_table(table_rows, titles, uppercase_headers=False)
-        print 
+        print
 

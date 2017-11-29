@@ -1,7 +1,7 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 class SlowFilter(BaseFilter):
-    """ accepts only lines that have a duration that is longer than the specified 
+    """ accepts only lines that have a duration that is longer than the specified
         parameter in ms (default 1000).
     """
     filterArgs = [
@@ -10,7 +10,7 @@ class SlowFilter(BaseFilter):
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
-        
+
         if 'slow' in self.mlogfilter.args and self.mlogfilter.args['slow'] != False:
             self.active = True
             if self.mlogfilter.args['slow'] == None:

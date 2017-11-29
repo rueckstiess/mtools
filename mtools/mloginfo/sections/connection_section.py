@@ -1,17 +1,17 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 from collections import defaultdict
 import re
 
-try: 
+try:
     from mtools.util.profile_collection import ProfileCollection
 except ImportError:
     ProfileCollection = None
-    
+
 class ConnectionSection(BaseSection):
-    """ This section goes through the logfile and extracts information 
+    """ This section goes through the logfile and extracts information
         about opened and closed connections.
     """
-    
+
     name = "connections"
 
     def __init__(self, mloginfo):
@@ -37,7 +37,7 @@ class ConnectionSection(BaseSection):
 
         ip_opened = defaultdict(lambda: 0)
         ip_closed = defaultdict(lambda: 0)
-        
+
         socket_exceptions = 0
 
         START_TIME_EMPTY=-11
@@ -83,10 +83,10 @@ class ConnectionSection(BaseSection):
                         continue
 
                     if connections_start[connid] != START_TIME_EMPTY:
-                        raise NotImplementedError("Multiple start datetimes found for the same connection ID. Consider analysing one log sequence.") 
-    
+                        raise NotImplementedError("Multiple start datetimes found for the same connection ID. Consider analysing one log sequence.")
+
                     connections_start[connid] = dt
-      
+
 
             pos = line.find('end connection')
             if pos != -1:
@@ -105,7 +105,7 @@ class ConnectionSection(BaseSection):
                         continue
 
                     #The connection id value is stored just before end connection -> [conn385] end connection
-                    end_connid = end_connid_pattern.search(line, re.M | re.I).group(1) 
+                    end_connid = end_connid_pattern.search(line, re.M | re.I).group(1)
                     dt = logevent.datetime
 
                     #Sanity checks
@@ -113,7 +113,7 @@ class ConnectionSection(BaseSection):
                         continue
 
                     if connections_start[end_connid] == END_TIME_ALREADY_FOUND:
-                        raise NotImplementedError("Multiple end datetimes found for the same connection ID %s. Consider analysing one log sequence." % (end_connid)) 
+                        raise NotImplementedError("Multiple end datetimes found for the same connection ID %s. Consider analysing one log sequence." % (end_connid))
 
                     dur = dt - connections_start[end_connid]
                     dur_in_sec = dur.seconds
@@ -161,7 +161,7 @@ class ConnectionSection(BaseSection):
                 print "overall average connection duration(s):", sum_durations/fullconn_counts
                 print "overall minimum connection duration(s):", min_connection_duration
                 print "overall maximum connection duration(s):", max_connection_duration
-            else: 
+            else:
                 print "overall average connection duration(s): -"
                 print "overall minimum connection duration(s): -"
                 print "overall maximum connection duration(s): -"
@@ -176,7 +176,7 @@ class ConnectionSection(BaseSection):
                 connection_duration_ip = ipwise_sum_durations[ip] if ip in ipwise_sum_durations else 0
                 ipwise_min_connection_duration_final = ipwise_min_connection_duration[ip] if ipwise_min_connection_duration[ip]!=MIN_DURATION_EMPTY else 0
                 ipwise_max_connection_duration_final = ipwise_max_connection_duration[ip] if ipwise_max_connection_duration[ip]!=MAX_DURATION_EMPTY else 0
- 
+
                 print "%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i dur-min(s): %-8i dur-max(s): %-8i" % (ip, opened, closed, connection_duration_ip/covered_count, ipwise_min_connection_duration_final, ipwise_max_connection_duration_final)
             else:
                 print "%-15s  opened: %-8i  closed: %-8i" % (ip, opened, closed)

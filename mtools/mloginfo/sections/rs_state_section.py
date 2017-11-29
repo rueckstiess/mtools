@@ -1,4 +1,4 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
 
@@ -6,7 +6,7 @@ class RsStateSection(BaseSection):
     """ This section determines if there were any Replica Set state changes in the log file and prints out
         the times and information about the restarts found.
     """
-    
+
     name = "rsstate"
 
     def __init__(self, mloginfo):

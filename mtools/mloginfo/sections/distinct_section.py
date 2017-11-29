@@ -1,8 +1,8 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 
 from mtools.util.log2code import Log2CodeConverter
 
-try: 
+try:
     from mtools.util.profile_collection import ProfileCollection
 except ImportError:
     ProfileCollection = None
@@ -15,7 +15,7 @@ class DistinctSection(BaseSection):
     	It will output sorted statistics of which logevent patterns where matched how often
     	(most frequent first).
     """
-    
+
     name = "distinct"
     log2code = Log2CodeConverter()
 
@@ -33,7 +33,7 @@ class DistinctSection(BaseSection):
 
 
     def run(self):
-        """ go over each line in the logfile, run through log2code matcher 
+        """ go over each line in the logfile, run through log2code matcher
             and group by matched pattern.
         """
 
@@ -89,7 +89,7 @@ class DistinctSection(BaseSection):
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
-        if self.mloginfo.args['verbose']: 
+        if self.mloginfo.args['verbose']:
             print
 
         for cl in sorted(codelines, key=lambda x: codelines[x], reverse=True):

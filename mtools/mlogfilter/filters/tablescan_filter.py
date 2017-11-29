@@ -1,4 +1,4 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 class TableScanFilter(BaseFilter):
     """ accepts only if the line contains a nscanned:[0-9] nreturned:[0-9] where the ratio of nscanned:nreturned is > 100 and nscanned > 10000
@@ -14,7 +14,7 @@ class TableScanFilter(BaseFilter):
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
-        
+
         if 'scan' in self.mlogfilter.args:
             self.active = self.mlogfilter.args['scan']
 

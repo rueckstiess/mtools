@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 from dateutil.tz import tzutc
 from mtools.util.logevent import LogEvent
 
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 
 def custom_parse_dt(value):

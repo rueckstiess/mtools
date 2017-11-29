@@ -1,6 +1,6 @@
-from base_section import BaseSection
+from .base_section import BaseSection
 
-try: 
+try:
     from mtools.util.profile_collection import ProfileCollection
 except ImportError:
     ProfileCollection = None
@@ -10,7 +10,7 @@ class RestartSection(BaseSection):
         the times and version of the restarts found. It uses the information collected in
         LogFile so it doesn't have to walk the file manually.
     """
-    
+
     name = "restarts"
 
     def __init__(self, mloginfo):

@@ -1,4 +1,4 @@
-from base_filter import BaseFilter
+from .base_filter import BaseFilter
 
 class FastFilter(BaseFilter):
     """ accepts only lines that have a duration that is shorter than the specified
