@@ -38,8 +38,8 @@ class TestUtilLogFile(object):
 
         logfile = LogFile(self.file_year_rollover)
 
-        assert logfile.start == datetime(self.current_year - 1, 12, 30, 00, 13, 01, 661000, tzutc())
-        assert logfile.end == datetime(self.current_year, 01, 02, 23, 27, 11, 720000, tzutc())
+        assert logfile.start == datetime(self.current_year - 1, 12, 30, 0, 13, 1, 661000, tzutc())
+        assert logfile.end == datetime(self.current_year, 1, 2, 23, 27, 11, 720000, tzutc())
 
 
     def test_timezone(self):

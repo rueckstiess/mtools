@@ -19,7 +19,7 @@ def test_dtb_from_before_start():
     dtb = DateTimeBoundaries(start, end)
     from_dt, to_dt = dtb('Sep 15 2012', 'Dec 1 2012')
     assert from_dt == start
-    assert to_dt == datetime(2012, 12, 01, tzinfo=tzutc())
+    assert to_dt == datetime(2012, 12, 1, tzinfo=tzutc())
 
 
 def test_dtb_to_after_end():
