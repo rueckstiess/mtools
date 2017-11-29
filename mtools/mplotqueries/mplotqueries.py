@@ -6,7 +6,7 @@ import os
 import sys
 import uuid
 import glob
-import cPickle
+from six.moves import cPickle
 import types
 import inspect
 

@@ -1,12 +1,13 @@
 from __future__ import print_function
 
-import cPickle
+from six.moves import cPickle
 import os
 import re
 import sys
 import argparse
 from collections import defaultdict
-from itertools import chain, izip_longest
+from itertools import chain
+from six.moves import zip_longest as izip_longest
 
 
 from mtools.util.logcodeline import LogCodeLine

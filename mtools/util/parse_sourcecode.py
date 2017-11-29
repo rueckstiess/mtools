@@ -5,7 +5,7 @@ import re
 import sys
 import commands
 import subprocess
-import cPickle
+from six.moves import cPickle
 from collections import defaultdict
 
 from mtools.util.logcodeline import LogCodeLine
