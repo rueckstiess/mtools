@@ -1,6 +1,3 @@
-# nose tests require multiprocessing package, see
-# https://groups.google.com/forum/#!msg/nose-users/fnJ-kAUbYHQ/_UsLN786ygcJ
-import multiprocessing
 import sys
 import platform
 import re
@@ -25,7 +22,6 @@ try:
         "mplotqueries": ['matplotlib>=1.3.1', 'numpy>=1.8.0'],
     }
 
-    test_requires = ['nose>=1.3.0', 'psutil>=2.0', 'pymongo>=3.3']
     try:
         import argparse
     except ImportError:
@@ -35,14 +31,12 @@ try:
         from collections import OrderedDict
     except ImportError:
         install_requires.append('ordereddict')
-        test_requires.append('ordereddict')
 
     # add dateutil if not installed already
     try:
         import dateutil
     except ImportError:
         install_requires.append('python-dateutil==2.2')
-        test_requires.append('python-dateutil==2.2')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
@@ -114,7 +108,5 @@ setup(
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,
-    tests_require=test_requires,
-    test_suite = 'nose.collector',
     **kws
 )
