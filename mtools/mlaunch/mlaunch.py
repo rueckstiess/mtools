@@ -1569,7 +1569,18 @@ class MLaunchTool(BaseCmdLineTool):
         # set WiredTiger cache size to 1 GB by default
         if '--wiredTigerCacheSizeGB' not in extra and self._filter_valid_arguments(['--wiredTigerCacheSizeGB'], 'mongod'):
             extra += ' --wiredTigerCacheSizeGB 1 '
-            
+
+        current_version = self.getMongoDVersion()
+
+        # Exit with error if hostname is specified but not bind_ip options
+        if (self.args['hostname'] != 'localhost'
+            and LooseVersion(current_version) >= LooseVersion("3.6.0")
+            and (self.args['sharded'] or self.args['replicaset'])
+            and '--bind_ip' not in extra):
+            os.removedirs(dbpath)
+            errmsg = " \n * If hostname is specified, please include '--bind_ip_all' or '--bind_ip' options when deploying replica sets or sharded cluster with MongoDB version 3.6.0 or greater"
+            raise SystemExit(errmsg)
+
         extra += self._get_ssl_server_args()
 
         path = self.args['binarypath'] or ''
