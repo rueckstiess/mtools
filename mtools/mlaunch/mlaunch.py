@@ -1434,10 +1434,10 @@ class MLaunchTool(BaseCmdLineTool):
         # discover current setup
         self.discover()
 
-
-
     def _construct_sharded(self):
         """ construct command line strings for a sharded cluster. """
+
+        current_version = self.getMongoDVersion()
 
         num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
         shard_names = self._get_shard_names(self.args)
@@ -1445,11 +1445,20 @@ class MLaunchTool(BaseCmdLineTool):
         # create shards as stand-alones or replica sets
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
-            if self.args['single']:
-                self.shard_connection_str.append( self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr') )
+            if (self.args['single']
+                and LooseVersion(current_version) >= LooseVersion("3.6.0")):
+                errmsg = " \n * In MongoDB 3.6 and above a Shard must be made up of a replica set. Please use --replicaset option when starting a sharded cluster.*"
+                raise SystemExit(errmsg)
+
+            elif (self.args['single']
+                  and LooseVersion(current_version) < LooseVersion("3.6.0")):
+                self.shard_connection_str.append(
+                    self._construct_single(self.dir, nextport, name=shard, extra='--shardsvr'))
                 nextport += 1
             elif self.args['replicaset']:
-                self.shard_connection_str.append( self._construct_replset(self.dir, nextport, shard, num_nodes=range(self.args['nodes']), arbiter=self.args['arbiter'], extra='--shardsvr') )
+                self.shard_connection_str.append(
+                    self._construct_replset(self.dir, nextport, shard, num_nodes=range(self.args['nodes']),
+                                            arbiter=self.args['arbiter'], extra='--shardsvr'))
                 nextport += self.args['nodes']
                 if self.args['arbiter']:
                     nextport += 1
