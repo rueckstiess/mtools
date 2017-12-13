@@ -1780,7 +1780,7 @@ class MLaunchTool(BaseCmdLineTool):
         for shard in shard_names:
             if (self.args['single']
                 and LooseVersion(current_version) >= LooseVersion("3.6.0")):
-                errmsg = " \n * In MongoDB 3.6 a Shard must be made up of a replica set. Please use --replicaset option when starting a sharded cluster.*"
+                errmsg = " \n * In MongoDB 3.6 and above a Shard must be made up of a replica set. Please use --replicaset option when starting a sharded cluster.*"
                 raise SystemExit(errmsg)
 
             elif (self.args['single']
