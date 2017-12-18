@@ -1,5 +1,6 @@
-from mtools.util import OrderedDict
 import re
+
+from mtools.util import OrderedDict
 
 
 class Grouping(object):

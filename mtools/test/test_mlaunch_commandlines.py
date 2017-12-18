@@ -1,12 +1,13 @@
-import os
-import json
 import inspect
+import json
+import os
 import shutil
+from distutils.version import LooseVersion
+
+from nose.plugins.skip import SkipTest
+from nose.tools import raises
 
 from mtools.mlaunch.mlaunch import MLaunchTool
-from nose.tools import raises
-from nose.plugins.skip import SkipTest
-from distutils.version import LooseVersion
 
 
 class TestMLaunch(object):

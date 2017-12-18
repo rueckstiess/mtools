@@ -1,6 +1,8 @@
-from mtools.util.logevent import LogEvent
 import datetime
+
 from dateutil import parser
+
+from mtools.util.logevent import LogEvent
 
 line_ctime_pre24 = ("Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, "
                     "pdfile version 4.5")

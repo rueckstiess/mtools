@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from mtools.util.cmdlinetool import LogFileTool
-
-import sys
 import inspect
+import sys
+
 import mtools.mloginfo.sections as sections
+from mtools.util.cmdlinetool import LogFileTool
 
 
 class MLogInfoTool(LogFileTool):

@@ -1,5 +1,6 @@
-from datetime_filter import DateTimeFilter
 from datetime import timedelta
+
+from datetime_filter import DateTimeFilter
 from mtools.util.cmdlinetool import InputSourceAction
 
 

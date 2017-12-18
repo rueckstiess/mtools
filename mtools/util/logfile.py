@@ -1,11 +1,12 @@
 from __future__ import print_function
-from mtools.util.logevent import LogEvent
-from mtools.util.input_source import InputSource
 
-from math import ceil
-import re
 import os
+import re
 import sys
+from math import ceil
+
+from mtools.util.input_source import InputSource
+from mtools.util.logevent import LogEvent
 
 
 class LogFile(InputSource):

@@ -1,18 +1,18 @@
+import json
+import os
+import re
+import sys
+from datetime import datetime, timedelta
+from random import randrange
+
+from dateutil import parser
+from nose.plugins.skip import SkipTest
+from nose.tools import raises
+
+import mtools
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
-import mtools
-
-from nose.tools import raises
-from nose.plugins.skip import SkipTest
-
-from random import randrange
-from datetime import timedelta, datetime
-from dateutil import parser
-import os
-import sys
-import re
-import json
 
 
 def random_date(start, end):

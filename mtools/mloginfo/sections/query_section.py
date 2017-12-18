@@ -1,11 +1,10 @@
-from base_section import BaseSection
+from collections import namedtuple
+from operator import itemgetter
 
+from base_section import BaseSection
+from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
-from mtools.util import OrderedDict
-
-from operator import itemgetter
-from collections import namedtuple
 
 try:
     import numpy as np

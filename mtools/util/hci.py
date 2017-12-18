@@ -1,8 +1,10 @@
-from mtools.util import OrderedDict
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
+
 from dateutil import parser
 from dateutil.tz import tzutc
+
+from mtools.util import OrderedDict
 
 
 class DateTimeBoundaries(object):

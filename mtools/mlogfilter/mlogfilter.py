@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
+import inspect
 import re
 import sys
-import inspect
+from datetime import MAXYEAR, MINYEAR, datetime, timedelta
 
-from datetime import datetime, timedelta, MINYEAR, MAXYEAR
 from dateutil.tz import tzutc
 
-from mtools.util.cmdlinetool import LogFileTool
-
 import mtools.mlogfilter.filters as filters
+from mtools.util.cmdlinetool import LogFileTool
 
 
 class MLogFilterTool(LogFileTool):

@@ -3,7 +3,6 @@
 import argparse
 import json
 import os
-import psutil
 import Queue
 import re
 import signal
@@ -14,12 +13,11 @@ import sys
 import threading
 import time
 import warnings
-
 from collections import defaultdict
-from mtools.util import OrderedDict
-
 from operator import itemgetter
 
+import psutil
+from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
 from mtools.version import __version__

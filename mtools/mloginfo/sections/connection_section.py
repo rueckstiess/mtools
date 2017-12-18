@@ -1,6 +1,7 @@
-from base_section import BaseSection
-from collections import defaultdict
 import re
+from collections import defaultdict
+
+from base_section import BaseSection
 
 try:
     from mtools.util.profile_collection import ProfileCollection

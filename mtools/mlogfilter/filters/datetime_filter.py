@@ -1,9 +1,10 @@
-from mtools.util import OrderedDict
-from mtools.util.hci import DateTimeBoundaries
-from datetime import datetime, timedelta, MAXYEAR
+from datetime import MAXYEAR, datetime, timedelta
+
 from dateutil.tz import tzutc
 
 from base_filter import BaseFilter
+from mtools.util import OrderedDict
+from mtools.util.hci import DateTimeBoundaries
 
 
 def custom_parse_dt(value):

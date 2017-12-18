@@ -1,6 +1,6 @@
 from base_section import BaseSection
-from mtools.util.print_table import print_table
 from mtools.util import OrderedDict
+from mtools.util.print_table import print_table
 
 
 class RsStateSection(BaseSection):

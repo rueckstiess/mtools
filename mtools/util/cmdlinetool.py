@@ -1,14 +1,14 @@
 import argparse
-import sys
-import re
-import signal
 import datetime
 import os
+import re
+import signal
+import sys
 
 from dateutil.tz import tzutc
 
-from mtools.version import __version__
 from mtools.util.logfile import LogFile
+from mtools.version import __version__
 
 try:
     from mtools.util.profile_collection import ProfileCollection

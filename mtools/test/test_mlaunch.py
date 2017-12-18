@@ -1,18 +1,19 @@
 import inspect
-import shutil
-import time
-import os
 import json
+import os
+import shutil
 import sys
+import time
 import unittest
 
-from mtools.mlaunch.mlaunch import MLaunchTool
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 from bson import SON
-from nose.tools import raises, timed
 from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
+from nose.tools import raises, timed
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+
+from mtools.mlaunch.mlaunch import MLaunchTool
 
 # temporarily skipping mlaunch tests until issues are sorted out
 raise SkipTest
