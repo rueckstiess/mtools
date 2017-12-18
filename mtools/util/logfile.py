@@ -1,21 +1,23 @@
+from __future__ import print_function
 from mtools.util.logevent import LogEvent
 from mtools.util.input_source import InputSource
 
-from math import ceil 
-from datetime import datetime
-import time
+from math import ceil
 import re
 import os
 import sys
 
+
 class LogFile(InputSource):
-    """ wrapper class for log files, either as open file streams of from stdin. """
+    """
+    Wrapper class for log files, either as open file streams of from stdin.
+    """
 
     def __init__(self, filehandle):
-        """ provide logfile as open file stream or stdin. """
+        """Provide logfile as open file stream or stdin."""
         self.filehandle = filehandle
         self.name = filehandle.name
-        
+
         self.from_stdin = filehandle.name == "<stdin>"
         self._bounds_calculated = False
         self._start = None
@@ -32,44 +34,50 @@ class LogFile(InputSource):
         self._repl_set = None
         self._repl_set_members = None
         self._repl_set_version = None
-        
+
         self._storage_engine = None
-        
+
         self._datetime_format = None
         self._year_rollover = None
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
 
-        self._has_level= None
-        
-        # make sure bounds are calculated before starting to iterate, including potential year rollovers
+        self._has_level = None
+
+        # make sure bounds are calculated before starting to iterate,
+        # including potential year rollovers
         self._calculate_bounds()
 
     @property
     def start(self):
-        """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
+        """
+        Lazy evaluation of start and end of logfile.
+        Returns None for stdin input currently.
+        """
         if not self._start:
             self._calculate_bounds()
         return self._start
 
     @property
     def end(self):
-        """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
+        """Lazy evaluation of start and end of logfile.
+        Returns None for stdin input currently."""
         if not self._end:
             self._calculate_bounds()
         return self._end
 
     @property
     def timezone(self):
-        """ lazy evaluation of timezone of logfile. """
+        """Lazy evaluation of timezone of logfile."""
         if not self._timezone:
             self._calculate_bounds()
         return self._timezone
 
     @property
     def filesize(self):
-        """ lazy evaluation of start and end of logfile. Returns None for stdin input currently. """
+        """Lazy evaluation of start and end of logfile.
+        Returns None for stdin input currently."""
         if self.from_stdin:
             return None
         if not self._filesize:
@@ -78,28 +86,31 @@ class LogFile(InputSource):
 
     @property
     def datetime_format(self):
-        """ lazy evaluation of the datetime format. """
+        """Lazy evaluation of the datetime format."""
         if not self._datetime_format:
             self._calculate_bounds()
         return self._datetime_format
 
     @property
     def has_level(self):
-        """ lazy evaluation of the whether the logfile has any level lines. """
+        """Lazy evaluation of the whether the logfile has any level lines."""
         if self._has_level is None:
             self._iterate_lines()
         return self._has_level
 
     @property
     def year_rollover(self):
-        """ lazy evaluation of the datetime format. """
-        if self._year_rollover == None:
+        """Lazy evaluation of the datetime format. """
+        if self._year_rollover is None:
             self._calculate_bounds()
         return self._year_rollover
 
     @property
     def num_lines(self):
-        """ lazy evaluation of the number of lines. Returns None for stdin input currently. """
+        """
+        Lazy evaluation of the number of lines.
+        Returns None for stdin input currently.
+        """
         if self.from_stdin:
             return None
         if not self._num_lines:
@@ -108,42 +119,42 @@ class LogFile(InputSource):
 
     @property
     def restarts(self):
-        """ lazy evaluation of all restarts. """
+        """Lazy evaluation of all restarts."""
         if not self._num_lines:
             self._iterate_lines()
         return self._restarts
 
     @property
     def rs_state(self):
-        """ lazy evaluation of all restarts. """
+        """Lazy evaluation of all restarts."""
         if not self._num_lines:
             self._iterate_lines()
         return self._rs_state
 
     @property
     def binary(self):
-        """ lazy evaluation of the binary name. """
+        """Lazy evaluation of the binary name."""
         if not self._num_lines:
             self._iterate_lines()
         return self._binary
 
     @property
     def hostname(self):
-        """ lazy evaluation of the binary name. """
+        """Lazy evaluation of the binary name."""
         if not self._num_lines:
             self._iterate_lines()
         return self._hostname
 
     @property
     def port(self):
-        """ lazy evaluation of the binary name. """
+        """Lazy evaluation of the binary name."""
         if not self._num_lines:
             self._iterate_lines()
         return self._port
 
     @property
     def versions(self):
-        """ return all version changes. """
+        """Return all version changes."""
         versions = []
         for v, _ in self.restarts:
             if len(versions) == 0 or v != versions[-1]:
@@ -152,62 +163,68 @@ class LogFile(InputSource):
 
     @property
     def repl_set(self):
-        """ return the replSet (if available). """
+        """Return the replSet (if available)."""
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set
 
     @property
     def repl_set_members(self):
-        """ return the replSet (if available). """
+        """Return the replSet (if available)."""
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set_members
 
     @property
     def repl_set_version(self):
-        """ return the replSet (if available). """
+        """Return the replSet (if available)."""
         if not self._num_lines:
             self._iterate_lines()
         return self._repl_set_version
 
     @property
     def storage_engine(self):
-        """ return storage engine if available """
+        """Return storage engine if available."""
         if not self._num_lines:
             self._iterate_lines()
         return self._storage_engine
-    
 
     def next(self):
-        """ get next line, adjust for year rollover and hint datetime format. """
+        """Get next line, adjust for year rollover and hint datetime format."""
 
-        # use readline here because next() iterator uses internal readahead buffer so seek position is wrong
+        # use readline here because next() iterator uses internal readahead
+        # buffer so seek position is wrong
         line = self.filehandle.readline()
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
 
         le = LogEvent(line)
-        
+
         # hint format and nextpos from previous line
-        if self._datetime_format and self._datetime_nextpos != None:
-            ret = le.set_datetime_hint(self._datetime_format, self._datetime_nextpos, self.year_rollover)
+        if self._datetime_format and self._datetime_nextpos is not None:
+            ret = le.set_datetime_hint(self._datetime_format,
+                                       self._datetime_nextpos,
+                                       self.year_rollover)
             if not ret:
-                # logevent indicates timestamp format has changed, invalidate hint info
+                # logevent indicates timestamp format has changed,
+                # invalidate hint info
                 self._datetime_format = None
                 self._datetime_nextpos = None
         elif le.datetime:
             # gather new hint info from another logevent
             self._datetime_format = le.datetime_format
-            self._datetime_nextpos = le._datetime_nextpos  
+            self._datetime_nextpos = le._datetime_nextpos
 
         return le
 
     def __iter__(self):
-        """ iteration over LogFile object will return a LogEvent object for each line (generator) """
+        """
+        Iteration over LogFile object will return a LogEvent object for
+        each line (generator).
+        """
         le = None
-        
+
         while True:
             try:
                 le = self.next()
@@ -220,7 +237,7 @@ class LogFile(InputSource):
                 # future iterations start from the beginning
                 if not self.from_stdin:
                     self.filehandle.seek(0)
-                
+
                 # now raise StopIteration exception
                 raise e
 
@@ -231,23 +248,25 @@ class LogFile(InputSource):
 
             yield le
 
-    states = ['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2', 'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN']
+    states = (['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2',
+               'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN'])
 
     def __len__(self):
-        """ return the number of lines in a log file. """
+        """Return the number of lines in a log file."""
         return self.num_lines
 
-
     def _iterate_lines(self):
-        """ count number of lines (can be expensive). """
+        """Count number of lines (can be expensive)."""
         self._num_lines = 0
         self._restarts = []
         self._rs_state = []
 
-        l = 0
-        for l, line in enumerate(self.filehandle):
+        ln = 0
+        for ln, line in enumerate(self.filehandle):
 
-            if self._has_level is None and line[28:31].strip() in LogEvent.log_levels and line[31:39].strip() in LogEvent.log_components:
+            if (self._has_level is None and
+                    line[28:31].strip() in LogEvent.log_levels and
+                    line[31:39].strip() in LogEvent.log_components):
                 self._has_level = True
 
             # find version string (fast check to eliminate most lines)
@@ -259,15 +278,16 @@ class LogFile(InputSource):
 
             if "starting :" in line or "starting:" in line:
                 # look for hostname, port
-                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)', line)
+                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
+                                  line)
                 if match:
                     self._hostname = match.group('host')
                     self._port = match.group('port')
 
-            ''' For 3.0 the "[initandlisten] options:" long entry contained the "engine" field
-                if WiredTiger was the storage engine. There were only two engines, MMAPv1
-                and WiredTiger
-            '''
+            """ For 3.0 the "[initandlisten] options:" long entry contained the
+                "engine" field if WiredTiger was the storage engine. There were
+                only two engines, MMAPv1 and WiredTiger
+            """
             if "[initandlisten] options:" in line:
                 match = re.search('replSet: "(?P<replSet>\S+)"', line)
                 if match:
@@ -279,27 +299,34 @@ class LogFile(InputSource):
                 else:
                     self._storage_engine = 'mmapv1'
 
-            ''' For 3.2 the "[initandlisten] options:" no longer contains the "engine" field
-                So now we have to look for the "[initandlisten] wiredtiger_open config:"
-                which was present in 3.0, but would now tell us definatively that wiredTiger is being used
-            '''
+            """ For 3.2 the "[initandlisten] options:" no longer contains the
+                "engine" field So now we have to look for the "[initandlisten]
+                wiredtiger_open config:" which was present in 3.0, but would
+                now tell us definatively that wiredTiger is being used
+            """
             if "[initandlisten] wiredtiger_open config:" in line:
-                self._storage_engine =  'wiredTiger'
+                self._storage_engine = 'wiredTiger'
 
             if "command admin.$cmd command: { replSetInitiate:" in line:
-                match = re.search('{ _id: "(?P<replSet>\S+)", members: (?P<replSetMembers>[^]]+ ])', line)
+                match = re.search('{ _id: "(?P<replSet>\S+)", '
+                                  'members: (?P<replSetMembers>[^]]+ ])', line)
                 if match:
                     self._repl_set = match.group('replSet')
                     self._repl_set_members = match.group('replSetMembers')
 
-            if "replSet info saving a newer config version to local.system.replset: " in line:
-                match = re.search('{ _id: "(?P<replSet>\S+)", version: (?P<replSetVersion>\d+), members: (?P<replSetMembers>[^]]+ ])', line)
+            new_config = ("replSet info saving a newer config version "
+                          "to local.system.replset: ")
+            if new_config in line:
+                match = re.search('{ _id: "(?P<replSet>\S+)", '
+                                  'version: (?P<replSetVersion>\d+), '
+                                  'members: (?P<replSetMembers>[^]]+ ])', line)
                 if match:
                     self._repl_set = match.group('replSet')
                     self._repl_set_members = match.group('replSetMembers')
                     self._repl_set_version = match.group('replSetVersion')
-    
-            # if "is now in state" in line and next(state for state in states if line.endswith(state)):
+
+            # if ("is now in state" in line and
+            #        next(state for state in states if line.endswith(state))):
             if "is now in state" in line:
                 tokens = line.split()
                 # 2.6
@@ -316,7 +343,7 @@ class LogFile(InputSource):
             if "[rsMgr] replSet" in line:
                 tokens = line.split()
                 if self._hostname:
-                    host = self._hostname + ':' + self._port 
+                    host = self._hostname + ':' + self._port
                 else:
                     host = os.path.basename(self.name)
                 host += ' (self)'
@@ -334,40 +361,38 @@ class LogFile(InputSource):
                 self._rs_state.append(state)
                 continue
 
-
-        self._num_lines = l+1
+        self._num_lines = ln + 1
 
         # reset logfile
         self.filehandle.seek(0)
 
-
     def _check_for_restart(self, logevent):
         if logevent.thread == 'mongosMain' and 'MongoS' in logevent.line_str:
             self._binary = 'mongos'
-        
-        elif logevent.thread == 'initandlisten' and "db version v" in logevent.line_str:
+
+        elif (logevent.thread == 'initandlisten' and
+                "db version v" in logevent.line_str):
             self._binary = 'mongod'
 
         else:
             return False
 
         version = re.search(r'(\d\.\d\.\d+)', logevent.line_str)
-                
+
         if version:
             version = version.group(1)
             return version
         else:
             return False
 
-
     def _calculate_bounds(self):
-        """ calculate beginning and end of logfile. """
+        """Calculate beginning and end of logfile."""
 
         if self._bounds_calculated:
             # Assume no need to recalc bounds for lifetime of a Logfile object
             return
 
-        if self.from_stdin: 
+        if self.from_stdin:
             return False
 
         # we should be able to find a valid log line within max_start_lines
@@ -389,11 +414,11 @@ class LogFile(InputSource):
 
         # sanity check before attempting to find end date
         if (self._start is None):
-            raise SystemExit(
-                "Error: <%s> does not appear to be a supported MongoDB log file format" % self.filehandle.name
-            )
+            raise SystemExit("Error: <%s> does not appear to be a supported "
+                             "MongoDB log file format" % self.filehandle.name)
 
-        # get end datetime (lines are at most 10k, go back 30k at most to make sure we catch one)
+        # get end datetime (lines are at most 10k,
+        # go back 30k at most to make sure we catch one)
         self.filehandle.seek(0, 2)
         self._filesize = self.filehandle.tell()
         self.filehandle.seek(-min(self._filesize, 30000), 2)
@@ -406,7 +431,7 @@ class LogFile(InputSource):
 
         # if there was a roll-over, subtract 1 year from start time
         if self._end < self._start:
-            self._start = self._start.replace(year=self._start.year-1)
+            self._start = self._start.replace(year=self._start.year - 1)
             self._year_rollover = self._end
         else:
             self._year_rollover = False
@@ -418,11 +443,10 @@ class LogFile(InputSource):
         return True
 
     def _find_curr_line(self, prev=False):
-        """ internal helper function that finds the current (or previous if prev=True) line in a log file
-            based on the current seek position.
         """
-        line = None
-
+        Internal helper function that finds the current (or previous if
+        prev=True) line in a log file based on the current seek position.
+        """
         curr_pos = self.filehandle.tell()
 
         # jump back 15k characters (at most) and find last newline char
@@ -436,13 +460,15 @@ class LogFile(InputSource):
             error_context = 300
             self.filehandle.seek(-error_context, 1)
             buff = self.filehandle.read(curr_pos)
-            print >>sys.stderr, \
-                "Fatal log parsing loop detected trying to find previous log line " \
-                "near offset %s in %s:" % (curr_pos, self.name), "\n\n", \
-                "-" * 60, "\n", \
-                buff[:error_context], "\n<--- (current log parsing offset) \n", buff[error_context:error_context*2], "\n", \
-                "-" * 60, "\n"
-            raise SystemExit("Cannot parse %s with requested options" % self.filehandle.name)
+            hr = "-" * 60
+            print("Fatal log parsing loop detected trying to find previous "
+                  "log line near offset %s in %s:\n\n%s\n%s\n"
+                  "<--- (current log parsing offset) \n%s\n%s\n"
+                  % (curr_pos, self.name, hr, buff[:error_context],
+                     buff[error_context:error_context + 1], hr),
+                  file=sys.stderr)
+            raise SystemExit("Cannot parse %s with requested options"
+                             % self.filehandle.name)
         else:
             self.prev_pos = curr_pos
 
@@ -468,11 +494,12 @@ class LogFile(InputSource):
             # reached end of file
             return None
 
-
     def fast_forward(self, start_dt):
-        """ Fast-forward a log file to the given start_dt datetime object using binary search.
-            Only fast for files. Streams need to be forwarded manually, and it will miss the 
-            first line that would otherwise match (as it consumes the log line). 
+        """
+        Fast-forward a log file to the given start_dt datetime object using
+        binary search. Only fast for files. Streams need to be forwarded
+        manually, and it will miss the first line that would otherwise match
+        (as it consumes the log line).
         """
         if self.from_stdin:
             # skip lines until start_dt is reached
@@ -480,7 +507,6 @@ class LogFile(InputSource):
 
         else:
             # fast bisection path
-            min_mark = 0
             max_mark = self.filesize
             step_size = max_mark
 
@@ -497,12 +523,12 @@ class LogFile(InputSource):
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
-                
+
                 self.filehandle.seek(step_size, 1)
                 le = self._find_curr_line()
                 if not le:
                     break
-                                
+
                 if le.datetime >= start_dt:
                     step_size = -abs(step_size)
                 else:
@@ -512,7 +538,8 @@ class LogFile(InputSource):
                 return
 
             # now walk backwards until we found a truly smaller line
-            while self.filehandle.tell() >= 2 and (le.datetime is None or le.datetime >= start_dt):
+            while self.filehandle.tell() >= 2 and (le.datetime is None or
+                                                   le.datetime >= start_dt):
                 self.filehandle.seek(-2, 1)
 
                 le = self._find_curr_line(prev=True)

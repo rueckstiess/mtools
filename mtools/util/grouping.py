@@ -1,6 +1,7 @@
 from mtools.util import OrderedDict
 import re
 
+
 class Grouping(object):
 
     def __init__(self, iterable=None, group_by=None):
@@ -11,12 +12,11 @@ class Grouping(object):
             for item in iterable:
                 self.add(item, group_by)
 
-
     def add(self, item, group_by=None):
-        """ General purpose class to group items by certain criteria. """
+        """General purpose class to group items by certain criteria."""
 
         key = None
-        
+
         if not group_by:
             group_by = self.group_by
 
@@ -39,9 +39,8 @@ class Grouping(object):
                             key = match.group(1)
                         else:
                             key = match.group()
-            
+
         self.groups.setdefault(key, list()).append(item)
-        
 
     def __getitem__(self, key):
         return self.groups[key]
@@ -62,7 +61,6 @@ class Grouping(object):
     def items(self):
         return self.groups.items()
 
-
     def regroup(self, group_by=None):
         if not group_by:
             group_by = self.group_by
@@ -74,36 +72,40 @@ class Grouping(object):
             for item in groups[g]:
                 self.add(item, group_by)
 
-
     def move_items(self, from_group, to_group):
-        """ will take all elements from the from_group and add it to the to_group. """
+        """Take all elements from the from_group and add it to the to_group."""
         if from_group not in self.keys() or len(self.groups[from_group]) == 0:
-            return 
+            return
 
-        self.groups.setdefault(to_group, list()).extend(self.groups.get(from_group, list()))
+        self.groups.setdefault(to_group, list()).extend(self.groups.get
+                                                        (from_group, list()))
         if from_group in self.groups:
             del self.groups[from_group]
 
-
-    def sort_by_size(self, group_limit=None, discard_others=False, others_label='others'):
-        """ sorts the groups by the number of elements they contain, descending. Also has option to 
-            limit the number of groups. If this option is chosen, the remaining elements are placed
-            into another group with the name specified with others_label. if discard_others is True,
-            the others group is removed instead.
+    def sort_by_size(self, group_limit=None, discard_others=False,
+                     others_label='others'):
+        """
+        Sort the groups by the number of elements they contain, descending.
+        Also has option to limit the number of groups. If this option is
+        chosen, the remaining elements are placed into another group with the
+        name specified with others_label. if discard_others is True, the others
+        group is removed instead.
         """
 
         # sort groups by number of elements
-        self.groups = OrderedDict( sorted(self.groups.iteritems(), key=lambda x: len(x[1]), reverse=True) )
+        self.groups = OrderedDict(sorted(self.groups.iteritems(),
+                                         key=lambda x: len(x[1]),
+                                         reverse=True))
 
         # if group-limit is provided, combine remaining groups
-        if group_limit != None:
+        if group_limit is not None:
 
             # now group together all groups that did not make the limit
             if not discard_others:
-                group_keys = self.groups.keys()[ group_limit-1: ]
+                group_keys = self.groups.keys()[group_limit - 1:]
                 self.groups.setdefault(others_label, list())
             else:
-                group_keys = self.groups.keys()[ group_limit: ]
+                group_keys = self.groups.keys()[group_limit:]
 
             # only go to second last (-1), since the 'others' group is now last
             for g in group_keys:
@@ -112,13 +114,13 @@ class Grouping(object):
                 del self.groups[g]
 
             # remove if empty
-            if others_label in self.groups and len(self.groups[others_label]) == 0:
+            if (others_label in self.groups and
+                    len(self.groups[others_label]) == 0):
                 del self.groups[others_label]
 
         # remove others group regardless of limit if requested
         if discard_others and others_label in self.groups:
             del self.groups[others_label]
-
 
 
 if __name__ == '__main__':
@@ -132,5 +134,4 @@ if __name__ == '__main__':
     grouping.regroup(lambda x: 'even' if x % 2 == 0 else 'odd')
 
     for g in grouping:
-        print g, grouping[g]
-
+        print('%s %s' % (g, grouping[g]))
