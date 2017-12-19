@@ -18,17 +18,18 @@ The following tools are in the mtools collection:
 
 `mlogfilter <https://github.com/rueckstiess/mtools/wiki/mlogfilter>`__
    slices log files by time, merges log files, filters slow queries, finds
-   table scans, shortens log lines, filters by other atributes, convert to JSON
+   table scans, shortens log lines, filters by other attributes, convert to
+   JSON
 
 `mloginfo <https://github.com/rueckstiess/mtools/wiki/mloginfo>`__
    returns info about log file, like start and end time, version, binary,
    special sections like restarts, connections, distinct view
 
 `mplotqueries <https://github.com/rueckstiess/mtools/wiki/mplotqueries>`__
-   visualize logfiles with different types of plots (requires matplotlib)
+   visualize log files with different types of plots (requires matplotlib)
 
 `mlogvis <https://github.com/rueckstiess/mtools/wiki/mlogvis>`__
-   creates a self-contained html file that shows an interactive visualization
+   creates a self-contained HTML file that shows an interactive visualization
    in a web browser (as an alternative to mplotqueries)
 
 `mlaunch <https://github.com/rueckstiess/mtools/wiki/mlaunch>`__
@@ -47,7 +48,8 @@ standard packages shipped with Python version 2.7.x.
 mtools is not currently compatible with Python 3.
 
 Some of the tools have additional dependencies, which are listed under the
-specific tool's section. See the `INSTALL.md <https://github.com/rueckstiess/mtools/blob/develop/INSTALL.md>`__ file for
+specific tool's section. See the `INSTALL.md
+<https://github.com/rueckstiess/mtools/blob/develop/INSTALL.md>`__ file for
 installation instructions for these modules.
 
 The mtools utilities are only tested with currently supported (non End-of-Life)
