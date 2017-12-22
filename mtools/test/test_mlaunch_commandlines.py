@@ -106,6 +106,11 @@ class TestMLaunch(object):
         if LooseVersion(self.mongod_version) < LooseVersion('3.6.0'):
             raise SkipTest('MongoDB version is < 3.6.0')
 
+    @raises(IOError)
+    def raises_ioerror(self):
+        """Check for IOError exceptions"""
+        self.read_config()
+
     # Tests
 
     def test_single(self):
@@ -155,7 +160,9 @@ class TestMLaunch(object):
     def test_sharded_single(self):
         """mlaunch should start 1 config, 2 single shards 1 mongos."""
         self.run_tool('init --sharded 2 --single')
-        if LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
+        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
+            self.raises_ioerror()
+        elif LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
             cmdlist = (
                 [set(['mongod', '--dbpath', '--logpath', '--port', '--fork',
                       '--replSet', '--configsvr'])] +
@@ -164,6 +171,7 @@ class TestMLaunch(object):
                 [set(['mongos', '--logpath', '--port', '--configdb',
                       '--fork'])]
                 )
+            self.cmdlist_assert(cmdlist)
         else:
             cmdlist = (
                 [set(['mongod', '--dbpath', '--logpath', '--port', '--fork',
@@ -173,7 +181,7 @@ class TestMLaunch(object):
                 [set(['mongos', '--logpath', '--port', '--configdb',
                       '--fork'])]
                 )
-        self.cmdlist_assert(cmdlist)
+            self.cmdlist_assert(cmdlist)
 
     def test_sharded_replicaset_sccc_1(self):
         """
@@ -362,15 +370,18 @@ class TestMLaunch(object):
         """mlaunch should start 2 mongos (CSRS)."""
         self.check_csrs()
         self.run_tool('init --sharded 2 --single --config 1 --mongos 2 --csrs')
-        cmdlist = (
-            [set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
-            [set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath',
-                  '--fork'])] * 2 +
-            [set(['mongos', '--port', '--logpath', '--configdb',
-                  '--fork'])] * 2
-            )
-        self.cmdlist_assert(cmdlist)
+        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
+            self.raises_ioerror()
+        else:
+            cmdlist = (
+                [set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr',
+                    '--fork', '--replSet'])] +
+                [set(['mongod', '--port', '--shardsvr', '--logpath', '--dbpath',
+                    '--fork'])] * 2 +
+                [set(['mongos', '--port', '--logpath', '--configdb',
+                    '--fork'])] * 2
+                )
+            self.cmdlist_assert(cmdlist)
 
     def test_sharded_three_mongos_sccc(self):
         """mlaunch should start 3 mongos (SCCC)."""
@@ -409,14 +420,17 @@ class TestMLaunch(object):
         """
         self.check_3_4()
         self.run_tool('init --sharded 2 --single')
-        cmdlist = (
-            [set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
-            [set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr',
-                  '--fork'])] * 2 +
-            [set(['mongos', '--port', '--logpath', '--configdb', '--fork'])]
-            )
-        self.cmdlist_assert(cmdlist)
+        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
+            self.raises_ioerror()
+        else:
+            cmdlist = (
+                [set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr',
+                    '--fork', '--replSet'])] +
+                [set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr',
+                    '--fork'])] * 2 +
+                [set(['mongos', '--port', '--logpath', '--configdb', '--fork'])]
+                )
+            self.cmdlist_assert(cmdlist)
 
     def test_default_replicaset_3_4(self):
         """mlaunch should create csrs by default -- replicaset shards (3.4)."""
@@ -488,12 +502,12 @@ class TestMLaunch(object):
         mlaunch should not pass storageEngine option to config server (3.4).
         """
         self.check_3_4()
-        self.run_tool('init --sharded 2 --single --storageEngine mmapv1')
+        self.run_tool('init --sharded 2 --replicaset --storageEngine mmapv1')
         cmdlist = (
             [set(['mongod', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
+                '--fork', '--replSet'])] +
             [set(['mongod', '--port', '--logpath', '--dbpath', '--shardsvr',
-                  '--fork', '--storageEngine'])] * 2 +
+                '--fork', '--storageEngine'])] * 6 +
             [set(['mongos', '--port', '--logpath', '--configdb', '--fork'])]
             )
         self.cmdlist_assert(cmdlist)
