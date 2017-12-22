@@ -1938,9 +1938,9 @@ class MLaunchTool(BaseCmdLineTool):
 
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
-            and LooseVersion(current_version) >= LooseVersion("3.6.0")
-            and (self.args['sharded'] or self.args['replicaset'])
-            and '--bind_ip' not in extra):
+                and LooseVersion(current_version) >= LooseVersion("3.6.0")
+                and (self.args['sharded'] or self.args['replicaset'])
+                and '--bind_ip' not in extra):
             os.removedirs(dbpath)
             errmsg = " \n * If hostname is specified, please include '--bind_ip_all' or '--bind_ip' options when deploying replica sets or sharded cluster with MongoDB version 3.6.0 or greater"
             raise SystemExit(errmsg)
