@@ -101,6 +101,11 @@ class TestMLaunch(object):
         if LooseVersion(self.mongod_version) < LooseVersion('3.4.0'):
             raise SkipTest('MongoDB version is < 3.4.0')
 
+    def check_3_6(self):
+        """Check for MongoDB 3.6, skip test otherwise."""
+        if LooseVersion(self.mongod_version) < LooseVersion('3.6.0'):
+            raise SkipTest('MongoDB version is < 3.6.0')
+
     # Tests
 
     def test_single(self):
@@ -492,3 +497,12 @@ class TestMLaunch(object):
             [set(['mongos', '--port', '--logpath', '--configdb', '--fork'])]
             )
         self.cmdlist_assert(cmdlist)
+
+    @raises(IOError)
+    def test_hostname_3_6(self):
+        """
+        mlaunch should not start if hostname is specified but not bind_ip.
+        """
+        self.check_3_6()
+        self.run_tool('init --replicaset --hostname this_host')
+        self.read_config()
