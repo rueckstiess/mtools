@@ -1,24 +1,22 @@
-from __future__ import print_function
+import json
+import os
+import re
+import sys
+from datetime import datetime, timedelta
+from random import randrange
 
+from dateutil import parser
+from nose.plugins.skip import SkipTest
+from nose.tools import raises
+
+import mtools
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
-import mtools
-
-from nose.tools import *
-from nose.plugins.skip import Skip, SkipTest
-
-from random import randrange
-from datetime import timedelta, datetime
-from dateutil import parser
-import os
-import sys
-import re
-import json
 
 
 def random_date(start, end):
-    """ This function will return a random datetime between two datetime objects. """
+    """Return a random datetime between two datetime objects."""
     delta = end - start
     int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
     random_second = randrange(int_delta)
@@ -26,20 +24,20 @@ def random_date(start, end):
 
 
 class TestMLogFilter(object):
-    """ This class tests functionality around the mlogfilter tool. """
+    """Test functionality around the mlogfilter tool."""
 
     def setup(self):
-        """ start up method to create mlaunch tool and find free port. """
+        """Start up method to create mlaunch tool and find free port."""
         self.tool = MLogFilterTool()
 
         self._test_base()
 
-    def _test_base(self,filename='mongod_225.log'):
+    def _test_base(self, filename='mongod_225.log'):
         # load logfile(s)
-        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                         'test/logfiles/', filename)
         self.logfile = LogFile(open(self.logfile_path, 'r'))
         self.current_year = datetime.now().year
-
 
     def test_msToString(self):
         assert(self.tool._msToString(100) == '0hr 0min 0secs 100ms')
@@ -49,7 +47,9 @@ class TestMLogFilter(object):
 
     def test_from(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
-        self.tool.run('%s --from %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S")))
+        self.tool.run('%s --from '
+                      '%s' % (self.logfile_path,
+                              random_start.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -59,7 +59,8 @@ class TestMLogFilter(object):
 
     def test_from_iso8601_timestamp(self):
         random_start = random_date(self.logfile.start, self.logfile.end)
-        self.tool.run('%s --from %s'%(self.logfile_path, random_start.isoformat()))
+        self.tool.run('%s --from %s' % (self.logfile_path,
+                                        random_start.isoformat()))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -71,7 +72,10 @@ class TestMLogFilter(object):
         random_start = random_date(self.logfile.start, self.logfile.end)
         random_end = random_date(random_start, self.logfile.end)
 
-        self.tool.run('%s --from %s --to %s'%(self.logfile_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        self.tool.run('%s --from %s --to '
+                      '%s' % (self.logfile_path,
+                              random_start.strftime("%b %d %H:%M:%S"),
+                              random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -79,18 +83,22 @@ class TestMLogFilter(object):
                 continue
             assert(le.datetime >= random_start and le.datetime <= random_end)
 
-
     def test_from_to_26_log(self):
-        logfile_26_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26.log')
+        logfile_26_path = os.path.join(os.path.dirname(mtools.__file__),
+                                       'test/logfiles/', 'mongod_26.log')
         logfile_26 = LogFile(open(logfile_26_path, 'r'))
 
         random_start = random_date(logfile_26.start, logfile_26.end)
-        random_end = random_date(random_start+timedelta(minutes=1), logfile_26.end+timedelta(minutes=1))
+        random_end = random_date(random_start + timedelta(minutes=1),
+                                 logfile_26.end + timedelta(minutes=1))
 
-        print(random_start, random_end)
-        print(logfile_26.start, logfile_26.end)
+        print('%s %s' % (random_start, random_end))
+        print('%s %s' % (logfile_26.start, logfile_26.end))
 
-        self.tool.run('%s --from %s --to %s'%(logfile_26_path, random_start.strftime("%b %d %H:%M:%S"), random_end.strftime("%b %d %H:%M:%S")))
+        self.tool.run('%s --from %s --to '
+                      '%s' % (logfile_26_path,
+                              random_start.strftime("%b %d %H:%M:%S"),
+                              random_end.strftime("%b %d %H:%M:%S")))
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
 
@@ -107,9 +115,12 @@ class TestMLogFilter(object):
 
         year = datetime.now().year
         start = datetime(year, 8, 5, 20, 45)
-        end = datetime(year, 8, 5, 21, 01)
+        end = datetime(year, 8, 5, 21, 1)
         self.tool.is_stdin = True
-        self.tool.run('%s --from %s --to %s'%(self.logfile_path, start.strftime("%b %d %H:%M:%S"), end.strftime("%b %d %H:%M:%S")))
+        self.tool.run('%s --from %s --to '
+                      '%s' % (self.logfile_path,
+                              start.strftime("%b %d %H:%M:%S"),
+                              end.strftime("%b %d %H:%M:%S")))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
@@ -117,10 +128,9 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.datetime >= start and le.datetime <= end)
 
-
     def test_json(self):
-        """ output with --json is in JSON format. """
-        self.tool.run('%s --json'%self.logfile_path)
+        """Output with --json is in JSON format."""
+        self.tool.run('%s --json' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             line_dict = json.loads(line)
@@ -128,23 +138,23 @@ class TestMLogFilter(object):
             assert(type(line_dict) == dict)
 
     def test_shorten_50(self):
-        self.tool.run('%s --shorten 50'%self.logfile_path)
+        self.tool.run('%s --shorten 50' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert(len(line) <= 50)
 
     def test_shorten_default(self):
-        self.tool.run('%s --shorten'%self.logfile_path)
+        self.tool.run('%s --shorten' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert(len(line) <= 200)
 
     def test_merge_same(self):
         file_length = len(self.logfile)
-        self.tool.run('%s %s'%(self.logfile_path, self.logfile_path))
+        self.tool.run('%s %s' % (self.logfile_path, self.logfile_path))
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert len(lines) == 2*file_length
+        assert len(lines) == 2 * file_length
         for prev, next in zip(lines[:-1], lines[1:]):
             prev_le = LogEvent(prev)
             next_le = LogEvent(next)
@@ -154,7 +164,8 @@ class TestMLogFilter(object):
 
     def test_merge_markers(self):
         file_length = len(self.logfile)
-        self.tool.run('%s %s --markers foo bar'%(self.logfile_path, self.logfile_path))
+        self.tool.run('%s %s --markers foo bar' % (self.logfile_path,
+                                                   self.logfile_path))
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert len([l for l in lines if l.startswith('foo')]) == file_length
@@ -162,7 +173,8 @@ class TestMLogFilter(object):
 
     def test_merge_invalid_markers(self):
         try:
-            self.tool.run('%s %s --markers foo bar baz'%(self.logfile_path, self.logfile_path))
+            self.tool.run('%s %s --markers foo bar baz' % (self.logfile_path,
+                                                           self.logfile_path))
         except SystemExit as e:
             assert 'Number of markers not the same' in e.message
 
@@ -178,25 +190,24 @@ class TestMLogFilter(object):
 
         assert lines_total == file_length
 
-
     def test_end_reached(self):
-        self.tool.run('%s --from Jan 3015 --to +10min'%self.logfile_path)
+        self.tool.run('%s --from Jan 3015 --to +10min' % self.logfile_path)
         output = sys.stdout.getvalue()
         assert output.strip() == ''
 
-
     def test_human(self):
-        # need to skip this test for python 2.6.x because thousands separator format is not compatible
+        # need to skip this test for python 2.6.x because thousands separator
+        # format is not compatible
         if sys.version_info < (2, 7):
             raise SkipTest
 
-        self.tool.run('%s --slow --thread conn8 --human'%self.logfile_path)
+        self.tool.run('%s --slow --thread conn8 --human' % self.logfile_path)
         output = sys.stdout.getvalue().rstrip()
         assert(output.endswith('(0hr 0min 1secs 324ms) 1,324ms'))
         assert('cursorid:7,776,022,515,301,717,602' in output)
 
     def test_slow_fast(self):
-        self.tool.run('%s --slow 145 --fast 500'%self.logfile_path)
+        self.tool.run('%s --slow 145 --fast 500' % self.logfile_path)
         output = sys.stdout.getvalue()
         assert(len(output.splitlines()) > 0)
         for line in output.splitlines():
@@ -206,12 +217,14 @@ class TestMLogFilter(object):
     @raises(SystemExit)
     def test_invalid_log(self):
         # load text file
-        invalid_logfile_path = os.path.join(os.path.dirname(mtools.__file__), '../', 'requirements.txt')
+        invalid_logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                            '../', 'requirements.txt')
         self.tool.run('%s' % invalid_logfile_path)
 
     def test_scan(self):
         # load tablescan logfile
-        scn_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'collscans.log')
+        scn_logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                        'test/logfiles/', 'collscans.log')
 
         self.tool.run('%s --scan' % scn_logfile_path)
         output = sys.stdout.getvalue()
@@ -220,31 +233,34 @@ class TestMLogFilter(object):
 
     def test_accept_nodate(self):
         self.tool.is_stdin = True
-        self.tool.run('%s --from Aug 5 %d 20:53:50 --to +5min' % (self.logfile_path, self.current_year -1))
+        self.tool.run('%s --from Aug 5 %d 20:53:50 --to '
+                      '+5min' % (self.logfile_path, self.current_year - 1))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any('=== a line without a datetime ===' in l for l in lines)
 
-    def _test_thread(self,path,thread):
-        self.tool.run('%s --thread mongosMain'%path )
+    def _test_thread(self, path, thread):
+        self.tool.run('%s --thread mongosMain' % path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.thread == thread)
-            md = re.match("^.* connection accepted from [0-9\.:]+ #(?P<conn>[0-9]+) " , le.line_str)
+            md = re.match("^.* connection accepted from [0-9\.:]+ "
+                          "#(?P<conn>[0-9]+) ", le.line_str)
             if md is None:
                 assert(le.conn is None)
             else:
                 assert(le.conn == "conn" + md.group('conn'))
 
-    def _test_thread_conn1(self,path,thread):
-        self.tool.run('%s --thread conn1'%path )
+    def _test_thread_conn1(self, path, thread):
+        self.tool.run('%s --thread conn1' % path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
-            md = re.match("^.* connection accepted from [0-9\.:]+ #(?P<conn>[0-9]+) " , le.line_str)
+            md = re.match("^.* connection accepted from [0-9\.:]+ "
+                          "#(?P<conn>[0-9]+) ", le.line_str)
             assert(le.conn == 'conn1')
             if md is None:
                 assert(le.thread == 'conn1')
@@ -252,21 +268,24 @@ class TestMLogFilter(object):
                 assert(le.thread == thread)
 
     def test_thread(self):
-        self._test_thread(self.logfile_path,'initandlisten')
+        self._test_thread(self.logfile_path, 'initandlisten')
 
     def test_thread_conn1(self):
-        self._test_thread_conn1(self.logfile_path,'initandlisten')
+        self._test_thread_conn1(self.logfile_path, 'initandlisten')
 
     def test_thread_mongos(self):
-        mongos_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
-        self._test_thread(mongos_path,'mongosMain')
+        mongos_path = os.path.join(os.path.dirname(mtools.__file__),
+                                   'test/logfiles/', 'mongos.log')
+        self._test_thread(mongos_path, 'mongosMain')
 
     def test_thread_mongos_conn1(self):
-        mongos_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongos.log')
-        self._test_thread_conn1(mongos_path,'mongosMain')
+        mongos_path = os.path.join(os.path.dirname(mtools.__file__),
+                                   'test/logfiles/', 'mongos.log')
+        self._test_thread_conn1(mongos_path, 'mongosMain')
 
     def test_no_timestamp_format(self):
-        self.tool.run('%s --timestamp-format none --timezone 5'%self.logfile_path)
+        self.tool.run('%s --timestamp-format none --timezone 5'
+                      % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -274,14 +293,14 @@ class TestMLogFilter(object):
                 assert le.datetime_format == 'ctime-pre2.4'
 
     def test_operation(self):
-        self.tool.run('%s --operation insert'%self.logfile_path)
+        self.tool.run('%s --operation insert' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.operation == 'insert')
 
     def test_multiple_operations(self):
-        self.tool.run('%s --operation insert query'%self.logfile_path)
+        self.tool.run('%s --operation insert query' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -289,42 +308,46 @@ class TestMLogFilter(object):
 
     def test_invalid_timezone_args(self):
         try:
-            self.tool.run('%s --timezone 1 2 3'%self.logfile_path)
+            self.tool.run('%s --timezone 1 2 3' % self.logfile_path)
         except SystemExit as e:
             assert "Invalid number of timezone parameters" in e.message
 
     def test_verbose(self):
-        self.tool.run('%s --slow --verbose'%self.logfile_path)
+        self.tool.run('%s --slow --verbose' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert lines[0].startswith('command line arguments')
-        assert any( line.startswith('active filters: SlowFilter') for line in lines )
+        assert any(line.startswith('active filters: SlowFilter')
+                   for line in lines)
 
     def test_namespace(self):
-        self.tool.run('%s --namespace local.oplog.rs'%self.logfile_path)
+        self.tool.run('%s --namespace local.oplog.rs' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.namespace == 'local.oplog.rs')
 
     def test_pattern(self):
-        # test that pattern is correctly parsed, reordered and compared to logevent pattern
-        self.tool.run('%s --pattern {ns:1,_id:1,host:1}'%self.logfile_path)
+        # test that pattern is correctly parsed, reordered and compared to
+        # logevent pattern
+        self.tool.run('%s --pattern {ns:1,_id:1,host:1}' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.pattern == '{"_id": 1, "host": 1, "ns": 1}')
 
     def test_command(self):
-        self.tool.run('%s --command dropDatabase deleteIndexes'%self.logfile_path)
+        self.tool.run('%s --command dropDatabase deleteIndexes'
+                      % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.command in ['dropDatabase', 'deleteIndexes'])
 
     def test_planSummary(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mongod_26_corrupt.log')
-        self.tool.run('%s --planSummary IXSCAN'%logfile_path)
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/', 'mongod_26_corrupt.log')
+        self.tool.run('%s --planSummary IXSCAN' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert(len(lines) > 0)
@@ -333,121 +356,131 @@ class TestMLogFilter(object):
             assert(le.planSummary == "IXSCAN")
 
     def test_word(self):
-        self.tool.run('%s --word lock'%self.logfile_path)
+        self.tool.run('%s --word lock' % self.logfile_path)
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert('lock' in line)
 
-
     def test_mask_end(self):
-        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+        mask_path = os.path.join(os.path.dirname(mtools.__file__),
+                                 'test/logfiles/', 'mask_centers.log')
 
         event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
-        padding = timedelta(seconds=mask_size/2)
+        padding = timedelta(seconds=mask_size / 2)
 
-        self.tool.run('%s --mask %s --mask-size %i'%(self.logfile_path, mask_path, mask_size))
+        self.tool.run('%s --mask %s --mask-size %i' % (self.logfile_path,
+                                                       mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
-            assert(
-                    (le.datetime >= event1 - padding and le.datetime <= event1 + padding) or
-                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
-                  )
-
+            le = LogEvent(line)
+            assert((le.datetime >= event1 - padding and
+                    le.datetime <= event1 + padding) or
+                   (le.datetime >= event2 - padding and
+                    le.datetime <= event2 + padding))
 
     def test_mask_start(self):
-        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+        mask_path = os.path.join(os.path.dirname(mtools.__file__),
+                                 'test/logfiles/', 'mask_centers.log')
 
         event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
         event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
-        padding = timedelta(seconds=mask_size/2)
+        padding = timedelta(seconds=mask_size / 2)
 
-        self.tool.run('%s --mask %s --mask-size %i --mask-center start'%(self.logfile_path, mask_path, mask_size))
+        self.tool.run('%s --mask %s --mask-size %i --mask-center start'
+                      % (self.logfile_path, mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
-            assert(
-                    (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 - duration1 + padding) or
-                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
-                  )
-
+            le = LogEvent(line)
+            assert((le.datetime >= event1 - duration1 - padding and
+                    le.datetime <= event1 - duration1 + padding) or
+                   (le.datetime >= event2 - padding and
+                    le.datetime <= event2 + padding))
 
     def test_mask_both(self):
-        mask_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'mask_centers.log')
+        mask_path = os.path.join(os.path.dirname(mtools.__file__),
+                                 'test/logfiles/', 'mask_centers.log')
 
         event1 = parser.parse("Mon Aug  5 20:27:15 UTC")
         duration1 = timedelta(seconds=75)
         event2 = parser.parse("Mon Aug  5 20:30:09 UTC")
         mask_size = randrange(10, 60)
-        padding = timedelta(seconds=mask_size/2)
+        padding = timedelta(seconds=mask_size / 2)
 
-        self.tool.run('%s --mask %s --mask-size %i --mask-center both'%(self.logfile_path, mask_path, mask_size))
+        self.tool.run('%s --mask %s --mask-size %i --mask-center both'
+                      % (self.logfile_path, mask_path, mask_size))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
-            le =  LogEvent(line)
-            assert(
-                    (le.datetime >= event1 - duration1 - padding and le.datetime <= event1 + padding) or
-                    (le.datetime >= event2 - padding and le.datetime <= event2 + padding)
-                  )
+            le = LogEvent(line)
+            assert((le.datetime >= event1 - duration1 - padding and
+                    le.datetime <= event1 + padding) or
+                   (le.datetime >= event2 - padding and
+                    le.datetime <= event2 + padding))
 
     @raises(SystemExit)
     def test_no_logfile(self):
-        """ mlogfilter: test that not providing at least 1 log file throws clean error. """
+        """Test that not providing at least 1 log file throws clean error."""
 
         self.tool.run('--from Jan 1')
 
-
     def test_year_rollover_1(self):
-        """ mlogfilter: test that mlogfilter works correctly with year-rollovers in logfiles with ctime (1) """
+        """
+        Test that mlogfilter works correctly with year-rollovers in logfiles
+        with ctime (1).
+        """
 
         # load year rollover logfile
-        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
+        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                        'test/logfiles/', 'year_rollover.log')
 
-        self.tool.run('%s --from Jan 1 %d --timestamp-format iso8601-utc' % (yro_logfile_path, self.current_year))
+        self.tool.run('%s --from Jan 1 %d --timestamp-format iso8601-utc'
+                      % (yro_logfile_path, self.current_year))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert line.startswith('%d-' % self.current_year)
 
-
     def test_year_rollover_2(self):
-        """ mlogfilter: test that mlogfilter works correctly with year-rollovers in logfiles with ctime (2) """
+        """
+        Test that mlogfilter works correctly with year-rollovers in logfiles
+        with ctime (2).
+        """
 
         # load year rollover logfile
-        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', 'year_rollover.log')
-
-        self.tool.run('%s --from Dec 31 --to +1day --timestamp-format iso8601-utc' % yro_logfile_path)
+        yro_logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                        'test/logfiles/', 'year_rollover.log')
+        self.tool.run('%s --from Dec 31 --to +1day --timestamp-format '
+                      'iso8601-utc' % yro_logfile_path)
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
         for line in output.splitlines():
-            assert line.startswith('%d-' % (self.current_year -1) )
+            assert line.startswith('%d-' % (self.current_year - 1))
 
     def test_level_225(self):
-        """ mlogfilter: test that mlogfilter works levels on older logs """
+        """Test that mlogfilter works levels on older logs."""
 
-        self.tool.run('%s --level D '%self.logfile_path)
+        self.tool.run('%s --level D ' % self.logfile_path)
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) == 0
 
     def test_component_225(self):
-        """ mlogfilter: test that mlogfilter works components on older logs """
+        """Test that mlogfilter works components on older logs."""
 
-        self.tool.run('%s --component ACCESS '%self.logfile_path)
+        self.tool.run('%s --component ACCESS ' % self.logfile_path)
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) == 0
 
     @raises(SystemExit)
     def test_invalid_level(self):
         self._test_base('mongod_278.log')
-        self.tool.run(' %s --level C'%self.logfile_path)
+        self.tool.run(' %s --level C' % self.logfile_path)
 
     @raises(SystemExit)
     def test_invalid_component(self):
         self._test_base('mongod_278.log')
-        self.tool.run(' %s --component FAKE'%self.logfile_path)
+        self.tool.run(' %s --component FAKE' % self.logfile_path)
 
     def _test_levels(self, level, expected=1):
         self._test_base('mongod_278.log')
@@ -463,18 +496,18 @@ class TestMLogFilter(object):
 
 
 def _add_component_test(cls, name, component, expected):
-    """
-    meta program new tests
-    """
+    """Meta program new tests."""
     def test_method(self):
-        self._test_components(component,expected)
+        self._test_components(component, expected)
     test_method.__doc__ = name
     test_method.__name__ = name
-    setattr(cls,test_method.__name__,test_method)
+    setattr(cls, test_method.__name__, test_method)
+
 
 _add_component_test(TestMLogFilter, 'test_total_component', 'TOTAL', 1)
 _add_component_test(TestMLogFilter, 'test_s2_component', 'GEO', 1)
-_add_component_test(TestMLogFilter, 'test_all_component', " ".join(LogEvent.log_components), 25)
+_add_component_test(TestMLogFilter, 'test_all_component',
+                    " ".join(LogEvent.log_components), 25)
 _add_component_test(TestMLogFilter, 'test_dash_component', '-', 10)
 _add_component_test(TestMLogFilter, 'test_access_component', 'ACCESS', 1)
 _add_component_test(TestMLogFilter, 'test_commands_component', 'COMMAND', 1)
@@ -496,9 +529,11 @@ def _add_level_test(cls, name, level, expected=1):
         self._test_levels(level, expected)
     test_method.__doc__ = name
     test_method.__name__ = name
-    setattr(cls,test_method.__name__,test_method)
+    setattr(cls, test_method.__name__, test_method)
 
-_add_level_test(TestMLogFilter, 'test_all_levels', " ".join(LogEvent.log_levels), 25)
+
+_add_level_test(TestMLogFilter, 'test_all_levels',
+                " ".join(LogEvent.log_levels), 25)
 _add_level_test(TestMLogFilter, 'test_D_levels', 'D')
 _add_level_test(TestMLogFilter, 'test_F_levels', 'F')
 _add_level_test(TestMLogFilter, 'test_E_levels', 'E')

@@ -1,8 +1,11 @@
-from datetime import datetime
-from dateutil.tz import tzutc
-import dateutil.parser
-import re
+#!/bin/python
+
 import json
+import re
+from datetime import datetime
+
+import dateutil.parser
+from dateutil.tz import tzutc
 
 from six.moves import range
 
@@ -10,7 +13,8 @@ from mtools.util.pattern import json2pattern
 
 
 class DateTimeEncoder(json.JSONEncoder):
-    """ custom datetime encoder for json output. """
+    """Custom datetime encoder for json output."""
+
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
@@ -18,43 +22,44 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class LogEvent(object):
-    """ LogEvent extracts information from a mongod/mongos log file line and
-        stores the following properties/variables:
+    """
+    Extract information from log line and store properties/variables.
 
-        line_str: the original line string
-        split_tokens: a list of string tokens after splitting line_str using
-                      whitespace as split points
-        datetime: a datetime object for the logevent. For logfiles created with
-                  version 2.4+, it also contains micro-seconds
-        duration: the duration of a timed operation in ms
-        thread: the thread name (e.g. "conn1234") as string
-        operation: insert, update, remove, query, command, getmore, None
-        namespace: the namespace of the operation, or None
-        command: the type of command, if the operation was a "command"
-        pattern: the query pattern for queries, updates, counts, etc
-        ...
+    line_str: the original line string
+    split_tokens: a list of string tokens after splitting line_str using
+                  whitespace as split points
+    datetime: a datetime object for the logevent. For logfiles created with
+              version 2.4+, it also contains micro-seconds
+    duration: the duration of a timed operation in ms
+    thread: the thread name (e.g. "conn1234") as string
+    operation: insert, update, remove, query, command, getmore, None
+    namespace: the namespace of the operation, or None
+    command: the type of command, if the operation was a "command"
+    pattern: the query pattern for queries, updates, counts, etc
+    ...
 
-        Certain operations also add the number of affected/scanned documents.
-        If applicable, the following variables are also set, otherwise the
-        default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
+    Certain operations also add the number of affected/scanned documents.
+    If applicable, the following variables are also set, otherwise the
+    default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
 
-        For performance reason, all fields are evaluated lazily upon first
-        request.
+    For performance reason, all fields are evaluated lazily upon first
+    request.
     """
 
     # datetime handler for json encoding
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj, \
-        datetime) else None
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj,
+                                                          datetime) else None
 
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', \
-        'Oct', 'Nov', 'Dec']
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec']
 
-    log_operations = ['query', 'insert', 'update', 'remove', 'getmore', 'command']
+    log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
+                      'command']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
-    log_components = ['-','ACCESS','COMMAND','CONTROL','GEO', \
-                      'INDEX','NETWORK','QUERY','REPL','SHARDING', \
-                      'STORAGE','JOURNAL','WRITE','TOTAL']
+    log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
+                      'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
+                      'JOURNAL', 'WRITE', 'TOTAL']
 
     def __init__(self, doc_or_str):
         self._year_rollover = False
@@ -70,8 +75,6 @@ class LogEvent(object):
             self._profile_doc = doc_or_str
             # docs don't need to be parsed lazily, they are fast
             self._parse_document()
-
-
 
     def _reset(self):
         self._split_tokens_calculated = False
@@ -101,8 +104,10 @@ class LogEvent(object):
 
         self._counters_calculated = False
 
-        # TODO: refactor from the legacy names to modern (eg: nscanned => keysExamined). Currently _extract_counters()
-        # maps newer property names into  legacy equivalents for broader log file support.
+        # TODO: refactor from the legacy names to modern
+        # (eg: nscanned => keysExamined). Currently _extract_counters()
+        # maps newer property names into legacy equivalents for
+        # broader log file support.
         self._nscanned = None         # keysExamined
         self._nscannedObjects = None  # docsExamined
         self._ntoreturn = None
@@ -125,31 +130,35 @@ class LogEvent(object):
         self.merge_marker_str = ''
 
     def set_line_str(self, line_str):
-        """ line_str is only writeable if LogEvent was created from a string, not from a system.profile documents. """
+        """
+        Set line_str.
 
+        Line_str is only writeable if LogEvent was created from a string,
+        not from a system.profile documents.
+        """
         if not self.from_string:
-            raise ValueError("can't set line_str for LogEvent created from system.profile documents.")
+            raise ValueError("can't set line_str for LogEvent created from "
+                             "system.profile documents.")
 
         if line_str != self._line_str:
             self._line_str = line_str.rstrip()
             self._reset()
 
-
     def get_line_str(self):
-        """ return line_str depending on source, logfile or system.profile. """
-
+        """Return line_str depending on source, logfile or system.profile."""
         if self.from_string:
-            return ' '.join([s for s in [self.merge_marker_str, self._datetime_str, self._line_str] if s])
+            return ' '.join([s for s in [self.merge_marker_str,
+                                         self._datetime_str,
+                                         self._line_str] if s])
         else:
-            return ' '.join([s for s in [self._datetime_str, self._line_str] if s])
+            return ' '.join([s for s in [self._datetime_str,
+                                         self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
-
     @property
     def split_tokens(self):
-        """ splits string into tokens (lazy) """
-
+        """Split string into tokens (lazy)."""
         if not self._split_tokens_calculated:
             # split into items (whitespace split)
             self._split_tokens = self._line_str.split()
@@ -157,11 +166,9 @@ class LogEvent(object):
 
         return self._split_tokens
 
-
     @property
     def duration(self):
-        """ calculate duration if available (lazy) """
-
+        """Calculate duration if available (lazy)."""
         if not self._duration_calculated:
             self._duration_calculated = True
 
@@ -174,30 +181,30 @@ class LogEvent(object):
                     space_pos = line_str.rfind(" ")
                     if space_pos == -1:
                         return
-                    self._duration = int(line_str[line_str.rfind(" ")+1:-2].replace(',',''))
+                    self._duration = int(line_str[line_str.rfind(" ") +
+                                                  1:-2].replace(',', ''))
                 except ValueError:
                     self._duration = None
             elif "flushing" in self.line_str:
-                matchobj = re.search(r'flushing mmaps took (\d+)ms', self.line_str)
+                matchobj = re.search(r'flushing mmaps took (\d+)ms',
+                                     self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1))
 
         return self._duration
 
-
     @property
     def datetime(self):
-        """ extract datetime if available (lazy) """
-
+        """Extract datetime if available (lazy)."""
         if not self._datetime_calculated:
             self._datetime_calculated = True
 
-            # if no datetime after 10 tokens, break to avoid parsing very long lines
+            # if no datetime after 10 tokens, break to avoid parsing
+            # very long lines
             split_tokens = self.split_tokens[:10]
 
-            match_found = False
             for offs in range(len(split_tokens)):
-                dt = self._match_datetime_pattern(split_tokens[offs:offs+4])
+                dt = self._match_datetime_pattern(split_tokens[offs:offs + 4])
                 if dt:
                     self._datetime = dt
                     self._datetime_nextpos = offs
@@ -207,7 +214,8 @@ class LogEvent(object):
                         self._datetime_nextpos += 4
 
                     # separate datetime str and linestr
-                    self._line_str = ' '.join(self.split_tokens[self._datetime_nextpos:])
+                    self._line_str = (' '.join(self.split_tokens
+                                               [self._datetime_nextpos:]))
 
                     if self.level:
                         self._datetime_nextpos += 2
@@ -217,7 +225,6 @@ class LogEvent(object):
 
         return self._datetime
 
-
     @property
     def datetime_format(self):
         if not self._datetime_calculated:
@@ -225,22 +232,23 @@ class LogEvent(object):
 
         return self._datetime_format
 
-
     @property
     def datetime_nextpos(self):
-        if self._datetime_nextpos == None and not self._datetime_calculated:
+        if self._datetime_nextpos is None and not self._datetime_calculated:
             _ = self.datetime
         return self._datetime_nextpos
-
 
     def set_datetime_hint(self, format, nextpos, rollover):
         self._datetime_format = format
         self._datetime_nextpos = nextpos
         self._year_rollover = rollover
 
-        # fast check if timestamp format changed. if it has, trigger datetime evaluation
+        # Fast check if timestamp format changed.
+        # If it has, trigger datetime evaluation.
         if format.startswith('ctime'):
-            if len(self.split_tokens) < 4 or self.split_tokens[self._datetime_nextpos-4] not in self.weekdays:
+            if (len(self.split_tokens) < 4 or
+                    self.split_tokens[self._datetime_nextpos - 4] not in
+                    self.weekdays):
                 _ = self.datetime
                 return False
             return True
@@ -250,26 +258,26 @@ class LogEvent(object):
                 self._datetime_calculated = True
                 return False
             try:
-                if not self.split_tokens[self._datetime_nextpos-1][0].isdigit():
+                if not (self.split_tokens[self._datetime_nextpos - 1][0]
+                        .isdigit()):
                     # not the timestamp format that was hinted
                     _ = self.datetime
                     return False
-            except:
+            except Exception:
                 pass
             return True
 
-
     def _match_datetime_pattern(self, tokens):
-        """ Helper method that takes a list of tokens and tries to match
-            the datetime pattern at the beginning of the token list.
+        """
+        Match the datetime pattern at the beginning of the token list.
 
-            There are several formats that this method needs to understand
-            and distinguish between (see MongoDB's SERVER-7965):
+        There are several formats that this method needs to understand
+        and distinguish between (see MongoDB's SERVER-7965):
 
-            ctime-pre2.4    Wed Dec 31 19:00:00
-            ctime           Wed Dec 31 19:00:00.000
-            iso8601-utc     1970-01-01T00:00:00.000Z
-            iso8601-local   1969-12-31T19:00:00.000+0500
+        ctime-pre2.4    Wed Dec 31 19:00:00
+        ctime           Wed Dec 31 19:00:00.000
+        iso8601-utc     1970-01-01T00:00:00.000Z
+        iso8601-local   1969-12-31T19:00:00.000+0500
         """
         # first check: less than 4 tokens can't be ctime
         assume_iso8601_format = len(tokens) < 4
@@ -277,14 +285,14 @@ class LogEvent(object):
         # check for ctime-pre-2.4 or ctime format
         if not assume_iso8601_format:
             weekday, month, day, time = tokens[:4]
-            if len(tokens) < 4 or (weekday not in self.weekdays) or \
-               (month not in self.months) or not day.isdigit():
+            if (len(tokens) < 4 or (weekday not in self.weekdays) or
+                    (month not in self.months) or not day.isdigit()):
                 assume_iso8601_format = True
 
         if assume_iso8601_format:
             # sanity check, because the dateutil parser could interpret
             # any numbers as a valid date
-            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}', \
+            if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}',
                             tokens[0]):
                 return None
 
@@ -295,32 +303,33 @@ class LogEvent(object):
                 if tokens[0].endswith('Z') else "iso8601-local"
 
         else:
-            # assume current year unless self.year_rollover is set (from LogFile)
+            # assume current year unless self.year_rollover
+            # is set (from LogFile)
             year = datetime.now().year
-            dt = dateutil.parser.parse(' '.join(tokens[:4]), default=datetime(year, 1, 1))
+            dt = dateutil.parser.parse(' '.join(tokens[: 4]),
+                                       default=datetime(year, 1, 1))
 
-            if dt.tzinfo == None:
+            if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=tzutc())
 
             if self._year_rollover and dt > self._year_rollover:
-                dt = dt.replace(year=year-1)
+                dt = dt.replace(year=year - 1)
 
             self._datetime_format = "ctime" \
                 if '.' in tokens[3] else "ctime-pre2.4"
 
         return dt
 
-
     @property
     def thread(self):
-        """ extract thread name if available (lazy) """
-
+        """Extract thread name if available (lazy)."""
         if not self._thread_calculated:
             self._thread_calculated = True
 
             split_tokens = self.split_tokens
 
-            if not self.datetime_nextpos or len(split_tokens) <= self.datetime_nextpos:
+            if not (self.datetime_nextpos or
+                    len(split_tokens) <= self.datetime_nextpos):
                 return None
 
             connection_token = split_tokens[self.datetime_nextpos]
@@ -330,7 +339,7 @@ class LogEvent(object):
 
             if self._thread is not None:
                 if self._thread in ['initandlisten', 'mongosMain']:
-                    if len(split_tokens) >= 5 and  split_tokens[-5][0] == '#':
+                    if len(split_tokens) >= 5 and split_tokens[-5][0] == '#':
                         self._conn = 'conn' + split_tokens[-5][1:]
                 elif self._thread.startswith('conn'):
                     self._conn = self._thread
@@ -338,61 +347,64 @@ class LogEvent(object):
 
     @property
     def conn(self):
-        """
-        extract conn name if available (lazy)
-        this value is None for all lines except the log lines related to connections ,
-        that is lines matching '\[conn[0-9]+\]' or '\[(initandlisten|mongosMain)\] .* connection accepted from'
+        r"""
+        Extract conn name if available (lazy).
+
+        This value is None for all lines except the log lines related to
+        connections, that is lines matching '\[conn[0-9]+\]' or
+        '\[(initandlisten|mongosMain)\] .* connection accepted from'.
         """
         self.thread
         return self._conn
 
     @property
     def operation(self):
-        """ extract operation (query, insert, update, remove, getmore, command)
-            if available (lazy) """
+        """
+        Extract operation if available (lazy).
 
+        Operations: query, insert, update, remove, getmore, command
+        """
         if not self._operation_calculated:
             self._operation_calculated = True
             self._extract_operation_and_namespace()
 
         return self._operation
 
-
     @property
     def namespace(self):
-        """ extract namespace if available (lazy) """
-
+        """Extract namespace if available (lazy)."""
         if not self._operation_calculated:
             self._operation_calculated = True
             self._extract_operation_and_namespace()
 
         return self._namespace
 
-
     def _extract_operation_and_namespace(self):
-        """ Helper method to extract both operation and namespace from a
-            logevent. It doesn't make sense to only extract one as they
-            appear back to back in the token list.
         """
+        Helper method to extract both operation and namespace from a logevent.
 
+        It doesn't make sense to only extract one as they appear back to back
+        in the token list.
+        """
         split_tokens = self.split_tokens
 
         if not self._datetime_nextpos:
-            # force evaluation of thread to get access to datetime_offset and to
-            # protect from changes due to line truncation
+            # force evaluation of thread to get access to datetime_offset and
+            # to protect from changes due to line truncation.
             _ = self.thread
 
-        if not self._datetime_nextpos or len(split_tokens) <= self._datetime_nextpos + 2:
+        if not self._datetime_nextpos or (len(split_tokens) <=
+                                          self._datetime_nextpos + 2):
             return
 
         op = split_tokens[self._datetime_nextpos + 1].lower()
 
         if op == 'warning:':
             # check if this log line got truncated
-            if ("warning: log line attempted" in self._line_str) and \
-               ("over max size") in self._line_str:
-               self._datetime_nextpos = split_tokens.index('...')
-               op = split_tokens[self._datetime_nextpos + 1]
+            if ("warning: log line attempted" in self._line_str and
+                    "over max size" in self._line_str):
+                self._datetime_nextpos = split_tokens.index('...')
+                op = split_tokens[self._datetime_nextpos + 1]
             else:
                 # unknown warning, bail out
                 return
@@ -401,27 +413,23 @@ class LogEvent(object):
             self._operation = op
             self._namespace = split_tokens[self._datetime_nextpos + 2]
 
-
-
     @property
     def pattern(self):
-        """ extract query pattern from operations """
-
+        """Extract query pattern from operations."""
         if not self._pattern:
 
             # trigger evaluation of operation
-            if self.operation in ['query', 'getmore', 'update', 'remove'] or self.command in ['count', 'findandmodify']:
+            if (self.operation in ['query', 'getmore', 'update', 'remove'] or
+                    self.command in ['count', 'findandmodify']):
                 self._pattern = self._find_pattern('query: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
 
         return self._pattern
 
-
     @property
     def sort_pattern(self):
-        """ extract query pattern from operations """
-
+        """Extract query pattern from operations."""
         if not self._sort_pattern:
 
             # trigger evaluation of operation
@@ -430,21 +438,20 @@ class LogEvent(object):
 
         return self._sort_pattern
 
-
     @property
     def command(self):
-        """ extract query pattern from operations """
-
+        """Extract query pattern from operations."""
         if not self._command_calculated:
 
             self._command_calculated = True
             if self.operation == 'command':
                 try:
                     command_idx = self.split_tokens.index('command:')
-                    command = self.split_tokens[command_idx+1]
+                    command = self.split_tokens[command_idx + 1]
                     if command == '{':
-                        # workaround for <= 2.2 log files, where command was not listed separately
-                        command = self.split_tokens[command_idx+2][:-1]
+                        # workaround for <= 2.2 log files,
+                        # where command was not listed separately
+                        command = self.split_tokens[command_idx + 2][:-1]
                     self._command = command.lower()
                 except ValueError:
                     pass
@@ -453,8 +460,7 @@ class LogEvent(object):
 
     @property
     def nscanned(self):
-        """ extract nscanned or keysExamined counter if available (lazy) """
-
+        """Extract nscanned or keysExamined counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -463,8 +469,11 @@ class LogEvent(object):
 
     @property
     def nscannedObjects(self):
-        """ extract nscannedObjects or docsExamined counter if available (lazy) """
+        """
+        Extract counters if available (lazy).
 
+        Looks for nscannedObjects or docsExamined.
+        """
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -473,41 +482,38 @@ class LogEvent(object):
 
     @property
     def ntoreturn(self):
-        """ extract ntoreturn counter if available (lazy) """
-
+        """Extract ntoreturn counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._ntoreturn
 
-
     @property
     def writeConflicts(self):
-        """ extract ntoreturn counter if available (lazy) """
-
+        """Extract ntoreturn counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._writeConflicts
 
-
     @property
     def nreturned(self):
-        """ extract nreturned, nReturned, or nMatched counter if available (lazy) """
+        """
+        Extract counters if available (lazy).
 
+        Looks for nreturned, nReturned, or nMatched counter.
+        """
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._nreturned
 
-
     @property
     def ninserted(self):
-        """ extract ninserted or nInserted counter if available (lazy) """
-
+        """Extract ninserted or nInserted counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -516,8 +522,7 @@ class LogEvent(object):
 
     @property
     def ndeleted(self):
-        """ extract ndeleted or nDeleted counter if available (lazy) """
-
+        """Extract ndeleted or nDeleted counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -526,8 +531,7 @@ class LogEvent(object):
 
     @property
     def nupdated(self):
-        """ extract nupdated or nModified counter if available (lazy) """
-
+        """Extract nupdated or nModified counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -536,8 +540,7 @@ class LogEvent(object):
 
     @property
     def numYields(self):
-        """ extract numYields counter if available (lazy) """
-
+        """Extract numYields counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -546,19 +549,16 @@ class LogEvent(object):
 
     @property
     def planSummary(self):
-        """ extract numYields counter if available (lazy) """
-
+        """Extract numYields counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._planSummary
 
-
     @property
     def r(self):
-        """ extract read lock (r) counter if available (lazy) """
-
+        """Extract read lock (r) counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -567,8 +567,7 @@ class LogEvent(object):
 
     @property
     def w(self):
-        """ extract write lock (w) counter if available (lazy) """
-
+        """Extract write lock (w) counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
@@ -576,23 +575,21 @@ class LogEvent(object):
         return self._w
 
     def _extract_counters(self):
-        """ Helper method to extract counters like nscanned, nreturned, etc.
-            from the logevent.
-        """
-
+        """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
-        counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned', 'ninserted', \
-            'nupdated', 'ndeleted', 'r', 'w', 'numYields', 'planSummary', 'writeConflicts', 'keyUpdates']
+        counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
+                    'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
+                    'planSummary', 'writeConflicts', 'keyUpdates']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
         counter_equiv = {
-            'docsExamined' : 'nscannedObjects',
-            'keysExamined' : 'nscanned',
-            'nDeleted'     : 'ndeleted',
-            'nInserted'    : 'ninserted',
-            'nMatched'     : 'nreturned',
-            'nModified'    : 'nupdated'
+            'docsExamined': 'nscannedObjects',
+            'keysExamined': 'nscanned',
+            'nDeleted': 'ndeleted',
+            'nInserted': 'ninserted',
+            'nMatched': 'nreturned',
+            'nModified': 'nupdated'
         }
         counters.extend(counter_equiv.keys())
 
@@ -600,24 +597,30 @@ class LogEvent(object):
 
         # trigger operation evaluation to get access to offset
         if self.operation:
-            for t, token in enumerate(split_tokens[self.datetime_nextpos+2:]):
+            for t, token in enumerate(split_tokens[self.datetime_nextpos +
+                                                   2:]):
                 for counter in counters:
-                    if token.startswith('%s:'%counter):
+                    if token.startswith('%s:' % counter):
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            vars(self)['_'+counter] = int((token.split(':')[-1]).replace(',', ''))
+                            vars(self)['_' + counter] = int((token.split(':')
+                                                             [-1]).replace(',',
+                                                                           ''))
                         except ValueError:
-                            # see if this is a pre-2.5.2 numYields with space in between (e.g. "numYields: 2")
+                            # see if this is a pre-2.5.2 numYields with space
+                            # in between (e.g. "numYields: 2")
                             # https://jira.mongodb.org/browse/SERVER-10101
-                            if counter == 'numYields' and token.startswith('numYields'):
+                            if (counter == 'numYields' and
+                                    token.startswith('numYields')):
                                 try:
-                                    self._numYields = int((split_tokens[t+1+self.datetime_nextpos+2]).replace(',', ''))
+                                    self._numYields = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
                                 except ValueError:
                                     pass
-                            if counter == 'planSummary' and token.startswith('planSummary'):
+                            if (counter == 'planSummary' and
+                                    token.startswith('planSummary')):
                                 try:
-                                    self._planSummary = split_tokens[t+1+self.datetime_nextpos+2]
+                                    self._planSummary = split_tokens[t + 1 + self.datetime_nextpos + 2]
                                 except ValueError:
                                     pass
 
@@ -626,7 +629,7 @@ class LogEvent(object):
 
     @property
     def level(self):
-        """ extract log level if available (lazy) """
+        """Extract log level if available (lazy)."""
         if not self._level_calculated:
             self._level_calculated = True
             self._extract_level()
@@ -634,18 +637,16 @@ class LogEvent(object):
 
     @property
     def component(self):
-        """ extract log component if available (lazy) """
+        """Extract log component if available (lazy)."""
         self.level
         return self._component
 
     def _extract_level(self):
-        """
-        extract level and component if available (lazy)
-        """
-
+        """Extract level and component if available (lazy)."""
         if self._level is None:
             split_tokens = self.split_tokens
-            x = self.log_levels.index(split_tokens[1]) if split_tokens[1] in self.log_levels else None
+            x = (self.log_levels.index(split_tokens[1])
+                 if split_tokens[1] in self.log_levels else None)
 
             if x is not None:
                 self._level = split_tokens[1]
@@ -654,10 +655,11 @@ class LogEvent(object):
                 self._level = False
                 self._component = False
 
-
     def parse_all(self):
-        """ triggers the extraction of all information, which would usually
-            just be evaluated lazily.
+        """
+        Trigger extraction of all information.
+
+        These values are usually evaluated lazily.
         """
         tokens = self.split_tokens
         duration = self.duration
@@ -677,9 +679,7 @@ class LogEvent(object):
         w = self.w
         r = self.r
 
-
     def _find_pattern(self, trigger):
-
         # get start of json query pattern
         start_idx = self.line_str.rfind(trigger)
         if start_idx == -1:
@@ -688,7 +688,7 @@ class LogEvent(object):
 
         stop_idx = 0
         brace_counter = 0
-        search_str = self.line_str[start_idx+len(trigger):]
+        search_str = self.line_str[start_idx + len(trigger):]
 
         for match in re.finditer(r'{|}', search_str):
             stop_idx = match.start()
@@ -698,78 +698,85 @@ class LogEvent(object):
                 brace_counter -= 1
             if brace_counter == 0:
                 break
-        search_str = search_str[:stop_idx+1].strip()
+        search_str = search_str[:stop_idx + 1].strip()
         if search_str:
             return json2pattern(search_str)
         else:
             return None
 
-
     def _reformat_timestamp(self, format, force=False):
-        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc', 'iso8601-local']:
-            raise ValueError('invalid datetime format %s, choose from ctime, ctime-pre2.4, iso8601-utc, iso8601-local.')
+        if format not in ['ctime', 'ctime-pre2.4', 'iso8601-utc',
+                          'iso8601-local']:
+            raise ValueError('invalid datetime format %s, choose from ctime, '
+                             'ctime-pre2.4, iso8601-utc, iso8601-local.')
 
-        if (self.datetime_format == None or (self.datetime_format == format and self._datetime_str != '')) and not force:
+        if ((self.datetime_format is None or
+                (self.datetime_format == format and
+                    self._datetime_str != '')) and not force):
             return
-        elif self.datetime == None:
+        elif self.datetime is None:
             return
         elif format.startswith('ctime'):
-            dt_string = self.weekdays[self.datetime.weekday()] + ' ' + self.datetime.strftime("%b %d %H:%M:%S")
+            dt_string = (self.weekdays[self.datetime.weekday()] + ' ' +
+                         self.datetime.strftime("%b %d %H:%M:%S"))
             # remove zero-padding from day number
             tokens = dt_string.split(' ')
             if tokens[2].startswith('0'):
                 tokens[2] = tokens[2].replace('0', ' ', 1)
             dt_string = ' '.join(tokens)
             if format == 'ctime':
-                dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)
+                dt_string += '.' + str(int(self.datetime.microsecond /
+                                           1000)).zfill(3)
         elif format == 'iso8601-local':
             dt_string = self.datetime.isoformat()
-            if self.datetime.utcoffset() == None:
+            if self.datetime.utcoffset() is None:
                 dt_string += '+00:00'
             ms_str = str(int(self.datetime.microsecond / 1000)).zfill(3)[:3]
-            # change isoformat string to have 3 digit milliseconds and no : in offset
-            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)', '.%s\\2\\3\\4'%ms_str, dt_string, count=1)
+            # change isoformat string to have 3 digit milliseconds and no :
+            # in offset
+            dt_string = re.sub(r'(\.\d+)?([+-])(\d\d):(\d\d)',
+                               '.%s\\2\\3\\4' % ms_str, dt_string, count=1)
         elif format == 'iso8601-utc':
             if self.datetime.utcoffset():
-                dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-%dT%H:%M:%S")
+                dt_string = self.datetime.astimezone(tzutc()).strftime("%Y-%m-"
+                                                                       "%dT%H:"
+                                                                       "%M:%S")
             else:
                 dt_string = self.datetime.strftime("%Y-%m-%dT%H:%M:%S")
-            dt_string += '.' + str(int(self.datetime.microsecond / 1000)).zfill(3)[:3] + 'Z'
+            dt_string += '.' + str(int(self.datetime.microsecond /
+                                       1000)).zfill(3)[:3] + 'Z'
 
         # set new string and format
         self._datetime_str = dt_string
         self._datetime_format = format
 
-
     def __str__(self):
-        """ default string conversion for a LogEvent object is just its line_str. """
+        """Default string conversion for LogEvent object is its line_str."""
         return str(self.line_str)
 
-
     def to_dict(self, labels=None):
-        """ converts LogEvent object to a dictionary. """
+        """Convert LogEvent object to a dictionary."""
         output = {}
-        if labels == None:
-            labels = ['line_str', 'split_tokens', 'datetime', 'operation', \
-                'thread', 'namespace', 'nscanned', 'ntoreturn',  \
-                'nreturned', 'ninserted', 'nupdated', 'ndeleted', 'duration', 'r', 'w', 'numYields']
+        if labels is None:
+            labels = ['line_str', 'split_tokens', 'datetime', 'operation',
+                      'thread', 'namespace', 'nscanned', 'ntoreturn',
+                      'nreturned', 'ninserted', 'nupdated', 'ndeleted',
+                      'duration', 'r', 'w', 'numYields']
 
         for label in labels:
             value = getattr(self, label, None)
-            if value != None:
+            if value is not None:
                 output[label] = value
 
         return output
 
-
     def to_json(self, labels=None):
-        """ converts LogEvent object to valid JSON. """
+        """Convert LogEvent object to valid JSON."""
         output = self.to_dict(labels)
         return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
-
     def _parse_document(self):
-        """ Parses a system.profile document and copies all the values to the member variables. """
+        """Parse system.profile doc, copy all values to member variables."""
         self._reset()
 
         doc = self._profile_doc
@@ -782,7 +789,7 @@ class LogEvent(object):
 
         self._datetime_calculated = True
         self._datetime = doc[u'ts']
-        if self._datetime.tzinfo == None:
+        if self._datetime.tzinfo is None:
             self._datetime = self._datetime.replace(tzinfo=tzutc())
         self._datetime_format = None
         self._reformat_timestamp('ctime', force=True)
@@ -798,10 +805,11 @@ class LogEvent(object):
         if self.operation == 'command':
             self._command = doc[u'command'].keys()[0]
 
-
-        # query pattern for system.profile events, all three cases (see SERVER-13245)
+        # query pattern for system.profile events, all three cases.
+        # See SERVER-13245
         if 'query' in doc:
-            if 'query' in doc['query'] and isinstance(doc['query']['query'], dict):
+            if 'query' in doc['query'] and isinstance(doc['query']['query'],
+                                                      dict):
                 self._pattern = str(doc['query']['query']).replace("'", '"')
             elif '$query' in doc['query']:
                 self._pattern = str(doc['query']['$query']).replace("'", '"')
@@ -809,10 +817,13 @@ class LogEvent(object):
                 self._pattern = str(doc['query']).replace("'", '"')
 
             # sort pattern
-            if 'orderby' in doc['query'] and isinstance(doc['query']['orderby'], dict):
-                self._sort_pattern = str(doc['query']['orderby']).replace("'", '"')
+            if ('orderby' in doc['query'] and
+                    isinstance(doc['query']['orderby'], dict)):
+                self._sort_pattern = str(doc['query']
+                                         ['orderby']).replace("'", '"')
             elif '$orderby' in doc['query']:
-                self._sort_pattern = str(doc['query']['$orderby']).replace("'", '"')
+                self._sort_pattern = str(doc['query']
+                                         ['$orderby']).replace("'", '"')
             else:
                 self._sort_pattern = None
 
@@ -830,25 +841,34 @@ class LogEvent(object):
             self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
             self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
             self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
-            locks = 'w:%i' % self.w if self.w != None else 'r:%i' % self.r
+            locks = 'w:%i' % self.w if self.w is not None else 'r:%i' % self.r
         elif u'locks' in doc:
             locks = json.dumps(doc[u'locks'])
         else:
             locks = ''
 
-
         # build a fake line_str
         payload = ''
         if 'query' in doc:
-            payload += 'query: %s' % str(doc[u'query']).replace("u'", "'").replace("'", '"')
+            payload += ('query: %s' % str(doc[u'query'])
+                        .replace("u'", "'").replace("'", '"'))
         if 'command' in doc:
-            payload += 'command: %s' % str(doc[u'command']).replace("u'", "'").replace("'", '"')
+            payload += ('command: %s' % str(doc[u'command'])
+                        .replace("u'", "'").replace("'", '"'))
         if 'updateobj' in doc:
-            payload += ' update: %s' % str(doc[u'updateobj']).replace("u'", "'").replace("'", '"')
+            payload += (' update: %s' % str(doc[u'updateobj'])
+                        .replace("u'", "'").replace("'", '"'))
 
-        scanned = 'nscanned:%i'%self._nscanned if 'nscanned' in doc else ''
-        yields = 'numYields:%i'%self._numYields if 'numYield' in doc else ''
-        duration = '%ims' % self.duration if self.duration != None else ''
+        scanned = 'nscanned:%i' % self._nscanned if 'nscanned' in doc else ''
+        yields = 'numYields:%i' % self._numYields if 'numYield' in doc else ''
+        duration = '%ims' % self.duration if self.duration is not None else ''
 
-        self._line_str = "[{thread}] {operation} {namespace} {payload} {scanned} {yields} locks(micros) {locks} {duration}".format(
-            datetime=self.datetime, thread=self.thread, operation=self.operation, namespace=self.namespace, payload=payload, scanned=scanned, yields=yields, locks=locks, duration=duration)
+        self._line_str = ("[{thread}] {operation} {namespace} {payload} "
+                          "{scanned} {yields} locks(micros) {locks} "
+                          "{duration}".format(datetime=self.datetime,
+                                              thread=self.thread,
+                                              operation=self.operation,
+                                              namespace=self.namespace,
+                                              payload=payload, scanned=scanned,
+                                              yields=yields, locks=locks,
+                                              duration=duration))

@@ -1,10 +1,4 @@
 language: python
-python:
-  - "2.7"
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install:
-  - pip install .
-  - pip install -r requirements.txt --allow-insecure matplotlib
-# command to run tests, e.g. python setup.py test
-script: nosetests
-sudo: false
+python: "2.7"
+install: pip install tox
+script: tox

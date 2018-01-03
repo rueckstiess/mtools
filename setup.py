@@ -1,9 +1,9 @@
-# nose tests require multiprocessing package, see
-# https://groups.google.com/forum/#!msg/nose-users/fnJ-kAUbYHQ/_UsLN786ygcJ
-import multiprocessing
-import sys
+#!/bin/python
+"""Setup file for mtools."""
+
 import platform
 import re
+import sys
 
 # try importing from setuptools, if unavailable use distutils.core
 try:
@@ -12,10 +12,10 @@ try:
     # test for 2.7-included packages, add to requirements if not available
     install_requires = ['six']
 
-    # Additional dependencies from requirements.txt that should be installed for
-    # full mtools feature support. These are optional dependencies to simplify
-    # the default install experience, particularly where a build toolchain is
-    # required.
+    # Additional dependencies from requirements.txt that should be installed
+    # for full mtools feature support. These are optional dependencies to
+    # simplify the default install experience, particularly where a build
+    # toolchain is required.
     extras_requires = {
         "all": ['matplotlib>=1.3.1', 'numpy>=1.8.0', 'pymongo>=3.3', 'psutil>=2.0'],
         "mlaunch": ['pymongo>=3.3', 'psutil>=2.0'],
@@ -25,7 +25,6 @@ try:
         "mplotqueries": ['matplotlib>=1.3.1', 'numpy>=1.8.0'],
     }
 
-    test_requires = ['nose>=1.3.0', 'psutil>=2.0', 'pymongo>=3.3']
     try:
         import argparse
     except ImportError:
@@ -35,14 +34,12 @@ try:
         from collections import OrderedDict
     except ImportError:
         install_requires.append('ordereddict')
-        test_requires.append('ordereddict')
 
     # add dateutil if not installed already
     try:
         import dateutil
     except ImportError:
         install_requires.append('python-dateutil==2.2')
-        test_requires.append('python-dateutil==2.2')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
@@ -52,17 +49,17 @@ except ImportError:
 
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
-        'mtools.mlaunch',
-        'mtools.mlogfilter',
-        'mtools.mloginfo',
-        'mtools.mlogvis',
-        'mtools.mplotqueries',
-        'mtools.mgenerate',
-        'mtools.test',
-        'mtools.util',
-        'mtools.mlogfilter.filters',
-        'mtools.mplotqueries.plottypes',
-        'mtools.mloginfo.sections']
+                'mtools.mlaunch',
+                'mtools.mlogfilter',
+                'mtools.mloginfo',
+                'mtools.mlogvis',
+                'mtools.mplotqueries',
+                'mtools.mgenerate',
+                'mtools.test',
+                'mtools.util',
+                'mtools.mlogfilter.filters',
+                'mtools.mplotqueries.plottypes',
+                'mtools.mloginfo.sections']
     kws = {}
 
 # import version from mtools/version.py
@@ -86,7 +83,7 @@ setup(
     name='mtools',
     version=__version__,
     packages=packages,
-    package_data = {
+    package_data={
         'mtools': ['data/log2code.pickle', 'data/index.html'],
     },
     entry_points={
@@ -102,7 +99,8 @@ setup(
     author='Thomas Rueckstiess',
     author_email='thomas@rueckstiess.net',
     url='https://github.com/rueckstiess/mtools',
-    description='Useful scripts to parse and visualize MongoDB log files, launch test environments, and reproduce issues.',
+    description=("Useful scripts to parse and visualize MongoDB log files, "
+                 "launch test environments, and reproduce issues."),
     long_description=long_description,
     license='Apache 2.0',
     classifiers=[
@@ -114,7 +112,5 @@ setup(
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,
-    tests_require=test_requires,
-    test_suite = 'nose.collector',
     **kws
 )

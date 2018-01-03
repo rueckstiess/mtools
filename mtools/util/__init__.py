@@ -1,5 +1,7 @@
-# make OrderedDict available from either collections (python 2.7) or ordereddict (python 2.6)
+#!/bin/python
+"""Make OrderedDict available: collections (py2.7) or ordereddict (py2.6)."""
+
 try:
-	from collections import OrderedDict
+    from collections import OrderedDict
 except ImportError:
-	from ordereddict import OrderedDict
+    from ordereddict import OrderedDict
