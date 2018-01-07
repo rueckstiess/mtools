@@ -1,7 +1,7 @@
 import os
 import re
 import sys
-from datetime import timedelta
+from datetime import timedelta, date
 from random import randrange
 
 import mtools
@@ -96,8 +96,10 @@ class TestMLogInfo(object):
             results[key.strip()] = val.strip()
 
         assert results['source'].endswith('mongod_306_ctime.log')
-        assert results['start'].endswith('2017 Jul 13 16:14:35.324')
-        assert results['end'].endswith('2017 Jul 13 16:14:35.324')
+        this_year = date.today().year
+        expected = '{this_year} Jul 13 16:14:35.324'.format(**locals())
+        assert results['start'].endswith(expected)
+        assert results['end'].endswith(expected)
         assert results['date format'] == 'ctime'
 
     def test_30_ctime_queries(self):
