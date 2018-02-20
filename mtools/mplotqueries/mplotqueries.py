@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cPickle
+from six.moves import cPickle
 import glob
 import inspect
 import os
@@ -313,7 +313,7 @@ class MPlotQueriesTool(LogFileTool):
             print("Loaded overlay: %s" % os.path.basename(f))
 
         if len(target_files) > 0:
-            print
+            print()
 
         return len(target_files) > 0
 

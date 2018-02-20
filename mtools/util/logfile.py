@@ -198,6 +198,7 @@ class LogFile(InputSource):
             self._iterate_lines()
         return self._storage_engine
 
+
     def next(self):
         """Get next line, adjust for year rollover and hint datetime format."""
         # use readline here because next() iterator uses internal readahead

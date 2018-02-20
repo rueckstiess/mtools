@@ -3,6 +3,8 @@
 
 import re
 
+import six
+
 from mtools.util import OrderedDict
 
 
@@ -46,6 +48,7 @@ class Grouping(object):
                             key = match.group()
 
         self.groups.setdefault(key, list()).append(item)
+
 
     def __getitem__(self, key):
         """Return item corresponding to key."""
@@ -105,7 +108,7 @@ class Grouping(object):
         group is removed instead.
         """
         # sort groups by number of elements
-        self.groups = OrderedDict(sorted(self.groups.iteritems(),
+        self.groups = OrderedDict(sorted(six.iteritems(self.groups),
                                          key=lambda x: len(x[1]),
                                          reverse=True))
 

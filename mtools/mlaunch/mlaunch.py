@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import json
 import os
@@ -15,6 +17,8 @@ import time
 import warnings
 from collections import defaultdict
 from operator import itemgetter
+
+import six
 
 import psutil
 from mtools.util import OrderedDict
@@ -1003,7 +1007,7 @@ class MLaunchTool(BaseCmdLineTool):
                     doc['startup command'] = startup[str(doc['port'])]
 
         print_docs.append(None)
-        print
+        print()
         print_table(print_docs)
         if self.loaded_args.get('auth'):
             print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
@@ -1335,10 +1339,10 @@ class MLaunchTool(BaseCmdLineTool):
         if isinstance(obj, dict):
             return(dict([(self._convert_u2b(key),
                           self._convert_u2b(value))
-                         for key, value in obj.iteritems()]))
+                         for key, value in six.iteritems(obj)]))
         elif isinstance(obj, list):
             return [self._convert_u2b(element) for element in obj]
-        elif isinstance(obj, unicode):
+        elif isinstance(obj, six.text_type):
             return obj.encode('utf-8')
         else:
             return obj
@@ -1618,7 +1622,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             except subprocess.CalledProcessError as e:
                 print(e.output)
-                print >>sys.stderr, self._get_last_error_log(command_str)
+                print(self._get_last_error_log(command_str), file=sys.stderr)
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s"
                                  % (e.returncode, command_str))

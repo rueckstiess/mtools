@@ -89,7 +89,7 @@ class HistogramPlotType(BasePlotType):
         for idx, group in enumerate(self.groups):
             print("%5s %9s  %s" % (idx + 1, len(self.groups[group]), group))
 
-        print
+        print('')
 
         datasets = []
         colors = []

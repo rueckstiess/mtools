@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cPickle
+from six.moves import cPickle
 import os
 import re
 import subprocess
@@ -143,7 +143,7 @@ def extract_logs(log_code_lines, current_version):
 
                 # unescape strings
                 # statement = statement.decode("string-escape")
-                # print statement
+                # print(statement)
 
                 # remove compiler #ifdef .. #endif directives
                 statement = re.sub(r'#ifdef.*?#endif', '',
@@ -170,16 +170,16 @@ def extract_logs(log_code_lines, current_version):
                         matches.append(match)
 
                 # get all double-quoted strings surrounded by << or ending in ;
-                # print "s:::", statement
+                # print("s:::", statement)
                 # matches = re.findall(r"<\s*\"(.*?)\"\s*(?:<|;)",
                 #                      statement, flags=re.DOTALL)
-                # print matches
+                # print(matches)
 
                 # remove tabs, double quotes and newlines and strip whitespace
                 # from matches
                 # matches = [re.sub(r'(\\t)|(\\n)|"', '', m).strip()
                 #            for m in matches]
-                # print matches
+                # print(matches)
 
                 # remove empty tokens
                 matches = [m for m in matches if m]
@@ -268,7 +268,7 @@ if __name__ == '__main__':
                                    reverse=True)
 
     # for l in sorted(logs_versions):
-    #     print " <var> ".join(l), "found in:", ", ".join(logs_versions[l])
+    #     print(" <var> ".join(l), "found in:", ", ".join(logs_versions[l]))
 
     # write out to mongodb
     write_to_db = True

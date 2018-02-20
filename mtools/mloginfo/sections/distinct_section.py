@@ -101,7 +101,7 @@ class DistinctSection(BaseSection):
         for cl in sorted(codelines, key=lambda x: codelines[x], reverse=True):
             print("%8i  %s" % (codelines[cl], " ... ".join(cl)))
 
-        print
+        print('')
         if non_matches > 0:
             print("distinct couldn't match %i lines" % non_matches)
             if not self.mloginfo.args['verbose']:

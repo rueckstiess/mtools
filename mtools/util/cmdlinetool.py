@@ -198,4 +198,4 @@ if __name__ == '__main__':
     tool.run()
     print(tool.args)
     # for line in tool.args['logfile']:
-    #     print line
+    #     print(line)

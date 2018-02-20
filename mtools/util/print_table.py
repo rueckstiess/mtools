@@ -20,11 +20,11 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
 
     for row in rows:
         if type(row) == str:
-            print row
+            print(row)
         elif row is None:
-            print
+            print()
         else:
-            print template.format(**row)
+            print(template.format(**row))
 
 
 if __name__ == '__main__':

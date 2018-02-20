@@ -1,5 +1,7 @@
 #!/bin/python
 
+from __future__ import print_function
+
 import argparse
 
 from bson.min_key import MinKey
@@ -97,7 +99,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
                 print(e)
 
     if verbose:
-        print 'chunk distribution:',
+        print('chunk distribution:', end=' ')
         chunk_group = (con['config']['chunks']
                        .group(key={'shard': 1}, condition={'ns': namespace},
                               initial={'nChunks': 0},

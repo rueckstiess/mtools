@@ -131,7 +131,7 @@ class DateTimeBoundaries(object):
         # (parser behavior)
         # if 'time' in result:
         #     dct = dict((k, int(v))
-        #                for k,v in result['time'].groupdict(0).iteritems())
+        #                for k,v in six.iteritems(result['time'].groupdict(0)))
         #     dct['microsecond'] *= 1000
         #     dt = dt.replace(**dct)
 

@@ -117,6 +117,6 @@ class BasePlotType(object):
             else:
                 artists.append(group_artists)
 
-        print
+        print()
 
         return artists

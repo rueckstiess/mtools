@@ -1,11 +1,13 @@
 #!/bin/python
 
+from __future__ import print_function
+
 import os
 import re
 # import sys
 # import argparse
-from itertools import izip_longest
-import cPickle
+from six.moves import zip_longest as izip_longest
+from six.moves import cPickle
 
 import mtools
 
@@ -67,7 +69,7 @@ class Log2CodeConverter(object):
                 #     continue
                 # else:
                 #     # duration = time.time() - start_time
-                #     # print duration
+                #     # print(duration)
                 #     continue
 
             best_match = self.logs_by_word[word][coverage.index(best_cov)]
@@ -193,9 +195,9 @@ class Log2CodeConverter(object):
 #             match = self.log2code(line)
 #
 #             if  match:
-#                 print line,
-#                 print self.logs_versions[match]
-#                 print self.log_code_lines[match]
+#                 print(line, end=' ')
+#                 print(self.logs_versions[match])
+#                 print(self.log_code_lines[match])
 #
 #
 #     def log2code(self, line):
@@ -257,7 +259,7 @@ class Log2CodeConverter(object):
 #     print("possible versions: "
 #           ", ".join([pv[1:] for pv in possible_versions]))
 #     for pv in possible_versions:
-#         print pv, possible_versions[pv]
+#         print(pv, possible_versions[pv])
 #
 #     plt.bar(range(len(possible_versions.values())),
 #             possible_versions.values(), align='center')

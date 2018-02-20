@@ -102,6 +102,7 @@ class ConnectionSection(BaseSection):
 
                     connections_start[connid] = dt
 
+
             pos = line.find('end connection')
             if pos != -1:
                 # connection was closed, increase counter

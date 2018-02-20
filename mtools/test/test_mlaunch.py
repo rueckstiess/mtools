@@ -37,6 +37,7 @@ class TestMLaunch(object):
         self.use_auth = False
         self.data_dir = ''
 
+
     def setup(self):
         """Start up method to create mlaunch tool and find free port."""
         self.tool = MLaunchTool(test=True)
@@ -704,6 +705,7 @@ class TestMLaunch(object):
         assert(set([x['role']
                     for x in user['roles']]) == set(self.tool.
                                                     _default_auth_roles))
+
 
     @attr('auth')
     def test_adding_custom_user(self):

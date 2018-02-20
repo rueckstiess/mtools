@@ -7,6 +7,8 @@ from datetime import datetime
 import dateutil.parser
 from dateutil.tz import tzutc
 
+from six.moves import range
+
 from mtools.util.pattern import json2pattern
 
 
@@ -201,7 +203,7 @@ class LogEvent(object):
             # very long lines
             split_tokens = self.split_tokens[:10]
 
-            for offs in xrange(len(split_tokens)):
+            for offs in range(len(split_tokens)):
                 dt = self._match_datetime_pattern(split_tokens[offs:offs + 4])
                 if dt:
                     self._datetime = dt
