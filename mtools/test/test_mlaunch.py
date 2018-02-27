@@ -305,7 +305,7 @@ class TestMLaunch(object):
 
         # compare content of startup file with tool.args
         file_contents = self.tool._convert_u2b(json.load(open(startup_file,
-                                                              'r')))
+                                                              'rb')))
         assert file_contents['parsed_args'] == self.tool.args
         assert file_contents['unknown_args'] == self.tool.unknown_args
 
@@ -762,7 +762,7 @@ class TestMLaunch(object):
         # now start with old config and check if upgrade worked
         self.run_tool("start")
         with open(os.path.join(self.base_dir, 'test_upgrade_v1_to_v2',
-                               '.mlaunch_startup'), 'r') as f:
+                               '.mlaunch_startup'), 'rb') as f:
             startup_options = json.load(f)
             assert startup_options['protocol_version'] == 2
 

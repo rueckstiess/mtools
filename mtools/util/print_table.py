@@ -4,7 +4,7 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
     """All rows need to be a list of dictionaries, all with the same keys."""
     if len(rows) == 0:
         return
-    keys = rows[0].keys()
+    keys = list(rows[0].keys())
     headers = override_headers or keys
     if uppercase_headers:
         rows = [dict(zip(keys,

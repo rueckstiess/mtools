@@ -39,7 +39,7 @@ def _decode_pattern_dict(data):
             value = _decode_pattern_dict(value)
         else:
             value = 1
-
+        key = key.decode("utf-8")
         rv[key] = value
     return rv
 
@@ -81,7 +81,7 @@ def json2pattern(s):
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
         return json.dumps(doc, sort_keys=True, separators=(', ', ': '))
-    except ValueError:
+    except ValueError as ex:
         return None
 
 

@@ -26,7 +26,7 @@ class MaskFilter(DateTimeFilter):
     """
 
     filterArgs = [
-        ('--mask', {'action': 'store', 'type': InputSourceAction(),
+        ('--mask', {'action': 'store', 'type': InputSourceAction('rb'),
                     'help': ('source (log file or system.profile db) '
                              'to create the filter mask.')}),
         ('--mask-size', {'action': 'store', 'type': int, 'default': 60,
