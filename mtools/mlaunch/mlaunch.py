@@ -1658,14 +1658,21 @@ class MLaunchTool(BaseCmdLineTool):
             print("replica set '%s' initialized." % name)
 
     def _add_user(self, port, name, password, database, roles):
-        con = self.client('localhost:%i' % port)
+        con = self.client('localhost:%i'%port)
+        v = con['admin'].command('isMaster').get('maxWireVersion', 0)
+        if v >= 7:
+            # Until drivers have implemented SCRAM-SHA-256, use old mechanism.
+            opts = {'mechanisms': ['SCRAM-SHA-1']}
+        else:
+            opts = {}
+
         try:
-            con[database].add_user(name, password=password, roles=roles)
-        except OperationFailure as e:
+            con[database].add_user(name, password=password, roles=roles, **opts)
+        except OperationFailure:
             pass
         except TypeError as e:
             if pymongo_version < (2, 5, 0):
-                con[database].add_user(name, password=password)
+                con[database].add_user(name, password=password, **opts)
                 warnings.warn("Your pymongo version is too old to support "
                               "auth roles. Added a legacy user with root "
                               "access. To support roles, you need to upgrade "
