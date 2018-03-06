@@ -1253,7 +1253,8 @@ class MLaunchTool(BaseCmdLineTool):
             con = self.client('localhost:%s' % port)
             con.admin.command('ping')
             return True
-        except (AutoReconnect, ConnectionFailure):
+        except (AutoReconnect, ConnectionFailure, OperationFailure):
+            # Catch OperationFailure to work around SERVER-31916.
             return False
 
     def get_tagged(self, tags):
