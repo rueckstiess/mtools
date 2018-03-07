@@ -59,7 +59,7 @@ or newer.
 Recent Changes
 --------------
 
-See `CHANGES.md <https://github.com/rueckstiess/mtools/blob/develop/CHANGES.md>`__
+See `CHANGES.rst <https://github.com/rueckstiess/mtools/blob/develop/CHANGES.rst>`__
 for a list of changes from previous versions of mtools.
 
 Contribute to mtools
