@@ -23,8 +23,11 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
             print(row)
         elif row is None:
             print()
-        else:
+        elif isinstance(row, dict): 
+            row = {k: v if v is not None else 'None' for k, v in row.items()}
             print(template.format(**row))
+        else:
+            print("Unhandled row type:", row)
 
 
 if __name__ == '__main__':

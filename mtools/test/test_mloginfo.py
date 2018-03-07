@@ -130,8 +130,8 @@ class TestMLogInfo(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'DISTINCT' in line, lines))
-        assert len(filter(lambda line: re.match(r'\s+\d+\s+\w+', line),
-                          lines)) > 10
+        assert len(list(filter(lambda line: re.match(r'\s+\d+\s+\w+', line),
+                          lines))) > 10
 
     def test_connections_output(self):
         # different log file
@@ -300,7 +300,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
         restring = r'\w+\.\w+\s+(query|update|getmore)\s+{'
-        assert len(filter(lambda line: re.match(restring, line), lines)) >= 1
+        assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
     def test_restarts_output(self):
         # different log file
@@ -321,8 +321,8 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
 
-        assert len(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{',
-                                                line), lines)) >= 1
+        assert len(list(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{',
+                                                line), lines))) >= 1
 
     def test_rsstate_225(self):
         pattern = r'^Aug 05'
@@ -350,9 +350,8 @@ class TestMLogInfo(object):
         self.tool.run('%s --rsstate' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert len([re.match(pattern, line) for line in lines]) == expected
-        #assert len(filter(lambda line: re.match(pattern, line),
-        #                  lines)) == expected
+        assert len(list(filter(lambda line: re.match(pattern, line),
+                          lines))) == expected
 
     def test_rsinfo(self):
         rsmembers = ('[ { host: "capslock.local:27017", _id: 0 }, '

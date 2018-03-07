@@ -103,7 +103,7 @@ class MLogFilterTool(LogFileTool):
 
         if length:
             if len(line) > length:
-                line = line[:int(length / 2 - 2)] + '...' + line[-int(length/2 + 1):]
+                line = line[:int(length / 2 - 2)] + '...' + line[int(-length/2 + 1):]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)

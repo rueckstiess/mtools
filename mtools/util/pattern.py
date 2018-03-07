@@ -24,8 +24,9 @@ def _decode_pattern_list(data):
 def _decode_pattern_dict(data):
     rv = {}
     for key, value in six.iteritems(data):
-        if isinstance(key, six.text_type):
+        if isinstance(key, bytes):
             key = key.encode('utf-8')
+        if isinstance(key, six.text_type):
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:
                 return 1
             if key == '$nin':
@@ -39,7 +40,6 @@ def _decode_pattern_dict(data):
             value = _decode_pattern_dict(value)
         else:
             value = 1
-        key = key.decode("utf-8")
         rv[key] = value
     return rv
 
