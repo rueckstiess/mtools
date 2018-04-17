@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-
+from __future__ import print_function
 
 import argparse
 import json
 import os
-import queue
 import re
 import signal
 import socket
@@ -25,6 +24,11 @@ from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
 from mtools.version import __version__
+
+try:
+    import queue
+except ImportError:
+    import Queue
 
 try:
     try:
@@ -567,14 +571,16 @@ class MLaunchTool(BaseCmdLineTool):
 
         # Exit with error if --csrs is set and MongoDB < 3.1.0
         if (self.args['csrs'] and
-                LooseVersion(current_version) < LooseVersion("3.1.0")):
+                LooseVersion(current_version) < LooseVersion("3.1.0") and
+                LooseVersion(current_version) != LooseVersion("0.0.0")):
             errmsg = (" \n * The '--csrs' option requires MongoDB version "
                       "3.2.0 or greater, the current version is %s.\n"
                       % current_version)
             raise SystemExit(errmsg)
 
         # add the 'csrs' parameter as default for MongoDB >= 3.3.0
-        if LooseVersion(current_version) >= LooseVersion("3.3.0"):
+        if (LooseVersion(current_version) >= LooseVersion("3.3.0") or
+            LooseVersion(current_version) == LooseVersion("0.0.0")):
             self.args['csrs'] = True
 
         # construct startup strings
