@@ -4,7 +4,7 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
     """All rows need to be a list of dictionaries, all with the same keys."""
     if len(rows) == 0:
         return
-    keys = rows[0].keys()
+    keys = list(rows[0].keys())
     headers = override_headers or keys
     if uppercase_headers:
         rows = [dict(zip(keys,
@@ -23,8 +23,11 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
             print(row)
         elif row is None:
             print()
-        else:
+        elif isinstance(row, dict): 
+            row = {k: v if v is not None else 'None' for k, v in row.items()}
             print(template.format(**row))
+        else:
+            print("Unhandled row type:", row)
 
 
 if __name__ == '__main__':

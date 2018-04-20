@@ -35,12 +35,13 @@ def test_version(tool_cls):
     try:
         tool.run("--version")
 
-    except SystemExit:
+    except SystemExit as ex:
+        print(ex)
         if not hasattr(sys.stdout, "getvalue"):
             raise Exception('stdout not captured in test.')
 
         # argparse's --version outputs to stderr, which can't be captured
         # with nosetests. Therefore just checking that the scripts run and not
-        # output anything to stdout
-        output = sys.stdout.getvalue().strip()
-        assert len(output) == 0
+        # output anything to stdout --- FIXED to stderr https://bugs.python.org/issue18920
+        #output = sys.stdout.getvalue().strip()
+        #assert len(output) == 0

@@ -99,12 +99,11 @@ class MLogFilterTool(LogFileTool):
         if self.args['json']:
             print(logevent.to_json())
             return
-
         line = logevent.line_str
 
         if length:
             if len(line) > length:
-                line = line[:length / 2 - 2] + '...' + line[-length / 2 + 1:]
+                line = line[:int(length / 2 - 2)] + '...' + line[int(-length/2 + 1):]
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
@@ -186,7 +185,7 @@ class MLogFilterTool(LogFileTool):
     def _merge_logfiles(self):
         """Helper method to merge several files together by datetime."""
         # open files, read first lines, extract first dates
-        lines = [next(logfile, None) for logfile in self.args['logfile']]
+        lines = [next(iter(logfile), None) for logfile in self.args['logfile']]
 
         # adjust lines by timezone
         for i in range(len(lines)):
@@ -205,7 +204,7 @@ class MLogFilterTool(LogFileTool):
             yield min_line
 
             # update lines array with a new line from the min_index'th logfile
-            lines[min_index] = next(self.args['logfile'][min_index], None)
+            lines[min_index] = next(iter(self.args['logfile'][min_index]), None)
             if lines[min_index] and lines[min_index].datetime:
                 lines[min_index]._datetime = (lines[min_index].datetime +
                                               timedelta(hours=self
@@ -247,14 +246,13 @@ class MLogFilterTool(LogFileTool):
         for f in self.filters:
             for fa in f.filterArgs:
                 self.argparser.add_argument(fa[0], **fa[1])
-
         # now parse arguments and post-process
         LogFileTool.run(self, arguments)
+
         self.args = dict((k, self.args[k]
                           if k in ['logfile', 'markers', 'timezone']
                           else self._arrayToString(self.args[k]))
                          for k in self.args)
-
         # make sure logfile is always a list, even if 1 is provided
         # through sys.stdin
         if not isinstance(self.args['logfile'], list):

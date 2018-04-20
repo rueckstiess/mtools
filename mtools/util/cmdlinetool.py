@@ -31,6 +31,7 @@ try:
 
         def __call__(self, string):
             """Open log file or MongoDB database."""
+
             try:
                 # catch filetype and return LogFile object
                 filehandle = argparse.FileType.__call__(self, string)
@@ -60,7 +61,6 @@ try:
                                                  % string)
 
 except ImportError:
-
     class InputSourceAction(argparse.FileType):
         """Extend the FileType class from the argparse module."""
 
@@ -105,10 +105,10 @@ class BaseCmdLineTool(object):
         evaluates sys.argv. Any inheriting class should extend the run method
         (but first calling BaseCmdLineTool.run(self)).
         """
+
         # redirect PIPE signal to quiet kill script, if not on Windows
         if os.name != 'nt':
             signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-
         if get_unknowns:
             if arguments:
                 self.args, self.unknown_args = (self.argparser.parse_known_args
@@ -119,8 +119,9 @@ class BaseCmdLineTool(object):
             self.args = vars(self.args)
         else:
             if arguments:
+                myargs = arguments.split()
                 self.args = vars(self.argparser.parse_args
-                                 (args=arguments.split()))
+                                 (args=myargs))
             else:
                 self.args = vars(self.argparser.parse_args())
 
@@ -171,7 +172,7 @@ class LogFileTool(BaseCmdLineTool):
         self.multiple_logfiles = multiple_logfiles
         self.stdin_allowed = stdin_allowed
 
-        arg_opts = {'action': 'store', 'type': InputSourceAction()}
+        arg_opts = {'action': 'store', 'type': InputSourceAction('rb')}
 
         if self.multiple_logfiles:
             arg_opts['nargs'] = '*'
@@ -189,8 +190,8 @@ class LogFileTool(BaseCmdLineTool):
                 del arg_opts['type']
             if 'nargs' in arg_opts:
                 del arg_opts['nargs']
-
         self.argparser.add_argument('logfile', **arg_opts)
+
 
 
 if __name__ == '__main__':

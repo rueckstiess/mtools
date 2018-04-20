@@ -94,7 +94,7 @@ def extract_logs(log_code_lines, current_version):
                      " error()", " out()", " problem()"])
 
     for filename in source_files(mongodb_path):
-        f = open(filename, 'r')
+        f = open(filename, 'rb')
 
         # remove parent path
         filename = filename[len(mongodb_path):]

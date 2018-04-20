@@ -2,6 +2,7 @@
 
 import json
 import re
+import sys
 from datetime import datetime
 
 import dateutil.parser
@@ -63,8 +64,11 @@ class LogEvent(object):
 
     def __init__(self, doc_or_str):
         self._year_rollover = False
+        if isinstance(doc_or_str, bytes):
+            doc_or_str = doc_or_str.decode("utf-8")
 
-        if isinstance(doc_or_str, str):
+        if isinstance(doc_or_str, str) or (sys.version_info.major == 2 and
+                                           isinstance(doc_or_str, unicode)):
             # create from string, remove line breaks at end of _line_str
             self.from_string = True
             self._line_str = doc_or_str.rstrip()
@@ -75,6 +79,7 @@ class LogEvent(object):
             self._profile_doc = doc_or_str
             # docs don't need to be parsed lazily, they are fast
             self._parse_document()
+
 
     def _reset(self):
         self._split_tokens_calculated = False
@@ -128,6 +133,7 @@ class LogEvent(object):
         self._component = None
 
         self.merge_marker_str = ''
+
 
     def set_line_str(self, line_str):
         """
@@ -645,6 +651,12 @@ class LogEvent(object):
         """Extract level and component if available (lazy)."""
         if self._level is None:
             split_tokens = self.split_tokens
+
+            if not split_tokens:
+                self._level = False
+                self._component = False
+                return
+
             x = (self.log_levels.index(split_tokens[1])
                  if split_tokens[1] in self.log_levels else None)
 

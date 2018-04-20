@@ -204,10 +204,10 @@ class LogFile(InputSource):
         # use readline here because next() iterator uses internal readahead
         # buffer so seek position is wrong
         line = self.filehandle.readline()
+        line = line.decode('utf-8')
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
-
         le = LogEvent(line)
 
         # hint format and nextpos from previous line
@@ -255,7 +255,6 @@ class LogFile(InputSource):
             if not self.start and self.from_stdin:
                 if le and le.datetime:
                     self._start = le.datetime
-
             yield le
 
     states = (['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2',
@@ -273,7 +272,7 @@ class LogFile(InputSource):
 
         ln = 0
         for ln, line in enumerate(self.filehandle):
-
+            line = line.decode("utf-8") 
             if (self._has_level is None and
                     line[28:31].strip() in LogEvent.log_levels and
                     line[31:39].strip() in LogEvent.log_components):
@@ -482,7 +481,7 @@ class LogFile(InputSource):
                              % self.filehandle.name)
         else:
             self.prev_pos = curr_pos
-
+        buff = buff.decode("utf-8")
         newline_pos = buff.rfind('\n')
         if prev:
             newline_pos = buff[:newline_pos].rfind('\n')

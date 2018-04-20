@@ -33,7 +33,7 @@ class TestMLogInfo(object):
         # load logfile(s)
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),
                                          'test/logfiles/', filename)
-        self.logfile = LogFile(open(self.logfile_path, 'r'))
+        self.logfile = LogFile(open(self.logfile_path, 'rb'))
 
     def test_basic(self):
         self.tool.run('%s' % self.logfile_path)
@@ -130,8 +130,8 @@ class TestMLogInfo(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'DISTINCT' in line, lines))
-        assert len(filter(lambda line: re.match(r'\s+\d+\s+\w+', line),
-                          lines)) > 10
+        assert len(list(filter(lambda line: re.match(r'\s+\d+\s+\w+', line),
+                          lines))) > 10
 
     def test_connections_output(self):
         # different log file
@@ -145,8 +145,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'unique IPs' in line, lines))
         assert any(map(lambda line: 'socket exceptions' in line, lines))
 
-        assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line),
-                          lines)) > 1
+        assert len([re.match(r'\d+\.\d+\.\d+\.\d+', line) for line in lines]) > 1
 
     def test_connstats_output(self):
         # different log file
@@ -166,8 +165,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'overall maximum connection duration(s):'
                        in line, lines))
 
-        assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line),
-                          lines)) > 1
+        assert len([re.match(r'\d+\.\d+\.\d+\.\d+', line) for line in lines]) > 1
 
     def test_connections_connstats_output(self):
         # different log file
@@ -196,7 +194,7 @@ class TestMLogInfo(object):
             self.tool.run('%s --connstats' % logfile_path)
         except NotImplementedError as e:
             assert("Multiple start datetimes found for the same connection ID"
-                   in e.message)
+                   in str(e))
 
     def test_connstats_endconnid_repeated(self):
         logfile_path = os.path.join(os.path.dirname(mtools.__file__),
@@ -207,7 +205,7 @@ class TestMLogInfo(object):
             self.tool.run('%s --connstats' % logfile_path)
         except NotImplementedError as e:
             assert("Multiple end datetimes found for the same connection ID"
-                   in e.message)
+                   in str(e))
 
     def test_connstats_start_endconnid_repeated(self):
         logfile_path = os.path.join(os.path.dirname(mtools.__file__),
@@ -218,7 +216,7 @@ class TestMLogInfo(object):
             self.tool.run('%s --connstats' % logfile_path)
         except NotImplementedError as e:
             assert("Multiple start datetimes found for the same connection ID"
-                   in e.message)
+                   in str(e))
 
     def test_connstats_connid_not_digit(self):
         logfile_path = os.path.join(os.path.dirname(mtools.__file__),
@@ -298,7 +296,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
         restring = r'\w+\.\w+\s+(query|update|getmore)\s+{'
-        assert len(filter(lambda line: re.match(restring, line), lines)) >= 1
+        assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
     def test_restarts_output(self):
         # different log file
@@ -319,8 +317,8 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
 
-        assert len(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{',
-                                                line), lines)) >= 1
+        assert len(list(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{',
+                                                line), lines))) >= 1
 
     def test_rsstate_225(self):
         pattern = r'^Aug 05'
@@ -348,8 +346,8 @@ class TestMLogInfo(object):
         self.tool.run('%s --rsstate' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert len(filter(lambda line: re.match(pattern, line),
-                          lines)) == expected
+        assert len(list(filter(lambda line: re.match(pattern, line),
+                          lines))) == expected
 
     def test_rsinfo(self):
         rsmembers = ('[ { host: "capslock.local:27017", _id: 0 }, '
@@ -395,7 +393,7 @@ class TestMLogInfo(object):
     def _test_rsinfo(self, logfile_path, **expected):
         """ utility test runner for rsstate
         """
-        self.tool.run('%s --rsinfo' % logfile_path)
+        self.tool.run('--rsinfo %s' % logfile_path)
         output = sys.stdout.getvalue()
         results = self._parse_output(output)
         for key, value in six.iteritems(expected):
