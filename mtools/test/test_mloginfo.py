@@ -146,8 +146,6 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'socket exceptions' in line, lines))
 
         assert len([re.match(r'\d+\.\d+\.\d+\.\d+', line) for line in lines]) > 1
-        #assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line),
-        #                  lines)) > 1
 
     def test_connstats_output(self):
         # different log file
@@ -168,8 +166,6 @@ class TestMLogInfo(object):
                        in line, lines))
 
         assert len([re.match(r'\d+\.\d+\.\d+\.\d+', line) for line in lines]) > 1
-        #assert len(filter(lambda line: re.match(r'\d+\.\d+\.\d+\.\d+', line),
-        #                  lines)) > 1
 
     def test_connections_connstats_output(self):
         # different log file

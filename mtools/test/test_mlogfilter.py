@@ -148,7 +148,6 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             assert(len(line) <= 200)
-        #assert(len(output.splitlines())<=200)
 
     def test_merge_same(self):
         file_length = len(self.logfile)
