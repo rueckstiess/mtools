@@ -1606,7 +1606,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
-                    ret = subprocess.check_call([_f for _f in command_str.split(' ') if _f],
+                    ret = subprocess.check_call(command_str,
                                                 shell=True)
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
@@ -1971,8 +1971,8 @@ class MLaunchTool(BaseCmdLineTool):
         if os.name == 'nt':
             newdbpath = dbpath.replace('\\', '\\\\')
             newlogpath = logpath.replace('\\', '\\\\')
-            command_str = ("start /b \"%s\" %s --dbpath %s --logpath %s --port %i "
-                           "%s %s" % (os.path.join(path, 'mongod'),
+            command_str = ("start /b \"\" \"%s\" %s --dbpath %s --logpath %s --port %i "
+                           "%s %s" % (os.path.join(path, 'mongod.exe'),
                                       rs_param, newdbpath, newlogpath, port,
                                       auth_param, extra))
         else:
