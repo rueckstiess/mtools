@@ -599,9 +599,10 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
-            os.system('openssl rand -base64 753 > %s/keyfile' % self.dir)
+            keyfile = os.path.join(self.dir, "keyfile")
+            os.system('openssl rand -base64 753 > %s' % keyfile)
             if os.name != 'nt':
-                os.system('chmod 600 %s/keyfile' % self.dir)
+                os.system('chmod 600 %s' % keyfile)
 
         # if not all ports are free, complain and suggest alternatives.
         all_ports = self.get_tagged(['all'])
@@ -1098,8 +1099,9 @@ class MLaunchTool(BaseCmdLineTool):
             self.loaded_unknown_args = self.unknown_args
         else:
             if not self._load_parameters():
-                raise SystemExit("can't read %s/.mlaunch_startup, use "
-                                 "'mlaunch init ...' first." % self.dir)
+                startup_file = os.path.join(self.dir, ".mlaunch_startup")
+                raise SystemExit("Can't read %s, use 'mlaunch init ...' first."
+                                 % startup_file)
 
         self.ssl_pymongo_options = self._get_ssl_pymongo_options(
             self.loaded_args)
