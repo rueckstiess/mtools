@@ -19,19 +19,20 @@ Using a development branch
 
       sudo pip uninstall mtools
 
-#. Clone the current mtools GitHub repository to your computer. This step
-   creates an ``mtools`` directory in the current directory, so you may want to
-   switch to an appropriate directory first (for example ``~/code/``):
+#. `Fork the mtools repository <https://help.github.com/articles/fork-a-repo/>`__
+   to your own GitHub account.
+
+#. Clone your mtools fork to your development environment. This step creates
+   an mtools directory in the current directory, so you may want to switch
+   to an appropriate directory first (for example ``~/code/``):
 
    .. code-block:: bash
 
-      git clone https://github.com/rueckstiess/mtools.git
+      cd ~/code
+      git clone https://github.com/<username>/mtools.git
 
-   If you have forked mtools to your own account, replace ``rueckstiess``
-   with your own GitHub username.
-
-#. Change into the ``mtools`` directory and check out the desired branch. This
-   examples uses ``develop``:
+#. Change into the mtools directory and check out the desired branch. All
+   development should be based off the ``develop`` branch:
 
    .. code-block:: bash
 
@@ -47,7 +48,7 @@ Using a development branch
 
          sudo pip install -e '/path/to/cloned/repo[all]'
 
-   * ``setup.py``
+   *  ``setup.py``
 
       .. code-block:: bash
 
@@ -61,7 +62,7 @@ Using a development branch
       mlogf<tab>
 
    This should auto-complete to ``mlogfilter``. Also confirm the current
-   version:
+   version, which should end in ``-dev`` for the ``develop`` branch:
 
    .. code-block:: bash
 
@@ -87,7 +88,7 @@ Using the stable branch
 Making pull requests
 ~~~~~~~~~~~~~~~~~~~~
 
-mtools uses a simplified version of `this git branching
+mtools uses a simplified version of the `git branching
 model <http://nvie.com/posts/a-successful-git-branching-model/>`__ by
 `@nvie <https://twitter.com/nvie>`__.
 
@@ -132,34 +133,38 @@ Development happens on the `develop branch
       git pull upstream develop
 
 #. Create a feature or bug fix branch that forks off the local ``develop``
-   branch:
+   branch. The branch should named after the
+   `GitHub issue number <https://github.com/rueckstiess/mtools/issues/>`__
+   you are working on. If there isn't a GitHub issue yet, please
+   `create one <https://github.com/rueckstiess/mtools/issues/new>`__.
 
    .. code-block:: bash
 
-      git checkout -b feature-37-fast develop
-
-   The naming is not that relevant, but it's good practice to start with
-   ``feature-`` or ``bug-`` and include the issue number in the branch name
-   (if available).
+      git checkout -b issue-12345 develop
 
 #. Make your changes to the code. Commit as often as you like. Please use
-   meaningful, descriptive git commit messages and avoid ``asdf`` or ``changed
+   meaningful, descriptive commit messages and avoid ``asdf`` or ``changed
    stuff`` descriptions.
+
+#. Add or update tests to confirm your changes are working as expected. See
+   :ref:`testing` for more information.
 
 #. When you're happy with your changes, push your feature branch to GitHub:
 
    .. code-block:: bash
 
-      git push origin feature-37-fast
+      git push origin issue-12345
 
-#. Raise a pull request against the upstream ``develop`` branch using the
-   GitHub interface. After the code is merged into the ``develop`` branch, you
-   can pull the change from upstream develop and then delete your local and
-   GitHub feature or bug fix branch:
+#. `Raise a pull request <https://help.github.com/articles/creating-a-pull-request/>`__
+   against the upstream ``develop`` branch using the GitHub interface.
+
+#. After the code is merged into the ``develop`` branch, you can pull the
+   change from the upstream ``develop`` branch and delete your local feature
+   or bug fix branch:
 
    .. code-block:: bash
 
       git checkout develop
       git pull upstream develop
-      git push origin --delete feature-37-fast
-      git branch -d feature-37-fast
+      git push origin --delete issue-12345
+      git branch -d issue-12345
