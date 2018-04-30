@@ -2,6 +2,33 @@
 Changes to mtools
 =================
 
+version 1.4.0
+~~~~~~~~~~~~~
+
+* Improve testing and documentation infrastructure (#542)
+   - Add tox (#543)
+   - Fix flake8 violations (#544)
+   - Fix isort violations (#545)
+   - Fix PEP 257 violations (#546)
+   - Add RST documentation (#548)
+* Make code compatible with both Python 2.7 and 3.6 (#527)
+   - Add py36 environment for tox & Travis (#587)
+* mlaunch: Error while creating replica set with name and auth args (#476)
+* mlaunch: Testing for MongoDB 3.6 (#531)
+* mlaunch: Using --hostname causes deploying failure in 3.6 (#554)
+* mlaunch: psutil dependency missing (#557)
+* mlaunch: Require shard servers to be replica sets (3.6.1+) (#567)
+* mlaunch: Force `mlaunch --csrs` when "version" is `0.0.0` (#576)
+* mlaunch: Create user with SCRAM-SHA-1 mechanism (#574)
+* mlaunch: Allow starting 3.6 clusters with PyMongo 3.6.1 (#575)
+* mlaunch: Use correct path separator according to OS (#584)
+* mlaunch: Support path parameters containing spaces (#578)
+* mlaunch: Update psutil requirement to 5.4.2 (#590)
+* mloginfo: Test using current year rather than hardcoded value (#568)
+
+Thanks to @kallimachos, @kevinadi, @sindbach, @ajdavis, @jaraco, @devkev,
+@stephentunney, @shaneharvey, and @stennie for contributions to this release!
+
 version 1.3.2
 ~~~~~~~~~~~~~
 
