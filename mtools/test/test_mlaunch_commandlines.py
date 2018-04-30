@@ -48,6 +48,7 @@ class TestMLaunch(object):
 
     def cmdlist_filter(self, cmdlist):
         """Filter command lines to contain only [mongod|mongos] --parameter."""
+        # NOTE: The command "mongo was intentionally written with a leading quote
         res = map(lambda cmd: set([param for param in cmd.split()
                                    if param.startswith('"mongo') or
                                    param.startswith('--')]),
