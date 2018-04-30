@@ -1971,12 +1971,12 @@ class MLaunchTool(BaseCmdLineTool):
         if os.name == 'nt':
             newdbpath = dbpath.replace('\\', '\\\\')
             newlogpath = logpath.replace('\\', '\\\\')
-            command_str = ("start /b \"\" \"%s\" %s --dbpath %s --logpath %s --port %i "
+            command_str = ("start /b \"\" \"%s\" %s --dbpath \"%s\" --logpath \"%s\" --port %i "
                            "%s %s" % (os.path.join(path, 'mongod.exe'),
                                       rs_param, newdbpath, newlogpath, port,
                                       auth_param, extra))
         else:
-            command_str = ("\"%s\" %s --dbpath %s --logpath %s --port %i --fork "
+            command_str = ("\"%s\" %s --dbpath \"%s\" --logpath \"%s\" --port %i --fork "
                            "%s %s" % (os.path.join(path, 'mongod'), rs_param,
                                       dbpath, logpath, port, auth_param,
                                       extra))
