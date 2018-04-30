@@ -54,7 +54,6 @@ Using a development branch
 
          sudo python setup.py develop
 
-
 #. Test the installation by confirming that the scripts tab-complete from any
    directory:
 
