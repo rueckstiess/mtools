@@ -26,9 +26,9 @@ from mtools.util.print_table import print_table
 from mtools.version import __version__
 
 try:
-    import queue
-except ImportError:
     import Queue
+except ImportError:
+    import queue as Queue
 
 try:
     try:
