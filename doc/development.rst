@@ -48,7 +48,7 @@ Using a development branch
 
          sudo pip install -e '/path/to/cloned/repo[all]'
 
-   * ``setup.py``
+   *  ``setup.py``
 
       .. code-block:: bash
 
