@@ -784,7 +784,7 @@ class MLaunchTool(BaseCmdLineTool):
         binary = "mongod"
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = subprocess.Popen([binary, '--version'],
+        ret = subprocess.Popen(['%s' % binary, '--version'],
                                stderr=subprocess.STDOUT,
                                stdout=subprocess.PIPE, shell=False)
         out, err = ret.communicate()
@@ -1470,7 +1470,7 @@ class MLaunchTool(BaseCmdLineTool):
         # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = (subprocess.Popen([binary, '--help'],
+        ret = (subprocess.Popen(['%s' % binary, '--help'],
                stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False))
 
         out, err = ret.communicate()
@@ -1608,7 +1608,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
-                    ret = subprocess.check_call([_f for _f in command_str.split(' ') if _f],
+                    ret = subprocess.check_call(command_str,
                                                 shell=True)
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
@@ -1973,12 +1973,12 @@ class MLaunchTool(BaseCmdLineTool):
         if os.name == 'nt':
             newdbpath = dbpath.replace('\\', '\\\\')
             newlogpath = logpath.replace('\\', '\\\\')
-            command_str = ("start /b %s %s --dbpath %s --logpath %s --port %i "
-                           "%s %s" % (os.path.join(path, 'mongod'),
+            command_str = ("start /b \"\" \"%s\" %s --dbpath \"%s\" --logpath \"%s\" --port %i "
+                           "%s %s" % (os.path.join(path, 'mongod.exe'),
                                       rs_param, newdbpath, newlogpath, port,
                                       auth_param, extra))
         else:
-            command_str = ("%s %s --dbpath %s --logpath %s --port %i --fork "
+            command_str = ("\"%s\" %s --dbpath \"%s\" --logpath \"%s\" --port %i --fork "
                            "%s %s" % (os.path.join(path, 'mongod'), rs_param,
                                       dbpath, logpath, port, auth_param,
                                       extra))
