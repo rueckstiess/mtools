@@ -109,6 +109,7 @@ setup(
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,
