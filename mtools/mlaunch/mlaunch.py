@@ -1343,19 +1343,6 @@ class MLaunchTool(BaseCmdLineTool):
 
     # --- below here are internal helper methods, do not call externally ---
 
-    def _convert_u2b(self, obj):
-        """Helper method to convert unicode back to plain text."""
-        if isinstance(obj, dict):
-            return(dict([(self._convert_u2b(key),
-                          self._convert_u2b(value))
-                         for key, value in six.iteritems(obj)]))
-        elif isinstance(obj, list):
-            return [self._convert_u2b(element) for element in obj]
-        elif isinstance(obj, six.text_type):
-            return obj.encode('utf-8')
-        else:
-            return obj
-
     def _load_parameters(self):
         """
         Load the .mlaunch_startup file that exists in each datadir.
