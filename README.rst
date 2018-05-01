@@ -8,7 +8,7 @@ mtools
 MongoDB log files (``mongod``, ``mongos``). mtools also includes ``mlaunch``, a
 utility to quickly set up complex MongoDB test environments on a local machine.
 
-.. figure:: ./mtools.png
+.. figure:: https://raw.githubusercontent.com/rueckstiess/mtools/develop/mtools.png
    :alt: mtools box
 
 What's in the box?
