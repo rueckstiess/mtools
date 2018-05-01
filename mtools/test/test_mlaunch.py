@@ -304,8 +304,7 @@ class TestMLaunch(object):
         assert os.path.isfile(startup_file)
 
         # compare content of startup file with tool.args
-        file_contents = self.tool._convert_u2b(json.load(open(startup_file,
-                                                              'rb')))
+        file_contents = json.load(open(startup_file, 'rb'))
         assert file_contents['parsed_args'] == self.tool.args
         assert file_contents['unknown_args'] == self.tool.unknown_args
 

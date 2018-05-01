@@ -1368,7 +1368,7 @@ class MLaunchTool(BaseCmdLineTool):
         if not os.path.exists(startup_file):
             return False
 
-        in_dict = self._convert_u2b(json.load(open(startup_file, 'rb')))
+        in_dict = json.load(open(startup_file, 'rb'))
 
         # handle legacy version without versioned protocol
         if 'protocol_version' not in in_dict:
