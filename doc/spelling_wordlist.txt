@@ -1,6 +1,7 @@
 Admin
 admin
 ajdavis
+args
 auth
 binarypath
 brondsem
@@ -32,12 +33,14 @@ gianpaj
 github
 gormanb
 grep
+hardcoded
 hostname
 indentifiers
 ini
 init
 iso
 isort
+jaraco
 Javascript
 jimoleary
 josefahmad
@@ -46,6 +49,7 @@ kevinadi
 keyfile
 localhost
 logevent
+manfontan
 metadata
 mgenerate
 mixedCase
@@ -82,13 +86,16 @@ reStructuredText
 rsstate
 rueckstiess
 setParameter
+shaneharvey
 sharded
 Sharding
 sharding
+sindbach
 sl33nyc
 stderr
 stdin
 stennie
+stephentunney
 tarball
 testenv
 testenvs
