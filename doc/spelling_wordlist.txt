@@ -49,6 +49,7 @@ kevinadi
 keyfile
 localhost
 logevent
+manfontan
 metadata
 mgenerate
 mixedCase
