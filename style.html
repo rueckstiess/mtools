@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Style Guidelines &mdash; mtools  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/mtools.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Contribute to mtools" href="contributing.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mtools
+          
+
+          
+            
+            <img src="_static/mtools.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mgenerate.html">mgenerate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Contribute to mtools</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Style Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-guidelines">Code guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation-guidelines">Documentation guidelines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release.html">Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mtools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="contributing.html">Contribute to mtools</a> &raquo;</li>
+        
+      <li>Style Guidelines</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/style.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="style-guidelines">
+<h1>Style Guidelines<a class="headerlink" href="#style-guidelines" title="Permalink to this headline">#</a></h1>
+<p>Before contributing code or documentation to the mtools project, please
+familiarize yourself with these style guidelines.</p>
+<div class="section" id="code-guidelines">
+<h2>Code guidelines<a class="headerlink" href="#code-guidelines" title="Permalink to this headline">#</a></h2>
+<p>mtools is not overly prescriptive in terms of style: readability and
+functionality are the main guiding principles. As a general rule, follow the
+style used elsewhere in the code and always add meaningful comments.</p>
+<p>If you implement a new feature anywhere in mlaunch, please write a test
+function or test class for the feature and document it.</p>
+<div class="section" id="pep-8">
+<h3>PEP 8<a class="headerlink" href="#pep-8" title="Permalink to this headline">#</a></h3>
+<p>mtools adheres to most of the standard Python guidelines provided in <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP 8</a>, with the main exception being
+that mixedCase function and variable names are permitted in order to match
+usage in MongoDB (for example <code class="docutils literal notranslate"><span class="pre">serverStatus</span></code>). <a class="reference external" href="http://flake8.pycqa.org/en/latest/">flake8</a> is used for style checking.</p>
+</div>
+<div class="section" id="import-order">
+<h3>Import order<a class="headerlink" href="#import-order" title="Permalink to this headline">#</a></h3>
+<p>To improve readability, imports are sorted alphabetically by type of import.
+<a class="reference external" href="https://readthedocs.org/projects/isort/">isort</a> is used for import
+structure checking.</p>
+</div>
+<div class="section" id="docstrings-pep-257">
+<h3>Docstrings (PEP 257)<a class="headerlink" href="#docstrings-pep-257" title="Permalink to this headline">#</a></h3>
+<p>Please add a descriptive docstring to all new modules, classes, and functions.
+<a class="reference external" href="http://www.pydocstyle.org">pydocstyle</a> is used to check docstrings comply
+with <a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">PEP 257</a>.</p>
+</div>
+</div>
+<div class="section" id="documentation-guidelines">
+<h2>Documentation guidelines<a class="headerlink" href="#documentation-guidelines" title="Permalink to this headline">#</a></h2>
+<p>mtools documentation is written in <a class="reference external" href="http://www.sphinx-doc.org/en/stable/rest.html">reStructuredText</a> and built using <a class="reference external" href="http://www.sphinx-doc.org/en/stable/index.html">Sphinx</a>.</p>
+<p>The mtools documentation uses only standard RST and Sphinx syntax. As a general
+rule, follow the style used in the rest of the documentation.</p>
+<div class="section" id="indentation">
+<h3>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline">#</a></h3>
+<p>Indent 3 spaces.</p>
+</div>
+<div class="section" id="line-length">
+<h3>Line length<a class="headerlink" href="#line-length" title="Permalink to this headline">#</a></h3>
+<p>Limit all lines to 79 characters.</p>
+<p>Exceptions:</p>
+<ul class="simple">
+<li>code blocks</li>
+<li>URLs</li>
+</ul>
+</div>
+<div class="section" id="code-blocks">
+<h3>Code blocks<a class="headerlink" href="#code-blocks" title="Permalink to this headline">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">code-block</span></code> directive and specify the language. For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>.. code-block:: python
+
+   import re
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="development.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="contributing.html" class="btn btn-neutral" title="Contribute to mtools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

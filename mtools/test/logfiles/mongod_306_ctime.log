@@ -1,1 +1,0 @@
-Wed Jul 13 16:14:35.324 I QUERY [conn39] getmore db.collection query: { Header._id: null, Header.flag: true, Contact.flag: true } cursorid:47273143030 ntoreturn:0 keyUpdates:0 writeConflicts:0 numYields:202 nreturned:10024 reslen:1929777 locks:{ Global: { acquireCount: { r: 406 } }, Database: { acquireCount: { r: 203 } }, Collection: { acquireCount: { r: 203 } } } 220ms

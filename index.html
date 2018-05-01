@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mtools &mdash; mtools  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/mtools.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> mtools
+          
+
+          
+            
+            <img src="_static/mtools.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mgenerate.html">mgenerate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">mtools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>mtools</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mtools">
+<h1>mtools<a class="headerlink" href="#mtools" title="Permalink to this headline">#</a></h1>
+<p><a class="reference external" href="https://pypi.python.org/pypi/mtools/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/mtools.svg" /></a> <a class="reference external" href="https://travis-ci.org/rueckstiess/mtools"><img alt="Build Status" src="https://img.shields.io/travis/rueckstiess/mtools/master.svg" /></a> <a class="reference external" href="http://python.org"><img alt="Python 27" src="https://img.shields.io/badge/Python-2.7-brightgreen.svg?style=flat" /></a> <a class="reference external" href="http://python.org"><img alt="Python 36" src="https://img.shields.io/badge/Python-3.6-brightgreen.svg?style=flat" /></a></p>
+<p><strong>mtools</strong> is a collection of helper scripts to parse, filter, and visualize
+MongoDB log files (<code class="docutils literal notranslate"><span class="pre">mongod</span></code>, <code class="docutils literal notranslate"><span class="pre">mongos</span></code>). mtools also includes <code class="docutils literal notranslate"><span class="pre">mlaunch</span></code>, a
+utility to quickly set up complex MongoDB test environments on a local machine.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="what-s-in-the-box">
+<h2>What’s in the box?<a class="headerlink" href="#what-s-in-the-box" title="Permalink to this headline">#</a></h2>
+<p>The following tools are in the mtools collection:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="mlogfilter.html#mlogfilter"><span class="std std-ref">mlogfilter</span></a></dt>
+<dd>slices log files by time, merges log files, filters slow queries, finds
+table scans, shortens log lines, filters by other attributes, convert to
+JSON</dd>
+<dt><a class="reference internal" href="mloginfo.html#mloginfo"><span class="std std-ref">mloginfo</span></a></dt>
+<dd>returns info about log file, like start and end time, version, binary,
+special sections like restarts, connections, distinct view</dd>
+<dt><a class="reference internal" href="mplotqueries.html#mplotqueries"><span class="std std-ref">mplotqueries</span></a></dt>
+<dd>visualize log files with different types of plots (requires matplotlib)</dd>
+<dt><a class="reference internal" href="mlogvis.html#mlogvis"><span class="std std-ref">mlogvis</span></a></dt>
+<dd>creates a self-contained HTML file that shows an interactive visualization
+in a web browser (as an alternative to mplotqueries)</dd>
+<dt><a class="reference internal" href="mlaunch.html#mlaunch"><span class="std std-ref">mlaunch</span></a></dt>
+<dd>a script to spin up local test environments quickly, including replica sets
+and sharded systems (requires pymongo)</dd>
+</dl>
+<p>The <a class="reference external" href="https://github.com/rueckstiess/mtools">mtools source code</a> is available
+on GitHub under an <a class="reference external" href="https://github.com/rueckstiess/mtools/blob/develop/LICENSE.md">Apache 2.0 license</a>.</p>
+</div>
+<div class="section" id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">#</a></h2>
+<p>This software is not supported by <a class="reference external" href="https://www.mongodb.com">MongoDB, Inc.</a>
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the <a class="reference external" href="https://github.com/rueckstiess/mtools/issues?state=open">Issues</a> section on GitHub.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

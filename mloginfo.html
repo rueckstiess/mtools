@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mloginfo &mdash; mtools  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/mtools.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mlogvis" href="mlogvis.html" />
+    <link rel="prev" title="mlogfilter" href="mlogfilter.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mtools
+          
+
+          
+            
+            <img src="_static/mtools.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mgenerate.html">mgenerate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mloginfo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-parameters">General Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#help">Help</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version">Version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verbosity">Verbosity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#default-information">Default Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sections">Sections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#queries-queries">Queries (<code class="docutils literal notranslate"><span class="pre">--queries</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restarts-restarts">Restarts (<code class="docutils literal notranslate"><span class="pre">--restarts</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#distinct-distinct">Distinct (<code class="docutils literal notranslate"><span class="pre">--distinct</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connections-connections">Connections (<code class="docutils literal notranslate"><span class="pre">--connections</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replica-set-state-changes-rsstate">Replica Set State Changes (<code class="docutils literal notranslate"><span class="pre">--rsstate</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mtools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>mloginfo</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/mloginfo.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mloginfo">
+<span id="id1"></span><h1>mloginfo<a class="headerlink" href="#mloginfo" title="Permalink to this headline">#</a></h1>
+<p><strong>mloginfo</strong> takes a log file and reports <a class="reference internal" href="#default-info"><span class="std std-ref">Default Information</span></a> about the
+log file. The script also has some options for additional <a class="reference internal" href="#info-sections"><span class="std std-ref">Sections</span></a>.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> logfile
+         <span class="o">[</span>--verbose<span class="o">]</span>
+         <span class="o">[</span>--queries<span class="o">]</span> <span class="o">[</span>--restarts<span class="o">]</span> <span class="o">[</span>--distinct<span class="o">]</span> <span class="o">[</span>--connections<span class="o">]</span> <span class="o">[</span>--rsstate<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="general-parameters">
+<h2>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline">#</a></h2>
+<div class="section" id="help">
+<h3>Help<a class="headerlink" href="#help" title="Permalink to this headline">#</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt>
+<dd>shows the help text and exits.</dd>
+</dl>
+</div>
+<div class="section" id="version">
+<h3>Version<a class="headerlink" href="#version" title="Permalink to this headline">#</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt>
+<dd>shows the version number and exits.</dd>
+</dl>
+</div>
+<div class="section" id="verbosity">
+<h3>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">#</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt>
+<dd>shows extra information, depending on the different sections.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="default-information">
+<span id="default-info"></span><h2>Default Information<a class="headerlink" href="#default-information" title="Permalink to this headline">#</a></h2>
+<p>By default, <strong>mloginfo</strong> will output general information about the log file,
+including start and end of the file and the number of lines. If a restart was
+found in the file, it will also output the binary (<code class="docutils literal notranslate"><span class="pre">mongod</span></code> or <code class="docutils literal notranslate"><span class="pre">mongos</span></code>)
+and the version history.</p>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log
+
+     source: mongod.log
+       host: enter.local:27019
+      start: <span class="m">2017</span> Dec <span class="m">14</span> <span class="m">05</span>:56:48.578
+        end: <span class="m">2017</span> Dec <span class="m">14</span> <span class="m">05</span>:57:55.965
+date format: iso8601-local
+     length: <span class="m">190</span>
+     binary: mongod
+    version: <span class="m">3</span>.4.9
+    storage: wiredTiger
+</pre></div>
+</div>
+</div>
+<div class="section" id="sections">
+<span id="info-sections"></span><h2>Sections<a class="headerlink" href="#sections" title="Permalink to this headline">#</a></h2>
+<p>In addition to the general information, <strong>mloginfo</strong> also supports different
+information sections, that can be invoked with an additional parameter.
+Depending on the section, gathering the information may take some time. The
+sections are described below.</p>
+<div class="section" id="queries-queries">
+<h3>Queries (<code class="docutils literal notranslate"><span class="pre">--queries</span></code>)<a class="headerlink" href="#queries-queries" title="Permalink to this headline">#</a></h3>
+<p>The queries section will go through the log file and find all queries
+(including queries from updates) and collect some statistics for each query
+pattern. A query pattern is the shape or signature of a query (similar to an
+index definition) without the actual query values for each field.</p>
+<p>The section shows a table with namespace (in usual database.collection syntax),
+the query pattern, and various statistics, like how often this query pattern
+was found (count), the minimum and maximum execution time, the mean and the
+total sum. The list is sorted by total sum (last column), which reflects the
+overall work the database has to perform for each query pattern.</p>
+<p>This overview is very useful to know which indexes to create to get the best
+performance out of a MongoDB environment. Optimization efforts should start at
+the top of the list and work downwards, to get the highest overall improvement
+with the least amount of index creation.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --queries
+</pre></div>
+</div>
+<p>In addition to the default information, this command will also output the
+<code class="docutils literal notranslate"><span class="pre">QUERIES</span></code> section:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QUERIES
+
+namespace                    pattern                                        count    min <span class="o">(</span>ms<span class="o">)</span>    max <span class="o">(</span>ms<span class="o">)</span>    mean <span class="o">(</span>ms<span class="o">)</span>    sum <span class="o">(</span>ms<span class="o">)</span>
+
+serverside.scrum_master      <span class="o">{</span><span class="s2">&quot;datetime_used&quot;</span>: <span class="o">{</span><span class="s2">&quot;</span><span class="nv">$ne</span><span class="s2">&quot;</span>: <span class="m">1</span><span class="o">}}</span>                     <span class="m">20</span>       <span class="m">15753</span>       <span class="m">17083</span>        <span class="m">16434</span>      <span class="m">328692</span>
+serverside.django_session    <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                       <span class="m">562</span>         <span class="m">101</span>        <span class="m">1512</span>          <span class="m">317</span>      <span class="m">178168</span>
+serverside.user              <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                 <span class="m">804</span>         <span class="m">101</span>        <span class="m">1262</span>          <span class="m">201</span>      <span class="m">162311</span>
+local.slaves                 <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;host&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;ns&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">131</span>         <span class="m">101</span>        <span class="m">1048</span>          <span class="m">310</span>       <span class="m">40738</span>
+serverside.email_alerts      <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;email&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;pp_user_id&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">13</span>         <span class="m">153</span>       <span class="m">11639</span>         <span class="m">2465</span>       <span class="m">32053</span>
+serverside.sign_up           <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                        <span class="m">77</span>         <span class="m">103</span>         <span class="m">843</span>          <span class="m">269</span>       <span class="m">20761</span>
+serverside.user_credits      <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">6</span>         <span class="m">204</span>         <span class="m">900</span>          <span class="m">369</span>        <span class="m">2218</span>
+serverside.counters          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">8</span>         <span class="m">121</span>         <span class="m">500</span>          <span class="m">263</span>        <span class="m">2111</span>
+serverside.auth_sessions     <span class="o">{</span><span class="s2">&quot;session_key&quot;</span>: <span class="m">1</span><span class="o">}</span>                                 <span class="m">7</span>         <span class="m">111</span>         <span class="m">684</span>          <span class="m">277</span>        <span class="m">1940</span>
+serverside.credit_card       <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">5</span>         <span class="m">145</span>         <span class="m">764</span>          <span class="m">368</span>        <span class="m">1840</span>
+serverside.email_alerts      <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;request_code&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">6</span>         <span class="m">143</span>         <span class="m">459</span>          <span class="m">277</span>        <span class="m">1663</span>
+serverside.user              <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">5</span>         <span class="m">153</span>         <span class="m">427</span>          <span class="m">320</span>        <span class="m">1601</span>
+serverside.user              <span class="o">{</span><span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                                <span class="m">2</span>         <span class="m">218</span>         <span class="m">422</span>          <span class="m">320</span>         <span class="m">640</span>
+serverside.user              <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">2</span>         <span class="m">139</span>         <span class="m">278</span>          <span class="m">208</span>         <span class="m">417</span>
+serverside.auth_sessions     <span class="o">{</span><span class="s2">&quot;session_endtime&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;session_userid&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">1</span>         <span class="m">244</span>         <span class="m">244</span>          <span class="m">244</span>         <span class="m">244</span>
+serverside.game_level        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">1</span>         <span class="m">104</span>         <span class="m">104</span>          <span class="m">104</span>         <span class="m">104</span>
+</pre></div>
+</div>
+<div class="section" id="sort">
+<h4><code class="docutils literal notranslate"><span class="pre">--sort</span></code><a class="headerlink" href="#sort" title="Permalink to this headline">#</a></h4>
+<p>This option can be used to sort the results of the <code class="docutils literal notranslate"><span class="pre">--queries</span></code> table, for
+example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --queries --sort count
+mloginfo mongod.log --queries --sort sum
+</pre></div>
+</div>
+<p>This option has no effect unless <code class="docutils literal notranslate"><span class="pre">--queries</span></code> is also specified.</p>
+</div>
+</div>
+<div class="section" id="restarts-restarts">
+<h3>Restarts (<code class="docutils literal notranslate"><span class="pre">--restarts</span></code>)<a class="headerlink" href="#restarts-restarts" title="Permalink to this headline">#</a></h3>
+<p>The restarts section will go through the log file and find all server restarts.
+It will output a line per found restart, including the date and time and the
+version.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --restarts
+</pre></div>
+</div>
+<p>In addition to the default information, this command will also output the
+<code class="docutils literal notranslate"><span class="pre">RESTARTS</span></code> section:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>RESTARTS
+
+Jul <span class="m">17</span> <span class="m">09</span>:11:37 version <span class="m">2</span>.2.2
+Jul <span class="m">18</span> <span class="m">09</span>:14:21 version <span class="m">2</span>.2.2
+Jul <span class="m">18</span> <span class="m">15</span>:53:51 version <span class="m">2</span>.4.6
+Jul <span class="m">18</span> <span class="m">13</span>:46:39 version <span class="m">2</span>.4.6
+Jul <span class="m">19</span> <span class="m">18</span>:30:04 version <span class="m">2</span>.4.6
+</pre></div>
+</div>
+</div>
+<div class="section" id="distinct-distinct">
+<h3>Distinct (<code class="docutils literal notranslate"><span class="pre">--distinct</span></code>)<a class="headerlink" href="#distinct-distinct" title="Permalink to this headline">#</a></h3>
+<p>The distinct section goes through the log file and group all the lines together
+by the type of message (it uses the “log2code” matcher). It will then output a
+line per group, sorted by the largest group descending. This will return a good
+overview of the log file of what kind of lines appear in the file.</p>
+<p>This operation can take some time if the log file is big.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --distinct
+</pre></div>
+</div>
+<p>In addition to the default information, this command also outputs a list of
+distinct messages grouped by message type, sorted by the number of matching
+lines, as shown below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>DISTINCT
+
+<span class="m">776367</span>    connection accepted from ... <span class="c1"># ... ( ... now open)</span>
+<span class="m">776316</span>    end connection ... <span class="o">(</span> ... now open<span class="o">)</span>
+ <span class="m">25526</span>    info DFM::findAll<span class="o">()</span>: extent ... was empty, skipping ahead. ns:
+  <span class="m">9402</span>    ERROR: key too large len: ... max:
+    <span class="m">93</span>    Btree::insert: key too large to index, skipping
+     <span class="m">6</span>    unindex failed <span class="o">(</span>key too big?<span class="o">)</span> ... key:
+     <span class="m">5</span>    old journal file will be removed:
+     <span class="m">1</span>    ClientCursor::yield can<span class="s1">&#39;t unlock b/c of recursive lock ... ns: ... top:</span>
+<span class="s1">     1    key seems to have moved in the index, refinding.</span>
+
+<span class="s1">distinct couldn&#39;</span>t match <span class="m">6</span> lines
+to show non-matched lines, run with --verbose.
+</pre></div>
+</div>
+<p>If some lines can’t be matched with the <code class="docutils literal notranslate"><span class="pre">log2code</span></code> matcher, the number of
+unmatched lines is printed at the end. To show all the lines that couldn’t be
+matched, run mloginfo with the additional <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> command.</p>
+</div>
+<div class="section" id="connections-connections">
+<h3>Connections (<code class="docutils literal notranslate"><span class="pre">--connections</span></code>)<a class="headerlink" href="#connections-connections" title="Permalink to this headline">#</a></h3>
+<p>The connections section returns general information about opened and closed
+connections in the log file, as well as statistics of opened and closed
+connections per unique IP address.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --connections
+</pre></div>
+</div>
+<p>In addition to the default information, this command also outputs connection
+information as shown below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CONNECTIONS
+
+     total opened: <span class="m">156765</span>
+     total closed: <span class="m">155183</span>
+    no unique IPs: <span class="m">4</span>
+socket exceptions: <span class="m">915</span>
+
+<span class="m">192</span>.168.0.15      opened: <span class="m">39758</span>      closed: <span class="m">39356</span>
+<span class="m">192</span>.168.0.17      opened: <span class="m">39606</span>      closed: <span class="m">39207</span>
+<span class="m">192</span>.168.0.21      opened: <span class="m">39176</span>      closed: <span class="m">38779</span>
+<span class="m">192</span>.168.0.24      opened: <span class="m">38225</span>      closed: <span class="m">37841</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="replica-set-state-changes-rsstate">
+<h3>Replica Set State Changes (<code class="docutils literal notranslate"><span class="pre">--rsstate</span></code>)<a class="headerlink" href="#replica-set-state-changes-rsstate" title="Permalink to this headline">#</a></h3>
+<p>Outputs information about every detected replica set state change.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --rsstate
+</pre></div>
+</div>
+<p>In addition to the default information, this command also outputs replica set
+state changes.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>RSSTATE
+date               host                        state/message
+
+Oct <span class="m">07</span> <span class="m">23</span>:22:20    example.com:27017 <span class="o">(</span>self<span class="o">)</span>    replSet info electSelf <span class="m">0</span>
+Oct <span class="m">07</span> <span class="m">23</span>:22:21    example.com:27017 <span class="o">(</span>self<span class="o">)</span>    PRIMARY
+Oct <span class="m">07</span> <span class="m">23</span>:23:14    example.com:27017 <span class="o">(</span>self<span class="o">)</span>    replSet total number of votes is even - add arbiter or give one member an extra vote
+Oct <span class="m">07</span> <span class="m">23</span>:23:16    example.com:27018           STARTUP2
+Oct <span class="m">07</span> <span class="m">23</span>:23:32    example.com:27018           RECOVERING
+Oct <span class="m">07</span> <span class="m">23</span>:23:34    example.com:27018           SECONDARY
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mlogvis.html" class="btn btn-neutral float-right" title="mlogvis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mlogfilter.html" class="btn btn-neutral" title="mlogfilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>
