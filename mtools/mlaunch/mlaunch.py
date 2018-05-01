@@ -1687,7 +1687,7 @@ class MLaunchTool(BaseCmdLineTool):
                 raise e
 
     def _get_processes(self):
-        all_ports = self.get_tagged('running')
+        all_ports = self.get_tagged(['running'])
 
         process_dict = {}
 
