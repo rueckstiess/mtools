@@ -2,6 +2,16 @@
 Changes to mtools
 =================
 
+version 1.4.1
+~~~~~~~~~~~~~
+* mlaunch: Fixes for Python 3.6.5 support (#596, #586)
+* Include sys.version in --version output (#597)
+* Migrate wiki pages to gh-pages and RST (#550, #550)
+   - New documentation: http://blog.rueckstiess.com/mtools/
+
+Thanks to @kallimachos, @sindbach, @kevinadi, @manfontan,
+and @stennie for contributions to this release!
+
 version 1.4.0
 ~~~~~~~~~~~~~
 
