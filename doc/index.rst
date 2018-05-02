@@ -12,7 +12,6 @@ utility to quickly set up complex MongoDB test environments on a local machine.
    :hidden:
 
    install.rst
-   mgenerate.rst
    mlaunch.rst
    mlogfilter.rst
    mloginfo.rst
