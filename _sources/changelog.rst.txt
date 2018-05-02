@@ -1,1 +1,3 @@
-.. include:: ../CHANGES.rst
+.. only:: html
+
+   .. include:: ../CHANGES.rst
