@@ -16,28 +16,28 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-`mlogfilter <https://github.com/rueckstiess/mtools/wiki/mlogfilter>`__
+`mlogfilter <http://rueckstiess.github.io/mtools/mlogfilter.html>`__
    slices log files by time, merges log files, filters slow queries, finds
    table scans, shortens log lines, filters by other attributes, convert to
    JSON
 
-`mloginfo <https://github.com/rueckstiess/mtools/wiki/mloginfo>`__
+`mloginfo <http://rueckstiess.github.io/mtools/mloginfo.html>`__
    returns info about log file, like start and end time, version, binary,
    special sections like restarts, connections, distinct view
 
-`mplotqueries <https://github.com/rueckstiess/mtools/wiki/mplotqueries>`__
+`mplotqueries <http://rueckstiess.github.io/mtools/mplotqueries.html>`__
    visualize log files with different types of plots (requires matplotlib)
 
-`mlogvis <https://github.com/rueckstiess/mtools/wiki/mlogvis>`__
+`mlogvis <http://rueckstiess.github.io/mtools/mlogvis.html>`__
    creates a self-contained HTML file that shows an interactive visualization
    in a web browser (as an alternative to mplotqueries)
 
-`mlaunch <https://github.com/rueckstiess/mtools/wiki/mlaunch>`__
+`mlaunch <http://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
    and sharded systems (requires pymongo)
 
-You can find the manual and many usage examples on the `mtools wiki pages
-<https://github.com/rueckstiess/mtools/wiki>`__.
+For more information, see the `mtools documentation
+<http://rueckstiess.github.io/mtools>`__.
 
 Requirements and Installation Instructions
 ------------------------------------------
@@ -47,9 +47,8 @@ standard packages shipped with Python. The tools are currently tested with
 Python 2.7 and 3.6.
 
 Some of the tools have additional dependencies, which are listed under the
-specific tool's section. See the `INSTALL.md
-<https://github.com/rueckstiess/mtools/blob/develop/INSTALL.md>`__ file for
-installation instructions for these modules.
+specific tool's section. See the `installation instructions
+<http://rueckstiess.github.io/mtools/install.html>`__ for more information.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
 versions of the MongoDB server. As of April 2018, that includes MongoDB 3.2
@@ -58,15 +57,14 @@ or newer.
 Recent Changes
 --------------
 
-See `CHANGES.rst <https://github.com/rueckstiess/mtools/blob/develop/CHANGES.rst>`__
+See `Changes to mtools <http://rueckstiess.github.io/mtools/changelog.html>`__
 for a list of changes from previous versions of mtools.
 
 Contribute to mtools
 --------------------
 
 If you'd like to contribute to mtools, please read the `contributor page
-<https://github.com/rueckstiess/mtools/wiki/Development:-contributing-to-mtools>`__
-for instructions.
+<http://rueckstiess.github.io/mtools/contributing.html>`__ for instructions.
 
 Disclaimer
 ----------
