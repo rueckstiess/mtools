@@ -18,13 +18,13 @@ try:
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
-except ImportError:
+except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
                       "for instructions how to install matplotlib or try "
                       "mlogvis instead, which is a simplified version of "
                       "mplotqueries that visualizes the logfile in a "
-                      "web browser.")
+                      "web browser. Error: " + str(e))
 
 
 class MPlotQueriesTool(LogFileTool):
