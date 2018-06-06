@@ -746,7 +746,7 @@ class MLaunchTool(BaseCmdLineTool):
                     if role_doc['role'] == "clusterAdmin":
                         found_cluster_admin = True
             else:
-                roles = self.args['auth_role_docs']
+                roles = self.args['auth_role']
                found_cluster_admin = "clusterAdmin" in self.args['auth_roles']
 
             if not found_cluster_admin:
