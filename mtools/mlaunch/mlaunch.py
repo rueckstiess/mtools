@@ -326,6 +326,7 @@ class MLaunchTool(BaseCmdLineTool):
                                        'required to run the stop command '
                                        '(requires --auth, default="%s")'
                                        % ' '.join(self._default_auth_roles)))
+        init_parser.add_argument('--auth-role-docs', action='store_true', default=False, help='auth-roles are json documents')
         init_parser.add_argument('--no-initial-user', action='store_false',
                                  default=True, dest='initial-user',
                                  help=('create an initial user if auth is '
@@ -735,7 +736,20 @@ class MLaunchTool(BaseCmdLineTool):
                 raise RuntimeError("can't connect to server, so adding admin "
                                    "user isn't possible")
 
-            if "clusterAdmin" not in self.args['auth_roles']:
+
+            roles = []
+            found_cluster_admin = False
+            if self.args['auth_role_docs']:
+                for role_str in self.args['auth_roles']:
+                    role_doc = json.loads(role_str)
+                    roles.append(role_doc)
+                    if role_doc['role'] == "clusterAdmin":
+                        found_cluster_admin = True
+            else:
+                roles = self.args['auth_role_docs']
+               found_cluster_admin = "clusterAdmin" in self.args['auth_roles']
+
+            if not found_cluster_admin:
                 warnings.warn("the stop command will not work with auth "
                               "because the user does not have the "
                               "clusterAdmin role")
@@ -743,7 +757,7 @@ class MLaunchTool(BaseCmdLineTool):
             self._add_user(sorted(nodes)[0], name=self.args['username'],
                            password=self.args['password'],
                            database=self.args['auth_db'],
-                           roles=self.args['auth_roles'])
+                           roles=roles)
 
             if self.args['verbose']:
                 print("added user %s on %s database" % (self.args['username'],
@@ -1659,6 +1673,9 @@ class MLaunchTool(BaseCmdLineTool):
             opts = {'mechanisms': ['SCRAM-SHA-1']}
         else:
             opts = {}
+
+        if database == "$external":
+            password = None
 
         try:
             con[database].add_user(name, password=password, roles=roles, **opts)
