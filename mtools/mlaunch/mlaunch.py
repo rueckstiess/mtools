@@ -17,8 +17,6 @@ import warnings
 from collections import defaultdict
 from operator import itemgetter
 
-import six
-
 import psutil
 from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
@@ -33,14 +31,12 @@ except ImportError:
 try:
     try:
         from pymongo import MongoClient as Connection
-        from pymongo import MongoReplicaSetClient as ReplicaSetConnection
         from pymongo import version_tuple as pymongo_version
         from bson import SON
         from io import BytesIO
         from distutils.version import LooseVersion
     except ImportError:
         from pymongo import Connection
-        from pymongo import ReplicaSetConnection
         from pymongo import version_tuple as pymongo_version
         from bson import SON
 
@@ -1120,8 +1116,6 @@ class MLaunchTool(BaseCmdLineTool):
                       self.loaded_args['sharded'] is not None)
         is_replicaset = ('replicaset' in self.loaded_args and
                          self.loaded_args['replicaset'])
-        is_csrs = ('csrs' in self.loaded_args and
-                   self.loaded_args['csrs'])
         is_single = 'single' in self.loaded_args and self.loaded_args['single']
         has_arbiter = ('arbiter' in self.loaded_args and
                        self.loaded_args['arbiter'])
@@ -1580,8 +1574,6 @@ class MLaunchTool(BaseCmdLineTool):
         return loglines
 
     def _start_on_ports(self, ports, wait=False, override_auth=False):
-        threads = []
-
         if override_auth and self.args['verbose']:
             print("creating cluster without auth for setup, "
                   "will enable auth at the end...")
@@ -1606,6 +1598,7 @@ class MLaunchTool(BaseCmdLineTool):
                                                   stderr=subprocess.STDOUT,
                                                   shell=True)
 
+
                 binary = command_str.split()[0]
                 if '--configsvr' in command_str:
                     binary = 'config server'
@@ -1614,6 +1607,7 @@ class MLaunchTool(BaseCmdLineTool):
                     print("launching: %s" % command_str)
                 else:
                     print("launching: %s on port %s" % (binary, port))
+                return ret
 
             except subprocess.CalledProcessError as e:
                 print(e.output)
@@ -1625,6 +1619,7 @@ class MLaunchTool(BaseCmdLineTool):
         if wait:
             self.wait_for(ports)
 
+
     def _initiate_replset(self, port, name, maxwait=30):
         """Initiate replica set."""
         if not self.args['replicaset'] and name != 'configRepl':
@@ -1635,6 +1630,7 @@ class MLaunchTool(BaseCmdLineTool):
         con = self.client('localhost:%i' % port)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
+            return rs_status
         except OperationFailure as e:
             # not initiated yet
             for i in range(maxwait):
@@ -1977,9 +1973,6 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_mongos(self, logpath, port, configdb):
         """Construct command line strings for a mongos process."""
         extra = ''
-        out = subprocess.PIPE
-        if self.args['verbose']:
-            out = None
 
         auth_param = ''
         if self.args['auth']:
