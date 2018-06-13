@@ -146,13 +146,10 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 
 class MLaunchTool(BaseCmdLineTool):
-
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj']
-    UNDOCUMENTED_MONGOS_ARGS = []
 
     def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
-        self.hostname = socket.gethostname()
 
         # arguments
         self.args = None
@@ -1491,8 +1488,6 @@ class MLaunchTool(BaseCmdLineTool):
                 if arg in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
                 elif binary.endswith('mongod') and arg in self.UNDOCUMENTED_MONGOD_ARGS:
-                    result.append(arg)
-                elif binary.endswith('mongos') and arg in self.UNDOCUMENTED_MONGOS_ARGS:
                     result.append(arg)
                 elif self.ignored_arguments.get(binary + arg) is None:
                     # warn once for each combination of binary and unknown arg
