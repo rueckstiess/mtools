@@ -781,12 +781,18 @@ class MLaunchTool(BaseCmdLineTool):
         binary = "mongod"
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = subprocess.Popen(['%s' % binary, '--version'],
-                               stderr=subprocess.STDOUT,
-                               stdout=subprocess.PIPE, shell=False)
+        try:
+            ret = subprocess.Popen(['%s' % binary, '--version'],
+                                   stderr=subprocess.STDOUT,
+                                   stdout=subprocess.PIPE, shell=False)
+        except OSError as e:
+            print('Failed to launch %s' % binary)
+            raise e
+
         out, err = ret.communicate()
         if ret.returncode:
             raise OSError(out or err)
+
         buf = BytesIO(out)
         current_version = buf.readline().strip().decode('utf-8')
         # remove prefix "db version v"
