@@ -747,7 +747,8 @@ class MLaunchTool(BaseCmdLineTool):
                         found_cluster_admin = True
             else:
                 roles = self.args['auth_role']
-               found_cluster_admin = "clusterAdmin" in self.args['auth_roles']
+
+            found_cluster_admin = "clusterAdmin" in self.args['auth_roles']
 
             if not found_cluster_admin:
                 warnings.warn("the stop command will not work with auth "
