@@ -1613,7 +1613,6 @@ class MLaunchTool(BaseCmdLineTool):
                     print("launching: %s" % command_str)
                 else:
                     print("launching: %s on port %s" % (binary, port))
-                return ret
 
             except subprocess.CalledProcessError as e:
                 print(e.output)
