@@ -10,7 +10,7 @@ try:
     from setuptools import setup, find_packages
 
     # test for 2.7-included packages, add to requirements if not available
-    install_requires = ['six']
+    install_requires = ['six', 'python-dateutil>=2.7']
 
     # Additional dependencies from requirements.txt that should be installed
     # for full mtools feature support. These are optional dependencies to
@@ -34,12 +34,6 @@ try:
         from collections import OrderedDict
     except ImportError:
         install_requires.append('ordereddict')
-
-    # add dateutil if not installed already
-    try:
-        import dateutil
-    except ImportError:
-        install_requires.append('python-dateutil==2.2')
 
     packages = find_packages()
     kws = {'install_requires': install_requires}
