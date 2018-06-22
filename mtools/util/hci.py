@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from dateutil import parser
 from dateutil.tz import tzutc
+from dateutil.utils import default_tzinfo
 
 from mtools.util import OrderedDict
 
@@ -100,7 +101,7 @@ class DateTimeBoundaries(object):
         if s.strip() != '':
             try:
                 if dt:
-                    dt = parser.parse(s, default=dt, tzinfos=tzutc)
+                    dt = default_tzinfo(parser.parse(s, default=dt), tzutc)
                 else:
                     # check if it's only time, then use the start dt as
                     # default, else just use the current year
