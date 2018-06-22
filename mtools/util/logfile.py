@@ -204,7 +204,7 @@ class LogFile(InputSource):
         # use readline here because next() iterator uses internal readahead
         # buffer so seek position is wrong
         line = self.filehandle.readline()
-        line = line.decode('utf-8')
+        line = line.decode('utf-8', 'replace')
         if line == '':
             raise StopIteration
         line = line.rstrip('\n')
@@ -272,7 +272,7 @@ class LogFile(InputSource):
 
         ln = 0
         for ln, line in enumerate(self.filehandle):
-            line = line.decode("utf-8") 
+            line = line.decode("utf-8", "replace")
             if (self._has_level is None and
                     line[28:31].strip() in LogEvent.log_levels and
                     line[31:39].strip() in LogEvent.log_components):
@@ -481,7 +481,7 @@ class LogFile(InputSource):
                              % self.filehandle.name)
         else:
             self.prev_pos = curr_pos
-        buff = buff.decode("utf-8")
+        buff = buff.decode("utf-8", "replace")
         newline_pos = buff.rfind('\n')
         if prev:
             newline_pos = buff[:newline_pos].rfind('\n')
