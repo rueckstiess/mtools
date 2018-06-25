@@ -10,19 +10,19 @@ try:
     from setuptools import setup, find_packages
 
     # test for 2.7-included packages, add to requirements if not available
-    install_requires = ['six', 'python-dateutil>=2.7']
+    install_requires = ['six', 'python-dateutil==2.7']
 
     # Additional dependencies from requirements.txt that should be installed
     # for full mtools feature support. These are optional dependencies to
     # simplify the default install experience, particularly where a build
     # toolchain is required.
     extras_requires = {
-        "all": ['matplotlib>=1.3.1', 'numpy>=1.8.0', 'pymongo>=3.3', 'psutil>=5.4.2'],
-        "mlaunch": ['pymongo>=3.3', 'psutil>=5.4.2'],
+        "all": ['matplotlib==1.3.1', 'numpy==1.8.0', 'pymongo==3.6', 'psutil==5.4'],
+        "mlaunch": ['pymongo==3.6', 'psutil==5.4'],
         "mlogfilter": [],
-        "mloginfo": ['numpy>=1.8.0'],
+        "mloginfo": ['numpy==1.8.0'],
         "mlogvis": [],
-        "mplotqueries": ['matplotlib>=1.3.1', 'numpy>=1.8.0'],
+        "mplotqueries": ['matplotlib==1.3.1', 'numpy==1.8.0'],
     }
 
     try:
