@@ -63,6 +63,7 @@ line_truncated_24 = ("Wed Jan 28 00:31:16.302 [conn12345] warning: log line "
                      "reslen:256993 1445ms")
 line_fassert = ("***aborting after fassert() failure")
 line_empty = ("")
+line_new_oplog_query = ('2018-05-01T21:57:45.989+0000 I REPL [replication-0] Scheduled new oplog query Fetcher source: host.name database: local query: { find: "oplog.rs", filter: { ts: { $gte: Timestamp(1525211859, 1) } }, tailable: true, oplogReplay: true, awaitData: true, maxTimeMS: 60000, batchSize: 13981010, term: 1, readConcern: { afterClusterTime: Timestamp(1525211859, 1) } } query metadata: { $replData: 1, $oplogQueryData: 1, $readPreference: { mode: "secondaryPreferred" } } active: 1 findNetworkTimeout: 65000ms getMoreNetworkTimeout: 7500ms shutting down?: 0 first: 1 firstCommandScheduler: RemoteCommandRetryScheduler request: RemoteCommand 16543 -- target:host.name db:local cmd:{ find: "oplog.rs", filter: { ts: { $gte: Timestamp(1525211859, 1) } }, tailable: true, oplogReplay: true, awaitData: true, maxTimeMS: 60000, batchSize: 13981010, term: 1, readConcern: { afterClusterTime: Timestamp(1525211859, 1) } } active: 1 callbackHandle.valid: 1 callbackHandle.cancelled: 0 attempt: 1 retryPolicy: RetryPolicyImpl maxAttempts: 1 maxTimeMillis: -1ms')
 
 # fake system.profile documents
 profile_doc1 = {"op": "query", "ns": "test.foo",
@@ -251,6 +252,11 @@ def test_logevent_non_log_line():
     assert(le.ntoreturn == None)
     assert(le.nreturned == None)
     assert(le.pattern == None)
+
+def test_logevent_new_oplog_query():
+    """ Check that LogEvent correctly ignores new oplog query for duration extraction """
+    le = LogEvent(line_new_oplog_query)
+    assert(le.duration == None)
 
 def test_logevent_lazy_evaluation():
     """ Check that all LogEvent variables are evaluated lazily. """

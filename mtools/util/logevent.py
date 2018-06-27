@@ -181,7 +181,10 @@ class LogEvent(object):
             # split_tokens = self.split_tokens
             line_str = self.line_str
 
-            if line_str and line_str.endswith('ms'):
+            if (line_str
+                and line_str.endswith('ms')
+                and 'Scheduled new oplog query' not in line_str):
+
                 try:
                     # find duration from end
                     space_pos = line_str.rfind(" ")
