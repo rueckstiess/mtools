@@ -334,8 +334,9 @@ class LogEvent(object):
 
             split_tokens = self.split_tokens
 
-            if not (self.datetime_nextpos or
-                    len(split_tokens) <= self.datetime_nextpos):
+            if not self.datetime_nextpos:
+                return None
+            if len(split_tokens) <= self.datetime_nextpos:
                 return None
 
             connection_token = split_tokens[self.datetime_nextpos]

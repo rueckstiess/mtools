@@ -61,6 +61,8 @@ line_truncated_24 = ("Wed Jan 28 00:31:16.302 [conn12345] warning: log line "
                      "cursorid:1234567890123456789 ntoreturn:0 keyUpdates:0 "
                      "numYields: 23 locks(micros) r:24715 nreturned:1324 "
                      "reslen:256993 1445ms")
+line_fassert = ("***aborting after fassert() failure")
+line_empty = ("")
 
 # fake system.profile documents
 profile_doc1 = {"op": "query", "ns": "test.foo",
@@ -226,6 +228,29 @@ def test_logevent_value_extraction():
     assert(le.nreturned == 13551)
     assert(le.pattern == '{"ts": 1}')
 
+def test_logevent_non_log_line():
+    """ Check that LogEvent correctly ignores non log lines"""
+    le = LogEvent(line_fassert)
+    assert(le.thread == None)
+    assert(le.operation == None)
+    assert(le.namespace == None)
+    assert(le.duration == None)
+    assert(le.numYields == None)
+    assert(le.r == None)
+    assert(le.ntoreturn == None)
+    assert(le.nreturned == None)
+    assert(le.pattern == None)
+
+    le = LogEvent(line_empty)
+    assert(le.thread == None)
+    assert(le.operation == None)
+    assert(le.namespace == None)
+    assert(le.duration == None)
+    assert(le.numYields == None)
+    assert(le.r == None)
+    assert(le.ntoreturn == None)
+    assert(le.nreturned == None)
+    assert(le.pattern == None)
 
 def test_logevent_lazy_evaluation():
     """ Check that all LogEvent variables are evaluated lazily. """
