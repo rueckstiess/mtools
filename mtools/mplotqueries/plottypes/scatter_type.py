@@ -6,6 +6,8 @@ from operator import itemgetter
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
+    import matplotlib
+    matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
 
     from matplotlib import __version__ as mpl_version

@@ -14,6 +14,8 @@ from mtools import __version__
 from mtools.util.cmdlinetool import LogFileTool
 
 try:
+    import matplotlib
+    matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
