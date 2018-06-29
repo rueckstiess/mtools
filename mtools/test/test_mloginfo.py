@@ -390,6 +390,7 @@ class TestMLogInfo(object):
         self._test_rsinfo(logfile_path, **{'rs name': None, 'rs version': None,
                                            'rs members': None})
 
+
     def _test_rsinfo(self, logfile_path, **expected):
         """ utility test runner for rsstate
         """
@@ -408,3 +409,8 @@ class TestMLogInfo(object):
             key, val = line.split(':', 1)
             results[key.strip()] = val.strip()
         return results
+
+    def test_avoid_dict_sorting(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/', 'issue-636.log')
+        self.tool.run('%s --queries' % logfile_path)

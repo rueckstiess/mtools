@@ -17,7 +17,10 @@ def _decode_pattern_list(data):
             item = _decode_pattern_dict(item)
         rv.append(item)
 
-    rv = sorted(rv)
+    # avoid sorting if any element in the list is a dict
+    if not any(isinstance(x, dict) for x in rv):
+        rv = sorted(rv)
+
     return rv
 
 
