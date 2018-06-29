@@ -645,17 +645,13 @@ class MPlotQueriesTool(LogFileTool):
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
-            # escape dollar signs in legend labels
-            labels = [x.replace('$', '\$') for x in labels]
             # only change fontsize if supported
             major, minor, _ = mpl_version.split('.')
             if (int(major), int(minor)) >= (1, 3):
-                self.legend = axis.legend(labels=labels,
-                                          loc='upper left', frameon=False,
+                self.legend = axis.legend(loc='upper left', frameon=False,
                                           numpoints=1, fontsize=9)
             else:
-                self.legend = axis.legend(labels=labels,
-                                          loc='upper left', frameon=False,
+                self.legend = axis.legend(loc='upper left', frameon=False,
                                           numpoints=1)
 
         if self.args['type'] == 'scatter':
