@@ -6,8 +6,6 @@ from operator import itemgetter
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
-    import matplotlib.pyplot as plt
-
     from matplotlib import __version__ as mpl_version
     from matplotlib.dates import date2num
     from matplotlib.patches import Polygon
