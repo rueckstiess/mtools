@@ -74,9 +74,10 @@ class ScatterPlotType(BasePlotType):
         if self.logscale:
             axis.semilogy()
 
+        group_label = group.replace('$', '\$')
         artist = axis.plot_date(x, y, color=color, markeredgecolor='k',
                                 marker=marker, alpha=0.8,
-                                markersize=7, picker=5, label=group)[0]
+                                markersize=7, picker=5, label=group_label)[0]
         # add meta-data for picking
         artist._mt_plot_type = self
         artist._mt_group = group
