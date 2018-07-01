@@ -8,6 +8,7 @@ import six
 
 def _decode_pattern_list(data):
     rv = []
+    contains_dict = False
     for item in data:
         if isinstance(item, six.text_type):
             item = item.encode('utf-8')
@@ -15,9 +16,13 @@ def _decode_pattern_list(data):
             item = _decode_pattern_list(item)
         elif isinstance(item, dict):
             item = _decode_pattern_dict(item)
+            contains_dict = True
         rv.append(item)
 
-    rv = sorted(rv)
+    # avoid sorting if any element in the list is a dict
+    if not contains_dict:
+        rv = sorted(rv)
+
     return rv
 
 
