@@ -3,4 +3,4 @@ python-dateutil==2.7
 matplotlib==1.4.3
 numpy==1.14.5
 pymongo==3.6
-psutil==5.4
+psutil==5.4.2
