@@ -2,6 +2,25 @@
 Changes to mtools
 =================
 
+version 1.5.0
+~~~~~~~~~~~~~
+* Update matplotlib to 1.4.3
+* Update numpy to 1.14.5
+* Update python-dateutil to 2.7
+* Update pymongo to 3.6.1
+* Pin requirements to avoid pulling in breaking changes
+* Ignore "new oplog query" log entries for query duration parsing
+* Replace characters that can't be UTF decoded with '?'
+* Fix logic error preventing parsing of empty or unexpected log lines
+* mplotqueries: Report actual error when `matplotlib` import fails
+* mlaunch: If `mongod` is missing, print the path that was used
+* mlaunch: Add support for GSSAPI
+* mlaunch: Add users to all shards in sharded cluster
+* mlogvis: Remove write lock and read lock grouping
+
+Thanks to @kevinadi, @jamesbroadhead, @mathom, @bmoss, @sindbach,
+and @stennie for contributions to this release!
+
 version 1.4.1
 ~~~~~~~~~~~~~
 * mlaunch: Fixes for Python 3.6.5 support (#596, #586)
