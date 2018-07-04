@@ -49,7 +49,7 @@ class TestMLogFilter(object):
         random_start = random_date(self.logfile.start, self.logfile.end)
         self.tool.run('%s --from '
                       '%s' % (self.logfile_path,
-                              random_start.strftime("%b %d %H:%M:%S")))
+                              random_start.strftime("%b %d %H:%M:%S.%f")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -74,8 +74,8 @@ class TestMLogFilter(object):
 
         self.tool.run('%s --from %s --to '
                       '%s' % (self.logfile_path,
-                              random_start.strftime("%b %d %H:%M:%S"),
-                              random_end.strftime("%b %d %H:%M:%S")))
+                              random_start.strftime("%b %d %H:%M:%S.%f"),
+                              random_end.strftime("%b %d %H:%M:%S.%f")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -97,8 +97,8 @@ class TestMLogFilter(object):
 
         self.tool.run('%s --from %s --to '
                       '%s' % (logfile_26_path,
-                              random_start.strftime("%b %d %H:%M:%S"),
-                              random_end.strftime("%b %d %H:%M:%S")))
+                              random_start.strftime("%b %d %H:%M:%S.%f"),
+                              random_end.strftime("%b %d %H:%M:%S.%f")))
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
 
@@ -119,8 +119,8 @@ class TestMLogFilter(object):
         self.tool.is_stdin = True
         self.tool.run('%s --from %s --to '
                       '%s' % (self.logfile_path,
-                              start.strftime("%b %d %H:%M:%S"),
-                              end.strftime("%b %d %H:%M:%S")))
+                              start.strftime("%b %d %H:%M:%S.%f"),
+                              end.strftime("%b %d %H:%M:%S.%f")))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
