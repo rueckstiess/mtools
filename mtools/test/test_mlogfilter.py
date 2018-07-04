@@ -74,8 +74,8 @@ class TestMLogFilter(object):
 
         self.tool.run('%s --from %s --to '
                       '%s' % (self.logfile_path,
-                              random_start.strftime("%b %d %H:%M:%S"),
-                              random_end.strftime("%b %d %H:%M:%S")))
+                              random_start.strftime("%b %d %H:%M:%S.%f"),
+                              random_end.strftime("%b %d %H:%M:%S.%f")))
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
@@ -97,8 +97,8 @@ class TestMLogFilter(object):
 
         self.tool.run('%s --from %s --to '
                       '%s' % (logfile_26_path,
-                              random_start.strftime("%b %d %H:%M:%S"),
-                              random_end.strftime("%b %d %H:%M:%S")))
+                              random_start.strftime("%b %d %H:%M:%S.%f"),
+                              random_end.strftime("%b %d %H:%M:%S.%f")))
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) > 0
 
