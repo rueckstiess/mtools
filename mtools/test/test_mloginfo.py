@@ -358,32 +358,6 @@ class TestMLogInfo(object):
                                                 'rs version': 'unknown',
                                                 'rs members': rsmembers})
 
-    def test_rsstate_26_2(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
-                                    'test/logfiles/', 'mongod_26.log')
-        self._test_rsinfo(logfile_path,
-                          **{'rs name': 'shard01',
-                             'rs version': '1',
-                             'rs members': ('[ { _id: 0, '
-                                            'host: "enter.local:27019" }, '
-                                            '{ _id: 1, '
-                                            'host: "enter.local:27020" }, '
-                                            '{ _id: 2, '
-                                            'host: "enter.local:27021" } ]')})
-
-    def test_rsstate_24(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
-                                    'test/logfiles/', 'mongod-2411.log')
-        self._test_rsinfo(logfile_path,
-                          **{'rs name': 'repl1',
-                             'rs version': 'unknown',
-                             'rs members': ('[ { host: "hostname.local:37018",'
-                                            ' _id: 0, votes: 1 }, '
-                                            '{ host: "hostname.local:37019", '
-                                            '_id: 1, votes: 1 }, { host: '
-                                            '"hostname.local:37020", _id: 2, '
-                                            'arbiterOnly: true } ]')})
-
     def test_rsstate_mongos_2(self):
         logfile_path = os.path.join(os.path.dirname(mtools.__file__),
                                     'test/logfiles/', 'mongos.log')

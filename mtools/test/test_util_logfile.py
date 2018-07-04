@@ -84,6 +84,17 @@ class TestUtilLogFile(object):
         logfile = LogFile(wiredtiger)
         assert logfile.storage_engine == 'wiredTiger'
 
+    def test_rsinfo(self):
+        """LogFile: test if replication info is detected (MongoDB 3.2+) """
+
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/', 'rsinfo_36.log')
+        rslog = open(logfile_path, 'rb')
+        logfile = LogFile(rslog)
+        assert logfile.repl_set == 'replset'
+        assert logfile.repl_set_version == '1'
+        assert logfile.repl_set_protocol == '1'
+
     def test_hostname_port(self):
         # mongod
         logfile_path = os.path.join(os.path.dirname(mtools.__file__),

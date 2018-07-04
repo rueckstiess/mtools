@@ -35,5 +35,8 @@ class RsInfoSection(BaseSection):
             print(" rs version: %s"
                   % (self.mloginfo.logfile.repl_set_version
                      if self.mloginfo.logfile.repl_set_version else "unknown"))
+            print("rs protocol: %s"
+                  % (self.mloginfo.logfile.repl_set_protocol
+                    if self.mloginfo.logfile.repl_set_protocol else "unknown"))
         else:
             print("  no rs info changes found")
