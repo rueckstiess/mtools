@@ -2,6 +2,15 @@
 Changes to mtools
 =================
 
+version 1.5.1
+~~~~~~~~~~~~~
+* mlaunch: Fix 1.5.0 regression preventing use of --auth
+* mloginfo: Add support for MongoDB 3.2+ --rsinfo
+* mlogfilter: Fix intermittent test failures
+
+Thanks to @kevinadi, @kallimachos, @sindbach, and @stennie
+for contributions to this release.
+
 version 1.5.0
 ~~~~~~~~~~~~~
 * Update matplotlib to 1.4.3
@@ -18,8 +27,8 @@ version 1.5.0
 * mlaunch: Add users to all shards in sharded cluster
 * mlogvis: Remove write lock and read lock grouping
 
-Thanks to @kevinadi, @jamesbroadhead, @mathom, @bmoss, @sindbach,
-and @stennie for contributions to this release!
+Thanks to @kevinadi, @jamesbroadhead, @mathom, @kallimachos,
+@sindbach, and @stennie for contributions to this release!
 
 version 1.4.1
 ~~~~~~~~~~~~~
