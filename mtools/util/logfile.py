@@ -35,6 +35,7 @@ class LogFile(InputSource):
         self._repl_set = None
         self._repl_set_members = None
         self._repl_set_version = None
+        self._repl_set_protocol = None
 
         self._storage_engine = None
 
@@ -192,6 +193,13 @@ class LogFile(InputSource):
         return self._repl_set_version
 
     @property
+    def repl_set_protocol(self):
+        """Return the replSet protocolVersion (if available)."""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._repl_set_protocol
+
+    @property
     def storage_engine(self):
         """Return storage engine if available."""
         if not self._num_lines:
@@ -311,7 +319,7 @@ class LogFile(InputSource):
             """ For 3.2 the "[initandlisten] options:" no longer contains the
                 "engine" field So now we have to look for the "[initandlisten]
                 wiredtiger_open config:" which was present in 3.0, but would
-                now tell us definatively that wiredTiger is being used
+                now tell us definitively that wiredTiger is being used
             """
             if "[initandlisten] wiredtiger_open config:" in line:
                 self._storage_engine = 'wiredTiger'
@@ -323,15 +331,17 @@ class LogFile(InputSource):
                     self._repl_set = match.group('replSet')
                     self._repl_set_members = match.group('replSetMembers')
 
-            new_config = ("replSet info saving a newer config version "
-                          "to local.system.replset: ")
+            # Replica set config logging in MongoDB 3.0+
+            new_config = ("New replica set config in use: ")
             if new_config in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", '
                                   'version: (?P<replSetVersion>\d+), '
+                                  '(protocolVersion: (?P<replSetProtocol>\d+), )?'
                                   'members: (?P<replSetMembers>[^]]+ ])', line)
                 if match:
                     self._repl_set = match.group('replSet')
                     self._repl_set_members = match.group('replSetMembers')
+                    self._repl_set_protocol = match.group('replSetProtocol')
                     self._repl_set_version = match.group('replSetVersion')
 
             # if ("is now in state" in line and
