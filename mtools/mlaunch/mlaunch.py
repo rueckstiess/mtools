@@ -1541,6 +1541,13 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _get_ssl_pymongo_options(self, args):
         opts = {}
+        for parser in [self.ssl_server_args]:
+            for action in parser._group_actions:
+                name = action.dest
+                value = args.get(name)
+                if value:
+                    opts['ssl'] = True
+                    opts['ssl_cert_reqs'] = ssl.CERT_NONE
         for parser in self.ssl_args, self.ssl_client_args:
             for action in parser._group_actions:
                 name = action.dest
