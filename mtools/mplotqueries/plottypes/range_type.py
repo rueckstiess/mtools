@@ -97,7 +97,7 @@ class RangePlotType(BasePlotType):
         return artists
 
     def clicked(self, event):
-        group = event.artist._mt_group
+        # group = event.artist._mt_group
         print(num2date(event.artist._mt_left).strftime("%a %b %d %H:%M:%S") +
               ' - ' +
               num2date(event.artist._mt_right).strftime("%a %b %d %H:%M:%S"))

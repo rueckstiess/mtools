@@ -175,7 +175,10 @@ class MPlotQueriesTool(LogFileTool):
             multiple_files = True
             self.args['group'] = 'filename'
 
-        self.plot_instance = self.plot_types[self.args['type']](args=self.args, unknown_args=self.unknown_args)
+        self.plot_instance = self.plot_types[
+            self.args['type']](
+                args=self.args,
+                unknown_args=self.unknown_args)
 
         for logfile in self.logfiles:
 
@@ -586,7 +589,7 @@ class MPlotQueriesTool(LogFileTool):
         # use timezone of first log file (may not always be what user wants
         # but must make a choice)
         tz = self.logfiles[0].timezone
-        tzformat = '%b %d\n%H:%M:%S' if tz == tzutc() else '%b %d\n%H:%M:%S%z'
+        # tzformat='%b %d\n%H:%M:%S' if tz == tzutc() else '%b %d\n%H:%M:%S%z'
 
         locator = AutoDateLocator(tz=tz, minticks=5, maxticks=10)
         formatter = AutoDateFormatter(locator, tz=tz)

@@ -103,7 +103,8 @@ class MLogFilterTool(LogFileTool):
 
         if length:
             if len(line) > length:
-                line = line[:int(length / 2 - 2)] + '...' + line[int(-length/2 + 1):]
+                line = (line[:int(length / 2 - 2)] + '...' +
+                        line[int(-length / 2 + 1):])
         if human:
             line = self._changeMs(line)
             line = self._formatNumbers(line)
@@ -196,20 +197,19 @@ class MLogFilterTool(LogFileTool):
 
         while any(lines):
             min_line = min(lines, key=self._datetime_key_for_merge)
-            min_index = lines.index(min_line)
+            min_idx = lines.index(min_line)
 
-            if self.args['markers'][min_index]:
-                min_line.merge_marker_str = self.args['markers'][min_index]
+            if self.args['markers'][min_idx]:
+                min_line.merge_marker_str = self.args['markers'][min_idx]
 
             yield min_line
 
-            # update lines array with a new line from the min_index'th logfile
-            lines[min_index] = next(iter(self.args['logfile'][min_index]), None)
-            if lines[min_index] and lines[min_index].datetime:
-                lines[min_index]._datetime = (lines[min_index].datetime +
-                                              timedelta(hours=self
-                                                        .args['timezone']
-                                                        [min_index]))
+            # update lines array with a new line from the min_idx'th logfile
+            lines[min_idx] = next(iter(self.args['logfile'][min_idx]), None)
+            if lines[min_idx] and lines[min_idx].datetime:
+                lines[min_idx]._datetime = (
+                    lines[min_idx].datetime +
+                    timedelta(hours=self.args['timezone'][min_idx]))
 
     def logfile_generator(self):
         """Yield each line of the file, or the next line if several files."""

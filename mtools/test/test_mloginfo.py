@@ -364,7 +364,6 @@ class TestMLogInfo(object):
         self._test_rsinfo(logfile_path, **{'rs name': None, 'rs version': None,
                                            'rs members': None})
 
-
     def _test_rsinfo(self, logfile_path, **expected):
         """ utility test runner for rsstate
         """
