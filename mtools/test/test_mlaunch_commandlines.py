@@ -48,7 +48,7 @@ class TestMLaunch(object):
 
     def cmdlist_filter(self, cmdlist):
         """Filter command lines to contain only [mongod|mongos] --parameter."""
-        # NOTE: The command "mongo was intentionally written with a leading quote
+        # NOTE: Command "mongo was intentionally written with a leading quote
         res = map(lambda cmd: set([param for param in cmd.split()
                                    if param.startswith('"mongo') or
                                    param.startswith('--')]),
@@ -375,12 +375,12 @@ class TestMLaunch(object):
             self.raises_ioerror()
         else:
             cmdlist = (
-                [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                    '--fork', '--replSet'])] +
-                [set(['"mongod"', '--port', '--shardsvr', '--logpath', '--dbpath',
-                    '--fork'])] * 2 +
+                [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                      '--configsvr', '--fork', '--replSet'])] +
+                [set(['"mongod"', '--port', '--shardsvr', '--logpath',
+                      '--dbpath', '--fork'])] * 2 +
                 [set(['"mongos"', '--port', '--logpath', '--configdb',
-                    '--fork'])] * 2
+                      '--fork'])] * 2
                 )
             self.cmdlist_assert(cmdlist)
 
@@ -425,11 +425,12 @@ class TestMLaunch(object):
             self.raises_ioerror()
         else:
             cmdlist = (
-                [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                    '--fork', '--replSet'])] +
-                [set(['"mongod"', '--port', '--logpath', '--dbpath', '--shardsvr',
-                    '--fork'])] * 2 +
-                [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
+                [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                      '--configsvr', '--fork', '--replSet'])] +
+                [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                      '--shardsvr', '--fork'])] * 2 +
+                [set(['"mongos"', '--port', '--logpath', '--configdb',
+                      '--fork'])]
                 )
             self.cmdlist_assert(cmdlist)
 
@@ -506,9 +507,9 @@ class TestMLaunch(object):
         self.run_tool('init --sharded 2 --replicaset --storageEngine mmapv1')
         cmdlist = (
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                '--fork', '--replSet'])] +
+                  '--fork', '--replSet'])] +
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--shardsvr',
-                '--fork', '--storageEngine'])] * 6 +
+                  '--fork', '--storageEngine'])] * 6 +
             [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
             )
         self.cmdlist_assert(cmdlist)

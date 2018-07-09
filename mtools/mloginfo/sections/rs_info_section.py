@@ -31,12 +31,15 @@ class RsInfoSection(BaseSection):
             print("    rs name: %s" % self.mloginfo.logfile.repl_set)
             print(" rs members: %s"
                   % (self.mloginfo.logfile.repl_set_members
-                     if self.mloginfo.logfile.repl_set_members else "unknown"))
+                     if self.mloginfo.logfile.repl_set_members
+                     else "unknown"))
             print(" rs version: %s"
                   % (self.mloginfo.logfile.repl_set_version
-                     if self.mloginfo.logfile.repl_set_version else "unknown"))
+                     if self.mloginfo.logfile.repl_set_version
+                     else "unknown"))
             print("rs protocol: %s"
                   % (self.mloginfo.logfile.repl_set_protocol
-                    if self.mloginfo.logfile.repl_set_protocol else "unknown"))
+                     if self.mloginfo.logfile.repl_set_protocol
+                     else "unknown"))
         else:
             print("  no rs info changes found")

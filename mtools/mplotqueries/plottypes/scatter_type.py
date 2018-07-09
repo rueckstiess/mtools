@@ -7,6 +7,7 @@ from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
     from matplotlib import __version__ as mpl_version
+    import matplotlib.pyplot as plt
     from matplotlib.dates import date2num
     from matplotlib.patches import Polygon
 

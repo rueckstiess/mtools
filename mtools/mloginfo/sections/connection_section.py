@@ -102,7 +102,6 @@ class ConnectionSection(BaseSection):
 
                     connections_start[connid] = dt
 
-
             pos = line.find('end connection')
             if pos != -1:
                 # connection was closed, increase counter
@@ -193,11 +192,22 @@ class ConnectionSection(BaseSection):
             closed = ip_closed[ip] if ip in ip_closed else 0
 
             if genstats:
-                covered_count = ipwise_count[ip] if ip in ipwise_count else 1
-                connection_duration_ip = (ipwise_sum_durations[ip]
-                                          if ip in ipwise_sum_durations else 0)
-                ipwise_min_connection_duration_final = ipwise_min_connection_duration[ip] if ipwise_min_connection_duration[ip] != MIN_DURATION_EMPTY else 0
-                ipwise_max_connection_duration_final = ipwise_max_connection_duration[ip] if ipwise_max_connection_duration[ip] != MAX_DURATION_EMPTY else 0
+                covered_count = (
+                    ipwise_count[ip]
+                    if ip in ipwise_count
+                    else 1)
+                connection_duration_ip = (
+                    ipwise_sum_durations[ip]
+                    if ip in ipwise_sum_durations
+                    else 0)
+                ipwise_min_connection_duration_final = (
+                    ipwise_min_connection_duration[ip]
+                    if ipwise_min_connection_duration[ip] != MIN_DURATION_EMPTY
+                    else 0)
+                ipwise_max_connection_duration_final = (
+                    ipwise_max_connection_duration[ip]
+                    if ipwise_max_connection_duration[ip] != MAX_DURATION_EMPTY
+                    else 0)
 
                 print("%-15s  opened: %-8i  closed: %-8i dur-avg(s): %-8i "
                       "dur-min(s): %-8i dur-max(s): %-8i"
