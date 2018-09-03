@@ -64,6 +64,9 @@ class MongoConnection(Connection):
             if 'serverSelectionTimeoutMS' in kwargs:
                 kwargs.remove('serverSelectionTimeoutMS')
 
+        # Set client application name for MongoDB 3.4+ servers
+        kwargs['appName'] = 'mlaunch v{0}'.format(__version__)
+
         Connection.__init__(self, *args, **kwargs)
 
 
