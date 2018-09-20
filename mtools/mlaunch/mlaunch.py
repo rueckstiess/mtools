@@ -748,8 +748,7 @@ class MLaunchTool(BaseCmdLineTool):
                         found_cluster_admin = True
             else:
                 roles = self.args['auth_roles']
-
-            found_cluster_admin = "clusterAdmin" in self.args['auth_roles']
+                found_cluster_admin = "clusterAdmin" in roles
 
             if not found_cluster_admin:
                 warnings.warn("the stop command will not work with auth "
@@ -770,7 +769,7 @@ class MLaunchTool(BaseCmdLineTool):
                                    name=self.args['username'],
                                    password=self.args['password'],
                                    database=self.args['auth_db'],
-                                   roles=self.args['auth_roles'])
+                                   roles=roles)
 
             if self.args['verbose']:
                 print("added user %s on %s database" % (self.args['username'],
