@@ -2,6 +2,19 @@
 Changes to mtools
 =================
 
+version 1.5.2
+~~~~~~~~~~~~~
+* mlaunch: Set appname for MongoDB 3.4+ client metadata
+* mlaunch: Only use roles variable instead of args once set up
+* mlaunch: Fix for --sharded and --auth-role-docs failing to add roles
+* mlaunch: Fix failure to connect to standalone SSL mongod
+* mlaunch: Retain PyMongo import error exceptions
+* mlogfilter: Fix Unicode error for redirected output
+* Improve flake8 style compliance
+
+Thanks to @kevinadi, @p-mongo, @gmishkin, and @stennie for contributions
+to this release.
+
 version 1.5.1
 ~~~~~~~~~~~~~
 * mlaunch: Fix 1.5.0 regression preventing use of --auth
