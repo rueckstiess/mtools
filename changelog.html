@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.5.0
+                1.5.2
               </div>
             
           
@@ -96,6 +96,8 @@
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changes to mtools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-5-2">version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-5-1">version 1.5.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-5-0">version 1.5.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-4-1">version 1.4.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-4-0">version 1.4.0</a></li>
@@ -193,6 +195,30 @@
             
   <div class="section" id="changes-to-mtools">
 <h1>Changes to mtools<a class="headerlink" href="#changes-to-mtools" title="Permalink to this headline">#</a></h1>
+<div class="section" id="version-1-5-2">
+<h2>version 1.5.2<a class="headerlink" href="#version-1-5-2" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li>mlaunch: Set appname for MongoDB 3.4+ client metadata</li>
+<li>mlaunch: Only use roles variable instead of args once set up</li>
+<li>mlaunch: Fix for –sharded and –auth-role-docs failing to add roles</li>
+<li>mlaunch: Fix failure to connect to standalone SSL mongod</li>
+<li>mlaunch: Retain PyMongo import error exceptions</li>
+<li>mlogfilter: Fix Unicode error for redirected output</li>
+<li>Improve flake8 style compliance</li>
+</ul>
+<p>Thanks to &#64;kevinadi, &#64;p-mongo, &#64;gmishkin, and &#64;stennie for contributions
+to this release.</p>
+</div>
+<div class="section" id="version-1-5-1">
+<h2>version 1.5.1<a class="headerlink" href="#version-1-5-1" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li>mlaunch: Fix 1.5.0 regression preventing use of –auth</li>
+<li>mloginfo: Add support for MongoDB 3.2+ –rsinfo</li>
+<li>mlogfilter: Fix intermittent test failures</li>
+</ul>
+<p>Thanks to &#64;kevinadi, &#64;kallimachos, &#64;sindbach, and &#64;stennie
+for contributions to this release.</p>
+</div>
 <div class="section" id="version-1-5-0">
 <h2>version 1.5.0<a class="headerlink" href="#version-1-5-0" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
@@ -210,8 +236,8 @@
 <li>mlaunch: Add users to all shards in sharded cluster</li>
 <li>mlogvis: Remove write lock and read lock grouping</li>
 </ul>
-<p>Thanks to &#64;kevinadi, &#64;jamesbroadhead, &#64;mathom, &#64;bmoss, &#64;sindbach,
-and &#64;stennie for contributions to this release!</p>
+<p>Thanks to &#64;kevinadi, &#64;jamesbroadhead, &#64;mathom, &#64;kallimachos,
+&#64;sindbach, and &#64;stennie for contributions to this release!</p>
 </div>
 <div class="section" id="version-1-4-1">
 <h2>version 1.4.1<a class="headerlink" href="#version-1-4-1" title="Permalink to this headline">#</a></h2>
@@ -767,6 +793,7 @@ accessed programmatically from a Python shell with:</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
