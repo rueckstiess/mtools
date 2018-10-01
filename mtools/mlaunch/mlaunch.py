@@ -295,7 +295,7 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--hostname', action='store',
                                  default='localhost',
                                  help=('override hostname for replica set '
-                                       'configuration'))
+                                       'and SSL configuration'))
 
         # authentication, users, roles
         self._default_auth_roles = ['dbAdminAnyDatabase',
@@ -357,6 +357,9 @@ class MLaunchTool(BaseCmdLineTool):
                                     'invalid certificates'))
 
         ssl_server_args = init_parser.add_argument_group('Server SSL Options')
+        ssl_args.add_argument('--gen-certs',
+                              help='Generate self-signed server and client certificates',
+                              action='store_true')
         ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true',
                                      help='use ssl on configured ports')
         ssl_server_args.add_argument('--sslMode',
@@ -1534,18 +1537,44 @@ class MLaunchTool(BaseCmdLineTool):
         return ' '.join(result)
 
     def _get_ssl_server_args(self):
-        s = ''
+        args = []
+        gen_certs = False
         for parser in self.ssl_args, self.ssl_server_args:
             for action in parser._group_actions:
                 name = action.dest
                 value = self.args.get(name)
-                if value:
+                if name == 'gen_certs' and value:
+                    gen_certs = True
+                elif value:
                     if value is True:
-                        s += ' --%s' % (name,)
+                        args.append('--%s' % name)
                     else:
-                        s += ' --%s "%s"' % (name, value)
+                        args.append('--%s' % name)
+                        args.append('"%s"' % value)
 
-        return s
+        if gen_certs:
+            if not os.path.exists(self.dir):
+                os.makedirs(self.dir)
+            # taken from https://docs.mongodb.com/manual/tutorial/configure-ssl/
+            cert_path = os.path.join(self.dir, 'mlaunch.crt')
+            key_path = os.path.join(self.dir, 'mlaunch.key')
+            pem_path = os.path.join(self.dir, 'mlaunch.pem')
+            subject = '/C=Cc/ST=St/L=Loc/O=Org/OU=mlaunch/CN=%s' % self.args['hostname']
+            subprocess.check_call(['openssl', 'req',
+                '-newkey', 'rsa:2048', '-new', '-x509', '-days', '365',
+                '-subj', subject,
+                '-nodes', '-out', cert_path, '-keyout',
+                key_path])
+            with open(pem_path, 'wb') as pem_f:
+                with open(key_path) as key_f:
+                    with open(cert_path) as cert_f:
+                        pem_f.write(key_f.read() + cert_f.read())
+            if '--sslMode' not in args:
+                args.append('--sslMode')
+                args.append('allowSSL')
+            args.append('--sslPEMKeyFile')
+            args.append(pem_path)
+        return ' '.join(args)
 
     def _get_ssl_pymongo_options(self, args):
         opts = {}
