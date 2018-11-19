@@ -13,6 +13,7 @@ utility to quickly set up complex MongoDB test environments on a local machine.
 
    install.rst
    mlaunch.rst
+   mlogexcel.rst
    mlogfilter.rst
    mloginfo.rst
    mlogvis.rst
@@ -25,6 +26,9 @@ What's in the box?
 ~~~~~~~~~~~~~~~~~~
 
 The following tools are in the mtools collection:
+
+:ref:`mlogexcel`
+   writes parsed log messages to an Excel .xslx file (requires openpyxl)
 
 :ref:`mlogfilter`
    slices log files by time, merges log files, filters slow queries, finds

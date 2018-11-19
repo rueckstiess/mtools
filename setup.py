@@ -19,6 +19,7 @@ try:
     extras_requires = {
         "all": ['matplotlib==1.4.3', 'numpy==1.14.5', 'pymongo==3.6.1', 'psutil==5.4.2'],
         "mlaunch": ['pymongo==3.6.1', 'psutil==5.4.2'],
+        "mlogexcel": ['openpyxl==2.5.4'],
         "mlogfilter": [],
         "mloginfo": ['numpy==1.14.5'],
         "mlogvis": [],
@@ -44,6 +45,7 @@ except ImportError:
     # find_packages not available in distutils, manually define packaging
     packages = ['mtools',
                 'mtools.mlaunch',
+                'mtools.mlogexcel',
                 'mtools.mlogfilter',
                 'mtools.mloginfo',
                 'mtools.mlogvis',
@@ -84,6 +86,7 @@ setup(
         "console_scripts": [
             "mgenerate=mtools.mgenerate.mgenerate:main",
             "mlaunch=mtools.mlaunch.mlaunch:main",
+            "mlogexcel=mtools.mlogexcel.mlogexcel:main",
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
             "mlogvis=mtools.mlogvis.mlogvis:main",

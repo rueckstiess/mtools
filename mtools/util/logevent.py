@@ -103,6 +103,8 @@ class LogEvent(object):
 
         self._pattern = None
         self._sort_pattern = None
+        self._actual_query = None
+        self._actual_sort = None
 
         self._command_calculated = False
         self._command = None
@@ -123,6 +125,7 @@ class LogEvent(object):
 
         self._numYields = None
         self._planSummary = None
+        self._actualPlanSummary = None
         self._writeConflicts = None
         self._r = None
         self._w = None
@@ -449,6 +452,33 @@ class LogEvent(object):
         return self._sort_pattern
 
     @property
+    def actual_query(self):
+        """Extract the actual query (not pattern) from operations."""
+        if not self._actual_query:
+
+            # trigger evaluation of operation
+            if (self.operation in ['query', 'getmore', 'update', 'remove'] or
+                    self.command in ['count', 'findandmodify']):
+                self._actual_query = self._find_pattern('query: ', actual=True)
+            elif self.command == 'find':
+                self._actual_query = self._find_pattern('filter: ',
+                                                        actual=True)
+
+        return self._actual_query
+
+    @property
+    def actual_sort(self):
+        """Extract the actual sort key (not pattern) from operations."""
+        if not self._actual_sort:
+
+            # trigger evaluation of operation
+            if self.operation in ['query', 'getmore']:
+                self._actual_sort = self._find_pattern('orderby: ',
+                                                        actual=True)
+
+        return self._actual_sort
+
+    @property
     def command(self):
         """Extract query pattern from operations."""
         if not self._command_calculated:
@@ -559,12 +589,21 @@ class LogEvent(object):
 
     @property
     def planSummary(self):
-        """Extract numYields counter if available (lazy)."""
+        """Extract planSummary if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
 
         return self._planSummary
+
+    @property
+    def actualPlanSummary(self):
+        """Extract planSummary including JSON if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._actualPlanSummary
 
     @property
     def r(self):
@@ -631,6 +670,14 @@ class LogEvent(object):
                                     token.startswith('planSummary')):
                                 try:
                                     self._planSummary = split_tokens[t + 1 + self.datetime_nextpos + 2]
+                                    if self._planSummary:
+                                        if split_tokens[t + 1 + self.datetime_nextpos + 3] != '{':
+                                            self._actualPlanSummary = self._planSummary
+                                        else:
+                                            self._actualPlanSummary = '%s %s' % (
+                                                self._planSummary,
+                                                self._find_pattern('planSummary: %s' % self._planSummary, actual=True)
+                                            )
                                 except ValueError:
                                     pass
 
@@ -695,7 +742,7 @@ class LogEvent(object):
         w = self.w
         r = self.r
 
-    def _find_pattern(self, trigger):
+    def _find_pattern(self, trigger, actual=False):
         # get start of json query pattern
         start_idx = self.line_str.rfind(trigger)
         if start_idx == -1:
@@ -716,7 +763,10 @@ class LogEvent(object):
                 break
         search_str = search_str[:stop_idx + 1].strip()
         if search_str:
-            return json2pattern(search_str)
+            if actual:
+                return search_str
+            else:
+                return json2pattern(search_str)
         else:
             return None
 

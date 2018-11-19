@@ -28,3 +28,13 @@ pip-log.txt
 
 # Doc build files
 _build
+
+# vim swap files
+*.swp
+
+# Virtualenv related directories
+venv
+
+# Local output files
+stdin.html
+stdin.xlsx
