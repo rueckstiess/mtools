@@ -4,6 +4,8 @@ import sys
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from openpyxl.utils.escape import escape
+from openpyxl.utils.exceptions import IllegalCharacterError
 
 from mtools.util.cmdlinetool import LogFileTool
 
@@ -127,13 +129,30 @@ class MLogExcelTool(LogFileTool):
                 coord = 'D%d' % ops_row
                 ops_ws[coord].number_format = '0" ms"'
             else:
-                msg = logevent.line_str[logevent.line_str.index(']') + 2:]
-                info_ws.append([
-                    lineno,
-                    logevent.datetime,
-                    logevent.thread,
-                    msg,
-                ])
+                if logevent.datetime and logevent.thread:
+                    try:
+                        msg = logevent.line_str[
+                            (logevent.line_str.index(']') + 2):
+                        ]
+                    except ValueError:
+                        print('Unexpected line format on line {}: {}'.format(
+                            lineno, logevent.line_str))
+                        msg = logevent.line_str
+                else:
+                    msg = logevent.line_str
+
+                if msg:
+                    try:
+                        info_ws.append([
+                            lineno,
+                            logevent.datetime,
+                            logevent.thread,
+                            escape(msg),
+                        ])
+                    except IllegalCharacterError:
+                        print('Special character in line {} '
+                              'cannot be stored in OOXML: {}'.format(
+                                  lineno, msg))
 
         # apply formatting to header cells
         for col in [chr(num) for num in range(ord('A'), ord('O') + 1)]:
