@@ -138,7 +138,6 @@ def test_logevent_datetime_parsing():
 
 
 def test_logevent_pattern_parsing():
-
     le = LogEvent(line_pattern_26_a)
     assert(le.pattern) == '{"a": 1}'
 
@@ -149,8 +148,18 @@ def test_logevent_pattern_parsing():
     assert(le.pattern) == '{"a": 1}'
 
 
-def test_logevent_command_parsing():
+def test_logevent_actual_query_parsing():
+    le = LogEvent(line_pattern_26_a)
+    assert(le.actual_query) == '{ a: 1.0 }'
 
+    le = LogEvent(line_pattern_26_b)
+    assert(le.actual_query) == '{ a: 1.0 }'
+
+    le = LogEvent(line_pattern_26_c)
+    assert(le.actual_query) == '{ a: 1.0 }'
+
+
+def test_logevent_command_parsing():
     le = LogEvent(line_command_26_a)
     assert(le.command) == 'replsetgetstatus'
 
@@ -162,7 +171,6 @@ def test_logevent_command_parsing():
 
 
 def test_logevent_sort_pattern_parsing():
-
     le = LogEvent(line_pattern_26_a)
     assert(le.sort_pattern) is None
 
@@ -171,6 +179,17 @@ def test_logevent_sort_pattern_parsing():
 
     le = LogEvent(line_pattern_26_c)
     assert(le.sort_pattern) == '{"b": 1}'
+
+
+def test_logevent_actual_sort_parsing():
+    le = LogEvent(line_pattern_26_a)
+    assert(le.actual_sort) is None
+
+    le = LogEvent(line_pattern_26_b)
+    assert(le.actual_sort) == '{ b: 1.0 }'
+
+    le = LogEvent(line_pattern_26_c)
+    assert(le.actual_sort) == '{ b: 1.0 }'
 
 
 def test_logevent_profile_pattern_parsing():
@@ -214,6 +233,17 @@ def test_logevent_extract_planSummary():
     le = LogEvent(line_26_planSummary)
     assert(le.planSummary == "IXSCAN")
 
+    le = LogEvent(line_pattern_26_a)
+    assert(le.planSummary == "EOF")
+
+
+def test_logevent_extract_actualPlanSummary():
+    le = LogEvent(line_26_planSummary)
+    assert(le.actualPlanSummary == "IXSCAN { cid: 1 }")
+
+    le = LogEvent(line_pattern_26_a)
+    assert(le.actualPlanSummary == "EOF")
+
 
 def test_logevent_value_extraction():
     """ Check for correct value extraction of all fields. """
@@ -228,6 +258,7 @@ def test_logevent_value_extraction():
     assert(le.ntoreturn == 0)
     assert(le.nreturned == 13551)
     assert(le.pattern == '{"ts": 1}')
+
 
 def test_logevent_non_log_line():
     """ Check that LogEvent correctly ignores non log lines"""
@@ -253,10 +284,12 @@ def test_logevent_non_log_line():
     assert(le.nreturned == None)
     assert(le.pattern == None)
 
+
 def test_logevent_new_oplog_query():
     """ Check that LogEvent correctly ignores new oplog query for duration extraction """
     le = LogEvent(line_new_oplog_query)
     assert(le.duration == None)
+
 
 def test_logevent_lazy_evaluation():
     """ Check that all LogEvent variables are evaluated lazily. """
