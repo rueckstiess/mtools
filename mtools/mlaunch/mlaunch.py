@@ -2042,12 +2042,12 @@ class MLaunchTool(BaseCmdLineTool):
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
             newlogpath = logpath.replace('\\', '\\\\')
-            command_str = ("start /b %s --logpath %s --port %i --configdb %s "
+            command_str = ("start /b %s --logpath \"%s\" --port %i --configdb %s "
                            "%s %s " % (os.path.join(path, 'mongos'),
                                        newlogpath, port, configdb,
                                        auth_param, extra))
         else:
-            command_str = ("%s --logpath %s --port %i --configdb %s %s %s "
+            command_str = ("%s --logpath \"%s\" --port %i --configdb %s %s %s "
                            "--fork" % (os.path.join(path, 'mongos'), logpath,
                                        port, configdb, auth_param, extra))
 
