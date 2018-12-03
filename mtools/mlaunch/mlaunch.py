@@ -1515,14 +1515,15 @@ class MLaunchTool(BaseCmdLineTool):
             if arg.startswith('-'):
                 # check if the binary accepts this argument
                 # or special case -vvv for any number of v
-                if arg in accepted_arguments or re.match(r'-v+', arg):
+                argname = arg.split('=', 1)[0]
+                if argname in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
                 elif (binary.endswith('mongod') and
-                        arg in self.UNDOCUMENTED_MONGOD_ARGS):
+                      argname in self.UNDOCUMENTED_MONGOD_ARGS):
                     result.append(arg)
-                elif self.ignored_arguments.get(binary + arg) is None:
+                elif self.ignored_arguments.get(binary + argname) is None:
                     # warn once for each combination of binary and unknown arg
-                    self.ignored_arguments[binary + arg] = True
+                    self.ignored_arguments[binary + argname] = True
                     print("warning: ignoring unknown argument %s for %s" %
                           (arg, binary))
             elif i > 0 and arguments[i - 1] in result:
