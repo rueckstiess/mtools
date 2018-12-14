@@ -1506,7 +1506,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # add undocumented options
         accepted_arguments.append('--setParameter')
-        if binary == "mongod":
+        if binary.endswith('mongod'):
             accepted_arguments.append('--wiredTigerEngineConfigString')
 
         # filter valid arguments
