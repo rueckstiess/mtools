@@ -146,6 +146,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 class MLaunchTool(BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj']
+    UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB']
 
     def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
@@ -1524,8 +1525,10 @@ class MLaunchTool(BaseCmdLineTool):
                 elif self.ignored_arguments.get(binary + argname) is None:
                     # warn once for each combination of binary and unknown arg
                     self.ignored_arguments[binary + argname] = True
-                    print("warning: ignoring unknown argument %s for %s" %
-                          (arg, binary))
+                    if not (binary.endswith("mongos") and
+                        arg in self.UNSUPPORTED_MONGOS_ARGS):
+                        print("warning: ignoring unknown argument %s for %s" %
+                            (arg, binary))
             elif i > 0 and arguments[i - 1] in result:
                 # if it doesn't start with a '-', it could be the value of
                 # the last argument, e.g. `--slowms 1000`
