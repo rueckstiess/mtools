@@ -145,7 +145,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 
 class MLaunchTool(BaseCmdLineTool):
-    UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj']
+    UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB']
 
     def __init__(self, test=False):
