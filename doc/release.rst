@@ -29,15 +29,16 @@ Releasing a new version
    version to be released.
 #. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev`` to
    ``x.y.z``.
-#. Run tests via ``nosetests`` and make sure they pass
-#. Update README.rst and CHANGES.rst accordingly
-#. Any other cleanup tasks
+#. Make sure tests are passing in Python 2.7 and 3.6 via ``tox -e py27,py36``.
+#. Update README.rst and CHANGES.rst accordingly.
+#. Any other cleanup tasks.
 #. (optional) leave the release branch for a few days to give others a chance
-   to test it before releasing
+   to test it before releasing.
+#. Run ``python setup.py sdist bdist_wheel`` to build the dist packages.
 #. Run ``twine upload dist/*`` to publish the new version to pip (if you have
    permissions, otherwise ask someone who does, e.g. @rueckstiess or @stennie).
-#. Merge the release branch into ``master``
-#. Merge the release branch into ``develop``
-#. Delete the ``release-x.y.z`` branch
+#. Merge the release branch into ``master``.
+#. Merge the release branch into ``develop``.
+#. Delete the ``release-x.y.z`` branch.
 #. Bump the version on the develop branch (in ``./mtools/version.py``) to
    ``x.y.(z+1)-dev``.
