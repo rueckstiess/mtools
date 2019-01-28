@@ -2,6 +2,17 @@
 Changes to mtools
 =================
 
+version 1.5.3
+~~~~~~~~~~~~~
+* mlaunch: Quote mongos --logpath (to handle paths with spaces)
+* mlaunch: Permit command line options with "="
+* mlaunch: Ignore passing unsupported param --wiredTigerCacheSizeGB to mongos
+* mlaunch: Add --wiredTigerEngineConfigString as an undocumented mongod param
+* util/logevent.py: Add LogEvent support for returning actual query (not pattern)
+
+Thanks to @ajdavis, @renatoriccio, @twblamer, @kevinadi, @sindbach,
+@kallimachos, and @stennie for contributions to this release.
+
 version 1.5.2
 ~~~~~~~~~~~~~
 * mlaunch: Set appname for MongoDB 3.4+ client metadata
