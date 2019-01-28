@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.5.2
+                1.5.3
               </div>
             
           
@@ -193,16 +193,17 @@ release candidate for upcoming release version <code class="docutils literal not
 version to be released.</li>
 <li>Increase the version in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code> from <code class="docutils literal notranslate"><span class="pre">x.y.z-dev</span></code> to
 <code class="docutils literal notranslate"><span class="pre">x.y.z</span></code>.</li>
-<li>Run tests via <code class="docutils literal notranslate"><span class="pre">nosetests</span></code> and make sure they pass</li>
-<li>Update README.md and CHANGES.md accordingly</li>
-<li>Any other cleanup tasks</li>
+<li>Make sure tests are passing in Python 2.7 and 3.6 via <code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-e</span> <span class="pre">py27,py36</span></code>.</li>
+<li>Update README.rst and CHANGES.rst accordingly.</li>
+<li>Any other cleanup tasks.</li>
 <li>(optional) leave the release branch for a few days to give others a chance
-to test it before releasing</li>
+to test it before releasing.</li>
+<li>Run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span> <span class="pre">bdist_wheel</span></code> to build the dist packages.</li>
 <li>Run <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">upload</span> <span class="pre">dist/*</span></code> to publish the new version to pip (if you have
 permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stennie).</li>
-<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">master</span></code></li>
-<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code></li>
-<li>Delete the <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> branch</li>
+<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">master</span></code>.</li>
+<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</li>
+<li>Delete the <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> branch.</li>
 <li>Bump the version on the develop branch (in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code>) to
 <code class="docutils literal notranslate"><span class="pre">x.y.(z+1)-dev</span></code>.</li>
 </ol>
