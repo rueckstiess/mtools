@@ -30,7 +30,7 @@ Releasing a new version
 #. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev`` to
    ``x.y.z``.
 #. Run tests via ``nosetests`` and make sure they pass
-#. Update README.md and CHANGES.md accordingly
+#. Update README.rst and CHANGES.rst accordingly
 #. Any other cleanup tasks
 #. (optional) leave the release branch for a few days to give others a chance
    to test it before releasing
