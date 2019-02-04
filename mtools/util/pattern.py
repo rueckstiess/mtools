@@ -81,7 +81,7 @@ def json2pattern(s):
     # handle shell values that are not valid JSON
     s = shell2json(s)
     # convert to 1 where possible, to get rid of things like new Date(...)
-    s, n = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
+    s, n = re.subn(r'([:,\[])\s*([^{}\[\]",]+?)\s*(?=[,}\]])', '\\1 1 ', s)
     # now convert to dictionary, converting unicode to ascii
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
@@ -119,4 +119,7 @@ if __name__ == '__main__':
 
     s = ('{ _id: ObjectId(\'528556616dde23324f233168\'), '
          'config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }')
+    print(json2pattern(s))
+
+    s = '{ $geometry: { type: "Point", coordinates: [ 174.78, -41.29 ] }, $maxDistance: 50000 }'
     print(json2pattern(s))
