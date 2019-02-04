@@ -102,12 +102,13 @@ class QuerySection(BaseSection):
 
             group_events = [le.duration for le in grouping[g]
                             if le.duration is not None]
+            group_events_all = [le.duration for le in grouping[g]]
 
             stats = OrderedDict()
             stats['namespace'] = namespace
             stats['operation'] = op
             stats['pattern'] = pattern
-            stats['count'] = len(group_events)
+            stats['count'] = len(group_events_all)
             stats['min'] = min(group_events) if group_events else '-'
             stats['max'] = max(group_events) if group_events else '-'
             stats['mean'] = 0
