@@ -4,3 +4,4 @@ from .connection_section import ConnectionSection
 from .query_section import QuerySection
 from .rs_state_section import RsStateSection
 from .rs_info_section import RsInfoSection
+from .clients_section import ClientSection
