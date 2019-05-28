@@ -48,22 +48,13 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
-                tokens = line[pos:pos + 100].split(' ')
+                tokens = line[pos:pos + 130].split(' ')
                 #handle mgo as driver and verion backwards
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
-                if tokens[6] == 'driver:' and tokens[8] == 'version:':
-                    driver = tokens[11]
-                    version = tokens[9]
-                    dv_formatted = str(driver[1:-1])+":"+str(version[1:-2])
-                    if dv_formatted not in driver_info:
-                        driver_info[dv_formatted] = [ip_formatted]
-                    elif dv_formatted in driver_info:
-                        if ip_formatted in driver_info.get(dv_formatted):
-                            continue
-                        else:
-                            driver_info[dv_formatted].append(ip_formatted)
-                elif tokens[6] == 'driver:' and not tokens[8] == 'version:':
+                print(tokens)
+                if tokens[6] == 'driver:' and tokens[10] == 'version:':
+                    print("hit1")
                     driver = tokens[9]
                     version = tokens[11]
                     dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
@@ -74,6 +65,33 @@ class ClientSection(BaseSection):
                             continue
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
+                elif tokens[9] == '\"MongoDB' and tokens[10] == 'Internal':
+                    print("hit2")
+                    driver = 'MongoDB Internal Driver'
+                    version = tokens[13]
+                    dv_formatted = str(driver)+":"+str(version[1:-1])
+                    if dv_formatted not in driver_info:
+                        driver_info[dv_formatted] = [ip_formatted]
+                    elif dv_formatted in driver_info:
+                        if ip_formatted in driver_info.get(dv_formatted):
+                            continue
+                        else:
+                            driver_info[dv_formatted].append(ip_formatted)
+                elif tokens[9] == '\"mgo\"':
+                    print("hit3")
+                    driver = tokens[9]
+                    version = tokens[11]
+                    dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
+                    if dv_formatted not in driver_info:
+                        driver_info[dv_formatted] = [ip_formatted]
+                    elif dv_formatted in driver_info:
+                        if ip_formatted in driver_info.get(dv_formatted):
+                            continue
+                        else:
+                            driver_info[dv_formatted].append(ip_formatted)
+
+
+
 
         print('%-15s - Unique connections'%'Driver:Version ')
         for key, value in sorted(driver_info.items()):
