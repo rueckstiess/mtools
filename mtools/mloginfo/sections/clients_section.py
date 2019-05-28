@@ -52,9 +52,8 @@ class ClientSection(BaseSection):
                 #handle mgo as driver and verion backwards
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
-                print(tokens)
+                
                 if tokens[6] == 'driver:' and tokens[10] == 'version:':
-                    print("hit1")
                     driver = tokens[9]
                     version = tokens[11]
                     dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
@@ -66,7 +65,6 @@ class ClientSection(BaseSection):
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
                 elif tokens[9] == '\"MongoDB' and tokens[10] == 'Internal':
-                    print("hit2")
                     driver = 'MongoDB Internal Driver'
                     version = tokens[13]
                     dv_formatted = str(driver)+":"+str(version[1:-1])
@@ -78,7 +76,6 @@ class ClientSection(BaseSection):
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
                 elif tokens[9] == '\"mgo\"':
-                    print("hit3")
                     driver = tokens[9]
                     version = tokens[11]
                     dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
