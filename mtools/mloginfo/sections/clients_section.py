@@ -75,7 +75,7 @@ class ClientSection(BaseSection):
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
 
-
+        print('%-15s - Unique connections'%'Driver:Version ')
         for key, value in sorted(driver_info.items()):
             print("%-15s : "
                   % (key) + str(value))
