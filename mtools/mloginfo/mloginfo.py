@@ -24,7 +24,7 @@ class MLogInfoTool(LogFileTool):
         self.argparser_sectiongroup = self.argparser.add_argument_group(inf,
                                                                         cmds)
 
-        # add all filter classes from the filters moduleL
+        # add all filter classes from the filters module
         self.sections = ([c[1](self)
                           for c in inspect.getmembers(sections,
                                                       inspect.isclass)])
