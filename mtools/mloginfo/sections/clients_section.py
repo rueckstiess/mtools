@@ -64,7 +64,7 @@ class ClientSection(BaseSection):
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
                 elif tokens[9] == '\"MongoDB' and tokens[10] == 'Internal':
-                    driver = 'MongoDB Internal Driver'
+                    driver = 'MongoDB Internal Client'
                     version = tokens[13]
                     dv_formatted = str(driver)+":"+str(version[1:-1])
                     if dv_formatted not in driver_info:
