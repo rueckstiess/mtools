@@ -48,6 +48,7 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
+                #MongoDB Internal Driver was pushing version number outside index, increased from 100 to 120 to accommodate
                 tokens = line[pos:pos + 120].split(' ')
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
