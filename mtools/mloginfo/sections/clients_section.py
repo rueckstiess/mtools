@@ -17,7 +17,7 @@ class ClientSection(BaseSection):
     connected clients.
     """
 
-    name = "client driver info"
+    name = "clients"
 
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
@@ -48,11 +48,9 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
-                tokens = line[pos:pos + 130].split(' ')
-                #handle mgo as driver and verion backwards
+                tokens = line[pos:pos + 120].split(' ')
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
-                
                 if tokens[6] == 'driver:' and tokens[10] == 'version:':
                     driver = tokens[9]
                     version = tokens[11]
@@ -75,10 +73,11 @@ class ClientSection(BaseSection):
                             continue
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
-                elif tokens[9] == '\"mgo\"':
-                    driver = tokens[9]
-                    version = tokens[11]
-                    dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
+                #Ocassionly mgo drivers are logged as drver: version -> name, below to handle
+                elif tokens[9] == '\"globalsign\",':
+                    driver = tokens[11]
+                    version = tokens[9]
+                    dv_formatted = str(driver[1:-1])+":"+str(version[1:-2])
                     if dv_formatted not in driver_info:
                         driver_info[dv_formatted] = [ip_formatted]
                     elif dv_formatted in driver_info:
