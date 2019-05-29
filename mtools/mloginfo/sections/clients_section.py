@@ -39,6 +39,8 @@ class ClientSection(BaseSection):
             print("\n    not available for system.profile collections\n")
             return
 
+        """dictionary variable to hold driver name + version as key and each ip
+        appended to a list for value against key"""
         driver_info = {}
 
         for logevent in self.mloginfo.logfile:
@@ -48,7 +50,8 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
-                #MongoDB Internal Driver was pushing version number outside index, increased from 100 to 120 to accommodate
+                """MongoDB Internal Driver was pushing version number outside index,
+                increased from 100 to 120 to accommodate"""
                 tokens = line[pos:pos + 120].split(' ')
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
@@ -74,7 +77,8 @@ class ClientSection(BaseSection):
                             continue
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
-                #Occasionally mgo drivers are logged as driver: version -> name, below to handle
+                """Occasionally mgo drivers are logged as driver: version -> name, as opposed
+                to the usual driver: name -> version"""
                 elif tokens[9] == '\"globalsign\",':
                     driver = tokens[11]
                     version = tokens[9]
