@@ -77,7 +77,7 @@ class ClientSection(BaseSection):
                             continue
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
-                #Occasionally mgo drivers are logged as driver: version -> name, as opposed
+                #Occasionally mgo/globalsign drivers are logged as driver: version -> name, as opposed
                 #to the usual driver: name -> version'''
                 elif tokens[9] == '\"globalsign\",':
                     driver = tokens[11]
