@@ -50,8 +50,8 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
-                """MongoDB Internal Driver was pushing version number outside index,
-                increased from 100 to 120 to accommodate"""
+                #MongoDB Internal Driver was pushing version number outside index,
+                #increased from 100 to 120 to accommodate"""
                 tokens = line[pos:pos + 120].split(' ')
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
@@ -77,8 +77,8 @@ class ClientSection(BaseSection):
                             continue
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
-                """Occasionally mgo drivers are logged as driver: version -> name, as opposed
-                to the usual driver: name -> version"""
+                #Occasionally mgo drivers are logged as driver: version -> name, as opposed
+                #to the usual driver: name -> version'''
                 elif tokens[9] == '\"globalsign\",':
                     driver = tokens[11]
                     version = tokens[9]
