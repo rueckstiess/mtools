@@ -1,4 +1,5 @@
 import re
+import json
 from collections import defaultdict
 
 from .base_section import BaseSection
@@ -50,47 +51,28 @@ class ClientSection(BaseSection):
 
             pos = line.find('client metadata')
             if pos != -1:
-                #MongoDB Internal Driver was pushing version number outside index,
-                #increased from 100 to 120 to accommodate"""
-                tokens = line[pos:pos + 120].split(' ')
+
+                tokens = line[pos:pos + 100].split(' ')
                 ip, _ = tokens[3].split(':')
                 ip_formatted = str(ip)
-                if tokens[6] == 'driver:' and tokens[10] == 'version:':
-                    driver = tokens[9]
-                    version = tokens[11]
-                    dv_formatted = str(driver[1:-2])+":"+str(version[1:-1])
-                    if dv_formatted not in driver_info:
-                        driver_info[dv_formatted] = [ip_formatted]
-                    elif dv_formatted in driver_info:
-                        if ip_formatted in driver_info.get(dv_formatted):
-                            continue
-                        else:
-                            driver_info[dv_formatted].append(ip_formatted)
-                elif tokens[9] == '\"MongoDB' and tokens[10] == 'Internal':
-                    driver = 'MongoDB Internal Client'
-                    version = tokens[13]
-                    dv_formatted = str(driver)+":"+str(version[1:-1])
-                    if dv_formatted not in driver_info:
-                        driver_info[dv_formatted] = [ip_formatted]
-                    elif dv_formatted in driver_info:
-                        if ip_formatted in driver_info.get(dv_formatted):
-                            continue
-                        else:
-                            driver_info[dv_formatted].append(ip_formatted)
-                #Occasionally mgo/globalsign drivers are logged as driver: version -> name, as opposed
-                #to the usual driver: name -> version'''
-                elif tokens[9] == '\"globalsign\",':
-                    driver = tokens[11]
-                    version = tokens[9]
-                    dv_formatted = str(driver[1:-1])+":"+str(version[1:-2])
-                    if dv_formatted not in driver_info:
-                        driver_info[dv_formatted] = [ip_formatted]
-                    elif dv_formatted in driver_info:
-                        if ip_formatted in driver_info.get(dv_formatted):
-                            continue
-                        else:
-                            driver_info[dv_formatted].append(ip_formatted)
 
+                if ip_formatted != "127.0.0.1":
+                    #driver metadata is not strict JSON, parsing string
+                    #then adding required double quotes to keys
+                    driver_data_raw = ("{" + line.split("{",1)[1].split("}")[0]+"}}")
+                    driver_data = (re.sub(r"(\w+): ", r'"\1":', driver_data_raw))
+                    driver_data_json = json.loads(driver_data)
+
+                    driver = driver_data_json["driver"]["name"]
+                    version = driver_data_json["driver"]["version"]
+                    dv_formatted = str(driver)+":"+str(version)
+                    if dv_formatted not in driver_info:
+                        driver_info[dv_formatted] = [ip_formatted]
+                    elif dv_formatted in driver_info:
+                        if ip_formatted in driver_info.get(dv_formatted):
+                            continue
+                        else:
+                            driver_info[dv_formatted].append(ip_formatted)
 
 
 
