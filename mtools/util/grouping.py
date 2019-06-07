@@ -117,10 +117,10 @@ class Grouping(object):
 
             # now group together all groups that did not make the limit
             if not discard_others:
-                group_keys = self.groups.keys()[group_limit - 1:]
+                group_keys = list(self.groups.keys())[group_limit - 1:]
                 self.groups.setdefault(others_label, list())
             else:
-                group_keys = self.groups.keys()[group_limit:]
+                group_keys = list(self.groups.keys())[group_limit:]
 
             # only go to second last (-1), since the 'others' group is now last
             for g in group_keys:
