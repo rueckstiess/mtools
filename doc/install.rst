@@ -4,20 +4,20 @@ Installation
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 2.7 and 3.6.
+Python 3.6.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section.
 
-The mtools utilities are only tested with currently supported (non End-of-Life)
-versions of the MongoDB server. As of April 2018, that includes MongoDB 3.2
+The mtools suite is only tested with actively supported (non End-of-Life)
+versions of the MongoDB server. As of June 2019, that includes MongoDB 3.4
 or newer.
 
 Prerequisites
 ~~~~~~~~~~~~~
 
 Python
-   You need to have Python 2.7.x or 3.6.x installed in order to use mtools.
+   You need to have Python 3.6.x installed in order to use mtools.
    Other versions of Python are not currently supported.
 
    To check your Python version, run ``python --version`` on the command line.
