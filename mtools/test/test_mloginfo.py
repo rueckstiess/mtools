@@ -298,6 +298,16 @@ class TestMLogInfo(object):
         restring = r'\w+\.\w+\s+(query|update|getmore)\s+{'
         assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
+    def test_transactions_output(self):
+        # different log file
+        self.tool.run('%s --transactions' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'TRANSACTIONS' in line, lines))
+        assert any(map(lambda line: line.startswith('datetime'), lines))
+        restring = r'\w+\.\w+\s+(datetime|txnnumber|readConcern)\s+{'
+        assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
+
     def test_restarts_output(self):
         # different log file
         self.tool.run('%s --restarts' % self.logfile_path)
