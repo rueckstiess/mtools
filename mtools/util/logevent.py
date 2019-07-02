@@ -134,7 +134,7 @@ class LogEvent(object):
         self._level_calculated = False
         self._level = None
         self._component = None
-
+        self.checkpoints = None
         self.merge_marker_str = ''
 
 
@@ -202,6 +202,9 @@ class LogEvent(object):
                                      self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1))
+            # SERVER-16176 log the checkpoints
+            elif "Checkpoint" in self.line_str:
+                self._duration = int(line_str[line_str.find("Checkpoint took") + len("Checkpoint took"): -20]) * 1000
 
         return self._duration
 

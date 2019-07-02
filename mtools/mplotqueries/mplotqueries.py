@@ -19,6 +19,8 @@ try:
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
+    import re
+
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -118,9 +120,15 @@ class MPlotQueriesTool(LogFileTool):
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
 
+        # SERVER-16176 - checkpoints argument has been added to the existing group
+        self.argparser.add_argument('--checkpoints',
+                                    action='store_true', default=None,
+                                    help=("display the slow transactions "
+                                          "with checkpoints"))
+
         self.legend = None
 
-        # progress bar
+        # progress bar status
         self.progress_bar_enabled = not self.is_stdin
 
     def run(self, arguments=None):
@@ -180,6 +188,7 @@ class MPlotQueriesTool(LogFileTool):
                 args=self.args,
                 unknown_args=self.unknown_args)
 
+
         for logfile in self.logfiles:
 
             # get log file information
@@ -198,7 +207,9 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
-
+                # find the checkpoint values
+                if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
+                    continue
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
                         logevent.duration is not None and logevent.datetime):
