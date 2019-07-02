@@ -131,6 +131,8 @@ class LogEvent(object):
         self._w = None
         self._conn = None
 
+        # SERVER-41349 - connector for DNS resolution logs
+        self._connector = None
         self._level_calculated = False
         self._level = None
         self._component = None
@@ -204,6 +206,16 @@ class LogEvent(object):
                     self._duration = int(matchobj.group(1))
 
         return self._duration
+
+    #SERVER-41349 - get connector from the DNS log line
+    @property
+    def connector(self):
+        line_str = self.line_str
+        if(line_str and 'DNS resolution' in line_str):
+            searchString = "connecting to"
+            self._connector = line_str[line_str.rfind(searchString) + len(searchString) + 1:-12]
+
+        return self._connector
 
     @property
     def datetime(self):
@@ -654,8 +666,8 @@ class LogEvent(object):
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
                             vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                            [-1]).replace(',',
+                                              ''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
