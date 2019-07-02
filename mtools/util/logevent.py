@@ -56,7 +56,7 @@ class LogEvent(object):
               'Oct', 'Nov', 'Dec']
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
-                      'command']
+                      'command', 'aggregate']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
@@ -134,6 +134,7 @@ class LogEvent(object):
         self._level_calculated = False
         self._level = None
         self._component = None
+        self._allowDiskUse = None
 
         self.merge_marker_str = ''
 
@@ -588,6 +589,16 @@ class LogEvent(object):
         return self._numYields
 
     @property
+    def allowDiskUse(self):
+        """Extract allowDiskUse counter for aggregation if available (lazy)."""
+
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._allowDiskUse
+
+    @property
     def planSummary(self):
         """Extract planSummary if available (lazy)."""
         if not self._counters_calculated:
@@ -628,7 +639,7 @@ class LogEvent(object):
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates']
+                    'planSummary', 'writeConflicts', 'keyUpdates','allowDiskUse']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -653,9 +664,19 @@ class LogEvent(object):
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                            #extract allowDiskUse counter
+                            if(counter == 'allowDiskUse' and
+                                token.startswith('allowDiskUse')):
+                                try:
+                                    self._allowDiskUse = (
+                                        split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
+
+                                except ValueError:
+                                    pass
+                            else:
+                                vars(self)['_' + counter] = int((token.split(':')
+                                [-1]).replace(',',
+                                              ''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
