@@ -134,6 +134,7 @@ class LogEvent(object):
         self._level_calculated = False
         self._level = None
         self._component = None
+
         self.checkpoints = None
         self.merge_marker_str = ''
 

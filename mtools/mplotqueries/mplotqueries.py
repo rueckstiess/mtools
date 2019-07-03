@@ -20,7 +20,6 @@ try:
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
     import re
-
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -125,10 +124,9 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store_true', default=None,
                                     help=("display the slow transactions "
                                           "with checkpoints"))
-
         self.legend = None
 
-        # progress bar status
+        # progress bar
         self.progress_bar_enabled = not self.is_stdin
 
     def run(self, arguments=None):
@@ -188,7 +186,6 @@ class MPlotQueriesTool(LogFileTool):
                 args=self.args,
                 unknown_args=self.unknown_args)
 
-
         for logfile in self.logfiles:
 
             # get log file information
@@ -207,6 +204,7 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+
                 # find the checkpoint values
                 if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
                     continue
