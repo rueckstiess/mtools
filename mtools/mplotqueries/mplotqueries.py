@@ -20,7 +20,6 @@ try:
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
     import re
-
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
