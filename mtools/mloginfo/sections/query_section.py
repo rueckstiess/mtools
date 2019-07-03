@@ -12,7 +12,6 @@ except ImportError:
     np = None
 
 #SERVER-19260 - Added allowDiskUse flag for aggregation
-
 LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
                                    'duration','allowDiskUse'])
 
@@ -80,7 +79,7 @@ class QuerySection(BaseSection):
                     le.command in ['count', 'findandmodify',
                                    'geonear', 'find','aggregate']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
-                              pattern=le.pattern, duration=le.duration, allowDiskUse = le.allowDiskUse)
+                              pattern=le.pattern, duration=le.duration,allowDiskUse = le.allowDiskUse)
                 grouping.add(lt)
 
         grouping.sort_by_size()
@@ -100,7 +99,7 @@ class QuerySection(BaseSection):
 
         for g in grouping:
             # calculate statistics for this group
-            namespace, op, pattern, allowDiskUse = g
+            namespace, op, pattern,allowDiskUse = g
 
             group_events = [le.duration for le in grouping[g]
                             if le.duration is not None]
@@ -125,6 +124,7 @@ class QuerySection(BaseSection):
             if self.mloginfo.args['verbose']:
                 stats['example'] = grouping[g][0]
                 titles.append('example')
+
             stats['allowDiskUse'] = allowDiskUse
             table_rows.append(stats)
 
