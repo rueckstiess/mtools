@@ -666,8 +666,8 @@ class LogEvent(object):
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
                             vars(self)['_' + counter] = int((token.split(':')
-                            [-1]).replace(',',
-                                              ''))
+                                                             [-1]).replace(',',
+                                                                           ''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")

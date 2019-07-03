@@ -20,7 +20,6 @@ try:
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
     import re
-
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -202,7 +201,6 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
-
                 if (self.args['dns'] and (
                         not re.search("DNS resolution while connecting to", logevent.line_str))):
                     continue
