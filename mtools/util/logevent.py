@@ -683,7 +683,7 @@ class LogEvent(object):
 
     @property
     def txnNumber(self):
-        """Extract read lock (r) counter if available (lazy)."""
+        """Extract txnNumber counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
