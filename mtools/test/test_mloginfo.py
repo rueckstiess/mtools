@@ -300,13 +300,12 @@ class TestMLogInfo(object):
 
     def test_transactions_output(self):
         # different log file
-        self.tool.run('%s --transactions' % self.logfile_path)
+        logfile_transactions_path = 'mtools/test/logfiles/mongod.log'
+        self.tool.run('%s --transactions' % logfile_transactions_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'TRANSACTIONS' in line, lines))
-        assert any(map(lambda line: line.startswith('datetime'), lines))
-        restring = r'\w+\.\w+\s+(datetime|txnnumber|readConcern)\s+{'
-        assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
+        assert any(map(lambda line: line.startswith('DATETIME'), lines))
 
     def test_restarts_output(self):
         # different log file

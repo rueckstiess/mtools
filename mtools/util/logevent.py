@@ -24,28 +24,28 @@ class DateTimeEncoder(json.JSONEncoder):
 
 class LogEvent(object):
     """
-  Extract information from log line and store properties/variables.
+    Extract information from log line and store properties/variables.
 
-  line_str: the original line string
-  split_tokens: a list of string tokens after splitting line_str using
-                whitespace as split points
-  datetime: a datetime object for the logevent. For logfiles created with
-            version 2.4+, it also contains micro-seconds
-  duration: the duration of a timed operation in ms
-  thread: the thread name (e.g. "conn1234") as string
-  operation: insert, update, remove, query, command, getmore, None
-  namespace: the namespace of the operation, or None
-  command: the type of command, if the operation was a "command"
-  pattern: the query pattern for queries, updates, counts, etc
-  ...
+    line_str: the original line string
+    split_tokens: a list of string tokens after splitting line_str using
+                  whitespace as split points
+    datetime: a datetime object for the logevent. For logfiles created with
+              version 2.4+, it also contains micro-seconds
+    duration: the duration of a timed operation in ms
+    thread: the thread name (e.g. "conn1234") as string
+    operation: insert, update, remove, query, command, getmore, None
+    namespace: the namespace of the operation, or None
+    command: the type of command, if the operation was a "command"
+    pattern: the query pattern for queries, updates, counts, etc
+    ...
 
-  Certain operations also add the number of affected/scanned documents.
-  If applicable, the following variables are also set, otherwise the
-  default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
+    Certain operations also add the number of affected/scanned documents.
+    If applicable, the following variables are also set, otherwise the
+    default is None: nscanned, ntoreturn, nreturned, ninserted, nupdated
 
-  For performance reason, all fields are evaluated lazily upon first
-  request.
-  """
+    For performance reason, all fields are evaluated lazily upon first
+    request.
+    """
 
     # datetime handler for json encoding
     dthandler = lambda obj: obj.isoformat() if isinstance(obj,
@@ -79,6 +79,7 @@ class LogEvent(object):
             self._profile_doc = doc_or_str
             # docs don't need to be parsed lazily, they are fast
             self._parse_document()
+
 
     def _reset(self):
         self._split_tokens_calculated = False
@@ -127,13 +128,13 @@ class LogEvent(object):
         # (eg: nscanned => keysExamined). Currently _extract_counters()
         # maps newer property names into legacy equivalents for
         # broader log file support.
-        self._nscanned = None  # keysExamined
+        self._nscanned = None         # keysExamined
         self._nscannedObjects = None  # docsExamined
         self._ntoreturn = None
-        self._nupdated = None  # nModified
-        self._nreturned = None  # nReturned or nMatched (updates)
-        self._ninserted = None  # nInserted
-        self._ndeleted = None  # nDeleted
+        self._nupdated = None         # nModified
+        self._nreturned = None        # nReturned or nMatched (updates)
+        self._ninserted = None        # nInserted
+        self._ndeleted = None         # nDeleted
 
         self._numYields = None
         self._planSummary = None
@@ -149,13 +150,14 @@ class LogEvent(object):
 
         self.merge_marker_str = ''
 
+
     def set_line_str(self, line_str):
         """
-    Set line_str.
+        Set line_str.
 
-    Line_str is only writeable if LogEvent was created from a string,
-    not from a system.profile documents.
-    """
+        Line_str is only writeable if LogEvent was created from a string,
+        not from a system.profile documents.
+        """
         if not self.from_string:
             raise ValueError("can't set line_str for LogEvent created from "
                              "system.profile documents.")
@@ -245,6 +247,7 @@ class LogEvent(object):
 
                     self._reformat_timestamp(self._datetime_format)
                     break
+
         return self._datetime
 
     @property
@@ -749,7 +752,6 @@ class LogEvent(object):
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-
                             if (counter == 'level' and token.startswith('level')):
                                 try:
                                     self._readConcern = (
@@ -764,14 +766,15 @@ class LogEvent(object):
                             elif (counter == 'terminationCause' and token.startswith('terminationCause')):
                                 vars(self)['_' + counter] = (token.split(':')
                                 [-1]).replace(',', '')
-
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',',''))
 
+                                vars(self)['_' + counter] = int((token.split(':')
+                                                             [-1]).replace(',',
+                                                                           ''))
                         except ValueError:
-                          # see if this is a pre-2.5.2 numYields with space
-                          # in between (e.g. "numYields: 2")
-                          # https://jira.mongodb.org/browse/SERVER-10101
+                            # see if this is a pre-2.5.2 numYields with space
+                            # in between (e.g. "numYields: 2")
+                            # https://jira.mongodb.org/browse/SERVER-10101
                             if (counter == 'numYields' and
                                     token.startswith('numYields')):
                                 try:
@@ -816,8 +819,8 @@ class LogEvent(object):
                                 except ValueError:
                                     pass
 
-                              # token not parsable, skip
-                                break
+                        # token not parsable, skip
+                        break
 
     @property
     def level(self):
@@ -855,10 +858,10 @@ class LogEvent(object):
 
     def parse_all(self):
         """
-      Trigger extraction of all information.
+        Trigger extraction of all information.
 
-      These values are usually evaluated lazily.
-      """
+        These values are usually evaluated lazily.
+        """
         tokens = self.split_tokens
         duration = self.duration
         datetime = self.datetime
@@ -914,7 +917,7 @@ class LogEvent(object):
 
         if ((self.datetime_format is None or
                 (self.datetime_format == format and
-                   self._datetime_str != '')) and not force):
+                    self._datetime_str != '')) and not force):
             return
         elif self.datetime is None:
             return
