@@ -639,7 +639,7 @@ class LogEvent(object):
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates','allowDiskUse']
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'allowDiskUse']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -668,15 +668,12 @@ class LogEvent(object):
                             if(counter == 'allowDiskUse' and
                                 token.startswith('allowDiskUse')):
                                 try:
-                                    self._allowDiskUse = (
-                                        split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-
+                                    #Spliting space between token and value
+                                    self._allowDiskUse = (split_tokens[t+1+self.datetime_nextpos+2].replace(',', ''))
                                 except ValueError:
                                     pass
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')
-                                [-1]).replace(',',
-                                              ''))
+                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',',''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
