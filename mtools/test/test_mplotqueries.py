@@ -17,7 +17,7 @@ from mtools.util.logfile import LogFile
 class TestMPlotQueries(object):
 
     def setup(self):
-        """Startup method to create mloginfo tool."""
+        """Startup method to create mplotqueries tool."""
         self.tool = MPlotQueriesTool()
         self._test_init()
 
@@ -26,10 +26,10 @@ class TestMPlotQueries(object):
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),'test/logfiles/', filename)
         self.logfile = LogFile(open(self.logfile_path, 'rb'))
 
-    def test_checkpoints(self):
-        # different logfile for oplogs
-        logfile_oplog = "mtools/test/logfiles/mongod.log"
-        self.tool.run('%s --checkpoints' % logfile_oplog)
+    def test_checkpoints(self, filename='mongod.log'):
+        # different logfile for the slow Checkpoints
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
+        self.tool.run('%s --checkpoints' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'SCATTER plot' in line, lines))

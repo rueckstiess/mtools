@@ -122,8 +122,7 @@ class MPlotQueriesTool(LogFileTool):
         # SERVER-16176 - checkpoints argument has been added to the existing group
         self.argparser.add_argument('--checkpoints',
                                     action='store_true', default=None,
-                                    help=("display the slow transactions "
-                                          "with checkpoints"))
+                                    help=("Display the slow WiredTiger checkpoints "))
         self.legend = None
 
         # progress bar
@@ -205,7 +204,7 @@ class MPlotQueriesTool(LogFileTool):
 
             for i, logevent in enumerate(logfile):
 
-                # find the checkpoint values
+                # SERVER-16176 - Logging of slow checkpoints
                 if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
                     continue
                 # adjust times if --optime-start is enabled
