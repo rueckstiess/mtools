@@ -27,9 +27,9 @@ class TestMPlotQueries(object):
         self.logfile = LogFile(open(self.logfile_path, 'rb'))
 
     def test_oplog(self):
-        #different logfile for oplogs
+        # different logfile for oplogs
         logfile_oplog = "mtools/test/logfiles/mongod.log"
         self.tool.run('%s --oplog --group operation' % logfile_oplog)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
-        assert any(map(lambda line: 'SCATTER plot' in line, lines))
+        assert any('SCATTER plot' in line for line in lines)
