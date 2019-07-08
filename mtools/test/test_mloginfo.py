@@ -306,7 +306,6 @@ class TestMLogInfo(object):
         assert any(map(lambda line: '' in line, lines))
         assert any(map(lambda line: line.startswith('STORAGE STATISTICS '), lines))
 
-
     def test_restarts_output(self):
         # different log file
         self.tool.run('%s --restarts' % self.logfile_path)

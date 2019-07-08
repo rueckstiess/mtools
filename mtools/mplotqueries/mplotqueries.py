@@ -208,7 +208,6 @@ class MPlotQueriesTool(LogFileTool):
                 if(self.args['storagestats']):
                     if(op_or_cmd(logevent) not in ['insert','update']):
                         continue
-
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
                         logevent.duration is not None and logevent.datetime):

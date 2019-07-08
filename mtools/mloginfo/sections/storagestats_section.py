@@ -17,6 +17,8 @@ LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'bytesRead', 'bytes
 def op_or_cmd(le):
     return le.operation if le.operation != 'command' else le.command
 
+# SERVER-39654 - Log Storage Statistics for slow transactions
+
 
 class StorageStatsSection(BaseSection):
     """StorageStatsSection class."""
@@ -31,7 +33,6 @@ class StorageStatsSection(BaseSection):
         self.mloginfo.argparser_sectiongroup.add_argument('--storagestats',
                                                           action='store_true',
                                                           help=helptext)
-
 
     @property
     def active(self):
@@ -87,7 +88,6 @@ class StorageStatsSection(BaseSection):
             # calculate statistics for this group
             namespace, op, bytesRead, bytesWritten, timeReadingMicros, timeWritingMicros = g
 
-
             stats = OrderedDict()
             stats['namespace'] = namespace
             stats['operation'] = op
@@ -97,7 +97,6 @@ class StorageStatsSection(BaseSection):
             stats['timeWritingMicros'] = timeWritingMicros
 
             table_rows.append(stats)
-
 
         print_table(table_rows, titles, uppercase_headers=False)
         print('')
