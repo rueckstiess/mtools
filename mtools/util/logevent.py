@@ -80,7 +80,6 @@ class LogEvent(object):
             # docs don't need to be parsed lazily, they are fast
             self._parse_document()
 
-
     def _reset(self):
         self._split_tokens_calculated = False
         self._split_tokens = None
@@ -149,7 +148,6 @@ class LogEvent(object):
         self._component = None
 
         self.merge_marker_str = ''
-
 
     def set_line_str(self, line_str):
         """
@@ -590,7 +588,6 @@ class LogEvent(object):
 
         if not self._counters_calculated:
             self._counters_calculated = True
-
             self._extract_counters()
 
         return self._terminationCause

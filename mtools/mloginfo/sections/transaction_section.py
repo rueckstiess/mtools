@@ -9,10 +9,6 @@ from mtools.util.print_table import print_table
 from .base_section import BaseSection
 
 
-try:
-    import numpy as np
-except ImportError:
-    np = None
 
 LogTuple = namedtuple('LogTuple', ['datetime', 'txnNumber', 'autocommit', 'readConcern',
                                    'timeActiveMicros', 'timeInactiveMicros', 'duration'])
@@ -23,7 +19,7 @@ def op_or_cmd(le):
 
 
 class TransactionSection(BaseSection):
-    """QuerySection class."""
+    """TransactionSection class."""
 
     name = "transactions"
 
@@ -40,8 +36,7 @@ class TransactionSection(BaseSection):
         self.mloginfo.argparser_sectiongroup.add_argument('--tsort',
                                                           action='store',
 
-                                                          choices=['duration'
-                                                                ])
+                                                          choices=['duration'])
 
     @property
     def active(self):
@@ -104,13 +99,10 @@ class TransactionSection(BaseSection):
             # calculate statistics for this group
             datetime, txnNumber, autocommit, readConcern, timeActiveMicros, timeInactiveMicros, duration = g
             stats = OrderedDict()
-            #stats['lsid'] = lsid
             stats['datetime'] = str(datetime)
             stats['txnNumber'] = txnNumber
             stats['autocommit'] = autocommit
             stats['readConcern'] = readConcern
-            #stats['keysExamined'] = keysExamined
-            #stats['numYield'] = numYield
             stats['timeActiveMicros'] = timeActiveMicros
             stats['timeInactiveMicros'] = timeInactiveMicros
             stats['duration'] = duration
@@ -125,14 +117,3 @@ class TransactionSection(BaseSection):
         print_table(table_rows, titles, uppercase_headers=True)
 
         print('')
-
-        def logfile_generator(self):
-
-            if len(self.mloginfo.args['logfile']) > 1:
-                # merge log files by time
-                for logevent in self._merge_logfiles():
-                    yield logevent
-            else:
-                # only one file
-                for logevent in self.mloginfo.args['logfile'][0]:
-                    yield logevent
