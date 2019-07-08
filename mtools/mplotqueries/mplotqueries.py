@@ -28,6 +28,9 @@ except ImportError as e:
                       "web browser. Error: " + str(e))
 
 
+def op_or_cmd(le):
+    return le.operation if le.operation != 'command' else le.command
+
 class MPlotQueriesTool(LogFileTool):
 
     home_path = os.path.expanduser("~")
@@ -117,6 +120,9 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store', default=None,
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
+        self.argparser.add_argument('--storagestats',
+                                    action='store_true', default=False,
+                                    help=("Plot the storage statistics for insert and update operations"))
 
         self.legend = None
 
@@ -198,6 +204,10 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+
+                if(self.args['storagestats']):
+                    if(op_or_cmd(logevent) not in ['insert','update']):
+                        continue
 
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
