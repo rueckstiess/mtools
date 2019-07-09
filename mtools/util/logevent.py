@@ -667,11 +667,9 @@ class LogEvent(object):
                             #extract allowDiskUse counter
                             if(counter == 'allowDiskUse' and
                                 token.startswith('allowDiskUse')):
-                                try:
                                     #Spliting space between token and value
                                     self._allowDiskUse = (split_tokens[t+1+self.datetime_nextpos+2].replace(',', ''))
-                                except ValueError:
-                                    pass
+
                             else:
                                 vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',',''))
                         except ValueError:
