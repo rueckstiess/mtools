@@ -750,12 +750,8 @@ class LogEvent(object):
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
                             if (counter == 'level' and token.startswith('level')):
-                                try:
                                     self._readConcern = (
                                     split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-
-                                except ValueError:
-                                    pass
                             elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):
                                 vars(self)['_' + counter] = (token.split(':')
                                 [-1]).replace(',', '')
@@ -780,27 +776,13 @@ class LogEvent(object):
                                     pass
                             if (counter == 'txnNumber' and
                                     token.startswith('txnNumber')):
-                                try:
                                     self._txnNumber = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                    # print(self._txnNumber)
-                                except ValueError:
-                                    pass
-
                             if (counter == 'autocommit' and
                                     token.startswith('autocommit')):
-                                try:
                                     self._autocommit = (split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                                    # print(self._autocommit)
-                                except ValueError:
-                                    pass
                             if (counter == 'lsid' and
                                     token.startswith('lsid')):
-                                try:
                                     self._lsid = (split_tokens[t + 2 + self.datetime_nextpos + 2].replace(',', ''))
-                                    # print(self._autocommit)
-                                except ValueError:
-                                    pass
-
                             if (counter == 'planSummary' and
                                     token.startswith('planSummary')):
                                 try:

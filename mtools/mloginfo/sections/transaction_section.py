@@ -64,8 +64,7 @@ class TransactionSection(BaseSection):
 
             if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
                 if le.datetime:
-                    progress_curr = self.mloginfo._datetime_to_epoch(le
-                                                                     .datetime)
+                    progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     if progress_total:
                         (self.mloginfo
                          .update_progress(float(progress_curr -
@@ -85,7 +84,7 @@ class TransactionSection(BaseSection):
             self.mloginfo.update_progress(1.0)
 
         # no queries in the log file
-        if len(grouping) < 1:
+        if not len(grouping):
             print('no transactions found.')
             return
 
