@@ -11,8 +11,9 @@ try:
 except ImportError:
     np = None
 
+#SERVER-19260 - Added allowDiskUse flag for aggregation
 LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
-                                   'duration'])
+                                   'duration', 'allowDiskUse'])
 
 
 def op_or_cmd(le):
@@ -52,7 +53,7 @@ class QuerySection(BaseSection):
     def run(self):
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
-                                                x.pattern))
+                                                x.pattern, x.allowDiskUse))
         logfile = self.mloginfo.logfile
 
         if logfile.start and logfile.end:
@@ -76,9 +77,9 @@ class QuerySection(BaseSection):
 
             if (le.operation in ['query', 'getmore', 'update', 'remove'] or
                     le.command in ['count', 'findandmodify',
-                                   'geonear', 'find']):
+                                   'geonear', 'find', 'aggregate']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
-                              pattern=le.pattern, duration=le.duration)
+                              pattern=le.pattern, duration=le.duration, allowDiskUse = le.allowDiskUse)
                 grouping.add(lt)
 
         grouping.sort_by_size()
@@ -93,12 +94,12 @@ class QuerySection(BaseSection):
             return
 
         titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)',
-                  'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)']
+                  'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)', 'allowDiskUse']
         table_rows = []
 
         for g in grouping:
             # calculate statistics for this group
-            namespace, op, pattern = g
+            namespace, op, pattern, allowDiskUse = g
 
             group_events = [le.duration for le in grouping[g]
                             if le.duration is not None]
@@ -124,6 +125,7 @@ class QuerySection(BaseSection):
                 stats['example'] = grouping[g][0]
                 titles.append('example')
 
+            stats['allowDiskUse'] = allowDiskUse
             table_rows.append(stats)
 
         # sort order depending on field names
