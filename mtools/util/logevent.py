@@ -56,7 +56,7 @@ class LogEvent(object):
               'Oct', 'Nov', 'Dec']
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
-                      'command', 'transaction']
+                      'command', 'aggregate', 'transaction']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
@@ -148,6 +148,7 @@ class LogEvent(object):
         self._level_calculated = False
         self._level = None
         self._component = None
+        self._allowDiskUse = None
 
         self.merge_marker_str = ''
 
@@ -639,12 +640,16 @@ class LogEvent(object):
         return self._numYields
 
     @property
+
+    def allowDiskUse(self):
+        """Extract allowDiskUse counter for aggregation if available (lazy)."""
+        return self._allowDiskUse
+        
     def readTimestamp(self):
         """Extract readTimeStamp counter if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
             self._extract_counters()
-
         return self._readTimestamp
 
     @property
@@ -731,7 +736,7 @@ class LogEvent(object):
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates', 'lsid', 'txnNumber', 'autocommit',
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'allowDiskUse', 'lsid', 'txnNumber', 'autocommit',
                     'level','timeActiveMicros', 'timeInactiveMicros', 'duration', 'readTimestamp',
                     'terminationCause']
 
@@ -759,7 +764,13 @@ class LogEvent(object):
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            if (counter == 'level' and token.startswith('level')):
+                            
+                            #extract allowDiskUse counter
+                            if(counter == 'allowDiskUse' and
+                                token.startswith('allowDiskUse')):
+                                    #Spliting space between token and value
+                                    self._allowDiskUse = (split_tokens[t+1+self.datetime_nextpos+2].replace(',', ''))
+                            elif (counter == 'level' and token.startswith('level')):
                                     self._readConcern = (
                                     split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
                             elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):

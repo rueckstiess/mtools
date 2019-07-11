@@ -295,7 +295,7 @@ class TestMLogInfo(object):
         lines = output.splitlines()
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
-        restring = r'\w+\.\w+\s+(query|update|getmore)\s+{'
+        restring = r'\w+\.\w+\s+(query|update|getmore|allowDiskUse)\s+{'
         assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
     def test_transactions_output(self):
