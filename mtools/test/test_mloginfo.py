@@ -295,8 +295,17 @@ class TestMLogInfo(object):
         lines = output.splitlines()
         assert any(map(lambda line: 'QUERIES' in line, lines))
         assert any(map(lambda line: line.startswith('namespace'), lines))
-        restring = r'\w+\.\w+\s+(query|update|getmore)\s+{'
+        restring = r'\w+\.\w+\s+(query|update|getmore|allowDiskUse)\s+{'
         assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
+
+    def test_transactions_output(self):
+        # different log file
+        logfile_transactions_path = 'mtools/test/logfiles/mongod.log'
+        self.tool.run('%s --transactions' % logfile_transactions_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'TRANSACTIONS' in line, lines))
+        assert any(map(lambda line: line.startswith('DATETIME'), lines))
 
     def test_restarts_output(self):
         # different log file
