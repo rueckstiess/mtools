@@ -19,6 +19,7 @@ try:
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
+    import re
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -69,6 +70,8 @@ class MPlotQueriesTool(LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
+        # SERVER-41349 - --dns flag to plot slow DNS Resolutions; Can be grouped by hostname
+        self.argparser.add_argument('--dns', action='store_true', help='slow DNS Resolutions', default=False)
         self.argparser.add_argument('--type', action='store',
                                     default='scatter',
                                     choices=self.plot_types.keys(),
@@ -81,7 +84,7 @@ class MPlotQueriesTool(LogFileTool):
                                     help=("specify value to group on. "
                                           "Possible values depend on type of "
                                           "plot. All basic plot types can "
-                                          "group on 'namespace', 'operation', "
+                                          "group on 'namespace','hostname' 'operation', "
                                           "'thread', 'pattern', range and "
                                           "histogram plots can additionally "
                                           "group on 'log2code'. The group can "
@@ -198,6 +201,9 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+                if (self.args['dns'] and (
+                        not re.search("DNS resolution while connecting to", logevent.line_str))):
+                    continue
 
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
@@ -317,7 +323,7 @@ class MPlotQueriesTool(LogFileTool):
             print("Loaded overlay: %s" % os.path.basename(f))
 
         if len(target_files) > 0:
-            print()
+            print('')
 
         return len(target_files) > 0
 

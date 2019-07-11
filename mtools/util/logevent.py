@@ -143,6 +143,8 @@ class LogEvent(object):
         self._w = None
         self._conn = None
 
+        # SERVER-41349 - hostname for DNS resolution logs
+        self._hostname = None
         self._level_calculated = False
         self._level = None
         self._component = None
@@ -215,6 +217,14 @@ class LogEvent(object):
                     self._duration = int(matchobj.group(1))
 
         return self._duration
+
+    #SERVER-41349 - get hostname from the DNS log line
+    @property
+    def hostname(self):
+        line_str = self.line_str
+        groups = re.search("DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
+        self._hostname = groups.group(1)
+        return self._hostname
 
     @property
     def datetime(self):
