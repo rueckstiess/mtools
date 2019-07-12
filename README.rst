@@ -2,7 +2,7 @@
 mtools
 ======
 
-|PyPI version| |Build Status| |Python 36|
+|PyPI version| |Build Status| |Python 36| |Python 37|
 
 **mtools** is a collection of helper scripts to parse, filter, and visualize
 MongoDB log files (``mongod``, ``mongos``). mtools also includes ``mlaunch``, a
@@ -44,7 +44,7 @@ Requirements and Installation Instructions
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.6.
+Python 3.6 and 3.7.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the `installation instructions
@@ -80,4 +80,6 @@ posted in the `Issues
 .. |Build Status| image:: https://img.shields.io/travis/rueckstiess/mtools/master.svg
    :target: https://travis-ci.org/rueckstiess/mtools
 .. |Python 36| image:: https://img.shields.io/badge/Python-3.6-brightgreen.svg?style=flat
+   :target: http://python.org
+.. |Python 37| image:: https://img.shields.io/badge/Python-3.7-brightgreen.svg?style=flat
    :target: http://python.org
