@@ -256,14 +256,18 @@ class LogFile(InputSource):
                 if not self.from_stdin:
                     self.filehandle.seek(0)
 
-                # now raise StopIteration exception
-                raise e
+                # return (instead of raising StopIteration exception) per PEP 479
+                return
 
             # get start date for stdin input
             if not self.start and self.from_stdin:
                 if le and le.datetime:
                     self._start = le.datetime
-            yield le
+
+            try:
+                yield le
+            except StopIteration:
+                return
 
     states = (['PRIMARY', 'SECONDARY', 'DOWN', 'STARTUP', 'STARTUP2',
                'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN'])

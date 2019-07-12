@@ -57,7 +57,10 @@ class Grouping(object):
     def __iter__(self):
         """Iterate items in group."""
         for key in self.groups:
-            yield key
+            try:
+                yield key
+            except StopIteration:
+                return
 
     def __len__(self):
         """Return length of group."""
