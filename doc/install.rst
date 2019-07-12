@@ -4,7 +4,7 @@ Installation
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.6.
+Python 3.6 and Python 3.7.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section.
@@ -17,7 +17,7 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 Python
-   You need to have Python 3.6.x installed in order to use mtools.
+   You need to have Python 3.6.x or 3.7.x installed in order to use mtools.
    Other versions of Python are not currently supported.
 
    To check your Python version, run ``python --version`` on the command line.
@@ -31,6 +31,13 @@ The easiest way to install mtools is via ``pip``. From the command line, run:
 
    pip install mtools
 
+Some mtools scripts have additional :ref:`dependencies`. To install all optional
+dependencies use:
+
+.. code-block:: bash
+
+   pip install mtools[all]
+
 You need to have ``pip`` installed for this to work. If you don't have ``pip``
 installed yet, try ``sudo easy_install pip`` from the command line first, or
 follow the instructions provided on the `pip installation page
@@ -42,8 +49,6 @@ permissions to install into the system directory.
 In that case, you either need to add ``sudo`` in front of the ``pip`` command
 to install into a system directory, or append ``--user`` to install into your
 home directory.
-
-Some mtools scripts have additional :ref:`dependencies`.
 
 Installation from source
 ~~~~~~~~~~~~~~~~~~~~~~~~
