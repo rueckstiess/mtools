@@ -225,7 +225,11 @@ class MLogFilterTool(LogFileTool):
         if len(self.args['logfile']) > 1:
             # merge log files by time
             for logevent in self._merge_logfiles():
-                yield logevent
+                try:
+                    yield logevent
+                except StopIteration:
+                    return
+
         else:
             # only one file
             for logevent in self.args['logfile'][0]:
@@ -233,7 +237,10 @@ class MLogFilterTool(LogFileTool):
                     logevent._datetime = (logevent.datetime +
                                           timedelta(hours=self
                                                     .args['timezone'][0]))
-                yield logevent
+                try:
+                    yield logevent
+                except StopIteration:
+                    return
 
     def run(self, arguments=None):
         """

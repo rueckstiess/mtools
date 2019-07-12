@@ -61,7 +61,10 @@ class BasePlotType(object):
         """Iterator yielding all logevents from groups dictionary."""
         for key in self.groups:
             for logevent in self.groups[key]:
-                yield logevent
+                try:
+                    yield logevent
+                except StopIteration:
+                    return
 
     @classmethod
     def color_map(cls, group):
