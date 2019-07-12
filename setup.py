@@ -17,12 +17,12 @@ try:
     # simplify the default install experience, particularly where a build
     # toolchain is required.
     extras_requires = {
-        "all": ['matplotlib==1.4.3', 'numpy==1.14.5', 'pymongo==3.6.1', 'psutil==5.4.2'],
-        "mlaunch": ['pymongo==3.6.1', 'psutil==5.4.2'],
+        "all": ['matplotlib==3.1.1', 'numpy==1.16.4', 'pymongo==3.8.0', 'psutil==5.6.3'],
+        "mlaunch": ['pymongo==3.8.0', 'psutil==5.6.3'],
         "mlogfilter": [],
-        "mloginfo": ['numpy==1.14.5'],
+        "mloginfo": ['numpy==1.16.4'],
         "mlogvis": [],
-        "mplotqueries": ['matplotlib==1.4.3', 'numpy==1.14.5'],
+        "mplotqueries": ['matplotlib==3.1.1', 'numpy==1.16.4'],
     }
 
     try:
@@ -103,6 +103,7 @@ setup(
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,
