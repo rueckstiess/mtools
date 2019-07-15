@@ -18,6 +18,7 @@ Usage
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
                 [additional plot type parameters]
+                [--oplog]
 
 **mplotqueries** can also be used with shell pipe syntax, for example:
 
@@ -78,6 +79,13 @@ Output to File
    interactive view window. The format is auto-recognized from the filename
    extension, with many supported formats, e.g. ``.png``, ``.pdf``, ...
 
+OpLog
+-----------------
+``--oplog``
+   The ``--oplog`` flag provides the information about the slow operations logs.
+   The terminal output shows the number of slow operation detected in the log and
+   the number of operations(points) plotted on to the graph. The oplog will produce
+   the scatter plot with respect to duration(milliseconds) and the date.
 
 Groupings
 ~~~~~~~~~
