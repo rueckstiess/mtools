@@ -111,6 +111,7 @@ class LogEvent(object):
 
         self._counters_calculated = False
 
+
         # TODO: refactor from the legacy names to modern
         # (eg: nscanned => keysExamined). Currently _extract_counters()
         # maps newer property names into legacy equivalents for
@@ -130,6 +131,7 @@ class LogEvent(object):
         self._r = None
         self._w = None
         self._conn = None
+        self._hostname = None
 
         self._level_calculated = False
         self._level = None
@@ -204,6 +206,15 @@ class LogEvent(object):
                     self._duration = int(matchobj.group(1))
 
         return self._duration
+
+    # SERVER-41349 - get hostname from the DNS log line
+    @property
+    def hostname(self):
+        line_str = self.line_str
+        groups = re.search("DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
+        self._hostname = groups.group(1)
+        return self._hostname
+
 
     @property
     def datetime(self):
