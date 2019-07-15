@@ -16,6 +16,7 @@ Usage
    mloginfo [-h] [--version] logfile
             [--verbose]
             [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
+            [--transactions] [--tsort {duration}]
 
 
 General Parameters
@@ -135,6 +136,51 @@ example:
    mloginfo mongod.log --queries --sort sum
 
 This option has no effect unless ``--queries`` is also specified.
+
+Transactions (``--transactions``)
+-----------------------
+
+The transaction section will parse the log file to find information related
+to the transactions. The autocommit indicates whether the autocommit was
+enable for the transaction or not. The parameters explain themselves. The readConcern
+information is fetched either from OperationContext or _txnResourceStash.
+TimeActiveMicros and TimeInactiveMicros denotes the number of micros were active and
+inactive during the span of the transaction respectively. The duration field pours the
+value in milliseconds and indicates the amount of time taken by each transaction.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --transactions
+
+In addition to the default information, this command will also output the
+``TRANSACTIONS`` section:
+
+.. code-block:: bash
+
+ TRANSACTION
+
+ DATETIME                       TXNNUMBER       AUTOCOMMIT      READCONCERN     TIMEACTIVEMICROS    TIMEINACTIVEMICROS   DURATION
+
+ 2019-06-18T12:31:03.180+0100           1         false         "snapshot"                 11142                     3   7
+ 2019-03-18T12:31:03.180+0100           2         false         "snapshot"                 11143                     4   6
+ 2019-07-18T12:31:03.180+0100           3         false         "snapshot"                 11144                     3   4
+ 2019-08-18T12:31:03.180+0100           4         false         "snapshot"                 11145                     4   7
+ 2019-06-18T12:31:03.180+0100           5         false         "snapshot"                 11146                     3   3
+
+``--tsort``
+^^^^^^^^^^
+
+This option can be used to sort the results of the ``--transaction`` table, along with 'duration' keyword.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --transaction --tsort duration
+
+This option has no effect unless it is specified between ``--transaction`` and ``duration`` is specified.
 
 Restarts (``--restarts``)
 -------------------------
