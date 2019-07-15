@@ -18,6 +18,7 @@ Usage
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
                 [additional plot type parameters]
+                [--dns]
 
 **mplotqueries** can also be used with shell pipe syntax, for example:
 
@@ -78,6 +79,15 @@ Output to File
    interactive view window. The format is auto-recognized from the filename
    extension, with many supported formats, e.g. ``.png``, ``.pdf``, ...
 
+DNS
+-----------------
+``--dns``
+   With ``--dns`` flag, the slow DNS resolutions can be identified and the plotted
+   on the graph. The flag will parse the log and collect the slow DNS information i.e.
+   its hostname, and time it took to resolve the DNS conflict. Ideally, the DNS queries
+   which took more than a second are logged. The collected information will be
+   plotted on to the graph. The information can be grouped by the hostname by making use
+   of ``--group`` flag.
 
 Groupings
 ~~~~~~~~~
@@ -98,6 +108,7 @@ The following values are possible for ``GROUP`` for most plots (some plots may
 not support all groups):
 
 *  ``namespace`` (default for single file)
+*  ``hostname``
 *  ``filename`` (default for multiple files)
 *  ``operation`` (queries, inserts, updates, ...)
 *  ``thread``
