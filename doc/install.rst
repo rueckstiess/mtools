@@ -31,7 +31,7 @@ The easiest way to install mtools is via ``pip``. From the command line, run:
 
    pip install mtools
 
-Some mtools scripts have additional :ref:`dependencies`. To install all optional
+Some mtools scripts have additional `dependencies`_. To install all optional
 dependencies use:
 
 .. code-block:: bash
