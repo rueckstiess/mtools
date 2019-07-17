@@ -16,6 +16,7 @@ Usage
    mloginfo [-h] [--version] logfile
             [--verbose]
             [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
+            [--cursor]
 
 
 General Parameters
@@ -260,3 +261,25 @@ state changes.
    Oct 07 23:23:16    example.com:27018           STARTUP2
    Oct 07 23:23:32    example.com:27018           RECOVERING
    Oct 07 23:23:34    example.com:27018           SECONDARY
+
+Cursor (``--cursor``)
+-----------------------------------------
+
+Outputs information if the cursor was reaped for exceeding the transaction timeout. The timestamp of transaction, Cursor ID, and the time at
+which the cursor was reaped is captured from the logs.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --cursor
+
+.. code-block:: bash
+
+CURSOR
+
+DATETIME                            CURSORID    REAPEDTIME
+
+2019-06-14 12:31:04.180000+01:00    abc1        2019-06-18 12:31:04.180000+01:00
+2019-06-14 12:31:04.180000+01:00    abc2        2019-06-18 12:31:06.180000+01:00
+2019-06-14 12:31:04.180000+01:00    abc3        2019-06-18 12:31:08.180000+01:00
