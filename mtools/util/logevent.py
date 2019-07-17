@@ -111,6 +111,11 @@ class LogEvent(object):
 
         self._counters_calculated = False
 
+        self._bytesRead = None
+        self._bytesWritten = None
+        self._timeReadingMicros = None
+        self._timeWritingMicros = None
+
         # TODO: refactor from the legacy names to modern
         # (eg: nscanned => keysExamined). Currently _extract_counters()
         # maps newer property names into legacy equivalents for
@@ -561,6 +566,42 @@ class LogEvent(object):
         return self._ninserted
 
     @property
+    def bytesRead(self):
+        """Extract bytesRead counter if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._bytesRead
+
+    @property
+    def bytesWritten(self):
+        """Extract bytesWritten counter if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._bytesWritten
+
+    @property
+    def timeReadingMicros(self):
+        """Extract timeReadingMicros counter if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._timeReadingMicros
+
+    @property
+    def timeWritingMicros(self):
+        """Extract timeWritingMicros counter if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._timeWritingMicros
+
+    @property
     def ndeleted(self):
         """Extract ndeleted or nDeleted counter if available (lazy)."""
         if not self._counters_calculated:
@@ -628,7 +669,8 @@ class LogEvent(object):
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates']
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'bytesRead', 'bytesWritten', 'timeReadingMicros',
+                    'timeWritingMicros']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -664,6 +706,33 @@ class LogEvent(object):
                                     token.startswith('numYields')):
                                 try:
                                     self._numYields = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                            if (counter == 'bytesRead' and
+                                    token.startswith('bytesRead')):
+                                try:
+                                    self._bytesRead = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                            if (counter == 'bytesWritten' and
+                                    token.startswith('bytesWritten')):
+                                try:
+                                    self._bytesWritten = int(
+                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                            if (counter == 'timeReadingMicros' and
+                                    token.startswith('timeReadingMicros')):
+                                try:
+                                    self._timeReadingMicros = int(
+                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                except ValueError:
+                                    pass
+                            if (counter == 'timeWritingMicros' and
+                                    token.startswith('timeWritingMicros')):
+                                try:
+                                    self._timeWritingMicros = int(
+                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
                                 except ValueError:
                                     pass
                             if (counter == 'planSummary' and

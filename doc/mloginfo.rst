@@ -16,7 +16,7 @@ Usage
    mloginfo [-h] [--version] logfile
             [--verbose]
             [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
-
+            [--storagestats]
 
 General Parameters
 ~~~~~~~~~~~~~~~~~~
@@ -260,3 +260,27 @@ state changes.
    Oct 07 23:23:16    example.com:27018           STARTUP2
    Oct 07 23:23:32    example.com:27018           RECOVERING
    Oct 07 23:23:34    example.com:27018           SECONDARY
+
+Storagestats (``--storagestats``)
+-----------------------------------------
+
+It outputs the information about the storage statistics for slow transactions.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --storagestats
+
+.. code-block:: bash
+
+STORAGE STATISTICS
+
+namespace                 operation    bytesRead    bytesWritten    timeReadingMicros    timeWritingMicros
+
+config.system.sessions    update       None         None            None                 None
+local.myCollection        insert       None         None            None                 None
+local.myCollection        update       None         None            None                 None
+local1.myCollection       insert       None         None            None                 None
+invoice-prod.invoices     insert        12768411        22233323                86313    12344
+invoice-prod.invoices     insert        12868411        22233323                86313    12344

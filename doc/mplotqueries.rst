@@ -17,6 +17,7 @@ Usage
                 [--logscale]
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
+                [--storagestats]
                 [additional plot type parameters]
 
 **mplotqueries** can also be used with shell pipe syntax, for example:
@@ -78,6 +79,12 @@ Output to File
    interactive view window. The format is auto-recognized from the filename
    extension, with many supported formats, e.g. ``.png``, ``.pdf``, ...
 
+Storage Statistics
+--------------
+``--storagestats``
+   The read storage statistics can be plotted on the graph with the use of
+   ``--storagestats`` flag. The number of bytes read at particular time is mapped on
+   to the graph.
 
 Groupings
 ~~~~~~~~~
@@ -534,4 +541,4 @@ Remove Overlays
 ``--overlay reset``
    To remove all overlays, you can use this command. It will delete all
    existing overlays, and the next (or current, if a log file is specified as
-   well) call to **mplotqueries** will not show additional overlays anymore.
+   well) call to **mplotqueries** will not show additional overlays anymore
