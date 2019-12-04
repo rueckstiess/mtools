@@ -4,6 +4,7 @@ import argparse, os, re, sys
 import bson, wiredtiger
 
 from mtools.util.cmdlinetool import BaseCmdLineTool
+from mtools.version import __version__
 
 codec_options = bson.codec_options.CodecOptions(uuid_representation=bson.binary.STANDARD)
 
@@ -15,6 +16,9 @@ class MTransferTool(BaseCmdLineTool):
 
         self.argparser.add_argument('--dbpath', dest='dbpath', default='.', nargs=1,
                                     help='MongoDB database path')
+
+        self.argparser.add_argument('--force', action='store_true',
+                                    help='ignore safety checks')
 
         self.argparser.add_argument('--verbose', action='store_true',
                                     help='enable verbose output')
@@ -28,6 +32,7 @@ class MTransferTool(BaseCmdLineTool):
         BaseCmdLineTool.run(self, arguments)
 
         self.dbpath = self.args['dbpath']
+        self.force = self.args['force']
         self.verbose = self.args['verbose']
 
         # Read storage.bson, sanity check.
@@ -43,7 +48,8 @@ class MTransferTool(BaseCmdLineTool):
             return
         if settings["directoryForIndexes"] or settings.get("groupCollections", False):
             sys.stderr.write('incompatible storage settings\n')
-            return
+            if not self.force:
+                return
 
         self.database = self.args['database'][0]
         self.nsprefix = self.database + '.'
@@ -51,7 +57,7 @@ class MTransferTool(BaseCmdLineTool):
         mtransfer_file = os.path.join(self.dbpath, self.database, 'mtransfer.bson')
 
         if self.args['command'] == 'export':
-            if os.path.exists(mtransfer_file):
+            if not self.force and os.path.exists(mtransfer_file):
                 sys.stderr.write('Output file "%s" already exists\n' % (mtransfer_file))
                 return
             with open(mtransfer_file, 'w') as outf:
@@ -105,7 +111,16 @@ class MTransferTool(BaseCmdLineTool):
             wtmeta_file = wtMeta[file_ident]
             wtmeta_table = wtMetaCreate[ident]
             basename = filename[len(self.nsprefix):]
-            export = {'collname' : collname, 'filename' : basename, 'mdb_catalog' : meta, 'sizeStorer' : size, 'wtmeta_table' : wtmeta_table, 'wtmeta_file' : wtmeta_file, 'indexes' : indexes }
+            export = {
+                'collname' : collname,
+                'filename' : basename,
+                'mdb_catalog' : meta,
+                'sizeStorer' : size,
+                'wtmeta_table' : wtmeta_table,
+                'wtmeta_file' : wtmeta_file,
+                'indexes' : indexes,
+                'version' : __version__,
+            }
             self.message(str(export))
             outf.write(bson.encode(export, codec_options = codec_options))
 
@@ -145,6 +160,13 @@ class MTransferTool(BaseCmdLineTool):
         for export in bson.decode_file_iter(inf, codec_options = codec_options):
             if not os.path.exists(os.path.join(self.dbpath, self.database, export['filename'])):
                 sys.stderr.write('File "%s" referenced in export missing during import' % (export['filename']))
+                if not self.force:
+                    return
+
+            if not self.force and export['version'] != __version__:
+                sys.stderr.write('Database was exported with mtools version {0}, '
+                    'current version {1} may not be compatible'.format(
+                    export['version'], __version__))
                 return
 
             # First process the indexes
