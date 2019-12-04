@@ -89,7 +89,7 @@ setup(
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
             "mlogvis=mtools.mlogvis.mlogvis:main",
-            "mplotqueries=mtools.mplotqueries.mplotqueries:main"
+            "mplotqueries=mtools.mplotqueries.mplotqueries:main",
             "mtransfer=mtools.mtransfer.mtransfer:main",
         ],
     },
