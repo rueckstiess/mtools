@@ -30,6 +30,9 @@ except ImportError as e:
                       "web browser. Error: " + str(e))
 
 
+def op_or_cmd(le):
+    return le.operation if le.operation != 'command' else le.command
+
 class MPlotQueriesTool(LogFileTool):
 
     home_path = os.path.expanduser("~")
@@ -129,6 +132,9 @@ class MPlotQueriesTool(LogFileTool):
         self.argparser.add_argument('--checkpoints',
                                     action='store_true', default=None,
                                     help=("Display the slow WiredTiger checkpoints "))
+        self.argparser.add_argument('--storagestats',
+                                    action='store_true', default=False,
+                                    help=("Plot the storage statistics for insert and update operations"))
 
         self.legend = None
 
@@ -222,6 +228,9 @@ class MPlotQueriesTool(LogFileTool):
                 if (self.args['oplog'] and (logevent.component != "REPL" or not re.search("applied op:", logevent.line_str))):
                     continue
 
+                if(self.args['storagestats']):
+                    if(op_or_cmd(logevent) not in ['insert','update']):
+                        continue
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
                         logevent.duration is not None and logevent.datetime):

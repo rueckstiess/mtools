@@ -298,6 +298,15 @@ class TestMLogInfo(object):
         restring = r'\w+\.\w+\s+(query|update|getmore|allowDiskUse)\s+{'
         assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
+    def test_storagestats_output(self):
+        # different log file
+        self.logfile_path = "mtools/test/logfiles/mongod_4.0.10_storagestats.log"
+        self.tool.run('%s --storagestats' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: '' in line, lines))
+        assert any(map(lambda line: line.startswith('STORAGE STATISTICS '), lines))
+
     def test_transactions_output(self):
         # different log file
         logfile_transactions_path = 'mtools/test/logfiles/mongod_4.0.10_slowtransactions.log'

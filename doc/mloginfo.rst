@@ -16,6 +16,7 @@ Usage
    mloginfo [-h] [--version] logfile
             [--verbose]
             [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
+            [--storagestats]
             [--transactions] [--tsort {duration}]
             [--cursor]
 
@@ -332,3 +333,27 @@ DATETIME                            CURSORID    REAPEDTIME
 2019-06-14 12:31:04.180000+01:00    abc1        2019-06-18 12:31:04.180000+01:00
 2019-06-14 12:31:04.180000+01:00    abc2        2019-06-18 12:31:06.180000+01:00
 2019-06-14 12:31:04.180000+01:00    abc3        2019-06-18 12:31:08.180000+01:00
+
+Storagestats (``--storagestats``)
+-----------------------------------------
+
+Outputs the information about the storage statistics for slow transactions.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --storagestats
+
+.. code-block:: bash
+
+STORAGE STATISTICS
+
+namespace                 operation    bytesRead    bytesWritten    timeReadingMicros    timeWritingMicros
+
+config.system.sessions    update       None         None            None                 None
+local.myCollection        insert       None         None            None                 None
+local.myCollection        update       None         None            None                 None
+local1.myCollection       insert       None         None            None                 None
+invoice-prod.invoices     insert        12768411        22233323                86313    12344
+invoice-prod.invoices     insert        12868411        22233323                86313    12344

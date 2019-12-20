@@ -17,6 +17,7 @@ Usage
                 [--logscale]
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
+                [--storagestats]
                 [additional plot type parameters]
                 [--dns]
                 [--checkpoints]
@@ -105,6 +106,13 @@ OpLog
    the number of slow operation detected in the log and the number of operations(points)
    plotted on the graph. The oplog will produce a scatter plot with respect to
    duration(milliseconds) and the date.
+
+Storage Statistics
+--------------
+``--storagestats``
+   The read storage statistics can be plotted on the graph with the use of
+   ``--storagestats`` flag. The number of bytes read at particular time is mapped on
+   to the graph.
 
 Groupings
 ~~~~~~~~~
@@ -562,4 +570,4 @@ Remove Overlays
 ``--overlay reset``
    To remove all overlays, you can use this command. It will delete all
    existing overlays, and the next (or current, if a log file is specified as
-   well) call to **mplotqueries** will not show additional overlays anymore.
+   well) call to **mplotqueries** will not show additional overlays anymore
