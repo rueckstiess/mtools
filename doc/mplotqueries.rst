@@ -19,6 +19,7 @@ Usage
                 [--overlay [ {add,list,reset} ]]
                 [additional plot type parameters]
                 [--checkpoints]
+                [--oplog]
 
 **mplotqueries** can also be used with shell pipe syntax, for example:
 
@@ -87,6 +88,14 @@ Checkpoints
    milliseconds. Terminal output will give an overview of the number of points
    to be plotted on the graph. The graph will contain the datetime and duratio
    (in milliseconds) of slow checkpoints.
+
+OpLog
+-----------------
+``--oplog``
+   This parameter provides information about slow oplog operations. Output shows
+   the number of slow operation detected in the log and the number of operations(points)
+   plotted on the graph. The oplog will produce a scatter plot with respect to
+   duration(milliseconds) and the date.
 
 Groupings
 ~~~~~~~~~
