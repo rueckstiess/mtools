@@ -145,12 +145,12 @@ Transactions (``--transactions``)
 -----------------------
 
 The transaction section will parse the log file to find information related
-to the transactions. The autocommit indicates whether the autocommit was
-enable for the transaction or not. The parameters explain themselves. The readConcern
-information is fetched either from OperationContext or _txnResourceStash.
-TimeActiveMicros and TimeInactiveMicros denotes the number of micros were active and
-inactive during the span of the transaction respectively. The duration field pours the
-value in milliseconds and indicates the amount of time taken by each transaction.
+to transactions (MongoDB 4.0+). The autocommit indicates whether autocommit
+was enabled for a transaction. The readConcern information is fetched either
+from OperationContext or _txnResourceStash. TimeActiveMicros and TimeInactiveMicros
+denote the number of micros active and inactive during the span of the transaction.
+The duration field includes the value in milliseconds and indicates the amount
+of time taken by each transaction.
 
 For example:
 
