@@ -86,9 +86,9 @@ was found (count), the minimum and maximum execution time, the mean and the
 total sum. It also informs the type of operation that was performed. The list
 is sorted by total sum, which reflects the overall work the database has to
 perform for each query pattern. The allowDiskUsage(last column) parameter provides
-information about the disk usage of namespace. The slow query log entry shows value as 'True' if the disk was used,
-otherwise it pours the 'False' value. If the information is unavailable then it would display the column value as
-'None'.
+information about the disk usage of a namespace. The slow query log entry
+shows a value of 'True' or `False` if the disk was used, or `None` if this
+information is not available in the log.
 
 This overview is very useful to know which indexes to create to get the best
 performance out of a MongoDB environment. Optimization efforts should start at
