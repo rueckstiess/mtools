@@ -82,10 +82,11 @@ Output to File
 Checkpoints
 -----------------
 ``--checkpoints``
-   This parameters enables the information about the slow checkpoints under WiredTiger.
-   The duration of the checkpoints will be displayed in milliseconds. The terminal
-   output will give an overview of number of points to be plotted on the graph. The
-   graph will contain the information in milliseconds slow checkpoints took and the date.
+   This parameter enables information about slow checkpoints under WiredTiger, if
+   available in the log files. The duration of checkpoints will be displayed in
+   milliseconds. Terminal output will give an overview of the number of points
+   to be plotted on the graph. The graph will contain the datetime and duratio
+   (in milliseconds) of slow checkpoints.
 
 Groupings
 ~~~~~~~~~
