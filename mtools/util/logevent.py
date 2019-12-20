@@ -56,7 +56,7 @@ class LogEvent(object):
               'Oct', 'Nov', 'Dec']
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
-                      'command']
+                      'command', 'aggregate']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
@@ -110,6 +110,7 @@ class LogEvent(object):
         self._command = None
 
         self._counters_calculated = False
+        self._allowDiskUse = None
 
         # TODO: refactor from the legacy names to modern
         # (eg: nscanned => keysExamined). Currently _extract_counters()
@@ -201,6 +202,10 @@ class LogEvent(object):
                                      self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1))
+            # SERVER-16176 - Logging of slow checkpoints
+            elif "Checkpoint" in self.line_str:
+                groups = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                self._duration = int(groups.group(1)) * 1000
 
         return self._duration
 
@@ -580,6 +585,15 @@ class LogEvent(object):
         return self._ndeleted
 
     @property
+    def allowDiskUse(self):
+        """Extract allowDiskUse counter for aggregation if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._allowDiskUse
+
+    @property
     def nupdated(self):
         """Extract nupdated or nModified counter if available (lazy)."""
         if not self._counters_calculated:
@@ -638,7 +652,7 @@ class LogEvent(object):
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates']
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'allowDiskUse']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -665,9 +679,12 @@ class LogEvent(object):
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                            # extract allowDiskUse counter
+                            if (counter == 'allowDiskUse' and token.startswith('allowDiskUse')):
+                                # Splitting space between token and value
+                                self._allowDiskUse = split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',','')
+                            else:
+                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',', ''))
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
