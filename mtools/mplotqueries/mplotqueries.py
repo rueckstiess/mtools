@@ -71,6 +71,9 @@ class MPlotQueriesTool(LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
+
+        # SERVER-41349 - --dns flag to plot slow DNS Resolutions; Can be grouped by hostname
+        self.argparser.add_argument('--dns', action='store_true', help='slow DNS Resolutions', default=False)
         # SERVER-32146 - --oplog flag to plot slow oplog operations on the secondary replica set
         self.argparser.add_argument('--oplog', action='store_true',
                                     help=('make a plot only for slow oplogs on the secondary replica set.'))
@@ -86,7 +89,7 @@ class MPlotQueriesTool(LogFileTool):
                                     help=("specify value to group on. "
                                           "Possible values depend on type of "
                                           "plot. All basic plot types can "
-                                          "group on 'namespace', 'operation', "
+                                          "group on 'namespace','hostname' 'operation', "
                                           "'thread', 'pattern', range and "
                                           "histogram plots can additionally "
                                           "group on 'log2code'. The group can "
@@ -207,6 +210,9 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+                if (self.args['dns'] and (
+                        not re.search("DNS resolution while connecting to", logevent.line_str))):
+
                 # SERVER-16176 - Logging of slow checkpoints
                 if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
                     continue
@@ -334,7 +340,7 @@ class MPlotQueriesTool(LogFileTool):
             print("Loaded overlay: %s" % os.path.basename(f))
 
         if len(target_files) > 0:
-            print()
+            print('')
 
         return len(target_files) > 0
 

@@ -18,6 +18,7 @@ Usage
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
                 [additional plot type parameters]
+                [--dns]
                 [--checkpoints]
                 [--oplog]
 
@@ -89,6 +90,14 @@ Checkpoints
    to be plotted on the graph. The graph will contain the datetime and duratio
    (in milliseconds) of slow checkpoints.
 
+DNS
+-----------------
+``--dns``
+   Using this parameter slow DNS resolution can be identified and plotted.
+   This flag will parse the log and collect available slow DNS information including
+   hostname and time taken to resolve DNS. DNS information can be grouped by hostname
+   using the ``--group`` flag.
+  
 OpLog
 -----------------
 ``--oplog``
@@ -116,6 +125,7 @@ The following values are possible for ``GROUP`` for most plots (some plots may
 not support all groups):
 
 *  ``namespace`` (default for single file)
+*  ``hostname``
 *  ``filename`` (default for multiple files)
 *  ``operation`` (queries, inserts, updates, ...)
 *  ``thread``
