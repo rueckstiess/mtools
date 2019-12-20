@@ -298,6 +298,14 @@ class TestMLogInfo(object):
         restring = r'\w+\.\w+\s+(query|update|getmore|allowDiskUse)\s+{'
         assert len(list(filter(lambda line: re.match(restring, line), lines))) >= 1
 
+    def test_cursor_output(self):
+        # different log file
+        logfile_path = "mtools/test/logfiles/mongod_4.0.10_reapedcursor.log"
+        self.tool.run('%s --cursor' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any('CURSOR' in line for line in lines)
+
     def test_restarts_output(self):
         # different log file
         self.tool.run('%s --restarts' % self.logfile_path)
