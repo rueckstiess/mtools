@@ -122,6 +122,10 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store', default=None,
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
+        # SERVER-16176 - checkpoints argument has been added to the existing group
+        self.argparser.add_argument('--checkpoints',
+                                    action='store_true', default=None,
+                                    help=("Display the slow WiredTiger checkpoints "))
 
         self.legend = None
 
@@ -203,11 +207,13 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+                # SERVER-16176 - Logging of slow checkpoints
+                if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
+                    continue
 
                 # SERVER-32146 - skip the log line if the --oplog flag is set and the line does not contain REPL or
                 # applied op
-                if (self.args['oplog'] and (logevent.component != "REPL" or not re.search("applied op:",
-                                                                                          logevent.line_str))):
+                if (self.args['oplog'] and (logevent.component != "REPL" or not re.search("applied op:", logevent.line_str))):
                     continue
 
                 # adjust times if --optime-start is enabled
