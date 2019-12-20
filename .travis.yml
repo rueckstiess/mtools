@@ -4,6 +4,7 @@ dist: xenial
 python:
   - "3.6"
   - "3.7"
+  - "3.8"
 install: pip install tox
 script:
   - tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
