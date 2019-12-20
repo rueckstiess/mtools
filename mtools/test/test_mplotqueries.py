@@ -1,10 +1,10 @@
 import sys
 import os
-
 import mtools
 from mtools.mplotqueries.mplotqueries import MPlotQueriesTool
 from mtools.util.logfile import LogFile
-
+from nose.plugins.skip import SkipTest
+from nose.tools import raises
 
 class TestMPlotQueries(object):
 
@@ -25,3 +25,20 @@ class TestMPlotQueries(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'SCATTER plot' in line, lines))
+
+    def test_checkpoints(self, filename='mongod_4.0.10_slowcheckpoints.log'):
+        raise SkipTest('Skipping interactive test')
+        # different logfile for the slow Checkpoints
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
+        self.tool.run('%s --checkpoints' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any(map(lambda line: 'SCATTER plot' in line, lines))
+
+    def test_oplog(self):
+        # different logfile for oplogs
+        logfile_oplog = "mtools/test/logfiles/mongod_4.0.10_slowoplogs.log"
+        self.tool.run('%s --oplog --group operation' % logfile_oplog)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert any('SCATTER plot' in line for line in lines)
