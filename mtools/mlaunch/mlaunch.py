@@ -146,7 +146,8 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 class MLaunchTool(BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
-    UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB']
+    UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
+    UNSUPPORTED_CONFIG_ARGS = ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']
 
     def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
@@ -1499,10 +1500,6 @@ class MLaunchTool(BaseCmdLineTool):
             line = line.lstrip()
             if line.startswith('-'):
                 argument = line.split()[0]
-                # exception: don't allow unsupported config server arguments
-                if config and argument in ['--oplogSize', '--storageEngine',
-                                           '--smallfiles', '--nojournal']:
-                    continue
                 accepted_arguments.append(argument)
 
         # add undocumented options
@@ -1517,7 +1514,10 @@ class MLaunchTool(BaseCmdLineTool):
                 # check if the binary accepts this argument
                 # or special case -vvv for any number of v
                 argname = arg.split('=', 1)[0]
-                if argname in accepted_arguments or re.match(r'-v+', arg):
+                if (binary.endswith('mongod') and config and
+                      argname in self.UNSUPPORTED_CONFIG_ARGS):
+                    continue
+                elif argname in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
                 elif (binary.endswith('mongod') and
                       argname in self.UNDOCUMENTED_MONGOD_ARGS):

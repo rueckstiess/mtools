@@ -19,6 +19,9 @@ Usage
                 [--overlay [ {add,list,reset} ]]
                 [--storagestats]
                 [additional plot type parameters]
+                [--dns]
+                [--checkpoints]
+                [--oplog]
 
 **mplotqueries** can also be used with shell pipe syntax, for example:
 
@@ -79,6 +82,31 @@ Output to File
    interactive view window. The format is auto-recognized from the filename
    extension, with many supported formats, e.g. ``.png``, ``.pdf``, ...
 
+Checkpoints
+-----------------
+``--checkpoints``
+   This parameter enables information about slow checkpoints under WiredTiger, if
+   available in the log files. The duration of checkpoints will be displayed in
+   milliseconds. Terminal output will give an overview of the number of points
+   to be plotted on the graph. The graph will contain the datetime and duratio
+   (in milliseconds) of slow checkpoints.
+
+DNS
+-----------------
+``--dns``
+   Using this parameter slow DNS resolution can be identified and plotted.
+   This flag will parse the log and collect available slow DNS information including
+   hostname and time taken to resolve DNS. DNS information can be grouped by hostname
+   using the ``--group`` flag.
+  
+OpLog
+-----------------
+``--oplog``
+   This parameter provides information about slow oplog operations. Output shows
+   the number of slow operation detected in the log and the number of operations(points)
+   plotted on the graph. The oplog will produce a scatter plot with respect to
+   duration(milliseconds) and the date.
+
 Storage Statistics
 --------------
 ``--storagestats``
@@ -105,6 +133,7 @@ The following values are possible for ``GROUP`` for most plots (some plots may
 not support all groups):
 
 *  ``namespace`` (default for single file)
+*  ``hostname``
 *  ``filename`` (default for multiple files)
 *  ``operation`` (queries, inserts, updates, ...)
 *  ``thread``

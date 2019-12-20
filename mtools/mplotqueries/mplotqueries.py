@@ -19,6 +19,8 @@ try:
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
+    import re
+
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -72,6 +74,12 @@ class MPlotQueriesTool(LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
+
+        # SERVER-41349 - --dns flag to plot slow DNS Resolutions; Can be grouped by hostname
+        self.argparser.add_argument('--dns', action='store_true', help='slow DNS Resolutions', default=False)
+        # SERVER-32146 - --oplog flag to plot slow oplog operations on the secondary replica set
+        self.argparser.add_argument('--oplog', action='store_true',
+                                    help=('make a plot only for slow oplogs on the secondary replica set.'))
         self.argparser.add_argument('--type', action='store',
                                     default='scatter',
                                     choices=self.plot_types.keys(),
@@ -84,7 +92,7 @@ class MPlotQueriesTool(LogFileTool):
                                     help=("specify value to group on. "
                                           "Possible values depend on type of "
                                           "plot. All basic plot types can "
-                                          "group on 'namespace', 'operation', "
+                                          "group on 'namespace','hostname' 'operation', "
                                           "'thread', 'pattern', range and "
                                           "histogram plots can additionally "
                                           "group on 'log2code'. The group can "
@@ -120,6 +128,10 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store', default=None,
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
+        # SERVER-16176 - checkpoints argument has been added to the existing group
+        self.argparser.add_argument('--checkpoints',
+                                    action='store_true', default=None,
+                                    help=("Display the slow WiredTiger checkpoints "))
         self.argparser.add_argument('--storagestats',
                                     action='store_true', default=False,
                                     help=("Plot the storage statistics for insert and update operations"))
@@ -204,6 +216,17 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
+                if (self.args['dns'] and (
+                        not re.search("DNS resolution while connecting to", logevent.line_str))):
+
+                # SERVER-16176 - Logging of slow checkpoints
+                if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
+                    continue
+
+                # SERVER-32146 - skip the log line if the --oplog flag is set and the line does not contain REPL or
+                # applied op
+                if (self.args['oplog'] and (logevent.component != "REPL" or not re.search("applied op:", logevent.line_str))):
+                    continue
 
                 if(self.args['storagestats']):
                     if(op_or_cmd(logevent) not in ['insert','update']):
@@ -326,7 +349,7 @@ class MPlotQueriesTool(LogFileTool):
             print("Loaded overlay: %s" % os.path.basename(f))
 
         if len(target_files) > 0:
-            print()
+            print('')
 
         return len(target_files) > 0
 
