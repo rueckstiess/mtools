@@ -28,7 +28,7 @@ class MLogVisTool(LogFileTool):
                                     help=('filename to output. Default is '
                                           '<original logfile>.html'))
         self.argparser.add_argument('--line-max', action='store',
-                                    default=10000,
+                                    type=int, default=10000,
                                     help=('max count of datapoints at which '
                                           'actual log line strings are not '
                                           'printed any more.'))

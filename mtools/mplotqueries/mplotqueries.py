@@ -19,6 +19,7 @@ try:
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
+    import re
 except ImportError as e:
     raise ImportError("Can't import matplotlib. See "
                       "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
@@ -117,6 +118,10 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store', default=None,
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
+        # SERVER-16176 - checkpoints argument has been added to the existing group
+        self.argparser.add_argument('--checkpoints',
+                                    action='store_true', default=None,
+                                    help=("Display the slow WiredTiger checkpoints "))
 
         self.legend = None
 
@@ -199,6 +204,9 @@ class MPlotQueriesTool(LogFileTool):
 
             for i, logevent in enumerate(logfile):
 
+                # SERVER-16176 - Logging of slow checkpoints
+                if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
+                    continue
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
                         logevent.duration is not None and logevent.datetime):

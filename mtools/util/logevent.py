@@ -53,7 +53,7 @@ class LogEvent(object):
               'Oct', 'Nov', 'Dec']
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
-                      'command', 'transaction']
+                      'command', 'aggregate', 'transaction']
     log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
@@ -119,6 +119,7 @@ class LogEvent(object):
         self._command = None
 
         self._counters_calculated = False
+        self._allowDiskUse = None
 
         # TODO: refactor from the legacy names to modern
         # (eg: nscanned => keysExamined). Currently _extract_counters()
@@ -143,7 +144,6 @@ class LogEvent(object):
         self._level_calculated = False
         self._level = None
         self._component = None
-
         self.merge_marker_str = ''
 
     def set_line_str(self, line_str):
@@ -209,8 +209,23 @@ class LogEvent(object):
                                      self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1))
+            # SERVER-16176 - Logging of slow checkpoints
+            elif "Checkpoint" in self.line_str:
+                groups = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                self._duration = int(groups.group(1)) * 1000
 
         return self._duration
+
+    @property
+    def cursor(self):
+        """Pull the cursor information if available (lazy)."""
+        line_str = self.line_str
+        # SERVER-28604 Checking reaped cursor information
+        groups = re.search("Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
+        self._cursorid = groups.group(1)
+        self._reapedtime = groups.group(2)
+
+        return self._cursorid
 
     @property
     def datetime(self):
@@ -600,6 +615,15 @@ class LogEvent(object):
         return self._ndeleted
 
     @property
+    def allowDiskUse(self):
+        """Extract allowDiskUse counter for aggregation if available (lazy)."""
+        if not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+
+        return self._allowDiskUse
+
+    @property
     def nupdated(self):
         """Extract nupdated or nModified counter if available (lazy)."""
         if not self._counters_calculated:
@@ -712,7 +736,7 @@ class LogEvent(object):
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
                     'planSummary', 'writeConflicts', 'keyUpdates', 'lsid', 'txnNumber', 'autocommit',
                     'level','timeActiveMicros', 'timeInactiveMicros', 'duration', 'readTimestamp',
-                    'terminationCause']
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'allowDiskUse', 'terminationCause']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -723,7 +747,9 @@ class LogEvent(object):
             'nDeleted': 'ndeleted',
             'nInserted': 'ninserted',
             'nMatched': 'nreturned',
-            'nModified': 'nupdated'
+            'nModified': 'nupdated',
+            'cursorid' : 'cursorid',
+            'repaedtime' : 'reapedtime'
         }
         counters.extend(counter_equiv.keys())
 
@@ -744,15 +770,21 @@ class LogEvent(object):
                             elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):
                                 vars(self)['_' + counter] = (token.split(':')
                                 [-1]).replace(',', '')
-
                             elif (counter == 'terminationCause' and token.startswith('terminationCause')):
                                 vars(self)['_' + counter] = (token.split(':')
                                 [-1]).replace(',', '')
                             else:
-
                                 vars(self)['_' + counter] = int((token.split(':')
                                                              [-1]).replace(',',
                                                                            ''))
+
+                            # extract allowDiskUse counter
+                            if (counter == 'allowDiskUse' and token.startswith('allowDiskUse')):
+                                # Splitting space between token and value
+                                self._allowDiskUse = split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',','')
+                            else:
+                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',', ''))
+
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
@@ -933,7 +965,8 @@ class LogEvent(object):
             labels = ['line_str', 'split_tokens', 'datetime', 'operation',
                       'thread', 'namespace', 'nscanned', 'ntoreturn',
                       'nreturned', 'ninserted', 'nupdated', 'ndeleted',
-                      'duration', 'r', 'w', 'numYields', 'txtNumber', 'lsid', 'autocommit', 'readConcern',
+                      'duration', 'r', 'w', 'numYields',  'cursorid', 'reapedtime',
+                      'txtNumber', 'lsid', 'autocommit', 'readConcern',
                       'timeActiveMicros', 'timeInactiveMicros']
 
         for label in labels:
