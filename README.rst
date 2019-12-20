@@ -51,7 +51,7 @@ specific tool's section. See the `installation instructions
 <http://rueckstiess.github.io/mtools/install.html>`__ for more information.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
-versions of the MongoDB server. As of June 2019, that includes MongoDB 3.4
+versions of the MongoDB server. As of January 2020, that includes MongoDB 3.6
 or newer.
 
 Recent Changes
