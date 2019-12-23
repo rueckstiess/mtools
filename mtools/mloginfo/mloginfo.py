@@ -33,6 +33,11 @@ class MLogInfoTool(LogFileTool):
         """Print useful information about the log file."""
         LogFileTool.run(self, arguments)
 
+        if (self.args['logfile'] is None or len(self.args['logfile']) == 0):
+            self.argparser.print_usage()
+            print("\nERROR: At least one logfile argument must be provided")
+            self.argparser.exit()
+
         for i, self.logfile in enumerate(self.args['logfile']):
             if i > 0:
                 print("\n ------------------------------------------\n")
