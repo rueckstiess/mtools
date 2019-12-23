@@ -33,6 +33,7 @@ except ImportError as e:
 def op_or_cmd(le):
     return le.operation if le.operation != 'command' else le.command
 
+
 class MPlotQueriesTool(LogFileTool):
 
     home_path = os.path.expanduser("~")
@@ -74,12 +75,9 @@ class MPlotQueriesTool(LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
-
-        # SERVER-41349 - --dns flag to plot slow DNS Resolutions; Can be grouped by hostname
         self.argparser.add_argument('--dns', action='store_true', help='slow DNS Resolutions', default=False)
-        # SERVER-32146 - --oplog flag to plot slow oplog operations on the secondary replica set
         self.argparser.add_argument('--oplog', action='store_true',
-                                    help=('make a plot only for slow oplogs on the secondary replica set.'))
+                                    help=('plot slow oplog application'))
         self.argparser.add_argument('--type', action='store',
                                     default='scatter',
                                     choices=self.plot_types.keys(),
@@ -128,7 +126,6 @@ class MPlotQueriesTool(LogFileTool):
                                     action='store', default=None,
                                     help=("Save the plot to a file instead of "
                                           "displaying it in a window"))
-        # SERVER-16176 - checkpoints argument has been added to the existing group
         self.argparser.add_argument('--checkpoints',
                                     action='store_true', default=None,
                                     help=("Display the slow WiredTiger checkpoints "))
@@ -216,21 +213,22 @@ class MPlotQueriesTool(LogFileTool):
                     self.progress_bar_enabled = False
 
             for i, logevent in enumerate(logfile):
-                if (self.args['dns'] and (
-                        not re.search("DNS resolution while connecting to", logevent.line_str))):
-
-                # SERVER-16176 - Logging of slow checkpoints
-                if self.args['checkpoints'] and not re.search("Checkpoint took", logevent.line_str):
+                if (self.args['dns'] and
+                        not re.search("DNS resolution while connecting to", logevent.line_str)):
                     continue
 
-                # SERVER-32146 - skip the log line if the --oplog flag is set and the line does not contain REPL or
-                # applied op
-                if (self.args['oplog'] and (logevent.component != "REPL" or not re.search("applied op:", logevent.line_str))):
+                if (self.args['checkpoints'] and
+                        not re.search("Checkpoint took", logevent.line_str)):
                     continue
 
-                if(self.args['storagestats']):
-                    if(op_or_cmd(logevent) not in ['insert','update']):
+                if (self.args['oplog'] and
+                        (logevent.component != "REPL" or not re.search("applied op:", logevent.line_str))):
+                    continue
+
+                if (self.args['storagestats']):
+                    if (op_or_cmd(logevent) not in ['insert', 'update']):
                         continue
+
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and
                         logevent.duration is not None and logevent.datetime):

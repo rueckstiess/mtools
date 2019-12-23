@@ -87,8 +87,8 @@ class TransactionSection(BaseSection):
             print('no transactions found.')
             return
 
-        titles = ['datetime','txnNumber', 'autocommit', 'readConcern', 'timeActiveMicros',
-                  'timeInactiveMicros', 'duration']
+        titles = ['datetime', 'txnNumber', 'autocommit', 'readConcern',
+                  'timeActiveMicros', 'timeInactiveMicros', 'duration']
 
         table_rows = []
         # using only important key-values
