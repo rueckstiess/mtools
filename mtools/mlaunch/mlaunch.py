@@ -1537,7 +1537,8 @@ class MLaunchTool(BaseCmdLineTool):
             elif i > 0 and arguments[i - 1] in result:
                 # if it doesn't start with a '-', it could be the value of
                 # the last argument, e.g. `--slowms 1000`
-                result.append(arg)
+                # NB: arguments are always quoted
+                result.append(f'"{arg}"')
 
         # return valid arguments as joined string
         return ' '.join(result)
