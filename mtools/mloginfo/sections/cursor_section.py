@@ -20,7 +20,9 @@ class CursorSection(BaseSection):
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
         helptext = 'outputs statistics about cursor'
-        self.mloginfo.argparser_sectiongroup.add_argument('--cursor', action='store_true', help=helptext)
+        self.mloginfo.argparser_sectiongroup.add_argument('--cursor',
+                                                          action='store_true',
+                                                          help=helptext)
 
     @property
     def active(self):

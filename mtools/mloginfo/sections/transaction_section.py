@@ -1,5 +1,3 @@
-# SERVER-36414 - Log information about slow transactions
-
 import re
 from collections import namedtuple
 from operator import itemgetter
@@ -7,7 +5,6 @@ from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 from .base_section import BaseSection
-
 
 LogTuple = namedtuple('LogTuple', ['datetime', 'txnNumber', 'autocommit', 'readConcern',
                                    'timeActiveMicros', 'timeInactiveMicros', 'duration'])
@@ -46,8 +43,10 @@ class TransactionSection(BaseSection):
 
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.datetime, x.txnNumber,
-                                                x.autocommit, x.readConcern, x.timeActiveMicros,
-                                                x.timeInactiveMicros, x.duration))
+                                                x.autocommit, x.readConcern,
+                                                x.timeActiveMicros,
+                                                x.timeInactiveMicros,
+                                                x.duration))
 
         logfile = self.mloginfo.logfile
 
@@ -65,10 +64,8 @@ class TransactionSection(BaseSection):
                 if le.datetime:
                     progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     if progress_total:
-                        (self.mloginfo
-                         .update_progress(float(progress_curr -
-                                                progress_start) /
-                                          progress_total))
+                        (self.mloginfo.update_progress(
+                            float(progress_curr - progress_start) / progress_total))
 
             if re.search('transaction', le.line_str):
                 lt = LogTuple(le.datetime, le.txnNumber, le.autocommit, le.readConcern,

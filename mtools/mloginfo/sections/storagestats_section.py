@@ -6,14 +6,12 @@ from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 
-
-LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'bytesRead', 'bytesWritten', 'timeReadingMicros', 'timeWritingMicros'])
+LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'bytesRead',
+                      'bytesWritten', 'timeReadingMicros', 'timeWritingMicros'])
 
 
 def op_or_cmd(le):
     return le.operation if le.operation != 'command' else le.command
-
-# SERVER-39654 - Log Storage Statistics for slow transactions
 
 
 class StorageStatsSection(BaseSection):
@@ -39,7 +37,8 @@ class StorageStatsSection(BaseSection):
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
                                                 x.bytesRead, x.bytesWritten,
-                                                x.timeReadingMicros, x.timeWritingMicros))
+                                                x.timeReadingMicros,
+                                                x.timeWritingMicros))
         logfile = self.mloginfo.logfile
 
         if logfile.start and logfile.end:
@@ -76,7 +75,8 @@ class StorageStatsSection(BaseSection):
             print('no statistics found.')
             return
 
-        titles = ['namespace', 'operation', 'bytesRead', 'bytesWritten', 'timeReadingMicros', 'timeWritingMicros']
+        titles = ['namespace', 'operation', 'bytesRead', 'bytesWritten',
+                  'timeReadingMicros', 'timeWritingMicros']
         table_rows = []
 
         for g in grouping:
