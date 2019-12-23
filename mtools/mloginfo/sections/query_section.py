@@ -11,7 +11,6 @@ try:
 except ImportError:
     np = None
 
-# SERVER-19260 - Added allowDiskUse flag for aggregation
 LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
                                    'duration', 'allowDiskUse'])
 
@@ -79,7 +78,8 @@ class QuerySection(BaseSection):
                     le.command in ['count', 'findandmodify',
                                    'geonear', 'find', 'aggregate']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
-                              pattern=le.pattern, duration=le.duration, allowDiskUse=le.allowDiskUse)
+                              pattern=le.pattern, duration=le.duration,
+                              allowDiskUse=le.allowDiskUse)
                 grouping.add(lt)
 
         grouping.sort_by_size()
@@ -94,7 +94,8 @@ class QuerySection(BaseSection):
             return
 
         titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)',
-                  'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)', 'allowDiskUse']
+                  'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)',
+                  'allowDiskUse']
         table_rows = []
 
         for g in grouping:
