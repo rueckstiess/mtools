@@ -4,20 +4,29 @@
 mtransfer
 =========
 
-**mtransfer** allows databases to be exported from one MongoDB instance and
-imported into another.
+``mtransfer`` allows WiredTiger databases to be exported from one MongoDB
+instance and imported into another.
 
 
 Caveats
 ~~~~~~~
 
-**mtransfer** requires MongoDB by started with the ``--directoryperdb`` flag.
-It does not work with sharding or the encrypted storage engine.
-To export or import a database, MongoDB must not be running.
-The database must be imported to all nodes in a replica set or query results
-will be inconsistent. A database cannot be imported to any node in the replica
-set it was exported from: collections have unique identifiers, and this would
-violate that uniqueness.
+The ``mtransfer`` script is EXPERIMENTAL and has a number of important usage caveats:
+
+- MongoDB must be started with the ``--directoryperdb`` flag.
+- ``mtransfer`` does not work with sharding, the encrypted storage engine, or
+  MMAPv1 data files.
+- To export or import a database, MongoDB must not be running using either the
+  source or destination database paths.
+- A database must be imported to all nodes in a replica set or query results
+  will be inconsistent.
+- A database cannot be imported to any node in the replica set it was exported
+  from. Collections have unique identifiers, and this would violate that uniqueness.
+- The `wiredtiger` Python library must include support for any compression formats
+  uses by your MongoDB deployment (i.e. ``snappy``. ``zlib``, ``zstd``). If you are
+  encountering errors using the ``wiredtiger`` module as installed via `pip`,
+  you may need to `Build and install WiredTiger from source
+  <http://source.wiredtiger.com/develop/build-posix.html>`__.
 
 While there are some sanity checks built into the script, manipulating MongoDB
 files directly is inherently dangerous. Take care to test and backup your data.
@@ -27,7 +36,7 @@ Usage
 
 .. code-block:: bash
 
-  mtransfer.py [-h] [--version] [--verbose] [--dbpath DBPATH]
+  mtransfer [-h] [--version] [--verbose] [--dbpath DBPATH]
                     {export,import} database
 
 General Parameters
@@ -51,7 +60,8 @@ Verbosity
 Commands
 ~~~~~~~~
 
-``mtransfer`` reads or writes the data files in a MongoDB instance.
+``mtransfer`` reads or writes the data files in a MongoDB instance
+using the WiredTiger storage engine.
 
 Database Path
 -------------
@@ -73,7 +83,6 @@ Database
 The name of the database to export / import.  The MongoDB database name
 must match the directory name on disk for the export, and the MongoDB
 database name will be set to the directory name for the import.
-
 
 Example
 ~~~~~~~
@@ -103,3 +112,12 @@ Before starting, ensure MongoDB is not running.
   mv olddb newdb
   # Import the database (with the new name)
   mtransfer import newdb
+
+Disclaimer
+~~~~~~~~~~
+
+This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the `Issues
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.
