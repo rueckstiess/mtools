@@ -535,12 +535,17 @@ class MLaunchTool(BaseCmdLineTool):
                                      "single nodes.")
 
         # replace path with absolute path, but store relative path as well
-        self.relative_dir = self.args['dir']
-        self.dir = os.path.abspath(self.args['dir'])
-        self.args['dir'] = self.dir
+        if ('dir' in self.args and self.args['dir']):
+            self.relative_dir = self.args['dir']
+            self.dir = os.path.abspath(self.args['dir'])
+            self.args['dir'] = self.dir
 
-        # branch out in sub-commands
-        getattr(self, self.args['command'])()
+        if (self.args['command'] is None):
+            self.argparser.print_help()
+            self.argparser.exit()
+        else:
+            # branch out in sub-commands
+            getattr(self, self.args['command'])()
 
     # -- below are the main commands: init, start, stop, list, kill
     def init(self):
