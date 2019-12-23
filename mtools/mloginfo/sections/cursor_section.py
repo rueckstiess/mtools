@@ -2,15 +2,8 @@ from collections import namedtuple
 from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
-from .base_section import BaseSection
-
-from collections import namedtuple
 from operator import itemgetter
-
 from .base_section import BaseSection
-from mtools.util import OrderedDict
-from mtools.util.grouping import Grouping
-from mtools.util.print_table import print_table
 
 LogTuple = namedtuple('LogTuple', ['datetime', 'cursorid', 'reapedtime'])
 
@@ -18,7 +11,6 @@ LogTuple = namedtuple('LogTuple', ['datetime', 'cursorid', 'reapedtime'])
 def op_or_cmd(le):
     return le.operation if le.operation != 'command' else le.command
 
-# SERVER-28604 - Logging Reaped cursor information when idle
 
 class CursorSection(BaseSection):
     """CursorSection class."""

@@ -94,11 +94,11 @@ class ConnectionChurnPlotType(BasePlotType):
         if group == 'closed':
             ymin = 0
             for a in artists:
-                    height = a.get_height()
-                    height = -height
-                    a.set_height(height)
-                    if height < ymin:
-                        ymin = height
+                height = a.get_height()
+                height = -height
+                a.set_height(height)
+                if height < ymin:
+                    ymin = height
 
             axis.set_ylim(bottom=ymin * 1.1)
 

@@ -38,7 +38,8 @@ class StorageStatsSection(BaseSection):
     def run(self):
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
-                                                x.bytesRead, x.bytesWritten, x.timeReadingMicros, x.timeWritingMicros))
+                                                x.bytesRead, x.bytesWritten,
+                                                x.timeReadingMicros, x.timeWritingMicros))
         logfile = self.mloginfo.logfile
 
         if logfile.start and logfile.end:
@@ -54,12 +55,14 @@ class StorageStatsSection(BaseSection):
                 if le.datetime:
                     progress_curr = self.mloginfo._datetime_to_epoch(le.datetime)
                     if progress_total:
-                        (self.mloginfo.update_progress(float(progress_curr-progress_start)/progress_total))
+                        (self.mloginfo.update_progress(
+                            float(progress_curr - progress_start) / progress_total))
 
             if (le.operation in ['update'] or le.command in ['insert']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
                               bytesRead=le.bytesRead, bytesWritten=le.bytesWritten,
-                              timeReadingMicros=le.timeReadingMicros, timeWritingMicros=le.timeWritingMicros)
+                              timeReadingMicros=le.timeReadingMicros,
+                              timeWritingMicros=le.timeWritingMicros)
                 grouping.add(lt)
 
         grouping.sort_by_size()

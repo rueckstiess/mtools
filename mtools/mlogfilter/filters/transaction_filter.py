@@ -7,8 +7,9 @@ from .base_filter import BaseFilter
 
 class TransactionFilter(BaseFilter):
     filterArgs = [
-        ('--transactions', {'action': 'store_true','default': False,
-                    'help': 'only output lines containing logs of transactions'}),
+        ('--transactions', {
+            'action': 'store_true', 'default': False,
+            'help': 'only output lines containing logs of transactions'}),
     ]
 
     def __init__(self, mlogfilter):

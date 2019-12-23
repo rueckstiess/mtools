@@ -1452,11 +1452,11 @@ class MLaunchTool(BaseCmdLineTool):
             args['tags'] = []
 
         for tag1, tag2 in zip(args['tags'][:-1], args['tags'][1:]):
-            if re.match('^\d{1,2}$', tag1):
+            if re.match(r'^\d{1,2}$', tag1):
                 print("warning: ignoring numeric value '%s'" % tag1)
                 continue
 
-            if re.match('^\d{1,2}$', tag2):
+            if re.match(r'^\d{1,2}$', tag2):
                 if tag1 in ['mongos', 'shard', 'secondary', 'config']:
                     # combine tag with number, separate by string
                     tags.append('%s %s' % (tag1, tag2))
@@ -1469,7 +1469,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         if len(args['tags']) > 0:
             tag = args['tags'][-1]
-            if not re.match('^\d{1,2}$', tag):
+            if not re.match(r'^\d{1,2}$', tag):
                 tags.append(tag)
 
         tags.append(extra_tag)
@@ -1515,20 +1515,20 @@ class MLaunchTool(BaseCmdLineTool):
                 # or special case -vvv for any number of v
                 argname = arg.split('=', 1)[0]
                 if (binary.endswith('mongod') and config and
-                      argname in self.UNSUPPORTED_CONFIG_ARGS):
+                        argname in self.UNSUPPORTED_CONFIG_ARGS):
                     continue
                 elif argname in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
                 elif (binary.endswith('mongod') and
-                      argname in self.UNDOCUMENTED_MONGOD_ARGS):
+                        argname in self.UNDOCUMENTED_MONGOD_ARGS):
                     result.append(arg)
                 elif self.ignored_arguments.get(binary + argname) is None:
                     # warn once for each combination of binary and unknown arg
                     self.ignored_arguments[binary + argname] = True
                     if not (binary.endswith("mongos") and
-                        arg in self.UNSUPPORTED_MONGOS_ARGS):
+                            arg in self.UNSUPPORTED_MONGOS_ARGS):
                         print("warning: ignoring unknown argument %s for %s" %
-                            (arg, binary))
+                              (arg, binary))
             elif i > 0 and arguments[i - 1] in result:
                 # if it doesn't start with a '-', it could be the value of
                 # the last argument, e.g. `--slowms 1000`
@@ -1675,7 +1675,7 @@ class MLaunchTool(BaseCmdLineTool):
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
             return rs_status
-        except OperationFailure as e:
+        except OperationFailure:
             # not initiated yet
             for i in range(maxwait):
                 try:

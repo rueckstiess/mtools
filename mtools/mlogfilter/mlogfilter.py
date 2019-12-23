@@ -158,7 +158,7 @@ class MLogFilterTool(LogFileTool):
             return line
         else:
             # split the string on numbers to isolate them
-            splitted = re.split("(\d+)", end)
+            splitted = re.split(r"(\d+)", end)
             for index, val in enumerate(splitted):
                 converted = 0
                 try:
