@@ -571,3 +571,12 @@ Remove Overlays
    To remove all overlays, you can use this command. It will delete all
    existing overlays, and the next (or current, if a log file is specified as
    well) call to **mplotqueries** will not show additional overlays anymore
+
+Disclaimer
+~~~~~~~~~~
+
+This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the `Issues
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.

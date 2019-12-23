@@ -693,3 +693,12 @@ Optional Parameters
 
    This command displays a list of all nodes, their status and port number, and
    in addition, their startup commands.
+
+Disclaimer
+~~~~~~~~~~
+
+This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the `Issues
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.

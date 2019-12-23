@@ -357,3 +357,12 @@ local.myCollection        update       None         None            None        
 local1.myCollection       insert       None         None            None                 None
 invoice-prod.invoices     insert        12768411        22233323                86313    12344
 invoice-prod.invoices     insert        12868411        22233323                86313    12344
+
+Disclaimer
+~~~~~~~~~~
+
+This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the `Issues
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.
