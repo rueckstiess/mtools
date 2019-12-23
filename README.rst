@@ -27,7 +27,7 @@ The following tools are in the mtools collection:
    special sections like restarts, connections, distinct view
 
 `mplotqueries <http://rueckstiess.github.io/mtools/mplotqueries.html>`__
-   visualize log files with different types of plots (requires matplotlib)
+   visualize log files with different types of plots (requires ``matplotlib``)
 
 `mlogvis <http://rueckstiess.github.io/mtools/mlogvis.html>`__
    creates a self-contained HTML file that shows an interactive visualization
@@ -35,10 +35,11 @@ The following tools are in the mtools collection:
 
 `mlaunch <http://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
-   and sharded systems (requires pymongo)
+   and sharded systems (requires ``pymongo``)
 
 `mtransfer <http://rueckstiess.github.io/mtools/mtransfer.html>`__
-   a script to transfer databases between MongoDB instances by copying data files.
+   an experimental script to transfer databases between MongoDB instances by
+   copying WiredTiger data files (requires ``pymongo`` and ``wiredtiger``)
 
 For more information, see the `mtools documentation
 <http://rueckstiess.github.io/mtools>`__.
