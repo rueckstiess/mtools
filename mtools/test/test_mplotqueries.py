@@ -26,7 +26,7 @@ class TestMPlotQueries(object):
         self.logfile = LogFile(open(self.logfile_path, 'rb'))
 
     def test_dns(self, filename='mongod_4.0.10_slowdns.log'):
-        # different logfile for DNS
+        raise SkipTest('Skipping interactive test')
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),'test/logfiles/', filename)
         self.tool.run('%s --dns' % self.logfile_path)
         output = sys.stdout.getvalue()
@@ -35,23 +35,22 @@ class TestMPlotQueries(object):
 
     def test_checkpoints(self, filename='mongod_4.0.10_slowcheckpoints.log'):
         raise SkipTest('Skipping interactive test')
-        # different logfile for the slow Checkpoints
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
         self.tool.run('%s --checkpoints' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'SCATTER plot' in line, lines))
 
-    def test_oplog(self):
-        # different logfile for oplogs
-        logfile_oplog = "mtools/test/logfiles/mongod_4.0.10_slowoplogs.log"
-        self.tool.run('%s --oplog --group operation' % logfile_oplog)
+    def test_oplog(self, filename='mongod_4.0.10_slowoplogs.log'):
+        raise SkipTest('Skipping interactive test')
+        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__), 'test/logfiles/', filename)
+        self.tool.run('%s --oplog --group operation' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any('SCATTER plot' in line for line in lines)
 
     def test_storagestats(self, filename='mongod_4.0.10_storagestats.log'):
-        #different logfile for DNS
+        raise SkipTest('Skipping interactive test')
         self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),'test/logfiles/', filename)
         self.tool.run('%s --storagestats --yaxis bytesRead' % self.logfile_path)
         output = sys.stdout.getvalue()
