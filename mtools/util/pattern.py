@@ -37,7 +37,12 @@ def _decode_pattern_dict(data):
             if key == '$nin':
                 value = 1
             if key in ['query', '$query']:
-                return _decode_pattern_dict(value)
+                try:
+                    # Try to decode value as a dictionary; this will fail if
+                    # there happens to be a field called "query"
+                    return _decode_pattern_dict(value)
+                except:
+                    return value
 
         if isinstance(value, list):
             value = _decode_pattern_list(value)
