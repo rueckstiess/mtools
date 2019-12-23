@@ -46,9 +46,6 @@ class ClientSection(BaseSection):
 
         for logevent in self.mloginfo.logfile:
             line = logevent.line_str
-
-
-
             pos = line.find('client metadata')
             if pos != -1:
 
@@ -57,15 +54,15 @@ class ClientSection(BaseSection):
                 ip_formatted = str(ip)
 
                 if ip_formatted != "127.0.0.1":
-                    #driver metadata is not strict JSON, parsing string
-                    #then adding required double quotes to keys
-                    driver_data_raw = ("{" + line.split("{",1)[1].split("}")[0]+"}}")
+                    # driver metadata is not strict JSON, parsing string
+                    # then adding required double quotes to keys
+                    driver_data_raw = ("{" + line.split("{", 1)[1].split("}")[0] + "}}")
                     driver_data = (re.sub(r"(\w+): ", r'"\1":', driver_data_raw))
                     driver_data_json = json.loads(driver_data)
 
                     driver = driver_data_json["driver"]["name"]
                     version = driver_data_json["driver"]["version"]
-                    dv_formatted = str(driver)+":"+str(version)
+                    dv_formatted = str(driver) + ":" + str(version)
                     if dv_formatted not in driver_info:
                         driver_info[dv_formatted] = [ip_formatted]
                     elif dv_formatted in driver_info:
@@ -74,10 +71,7 @@ class ClientSection(BaseSection):
                         else:
                             driver_info[dv_formatted].append(ip_formatted)
 
-
-
-        print('%-15s - Unique connections'%'Driver:Version ')
+        print('%-15s - Unique connections' % 'Driver:Version ')
         for key, value in sorted(driver_info.items()):
-            print("%-15s : "
-                  % (key) + str(value))
+            print("%-15s : " % (key) + str(value))
         print('')
