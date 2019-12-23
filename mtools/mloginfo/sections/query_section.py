@@ -111,17 +111,17 @@ class QuerySection(BaseSection):
             stats['operation'] = op
             stats['pattern'] = pattern
             stats['count'] = len(group_events_all)
-            stats['min'] = min(group_events) if group_events else '-'
-            stats['max'] = max(group_events) if group_events else '-'
+            stats['min'] = min(group_events) if group_events else 0
+            stats['max'] = max(group_events) if group_events else 0
             stats['mean'] = 0
             if np:
                 stats['95%'] = (np.percentile(group_events, 95)
-                                if group_events else '-')
+                                if group_events else 0)
             else:
                 stats['95%'] = 'n/a'
-            stats['sum'] = sum(group_events) if group_events else '-'
+            stats['sum'] = sum(group_events) if group_events else 0
             stats['mean'] = (stats['sum'] / stats['count']
-                             if group_events else '-')
+                             if group_events else 0)
 
             if self.mloginfo.args['verbose']:
                 stats['example'] = grouping[g][0]
