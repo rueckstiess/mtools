@@ -13,6 +13,11 @@ Caveats
 
 The ``mtransfer`` script is EXPERIMENTAL and has a number of important usage caveats:
 
+- Installing the ``wiredtiger`` library via ``pip`` requires a C compiler.
+  The ``snappy`` and ``zlib`` development packages must also be installed first.
+- If you are encountering errors using or installing the ``wiredtiger`` module
+  via `pip`, you may need to `Build and install WiredTiger from source
+  <http://source.wiredtiger.com/develop/build-posix.html>`__.
 - MongoDB must be started with the ``--directoryperdb`` flag.
 - ``mtransfer`` does not work with sharding, the encrypted storage engine, or
   MMAPv1 data files.
@@ -22,11 +27,8 @@ The ``mtransfer`` script is EXPERIMENTAL and has a number of important usage cav
   will be inconsistent.
 - A database cannot be imported to any node in the replica set it was exported
   from. Collections have unique identifiers, and this would violate that uniqueness.
-- The `wiredtiger` Python library must include support for any compression formats
-  uses by your MongoDB deployment (i.e. ``snappy``. ``zlib``, ``zstd``). If you are
-  encountering errors using the ``wiredtiger`` module as installed via `pip`,
-  you may need to `Build and install WiredTiger from source
-  <http://source.wiredtiger.com/develop/build-posix.html>`__.
+- ``mtransfer`` currently only supports database files compressed with the
+  default `snappy` library.
 
 While there are some sanity checks built into the script, manipulating MongoDB
 files directly is inherently dangerous. Take care to test and backup your data.
