@@ -13,11 +13,6 @@ Caveats
 
 The ``mtransfer`` script is EXPERIMENTAL and has a number of important usage caveats:
 
-- Installing the ``wiredtiger`` library via ``pip`` requires a C compiler.
-  The ``snappy`` and ``zlib`` development packages must also be installed first.
-- If you are encountering errors using or installing the ``wiredtiger`` module
-  via `pip`, you may need to `Build and install WiredTiger from source
-  <http://source.wiredtiger.com/develop/build-posix.html>`__.
 - MongoDB must be started with the ``--directoryperdb`` flag.
 - ``mtransfer`` does not work with sharding, the encrypted storage engine, or
   MMAPv1 data files.
@@ -32,6 +27,33 @@ The ``mtransfer`` script is EXPERIMENTAL and has a number of important usage cav
 
 While there are some sanity checks built into the script, manipulating MongoDB
 files directly is inherently dangerous. Take care to test and backup your data.
+
+Installation
+~~~~~~~~~~~~
+
+The ``mtransfer`` script requires the
+`wiredtiger Python library <https://pypi.org/project/wiredtiger/>`__
+which is currently not installed by default with ``mtools``.
+
+The ``wiredtiger`` library can be installed via ``pip`` or built from source,
+but in either case requires:
+
+- A C compiler.
+- The ``snappy`` and ``zlib`` development packages installed.
+
+To install via ``pip`` use either of:
+
+.. code-block:: bash
+
+   pip install mtools[mtransfer]
+
+.. code-block:: bash
+
+   pip install wiredtiger
+
+If you are encountering errors using or installing the ``wiredtiger`` module
+via `pip`, you may need to `Build and install WiredTiger from source
+<http://source.wiredtiger.com/develop/build-posix.html>`__.
 
 Usage
 ~~~~~
