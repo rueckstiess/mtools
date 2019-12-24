@@ -108,34 +108,48 @@ The name of the database to export / import.  The MongoDB database name
 must match the directory name on disk for the export, and the MongoDB
 database name will be set to the directory name for the import.
 
-Example
-~~~~~~~
+Example Database Transfer and Rename
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-On the origin
--------------
+On the origin server
+--------------------
 
 Before starting, ensure MongoDB is not running.
+
+1. Change into the origin directory and create 'olddb/mtransfer.bson'
+   with exported metadata:
 
 .. code-block:: bash
-  
+
   cd /from/dbpath
-  # Create 'olddb/mtransfer.bson' with exported metadata
   mtransfer export olddb
-  # Copy the database files to the destination
+
+2. Copy the database files to the destination
+
+.. code-block:: bash
+
   rsync -av olddb destination:/to/dbpath
 
-On the destination
-------------------
+On the destination server
+-------------------------
 
 Before starting, ensure MongoDB is not running.
+
+3. Rename the database directory (optional)
 
 .. code-block:: bash
   
   cd /to/dbpath
-  # Rename the database directory
   mv olddb newdb
-  # Import the database (with the new name)
+
+4. Import the database (with the new name, if renamed)
+
+.. code-block:: bash
+
   mtransfer import newdb
+
+5. Start ``mongod`` and confirm the transferred database
+   is now available.
 
 Disclaimer
 ~~~~~~~~~~
