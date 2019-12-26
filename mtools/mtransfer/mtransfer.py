@@ -17,7 +17,8 @@ class MTransferTool(BaseCmdLineTool):
     def __init__(self):
         BaseCmdLineTool.__init__(self)
 
-        self.argparser.description = ('Imports and exports databases to/from MongoDB.')
+        self.argparser.description = ('Imports and exports databases between MongoDB deployments using '
+                                       'WiredTiger storage with directoryPerDB configuration.')
 
         self.argparser.add_argument('--dbpath', dest='dbpath', default='.', nargs=1,
                                     help='MongoDB database path')
@@ -36,39 +37,52 @@ class MTransferTool(BaseCmdLineTool):
     def run(self, arguments=None):
         BaseCmdLineTool.run(self, arguments)
 
-        self.dbpath = self.args['dbpath']
+        self.dbpath = self.args['dbpath'][0]
         self.force = self.args['force']
         self.verbose = self.args['verbose']
 
         # Read storage.bson, sanity check.
         try:
-            storage_raw = open(os.path.join(self.dbpath, 'storage.bson'), 'r').read()
+            storage_raw = open(os.path.join(self.dbpath, 'storage.bson'), 'rb').read()
         except Exception as e:
             sys.stderr.write('Failed to open storage.bson in "%s": %s\n' % (self.dbpath, e))
             return
 
         settings = bson.decode(storage_raw)["storage"]["options"]
         if not settings["directoryPerDB"]:
-            sys.stderr.write('requires a database created with --directoryperdb\n')
+            sys.stderr.write('Requires a database created with --directoryperdb\n')
             return
         if settings["directoryForIndexes"] or settings.get("groupCollections", False):
-            sys.stderr.write('incompatible storage settings\n')
+            sys.stderr.write('Incompatible storage settings detected: '
+                             'directoryForIndexes or groupCollections\n')
             if not self.force:
                 return
 
         self.database = self.args['database'][0]
         self.nsprefix = self.database + '.'
 
-        mtransfer_file = os.path.join(self.dbpath, self.database, 'mtransfer.bson')
+        mtransfer_dir  = os.path.join(self.dbpath, self.database)
+        mtransfer_file = os.path.join(mtransfer_dir, 'mtransfer.bson')
 
         if self.args['command'] == 'export':
+            if not os.path.exists(mtransfer_dir):
+                sys.stderr.write('Expected source directory "%s" does not exist. '
+                                 'Check the database name is correct.\n' % (mtransfer_dir))
+                return
             if not self.force and os.path.exists(mtransfer_file):
                 sys.stderr.write('Output file "%s" already exists\n' % (mtransfer_file))
                 return
-            with open(mtransfer_file, 'w') as outf:
+            with open(mtransfer_file, 'wb') as outf:
                 self.doExport(outf)
         elif self.args['command'] == 'import':
-            with open(mtransfer_file, 'r') as inf:
+            if not os.path.exists(mtransfer_dir):
+                sys.stderr.write('Expected target directory "%s" does not exist. '
+                                 'Check the database name is correct.\n' % (mtransfer_dir))
+                return
+            if not os.path.exists(mtransfer_file):
+                sys.stderr.write('Cannot import: mtransfer file "%s" does not exist.\n' % (mtransfer_file))
+                return
+            with open(mtransfer_file, 'rb') as inf:
                 self.doImport(inf)
 
     def message(self, msg):
@@ -148,6 +162,8 @@ class MTransferTool(BaseCmdLineTool):
             self._doImport(conn, inf)
         except Exception as e:
             sys.stderr.write('Import failed: %s' % e)
+
+        print('Import complete')
 
         conn.close()
 
