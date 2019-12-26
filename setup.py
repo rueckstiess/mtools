@@ -17,14 +17,14 @@ try:
     # simplify the default install experience, particularly where a build
     # toolchain is required.
     extras_requires = {
-        "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.8.0',
+        "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.9.0',
                 'psutil>=5.6.3'],
-        "mlaunch": ['pymongo>=3.8.0', 'psutil>=5.6.3'],
+        "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3'],
         "mlogfilter": [],
         "mloginfo": ['numpy>=1.16.4'],
         "mlogvis": [],
         "mplotqueries": ['matplotlib>=3.1.1', 'numpy>=1.16.4'],
-        "mtransfer": ['pymongo==3.8.0', 'wiredtiger>=3.2.1'],
+        "mtransfer": ['pymongo==3.9.0', 'wiredtiger>=3.2.1'],
     }
 
     try:
