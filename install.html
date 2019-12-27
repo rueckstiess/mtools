@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="mlaunch" href="mlaunch.html" />
     <link rel="prev" title="mtools" href="index.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -175,19 +177,18 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
 <p>The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 2.7 and 3.6.</p>
+Python 3.6, 3.7, and 3.8.</p>
 <p>Some of the tools have additional dependencies, which are listed under the
 specific tool’s section.</p>
-<p>The mtools utilities are only tested with currently supported (non End-of-Life)
-versions of the MongoDB server. As of April 2018, that includes MongoDB 3.2
+<p>The mtools suite is only tested with actively supported (non End-of-Life)
+versions of the MongoDB server. As of January 2020, that includes MongoDB 3.6
 or newer.</p>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">#</a></h2>
-<dl class="docutils">
-<dt>Python</dt>
-<dd><p class="first">You need to have Python 2.7.x or 3.6.x installed in order to use mtools.
-Other versions of Python are not currently supported.</p>
-<p class="last">To check your Python version, run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> on the command line.</p>
+<dl>
+<dt>Python</dt><dd><p>You need to have Python 3.6.x, 3.7.x, or 3.8.x installed in order to use
+mtools. Other versions of Python are not currently supported.</p>
+<p>To check your Python version, run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> on the command line.</p>
 </dd>
 </dl>
 </div>
@@ -195,6 +196,11 @@ Other versions of Python are not currently supported.</p>
 <h2>Installation with pip<a class="headerlink" href="#installation-with-pip" title="Permalink to this headline">#</a></h2>
 <p>The easiest way to install mtools is via <code class="docutils literal notranslate"><span class="pre">pip</span></code>. From the command line, run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools
+</pre></div>
+</div>
+<p>Some mtools scripts have additional <a class="reference internal" href="#dependencies">dependencies</a>. To install all optional
+dependencies use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
 <p>You need to have <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed for this to work. If you don’t have <code class="docutils literal notranslate"><span class="pre">pip</span></code>
@@ -205,7 +211,6 @@ permissions to install into the system directory.</p>
 <p>In that case, you either need to add <code class="docutils literal notranslate"><span class="pre">sudo</span></code> in front of the <code class="docutils literal notranslate"><span class="pre">pip</span></code> command
 to install into a system directory, or append <code class="docutils literal notranslate"><span class="pre">--user</span></code> to install into your
 home directory.</p>
-<p>Some mtools scripts have additional <a class="reference internal" href="#dependencies"><span class="std std-ref">Dependencies</span></a>.</p>
 </div>
 <div class="section" id="installation-from-source">
 <h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Permalink to this headline">#</a></h2>
@@ -280,7 +285,7 @@ computing and numerical calculations.</p>
         <a href="mlaunch.html" class="btn btn-neutral float-right" title="mlaunch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="mtools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="mtools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -305,33 +310,16 @@ computing and numerical calculations.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

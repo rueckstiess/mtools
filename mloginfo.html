@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="mlogvis" href="mlogvis.html" />
     <link rel="prev" title="mlogfilter" href="mlogfilter.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -107,6 +109,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#distinct-distinct">Distinct (<code class="docutils literal notranslate"><span class="pre">--distinct</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connections-connections">Connections (<code class="docutils literal notranslate"><span class="pre">--connections</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#replica-set-state-changes-rsstate">Replica Set State Changes (<code class="docutils literal notranslate"><span class="pre">--rsstate</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transactions-transactions">Transactions (<code class="docutils literal notranslate"><span class="pre">--transactions</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cursors-cursors">Cursors (<code class="docutils literal notranslate"><span class="pre">--cursors</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#storage-stats-storagestats">Storage Stats (<code class="docutils literal notranslate"><span class="pre">--storagestats</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -186,6 +191,10 @@ log file. The script also has some options for additional <a class="reference in
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> logfile
          <span class="o">[</span>--verbose<span class="o">]</span>
          <span class="o">[</span>--queries<span class="o">]</span> <span class="o">[</span>--restarts<span class="o">]</span> <span class="o">[</span>--distinct<span class="o">]</span> <span class="o">[</span>--connections<span class="o">]</span> <span class="o">[</span>--rsstate<span class="o">]</span>
+         <span class="o">[</span>--clients<span class="o">]</span>
+         <span class="o">[</span>--cursors<span class="o">]</span>
+         <span class="o">[</span>--storagestats<span class="o">]</span>
+         <span class="o">[</span>--transactions<span class="o">]</span> <span class="o">[</span>--tsort <span class="o">{</span>duration<span class="o">}]</span>
 </pre></div>
 </div>
 </div>
@@ -193,23 +202,23 @@ log file. The script also has some options for additional <a class="reference in
 <h2>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline">#</a></h2>
 <div class="section" id="help">
 <h3>Help<a class="headerlink" href="#help" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt>
-<dd>shows the help text and exits.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt><dd><p>shows the help text and exits.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="version">
 <h3>Version<a class="headerlink" href="#version" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt>
-<dd>shows the version number and exits.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt><dd><p>shows the version number and exits.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="verbosity">
 <h3>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt>
-<dd>shows extra information, depending on the different sections.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt><dd><p>shows extra information, depending on the different sections.</p>
+</dd>
 </dl>
 </div>
 </div>
@@ -249,8 +258,12 @@ index definition) without the actual query values for each field.</p>
 <p>The section shows a table with namespace (in usual database.collection syntax),
 the query pattern, and various statistics, like how often this query pattern
 was found (count), the minimum and maximum execution time, the mean and the
-total sum. The list is sorted by total sum (last column), which reflects the
-overall work the database has to perform for each query pattern.</p>
+total sum. It also informs the type of operation that was performed. The list
+is sorted by total sum, which reflects the overall work the database has to
+perform for each query pattern. The <code class="docutils literal notranslate"><span class="pre">allowDiskUsage</span></code> (last column) parameter
+provides information about the disk usage of a namespace. The slow query log
+entry shows a value of “True” or “False” if the disk was used, or “None” if
+this information is not available in the log.</p>
 <p>This overview is very useful to know which indexes to create to get the best
 performance out of a MongoDB environment. Optimization efforts should start at
 the top of the list and work downwards, to get the highest overall improvement
@@ -263,24 +276,24 @@ with the least amount of index creation.</p>
 <code class="docutils literal notranslate"><span class="pre">QUERIES</span></code> section:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QUERIES
 
-namespace                    pattern                                        count    min <span class="o">(</span>ms<span class="o">)</span>    max <span class="o">(</span>ms<span class="o">)</span>    mean <span class="o">(</span>ms<span class="o">)</span>    sum <span class="o">(</span>ms<span class="o">)</span>
+namespace                  operations    pattern                                        count    min <span class="o">(</span>ms<span class="o">)</span>    max <span class="o">(</span>ms<span class="o">)</span>    mean <span class="o">(</span>ms<span class="o">)</span>       <span class="m">95</span>%-ile <span class="o">(</span>ms<span class="o">)</span>    sum <span class="o">(</span>ms<span class="o">)</span>        allowDiskUse
 
-serverside.scrum_master      <span class="o">{</span><span class="s2">&quot;datetime_used&quot;</span>: <span class="o">{</span><span class="s2">&quot;</span><span class="nv">$ne</span><span class="s2">&quot;</span>: <span class="m">1</span><span class="o">}}</span>                     <span class="m">20</span>       <span class="m">15753</span>       <span class="m">17083</span>        <span class="m">16434</span>      <span class="m">328692</span>
-serverside.django_session    <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                       <span class="m">562</span>         <span class="m">101</span>        <span class="m">1512</span>          <span class="m">317</span>      <span class="m">178168</span>
-serverside.user              <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                 <span class="m">804</span>         <span class="m">101</span>        <span class="m">1262</span>          <span class="m">201</span>      <span class="m">162311</span>
-local.slaves                 <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;host&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;ns&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">131</span>         <span class="m">101</span>        <span class="m">1048</span>          <span class="m">310</span>       <span class="m">40738</span>
-serverside.email_alerts      <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;email&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;pp_user_id&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">13</span>         <span class="m">153</span>       <span class="m">11639</span>         <span class="m">2465</span>       <span class="m">32053</span>
-serverside.sign_up           <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                        <span class="m">77</span>         <span class="m">103</span>         <span class="m">843</span>          <span class="m">269</span>       <span class="m">20761</span>
-serverside.user_credits      <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">6</span>         <span class="m">204</span>         <span class="m">900</span>          <span class="m">369</span>        <span class="m">2218</span>
-serverside.counters          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">8</span>         <span class="m">121</span>         <span class="m">500</span>          <span class="m">263</span>        <span class="m">2111</span>
-serverside.auth_sessions     <span class="o">{</span><span class="s2">&quot;session_key&quot;</span>: <span class="m">1</span><span class="o">}</span>                                 <span class="m">7</span>         <span class="m">111</span>         <span class="m">684</span>          <span class="m">277</span>        <span class="m">1940</span>
-serverside.credit_card       <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">5</span>         <span class="m">145</span>         <span class="m">764</span>          <span class="m">368</span>        <span class="m">1840</span>
-serverside.email_alerts      <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;request_code&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">6</span>         <span class="m">143</span>         <span class="m">459</span>          <span class="m">277</span>        <span class="m">1663</span>
-serverside.user              <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">5</span>         <span class="m">153</span>         <span class="m">427</span>          <span class="m">320</span>        <span class="m">1601</span>
-serverside.user              <span class="o">{</span><span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                                <span class="m">2</span>         <span class="m">218</span>         <span class="m">422</span>          <span class="m">320</span>         <span class="m">640</span>
-serverside.user              <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">2</span>         <span class="m">139</span>         <span class="m">278</span>          <span class="m">208</span>         <span class="m">417</span>
-serverside.auth_sessions     <span class="o">{</span><span class="s2">&quot;session_endtime&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;session_userid&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">1</span>         <span class="m">244</span>         <span class="m">244</span>          <span class="m">244</span>         <span class="m">244</span>
-serverside.game_level        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">1</span>         <span class="m">104</span>         <span class="m">104</span>          <span class="m">104</span>         <span class="m">104</span>
+serverside.scrum_master    update        <span class="o">{</span><span class="s2">&quot;datetime_used&quot;</span>: <span class="o">{</span><span class="s2">&quot;</span><span class="nv">$ne</span><span class="s2">&quot;</span>: <span class="m">1</span><span class="o">}}</span>                     <span class="m">20</span>       <span class="m">15753</span>       <span class="m">17083</span>        <span class="m">16434</span>          <span class="m">1</span>.8          <span class="m">328692</span>          True
+serverside.django_session  find          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                       <span class="m">562</span>         <span class="m">101</span>        <span class="m">1512</span>          <span class="m">317</span>          <span class="m">2</span>.0          <span class="m">178168</span>          False
+serverside.user            find          <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                 <span class="m">804</span>         <span class="m">101</span>        <span class="m">1262</span>          <span class="m">201</span>          <span class="m">1</span>.0          <span class="m">162311</span>          False
+local.slaves               find          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;host&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;ns&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">131</span>         <span class="m">101</span>        <span class="m">1048</span>          <span class="m">310</span>          <span class="m">0</span>.0          <span class="m">40738</span>           True
+serverside.email_alerts    update        <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;email&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;pp_user_id&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">13</span>         <span class="m">153</span>       <span class="m">11639</span>         <span class="m">2465</span>          <span class="m">0</span>.0          <span class="m">32053</span>           None
+serverside.sign_up         update        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                        <span class="m">77</span>         <span class="m">103</span>         <span class="m">843</span>          <span class="m">269</span>          <span class="m">1</span>.8          <span class="m">20761</span>           None
+serverside.user_credits    remove        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">6</span>         <span class="m">204</span>         <span class="m">900</span>          <span class="m">369</span>          <span class="m">1</span>.3          <span class="m">2218</span>            None
+serverside.counters        remove        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">8</span>         <span class="m">121</span>         <span class="m">500</span>          <span class="m">263</span>          <span class="m">2</span>.1          <span class="m">2111</span>            True
+serverside.auth_sessions   update        <span class="o">{</span><span class="s2">&quot;session_key&quot;</span>: <span class="m">1</span><span class="o">}</span>                                 <span class="m">7</span>         <span class="m">111</span>         <span class="m">684</span>          <span class="m">277</span>          <span class="m">1</span>.0          <span class="m">1940</span>            True
+serverside.credit_card     update        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">5</span>         <span class="m">145</span>         <span class="m">764</span>          <span class="m">368</span>          <span class="m">0</span>.0          <span class="m">1840</span>            True
+serverside.email_alerts    remove        <span class="o">{</span><span class="s2">&quot;_types&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;request_code&quot;</span>: <span class="m">1</span><span class="o">}</span>                   <span class="m">6</span>         <span class="m">143</span>         <span class="m">459</span>          <span class="m">277</span>          <span class="m">1</span>.3          <span class="m">1663</span>            False
+serverside.user            find          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;_types&quot;</span>: <span class="m">1</span><span class="o">}</span>                            <span class="m">5</span>         <span class="m">153</span>         <span class="m">427</span>          <span class="m">320</span>          <span class="m">1</span>.9          <span class="m">1601</span>            False
+serverside.user            update        <span class="o">{</span><span class="s2">&quot;emails.email&quot;</span>: <span class="m">1</span><span class="o">}</span>                                <span class="m">2</span>         <span class="m">218</span>         <span class="m">422</span>          <span class="m">320</span>          <span class="m">0</span>.7          <span class="m">640</span>             True
+serverside.user            update        <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">2</span>         <span class="m">139</span>         <span class="m">278</span>          <span class="m">208</span>          <span class="m">0</span>.4          <span class="m">417</span>             True
+serverside.auth_sessions   update        <span class="o">{</span><span class="s2">&quot;session_endtime&quot;</span>: <span class="m">1</span>, <span class="s2">&quot;session_userid&quot;</span>: <span class="m">1</span><span class="o">}</span>        <span class="m">1</span>         <span class="m">244</span>         <span class="m">244</span>          <span class="m">244</span>          <span class="m">0</span>.2          <span class="m">244</span>             False
+serverside.game_level      find          <span class="o">{</span><span class="s2">&quot;_id&quot;</span>: <span class="m">1</span><span class="o">}</span>                                         <span class="m">1</span>         <span class="m">104</span>         <span class="m">104</span>          <span class="m">104</span>          <span class="m">0</span>.1          <span class="m">104</span>             None
 </pre></div>
 </div>
 <div class="section" id="sort">
@@ -395,6 +408,83 @@ Oct <span class="m">07</span> <span class="m">23</span>:23:34    example.com:270
 </pre></div>
 </div>
 </div>
+<div class="section" id="transactions-transactions">
+<h3>Transactions (<code class="docutils literal notranslate"><span class="pre">--transactions</span></code>)<a class="headerlink" href="#transactions-transactions" title="Permalink to this headline">#</a></h3>
+<p>The transaction section will parse the log file to find information related
+to transactions (MongoDB 4.0+). <code class="docutils literal notranslate"><span class="pre">autocommit</span></code> indicates whether <code class="docutils literal notranslate"><span class="pre">autocommit</span></code>
+was enabled for a transaction. The <code class="docutils literal notranslate"><span class="pre">readConcern</span></code> information is fetched
+either from <code class="docutils literal notranslate"><span class="pre">OperationContext</span></code> or <code class="docutils literal notranslate"><span class="pre">_txnResourceStash</span></code>. <code class="docutils literal notranslate"><span class="pre">TimeActiveMicros</span></code>
+and <code class="docutils literal notranslate"><span class="pre">TimeInactiveMicros</span></code> denote the number of micros active and inactive
+during the span of the transaction. The <code class="docutils literal notranslate"><span class="pre">duration</span></code> field includes the value
+in milliseconds and indicates the amount of time taken by each transaction.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --transactions
+</pre></div>
+</div>
+<p>In addition to the default information, this command will also output the
+<code class="docutils literal notranslate"><span class="pre">TRANSACTIONS</span></code> section:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>TRANSACTION
+
+DATETIME                       TXNNUMBER       AUTOCOMMIT      READCONCERN     TIMEACTIVEMICROS    TIMEINACTIVEMICROS   DURATION
+
+<span class="m">2019</span>-06-18T12:31:03.180+0100           <span class="m">1</span>         <span class="nb">false</span>         <span class="s2">&quot;snapshot&quot;</span>                 <span class="m">11142</span>                     <span class="m">3</span>   <span class="m">7</span>
+<span class="m">2019</span>-03-18T12:31:03.180+0100           <span class="m">2</span>         <span class="nb">false</span>         <span class="s2">&quot;snapshot&quot;</span>                 <span class="m">11143</span>                     <span class="m">4</span>   <span class="m">6</span>
+<span class="m">2019</span>-07-18T12:31:03.180+0100           <span class="m">3</span>         <span class="nb">false</span>         <span class="s2">&quot;snapshot&quot;</span>                 <span class="m">11144</span>                     <span class="m">3</span>   <span class="m">4</span>
+<span class="m">2019</span>-08-18T12:31:03.180+0100           <span class="m">4</span>         <span class="nb">false</span>         <span class="s2">&quot;snapshot&quot;</span>                 <span class="m">11145</span>                     <span class="m">4</span>   <span class="m">7</span>
+<span class="m">2019</span>-06-18T12:31:03.180+0100           <span class="m">5</span>         <span class="nb">false</span>         <span class="s2">&quot;snapshot&quot;</span>                 <span class="m">11146</span>                     <span class="m">3</span>   <span class="m">3</span>
+</pre></div>
+</div>
+<div class="section" id="tsort">
+<h4><code class="docutils literal notranslate"><span class="pre">--tsort</span></code><a class="headerlink" href="#tsort" title="Permalink to this headline">#</a></h4>
+<p>This option can be used to sort the results of the <code class="docutils literal notranslate"><span class="pre">--transaction</span></code> table,
+along with ‘duration’ keyword.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --transaction --tsort duration
+</pre></div>
+</div>
+<p>This option has no effect unless it is specified between <code class="docutils literal notranslate"><span class="pre">--transaction</span></code> and
+<code class="docutils literal notranslate"><span class="pre">duration</span></code> is specified.</p>
+</div>
+</div>
+<div class="section" id="cursors-cursors">
+<h3>Cursors (<code class="docutils literal notranslate"><span class="pre">--cursors</span></code>)<a class="headerlink" href="#cursors-cursors" title="Permalink to this headline">#</a></h3>
+<p>Outputs information if a cursor was reaped for exceeding the transaction
+timeout. The timestamp of transaction, Cursor ID, and the time at which the
+cursor was reaped is captured from the logs.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --cursors
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CURSOR
+
+DATETIME                            CURSORID    REAPEDTIME
+
+<span class="m">2019</span>-06-14 <span class="m">12</span>:31:04.180000+01:00    abc1        <span class="m">2019</span>-06-18 <span class="m">12</span>:31:04.180000+01:00
+<span class="m">2019</span>-06-14 <span class="m">12</span>:31:04.180000+01:00    abc2        <span class="m">2019</span>-06-18 <span class="m">12</span>:31:06.180000+01:00
+<span class="m">2019</span>-06-14 <span class="m">12</span>:31:04.180000+01:00    abc3        <span class="m">2019</span>-06-18 <span class="m">12</span>:31:08.180000+01:00
+</pre></div>
+</div>
+</div>
+<div class="section" id="storage-stats-storagestats">
+<h3>Storage Stats (<code class="docutils literal notranslate"><span class="pre">--storagestats</span></code>)<a class="headerlink" href="#storage-stats-storagestats" title="Permalink to this headline">#</a></h3>
+<p>Outputs information about the storage statistics for slow transactions.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --storagestats
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>STORAGE STATISTICS
+
+namespace                 operation    bytesRead    bytesWritten    timeReadingMicros    timeWritingMicros
+
+config.system.sessions    update       None         None            None                 None
+local.myCollection        insert       None         None            None                 None
+local.myCollection        update       None         None            None                 None
+local1.myCollection       insert       None         None            None                 None
+invoice-prod.invoices     insert       <span class="m">12768411</span>     <span class="m">22233323</span>        <span class="m">86313</span>                <span class="m">12344</span>
+invoice-prod.invoices     insert       <span class="m">12868411</span>     <span class="m">22233323</span>        <span class="m">86313</span>                <span class="m">12344</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -409,7 +499,7 @@ Oct <span class="m">07</span> <span class="m">23</span>:23:34    example.com:270
         <a href="mlogvis.html" class="btn btn-neutral float-right" title="mlogvis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="mlogfilter.html" class="btn btn-neutral" title="mlogfilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="mlogfilter.html" class="btn btn-neutral float-left" title="mlogfilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -434,33 +524,16 @@ Oct <span class="m">07</span> <span class="m">23</span>:23:34    example.com:270
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

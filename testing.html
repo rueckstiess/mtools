@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Releases" href="release.html" />
     <link rel="prev" title="Development" href="development.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -176,18 +178,18 @@
 <span id="id1"></span><h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">#</a></h1>
 <p>mtools uses the following testing tools:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://tox.readthedocs.io/en/latest/">tox</a> for creating a standardized
-test environment</li>
-<li><a class="reference external" href="https://github.com/nose-devs/nose">nose testing framework</a> for unit
-testing</li>
-<li><a class="reference external" href="http://flake8.pycqa.org/en/latest/">flake8</a> for style checking</li>
-<li><a class="reference external" href="https://readthedocs.org/projects/isort/">isort</a> for import structure
-checking</li>
-<li><a class="reference external" href="http://www.pydocstyle.org">pydocstyle</a> for docstring (<a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">PEP 257</a>) checking</li>
-<li><a class="reference external" href="https://pypi.python.org/pypi/doc8">doc8</a> for documentation style
-checking</li>
-<li><a class="reference external" href="http://pythonhosted.org/pyenchant/">pyenchant</a> for documentation spell
-checking</li>
+<li><p><a class="reference external" href="https://tox.readthedocs.io/en/latest/">tox</a> for creating a standardized
+test environment</p></li>
+<li><p><a class="reference external" href="https://github.com/nose-devs/nose">nose testing framework</a> for unit
+testing</p></li>
+<li><p><a class="reference external" href="http://flake8.pycqa.org/en/latest/">flake8</a> for style checking</p></li>
+<li><p><a class="reference external" href="https://readthedocs.org/projects/isort/">isort</a> for import structure
+checking</p></li>
+<li><p><a class="reference external" href="http://www.pydocstyle.org">pydocstyle</a> for docstring (<a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">PEP 257</a>) checking</p></li>
+<li><p><a class="reference external" href="https://pypi.python.org/pypi/doc8">doc8</a> for documentation style
+checking</p></li>
+<li><p><a class="reference external" href="http://pythonhosted.org/pyenchant/">pyenchant</a> for documentation spell
+checking</p></li>
 </ul>
 <p>If you implement a new feature anywhere in mtools, please write a test
 function or test class for the feature and document it. If you fix a bug,
@@ -198,7 +200,7 @@ as fixed behavior.</p>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">#</a></h2>
 <p>tox is required for testing mtools and building the documentation:</p>
-<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo pip install tox
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo pip install tox
 </pre></div>
 </div>
 </div>
@@ -219,9 +221,9 @@ code test suite:</p>
 general tox settings, a series of testenvs that can be
 invoked individually (e.g. <code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-e</span> <span class="pre">doc</span></code>), and configuration for
 certain tests.</p>
-<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tox</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tox</span><span class="p">]</span>
 <span class="n">minversion</span> <span class="o">=</span> <span class="mf">2.3</span>
-<span class="n">envlist</span> <span class="o">=</span> <span class="n">py27</span>
+<span class="n">envlist</span> <span class="o">=</span> <span class="n">py36</span>
 <span class="n">skipsdist</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="p">[</span><span class="n">testenv</span><span class="p">]</span>
@@ -229,7 +231,7 @@ certain tests.</p>
     <span class="o">-</span><span class="n">r</span><span class="p">{</span><span class="n">toxinidir</span><span class="p">}</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
     <span class="o">-</span><span class="n">r</span><span class="p">{</span><span class="n">toxinidir</span><span class="p">}</span><span class="o">/</span><span class="n">test</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 <span class="n">whitelist_externals</span> <span class="o">=</span> <span class="n">make</span>
-<span class="n">commands</span> <span class="o">=</span> <span class="n">nosetests</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">coverage</span> <span class="o">--</span><span class="n">cover</span><span class="o">-</span><span class="n">package</span><span class="o">=</span><span class="n">mtools</span>
+<span class="n">commands</span> <span class="o">=</span> <span class="n">nosetests</span> <span class="o">--</span><span class="n">detailed</span><span class="o">-</span><span class="n">errors</span> <span class="o">--</span><span class="n">verbose</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">coverage</span> <span class="o">--</span><span class="n">cover</span><span class="o">-</span><span class="n">package</span><span class="o">=</span><span class="n">mtools</span>
 
 <span class="p">[</span><span class="n">testenv</span><span class="p">:</span><span class="n">doc</span><span class="p">]</span>
 <span class="n">deps</span> <span class="o">=</span>
@@ -273,9 +275,12 @@ certain tests.</p>
 <span class="c1"># E123, E125 skipped as they are invalid PEP-8.</span>
 <span class="c1"># N802 skipped (function name should be lowercase)</span>
 <span class="c1"># N806 skipped (variable in function should be lowercase)</span>
-<span class="n">ignore</span> <span class="o">=</span> <span class="n">E123</span><span class="p">,</span><span class="n">E125</span><span class="p">,</span><span class="n">N802</span><span class="p">,</span><span class="n">N806</span>
+<span class="c1"># F401 skipped (imported but unused) after verifying current usage is valid</span>
+<span class="c1"># W503 skipped line break before binary operator</span>
+<span class="c1"># C901 skipped: &#39;MLaunchTool.init&#39; is too complex</span>
+<span class="n">ignore</span> <span class="o">=</span> <span class="n">E123</span><span class="p">,</span><span class="n">E125</span><span class="p">,</span><span class="n">N802</span><span class="p">,</span><span class="n">N806</span><span class="p">,</span><span class="n">F401</span><span class="p">,</span><span class="n">W503</span><span class="p">,</span><span class="n">C901</span>
 <span class="n">builtins</span> <span class="o">=</span> <span class="n">_</span>
-<span class="n">exclude</span><span class="o">=.</span><span class="n">venv</span><span class="p">,</span><span class="o">.</span><span class="n">git</span><span class="p">,</span><span class="o">.</span><span class="n">tox</span><span class="p">,</span><span class="n">dist</span><span class="p">,</span><span class="o">*</span><span class="n">lib</span><span class="o">/</span><span class="n">python</span><span class="o">*</span><span class="p">,</span><span class="o">*</span><span class="n">egg</span><span class="p">,</span><span class="o">*</span><span class="n">figures</span><span class="o">/*</span><span class="p">,</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+<span class="n">exclude</span><span class="o">=.</span><span class="n">venv</span><span class="p">,</span><span class="o">.</span><span class="n">git</span><span class="p">,</span><span class="o">.</span><span class="n">tox</span><span class="p">,</span><span class="n">dist</span><span class="p">,</span><span class="o">*</span><span class="n">lib</span><span class="o">/</span><span class="n">python</span><span class="o">*</span><span class="p">,</span><span class="o">*</span><span class="n">egg</span><span class="p">,</span><span class="o">*</span><span class="n">figures</span><span class="o">/*</span><span class="p">,</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">build</span><span class="o">/*</span><span class="p">,</span><span class="n">setup</span><span class="o">.</span><span class="n">py</span><span class="p">,</span><span class="n">mtools</span><span class="o">/</span><span class="n">util</span><span class="o">/*</span><span class="p">,</span><span class="n">mtools</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">test_</span><span class="o">*</span>
 <span class="n">count</span> <span class="o">=</span> <span class="n">true</span>
 <span class="n">statistics</span> <span class="o">=</span> <span class="n">true</span>
 <span class="nb">max</span><span class="o">-</span><span class="n">complexity</span> <span class="o">=</span> <span class="mi">49</span>
@@ -284,39 +289,34 @@ certain tests.</p>
 </div>
 <div class="section" id="tox-ini-options">
 <h3>tox.ini options<a class="headerlink" href="#tox-ini-options" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt>[tox]</dt>
-<dd><ul class="first last simple">
-<li><strong>minversion</strong>: minimum version of tox to use</li>
-<li><strong>envlist</strong>: Python versions to test against. Also the list of testenvs
-<code class="docutils literal notranslate"><span class="pre">tox</span></code> runs when invoked without <code class="docutils literal notranslate"><span class="pre">-e</span></code>.</li>
-<li><strong>skipdist</strong>: run tox without requiring a <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file</li>
+<dl class="simple">
+<dt>[tox]</dt><dd><ul class="simple">
+<li><p><strong>minversion</strong>: minimum version of tox to use</p></li>
+<li><p><strong>envlist</strong>: Python versions to test against. Also the list of testenvs
+<code class="docutils literal notranslate"><span class="pre">tox</span></code> runs when invoked without <code class="docutils literal notranslate"><span class="pre">-e</span></code>.</p></li>
+<li><p><strong>skipdist</strong>: run tox without requiring a <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file</p></li>
 </ul>
 </dd>
-<dt>[testenv]</dt>
-<dd><ul class="first last simple">
-<li><strong>deps</strong>: packages required by <code class="docutils literal notranslate"><span class="pre">[testenv]</span></code>.</li>
-<li><strong>whitelist_exernals</strong>: commands sourced from the local operating system
-instead of being downloaded and installed by tox</li>
+<dt>[testenv]</dt><dd><ul class="simple">
+<li><p><strong>deps</strong>: packages required by <code class="docutils literal notranslate"><span class="pre">[testenv]</span></code>.</p></li>
+<li><p><strong>whitelist_exernals</strong>: commands sourced from the local operating system
+instead of being downloaded and installed by tox</p></li>
 </ul>
 </dd>
-<dt>[testenv:NAME]</dt>
-<dd><ul class="first last simple">
-<li><strong>doc</strong>: Test and build the documentation</li>
-<li><strong>flake8</strong>: run flake8 tests</li>
-<li><strong>isort</strong>: run isort tests</li>
-<li><strong>pydocstyle</strong>: run pydocstyle tests</li>
+<dt>[testenv:NAME]</dt><dd><ul class="simple">
+<li><p><strong>doc</strong>: Test and build the documentation</p></li>
+<li><p><strong>flake8</strong>: run flake8 tests</p></li>
+<li><p><strong>isort</strong>: run isort tests</p></li>
+<li><p><strong>pydocstyle</strong>: run pydocstyle tests</p></li>
 </ul>
 </dd>
-<dt>[doc8]</dt>
-<dd><ul class="first last simple">
-<li>configuration options for the doc8 tests run in the <code class="docutils literal notranslate"><span class="pre">doc</span></code> environment</li>
+<dt>[doc8]</dt><dd><ul class="simple">
+<li><p>configuration options for the doc8 tests run in the <code class="docutils literal notranslate"><span class="pre">doc</span></code> environment</p></li>
 </ul>
 </dd>
-<dt>[flake8]</dt>
-<dd><ul class="first last simple">
-<li>configuration options for the flake8 tests run in the <code class="docutils literal notranslate"><span class="pre">flake8</span></code>
-environment</li>
+<dt>[flake8]</dt><dd><ul class="simple">
+<li><p>configuration options for the flake8 tests run in the <code class="docutils literal notranslate"><span class="pre">flake8</span></code>
+environment</p></li>
 </ul>
 </dd>
 </dl>
@@ -330,14 +330,14 @@ available, tox does not automatically refresh its environment.</p>
 a requirements file, you must force tox to recreate the test
 environment. You can do this in two ways:</p>
 <ul>
-<li><p class="first">Add the <code class="docutils literal notranslate"><span class="pre">-r,</span> <span class="pre">--recreate</span></code> option the next time you run tox:</p>
-<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span>$ tox -r
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">-r,</span> <span class="pre">--recreate</span></code> option the next time you run tox:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ tox -r
 </pre></div>
 </div>
 </li>
-<li><p class="first">Delete the hidden <code class="docutils literal notranslate"><span class="pre">.tox</span></code> directory in the repository root where the
+<li><p>Delete the hidden <code class="docutils literal notranslate"><span class="pre">.tox</span></code> directory in the repository root where the
 environment is stored:</p>
-<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span>$ rm -rf .tox
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rm -rf .tox
 </pre></div>
 </div>
 </li>
@@ -350,7 +350,7 @@ The tox error output should provide some clue in the traceback. Package
 maintainers will usually fix it these sorts of errors fairly quickly. In the
 meantime, you can pin that package to the most recent working version in
 the relevant requirements file. For example:</p>
-<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sphinx</span><span class="o">&lt;=</span><span class="mf">1.4</span><span class="o">.</span><span class="mi">1</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sphinx</span><span class="o">&lt;=</span><span class="mf">1.4</span><span class="o">.</span><span class="mi">1</span>
 <span class="n">sphinx_rtd_theme</span><span class="o">==</span><span class="mf">0.1</span><span class="o">.</span><span class="mi">9</span>
 </pre></div>
 </div>
@@ -382,7 +382,7 @@ to the <code class="docutils literal notranslate"><span class="pre">doc/spelling
         <a href="release.html" class="btn btn-neutral float-right" title="Releases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="development.html" class="btn btn-neutral" title="Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-left" title="Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -407,33 +407,16 @@ to the <code class="docutils literal notranslate"><span class="pre">doc/spelling
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

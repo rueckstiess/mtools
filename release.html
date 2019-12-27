@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Changes to mtools" href="changelog.html" />
     <link rel="prev" title="Testing" href="testing.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -189,23 +191,25 @@ release candidate for upcoming release version <code class="docutils literal not
 <div class="section" id="releasing-a-new-version">
 <h2>Releasing a new version<a class="headerlink" href="#releasing-a-new-version" title="Permalink to this headline">#</a></h2>
 <ol class="arabic simple">
-<li>Create a release branch, named <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> where <code class="docutils literal notranslate"><span class="pre">x.y.z</span></code> is the
-version to be released.</li>
-<li>Increase the version in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code> from <code class="docutils literal notranslate"><span class="pre">x.y.z-dev</span></code> to
-<code class="docutils literal notranslate"><span class="pre">x.y.z</span></code>.</li>
-<li>Make sure tests are passing in Python 2.7 and 3.6 via <code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-e</span> <span class="pre">py27,py36</span></code>.</li>
-<li>Update README.rst and CHANGES.rst accordingly.</li>
-<li>Any other cleanup tasks.</li>
-<li>(optional) leave the release branch for a few days to give others a chance
-to test it before releasing.</li>
-<li>Run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span> <span class="pre">bdist_wheel</span></code> to build the dist packages.</li>
-<li>Run <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">upload</span> <span class="pre">dist/*</span></code> to publish the new version to pip (if you have
-permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stennie).</li>
-<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">master</span></code>.</li>
-<li>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</li>
-<li>Delete the <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> branch.</li>
-<li>Bump the version on the develop branch (in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code>) to
-<code class="docutils literal notranslate"><span class="pre">x.y.(z+1)-dev</span></code>.</li>
+<li><p>Create a release branch, named <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> where <code class="docutils literal notranslate"><span class="pre">x.y.z</span></code> is the
+version to be released.</p></li>
+<li><p>Increase the version in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code> from <code class="docutils literal notranslate"><span class="pre">x.y.z-dev</span></code> to
+<code class="docutils literal notranslate"><span class="pre">x.y.z</span></code>.</p></li>
+<li><p>Make sure tests are passing in Python 3.6, 3.7, and 3.8 via
+<code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-re</span> <span class="pre">py36,py37,py38</span></code>.</p></li>
+<li><p>Make sure documentation tests are passing via <code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-re</span> <span class="pre">doc</span></code>.</p></li>
+<li><p>Update README.rst and CHANGES.rst accordingly.</p></li>
+<li><p>Any other cleanup tasks.</p></li>
+<li><p>(optional) leave the release branch for a few days to give others a chance
+to test it before releasing.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span> <span class="pre">bdist_wheel</span></code> to build the dist packages.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">upload</span> <span class="pre">dist/*</span></code> to publish the new version to pip (if you have
+permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stennie).</p></li>
+<li><p>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p></li>
+<li><p>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
+<li><p>Delete the <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> branch.</p></li>
+<li><p>Bump the version on the develop branch (in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code>) to
+<code class="docutils literal notranslate"><span class="pre">x.y.(z+1)-dev</span></code>.</p></li>
 </ol>
 </div>
 </div>
@@ -221,7 +225,7 @@ permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stenn
         <a href="changelog.html" class="btn btn-neutral float-right" title="Changes to mtools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="testing.html" class="btn btn-neutral" title="Testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="testing.html" class="btn btn-neutral float-left" title="Testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -246,33 +250,16 @@ permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stenn
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

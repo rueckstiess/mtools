@@ -68,7 +68,7 @@ certain tests.
 
    [tox]
    minversion = 2.3
-   envlist = py27
+   envlist = py36
    skipsdist = True
 
    [testenv]
@@ -76,7 +76,7 @@ certain tests.
        -r{toxinidir}/requirements.txt
        -r{toxinidir}/test-requirements.txt
    whitelist_externals = make
-   commands = nosetests -d --with-coverage --cover-package=mtools
+   commands = nosetests --detailed-errors --verbose --with-coverage --cover-package=mtools
 
    [testenv:doc]
    deps =
@@ -120,9 +120,12 @@ certain tests.
    # E123, E125 skipped as they are invalid PEP-8.
    # N802 skipped (function name should be lowercase)
    # N806 skipped (variable in function should be lowercase)
-   ignore = E123,E125,N802,N806
+   # F401 skipped (imported but unused) after verifying current usage is valid
+   # W503 skipped line break before binary operator
+   # C901 skipped: 'MLaunchTool.init' is too complex
+   ignore = E123,E125,N802,N806,F401,W503,C901
    builtins = _
-   exclude=.venv,.git,.tox,dist,*lib/python*,*egg,*figures/*,__init__.py
+   exclude=.venv,.git,.tox,dist,*lib/python*,*egg,*figures/*,__init__.py,build/*,setup.py,mtools/util/*,mtools/test/test_*
    count = true
    statistics = true
    max-complexity = 49

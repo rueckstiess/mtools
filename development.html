@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Testing" href="testing.html" />
     <link rel="prev" title="Style Guidelines" href="style.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -182,15 +184,14 @@ files directly in your local directory and test the changes right away.</p>
 <div class="section" id="using-a-development-branch">
 <h2>Using a development branch<a class="headerlink" href="#using-a-development-branch" title="Permalink to this headline">#</a></h2>
 <ol class="arabic">
-<li><p class="first">Remove any existing mtools installation:</p>
+<li><p>Remove any existing mtools installation:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip uninstall mtools
 </pre></div>
 </div>
 </li>
-<li><p class="first"><a class="reference external" href="https://help.github.com/articles/fork-a-repo/">Fork the mtools repository</a>
-to your own GitHub account.</p>
-</li>
-<li><p class="first">Clone your mtools fork to your development environment. This step creates
+<li><p><a class="reference external" href="https://help.github.com/articles/fork-a-repo/">Fork the mtools repository</a>
+to your own GitHub account.</p></li>
+<li><p>Clone your mtools fork to your development environment. This step creates
 an mtools directory in the current directory, so you may want to switch
 to an appropriate directory first (for example <code class="docutils literal notranslate"><span class="pre">~/code/</span></code>):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~/code
@@ -198,29 +199,29 @@ git clone https://github.com/&lt;username&gt;/mtools.git
 </pre></div>
 </div>
 </li>
-<li><p class="first">Change into the mtools directory and check out the desired branch. All
+<li><p>Change into the mtools directory and check out the desired branch. All
 development should be based off the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> mtools
 git checkout develop
 </pre></div>
 </div>
 </li>
-<li><p class="first">Install the mtools scripts in development mode using either:</p>
+<li><p>Install the mtools scripts in development mode using either:</p>
 <ul>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">pip</span></code> (recommended as a convenience for installing additional
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> (recommended as a convenience for installing additional
 dependencies):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install -e <span class="s1">&#39;/path/to/cloned/repo[all]&#39;</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">setup.py</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup.py</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo python setup.py develop
 </pre></div>
 </div>
 </li>
 </ul>
 </li>
-<li><p class="first">Test the installation by confirming that the scripts tab-complete from any
+<li><p>Test the installation by confirming that the scripts tab-complete from any
 directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogf&lt;tab&gt;
 </pre></div>
@@ -236,12 +237,12 @@ version, which should end in <code class="docutils literal notranslate"><span cl
 <div class="section" id="using-the-stable-branch">
 <h2>Using the stable branch<a class="headerlink" href="#using-the-stable-branch" title="Permalink to this headline">#</a></h2>
 <ol class="arabic">
-<li><p class="first">To use the latest stable release of mtools, check out the master branch:</p>
+<li><p>To use the latest stable release of mtools, check out the master branch:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout master
 </pre></div>
 </div>
 </li>
-<li><p class="first">Confirm your current version with the <code class="docutils literal notranslate"><span class="pre">--version</span></code> parameter:</p>
+<li><p>Confirm your current version with the <code class="docutils literal notranslate"><span class="pre">--version</span></code> parameter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo --version
 </pre></div>
 </div>
@@ -254,41 +255,40 @@ version, which should end in <code class="docutils literal notranslate"><span cl
 model</a> by
 <a class="reference external" href="https://twitter.com/nvie">&#64;nvie</a>.</p>
 <div class="admonition important">
-<p class="first admonition-title">Important</p>
-<p class="last">The <a class="reference external" href="https://github.com/rueckstiess/mtools">master branch</a> should only
+<p class="admonition-title">Important</p>
+<p>The <a class="reference external" href="https://github.com/rueckstiess/mtools">master branch</a> should only
 ever contain versioned releases. <strong>Do not send pull requests against the
 master branch.</strong></p>
 </div>
 <p>Development happens on the <a class="reference external" href="https://github.com/rueckstiess/mtools/tree/develop">develop branch</a>.</p>
 <ol class="arabic">
-<li><p class="first">Fork the <a class="reference external" href="https://github.com/rueckstiess/mtools">main repository</a>
-into your own GitHub account.</p>
-</li>
-<li><p class="first">Clone a copy to your local machine:</p>
+<li><p>Fork the <a class="reference external" href="https://github.com/rueckstiess/mtools">main repository</a>
+into your own GitHub account.</p></li>
+<li><p>Clone a copy to your local machine:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/&lt;username&gt;/mtools
 </pre></div>
 </div>
 </li>
-<li><p class="first">Add the upstream repository to pull in the latest changes:</p>
+<li><p>Add the upstream repository to pull in the latest changes:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> mtools
 git remote add upstream https://github.com/rueckstiess/mtools
 git fetch upstream
 </pre></div>
 </div>
 </li>
-<li><p class="first">Check out and track your remote <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch with a local branch:</p>
+<li><p>Check out and track your remote <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch with a local branch:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout -b develop origin/develop
 </pre></div>
 </div>
 </li>
-<li><p class="first">If you want to work on a bug or feature implementation, pull in the
+<li><p>If you want to work on a bug or feature implementation, pull in the
 latest changes from upstream:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout develop
 git pull upstream develop
 </pre></div>
 </div>
 </li>
-<li><p class="first">Create a feature or bug fix branch that forks off the local <code class="docutils literal notranslate"><span class="pre">develop</span></code>
+<li><p>Create a feature or bug fix branch that forks off the local <code class="docutils literal notranslate"><span class="pre">develop</span></code>
 branch. The branch should named after the
 <a class="reference external" href="https://github.com/rueckstiess/mtools/issues/">GitHub issue number</a>
 you are working on. If there isn’t a GitHub issue yet, please
@@ -297,22 +297,19 @@ you are working on. If there isn’t a GitHub issue yet, please
 </pre></div>
 </div>
 </li>
-<li><p class="first">Make your changes to the code. Commit as often as you like. Please use
+<li><p>Make your changes to the code. Commit as often as you like. Please use
 meaningful, descriptive commit messages and avoid <code class="docutils literal notranslate"><span class="pre">asdf</span></code> or <code class="docutils literal notranslate"><span class="pre">changed</span>
-<span class="pre">stuff</span></code> descriptions.</p>
-</li>
-<li><p class="first">Add or update tests to confirm your changes are working as expected. See
-<a class="reference internal" href="testing.html#testing"><span class="std std-ref">Testing</span></a> for more information.</p>
-</li>
-<li><p class="first">When you’re happy with your changes, push your feature branch to GitHub:</p>
+<span class="pre">stuff</span></code> descriptions.</p></li>
+<li><p>Add or update tests to confirm your changes are working as expected. See
+<a class="reference internal" href="testing.html#testing"><span class="std std-ref">Testing</span></a> for more information.</p></li>
+<li><p>When you’re happy with your changes, push your feature branch to GitHub:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push origin issue-12345
 </pre></div>
 </div>
 </li>
-<li><p class="first"><a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/">Raise a pull request</a>
-against the upstream <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch using the GitHub interface.</p>
-</li>
-<li><p class="first">After the code is merged into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch, you can pull the
+<li><p><a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/">Raise a pull request</a>
+against the upstream <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch using the GitHub interface.</p></li>
+<li><p>After the code is merged into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch, you can pull the
 change from the upstream <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch and delete your local feature
 or bug fix branch:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout develop
@@ -337,7 +334,7 @@ git branch -d issue-12345
         <a href="testing.html" class="btn btn-neutral float-right" title="Testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="style.html" class="btn btn-neutral" title="Style Guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="style.html" class="btn btn-neutral float-left" title="Style Guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -362,33 +359,16 @@ git branch -d issue-12345
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

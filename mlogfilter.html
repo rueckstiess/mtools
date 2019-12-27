@@ -19,13 +19,20 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
@@ -33,21 +40,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="mloginfo" href="mloginfo.html" />
     <link rel="prev" title="mlaunch" href="mlaunch.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -64,7 +66,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -220,59 +222,58 @@ other filters.</p>
 <h2>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline">#</a></h2>
 <div class="section" id="help">
 <h3>Help<a class="headerlink" href="#help" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt>
-<dd>shows the help text and exits.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt><dd><p>shows the help text and exits.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="version">
 <h3>Version<a class="headerlink" href="#version" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt>
-<dd>shows the version number and exits.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt><dd><p>shows the version number and exits.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="verbosity">
 <h3>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt>
-<dd>shows extra information about the parser and arguments. This is usually only
-needed for debugging purposes.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt><dd><p>shows extra information about the parser and arguments. This is usually only
+needed for debugging purposes.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="shorten-log-lines">
 <h3>Shorten Log Lines<a class="headerlink" href="#shorten-log-lines" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--shorten</span> <span class="pre">[LENGTH]</span></code></dt>
-<dd>will shorten long lines to at most <code class="docutils literal notranslate"><span class="pre">LENGTH</span></code> characters, only showing the
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--shorten</span> <span class="pre">[LENGTH]</span></code></dt><dd><p>will shorten long lines to at most <code class="docutils literal notranslate"><span class="pre">LENGTH</span></code> characters, only showing the
 beginning and end of a line. If <code class="docutils literal notranslate"><span class="pre">LENGTH</span></code> is not provided, the default is
 200. This is useful to ensure that each log line fits into a shell / editor
 window to compare certain re-occurring values. The line is split in the
-middle and the excess characters are replaced with <code class="docutils literal notranslate"><span class="pre">...</span></code>.</dd>
+middle and the excess characters are replaced with <code class="docutils literal notranslate"><span class="pre">...</span></code>.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="human-readability">
 <h3>Human Readability<a class="headerlink" href="#human-readability" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--human</span></code></dt>
-<dd>makes log lines easier to read for humans. Long numbers will be separated by
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--human</span></code></dt><dd><p>makes log lines easier to read for humans. Long numbers will be separated by
 “thousands” comma separators, and the duration at the end of an operation is
-augmented with the hours, minutes and seconds for readability.</dd>
+augmented with the hours, minutes and seconds for readability.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="exclude-log-lines">
 <h3>Exclude Log Lines<a class="headerlink" href="#exclude-log-lines" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--exclude</span></code></dt>
-<dd>This flag will invert the filter, excluding all the lines that match all
-filters, and only returning the non-matching lines.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--exclude</span></code></dt><dd><p>This flag will invert the filter, excluding all the lines that match all
+filters, and only returning the non-matching lines.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="json-output">
 <h3>JSON Output<a class="headerlink" href="#json-output" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--json</span></code></dt>
-<dd><p class="first">If this flag is used, the output will be in JSON format instead of the
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--json</span></code></dt><dd><p>If this flag is used, the output will be in JSON format instead of the
 regular log line string. Use this in conjunction with MongoDB’s
 <code class="docutils literal notranslate"><span class="pre">mongoimport</span></code> to store the log file data in a MongoDB database.</p>
 <p>The values that are extracted and stored as separate fields in the resulting
@@ -287,7 +288,7 @@ microseconds), <code class="docutils literal notranslate"><span class="pre">numY
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --slow --json <span class="p">|</span> mongoimport -d <span class="nb">test</span> -c mycoll
 </pre></div>
 </div>
-<p class="last">This command would apply the “slow” filter to <code class="docutils literal notranslate"><span class="pre">mongod.log</span></code> and output the
+<p>This command would apply the “slow” filter to <code class="docutils literal notranslate"><span class="pre">mongod.log</span></code> and output the
 information as JSON, which can then be read my <code class="docutils literal notranslate"><span class="pre">mongoimport</span></code>. The data is
 stored in the database <code class="docutils literal notranslate"><span class="pre">test</span></code>, collection <code class="docutils literal notranslate"><span class="pre">mycoll</span></code>. Each log line will
 be stored as a separate document.</p>
@@ -296,17 +297,16 @@ be stored as a separate document.</p>
 </div>
 <div class="section" id="timestamp-format">
 <h3>Timestamp Format<a class="headerlink" href="#timestamp-format" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--timestamp-format</span> <span class="pre">FORMAT</span></code></dt>
-<dd><p class="first">Changes the timestamp format to the specified format. Possible formats are:</p>
-<ul class="last simple">
-<li><code class="docutils literal notranslate"><span class="pre">ctime-pre2.4</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">Fri</span> <span class="pre">Jul</span> <span class="pre">26</span> <span class="pre">11:38:37</span></code> without
-milliseconds)</li>
-<li><code class="docutils literal notranslate"><span class="pre">ctime</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">Fri</span> <span class="pre">Jul</span> <span class="pre">26</span> <span class="pre">11:38:37.712</span></code> with
-milliseconds)</li>
-<li><code class="docutils literal notranslate"><span class="pre">iso8601-utc</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">2013-07-26T11:38:37.712Z</span></code>)</li>
-<li><code class="docutils literal notranslate"><span class="pre">iso8601-local</span></code> (the format looks like
-<code class="docutils literal notranslate"><span class="pre">2013-07-26T11:38:37.712+0000</span></code>)</li>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--timestamp-format</span> <span class="pre">FORMAT</span></code></dt><dd><p>Changes the timestamp format to the specified format. Possible formats are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ctime-pre2.4</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">Fri</span> <span class="pre">Jul</span> <span class="pre">26</span> <span class="pre">11:38:37</span></code> without
+milliseconds)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ctime</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">Fri</span> <span class="pre">Jul</span> <span class="pre">26</span> <span class="pre">11:38:37.712</span></code> with
+milliseconds)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iso8601-utc</span></code> (the format looks like <code class="docutils literal notranslate"><span class="pre">2013-07-26T11:38:37.712Z</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iso8601-local</span></code> (the format looks like
+<code class="docutils literal notranslate"><span class="pre">2013-07-26T11:38:37.712+0000</span></code>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -319,18 +319,17 @@ milliseconds)</li>
 applying any other filters.</p>
 <div class="section" id="merge-markers">
 <h3>Merge Markers<a class="headerlink" href="#merge-markers" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--markers</span> <span class="pre">M</span> <span class="pre">[M</span> <span class="pre">...]</span></code></dt>
-<dd><p class="first">Markers help distinguish the source of merged log lines. Each merged line is
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--markers</span> <span class="pre">M</span> <span class="pre">[M</span> <span class="pre">...]</span></code></dt><dd><p>Markers help distinguish the source of merged log lines. Each merged line is
 preceded with a marker that indicates the original file. By default, the
 marker type is <code class="docutils literal notranslate"><span class="pre">filename</span></code>. Another marker type can be specified, or custom
 markers can be provided. These are the available marker types:</p>
-<ul class="last simple">
-<li><code class="docutils literal notranslate"><span class="pre">filename</span></code> (the original filename in curly braces)</li>
-<li><code class="docutils literal notranslate"><span class="pre">enum</span></code> (numeric markers <code class="docutils literal notranslate"><span class="pre">{1}</span></code>, <code class="docutils literal notranslate"><span class="pre">{2}</span></code>, <code class="docutils literal notranslate"><span class="pre">{3}</span></code>, …)</li>
-<li><code class="docutils literal notranslate"><span class="pre">alpha</span></code> (letters <code class="docutils literal notranslate"><span class="pre">{a}</span></code>, <code class="docutils literal notranslate"><span class="pre">{b}</span></code>, <code class="docutils literal notranslate"><span class="pre">{c}</span></code>, …)</li>
-<li><code class="docutils literal notranslate"><span class="pre">none</span></code> (no markers, this is useful if you merge log files form the
-same host but for different times)</li>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filename</span></code> (the original filename in curly braces)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enum</span></code> (numeric markers <code class="docutils literal notranslate"><span class="pre">{1}</span></code>, <code class="docutils literal notranslate"><span class="pre">{2}</span></code>, <code class="docutils literal notranslate"><span class="pre">{3}</span></code>, …)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> (letters <code class="docutils literal notranslate"><span class="pre">{a}</span></code>, <code class="docutils literal notranslate"><span class="pre">{b}</span></code>, <code class="docutils literal notranslate"><span class="pre">{c}</span></code>, …)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code> (no markers, this is useful if you merge log files form the
+same host but for different times)</p></li>
 </ul>
 </dd>
 </dl>
@@ -339,13 +338,13 @@ the same as the number of provided log files.</p>
 </div>
 <div class="section" id="timezone-adjustments">
 <h3>Timezone Adjustments<a class="headerlink" href="#timezone-adjustments" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--timezone</span> <span class="pre">N</span> <span class="pre">[N</span> <span class="pre">...]</span></code></dt>
-<dd>The timezone parameter adjusts the timestamp of the log lines in hours. If
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--timezone</span> <span class="pre">N</span> <span class="pre">[N</span> <span class="pre">...]</span></code></dt><dd><p>The timezone parameter adjusts the timestamp of the log lines in hours. If
 one timezone value is provided, it is applied globally to all log lines. You
 can also adjust individual log files by providing the same number of
 timezone parameters as log files. Each log file is adjusted individually.
-For negative adjustments, the value has to be quoted, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;-2&quot;</span></code>.</dd>
+For negative adjustments, the value has to be quoted, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;-2&quot;</span></code>.</p>
+</dd>
 </dl>
 <p>For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter logfile1.log logfile2.log --timezone <span class="m">4</span> <span class="m">0</span>
@@ -363,12 +362,12 @@ returned if it would normally not be returned, i.e. if it does not match one or
 more of the filters).</p>
 <div class="section" id="namespace">
 <h3>Namespace<a class="headerlink" href="#namespace" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--namespace</span> <span class="pre">NS</span></code></dt>
-<dd>filter by namespace <code class="docutils literal notranslate"><span class="pre">NS</span></code>, where <code class="docutils literal notranslate"><span class="pre">NS</span></code> has to be of the form
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--namespace</span> <span class="pre">NS</span></code></dt><dd><p>filter by namespace <code class="docutils literal notranslate"><span class="pre">NS</span></code>, where <code class="docutils literal notranslate"><span class="pre">NS</span></code> has to be of the form
 <code class="docutils literal notranslate"><span class="pre">&lt;database&gt;.&lt;collection&gt;</span></code>. Only lines matching this namespace are being
 returned. Note that the <code class="docutils literal notranslate"><span class="pre">$</span></code> sign can be matched by escaping it with
-<code class="docutils literal notranslate"><span class="pre">\$</span></code>. Currently, only one namespace can be specified.</dd>
+<code class="docutils literal notranslate"><span class="pre">\$</span></code>. Currently, only one namespace can be specified.</p>
+</dd>
 </dl>
 <p>For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --namespace admin.<span class="se">\$</span>cmd --slow <span class="m">1000</span>
@@ -378,20 +377,20 @@ returned. Note that the <code class="docutils literal notranslate"><span class="
 </div>
 <div class="section" id="operation">
 <h3>Operation<a class="headerlink" href="#operation" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--operation</span> <span class="pre">OP</span></code></dt>
-<dd>filter by operation <code class="docutils literal notranslate"><span class="pre">OP</span></code>, where <code class="docutils literal notranslate"><span class="pre">OR</span></code> can be any of <code class="docutils literal notranslate"><span class="pre">query</span></code>,
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--operation</span> <span class="pre">OP</span></code></dt><dd><p>filter by operation <code class="docutils literal notranslate"><span class="pre">OP</span></code>, where <code class="docutils literal notranslate"><span class="pre">OR</span></code> can be any of <code class="docutils literal notranslate"><span class="pre">query</span></code>,
 <code class="docutils literal notranslate"><span class="pre">insert</span></code>, <code class="docutils literal notranslate"><span class="pre">update</span></code>, <code class="docutils literal notranslate"><span class="pre">delete</span></code>, <code class="docutils literal notranslate"><span class="pre">command</span></code>, <code class="docutils literal notranslate"><span class="pre">getmore</span></code>. Only the
 matching operations are returned. Currently, only one operation can be
-specified.</dd>
+specified.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="thread">
 <h3>Thread<a class="headerlink" href="#thread" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--thread</span> <span class="pre">THREAD</span></code></dt>
-<dd>filter by thread name (marked in square brackets after the timestamp in each
-line). This is useful to trace a single connection to the database.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--thread</span> <span class="pre">THREAD</span></code></dt><dd><p>filter by thread name (marked in square brackets after the timestamp in each
+line). This is useful to trace a single connection to the database.</p>
+</dd>
 </dl>
 <p>For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --thread conn1234
@@ -404,13 +403,13 @@ that the initial line marking the opening of a connection (containing
 </div>
 <div class="section" id="pattern">
 <h3>Pattern<a class="headerlink" href="#pattern" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--pattern</span> <span class="pre">P</span></code></dt>
-<dd>filter by pattern <code class="docutils literal notranslate"><span class="pre">P</span></code>, where <code class="docutils literal notranslate"><span class="pre">P</span></code> has to be a JSON string inside single
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--pattern</span> <span class="pre">P</span></code></dt><dd><p>filter by pattern <code class="docutils literal notranslate"><span class="pre">P</span></code>, where <code class="docutils literal notranslate"><span class="pre">P</span></code> has to be a JSON string inside single
 quotes. A pattern is a transformation of a query into a canonicalized form,
 where values are replaced by <code class="docutils literal notranslate"><span class="pre">1</span></code> and fields are reordered alphabetically.
 Only query, update and remove operations matching this query pattern (also
-called “query shape”) are being returned.</dd>
+called “query shape”) are being returned.</p>
+</dd>
 </dl>
 <p>For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --pattern <span class="s1">&#39;{&quot;_id&quot;: 1, &quot;host&quot;: 1, &quot;ns&quot;: 1}&#39;</span>
@@ -422,32 +421,32 @@ called “query shape”) are being returned.</dd>
 </div>
 <div class="section" id="duration">
 <h3>Duration<a class="headerlink" href="#duration" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--slow</span> <span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">--fast</span> <span class="pre">MS</span></code></dt>
-<dd>returns only operations that are slower/faster than <code class="docutils literal notranslate"><span class="pre">MS</span></code> milliseconds. Not
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--slow</span> <span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">--fast</span> <span class="pre">MS</span></code></dt><dd><p>returns only operations that are slower/faster than <code class="docutils literal notranslate"><span class="pre">MS</span></code> milliseconds. Not
 all lines in a log file have a duration, those without do not match the
-filter and are not being returned.</dd>
+filter and are not being returned.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="collection-scans">
 <h3>Collection Scans<a class="headerlink" href="#collection-scans" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--scan</span></code></dt>
-<dd>This flag attempts to detect queries that not using an index efficiently
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--scan</span></code></dt><dd><p>This flag attempts to detect queries that not using an index efficiently
 (scanning a large number of index keys relative to results) and returns only
 lines that match the detection heuristic. To match, a line has to have an
 <code class="docutils literal notranslate"><span class="pre">nscanned</span></code> value of 10000 or larger, and the ratio of <code class="docutils literal notranslate"><span class="pre">n</span></code> / <code class="docutils literal notranslate"><span class="pre">nscanned</span></code>
 must be larger than 100. These values have proven useful to detect potential
 collection scans. For confirmed collection scans, instead use
-<code class="docutils literal notranslate"><span class="pre">--planSummary</span> <span class="pre">COLLSCAN</span></code>.</dd>
+<code class="docutils literal notranslate"><span class="pre">--planSummary</span> <span class="pre">COLLSCAN</span></code>.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="keywords">
 <h3>Keywords<a class="headerlink" href="#keywords" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--word</span> <span class="pre">WORD</span> <span class="pre">[WORD</span> <span class="pre">...]</span></code></dt>
-<dd>Only lines that contain one or more of the provided words match this filter
-and are returned.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--word</span> <span class="pre">WORD</span> <span class="pre">[WORD</span> <span class="pre">...]</span></code></dt><dd><p>Only lines that contain one or more of the provided words match this filter
+and are returned.</p>
+</dd>
 </dl>
 <p>For example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --word assert warning error
@@ -458,31 +457,31 @@ and are returned.</dd>
 </div>
 <div class="section" id="time-slicing">
 <h3>Time Slicing<a class="headerlink" href="#time-slicing" title="Permalink to this headline">#</a></h3>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">--from</span> <span class="pre">FROM</span> <span class="pre">[FROM</span> <span class="pre">...]</span></code>, <code class="docutils literal notranslate"><span class="pre">--to</span> <span class="pre">TO</span> <span class="pre">[TO</span> <span class="pre">...]</span></code></dt>
-<dd>These parameters slice the log file by time, by providing either a lower
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--from</span> <span class="pre">FROM</span> <span class="pre">[FROM</span> <span class="pre">...]</span></code>, <code class="docutils literal notranslate"><span class="pre">--to</span> <span class="pre">TO</span> <span class="pre">[TO</span> <span class="pre">...]</span></code></dt><dd><p>These parameters slice the log file by time, by providing either a lower
 bound (<code class="docutils literal notranslate"><span class="pre">--from</span></code>) or an upper bound (<code class="docutils literal notranslate"><span class="pre">--to</span></code>) or both. This feature is
 implemented using binary search, making time slicing very fast and
 efficient. It should always be used if appropriate for the task. The
 arguments that can be passed into these parameters are quite flexible, and
-are explained below.</dd>
+are explained below.</p>
+</dd>
 </dl>
 <p>Both <code class="docutils literal notranslate"><span class="pre">FROM</span></code> and <code class="docutils literal notranslate"><span class="pre">TO</span></code> can accept the same format, which is defined as
 <code class="docutils literal notranslate"><span class="pre">[DATE]</span> <span class="pre">[TIME]</span> <span class="pre">[OFFSET]</span></code> separated by space. The square brackets indicate
 that any of these parts can also be omitted.</p>
 <p><code class="docutils literal notranslate"><span class="pre">DATE</span></code> can be any of:</p>
 <ul class="simple">
-<li>a 3-letter weekday (e.g., <code class="docutils literal notranslate"><span class="pre">Mon</span></code>, <code class="docutils literal notranslate"><span class="pre">Wed</span></code>, <code class="docutils literal notranslate"><span class="pre">Sun</span></code>, …)</li>
-<li>a date as 3-letter month and 1-2 digits day (e.g., <code class="docutils literal notranslate"><span class="pre">Sep</span> <span class="pre">5</span></code>, <code class="docutils literal notranslate"><span class="pre">Jan</span> <span class="pre">31</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Aug</span> <span class="pre">08</span></code>, …)</li>
-<li>the words: <code class="docutils literal notranslate"><span class="pre">today</span></code>, <code class="docutils literal notranslate"><span class="pre">now</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code></li>
+<li><p>a 3-letter weekday (e.g., <code class="docutils literal notranslate"><span class="pre">Mon</span></code>, <code class="docutils literal notranslate"><span class="pre">Wed</span></code>, <code class="docutils literal notranslate"><span class="pre">Sun</span></code>, …)</p></li>
+<li><p>a date as 3-letter month and 1-2 digits day (e.g., <code class="docutils literal notranslate"><span class="pre">Sep</span> <span class="pre">5</span></code>, <code class="docutils literal notranslate"><span class="pre">Jan</span> <span class="pre">31</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Aug</span> <span class="pre">08</span></code>, …)</p></li>
+<li><p>the words: <code class="docutils literal notranslate"><span class="pre">today</span></code>, <code class="docutils literal notranslate"><span class="pre">now</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code></p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">TIME</span></code> can be any of</p>
 <ul class="simple">
-<li>hours and minutes (e.g., <code class="docutils literal notranslate"><span class="pre">20:15</span></code>, <code class="docutils literal notranslate"><span class="pre">4:00</span></code>, <code class="docutils literal notranslate"><span class="pre">3:25</span></code>, …)</li>
-<li>hours, minutes and seconds (e.g., <code class="docutils literal notranslate"><span class="pre">13:30:01</span></code>, <code class="docutils literal notranslate"><span class="pre">4:55:55</span></code>, …)</li>
-<li>hours, minutes, seconds and milliseconds (e.g., <code class="docutils literal notranslate"><span class="pre">13:30:01.123</span></code>,
-<code class="docutils literal notranslate"><span class="pre">4:55:55.700</span></code>, …)</li>
+<li><p>hours and minutes (e.g., <code class="docutils literal notranslate"><span class="pre">20:15</span></code>, <code class="docutils literal notranslate"><span class="pre">4:00</span></code>, <code class="docutils literal notranslate"><span class="pre">3:25</span></code>, …)</p></li>
+<li><p>hours, minutes and seconds (e.g., <code class="docutils literal notranslate"><span class="pre">13:30:01</span></code>, <code class="docutils literal notranslate"><span class="pre">4:55:55</span></code>, …)</p></li>
+<li><p>hours, minutes, seconds and milliseconds (e.g., <code class="docutils literal notranslate"><span class="pre">13:30:01.123</span></code>,
+<code class="docutils literal notranslate"><span class="pre">4:55:55.700</span></code>, …)</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">OFFSET</span></code> is again composed of <code class="docutils literal notranslate"><span class="pre">OPERATOR````VALUE````UNIT</span></code> (not separated by
 spaces)</p>
@@ -491,13 +490,13 @@ otherwise be interpreted as another parameter by the argument parser.</p>
 <p><code class="docutils literal notranslate"><span class="pre">VALUE</span></code> is any number.</p>
 <p><code class="docutils literal notranslate"><span class="pre">UNIT</span></code> is one of the following:</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">s</span></code>, <code class="docutils literal notranslate"><span class="pre">sec</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">min</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">h</span></code>, <code class="docutils literal notranslate"><span class="pre">hours</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">days</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">w</span></code>, <code class="docutils literal notranslate"><span class="pre">weeks</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">mo</span></code>, <code class="docutils literal notranslate"><span class="pre">months</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">years</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s</span></code>, <code class="docutils literal notranslate"><span class="pre">sec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">min</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h</span></code>, <code class="docutils literal notranslate"><span class="pre">hours</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">days</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">w</span></code>, <code class="docutils literal notranslate"><span class="pre">weeks</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mo</span></code>, <code class="docutils literal notranslate"><span class="pre">months</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">years</span></code></p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code> value is added / subtracted from the <code class="docutils literal notranslate"><span class="pre">DATE````TIME</span></code> value if
 provided.</p>
@@ -513,68 +512,68 @@ on <code class="docutils literal notranslate"><span class="pre">Fri</span> <span
 </pre></div>
 </div>
 <p>This example would return lines that are later than <code class="docutils literal notranslate"><span class="pre">Wed</span> <span class="pre">Sep</span> <span class="pre">6</span> <span class="pre">19:00</span></code>.</p>
-<dl class="docutils">
-<dt><strong>Months</strong></dt>
-<dd>if only a month is specified, the day is assumed to be <code class="docutils literal notranslate"><span class="pre">1</span></code>.</dd>
+<dl class="simple">
+<dt><strong>Months</strong></dt><dd><p>if only a month is specified, the day is assumed to be <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
 </dl>
 <p>For example, the following line matches everything from <code class="docutils literal notranslate"><span class="pre">Sep</span> <span class="pre">1</span> <span class="pre">00:00:00</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from Sep
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>Now</strong></dt>
-<dd>if the keyword <code class="docutils literal notranslate"><span class="pre">now</span></code> is specified for, it uses the current date and time.</dd>
+<dl class="simple">
+<dt><strong>Now</strong></dt><dd><p>if the keyword <code class="docutils literal notranslate"><span class="pre">now</span></code> is specified for, it uses the current date and time.</p>
+</dd>
 </dl>
 <p>For example, the following line matches everything from 5 minutes ago:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from <span class="s2">&quot;now -5min&quot;</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>Today</strong></dt>
-<dd>if the keyword <code class="docutils literal notranslate"><span class="pre">today</span></code> is specified for <code class="docutils literal notranslate"><span class="pre">DATE</span></code>, it uses the current date
-and the time <code class="docutils literal notranslate"><span class="pre">00:00:00</span></code></dd>
+<dl class="simple">
+<dt><strong>Today</strong></dt><dd><p>if the keyword <code class="docutils literal notranslate"><span class="pre">today</span></code> is specified for <code class="docutils literal notranslate"><span class="pre">DATE</span></code>, it uses the current date
+and the time <code class="docutils literal notranslate"><span class="pre">00:00:00</span></code></p>
+</dd>
 </dl>
 <p>For example, the following line matches everything from <em>today</em> at <code class="docutils literal notranslate"><span class="pre">00:00:00</span></code>
 to <em>today</em> at <code class="docutils literal notranslate"><span class="pre">02:00:00</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from today --to +2hours
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>Start</strong></dt>
-<dd>if the keyword <code class="docutils literal notranslate"><span class="pre">start</span></code> is specified, it is replaced with the date and time
-of the beginning of the log file.</dd>
+<dl class="simple">
+<dt><strong>Start</strong></dt><dd><p>if the keyword <code class="docutils literal notranslate"><span class="pre">start</span></code> is specified, it is replaced with the date and time
+of the beginning of the log file.</p>
+</dd>
 </dl>
 <p>For example, the following line matches all but the first day (24h) of the log
 file:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from start +1day
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>End</strong></dt>
-<dd>if the keyword <code class="docutils literal notranslate"><span class="pre">end</span></code> is specified, it is replaced with the date and time
-of the end of the log file</dd>
+<dl class="simple">
+<dt><strong>End</strong></dt><dd><p>if the keyword <code class="docutils literal notranslate"><span class="pre">end</span></code> is specified, it is replaced with the date and time
+of the end of the log file</p>
+</dd>
 </dl>
 <p>For example, the following line returns the last 20 minutes of a log file (note
 the quotation marks):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from <span class="s2">&quot;end -20min&quot;</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>Time</strong></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">TIME</span></code> can be combined with any of the keywords above and has precedence
-of the keyword time</dd>
+<dl class="simple">
+<dt><strong>Time</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">TIME</span></code> can be combined with any of the keywords above and has precedence
+of the keyword time</p>
+</dd>
 </dl>
 <p>For example, the following line matches everything from today at <code class="docutils literal notranslate"><span class="pre">9:30</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mlogfilter mongod.log --from today <span class="m">9</span>:30
 </pre></div>
 </div>
-<dl class="docutils">
-<dt><strong>Offset</strong></dt>
-<dd>if only an <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code> is specified without <code class="docutils literal notranslate"><span class="pre">DATE</span></code> and/or <code class="docutils literal notranslate"><span class="pre">TIME</span></code>, then it
+<dl class="simple">
+<dt><strong>Offset</strong></dt><dd><p>if only an <code class="docutils literal notranslate"><span class="pre">OFFSET</span></code> is specified without <code class="docutils literal notranslate"><span class="pre">DATE</span></code> and/or <code class="docutils literal notranslate"><span class="pre">TIME</span></code>, then it
 depends if the parameter was <code class="docutils literal notranslate"><span class="pre">--from</span></code> or <code class="docutils literal notranslate"><span class="pre">--to</span></code>. For <code class="docutils literal notranslate"><span class="pre">--from</span></code>, the
 offset is calculated from the start of the file, and for <code class="docutils literal notranslate"><span class="pre">--to</span></code> the offset
 is calculated from the <code class="docutils literal notranslate"><span class="pre">--from</span></code> time if provided, or otherwise from the
-end of the file.</dd>
+end of the file.</p>
+</dd>
 </dl>
 <p>For example, the following line matches the hour before the last hour in the
 log file:</p>
@@ -596,7 +595,7 @@ log file:</p>
         <a href="mloginfo.html" class="btn btn-neutral float-right" title="mloginfo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="mlaunch.html" class="btn btn-neutral" title="mlaunch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="mlaunch.html" class="btn btn-neutral float-left" title="mlaunch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -621,33 +620,16 @@ log file:</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -19,34 +19,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Releases" href="release.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -63,7 +65,7 @@
             
             
               <div class="version">
-                1.5.3
+                1.6.0
               </div>
             
           
@@ -96,6 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changes to mtools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-6-0">version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-5-3">version 1.5.3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-5-2">version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-5-1">version 1.5.1</a></li>
@@ -196,14 +199,52 @@
             
   <div class="section" id="changes-to-mtools">
 <h1>Changes to mtools<a class="headerlink" href="#changes-to-mtools" title="Permalink to this headline">#</a></h1>
+<div class="section" id="version-1-6-0">
+<h2>version 1.6.0<a class="headerlink" href="#version-1-6-0" title="Permalink to this headline">#</a></h2>
+<p>Now supporting Python 3.6+ (only)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Add support for Python 3.7 and 3.8</p></li>
+<li><p>Remove support for Python 2.7</p></li>
+<li><p>Update requirements to modern package versions</p></li>
+<li><p>Require minimum dependency versions rather than exact</p></li>
+<li><p>mlaunch: mlaunch with no options should show –help (#749)</p></li>
+<li><p>mlaunch: Fix –storageEngine confusingly reported as ignored in sharded
+deployments (#730)</p></li>
+<li><p>mlaunch: Fix unquoted –wiredTigerEngineConfigString parameter (#683)</p></li>
+<li><p>mloginfo: mloginfo with no options should show usage info (#751)</p></li>
+<li><p>mloginfo: Fix for –queries gives AttributeError if there is a field called
+“query” in the log (#741)</p></li>
+<li><p>mloginfo: Fix –queries gives <cite>TypeError</cite> for some logs (#697)</p></li>
+<li><p>mloginfo: Add –checkpoints to show slow WiredTiger checkpoints if
+available (#707)</p></li>
+<li><p>mloginfo: Improve –queries to show allowDiskUse for aggregations if
+available (#708)</p></li>
+<li><p>mloginfo: Add –clients to show client summary info (#540)</p></li>
+<li><p>mloginfo: Add –cursors to show cursor information if available (#710)</p></li>
+<li><p>mloginfo: Add –storagestats to display storage statistics (#711)</p></li>
+<li><p>mloginfo: Add –transactions to display slow transactions if available (#704)</p></li>
+<li><p>mloginfo: Include queries without durations in the query count (#680)</p></li>
+<li><p>mplotqueries: Fix –group-limit throws error in Python 3.x (#688)</p></li>
+<li><p>mplotqueries: Add –dns to display slow DNS Resolutions if available (#706)</p></li>
+<li><p>mplotqueries: Add –oplog to display slow oplog entries if available (#705)</p></li>
+<li><p>Update mention of oldest non-EOL MongoDB server version (3.6 as of Jan 2020)</p></li>
+<li><p>util/logfile.py: Reading log from stdin hits error on str.decode() in
+Python 3 (#658)</p></li>
+</ul>
+</div></blockquote>
+<p>Thanks to &#64;stennie, &#64;kallimachos, &#64;kevinadi, &#64;savinay-vijay, &#64;mitesh-gosavi,
+&#64;HenryGP, &#64;sindbach, &#64;garycahill, &#64;karlvr, and &#64;josemonteiro
+for contributions to this release.</p>
+</div>
 <div class="section" id="version-1-5-3">
 <h2>version 1.5.3<a class="headerlink" href="#version-1-5-3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: Quote mongos –logpath (to handle paths with spaces)</li>
-<li>mlaunch: Permit command line options with “=”</li>
-<li>mlaunch: Ignore passing unsupported param –wiredTigerCacheSizeGB to mongos</li>
-<li>mlaunch: Add –wiredTigerEngineConfigString as an undocumented mongod param</li>
-<li>util/logevent.py: Add LogEvent support for returning actual query (not pattern)</li>
+<li><p>mlaunch: Quote mongos –logpath (to handle paths with spaces)</p></li>
+<li><p>mlaunch: Permit command line options with “=”</p></li>
+<li><p>mlaunch: Ignore passing unsupported param –wiredTigerCacheSizeGB to mongos</p></li>
+<li><p>mlaunch: Add –wiredTigerEngineConfigString as an undocumented mongod param</p></li>
+<li><p>util/logevent.py: Add LogEvent support for returning actual query (not pattern)</p></li>
 </ul>
 <p>Thanks to &#64;ajdavis, &#64;renatoriccio, &#64;twblamer, &#64;kevinadi, &#64;sindbach,
 &#64;kallimachos, and &#64;stennie for contributions to this release.</p>
@@ -211,13 +252,13 @@
 <div class="section" id="version-1-5-2">
 <h2>version 1.5.2<a class="headerlink" href="#version-1-5-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: Set appname for MongoDB 3.4+ client metadata</li>
-<li>mlaunch: Only use roles variable instead of args once set up</li>
-<li>mlaunch: Fix for –sharded and –auth-role-docs failing to add roles</li>
-<li>mlaunch: Fix failure to connect to standalone SSL mongod</li>
-<li>mlaunch: Retain PyMongo import error exceptions</li>
-<li>mlogfilter: Fix Unicode error for redirected output</li>
-<li>Improve flake8 style compliance</li>
+<li><p>mlaunch: Set appname for MongoDB 3.4+ client metadata</p></li>
+<li><p>mlaunch: Only use roles variable instead of args once set up</p></li>
+<li><p>mlaunch: Fix for –sharded and –auth-role-docs failing to add roles</p></li>
+<li><p>mlaunch: Fix failure to connect to standalone SSL mongod</p></li>
+<li><p>mlaunch: Retain PyMongo import error exceptions</p></li>
+<li><p>mlogfilter: Fix Unicode error for redirected output</p></li>
+<li><p>Improve flake8 style compliance</p></li>
 </ul>
 <p>Thanks to &#64;kevinadi, &#64;p-mongo, &#64;gmishkin, and &#64;stennie for contributions
 to this release.</p>
@@ -225,9 +266,9 @@ to this release.</p>
 <div class="section" id="version-1-5-1">
 <h2>version 1.5.1<a class="headerlink" href="#version-1-5-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: Fix 1.5.0 regression preventing use of –auth</li>
-<li>mloginfo: Add support for MongoDB 3.2+ –rsinfo</li>
-<li>mlogfilter: Fix intermittent test failures</li>
+<li><p>mlaunch: Fix 1.5.0 regression preventing use of –auth</p></li>
+<li><p>mloginfo: Add support for MongoDB 3.2+ –rsinfo</p></li>
+<li><p>mlogfilter: Fix intermittent test failures</p></li>
 </ul>
 <p>Thanks to &#64;kevinadi, &#64;kallimachos, &#64;sindbach, and &#64;stennie
 for contributions to this release.</p>
@@ -235,19 +276,19 @@ for contributions to this release.</p>
 <div class="section" id="version-1-5-0">
 <h2>version 1.5.0<a class="headerlink" href="#version-1-5-0" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>Update matplotlib to 1.4.3</li>
-<li>Update numpy to 1.14.5</li>
-<li>Update python-dateutil to 2.7</li>
-<li>Update pymongo to 3.6.1</li>
-<li>Pin requirements to avoid pulling in breaking changes</li>
-<li>Ignore “new oplog query” log entries for query duration parsing</li>
-<li>Replace characters that can’t be UTF decoded with ‘?’</li>
-<li>Fix logic error preventing parsing of empty or unexpected log lines</li>
-<li>mplotqueries: Report actual error when <cite>matplotlib</cite> import fails</li>
-<li>mlaunch: If <cite>mongod</cite> is missing, print the path that was used</li>
-<li>mlaunch: Add support for GSSAPI</li>
-<li>mlaunch: Add users to all shards in sharded cluster</li>
-<li>mlogvis: Remove write lock and read lock grouping</li>
+<li><p>Update matplotlib to 1.4.3</p></li>
+<li><p>Update numpy to 1.14.5</p></li>
+<li><p>Update python-dateutil to 2.7</p></li>
+<li><p>Update pymongo to 3.6.1</p></li>
+<li><p>Pin requirements to avoid pulling in breaking changes</p></li>
+<li><p>Ignore “new oplog query” log entries for query duration parsing</p></li>
+<li><p>Replace characters that can’t be UTF decoded with ‘?’</p></li>
+<li><p>Fix logic error preventing parsing of empty or unexpected log lines</p></li>
+<li><p>mplotqueries: Report actual error when <cite>matplotlib</cite> import fails</p></li>
+<li><p>mlaunch: If <cite>mongod</cite> is missing, print the path that was used</p></li>
+<li><p>mlaunch: Add support for GSSAPI</p></li>
+<li><p>mlaunch: Add users to all shards in sharded cluster</p></li>
+<li><p>mlogvis: Remove write lock and read lock grouping</p></li>
 </ul>
 <p>Thanks to &#64;kevinadi, &#64;jamesbroadhead, &#64;mathom, &#64;kallimachos,
 &#64;sindbach, and &#64;stennie for contributions to this release!</p>
@@ -255,12 +296,11 @@ for contributions to this release.</p>
 <div class="section" id="version-1-4-1">
 <h2>version 1.4.1<a class="headerlink" href="#version-1-4-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: Fixes for Python 3.6.5 support (#596, #586)</li>
-<li>Include sys.version in –version output (#597)</li>
-<li><dl class="first docutils">
-<dt>Migrate wiki pages to gh-pages and RST (#550, #550)</dt>
-<dd><ul class="first last">
-<li>New documentation: <a class="reference external" href="http://blog.rueckstiess.com/mtools/">http://blog.rueckstiess.com/mtools/</a></li>
+<li><p>mlaunch: Fixes for Python 3.6.5 support (#596, #586)</p></li>
+<li><p>Include sys.version in –version output (#597)</p></li>
+<li><dl class="simple">
+<dt>Migrate wiki pages to gh-pages and RST (#550, #550)</dt><dd><ul>
+<li><p>New documentation: <a class="reference external" href="http://blog.rueckstiess.com/mtools/">http://blog.rueckstiess.com/mtools/</a></p></li>
 </ul>
 </dd>
 </dl>
@@ -272,38 +312,36 @@ and &#64;stennie for contributions to this release!</p>
 <div class="section" id="version-1-4-0">
 <h2>version 1.4.0<a class="headerlink" href="#version-1-4-0" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>Improve testing and documentation infrastructure (#542)</dt>
-<dd><ul class="first last">
-<li>Add tox (#543)</li>
-<li>Fix flake8 violations (#544)</li>
-<li>Fix isort violations (#545)</li>
-<li>Fix PEP 257 violations (#546)</li>
-<li>Add RST documentation (#548)</li>
+<li><dl class="simple">
+<dt>Improve testing and documentation infrastructure (#542)</dt><dd><ul>
+<li><p>Add tox (#543)</p></li>
+<li><p>Fix flake8 violations (#544)</p></li>
+<li><p>Fix isort violations (#545)</p></li>
+<li><p>Fix PEP 257 violations (#546)</p></li>
+<li><p>Add RST documentation (#548)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>Make code compatible with both Python 2.7 and 3.6 (#527)</dt>
-<dd><ul class="first last">
-<li>Add py36 environment for tox &amp; Travis (#587)</li>
+<li><dl class="simple">
+<dt>Make code compatible with both Python 2.7 and 3.6 (#527)</dt><dd><ul>
+<li><p>Add py36 environment for tox &amp; Travis (#587)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li>mlaunch: Error while creating replica set with name and auth args (#476)</li>
-<li>mlaunch: Testing for MongoDB 3.6 (#531)</li>
-<li>mlaunch: Using –hostname causes deploying failure in 3.6 (#554)</li>
-<li>mlaunch: psutil dependency missing (#557)</li>
-<li>mlaunch: Require shard servers to be replica sets (3.6.1+) (#567)</li>
-<li>mlaunch: Force <cite>mlaunch –csrs</cite> when “version” is <cite>0.0.0</cite> (#576)</li>
-<li>mlaunch: Create user with SCRAM-SHA-1 mechanism (#574)</li>
-<li>mlaunch: Allow starting 3.6 clusters with PyMongo 3.6.1 (#575)</li>
-<li>mlaunch: Use correct path separator according to OS (#584)</li>
-<li>mlaunch: Support path parameters containing spaces (#578)</li>
-<li>mlaunch: Update psutil requirement to 5.4.2 (#590)</li>
-<li>mloginfo: Test using current year rather than hardcoded value (#568)</li>
+<li><p>mlaunch: Error while creating replica set with name and auth args (#476)</p></li>
+<li><p>mlaunch: Testing for MongoDB 3.6 (#531)</p></li>
+<li><p>mlaunch: Using –hostname causes deploying failure in 3.6 (#554)</p></li>
+<li><p>mlaunch: psutil dependency missing (#557)</p></li>
+<li><p>mlaunch: Require shard servers to be replica sets (3.6.1+) (#567)</p></li>
+<li><p>mlaunch: Force <cite>mlaunch –csrs</cite> when “version” is <cite>0.0.0</cite> (#576)</p></li>
+<li><p>mlaunch: Create user with SCRAM-SHA-1 mechanism (#574)</p></li>
+<li><p>mlaunch: Allow starting 3.6 clusters with PyMongo 3.6.1 (#575)</p></li>
+<li><p>mlaunch: Use correct path separator according to OS (#584)</p></li>
+<li><p>mlaunch: Support path parameters containing spaces (#578)</p></li>
+<li><p>mlaunch: Update psutil requirement to 5.4.2 (#590)</p></li>
+<li><p>mloginfo: Test using current year rather than hardcoded value (#568)</p></li>
 </ul>
 <p>Thanks to &#64;kallimachos, &#64;kevinadi, &#64;sindbach, &#64;ajdavis, &#64;jaraco, &#64;devkev,
 &#64;stephentunney, &#64;shaneharvey, and &#64;stennie for contributions to this release!</p>
@@ -311,17 +349,17 @@ and &#64;stennie for contributions to this release!</p>
 <div class="section" id="version-1-3-2">
 <h2>version 1.3.2<a class="headerlink" href="#version-1-3-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mloginfo: Add –connstats for connection duration metrics (#518)</li>
+<li><p>mloginfo: Add –connstats for connection duration metrics (#518)</p></li>
 </ul>
 <p>Thanks to &#64;nishantb10gen for contributions to this release!</p>
 </div>
 <div class="section" id="version-1-3-1">
 <h2>version 1.3.1<a class="headerlink" href="#version-1-3-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: support SSL parameters (#127)</li>
-<li>mlaunch: make 8th+ replica set members non-voting (#528)</li>
-<li>convert README to reStructuredText (#523)</li>
-<li>update metadata in setup.py (#520)</li>
+<li><p>mlaunch: support SSL parameters (#127)</p></li>
+<li><p>mlaunch: make 8th+ replica set members non-voting (#528)</p></li>
+<li><p>convert README to reStructuredText (#523)</p></li>
+<li><p>update metadata in setup.py (#520)</p></li>
 </ul>
 <p>Thanks to &#64;ajdavis, &#64;kallimachos, &#64;kevinadi, and &#64;josefahmad for contributions
 to this release!</p>
@@ -329,42 +367,42 @@ to this release!</p>
 <div class="section" id="version-1-3-0">
 <h2>version 1.3.0<a class="headerlink" href="#version-1-3-0" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>remove support for Python 2.6 (#469):
-<a class="reference external" href="https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6">https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6</a></li>
-<li>deprecate support for End-of-Life versions of MongoDB (currently &lt;3.0)</li>
-<li>deprecate <code class="docutils literal notranslate"><span class="pre">mgenerate</span></code> in favor of <code class="docutils literal notranslate"><span class="pre">mgeneratejs</span></code> (#494)</li>
-<li>add <code class="docutils literal notranslate"><span class="pre">pip</span></code> options to install/upgrade optional deps (PyMongo, numpy, …)
-(#450, #464)</li>
-<li>log tools should check if the file passed is a valid log file (#429)</li>
-<li>allow analysis of log files with ctime format (#428)</li>
-<li>add support for <code class="docutils literal notranslate"><span class="pre">find</span></code> commands in query section &amp; log event processing
-(#465)</li>
-<li>util/logevent.py: fixed incorrect timestamp processing (#490)</li>
-<li>util/logevent.py: support WriteResult counters like nModified, nInserted
-(#386)</li>
-<li>util/pattern.py line 15 wrong indentation level (#478)</li>
-<li>mlaunch: support on Windows! (#488)</li>
-<li>mlaunch: when a <code class="docutils literal notranslate"><span class="pre">mongod</span></code> fails to start, print log messages to stderr
-(#361)</li>
-<li>mlaunch: fix tests for compat with MongoDB 3.0+ (#192)</li>
-<li>mlaunch: –help should mention it accepts arbitrary <code class="docutils literal notranslate"><span class="pre">mongod</span></code>/<code class="docutils literal notranslate"><span class="pre">mongos</span></code>
-flags (#356)</li>
-<li>mlaunch: print error message for invalid options, rather than silently
-ignoring (#355)</li>
-<li>mlaunch: –no-initial-user option for servers with auth (#487)</li>
-<li>mlaunch: better error if –binarypath is wrong (#491)</li>
-<li>mlaunch: changed default hostname to localhost (#510)</li>
-<li>mlaunch: if unspecified, set wiredTigerCacheSizeGB to 1 (#517)</li>
-<li>mlogfilter: error if invalid pattern provided (#483)</li>
-<li>mlogfilter: calculate current year so rollover test will also work next
-year (#489)</li>
-<li>mlogfilter: loops forever for some datetimes (#507)</li>
-<li>mlogfilter: –component and –planSummary values should be case-insensitive
-(#505)</li>
-<li>mloginfo: –queries should output progress to stderr (#255)</li>
-<li>mplotqueries:  add chart –type docsExamined/n (#509)</li>
-<li>mplotqueries:  default colors could be better (#453)</li>
-<li>wiki: fix documentation mentioning “development mode” (#231)</li>
+<li><p>remove support for Python 2.6 (#469):
+<a class="reference external" href="https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6">https://github.com/rueckstiess/mtools/wiki/Notes:-Centos-6</a></p></li>
+<li><p>deprecate support for End-of-Life versions of MongoDB (currently &lt;3.0)</p></li>
+<li><p>deprecate <code class="docutils literal notranslate"><span class="pre">mgenerate</span></code> in favor of <code class="docutils literal notranslate"><span class="pre">mgeneratejs</span></code> (#494)</p></li>
+<li><p>add <code class="docutils literal notranslate"><span class="pre">pip</span></code> options to install/upgrade optional deps (PyMongo, numpy, …)
+(#450, #464)</p></li>
+<li><p>log tools should check if the file passed is a valid log file (#429)</p></li>
+<li><p>allow analysis of log files with ctime format (#428)</p></li>
+<li><p>add support for <code class="docutils literal notranslate"><span class="pre">find</span></code> commands in query section &amp; log event processing
+(#465)</p></li>
+<li><p>util/logevent.py: fixed incorrect timestamp processing (#490)</p></li>
+<li><p>util/logevent.py: support WriteResult counters like nModified, nInserted
+(#386)</p></li>
+<li><p>util/pattern.py line 15 wrong indentation level (#478)</p></li>
+<li><p>mlaunch: support on Windows! (#488)</p></li>
+<li><p>mlaunch: when a <code class="docutils literal notranslate"><span class="pre">mongod</span></code> fails to start, print log messages to stderr
+(#361)</p></li>
+<li><p>mlaunch: fix tests for compat with MongoDB 3.0+ (#192)</p></li>
+<li><p>mlaunch: –help should mention it accepts arbitrary <code class="docutils literal notranslate"><span class="pre">mongod</span></code>/<code class="docutils literal notranslate"><span class="pre">mongos</span></code>
+flags (#356)</p></li>
+<li><p>mlaunch: print error message for invalid options, rather than silently
+ignoring (#355)</p></li>
+<li><p>mlaunch: –no-initial-user option for servers with auth (#487)</p></li>
+<li><p>mlaunch: better error if –binarypath is wrong (#491)</p></li>
+<li><p>mlaunch: changed default hostname to localhost (#510)</p></li>
+<li><p>mlaunch: if unspecified, set wiredTigerCacheSizeGB to 1 (#517)</p></li>
+<li><p>mlogfilter: error if invalid pattern provided (#483)</p></li>
+<li><p>mlogfilter: calculate current year so rollover test will also work next
+year (#489)</p></li>
+<li><p>mlogfilter: loops forever for some datetimes (#507)</p></li>
+<li><p>mlogfilter: –component and –planSummary values should be case-insensitive
+(#505)</p></li>
+<li><p>mloginfo: –queries should output progress to stderr (#255)</p></li>
+<li><p>mplotqueries:  add chart –type docsExamined/n (#509)</p></li>
+<li><p>mplotqueries:  default colors could be better (#453)</p></li>
+<li><p>wiki: fix documentation mentioning “development mode” (#231)</p></li>
 </ul>
 <p>Thanks to &#64;kevinadi, &#64;zhaoyi0113, &#64;ajdavis, &#64;geuscht-m, &#64;TomerYakir, &#64;devkev,
 and &#64;stennie for contributions to this release!</p>
@@ -372,15 +410,15 @@ and &#64;stennie for contributions to this release!</p>
 <div class="section" id="version-1-2-3">
 <h2>version 1.2.3<a class="headerlink" href="#version-1-2-3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: support for MongoDB 3.4 (#466)</li>
-<li>mlaunch: MongoDB 3.3+ only supports CSRS for mongos –configdb parameter
-(#431)</li>
-<li>mlaunch: CSRS feature breaks older configurations (#402)</li>
-<li>mlaunch: improved parsing of the <code class="docutils literal notranslate"><span class="pre">mongod</span></code> version for RCs (#451)</li>
-<li>mlaunch: New init –priority option forces first member primary</li>
-<li>mlaunch: init &amp; list now print username and password if auth enabled (#469)</li>
-<li>mlaunch: –stop is now an alias of –kill to simplify auth shutdown (#363,
-#369, #333)</li>
+<li><p>mlaunch: support for MongoDB 3.4 (#466)</p></li>
+<li><p>mlaunch: MongoDB 3.3+ only supports CSRS for mongos –configdb parameter
+(#431)</p></li>
+<li><p>mlaunch: CSRS feature breaks older configurations (#402)</p></li>
+<li><p>mlaunch: improved parsing of the <code class="docutils literal notranslate"><span class="pre">mongod</span></code> version for RCs (#451)</p></li>
+<li><p>mlaunch: New init –priority option forces first member primary</p></li>
+<li><p>mlaunch: init &amp; list now print username and password if auth enabled (#469)</p></li>
+<li><p>mlaunch: –stop is now an alias of –kill to simplify auth shutdown (#363,
+#369, #333)</p></li>
 </ul>
 <p>Thanks to &#64;kevinadi, &#64;Pash10g, &#64;Steve-Hand, &#64;vmenajr, and &#64;ajdavis for
 contributions to this release!</p>
@@ -388,211 +426,211 @@ contributions to this release!</p>
 <div class="section" id="version-1-2-2">
 <h2>version 1.2.2<a class="headerlink" href="#version-1-2-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mgenerate: create operator for binary data  (#405)</li>
-<li>mlaunch: added <code class="docutils literal notranslate"><span class="pre">csrs</span></code> parameter if version &gt; 3.3</li>
-<li>mlaunch: Allow one node config server with –csrs and make the default be
-one node (#438)</li>
-<li>mlaunch: added <code class="docutils literal notranslate"><span class="pre">shardsrv</span></code> parameter automatically (#430)</li>
-<li>mlaunch: fixed <code class="docutils literal notranslate"><span class="pre">auth</span></code> not working for replica sets (#380)</li>
-<li>mlaunch: Make sure that when CSRS is deployed, –arbiter will not have an
-affect on it (#418)</li>
-<li>mlaunch: Allow –setParameter options (#445)</li>
-<li>mloginfo: fixed showing the host in <code class="docutils literal notranslate"><span class="pre">rsstate</span></code> (#410)</li>
-<li>mloginfo: fixed check for WT engine (#426)</li>
+<li><p>mgenerate: create operator for binary data  (#405)</p></li>
+<li><p>mlaunch: added <code class="docutils literal notranslate"><span class="pre">csrs</span></code> parameter if version &gt; 3.3</p></li>
+<li><p>mlaunch: Allow one node config server with –csrs and make the default be
+one node (#438)</p></li>
+<li><p>mlaunch: added <code class="docutils literal notranslate"><span class="pre">shardsrv</span></code> parameter automatically (#430)</p></li>
+<li><p>mlaunch: fixed <code class="docutils literal notranslate"><span class="pre">auth</span></code> not working for replica sets (#380)</p></li>
+<li><p>mlaunch: Make sure that when CSRS is deployed, –arbiter will not have an
+affect on it (#418)</p></li>
+<li><p>mlaunch: Allow –setParameter options (#445)</p></li>
+<li><p>mloginfo: fixed showing the host in <code class="docutils literal notranslate"><span class="pre">rsstate</span></code> (#410)</p></li>
+<li><p>mloginfo: fixed check for WT engine (#426)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-2-1">
 <h2>version 1.2.1<a class="headerlink" href="#version-1-2-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: fix bug for CSRS feature that prevents older mlaunch configurations
-to start (#402)</li>
+<li><p>mlaunch: fix bug for CSRS feature that prevents older mlaunch configurations
+to start (#402)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-2-0">
 <h2>version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: support config servers as replica sets (CSRS) (#399, #401)</li>
-<li>mlaunch: fix various <code class="docutils literal notranslate"><span class="pre">mlaunch</span> <span class="pre">list</span></code> errors (#396)</li>
-<li>fix log file testing errors (#393)</li>
+<li><p>mlaunch: support config servers as replica sets (CSRS) (#399, #401)</p></li>
+<li><p>mlaunch: fix various <code class="docutils literal notranslate"><span class="pre">mlaunch</span> <span class="pre">list</span></code> errors (#396)</p></li>
+<li><p>fix log file testing errors (#393)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-9">
 <h2>version 1.1.9<a class="headerlink" href="#version-1-1-9" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mplotqueries: pin python-dateutil to version 2.2 because of problems with
-matplotlib (#377)</li>
-<li>mplotqueries: fixed scaling issues with nscanned/n plots &#64;devkev (#243,
-#379)</li>
-<li>mlaunch: support for PyMongo 3.x &#64;gormanb (#351)</li>
-<li>better handling of invalid log lines due to line breaks &#64;gianpaj (#375)</li>
-<li>mloginfo: fixed bugs when reading from system.profile collection (#353)</li>
-<li>mloginfo: includes geoNear commands in statistics (#344)</li>
-<li>mgenerate: added more operators, like <code class="docutils literal notranslate"><span class="pre">$concat</span></code>, <code class="docutils literal notranslate"><span class="pre">$normal</span></code>, <code class="docutils literal notranslate"><span class="pre">$zipf</span></code>
-(#360)</li>
-<li>fixed false positives in the test suite</li>
+<li><p>mplotqueries: pin python-dateutil to version 2.2 because of problems with
+matplotlib (#377)</p></li>
+<li><p>mplotqueries: fixed scaling issues with nscanned/n plots &#64;devkev (#243,
+#379)</p></li>
+<li><p>mlaunch: support for PyMongo 3.x &#64;gormanb (#351)</p></li>
+<li><p>better handling of invalid log lines due to line breaks &#64;gianpaj (#375)</p></li>
+<li><p>mloginfo: fixed bugs when reading from system.profile collection (#353)</p></li>
+<li><p>mloginfo: includes geoNear commands in statistics (#344)</p></li>
+<li><p>mgenerate: added more operators, like <code class="docutils literal notranslate"><span class="pre">$concat</span></code>, <code class="docutils literal notranslate"><span class="pre">$normal</span></code>, <code class="docutils literal notranslate"><span class="pre">$zipf</span></code>
+(#360)</p></li>
+<li><p>fixed false positives in the test suite</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-8">
 <h2>version 1.1.8<a class="headerlink" href="#version-1-1-8" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mloginfo: storage engine is now listed for log files (#330)</li>
-<li>mplotqueries: x-axis bounds corrected when parsing multiple files (#322)</li>
-<li>mlogfilter: truncated log lines (“too long …”) recognized and parsed as
-much as possible (#133)</li>
-<li>better cross-platform script support, especially for windows users (#230)</li>
-<li>logging components are updated to match final version of MongoDB 3.0 (#328,
-#327)</li>
-<li>removed hard dependency on pymongo, only required if mlaunch is used (#337)</li>
-<li>removed deprecated scripts like mlogversion, mlogdistinct (#336)</li>
-<li>command in LogEvent is now always lowercase (#335)</li>
-<li>LogEvent now has writeConflicts property (#334)</li>
-<li>documented numpy minimum version 1.8.0 (#332)</li>
+<li><p>mloginfo: storage engine is now listed for log files (#330)</p></li>
+<li><p>mplotqueries: x-axis bounds corrected when parsing multiple files (#322)</p></li>
+<li><p>mlogfilter: truncated log lines (“too long …”) recognized and parsed as
+much as possible (#133)</p></li>
+<li><p>better cross-platform script support, especially for windows users (#230)</p></li>
+<li><p>logging components are updated to match final version of MongoDB 3.0 (#328,
+#327)</p></li>
+<li><p>removed hard dependency on pymongo, only required if mlaunch is used (#337)</p></li>
+<li><p>removed deprecated scripts like mlogversion, mlogdistinct (#336)</p></li>
+<li><p>command in LogEvent is now always lowercase (#335)</p></li>
+<li><p>LogEvent now has writeConflicts property (#334)</p></li>
+<li><p>documented numpy minimum version 1.8.0 (#332)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-7">
 <h2>version 1.1.7<a class="headerlink" href="#version-1-1-7" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mtools now understands 2.8 style log format, with severity and components.
-&nbsp;Added by &#64;jimoleary (#269)</li>
-<li>mlogfilter: added <code class="docutils literal notranslate"><span class="pre">--command</span></code>, <code class="docutils literal notranslate"><span class="pre">--planSummary</span></code>, <code class="docutils literal notranslate"><span class="pre">--component</span></code> and
-<code class="docutils literal notranslate"><span class="pre">--level</span></code> filters and allow multiple values for most filters (#239)</li>
-<li>mloginfo: show host information and replica set name if available (#247)</li>
-<li>mloginfo: added new section <code class="docutils literal notranslate"><span class="pre">--rsinfo</span></code> that prints replica set config
-information. Added by &#64;jimoleary (#290)</li>
-<li>mloginfo: now includes <code class="docutils literal notranslate"><span class="pre">count</span></code> and <code class="docutils literal notranslate"><span class="pre">findAndModify</span></code> commands in the
-statistics and adds operation column (#310)</li>
-<li>mloginfo: version detection works for enterprise edition with SSL.
-Added by &#64;gianpaj (#289)</li>
-<li>mplotqueries: ability to adjust graphical properties of scatter plots,
-like opacity, marker size and edge. Added by &#64;devkev (#309)</li>
-<li>mlaunch: legacy mode for adding users with pymongo version &lt; 2.5 (#221)</li>
-<li>mlaunch: named shards now have correct name for single instances (#291)</li>
-<li>mlaunch: <code class="docutils literal notranslate"><span class="pre">list</span></code> command was broken when other non-mtools instances were
-running. Added by &#64;devkev (#297)</li>
-<li>mlogvis: added options <code class="docutils literal notranslate"><span class="pre">--no-browser</span></code> and <code class="docutils literal notranslate"><span class="pre">--out</span></code> for mlogvis (#306)</li>
+<li><p>mtools now understands 2.8 style log format, with severity and components.
+ Added by &#64;jimoleary (#269)</p></li>
+<li><p>mlogfilter: added <code class="docutils literal notranslate"><span class="pre">--command</span></code>, <code class="docutils literal notranslate"><span class="pre">--planSummary</span></code>, <code class="docutils literal notranslate"><span class="pre">--component</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--level</span></code> filters and allow multiple values for most filters (#239)</p></li>
+<li><p>mloginfo: show host information and replica set name if available (#247)</p></li>
+<li><p>mloginfo: added new section <code class="docutils literal notranslate"><span class="pre">--rsinfo</span></code> that prints replica set config
+information. Added by &#64;jimoleary (#290)</p></li>
+<li><p>mloginfo: now includes <code class="docutils literal notranslate"><span class="pre">count</span></code> and <code class="docutils literal notranslate"><span class="pre">findAndModify</span></code> commands in the
+statistics and adds operation column (#310)</p></li>
+<li><p>mloginfo: version detection works for enterprise edition with SSL.
+Added by &#64;gianpaj (#289)</p></li>
+<li><p>mplotqueries: ability to adjust graphical properties of scatter plots,
+like opacity, marker size and edge. Added by &#64;devkev (#309)</p></li>
+<li><p>mlaunch: legacy mode for adding users with pymongo version &lt; 2.5 (#221)</p></li>
+<li><p>mlaunch: named shards now have correct name for single instances (#291)</p></li>
+<li><p>mlaunch: <code class="docutils literal notranslate"><span class="pre">list</span></code> command was broken when other non-mtools instances were
+running. Added by &#64;devkev (#297)</p></li>
+<li><p>mlogvis: added options <code class="docutils literal notranslate"><span class="pre">--no-browser</span></code> and <code class="docutils literal notranslate"><span class="pre">--out</span></code> for mlogvis (#306)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-6">
 <h2>version 1.1.6<a class="headerlink" href="#version-1-1-6" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlogfilter: <code class="docutils literal notranslate"><span class="pre">--thread</span></code> now also matches “connection accepted” lines for
-that connection (#218, #219)</li>
-<li>mlogfilter: fixed bug that would print milliseconds in timestamp twice in
-2.6 format for UTC timezone (#241)</li>
-<li>mlaunch: allow overriding hostname for replica set setup (#256)</li>
-<li>mlaunch: added a <code class="docutils literal notranslate"><span class="pre">restart</span></code> command (#253)</li>
-<li>mlaunch: added <code class="docutils literal notranslate"><span class="pre">--startup</span></code> to <code class="docutils literal notranslate"><span class="pre">list</span></code> command to show all startup
-strings (#257)</li>
-<li>mlaunch: aliased <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> (now deprecated) as <code class="docutils literal notranslate"><span class="pre">--tags</span></code> (#257)</li>
-<li>mloginfo: added <code class="docutils literal notranslate"><span class="pre">--rsstate</span></code> option to show all replica set state changes
-in log file. Added by &#64;jimoleary (#228)</li>
-<li>mloginfo: fixed issues with 95-percentile calculation. Added by &#64;gianpaj
-(#238)</li>
-<li>mloginfo: show host name and port if available (#247)</li>
-<li>mloginfo: fixed bug where empty lines can’t be parsed (#213)</li>
-<li>mloginfo: show milliseconds for start/end (#245)</li>
-<li>mloginfo: made numpy dependency optional for mloginfo. Added by &#64;brondsem
-(#216)</li>
-<li>mplotqueries: option to write output to image file instead of interactive
-mode. Added by &#64;dpercy (#266)</li>
-<li>mplotqueries: show correct timezone for time axis (#274)</li>
-<li>mplotqueries: added option to allow fixing y-axis to specific min/max
-values (#214)</li>
+<li><p>mlogfilter: <code class="docutils literal notranslate"><span class="pre">--thread</span></code> now also matches “connection accepted” lines for
+that connection (#218, #219)</p></li>
+<li><p>mlogfilter: fixed bug that would print milliseconds in timestamp twice in
+2.6 format for UTC timezone (#241)</p></li>
+<li><p>mlaunch: allow overriding hostname for replica set setup (#256)</p></li>
+<li><p>mlaunch: added a <code class="docutils literal notranslate"><span class="pre">restart</span></code> command (#253)</p></li>
+<li><p>mlaunch: added <code class="docutils literal notranslate"><span class="pre">--startup</span></code> to <code class="docutils literal notranslate"><span class="pre">list</span></code> command to show all startup
+strings (#257)</p></li>
+<li><p>mlaunch: aliased <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> (now deprecated) as <code class="docutils literal notranslate"><span class="pre">--tags</span></code> (#257)</p></li>
+<li><p>mloginfo: added <code class="docutils literal notranslate"><span class="pre">--rsstate</span></code> option to show all replica set state changes
+in log file. Added by &#64;jimoleary (#228)</p></li>
+<li><p>mloginfo: fixed issues with 95-percentile calculation. Added by &#64;gianpaj
+(#238)</p></li>
+<li><p>mloginfo: show host name and port if available (#247)</p></li>
+<li><p>mloginfo: fixed bug where empty lines can’t be parsed (#213)</p></li>
+<li><p>mloginfo: show milliseconds for start/end (#245)</p></li>
+<li><p>mloginfo: made numpy dependency optional for mloginfo. Added by &#64;brondsem
+(#216)</p></li>
+<li><p>mplotqueries: option to write output to image file instead of interactive
+mode. Added by &#64;dpercy (#266)</p></li>
+<li><p>mplotqueries: show correct timezone for time axis (#274)</p></li>
+<li><p>mplotqueries: added option to allow fixing y-axis to specific min/max
+values (#214)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-5">
 <h2>version 1.1.5<a class="headerlink" href="#version-1-1-5" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)</li>
-<li>mlaunch: fixed bug when using <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> and passing arguments
-through to mongod/mongos (#217)</li>
-<li>mlaunch: fixed help text for default username and password (#207)</li>
-<li>mlogfilter: “iso8601-local” timestamp format now working with <code class="docutils literal notranslate"><span class="pre">--from</span></code>
-and <code class="docutils literal notranslate"><span class="pre">--to</span></code> (#209)</li>
-<li>mplotqueries: fixed bug where “0ms” lines couldn’t be plotted with durline
-plots (#208)</li>
-<li>mgenerate: made it multi-threaded for performance boost (#204)</li>
-<li>mgenerate: fixed bug when using custom port number (#217)</li>
-<li>removed backward breaking <code class="docutils literal notranslate"><span class="pre">total_seconds()</span></code> from logevent parsing (#210)</li>
+<li><p>added workaround for compile errors with XCode 5.1 / clang 3.4 (#203)</p></li>
+<li><p>mlaunch: fixed bug when using <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> and passing arguments
+through to mongod/mongos (#217)</p></li>
+<li><p>mlaunch: fixed help text for default username and password (#207)</p></li>
+<li><p>mlogfilter: “iso8601-local” timestamp format now working with <code class="docutils literal notranslate"><span class="pre">--from</span></code>
+and <code class="docutils literal notranslate"><span class="pre">--to</span></code> (#209)</p></li>
+<li><p>mplotqueries: fixed bug where “0ms” lines couldn’t be plotted with durline
+plots (#208)</p></li>
+<li><p>mgenerate: made it multi-threaded for performance boost (#204)</p></li>
+<li><p>mgenerate: fixed bug when using custom port number (#217)</p></li>
+<li><p>removed backward breaking <code class="docutils literal notranslate"><span class="pre">total_seconds()</span></code> from logevent parsing (#210)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-4">
 <h2>version 1.1.4<a class="headerlink" href="#version-1-1-4" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>performance improvements for log parsing (#187)</li>
-<li>mloginfo <code class="docutils literal notranslate"><span class="pre">--queries</span></code> section to aggregate queries (#131)</li>
-<li>mplotqueries: scatter plots now show “duration triangles” on double-click
-(#201)</li>
-<li>mplotqueries: a number of bug fixes and stability improvements (#183, #199,
-#198, #191, #184)</li>
-<li>mlaunch: a different <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> can be specified with
-<code class="docutils literal notranslate"><span class="pre">mlaunch</span> <span class="pre">start</span></code> (#181)</li>
-<li>mlaunch: general bug fixes and tests (#178, #179, #176)</li>
-<li>mlogfilter: timezone bug fixed (#186)</li>
-<li>added sort pattern parsing to LogEvent and added query pattern parsing
-for system.profile events (#200)</li>
+<li><p>performance improvements for log parsing (#187)</p></li>
+<li><p>mloginfo <code class="docutils literal notranslate"><span class="pre">--queries</span></code> section to aggregate queries (#131)</p></li>
+<li><p>mplotqueries: scatter plots now show “duration triangles” on double-click
+(#201)</p></li>
+<li><p>mplotqueries: a number of bug fixes and stability improvements (#183, #199,
+#198, #191, #184)</p></li>
+<li><p>mlaunch: a different <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> can be specified with
+<code class="docutils literal notranslate"><span class="pre">mlaunch</span> <span class="pre">start</span></code> (#181)</p></li>
+<li><p>mlaunch: general bug fixes and tests (#178, #179, #176)</p></li>
+<li><p>mlogfilter: timezone bug fixed (#186)</p></li>
+<li><p>added sort pattern parsing to LogEvent and added query pattern parsing
+for system.profile events (#200)</p></li>
 </ul>
 <p>For all changes, see the <a class="reference external" href="https://github.com/rueckstiess/mtools/issues?direction=desc&amp;milestone=9&amp;page=1&amp;sort=updated&amp;state=closed">closed issues tagged with milestone 1.1.4</a></p>
 </div>
 <div class="section" id="version-1-1-3">
 <h2>version 1.1.3<a class="headerlink" href="#version-1-1-3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>all tools can now read from system.profile collections as if it was a
+<li><p>all tools can now read from system.profile collections as if it was a
 log file. Use this syntax as command line argument:
-“host:port/database.collection” (#164)</li>
-<li>mtools now uses <a class="reference external" href="https://travis-ci.org/rueckstiess/mtools">Travis CI</a> for
-continuous integration testing</li>
-<li>all log-parsing tools are now timezone aware. If no timezone is specified
-(all log files &lt;= 2.4.x), then UTC is assumed (#174)</li>
-<li>added new tool <code class="docutils literal notranslate"><span class="pre">mgenerate</span></code> to create structured randomized data for issue
-reproduction</li>
-<li>mlaunch: Added a <code class="docutils literal notranslate"><span class="pre">kill</span></code> command to send SIGTERM or any other signal to
-all or a subset of instances (#168)</li>
-<li>mlaunch: username + password is added for environments with
+“host:port/database.collection” (#164)</p></li>
+<li><p>mtools now uses <a class="reference external" href="https://travis-ci.org/rueckstiess/mtools">Travis CI</a> for
+continuous integration testing</p></li>
+<li><p>all log-parsing tools are now timezone aware. If no timezone is specified
+(all log files &lt;= 2.4.x), then UTC is assumed (#174)</p></li>
+<li><p>added new tool <code class="docutils literal notranslate"><span class="pre">mgenerate</span></code> to create structured randomized data for issue
+reproduction</p></li>
+<li><p>mlaunch: Added a <code class="docutils literal notranslate"><span class="pre">kill</span></code> command to send SIGTERM or any other signal to
+all or a subset of instances (#168)</p></li>
+<li><p>mlaunch: username + password is added for environments with
 <code class="docutils literal notranslate"><span class="pre">--authentication</span></code>. Configurable username, password, database, roles.
-Thanks, <code class="docutils literal notranslate"><span class="pre">&#64;sl33nyc</span></code> (#156)</li>
-<li>mlaunch: start command can receive new arguments to pass through to
-mongos/d, and a different <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> (#151)</li>
-<li>mlaunch: now checks in advance if port range is free, and warns if not
-(#166)</li>
-<li>mlaunch: <code class="docutils literal notranslate"><span class="pre">--version</span></code> was removed by accident in 1.1.2. It’s back now
-(#160)</li>
-<li>mlogfilter: <code class="docutils literal notranslate"><span class="pre">--thread</span></code>, <code class="docutils literal notranslate"><span class="pre">--namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">--operation</span></code> filters
-can now be combined arbitrarily (#167)</li>
-<li>mlogfilter: bug fix for when no log file was specified at command line.
-Now outputs clean error message (#124)</li>
-<li>mplotqueries: added a compatibility check for matplotlib version 1.1.1
-for setting font size in legends (#128)</li>
+Thanks, <code class="docutils literal notranslate"><span class="pre">&#64;sl33nyc</span></code> (#156)</p></li>
+<li><p>mlaunch: start command can receive new arguments to pass through to
+mongos/d, and a different <code class="docutils literal notranslate"><span class="pre">--binarypath</span></code> (#151)</p></li>
+<li><p>mlaunch: now checks in advance if port range is free, and warns if not
+(#166)</p></li>
+<li><p>mlaunch: <code class="docutils literal notranslate"><span class="pre">--version</span></code> was removed by accident in 1.1.2. It’s back now
+(#160)</p></li>
+<li><p>mlogfilter: <code class="docutils literal notranslate"><span class="pre">--thread</span></code>, <code class="docutils literal notranslate"><span class="pre">--namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">--operation</span></code> filters
+can now be combined arbitrarily (#167)</p></li>
+<li><p>mlogfilter: bug fix for when no log file was specified at command line.
+Now outputs clean error message (#124)</p></li>
+<li><p>mplotqueries: added a compatibility check for matplotlib version 1.1.1
+for setting font size in legends (#128)</p></li>
 </ul>
 <p>For all changes, see the <a class="reference external" href="https://github.com/rueckstiess/mtools/issues?direction=desc&amp;milestone=8&amp;page=1&amp;sort=updated&amp;state=closed">closed issues tagged with milestone 1.1.3</a></p>
 </div>
 <div class="section" id="version-1-1-2">
 <h2>version 1.1.2<a class="headerlink" href="#version-1-1-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlaunch: completely rewritten, is now aware of the launched environment,
-commands: init, start, stop, list (#148)</li>
-<li>mlaunch: mongos nodes start at beginning of port range for easier access
-(#145)</li>
-<li>mlaunch: always uses absolute paths for the data directory, which shows
-up in <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">mongo</span></code> output (#143)</li>
-<li>mlogfilter: added filter masks <code class="docutils literal notranslate"><span class="pre">--mask</span> <span class="pre">errors.log</span></code> to search for
-correlations around certain events (#138)</li>
-<li>mplotqueries: log parsing performance improvements for most plots</li>
-<li>mlogvis: log parsing performance improvements</li>
-<li>all tools: replaced shebang with <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code>, to support
-non-standard python installations</li>
+<li><p>mlaunch: completely rewritten, is now aware of the launched environment,
+commands: init, start, stop, list (#148)</p></li>
+<li><p>mlaunch: mongos nodes start at beginning of port range for easier access
+(#145)</p></li>
+<li><p>mlaunch: always uses absolute paths for the data directory, which shows
+up in <code class="docutils literal notranslate"><span class="pre">ps</span> <span class="pre">aux</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">mongo</span></code> output (#143)</p></li>
+<li><p>mlogfilter: added filter masks <code class="docutils literal notranslate"><span class="pre">--mask</span> <span class="pre">errors.log</span></code> to search for
+correlations around certain events (#138)</p></li>
+<li><p>mplotqueries: log parsing performance improvements for most plots</p></li>
+<li><p>mlogvis: log parsing performance improvements</p></li>
+<li><p>all tools: replaced shebang with <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code>, to support
+non-standard python installations</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-1">
 <h2>version 1.1.1<a class="headerlink" href="#version-1-1-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mplotqueries: introduced a new type of plot “durline”, to visualize start
-and end of long-running operations</li>
-<li>mplotqueries: use start times of operations that have a duration, rather
-than end time with <code class="docutils literal notranslate"><span class="pre">--optime-start</span></code> (#130)</li>
-<li>mplotqueries: group by query pattern with <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">pattern</span></code> (#129)</li>
-<li>mlaunch: allow more than 7 nodes, everyone above 7 is non-voting (#123)</li>
-<li>mloginfo: fixed bug where anonymous Unix sockets can’t be parsed (#121)</li>
+<li><p>mplotqueries: introduced a new type of plot “durline”, to visualize start
+and end of long-running operations</p></li>
+<li><p>mplotqueries: use start times of operations that have a duration, rather
+than end time with <code class="docutils literal notranslate"><span class="pre">--optime-start</span></code> (#130)</p></li>
+<li><p>mplotqueries: group by query pattern with <code class="docutils literal notranslate"><span class="pre">--group</span> <span class="pre">pattern</span></code> (#129)</p></li>
+<li><p>mlaunch: allow more than 7 nodes, everyone above 7 is non-voting (#123)</p></li>
+<li><p>mloginfo: fixed bug where anonymous Unix sockets can’t be parsed (#121)</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-1-0">
@@ -608,28 +646,28 @@ mlaunch. No features have been cut, they are all still available within the
 <h3>New Features<a class="headerlink" href="#new-features" title="Permalink to this headline">#</a></h3>
 <p><strong>mlogfilter</strong></p>
 <ul class="simple">
-<li>very fast binary search for time slicing</li>
-<li>timestamp-format aware, can convert between formats</li>
-<li>mlogmerge is now fully included into mlogfilter</li>
-<li>can output in json format</li>
+<li><p>very fast binary search for time slicing</p></li>
+<li><p>timestamp-format aware, can convert between formats</p></li>
+<li><p>mlogmerge is now fully included into mlogfilter</p></li>
+<li><p>can output in json format</p></li>
 </ul>
 <p><strong>mloginfo</strong></p>
 <ul class="simple">
-<li>mloginfo supports multiple files</li>
-<li>now with info sections on restarts, connections, distinct log lines</li>
-<li>shows progress bar during distinct log file parsing</li>
+<li><p>mloginfo supports multiple files</p></li>
+<li><p>now with info sections on restarts, connections, distinct log lines</p></li>
+<li><p>shows progress bar during distinct log file parsing</p></li>
 </ul>
 <p><strong>mplotqueries</strong></p>
 <ul class="simple">
-<li>can now group on arbitrary regular expressions</li>
-<li>has a new group limits feature, to group all but the top x groups together</li>
-<li>range plots support gaps</li>
-<li>better color scheme</li>
-<li>shows progress bar during log file parsing</li>
+<li><p>can now group on arbitrary regular expressions</p></li>
+<li><p>has a new group limits feature, to group all but the top x groups together</p></li>
+<li><p>range plots support gaps</p></li>
+<li><p>better color scheme</p></li>
+<li><p>shows progress bar during log file parsing</p></li>
 </ul>
 <p><strong>mlaunch</strong></p>
 <ul class="simple">
-<li>support multiple mongos</li>
+<li><p>support multiple mongos</p></li>
 </ul>
 </div>
 <div class="section" id="and-many-bug-fixes">
@@ -640,92 +678,92 @@ mlaunch. No features have been cut, they are all still available within the
 <div class="section" id="version-1-0-5">
 <h2>version 1.0.5<a class="headerlink" href="#version-1-0-5" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mplotqueries: included a new plot type ‘connchurn’ that shows opened vs.
-closed connections over time (#77, #74).</li>
-<li>mplotqueries: removed redundant <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">duration</span></code> plot and set the
-default to <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">scatter</span> <span class="pre">--yaxis</span> <span class="pre">duration</span></code>.</li>
-<li>mloginfo: new tool that summarizes log file information, including
-start/end time, version if present, and optionally restarts.</li>
-<li>added nosetests infrastructure and first tests for mlaunch and mlogfilter
-(#39).</li>
-<li>added internal LogFile class that offers helper methods around log files
-(#80).</li>
-<li>fixed bug where <code class="docutils literal notranslate"><span class="pre">mlogfilter</span> <span class="pre">--shorten</span></code> was off by one character.</li>
+<li><p>mplotqueries: included a new plot type ‘connchurn’ that shows opened vs.
+closed connections over time (#77, #74).</p></li>
+<li><p>mplotqueries: removed redundant <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">duration</span></code> plot and set the
+default to <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">scatter</span> <span class="pre">--yaxis</span> <span class="pre">duration</span></code>.</p></li>
+<li><p>mloginfo: new tool that summarizes log file information, including
+start/end time, version if present, and optionally restarts.</p></li>
+<li><p>added nosetests infrastructure and first tests for mlaunch and mlogfilter
+(#39).</p></li>
+<li><p>added internal LogFile class that offers helper methods around log files
+(#80).</p></li>
+<li><p>fixed bug where <code class="docutils literal notranslate"><span class="pre">mlogfilter</span> <span class="pre">--shorten</span></code> was off by one character.</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-0-4">
 <h2>version 1.0.4<a class="headerlink" href="#version-1-0-4" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlogvis: fixed a bug displaying the data in the wrong time zone (#70).</li>
-<li>mplotqueries: fixed bug where a plot’s argument sub-parser (e.g. for
-–bucketsize) couldn’t deal with stdin.</li>
-<li>mplotqueries: fixed bug that caused crash when there was no data to
-plot (#68).</li>
-<li>mlogfilter: fixed bug that prevented <code class="docutils literal notranslate"><span class="pre">--from</span></code> and <code class="docutils literal notranslate"><span class="pre">--to</span></code> to be
-used with stdin (#73).</li>
-<li>fixed bug parsing durations of log lines that have a float instead
-of int value (like 123.45ms).</li>
-<li>implemented ISO-8601 timestamp format parsing for upcoming change
-in MongoDB 2.6 (#76).</li>
+<li><p>mlogvis: fixed a bug displaying the data in the wrong time zone (#70).</p></li>
+<li><p>mplotqueries: fixed bug where a plot’s argument sub-parser (e.g. for
+–bucketsize) couldn’t deal with stdin.</p></li>
+<li><p>mplotqueries: fixed bug that caused crash when there was no data to
+plot (#68).</p></li>
+<li><p>mlogfilter: fixed bug that prevented <code class="docutils literal notranslate"><span class="pre">--from</span></code> and <code class="docutils literal notranslate"><span class="pre">--to</span></code> to be
+used with stdin (#73).</p></li>
+<li><p>fixed bug parsing durations of log lines that have a float instead
+of int value (like 123.45ms).</p></li>
+<li><p>implemented ISO-8601 timestamp format parsing for upcoming change
+in MongoDB 2.6 (#76).</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-0-3">
 <h2>version 1.0.3<a class="headerlink" href="#version-1-0-3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mplotqueries: new plot types: “scatter” can plot various counters on the
-y-axis, “nscanned/n” plots inefficient queries (#58).</li>
-<li>mplotqueries: added footnote (“created with mtools”) including version.
-Can be toggled on/off with ‘f’ (#33).</li>
-<li>mplotqueries: added histogram plots (–type histogram) with variable bucket
-size (#25).</li>
-<li>mplotqueries: always plot full range of log file on x-axis, even if data
-points start later or end earlier (#60).</li>
-<li>mlogfilter: added human-readable option (–human) that inserts <code class="docutils literal notranslate"><span class="pre">,</span></code> in
-large numbers and calculates durations in hrs,min,sec. (#8).</li>
-<li>mlogdistinct: improved log2code matching and cleaned up log2code match
-database.</li>
+<li><p>mplotqueries: new plot types: “scatter” can plot various counters on the
+y-axis, “nscanned/n” plots inefficient queries (#58).</p></li>
+<li><p>mplotqueries: added footnote (“created with mtools”) including version.
+Can be toggled on/off with ‘f’ (#33).</p></li>
+<li><p>mplotqueries: added histogram plots (–type histogram) with variable bucket
+size (#25).</p></li>
+<li><p>mplotqueries: always plot full range of log file on x-axis, even if data
+points start later or end earlier (#60).</p></li>
+<li><p>mlogfilter: added human-readable option (–human) that inserts <code class="docutils literal notranslate"><span class="pre">,</span></code> in
+large numbers and calculates durations in hrs,min,sec. (#8).</p></li>
+<li><p>mlogdistinct: improved log2code matching and cleaned up log2code match
+database.</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-0-2">
 <h2>version 1.0.2<a class="headerlink" href="#version-1-0-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>mlogvis: doesn’t require web server anymore. Data is directly stored in
-self-contained HTML file (#57).</li>
-<li>mlogvis: when clicking reset, keep group selection, only reset zoom
-window (#56).</li>
-<li>mlaunch: different directory name will no longer create a nested
-<code class="docutils literal notranslate"><span class="pre">data</span></code> folder (#54).</li>
-<li>mlaunch: arguments unknown to mlaunch are checked against mongod and
-mongos and only passed on if they are accepted (#55).</li>
-<li>mlaunch: now you can specify a path for the mongod and mongos binaries
-with –binarypath PATH (#46).</li>
-<li>mlaunch: positional argument for directory name removed. directory name
-now requires <code class="docutils literal notranslate"><span class="pre">--dir</span></code>. default is <code class="docutils literal notranslate"><span class="pre">./data</span></code>.</li>
+<li><p>mlogvis: doesn’t require web server anymore. Data is directly stored in
+self-contained HTML file (#57).</p></li>
+<li><p>mlogvis: when clicking reset, keep group selection, only reset zoom
+window (#56).</p></li>
+<li><p>mlaunch: different directory name will no longer create a nested
+<code class="docutils literal notranslate"><span class="pre">data</span></code> folder (#54).</p></li>
+<li><p>mlaunch: arguments unknown to mlaunch are checked against mongod and
+mongos and only passed on if they are accepted (#55).</p></li>
+<li><p>mlaunch: now you can specify a path for the mongod and mongos binaries
+with –binarypath PATH (#46).</p></li>
+<li><p>mlaunch: positional argument for directory name removed. directory name
+now requires <code class="docutils literal notranslate"><span class="pre">--dir</span></code>. default is <code class="docutils literal notranslate"><span class="pre">./data</span></code>.</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-0-1">
 <h2>version 1.0.1<a class="headerlink" href="#version-1-0-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
-<li>fixed timezone bug in mlogmerge (#24)</li>
-<li>allow for multiple mongos in mlaunch with <code class="docutils literal notranslate"><span class="pre">--mongos</span> <span class="pre">NUM</span></code> parameter (#30)</li>
-<li>mlaunch can now take any additional single arguments (like <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> or
-<code class="docutils literal notranslate"><span class="pre">--notablescan</span></code>) and pass it on to the mongod/s instances (#31)</li>
-<li>all scripts now have <code class="docutils literal notranslate"><span class="pre">--version</span></code> flag (inherited from BaseCmdLineTool)
-(#34)</li>
-<li>added <code class="docutils literal notranslate"><span class="pre">--fast</span></code> option to mlogfilter (#37)</li>
-<li>mlogvis title added and legend height determined automatically (#45)</li>
-<li>mlaunch now checks if port is available before trying to start and exits
-if port is already in use (#43)</li>
-<li>improved mlogfilter <code class="docutils literal notranslate"><span class="pre">--from</span></code> / <code class="docutils literal notranslate"><span class="pre">--to</span></code> parsing, now supports sole
+<li><p>fixed timezone bug in mlogmerge (#24)</p></li>
+<li><p>allow for multiple mongos in mlaunch with <code class="docutils literal notranslate"><span class="pre">--mongos</span> <span class="pre">NUM</span></code> parameter (#30)</p></li>
+<li><p>mlaunch can now take any additional single arguments (like <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> or
+<code class="docutils literal notranslate"><span class="pre">--notablescan</span></code>) and pass it on to the mongod/s instances (#31)</p></li>
+<li><p>all scripts now have <code class="docutils literal notranslate"><span class="pre">--version</span></code> flag (inherited from BaseCmdLineTool)
+(#34)</p></li>
+<li><p>added <code class="docutils literal notranslate"><span class="pre">--fast</span></code> option to mlogfilter (#37)</p></li>
+<li><p>mlogvis title added and legend height determined automatically (#45)</p></li>
+<li><p>mlaunch now checks if port is available before trying to start and exits
+if port is already in use (#43)</p></li>
+<li><p>improved mlogfilter <code class="docutils literal notranslate"><span class="pre">--from</span></code> / <code class="docutils literal notranslate"><span class="pre">--to</span></code> parsing, now supports sole
 relative arguments for both arguments, millisecond parsing, month-only
-filtering (#12).</li>
-<li>restructured tools to derive from base class <code class="docutils literal notranslate"><span class="pre">BaseCmdLineTool</span></code> or
-<code class="docutils literal notranslate"><span class="pre">LogFileTool</span></code></li>
-<li>fixed bug in log line parsing when detecting duration at the end of a line</li>
-<li>changed <code class="docutils literal notranslate"><span class="pre">--log</span></code> to <code class="docutils literal notranslate"><span class="pre">--logscale</span></code> argument for mplotqueries to avoid
-confusion with “log” files</li>
-<li>added <a class="reference external" href="https://github.com/rueckstiess/mtools/wiki/Development:-contributing-to-mtools">Contributing</a>
-page under the tutorials section</li>
+filtering (#12).</p></li>
+<li><p>restructured tools to derive from base class <code class="docutils literal notranslate"><span class="pre">BaseCmdLineTool</span></code> or
+<code class="docutils literal notranslate"><span class="pre">LogFileTool</span></code></p></li>
+<li><p>fixed bug in log line parsing when detecting duration at the end of a line</p></li>
+<li><p>changed <code class="docutils literal notranslate"><span class="pre">--log</span></code> to <code class="docutils literal notranslate"><span class="pre">--logscale</span></code> argument for mplotqueries to avoid
+confusion with “log” files</p></li>
+<li><p>added <a class="reference external" href="https://github.com/rueckstiess/mtools/wiki/Development:-contributing-to-mtools">Contributing</a>
+page under the tutorials section</p></li>
 </ul>
 </div>
 <div class="section" id="version-1-0-0">
@@ -733,19 +771,16 @@ page under the tutorials section</li>
 <p>This is the first version of mtools that has a version number. Some
 significant changes to its unnumbered predecessor are:</p>
 <ul>
-<li><p class="first">installable via pip</p>
-</li>
-<li><p class="first">directory re-organization: All tools are now located under
+<li><p>installable via pip</p></li>
+<li><p>directory re-organization: All tools are now located under
 <code class="docutils literal notranslate"><span class="pre">mtools/mtools/</span></code>. This makes for easier <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> integration, which
 will now have to point to the actual mtools directory, and not to the parent
-directory anymore. This is more in line with other Python projects.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">mlogvis</span></code> tool added: a simplified version of <code class="docutils literal notranslate"><span class="pre">mplotqueries</span></code> that
+directory anymore. This is more in line with other Python projects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mlogvis</span></code> tool added: a simplified version of <code class="docutils literal notranslate"><span class="pre">mplotqueries</span></code> that
 doesn’t require <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> dependency. Instead, it will run in a browser
 window, using <a class="reference external" href="https://www.d3js.org/">d3.js</a> for visualization.
-<code class="docutils literal notranslate"><span class="pre">mlogvis</span></code> is currently in BETA state.</p>
-</li>
-<li><p class="first">introduced versioning: The version is stored in mtools/version.py and can be
+<code class="docutils literal notranslate"><span class="pre">mlogvis</span></code> is currently in BETA state.</p></li>
+<li><p>introduced versioning: The version is stored in mtools/version.py and can be
 accessed programmatically from a Python shell with:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mtools</span>
 <span class="n">mtools</span><span class="o">.</span><span class="n">__version__</span>
@@ -765,7 +800,7 @@ accessed programmatically from a Python shell with:</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="release.html" class="btn btn-neutral" title="Releases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="release.html" class="btn btn-neutral float-left" title="Releases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -790,33 +825,16 @@ accessed programmatically from a Python shell with:</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
