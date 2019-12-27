@@ -29,7 +29,9 @@ Releasing a new version
    version to be released.
 #. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev`` to
    ``x.y.z``.
-#. Make sure tests are passing in Python 3.6 via ``tox -e py36``.
+#. Make sure tests are passing in Python 3.6, 3.7, and 3.8 via
+   ``tox -re py36,py37,py38``.
+#. Make sure documentation tests are passing via ``tox -re doc``.
 #. Update README.rst and CHANGES.rst accordingly.
 #. Any other cleanup tasks.
 #. (optional) leave the release branch for a few days to give others a chance
