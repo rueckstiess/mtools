@@ -15,19 +15,19 @@ def op_or_cmd(le):
 class CursorSection(BaseSection):
     """CursorSection class."""
 
-    name = 'cursor'
+    name = 'cursors'
 
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
-        helptext = 'outputs statistics about cursor'
-        self.mloginfo.argparser_sectiongroup.add_argument('--cursor',
+        helptext = 'outputs statistics about cursors'
+        self.mloginfo.argparser_sectiongroup.add_argument('--cursors',
                                                           action='store_true',
                                                           help=helptext)
 
     @property
     def active(self):
         """Return boolean if this section is active."""
-        return self.mloginfo.args['cursor']
+        return self.mloginfo.args['cursors']
 
     def run(self):
         """Run this section and print out information."""

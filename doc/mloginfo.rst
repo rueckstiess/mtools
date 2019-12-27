@@ -16,9 +16,10 @@ Usage
    mloginfo [-h] [--version] logfile
             [--verbose]
             [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
+            [--clients]
+            [--cursors]
             [--storagestats]
             [--transactions] [--tsort {duration}]
-            [--cursor]
 
 General Parameters
 ~~~~~~~~~~~~~~~~~~
@@ -141,53 +142,6 @@ example:
    mloginfo mongod.log --queries --sort sum
 
 This option has no effect unless ``--queries`` is also specified.
-
-Transactions (``--transactions``)
----------------------------------
-
-The transaction section will parse the log file to find information related
-to transactions (MongoDB 4.0+). ``autocommit`` indicates whether ``autocommit``
-was enabled for a transaction. The ``readConcern`` information is fetched
-either from ``OperationContext`` or ``_txnResourceStash``. ``TimeActiveMicros``
-and ``TimeInactiveMicros`` denote the number of micros active and inactive
-during the span of the transaction. The ``duration`` field includes the value
-in milliseconds and indicates the amount of time taken by each transaction.
-
-For example:
-
-.. code-block:: bash
-
-   mloginfo mongod.log --transactions
-
-In addition to the default information, this command will also output the
-``TRANSACTIONS`` section:
-
-.. code-block:: bash
-
- TRANSACTION
-
- DATETIME                       TXNNUMBER       AUTOCOMMIT      READCONCERN     TIMEACTIVEMICROS    TIMEINACTIVEMICROS   DURATION
-
- 2019-06-18T12:31:03.180+0100           1         false         "snapshot"                 11142                     3   7
- 2019-03-18T12:31:03.180+0100           2         false         "snapshot"                 11143                     4   6
- 2019-07-18T12:31:03.180+0100           3         false         "snapshot"                 11144                     3   4
- 2019-08-18T12:31:03.180+0100           4         false         "snapshot"                 11145                     4   7
- 2019-06-18T12:31:03.180+0100           5         false         "snapshot"                 11146                     3   3
-
-``--tsort``
-^^^^^^^^^^^
-
-This option can be used to sort the results of the ``--transaction`` table,
-along with 'duration' keyword.
-
-For example:
-
-.. code-block:: bash
-
-   mloginfo mongod.log --transaction --tsort duration
-
-This option has no effect unless it is specified between ``--transaction`` and
-``duration`` is specified.
 
 Restarts (``--restarts``)
 -------------------------
@@ -314,10 +268,57 @@ state changes.
    Oct 07 23:23:32    example.com:27018           RECOVERING
    Oct 07 23:23:34    example.com:27018           SECONDARY
 
-Cursor (``--cursor``)
+Transactions (``--transactions``)
+---------------------------------
+
+The transaction section will parse the log file to find information related
+to transactions (MongoDB 4.0+). ``autocommit`` indicates whether ``autocommit``
+was enabled for a transaction. The ``readConcern`` information is fetched
+either from ``OperationContext`` or ``_txnResourceStash``. ``TimeActiveMicros``
+and ``TimeInactiveMicros`` denote the number of micros active and inactive
+during the span of the transaction. The ``duration`` field includes the value
+in milliseconds and indicates the amount of time taken by each transaction.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --transactions
+
+In addition to the default information, this command will also output the
+``TRANSACTIONS`` section:
+
+.. code-block:: bash
+
+ TRANSACTION
+
+ DATETIME                       TXNNUMBER       AUTOCOMMIT      READCONCERN     TIMEACTIVEMICROS    TIMEINACTIVEMICROS   DURATION
+
+ 2019-06-18T12:31:03.180+0100           1         false         "snapshot"                 11142                     3   7
+ 2019-03-18T12:31:03.180+0100           2         false         "snapshot"                 11143                     4   6
+ 2019-07-18T12:31:03.180+0100           3         false         "snapshot"                 11144                     3   4
+ 2019-08-18T12:31:03.180+0100           4         false         "snapshot"                 11145                     4   7
+ 2019-06-18T12:31:03.180+0100           5         false         "snapshot"                 11146                     3   3
+
+``--tsort``
+^^^^^^^^^^^
+
+This option can be used to sort the results of the ``--transaction`` table,
+along with 'duration' keyword.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --transaction --tsort duration
+
+This option has no effect unless it is specified between ``--transaction`` and
+``duration`` is specified.
+
+Cursors (``--cursors``)
 -----------------------------------------
 
-Outputs information if the cursor was reaped for exceeding the transaction
+Outputs information if a cursor was reaped for exceeding the transaction
 timeout. The timestamp of transaction, Cursor ID, and the time at which the
 cursor was reaped is captured from the logs.
 
@@ -325,7 +326,7 @@ For example:
 
 .. code-block:: bash
 
-   mloginfo mongod.log --cursor
+   mloginfo mongod.log --cursors
 
 .. code-block:: bash
 
@@ -340,7 +341,7 @@ For example:
 Storage Stats (``--storagestats``)
 -----------------------------------------
 
-Outputs the information about the storage statistics for slow transactions.
+Outputs information about the storage statistics for slow transactions.
 
 For example:
 
@@ -358,5 +359,5 @@ For example:
    local.myCollection        insert       None         None            None                 None
    local.myCollection        update       None         None            None                 None
    local1.myCollection       insert       None         None            None                 None
-   invoice-prod.invoices     insert        12768411        22233323                86313    12344
-   invoice-prod.invoices     insert        12868411        22233323                86313    12344
+   invoice-prod.invoices     insert       12768411     22233323        86313                12344
+   invoice-prod.invoices     insert       12868411     22233323        86313                12344

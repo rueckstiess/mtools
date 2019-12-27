@@ -316,10 +316,10 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'TRANSACTIONS' in line, lines))
         assert any(map(lambda line: line.startswith('DATETIME'), lines))
 
-    def test_cursor_output(self):
+    def test_cursors_output(self):
         # different log file
         logfile_path = "mtools/test/logfiles/mongod_4.0.10_reapedcursor.log"
-        self.tool.run('%s --cursor' % logfile_path)
+        self.tool.run('%s --cursors' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any('CURSOR' in line for line in lines)
