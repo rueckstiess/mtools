@@ -87,10 +87,10 @@ the query pattern, and various statistics, like how often this query pattern
 was found (count), the minimum and maximum execution time, the mean and the
 total sum. It also informs the type of operation that was performed. The list
 is sorted by total sum, which reflects the overall work the database has to
-perform for each query pattern. The allowDiskUsage(last column) parameter provides
-information about the disk usage of a namespace. The slow query log entry
-shows a value of 'True' or `False` if the disk was used, or `None` if this
-information is not available in the log.
+perform for each query pattern. The ``allowDiskUsage`` (last column) parameter
+provides information about the disk usage of a namespace. The slow query log
+entry shows a value of "True" or "False" if the disk was used, or "None" if
+this information is not available in the log.
 
 This overview is very useful to know which indexes to create to get the best
 performance out of a MongoDB environment. Optimization efforts should start at
@@ -143,15 +143,15 @@ example:
 This option has no effect unless ``--queries`` is also specified.
 
 Transactions (``--transactions``)
------------------------
+---------------------------------
 
 The transaction section will parse the log file to find information related
-to transactions (MongoDB 4.0+). The autocommit indicates whether autocommit
-was enabled for a transaction. The readConcern information is fetched either
-from OperationContext or _txnResourceStash. TimeActiveMicros and TimeInactiveMicros
-denote the number of micros active and inactive during the span of the transaction.
-The duration field includes the value in milliseconds and indicates the amount
-of time taken by each transaction.
+to transactions (MongoDB 4.0+). ``autocommit`` indicates whether ``autocommit``
+was enabled for a transaction. The ``readConcern`` information is fetched
+either from ``OperationContext`` or ``_txnResourceStash``. ``TimeActiveMicros``
+and ``TimeInactiveMicros`` denote the number of micros active and inactive
+during the span of the transaction. The ``duration`` field includes the value
+in milliseconds and indicates the amount of time taken by each transaction.
 
 For example:
 
@@ -175,9 +175,10 @@ In addition to the default information, this command will also output the
  2019-06-18T12:31:03.180+0100           5         false         "snapshot"                 11146                     3   3
 
 ``--tsort``
-^^^^^^^^^^
+^^^^^^^^^^^
 
-This option can be used to sort the results of the ``--transaction`` table, along with 'duration' keyword.
+This option can be used to sort the results of the ``--transaction`` table,
+along with 'duration' keyword.
 
 For example:
 
@@ -185,7 +186,8 @@ For example:
 
    mloginfo mongod.log --transaction --tsort duration
 
-This option has no effect unless it is specified between ``--transaction`` and ``duration`` is specified.
+This option has no effect unless it is specified between ``--transaction`` and
+``duration`` is specified.
 
 Restarts (``--restarts``)
 -------------------------
@@ -315,8 +317,9 @@ state changes.
 Cursor (``--cursor``)
 -----------------------------------------
 
-Outputs information if the cursor was reaped for exceeding the transaction timeout. The timestamp of transaction, Cursor ID, and the time at
-which the cursor was reaped is captured from the logs.
+Outputs information if the cursor was reaped for exceeding the transaction
+timeout. The timestamp of transaction, Cursor ID, and the time at which the
+cursor was reaped is captured from the logs.
 
 For example:
 
@@ -326,15 +329,15 @@ For example:
 
 .. code-block:: bash
 
-CURSOR
+   CURSOR
 
-DATETIME                            CURSORID    REAPEDTIME
+   DATETIME                            CURSORID    REAPEDTIME
 
-2019-06-14 12:31:04.180000+01:00    abc1        2019-06-18 12:31:04.180000+01:00
-2019-06-14 12:31:04.180000+01:00    abc2        2019-06-18 12:31:06.180000+01:00
-2019-06-14 12:31:04.180000+01:00    abc3        2019-06-18 12:31:08.180000+01:00
+   2019-06-14 12:31:04.180000+01:00    abc1        2019-06-18 12:31:04.180000+01:00
+   2019-06-14 12:31:04.180000+01:00    abc2        2019-06-18 12:31:06.180000+01:00
+   2019-06-14 12:31:04.180000+01:00    abc3        2019-06-18 12:31:08.180000+01:00
 
-Storagestats (``--storagestats``)
+Storage Stats (``--storagestats``)
 -----------------------------------------
 
 Outputs the information about the storage statistics for slow transactions.
@@ -347,13 +350,13 @@ For example:
 
 .. code-block:: bash
 
-STORAGE STATISTICS
+   STORAGE STATISTICS
 
-namespace                 operation    bytesRead    bytesWritten    timeReadingMicros    timeWritingMicros
+   namespace                 operation    bytesRead    bytesWritten    timeReadingMicros    timeWritingMicros
 
-config.system.sessions    update       None         None            None                 None
-local.myCollection        insert       None         None            None                 None
-local.myCollection        update       None         None            None                 None
-local1.myCollection       insert       None         None            None                 None
-invoice-prod.invoices     insert        12768411        22233323                86313    12344
-invoice-prod.invoices     insert        12868411        22233323                86313    12344
+   config.system.sessions    update       None         None            None                 None
+   local.myCollection        insert       None         None            None                 None
+   local.myCollection        update       None         None            None                 None
+   local1.myCollection       insert       None         None            None                 None
+   invoice-prod.invoices     insert        12768411        22233323                86313    12344
+   invoice-prod.invoices     insert        12868411        22233323                86313    12344

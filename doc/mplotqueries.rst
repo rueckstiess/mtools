@@ -85,34 +85,34 @@ Output to File
 Checkpoints
 -----------------
 ``--checkpoints``
-   This parameter enables information about slow checkpoints under WiredTiger, if
-   available in the log files. The duration of checkpoints will be displayed in
-   milliseconds. Terminal output will give an overview of the number of points
-   to be plotted on the graph. The graph will contain the datetime and duratio
-   (in milliseconds) of slow checkpoints.
+   This parameter enables information about slow checkpoints under WiredTiger,
+   if available in the log files. The duration of checkpoints will be displayed
+   in milliseconds. Terminal output will give an overview of the number of
+   points to be plotted on the graph. The graph will contain the datetime and
+   duration (in milliseconds) of slow checkpoints.
 
 DNS
 -----------------
 ``--dns``
    Using this parameter slow DNS resolution can be identified and plotted.
-   This flag will parse the log and collect available slow DNS information including
-   hostname and time taken to resolve DNS. DNS information can be grouped by hostname
-   using the ``--group`` flag.
-  
+   This flag will parse the log and collect available slow DNS information
+   including hostname and time taken to resolve DNS. DNS information can be
+   grouped by hostname using the ``--group`` flag.
+
 OpLog
 -----------------
 ``--oplog``
-   This parameter provides information about slow oplog operations. Output shows
-   the number of slow operation detected in the log and the number of operations(points)
-   plotted on the graph. The oplog will produce a scatter plot with respect to
-   duration(milliseconds) and the date.
+   This parameter provides information about slow oplog operations. Output
+   shows the number of slow operation detected in the log and the number of
+   operations (points) plotted on the graph. The oplog will produce a scatter
+   plot with respect to duration(milliseconds) and the date.
 
 Storage Statistics
---------------
+------------------
 ``--storagestats``
    The read storage statistics can be plotted on the graph with the use of
-   ``--storagestats`` flag. The number of bytes read at particular time is mapped on
-   to the graph.
+   ``--storagestats`` flag. The number of bytes read at particular time is
+   mapped onto the graph.
 
 Groupings
 ~~~~~~~~~
@@ -570,4 +570,4 @@ Remove Overlays
 ``--overlay reset``
    To remove all overlays, you can use this command. It will delete all
    existing overlays, and the next (or current, if a log file is specified as
-   well) call to **mplotqueries** will not show additional overlays anymore
+   well) call to **mplotqueries** will not show additional overlays.
