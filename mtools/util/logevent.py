@@ -468,6 +468,9 @@ class LogEvent(object):
             if (self.operation in ['query', 'getmore', 'update', 'remove'] or
                     self.command in ['count', 'findandmodify']):
                 self._pattern = self._find_pattern('query: ')
+                # Fallback check for q: variation (eg "remove" command in 3.6+)
+                if self._pattern is None:
+                    self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
 
