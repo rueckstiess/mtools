@@ -13,13 +13,21 @@ Usage
 
 .. code-block:: bash
 
-   mloginfo [-h] [--version] logfile
-            [--verbose]
-            [--queries] [--restarts] [--distinct] [--connections] [--rsstate]
+   mloginfo [-h] logfile
             [--clients]
+            [--connections]
             [--cursors]
+            [--distinct]
+            [--queries]
+               [--rounding {0,1,2,3,4}]
+               [--sort {namespace,pattern,count,min,max,mean,95%,sum}]
+            [--restarts]
+            [--rsstate]
             [--storagestats]
-            [--transactions] [--tsort {duration}]
+            [--transactions]
+               [--tsort {duration}]
+            [--verbose]
+            [--version]
 
 General Parameters
 ~~~~~~~~~~~~~~~~~~
@@ -130,6 +138,24 @@ In addition to the default information, this command will also output the
    serverside.auth_sessions   update        {"session_endtime": 1, "session_userid": 1}        1         244         244          244          0.2          244             False
    serverside.game_level      find          {"_id": 1}                                         1         104         104          104          0.1          104             None
 
+
+``--rounding``
+^^^^^^^^^^^^^^
+
+This option adjusts the rounding for calculated statistics like mean and
+95%-ile.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --queries --rounding 2
+
+This option has no effect unless ``--queries`` is also specified.
+
+Valid rounding values are from 0 to 4 decimal places. The default value is 1.
+
+
 ``--sort``
 ^^^^^^^^^^
 
@@ -142,6 +168,11 @@ example:
    mloginfo mongod.log --queries --sort sum
 
 This option has no effect unless ``--queries`` is also specified.
+
+Valid sort options are: ``namespace``, ``pattern``, ``count``, ``min``,
+``max``, ``mean``, ``95%``, and ``sum``.
+
+The default sort option is ``sum``.
 
 Restarts (``--restarts``)
 -------------------------
