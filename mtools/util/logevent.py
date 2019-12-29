@@ -112,8 +112,6 @@ class LogEvent(object):
         self._readTimestamp = None
         self._terminationCause = None
         self._locks = None
-        self._commitedCount = 0
-        self._abortedCount = 0
 
         self._command_calculated = False
         self._command = None
@@ -218,8 +216,9 @@ class LogEvent(object):
                     self._duration = int(matchobj.group(1))
             # SERVER-16176 - Logging of slow checkpoints
             elif "Checkpoint" in self.line_str:
-                groups = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
-                self._duration = int(groups.group(1)) * 1000
+                matchobj = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                if matchobj:
+                    self._duration = int(matchobj.group(1)) * 1000
 
         return self._duration
 
