@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 """Utility for grouping items and working with grouped items."""
 
 import re
