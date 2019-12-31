@@ -120,7 +120,6 @@ class QuerySection(BaseSection):
             stats['count'] = len(group_events_all)
             stats['min'] = min(group_events) if group_events else 0
             stats['max'] = max(group_events) if group_events else 0
-            stats['mean'] = 0
             if np:
                 stats['95%'] = (round(np.percentile(group_events, 95), rounding)
                                 if group_events else 0)
