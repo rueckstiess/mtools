@@ -54,24 +54,25 @@ class ClientSection(BaseSection):
                 ip_formatted = str(ip)
 
                 if ip_formatted != "127.0.0.1":
-                    # driver metadata is not strict JSON, parsing string
-                    # then adding required double quotes to keys
-                    driver_data_raw = ("{" + line.split("{", 1)[1].split("}")[0] + "}}")
-                    driver_data = (re.sub(r"(\w+): ", r'"\1":', driver_data_raw))
-                    driver_data_json = json.loads(driver_data)
-
-                    driver = driver_data_json["driver"]["name"]
-                    version = driver_data_json["driver"]["version"]
-                    dv_formatted = str(driver) + ":" + str(version)
-                    if dv_formatted not in driver_info:
-                        driver_info[dv_formatted] = [ip_formatted]
-                    elif dv_formatted in driver_info:
-                        if ip_formatted in driver_info.get(dv_formatted):
-                            continue
-                        else:
-                            driver_info[dv_formatted].append(ip_formatted)
+                    client_metadata = logevent.client_metadata
+                    try:
+                        driver = client_metadata["driver"]["name"]
+                        version = client_metadata["driver"]["version"]
+                        dv_formatted = str(driver) + ":" + str(version)
+                        if dv_formatted not in driver_info:
+                            driver_info[dv_formatted] = [ip_formatted]
+                        elif dv_formatted in driver_info:
+                            if ip_formatted in driver_info.get(dv_formatted):
+                                continue
+                            else:
+                                driver_info[dv_formatted].append(ip_formatted)
+                    except:
+                        next
 
         print('%-15s - Unique connections' % 'Driver:Version ')
-        for key, value in sorted(driver_info.items()):
-            print("%-15s : " % (key) + str(value))
+        if len(driver_info):
+            for key, value in sorted(driver_info.items()):
+                print("%-15s : " % (key) + str(value))
+        else:
+            print("No client metadata found")
         print('')

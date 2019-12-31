@@ -119,7 +119,6 @@ class LogEvent(object):
         self._counters_calculated = False
         self._allowDiskUse = None
 
-
         self._bytesRead = None
         self._bytesWritten = None
         self._timeReadingMicros = None
@@ -150,6 +149,9 @@ class LogEvent(object):
         self._level = None
         self._component = None
         self.merge_marker_str = ''
+
+        self._client_metadata_calculated = False
+        self._client_metadata = None
 
     def set_line_str(self, line_str):
         """
@@ -937,6 +939,29 @@ class LogEvent(object):
             else:
                 self._level = False
                 self._component = False
+
+    @property
+    def client_metadata(self):
+        """Return client metadata."""
+        if not self._client_metadata_calculated:
+            self._client_metadata_calculated = True
+
+            line_str = self.line_str
+            if (line_str and line_str.find('client metadata')):
+                try:
+                    metadata_pos = line_str.find("{")
+                    if metadata_pos == -1:
+                        return
+                    else:
+                        metadata = line_str[metadata_pos:]
+                        # Make valid JSON by wrapping field names in quotes
+                        metadata, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:',
+                                              ' \\1 "\\2" : ', metadata)
+                        self._client_metadata = json.loads(metadata)
+                except ValueError:
+                    self._client_metadata = None
+
+        return self._client_metadata
 
     def parse_all(self):
         """
