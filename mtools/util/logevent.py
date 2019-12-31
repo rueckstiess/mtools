@@ -215,7 +215,7 @@ class LogEvent(object):
                 if matchobj:
                     self._duration = int(matchobj.group(1))
             # SERVER-16176 - Logging of slow checkpoints
-            elif "Checkpoint" in self.line_str:
+            elif "Checkpoint took" in self.line_str:
                 matchobj = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1)) * 1000
