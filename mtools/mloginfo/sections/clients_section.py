@@ -66,7 +66,7 @@ class ClientSection(BaseSection):
                                 continue
                             else:
                                 driver_info[dv_formatted].append(ip_formatted)
-                    except:
+                    except Exception:
                         next
 
         print('%-15s - Unique connections' % 'Driver:Version ')
