@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 def print_table(rows, override_headers=None, uppercase_headers=True):
     """All rows need to be a list of dictionaries, all with the same keys."""

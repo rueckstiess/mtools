@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 """Mtools init."""
 
 __author__ = 'thomas@rueckstiess.net'
