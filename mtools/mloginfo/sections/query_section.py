@@ -43,7 +43,13 @@ class QuerySection(BaseSection):
                                                                    'mean',
                                                                    '95%',
                                                                    'sum'])
-
+        helptext = 'Number of decimal places for rounding of calculated stats'
+        self.mloginfo.argparser_sectiongroup.add_argument('--rounding',
+                                                          action='store',
+                                                          type=int,
+                                                          default=1,
+                                                          choices=range(0,5),
+                                                          help=helptext)
     @property
     def active(self):
         """Return boolean if this section is active."""
@@ -54,6 +60,7 @@ class QuerySection(BaseSection):
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
                                                 x.pattern, x.allowDiskUse))
         logfile = self.mloginfo.logfile
+        rounding = self.mloginfo.args['rounding']
 
         if logfile.start and logfile.end:
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
@@ -113,14 +120,13 @@ class QuerySection(BaseSection):
             stats['count'] = len(group_events_all)
             stats['min'] = min(group_events) if group_events else 0
             stats['max'] = max(group_events) if group_events else 0
-            stats['mean'] = 0
             if np:
-                stats['95%'] = (np.percentile(group_events, 95)
+                stats['95%'] = (round(np.percentile(group_events, 95), rounding)
                                 if group_events else 0)
             else:
                 stats['95%'] = 'n/a'
             stats['sum'] = sum(group_events) if group_events else 0
-            stats['mean'] = (stats['sum'] / stats['count']
+            stats['mean'] = (round(stats['sum'] / stats['count'], rounding)
                              if group_events else 0)
 
             if self.mloginfo.args['verbose']:
