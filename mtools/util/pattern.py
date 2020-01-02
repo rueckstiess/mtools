@@ -3,7 +3,6 @@
 import json
 import re
 
-import six
 import sys
 
 
@@ -27,10 +26,10 @@ def _decode_pattern_list(data):
 
 def _decode_pattern_dict(data):
     rv = {}
-    for key, value in six.iteritems(data):
+    for key, value in data.items():
         if isinstance(key, bytes):
             key = key.encode('utf-8')
-        if isinstance(key, six.text_type):
+        if isinstance(key, str):
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:
                 return 1
             if key == '$nin':
