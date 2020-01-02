@@ -28,3 +28,6 @@ pip-log.txt
 
 # Doc build files
 _build
+
+# Visual Studio Code (vscode) config
+.vscode
