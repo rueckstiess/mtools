@@ -4,15 +4,14 @@ import json
 import re
 
 import six
+import sys
 
 
 def _decode_pattern_list(data):
     rv = []
     contains_dict = False
     for item in data:
-        if isinstance(item, six.text_type):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
+        if isinstance(item, list):
             item = _decode_pattern_list(item)
         elif isinstance(item, dict):
             item = _decode_pattern_dict(item)
@@ -81,6 +80,7 @@ def json2pattern(s):
 
     Includes even mongo shell notation without quoted key names.
     """
+    saved_s = s
     # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
     # handle shell values that are not valid JSON
@@ -88,11 +88,29 @@ def json2pattern(s):
     # convert to 1 where possible, to get rid of things like new Date(...)
     s, n = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
     # now convert to dictionary, converting unicode to ascii
+    doc = {}
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
-        return json.dumps(doc, sort_keys=True, separators=(', ', ': '))
-    except ValueError as ex:
+    except Exception as err:
+        ## print some context info and return without any extracted query data..
+        print ("json2pattern():json.loads Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  s: ({3})\n".
+            format(err, sys.exc_info()[0], saved_s, s), file=sys.stderr)
         return None
+    except:
+        print ("json2pattern():json.loads Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        raise
+
+
+    try:
+        return json.dumps(doc, sort_keys=True, separators=(', ', ': '), ensure_ascii=False)
+    except Exception as err:
+        ## print some context info and return without any extracted query data..
+        print ("json2pattern():json.dumps Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  doc: ({3})\n".
+            format(err, sys.exc_info()[0], saved_s, doc), file=sys.stderr)
+        return None
+    except:
+        print ("json2pattern():json.dumps Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        raise
 
 
 if __name__ == '__main__':
@@ -124,4 +142,10 @@ if __name__ == '__main__':
 
     s = ('{ _id: ObjectId(\'528556616dde23324f233168\'), '
          'config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }')
+    print(json2pattern(s))
+
+    ##
+    ## 20191231 - bugre - issue#764 - adding some more test cases.. based on our mongodb logs (mongod 4.0.3)
+    ##
+    s = (r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }')
     print(json2pattern(s))
