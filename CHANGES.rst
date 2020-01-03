@@ -2,6 +2,18 @@
 Changes to mtools
 =================
 
+version 1.6.1
+~~~~~~~~~~~~~
+ * mtools should use python3 in shebangs (#761)
+ * mloginfo: add timezone to mloginfo summary (#258)
+ * mloginfo --clients: more robust parsing of client metadata (#765)
+ * mloginfo --queries: fix missing patterns for remove command (#742)
+ * mloginfo --queries: add rounding option (#698)
+ * mplotqueries: fix error parsing checkpoint log line (#757)
+
+Thanks to @stennie, @kallimachos, @kevinadi, @niccottrell, and @p-mongo
+for contributions to this release.
+
 version 1.6.0
 ~~~~~~~~~~~~~
 Now supporting Python 3.6+ (only)
