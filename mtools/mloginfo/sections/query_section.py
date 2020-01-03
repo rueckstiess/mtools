@@ -48,8 +48,9 @@ class QuerySection(BaseSection):
                                                           action='store',
                                                           type=int,
                                                           default=1,
-                                                          choices=range(0,5),
+                                                          choices=range(0, 5),
                                                           help=helptext)
+
     @property
     def active(self):
         """Return boolean if this section is active."""
