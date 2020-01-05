@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 """Make OrderedDict available: collections (py2.7) or ordereddict (py2.6)."""
 
 try:

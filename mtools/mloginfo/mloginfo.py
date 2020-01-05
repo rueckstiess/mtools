@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+import datetime
 import inspect
 import sys
 
@@ -64,8 +65,15 @@ class MLogInfoTool(LogFileTool):
             print("      start: %s" % (start_time))
             print("        end: %s" % (end_time))
 
-            # TODO: add timezone if iso8601 format
             print("date format: %s" % self.logfile.datetime_format)
+
+            # self.logfile.timezone is a dateutil.tzinfo object
+            tzdt = datetime.datetime.now(self.logfile.timezone)
+            if (tzdt.tzname()):
+                timezone = tzdt.tzname()
+            else:
+                timezone = f"UTC {tzdt.strftime('%z')}"
+            print("   timezone: %s" % timezone)
             print("     length: %s" % len(self.logfile))
             print("     binary: %s" % (self.logfile.binary or "unknown"))
 
