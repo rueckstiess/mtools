@@ -29,9 +29,5 @@ pip-log.txt
 # Doc build files
 _build
 
-<<<<<<< HEAD
 # Visual Studio Code (vscode) config
-=======
-# VSCode config
->>>>>>> 333c0194e98e70e4f6a008f851f40f85089aed18
 .vscode
