@@ -83,7 +83,7 @@ def json2pattern(s, fDebug = 0):
     """
     saved_s = s
 
-    if fDebug : print ("\n\n", saved_s)
+    if fDebug : print ("\n=======================\n", saved_s, file=sys.stderr)
 
     # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
@@ -91,16 +91,21 @@ def json2pattern(s, fDebug = 0):
 
     # handle shell values that are not valid JSON
     s = shell2json(s)
-    if fDebug : print (s)
+    if fDebug : print (s, file=sys.stderr)
     # convert to 1 where possible, to get rid of things like new Date(...)
     s, _ = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
-    if fDebug : print (s)
+    if fDebug : print (s, file=sys.stderr)
 
-    # 20200104 - bugre - 
-    # try replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
+
+    # replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
     # ATENTION: will breack if one of the list values contains a ']' 
-    s, _ = re.subn(r'("\w+"\s*:\s*\[)(.[^\]]+)(]\s*[,}])', '\\1 1 \\3', s)
-    if fDebug : print (s)
+    # s, _ =  re.subn(r'("\w+"\s*:\s*\[)(.[^\]]+)(]\s*[,}])', '\\1 1 \\3', s)
+    
+    # this updated regex, using positive lookbehind to check for a " (quote) before ']' will 
+    # correctly handle cases where a ']' is part of the value and 
+    # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
+    s, _ = re.subn(r'("\S+"\s*:\s*\[)(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+    if fDebug : print (s, file=sys.stderr)
 
     # now convert to dictionary, converting unicode to ascii
     doc = {}
@@ -130,30 +135,34 @@ def json2pattern(s, fDebug = 0):
 
 if __name__ == '__main__':
 
-    # define as 1 to get verbose output of regex processing
+    # define as 1 to get verbose output of regex processing printed to stderr
     fDebug = 0
 
     tests = { 
         '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, '
-            'c: {$nin: [1, "foo", "bar"]}, "$or": [{a:1}, {b:1}] }' :  '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
-        '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }' : '{"$or": [{"a": 1}, {"b": 1}], "a": 1, "b": {"$nin": 1}}', 
-        "{a: {$gt: 2, $lt: 4}, b: {$in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }" : '{"a": 1, "b": 1}', 
-        "{ sk: -1182239108, _id: { $in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }" : '{"_id": 1, "sk": 1}', 
-        '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }' : '{"a": 1, "b": {"c": 1, "d": 1}, "e": 1}', 
+            'c: {$nin: [1, "foo", "bar"]}, "$or": [{a:"1uno"}, {b:"1uno"}] }'    : '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
+        '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'  : '{"$or": [{"a": 1}, {"b": 1}], "a": 1, "b": {"$nin": 1}}', 
+        "{a: {$gt: 2, $lt: 4}, b: {$in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"a": 1, "b": 1}', 
+        "{ sk: -1182239108, _id: { $in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"_id": 1, "sk": 1}', 
+        '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }'                                                                   : '{"a": 1, "b": {"c": 1, "d": 1}, "e": 1}', 
         '{ _id: ObjectId(\'528556616dde23324f233168\'), config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }' : '{"_id": 1, "config": {"_id": 1, "host": 1}, "ns": 1}',
 
         # 20191231 - bugre - issue#764 - adding some more test cases.. based on our mongodb logs (mongod 4.0.3)
-        r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }': '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
-        r'{_id: "test", curList: [ "1", "abc"] }': '{"_id": 1, "curList": [1]}',
+        r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }'   : '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
+        r'{_id: "test", curList: [ "1onum]pas", "ab\]c" ] }'                                                      : '{"_id": 1, "curList": [1]}',
         
-        # @niccottrell user case and 2nd one extrapolating the 1st one. I think both need changes in simplification process
-        r'{ urls: { $all: [ "https://surtronic.info/" ] } }': '{"urls": {"$all": ["https:1"]}}',
-        r'{ urls: { $all: [ "https://surtronic.info/", "http://url2.com" ] } }': '{"urls": {"$all": ["http://url2.com", "https:1"]}}'
+        # @niccottrell use case and 2nd one extrapolating the 1st one. 
+        r'{ urls: { $all: [ "https://surtronic.info/" ] } }'                      : '{"urls": {"$all": [1]}}',
+        r'{ urls: { $all: [ "https://surtronic.info/", "http://url2.com" ] } }'   : '{"urls": {"$all": [1]}}'
     }
 
     for k,v in tests.items():
         r = json2pattern(k, fDebug)
         if ( r == v ):
-            print("OK:\n  Input : {0}\n  Expect: {1}\n  Output: {2}".format(k,v,r))
+            if fDebug :
+                print("OK...: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
+            else:
+                print("OK: {0}".format(k))
+
         else:
-            print("ERROR ******* :\n  Input : {0}\n  Expect: {1}\n  Output: {2}".format(k,v,r))
+            print("\nERROR **: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
