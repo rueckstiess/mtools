@@ -144,7 +144,11 @@ if __name__ == '__main__':
 
         # 20191231 - bugre - issue#764 - adding some more test cases.. based on our mongodb logs (mongod 4.0.3)
         r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }': '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
-        r'{_id: "test", curList: [ "1", "abc"] }': '{"_id": 1, "curList": [1]}'
+        r'{_id: "test", curList: [ "1", "abc"] }': '{"_id": 1, "curList": [1]}',
+        
+        # @niccottrell user case and 2nd one extrapolating the 1st one. I think both need changes in simplification process
+        r'{ urls: { $all: [ "https://surtronic.info/" ] } }': '{"urls": {"$all": ["https:1"]}}',
+        r'{ urls: { $all: [ "https://surtronic.info/", "http://url2.com" ] } }': '{"urls": {"$all": ["http://url2.com", "https:1"]}}'
     }
 
     for k,v in tests.items():
