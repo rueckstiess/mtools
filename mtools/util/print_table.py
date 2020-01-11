@@ -13,7 +13,7 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
         rows = [dict(zip(keys, headers)), None] + rows
 
     lengths = [max(len(str(row[k]))
-                   for row in rows if hasattr(row, '__iter__')) for k in keys]
+                   for row in rows if isinstance(row, dict)) for k in keys]
     tmp = ['{%s:%i}' % (h, l) for h, l in zip(keys[: -1], lengths[: -1])]
     tmp.append('{%s}' % keys[-1])
     template = (' ' * 4).join(tmp)
