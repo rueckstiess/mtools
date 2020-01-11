@@ -129,11 +129,6 @@ class QuerySection(BaseSection):
             stats['sum'] = sum(group_events) if group_events else 0
             stats['mean'] = (round(stats['sum'] / stats['count'], rounding)
                              if group_events else 0)
-
-            if self.mloginfo.args['verbose']:
-                stats['example'] = grouping[g][0]
-                titles.append('example')
-
             stats['allowDiskUse'] = allowDiskUse
             table_rows.append(stats)
 
