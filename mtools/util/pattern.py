@@ -92,19 +92,18 @@ def json2pattern(s, fDebug = 0):
     # handle shell values that are not valid JSON
     s = shell2json(s)
     if fDebug : print (s, file=sys.stderr)
+    
     # convert to 1 where possible, to get rid of things like new Date(...)
     s, _ = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
     if fDebug : print (s, file=sys.stderr)
 
 
     # replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
-    # ATENTION: will breack if one of the list values contains a ']' 
-    # s, _ =  re.subn(r'("\w+"\s*:\s*\[)(.[^\]]+)(]\s*[,}])', '\\1 1 \\3', s)
-    
-    # this updated regex, using positive lookbehind to check for a " (quote) before ']' will 
-    # correctly handle cases where a ']' is part of the value and 
+    # updated regex, using positive lookahead and lookbehind to check for a " (quote) 
+    # right after '['  and before ']' to correctly handle cases where a ']' is part of the value and 
     # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
-    s, _ = re.subn(r'("\S+"\s*:\s*\[)(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+    s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+
     if fDebug : print (s, file=sys.stderr)
 
     # now convert to dictionary, converting unicode to ascii
@@ -139,17 +138,20 @@ if __name__ == '__main__':
     fDebug = 0
 
     tests = { 
-        '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, '
-            'c: {$nin: [1, "foo", "bar"]}, "$or": [{a:"1uno"}, {b:"1uno"}] }'    : '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
-        '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'  : '{"$or": [{"a": 1}, {"b": 1}], "a": 1, "b": {"$nin": 1}}', 
+        '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, "foo", "bar"]}, "$or": [{a:"1uno"}, {b:"1uno"}] }'                : '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
+        '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'                                              : '{"$or": [{"a": 1}, {"b": 1}], "a": 1, "b": {"$nin": 1}}', 
         "{a: {$gt: 2, $lt: 4}, b: {$in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"a": 1, "b": 1}', 
         "{ sk: -1182239108, _id: { $in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"_id": 1, "sk": 1}', 
         '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }'                                                                   : '{"a": 1, "b": {"c": 1, "d": 1}, "e": 1}', 
         '{ _id: ObjectId(\'528556616dde23324f233168\'), config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }' : '{"_id": 1, "config": {"_id": 1, "host": 1}, "ns": 1}',
 
         # 20191231 - bugre - issue#764 - adding some more test cases.. based on our mongodb logs (mongod 4.0.3)
-        r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }'   : '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
-        r'{_id: "test", curList: [ "1onum]pas", "ab\]c" ] }'                                                      : '{"_id": 1, "curList": [1]}',
+        r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }'              : '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
+        r'{_id: "test", curList: [ "1onum]pas", "ab\]c" ] }'                                                                 : '{"_id": 1, "curList": [1]}',
+        r'{ $and: [ { mode: ObjectId(\'5aafd085edb85e0dc09dd985\') }, { _id: { $ne: ObjectId(\'5e015519877718752d63dd9c\') } }, ' 
+            '{ snack: { $in: [ "BLA", "RUN", "BLE" ] } }, { $or: [ { $and: [ { kind: "Solar" }, { wind: true }, '
+            '{ beginTime: { $gte: new Date(1577134729858) } } ] }, { $and: [ { kind: "event" }, { endTime: { $gte: new Date(1577739529858) } } ] } ] } ] }'  : 
+                '{"$and": [{"mode": 1}, {"_id": {"$ne": 1}}, {"snack": 1}, {"$or": [{"$and": [{"kind": 1}, {"wind": 1}, {"beginTime": 1}]}, {"$and": [{"kind": 1}, {"endTime": 1}]}]}]}',
         
         # @niccottrell use case and 2nd one extrapolating the 1st one. 
         r'{ urls: { $all: [ "https://surtronic.info/" ] } }'                      : '{"urls": {"$all": [1]}}',
