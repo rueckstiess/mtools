@@ -129,12 +129,23 @@ class QuerySection(BaseSection):
             stats['sum'] = sum(group_events) if group_events else 0
             stats['mean'] = (round(stats['sum'] / stats['count'], rounding)
                              if group_events else 0)
-
+            stats['allowDiskUse'] = allowDiskUse
+            
+            ## Fix #769
+            ## IMPORTANT: 'example' must be the last element added to 'stats' and 'tittles'
+            ## or the print_table() -- if overwriting with titles, will crash because in 
+            ## utils/print_table.py " this code: 
+            ###       keys = list(rows[0].keys())
+            ###       headers = override_headers or keys
+            ## will mix assign the 'example' key with another one, because in 'titles', 
+            ## 'example' is the last item of the list, on the 'zip' that follows the above mentioned code
+            ## 
             if self.mloginfo.args['verbose']:
+                # stats['example'] = (grouping[g][0]).pattern
                 stats['example'] = grouping[g][0]
                 titles.append('example')
 
-            stats['allowDiskUse'] = allowDiskUse
+
             table_rows.append(stats)
 
         # sort order depending on field names
