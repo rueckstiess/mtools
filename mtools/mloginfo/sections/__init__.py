@@ -8,3 +8,4 @@ from .rs_info_section import RsInfoSection
 from .rs_state_section import RsStateSection
 from .storagestats_section import StorageStatsSection
 from .transactions_section import TransactionSection
+from .sharding_section import ShardingSection
