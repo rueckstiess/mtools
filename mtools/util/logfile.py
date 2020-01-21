@@ -42,6 +42,9 @@ class LogFile(InputSource):
         self._datetime_format = None
         self._year_rollover = None
 
+        self._shards = None
+        self._csrs = None
+
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
 
@@ -206,6 +209,20 @@ class LogFile(InputSource):
             self._iterate_lines()
         return self._storage_engine
 
+    @property
+    def shards(self):
+        """Return the shards (if available)"""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._shards
+
+    @property
+    def csrs(self):
+        """Return the CSRS (if available)"""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._csrs
+
 
     def next(self):
         """Get next line, adjust for year rollover and hint datetime format."""
@@ -284,6 +301,7 @@ class LogFile(InputSource):
         self._num_lines = 0
         self._restarts = []
         self._rs_state = []
+        self._shards = []
 
         ln = 0
         for ln, line in enumerate(self.filehandle):
@@ -388,6 +406,45 @@ class LogFile(InputSource):
                 state = (host, rs_state, LogEvent(line))
                 self._rs_state.append(state)
                 continue
+
+            
+            if self._binary == "mongos":
+
+                if "Starting new replica set monitor for" in line:
+                    logevent = LogEvent(line)
+                    if "conn" in logevent.thread:
+                        match = re.search("for (?P<shardName>\w+)/"
+                                          "(?P<replSetMembers>\S+)", line)
+                        if match:
+                            shard_info = (match.group('shardName'),
+                                        match.group('replSetMembers'))
+                            self._shards.append(shard_info)
+                    else:
+                        match = re.search("for (?P<csrsName>\w+)/"
+                                          "(?P<replSetMembers>\S+)", line)
+                        if match:
+                            csrs_info = (match.group('csrsName'),
+                                         match.group('replSetMembers'))
+                            self._csrs = csrs_info
+
+            elif self._binary == "mongod":
+                
+                if "initializing sharding state with" in line:
+                    match = re.search('configsvrConnectionString: "(?P<csrsName>\w+)/'
+                                      '(?P<replSetMembers>\S+)"', line)
+                    if match:
+                        csrs_info = (match.group('csrsName'),
+                                     match.group('replSetMembers'))
+                        self._csrs = csrs_info
+                if "Starting new replica set monitor for" in line:
+                    logevent = LogEvent(line)
+                    if logevent.thread == "shard-registry-reload":
+                        match = re.search("for (?P<shardName>\w+)/"
+                                          "(?P<replSetMembers>\S+)", line)
+                        if match:
+                            shard_info = (match.group('shardName'),
+                                          match.group('replSetMembers'))
+                            self._shards.append(shard_info)
 
         self._num_lines = ln + 1
 
