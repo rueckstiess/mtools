@@ -428,6 +428,17 @@ class LogFile(InputSource):
                             self._csrs = csrs_info
 
             elif self._binary == "mongod":
+
+                if "Starting new replica set monitor for" in line:
+                    logevent = LogEvent(line)
+                    if logevent.thread == "shard-registry-reload" or \
+                        "conn" in logevent.thread:
+                        match = re.search("for (?P<shardName>\w+)/"
+                                          "(?P<replSetMembers>\S+)", line)
+                        if match:
+                            shard_info = (match.group('shardName'),
+                                          match.group('replSetMembers'))
+                            self._shards.append(shard_info)
                 
                 if "initializing sharding state with" in line:
                     match = re.search('configsvrConnectionString: "(?P<csrsName>\w+)/'
@@ -436,15 +447,11 @@ class LogFile(InputSource):
                         csrs_info = (match.group('csrsName'),
                                      match.group('replSetMembers'))
                         self._csrs = csrs_info
-                if "Starting new replica set monitor for" in line:
-                    logevent = LogEvent(line)
-                    if logevent.thread == "shard-registry-reload":
-                        match = re.search("for (?P<shardName>\w+)/"
-                                          "(?P<replSetMembers>\S+)", line)
-                        if match:
-                            shard_info = (match.group('shardName'),
-                                          match.group('replSetMembers'))
-                            self._shards.append(shard_info)
+                elif "New replica set config in use" in line:
+                    if self._repl_set and self._repl_set_members:
+                        csrs_info = (self._repl_set,
+                                     self._repl_set_members)
+                        self._csrs = csrs_info
 
         self._num_lines = ln + 1
 
@@ -452,7 +459,8 @@ class LogFile(InputSource):
         self.filehandle.seek(0)
 
     def _check_for_restart(self, logevent):
-        if logevent.thread == 'mongosMain' and 'MongoS' in logevent.line_str:
+        if logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
+            'mongos' in logevent.line_str):
             self._binary = 'mongos'
 
         elif (logevent.thread == 'initandlisten' and
