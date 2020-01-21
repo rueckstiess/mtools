@@ -1,6 +1,4 @@
-import re
-import json
-from collections import defaultdict
+from mtools.util.print_table import print_table
 
 from .base_section import BaseSection
 
@@ -29,3 +27,24 @@ class ShardingSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
+        logfile = self.mloginfo.logfile
+
+        if logfile.shards and logfile.csrs:
+            print("  Sharding overview:")
+
+            if logfile.binary == "mongos":
+                print("    The role of this node (mongos)")
+            elif logfile.port in logfile.csrs[1]:
+                print("    The role of this node (CSRS)")
+            else:
+                print("    The role of this node (shard)")
+
+            print("    Shards:")
+            for shard_name, replica_set in logfile.shards:
+                print(f"      {shard_name}: {replica_set}")
+
+            print("    CSRS:")
+            name, replica_set = logfile.csrs
+            print(f"      {name}: {replica_set}")
+        else:
+            print("  No shard info found")
