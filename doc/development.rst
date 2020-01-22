@@ -17,7 +17,7 @@ Using a development branch
 
    .. code-block:: bash
 
-      sudo pip uninstall mtools
+      sudo pip3 uninstall mtools
 
 #. `Fork the mtools repository <https://help.github.com/articles/fork-a-repo/>`__
    to your own GitHub account.
@@ -41,18 +41,18 @@ Using a development branch
 
 #. Install the mtools scripts in development mode using either:
 
-   *  ``pip`` (recommended as a convenience for installing additional
+   *  ``pip3`` (recommended as a convenience for installing additional
       dependencies):
 
       .. code-block:: bash
 
-         sudo pip install -e '/path/to/cloned/repo[all]'
+         sudo pip3 install -e '/path/to/cloned/repo[all]'
 
    *  ``setup.py``
 
       .. code-block:: bash
 
-         sudo python setup.py develop
+         sudo python3 setup.py develop
 
 #. Test the installation by confirming that the scripts tab-complete from any
    directory:
