@@ -362,14 +362,17 @@ class LogFile(InputSource):
             new_config = ("New replica set config in use: ")
             if new_config in line:
                 match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                  'version: (?P<replSetVersion>\d+), '
-                                  '(protocolVersion: (?P<replSetProtocol>\d+), )?'
-                                  'members: (?P<replSetMembers>[^]]+ ])', line)
+                                  'version: (?P<replSetVersion>\d+), ', line)
                 if match:
                     self._repl_set = match.group('replSet')
-                    self._repl_set_members = match.group('replSetMembers')
-                    self._repl_set_protocol = match.group('replSetProtocol')
                     self._repl_set_version = match.group('replSetVersion')
+                match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', line)
+                if match:
+                    self._repl_set_protocol = match.group('replSetProtocol')
+                match = re.search('members: (?P<replSetMembers>[^]]+ ])', line)
+                if match:
+                    self._repl_set_members = match.group('replSetMembers')
+
 
             # if ("is now in state" in line and
             #        next(state for state in states if line.endswith(state))):
@@ -411,35 +414,23 @@ class LogFile(InputSource):
             if self._binary == "mongos":
 
                 if "Starting new replica set monitor for" in line:
-                    logevent = LogEvent(line)
-                    if "conn" in logevent.thread:
-                        match = re.search("for (?P<shardName>\w+)/"
-                                          "(?P<replSetMembers>\S+)", line)
-                        if match:
-                            shard_info = (match.group('shardName'),
-                                        match.group('replSetMembers'))
-                            self._shards.append(shard_info)
-                    else:
+                    if "[mongosMain]" in line:
                         match = re.search("for (?P<csrsName>\w+)/"
                                           "(?P<replSetMembers>\S+)", line)
                         if match:
                             csrs_info = (match.group('csrsName'),
                                          match.group('replSetMembers'))
                             self._csrs = csrs_info
-
-            elif self._binary == "mongod":
-
-                if "Starting new replica set monitor for" in line:
-                    logevent = LogEvent(line)
-                    if logevent.thread == "shard-registry-reload" or \
-                        "conn" in logevent.thread:
+                    else:
                         match = re.search("for (?P<shardName>\w+)/"
                                           "(?P<replSetMembers>\S+)", line)
                         if match:
                             shard_info = (match.group('shardName'),
-                                          match.group('replSetMembers'))
+                                        match.group('replSetMembers'))
                             self._shards.append(shard_info)
-                
+
+            elif self._binary == "mongod":
+
                 if "initializing sharding state with" in line:
                     match = re.search('configsvrConnectionString: "(?P<csrsName>\w+)/'
                                       '(?P<replSetMembers>\S+)"', line)
@@ -448,10 +439,22 @@ class LogFile(InputSource):
                                      match.group('replSetMembers'))
                         self._csrs = csrs_info
                 elif "New replica set config in use" in line:
-                    if self._repl_set and self._repl_set_members:
+                    print(self._repl_set, self._repl_set_members)
+                    if self._repl_set or self._repl_set_members:
                         csrs_info = (self._repl_set,
                                      self._repl_set_members)
                         self._csrs = csrs_info
+
+                if "Starting new replica set monitor for" in line:
+                    logevent = LogEvent(line)
+                    if self._csrs[0] in logevent.line_str:
+                        continue
+                    match = re.search("for (?P<shardName>\w+)/"
+                                        "(?P<replSetMembers>\S+)", line)
+                    if match:
+                        shard_info = (match.group('shardName'),
+                                        match.group('replSetMembers'))
+                        self._shards.append(shard_info)
 
         self._num_lines = ln + 1
 
@@ -459,13 +462,14 @@ class LogFile(InputSource):
         self.filehandle.seek(0)
 
     def _check_for_restart(self, logevent):
-        if logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
-            'mongos' in logevent.line_str):
-            self._binary = 'mongos'
 
-        elif (logevent.thread == 'initandlisten' and
+        if (logevent.thread == 'initandlisten' and
                 "db version v" in logevent.line_str):
             self._binary = 'mongod'
+
+        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
+            'mongos' in logevent.line_str):
+            self._binary = 'mongos'
 
         else:
             return False
