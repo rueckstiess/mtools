@@ -22,38 +22,36 @@ Python
 
    To check your Python version, run ``python --version`` on the command line.
 
-Installation with pip
-~~~~~~~~~~~~~~~~~~~~~
+Installation with pip3
+~~~~~~~~~~~~~~~~~~~~~~
 
-The easiest way to install mtools is via ``pip``. From the command line, run:
+The easiest way to install mtools is via ``pip3``. From the command line, run:
 
 .. code-block:: bash
 
-   pip install mtools
+   pip3 install mtools
 
 Some mtools scripts have additional `dependencies`_. To install all optional
 dependencies use:
 
 .. code-block:: bash
 
-   pip install mtools[all]
+   pip3 install mtools[all]
 
-You need to have ``pip`` installed for this to work. If you don't have ``pip``
-installed yet, try ``sudo easy_install pip`` from the command line first, or
-follow the instructions provided on the `pip installation page
-<http://www.pip-installer.org/en/latest/installing.html#using-the-installer>`__.
+You need to have Python 3.6 or newer installed. ``pip3`` should be included as
+part of the default install for supported versions of Python 3.
 
-Depending on your user rights, ``pip`` may complain about not having
+Depending on your user rights, ``pip3`` may complain about not having
 permissions to install into the system directory.
 
-In that case, you either need to add ``sudo`` in front of the ``pip`` command
+In that case, you either need to add ``sudo`` in front of the ``pip3`` command
 to install into a system directory, or append ``--user`` to install into your
 home directory.
 
 Installation from source
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-If ``pip`` is not available and you want to install mtools from source, you can
+If ``pip3`` is not available and you want to install mtools from source, you can
 get the source code by cloning the `mtools github repository
 <https://github.com/rueckstiess/mtools>`__:
 
@@ -91,14 +89,14 @@ To install all dependencies for full feature support, run:
 
 .. code-block:: bash
 
-   pip install mtools[all]
+   pip3 install mtools[all]
 
 To install dependencies for a subset of mtools utilities, specify one or more
 script names as a comma-separated list:
 
 .. code-block:: bash
 
-   pip install mtools[mlaunch,mloginfo]
+   pip3 install mtools[mlaunch,mloginfo]
 
 psutil
 ------
