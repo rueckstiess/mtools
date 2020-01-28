@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import re
 import sys
+from datetime import datetime
 from math import ceil
 
 from mtools.util.input_source import InputSource
@@ -44,6 +45,9 @@ class LogFile(InputSource):
 
         self._shards = None
         self._csrs = None
+
+        self._chunks_moved_from = None
+        self._chunks_moved_to = None
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
@@ -223,6 +227,19 @@ class LogFile(InputSource):
             self._iterate_lines()
         return self._csrs
 
+    @property
+    def chunks_moved_to(self):
+        """Return the chunks moved to this shard (if available)"""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._chunks_moved_to
+
+    @property
+    def chunks_moved_from(self):
+        """Return the chunks moved from this shard (if available)"""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._chunks_moved_from
 
     def next(self):
         """Get next line, adjust for year rollover and hint datetime format."""
@@ -302,6 +319,8 @@ class LogFile(InputSource):
         self._restarts = []
         self._rs_state = []
         self._shards = []
+        self._chunks_moved_from = []
+        self._chunks_moved_to = []
 
         ln = 0
         for ln, line in enumerate(self.filehandle):
@@ -430,31 +449,70 @@ class LogFile(InputSource):
                             self._shards.append(shard_info)
 
             elif self._binary == "mongod":
-
-                if "initializing sharding state with" in line:
-                    match = re.search('configsvrConnectionString: "(?P<csrsName>\w+)/'
-                                      '(?P<replSetMembers>\S+)"', line)
-                    if match:
-                        csrs_info = (match.group('csrsName'),
-                                     match.group('replSetMembers'))
-                        self._csrs = csrs_info
-                elif "New replica set config in use" in line:
-                    print(self._repl_set, self._repl_set_members)
-                    if self._repl_set or self._repl_set_members:
-                        csrs_info = (self._repl_set,
-                                     self._repl_set_members)
-                        self._csrs = csrs_info
+                logevent = LogEvent(line)
+                if "New replica set config in use" in line:
+                    
+                    if "configsvr: true" in line:
+                        match = re.search(' _id: "(?P<replSet>\S+)".*'
+                                          'members: (?P<replSetMembers>[^]]+ ])', line)
+                        if match:
+                            self._csrs = (
+                                match.group('replSet'),
+                                match.group('replSetMembers')
+                            )
 
                 if "Starting new replica set monitor for" in line:
-                    logevent = LogEvent(line)
-                    if self._csrs[0] in logevent.line_str:
-                        continue
-                    match = re.search("for (?P<shardName>\w+)/"
+                    match = re.search("for (?P<replSet>\w+)/"
                                         "(?P<replSetMembers>\S+)", line)
                     if match:
-                        shard_info = (match.group('shardName'),
-                                        match.group('replSetMembers'))
-                        self._shards.append(shard_info)
+                        if self._csrs:
+                            self._shards.append((
+                                match.group('replSet'),
+                                match.group('replSetMembers')
+                            ))
+                        else:
+                            self._csrs = (
+                                match.group('replSet'),
+                                match.group('replSetMembers')
+                            )
+
+                if "moveChunk.from" in line:
+                    match = re.search('ns: "(?P<namespace>\S+)".*to: "(?P<movedTo>\S+)".*'
+                                      'note: "(?P<note>\S+)"', line)
+                    if match:
+                        time = logevent.split_tokens[0]
+                        namespace = match.group('namespace')
+                        moved_to = match.group('movedTo')
+                        note = match.group('note')
+
+                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
+                        if match:
+                            errmsg = match.group('errmsg') 
+                        else:
+                            errmsg = None
+                        chunk_migration = (time, moved_to, namespace, note, errmsg)
+
+                        self._chunks_moved_from.append(chunk_migration)
+
+                if "moveChunk.to" in line:
+                    match = re.search('ns: "(?P<namespace>\S+)".*'
+                                      'note: "(?P<note>\S+)"', line)
+                    if match:
+                        time = logevent.split_tokens[0]
+                        namespace = match.group('namespace')
+                        # TODO: alter this to find moved from shard name when SERVER-45770 TICKET is added
+                        moved_from = "Unknown"
+                        note = match.group('note')
+
+                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
+                        if match:
+                            errmsg = match.group('errmsg') 
+                        else:
+                            errmsg = None
+
+                        chunk_migration = (time, moved_from, namespace, note, errmsg)
+
+                        self._chunks_moved_to.append(chunk_migration)
 
         self._num_lines = ln + 1
 
