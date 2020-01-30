@@ -48,6 +48,7 @@ class LogFile(InputSource):
 
         self._chunks_moved_from = None
         self._chunks_moved_to = None
+        self._chunk_splits = None
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
@@ -241,6 +242,14 @@ class LogFile(InputSource):
             self._iterate_lines()
         return self._chunks_moved_from
 
+    @property
+    def chunk_splits(self):
+        """Return the chunks split in this shard (if available)"""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._chunk_splits
+
+
     def next(self):
         """Get next line, adjust for year rollover and hint datetime format."""
         # use readline here because next() iterator uses internal readahead
@@ -321,7 +330,9 @@ class LogFile(InputSource):
         self._shards = []
         self._chunks_moved_from = []
         self._chunks_moved_to = []
-
+        self._chunk_splits = []
+        
+        prev_line = ""
         ln = 0
         for ln, line in enumerate(self.filehandle):
             if isinstance(line, bytes):
@@ -475,44 +486,91 @@ class LogFile(InputSource):
                                 match.group('replSet'),
                                 match.group('replSetMembers')
                             )
-
-                if "moveChunk.from" in line:
-                    match = re.search('ns: "(?P<namespace>\S+)".*to: "(?P<movedTo>\S+)".*'
-                                      'note: "(?P<note>\S+)"', line)
-                    if match:
-                        time = logevent.split_tokens[0]
-                        namespace = match.group('namespace')
-                        moved_to = match.group('movedTo')
-                        note = match.group('note')
-
-                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
+            
+            if "moveChunk.from" in line:
+                logevent = LogEvent(line)
+                match = re.search('ns: "(?P<namespace>\S+)".*'
+                                  'details: { (?P<range>.*\}).*'
+                                  'to: "(?P<movedTo>\S+)".*note: "(?P<note>\S+)"', line)
+                if match:
+                    time = logevent.datetime
+                    chunk_range = match.group('range')
+                    namespace = match.group('namespace')
+                    moved_to = match.group('movedTo')
+                    note = match.group('note')
+                    
+                    if note == "success":
+                        errmsg = None
+                    else:
+                        match = re.search(':: caused by :: (?P<errmsg>\S+):', prev_line)
                         if match:
-                            errmsg = match.group('errmsg') 
+                            errmsg = match.group('errmsg')
                         else:
-                            errmsg = None
-                        chunk_migration = (time, moved_to, namespace, note, errmsg)
+                            errmsg = "Unknown"
+                    chunk_migration = (time, chunk_range, moved_to, namespace, note, errmsg)
 
-                        self._chunks_moved_from.append(chunk_migration)
+                    self._chunks_moved_from.append(chunk_migration)
 
-                if "moveChunk.to" in line:
-                    match = re.search('ns: "(?P<namespace>\S+)".*'
-                                      'note: "(?P<note>\S+)"', line)
+            if "moveChunk.to" in line:
+                logevent = LogEvent(line)
+                match = re.search('ns: "(?P<namespace>\S+)".*'
+                                  'details: { (?P<range>.*\}).*.*note: "(?P<note>\S+)"', line)
+                if match:
+                    time = logevent.datetime
+                    chunk_range = match.group('range')
+                    namespace = match.group('namespace')
+                    # TODO: alter this to find moved from shard name when SERVER-45770 TICKET is added
+                    moved_from = "Unknown"
+                    note = match.group('note')
+
+                    match = re.search('errmsg: "(?P<errmsg>.*)"', line)
                     if match:
-                        time = logevent.split_tokens[0]
-                        namespace = match.group('namespace')
-                        # TODO: alter this to find moved from shard name when SERVER-45770 TICKET is added
-                        moved_from = "Unknown"
-                        note = match.group('note')
+                        errmsg = match.group('errmsg') 
+                    else:
+                        errmsg = None
 
-                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
-                        if match:
-                            errmsg = match.group('errmsg') 
-                        else:
-                            errmsg = None
+                    chunk_migration = (time, chunk_range, moved_from, namespace, note, errmsg)
 
-                        chunk_migration = (time, moved_from, namespace, note, errmsg)
+                    self._chunks_moved_to.append(chunk_migration)
 
-                        self._chunks_moved_to.append(chunk_migration)
+            if "ChunkSplitter" in line:
+                logevent = LogEvent(line)
+                if "Finding the split vector for" in line:
+                    match = re.search("for (?P<namespace>\S+).*"
+                                      "numSplits: (?P<numSplits>\d+)", line)
+                    if match:
+                        time = logevent.datetime
+                        split_range = None
+                        namespace = match.group("namespace")
+                        numSplits = match.group('numSplits')
+                        success = None
+                        error = None
+                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                elif "autosplitted" in line:
+                    match = re.search("autosplitted (?P<namespace>\S+).* "
+                                      "\[(?P<range>.*)\)", line)
+                    if match:
+                        time = logevent.datetime
+                        split_range = match.group("range")
+                        namespace = match.group("namespace")
+                        numSplits = 0
+                        success = True
+                        error = None
+                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                elif "Unable to auto-split chunk" in line:
+                    match = re.search("chunk \[(?P<range>.*)\) "
+                                      "in namespace (?P<namespace>\S+)"
+                                      " :: caused by :: (?P<error>\S+): ", line)                    
+                    if match:
+                        time = logevent.datetime
+                        split_range = match.group("range")
+                        namespace = match.group("namespace")
+                        numSplits = 0
+                        success = False
+                        error = match.group("error")
+                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+            
+            prev_line = line
 
         self._num_lines = ln + 1
 
