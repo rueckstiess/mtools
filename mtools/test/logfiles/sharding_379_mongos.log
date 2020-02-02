@@ -26,9 +26,9 @@
 2020-01-28T14:26:53.793+1100 I CONTROL  [mongosMain] build environment:
 2020-01-28T14:26:53.794+1100 I CONTROL  [mongosMain]     distarch: x86_64
 2020-01-28T14:26:53.794+1100 I CONTROL  [mongosMain]     target_arch: x86_64
-2020-01-28T14:26:53.795+1100 I CONTROL  [mongosMain] options: { net: { port: 27017 }, processManagement: { fork: true }, sharding: { configDB: "configRepl/localhost:27033" }, systemLog: { destination: "file", path: "/Users/giulianocelani/Documents/test_environment/3.7.9/data/mongos.log" } }
+2020-01-28T14:26:53.795+1100 I CONTROL  [mongosMain] options: { net: { port: 27017 }, processManagement: { fork: true }, sharding: { configDB: "configRepl/localhost:27033" }, systemLog: { destination: "file", path: "/Users/gc/Documents/test_environment/3.7.9/data/mongos.log" } }
 2020-01-28T14:26:53.800+1100 I NETWORK  [mongosMain] Starting new replica set monitor for configRepl/localhost:27033
-2020-01-28T14:26:53.800+1100 I SHARDING [thread1] creating distributed lock ping thread for process Giulianos-MacBook-Pro.local:27017:1580182013:8620574644003184788 (sleeping for 30000ms)
+2020-01-28T14:26:53.800+1100 I SHARDING [thread1] creating distributed lock ping thread for process gc.local:27017:1580182013:8620574644003184788 (sleeping for 30000ms)
 2020-01-28T14:26:53.803+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor] Successfully connected to localhost:27033 (1 connections now open to localhost:27033 with a 5 second timeout)
 2020-01-28T14:26:53.804+1100 W NETWORK  [ReplicaSetMonitor-TaskExecutor] Unable to reach primary for set configRepl
 2020-01-28T14:26:53.804+1100 I ASIO     [mongosMain] Connecting to localhost:27033
@@ -38,7 +38,7 @@
 2020-01-28T14:26:54.809+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
 2020-01-28T14:26:55.320+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
 2020-01-28T14:26:55.850+1100 W SHARDING [replSetDistLockPinger] pinging failed for distributed lock pinger :: caused by :: LockStateChangeFailed: findAndModify query predicate didn't match any lock document
-2020-01-28T14:26:57.738+1100 I FTDC     [mongosMain] Initializing full-time diagnostic data capture with directory '/Users/giulianocelani/Documents/test_environment/3.7.9/data/mongos.diagnostic.data'
+2020-01-28T14:26:57.738+1100 I FTDC     [mongosMain] Initializing full-time diagnostic data capture with directory '/Users/gc/Documents/test_environment/3.7.9/data/mongos.diagnostic.data'
 2020-01-28T14:26:57.739+1100 I NETWORK  [mongosMain] waiting for connections on port 27017
 2020-01-28T14:26:57.744+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58730 #5 (1 connection now open)
 2020-01-28T14:26:57.745+1100 I NETWORK  [conn5] received client metadata from 127.0.0.1:58730 conn5: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }

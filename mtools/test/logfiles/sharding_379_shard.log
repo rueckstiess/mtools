@@ -1,192 +1,64 @@
-2020-01-28T14:26:39.948+1100 I CONTROL  [initandlisten] MongoDB starting : pid=38105 port=27018 dbpath=/Users/giulianocelani/Documents/test_environment/3.7.9/data/shard01/rs1/db 64-bit host=Giulianos-MacBook-Pro.local
-2020-01-28T14:26:39.949+1100 I CONTROL  [initandlisten] db version v3.7.9
-2020-01-28T14:26:39.950+1100 I CONTROL  [initandlisten] git version: 681d1e0bf8d45c366848678811bad6f1a471f20c
-2020-01-28T14:26:39.950+1100 I CONTROL  [initandlisten] allocator: system
-2020-01-28T14:26:39.951+1100 I CONTROL  [initandlisten] modules: none
-2020-01-28T14:26:39.951+1100 I CONTROL  [initandlisten] build environment:
-2020-01-28T14:26:39.952+1100 I CONTROL  [initandlisten]     distarch: x86_64
-2020-01-28T14:26:39.952+1100 I CONTROL  [initandlisten]     target_arch: x86_64
-2020-01-28T14:26:39.953+1100 I CONTROL  [initandlisten] options: { net: { port: 27018 }, processManagement: { fork: true }, replication: { replSet: "shard01" }, sharding: { clusterRole: "shardsvr" }, storage: { dbPath: "/Users/giulianocelani/Documents/test_environment/3.7.9/data/shard01/rs1/db", wiredTiger: { engineConfig: { cacheSizeGB: 1.0 } } }, systemLog: { destination: "file", path: "/Users/giulianocelani/Documents/test_environment/3.7.9/data/shard01/rs1/mongod.log" } }
-2020-01-28T14:26:39.954+1100 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=1024M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
-2020-01-28T14:26:40.383+1100 I STORAGE  [initandlisten] WiredTiger message [1580182000:383550][38105:0x10d9c95c0], txn-recover: Set global recovery timestamp: 0
-2020-01-28T14:26:40.414+1100 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
-2020-01-28T14:26:40.457+1100 I CONTROL  [initandlisten] 
-2020-01-28T14:26:40.458+1100 I CONTROL  [initandlisten] ** NOTE: This is a development version (3.7.9) of MongoDB.
-2020-01-28T14:26:40.459+1100 I CONTROL  [initandlisten] **       Not recommended for production.
-2020-01-28T14:26:40.460+1100 I CONTROL  [initandlisten] 
-2020-01-28T14:26:40.461+1100 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2020-01-28T14:26:40.462+1100 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2020-01-28T14:26:40.462+1100 I CONTROL  [initandlisten] 
-2020-01-28T14:26:40.463+1100 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
-2020-01-28T14:26:40.464+1100 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
-2020-01-28T14:26:40.465+1100 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
-2020-01-28T14:26:40.465+1100 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
-2020-01-28T14:26:40.466+1100 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
-2020-01-28T14:26:40.467+1100 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
-2020-01-28T14:26:40.468+1100 I CONTROL  [initandlisten] 
-2020-01-28T14:26:40.469+1100 I CONTROL  [initandlisten] 
-2020-01-28T14:26:40.470+1100 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
-2020-01-28T14:26:40.472+1100 W SHARDING [initandlisten] Started with --shardsvr, but no shardIdentity document was found on disk in admin.system.version. This most likely means this server has not yet been added to a sharded cluster.
-2020-01-28T14:26:40.474+1100 I STORAGE  [initandlisten] createCollection: local.startup_log with generated UUID: 2be950e2-7eb0-4a75-8f0f-4574a4125380
-2020-01-28T14:26:40.515+1100 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/Users/giulianocelani/Documents/test_environment/3.7.9/data/shard01/rs1/db/diagnostic.data'
-2020-01-28T14:26:40.517+1100 I STORAGE  [initandlisten] createCollection: local.replset.oplogTruncateAfterPoint with generated UUID: 1950f988-55ad-455b-a3c3-23deff4e5472
-2020-01-28T14:26:40.559+1100 I STORAGE  [initandlisten] createCollection: local.replset.minvalid with generated UUID: 4f1acae1-7538-4831-947b-16c27f7411e4
-2020-01-28T14:26:40.603+1100 I REPL     [initandlisten] Did not find local voted for document at startup.
-2020-01-28T14:26:40.604+1100 I REPL     [initandlisten] Did not find local Rollback ID document at startup. Creating one.
-2020-01-28T14:26:40.606+1100 I STORAGE  [initandlisten] createCollection: local.system.rollback.id with generated UUID: 32999564-474a-4ad1-9f05-c8dadaf37d89
-2020-01-28T14:26:40.657+1100 I REPL     [initandlisten] Initialized the rollback ID to 1
-2020-01-28T14:26:40.658+1100 I REPL     [initandlisten] Did not find local replica set configuration document at startup;  NoMatchingDocument: Did not find replica set configuration document in local.system.replset
-2020-01-28T14:26:40.659+1100 I NETWORK  [initandlisten] waiting for connections on port 27018
-2020-01-28T14:26:51.774+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58600 #1 (1 connection now open)
-2020-01-28T14:26:51.775+1100 I NETWORK  [conn1] received client metadata from 127.0.0.1:58600 conn1: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:26:51.780+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58604 #2 (2 connections now open)
-2020-01-28T14:26:51.781+1100 I NETWORK  [conn2] received client metadata from 127.0.0.1:58604 conn2: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:26:51.785+1100 I NETWORK  [conn2] end connection 127.0.0.1:58604 (1 connection now open)
-2020-01-28T14:26:51.785+1100 I NETWORK  [conn1] end connection 127.0.0.1:58600 (0 connections now open)
-2020-01-28T14:26:52.108+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58636 #3 (1 connection now open)
-2020-01-28T14:26:52.108+1100 I NETWORK  [conn3] received client metadata from 127.0.0.1:58636 conn3: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:26:52.110+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58637 #4 (2 connections now open)
-2020-01-28T14:26:52.110+1100 I NETWORK  [conn4] received client metadata from 127.0.0.1:58637 conn4: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:26:52.117+1100 I REPL     [conn4] replSetInitiate admin command received from client
-2020-01-28T14:26:52.133+1100 I REPL     [conn4] replSetInitiate config object with 3 members parses ok
-2020-01-28T14:26:52.139+1100 I ASIO     [conn4] Connecting to localhost:27019
-2020-01-28T14:26:52.144+1100 I ASIO     [conn4] Connecting to localhost:27020
-2020-01-28T14:26:52.156+1100 I REPL     [conn4] ******
-2020-01-28T14:26:52.157+1100 I REPL     [conn4] creating replication oplog of size: 192MB...
-2020-01-28T14:26:52.157+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58642 #9 (3 connections now open)
-2020-01-28T14:26:52.158+1100 I STORAGE  [conn4] createCollection: local.oplog.rs with generated UUID: df5c063e-cd9d-4b06-816b-245626afc102
-2020-01-28T14:26:52.159+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58643 #10 (4 connections now open)
-2020-01-28T14:26:52.159+1100 I NETWORK  [conn9] received client metadata from 127.0.0.1:58642 conn9: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:52.160+1100 I NETWORK  [conn10] received client metadata from 127.0.0.1:58643 conn10: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:52.176+1100 I STORAGE  [conn4] Starting WiredTigerRecordStoreThread local.oplog.rs
-2020-01-28T14:26:52.178+1100 I STORAGE  [conn4] The size storer reports that the oplog contains 0 records totaling to 0 bytes
-2020-01-28T14:26:52.178+1100 I STORAGE  [conn4] Scanning the oplog to determine where to place markers for truncation
-2020-01-28T14:26:52.260+1100 I REPL     [conn4] ******
-2020-01-28T14:26:52.262+1100 I STORAGE  [conn4] createCollection: local.system.replset with generated UUID: 05c50501-8293-459f-930d-770e0c58de8f
-2020-01-28T14:26:52.406+1100 I STORAGE  [conn4] createCollection: admin.system.version with provided UUID: 04d4c4c2-d7ed-4510-8884-21215509caea
-2020-01-28T14:26:52.446+1100 I COMMAND  [conn4] setting featureCompatibilityVersion to 3.6
-2020-01-28T14:26:52.447+1100 I REPL     [conn4] New replica set config in use: { _id: "shard01", version: 1, protocolVersion: 1, writeConcernMajorityJournalDefault: true, members: [ { _id: 0, host: "localhost:27018", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "localhost:27019", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "localhost:27020", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, catchUpTimeoutMillis: -1, catchUpTakeoverDelayMillis: 30000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('5e2fa9fcc4e02a320b990cfc') } }
-2020-01-28T14:26:52.448+1100 I REPL     [conn4] This node is localhost:27018 in the config
-2020-01-28T14:26:52.449+1100 I REPL     [conn4] transition to STARTUP2 from STARTUP
-2020-01-28T14:26:52.450+1100 I REPL     [conn4] Starting replication storage threads
-2020-01-28T14:26:52.450+1100 I REPL     [replexec-0] Member localhost:27019 is now in state STARTUP
-2020-01-28T14:26:52.452+1100 I REPL     [replexec-1] Member localhost:27020 is now in state STARTUP
-2020-01-28T14:26:52.453+1100 I REPL     [conn4] transition to RECOVERING from STARTUP2
-2020-01-28T14:26:52.454+1100 I REPL     [conn4] Starting replication fetcher thread
-2020-01-28T14:26:52.454+1100 I REPL     [conn4] Starting replication applier thread
-2020-01-28T14:26:52.455+1100 I REPL     [conn4] Starting replication reporter thread
-2020-01-28T14:26:52.455+1100 I REPL     [rsSync-0] Starting oplog application
-2020-01-28T14:26:52.456+1100 I COMMAND  [conn4] command local.system.replset appName: "mlaunch v1.6.2-dev" command: replSetInitiate { replSetInitiate: { _id: "shard01", members: [ { _id: 0, host: "localhost:27018" }, { _id: 1, host: "localhost:27019" }, { _id: 2, host: "localhost:27020" } ] }, $clusterTime: { clusterTime: Timestamp(0, 0), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } }, $db: "admin", $readPreference: { mode: "primaryPreferred" } } numYields:0 reslen:163 locks:{ Global: { acquireCount: { r: 15, w: 6, W: 2 }, acquireWaitCount: { W: 1 }, timeAcquiringMicros: { W: 116 } }, Database: { acquireCount: { r: 3, w: 3, W: 3 } }, Collection: { acquireCount: { r: 1, w: 2 } }, oplog: { acquireCount: { r: 2, w: 3 } } } protocol:op_msg 339ms
-2020-01-28T14:26:52.457+1100 I REPL     [rsSync-0] transition to SECONDARY from RECOVERING
-2020-01-28T14:26:52.458+1100 I NETWORK  [conn4] end connection 127.0.0.1:58637 (3 connections now open)
-2020-01-28T14:26:52.458+1100 I NETWORK  [conn3] end connection 127.0.0.1:58636 (2 connections now open)
-2020-01-28T14:26:54.170+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58680 #11 (3 connections now open)
-2020-01-28T14:26:54.174+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58681 #12 (4 connections now open)
-2020-01-28T14:26:54.174+1100 I NETWORK  [conn11] end connection 127.0.0.1:58680 (3 connections now open)
-2020-01-28T14:26:54.175+1100 I NETWORK  [conn12] end connection 127.0.0.1:58681 (2 connections now open)
-2020-01-28T14:26:54.464+1100 I REPL     [replexec-0] Member localhost:27019 is now in state STARTUP2
-2020-01-28T14:26:54.470+1100 I REPL     [replexec-1] Member localhost:27020 is now in state STARTUP2
-2020-01-28T14:26:54.828+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58692 #13 (3 connections now open)
-2020-01-28T14:26:54.831+1100 I NETWORK  [conn13] received client metadata from 127.0.0.1:58692 conn13: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:54.843+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58697 #14 (4 connections now open)
-2020-01-28T14:26:54.848+1100 I NETWORK  [conn14] received client metadata from 127.0.0.1:58697 conn14: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:54.896+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58698 #15 (5 connections now open)
-2020-01-28T14:26:54.901+1100 I NETWORK  [conn15] received client metadata from 127.0.0.1:58698 conn15: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:54.916+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58699 #16 (6 connections now open)
-2020-01-28T14:26:54.926+1100 I NETWORK  [conn16] received client metadata from 127.0.0.1:58699 conn16: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:26:55.472+1100 I REPL     [replexec-0] Member localhost:27019 is now in state SECONDARY
-2020-01-28T14:26:55.488+1100 I REPL     [replexec-1] Member localhost:27020 is now in state SECONDARY
-2020-01-28T14:26:57.768+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58737 #17 (7 connections now open)
-2020-01-28T14:26:57.769+1100 I NETWORK  [conn17] received client metadata from 127.0.0.1:58737 conn17: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:02.815+1100 I REPL     [replexec-0] Starting an election, since we've seen no PRIMARY in the past 10000ms
-2020-01-28T14:27:02.816+1100 I REPL     [replexec-0] conducting a dry run election to see if we could be elected. current term: 0
-2020-01-28T14:27:02.818+1100 I REPL     [replexec-1] VoteRequester(term 0 dry run) received a yes vote from localhost:27019; response message: { term: 0, voteGranted: true, reason: "", ok: 1.0, operationTime: Timestamp(1580182012, 1), $clusterTime: { clusterTime: Timestamp(1580182016, 3), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } } }
-2020-01-28T14:27:02.818+1100 I REPL     [replexec-1] dry election run succeeded, running for election in term 1
-2020-01-28T14:27:02.819+1100 I STORAGE  [replexec-1] createCollection: local.replset.election with generated UUID: da248209-b764-4112-ae6c-ab1f055ffd17
-2020-01-28T14:27:02.934+1100 I REPL     [replexec-0] VoteRequester(term 1) received a yes vote from localhost:27019; response message: { term: 1, voteGranted: true, reason: "", ok: 1.0, operationTime: Timestamp(1580182012, 1), $clusterTime: { clusterTime: Timestamp(1580182022, 2), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } } }
-2020-01-28T14:27:02.937+1100 I REPL     [replexec-0] election succeeded, assuming primary role in term 1
-2020-01-28T14:27:02.942+1100 I REPL     [replexec-0] transition to PRIMARY from SECONDARY
-2020-01-28T14:27:02.943+1100 I REPL     [replexec-0] Entering primary catch-up mode.
-2020-01-28T14:27:02.943+1100 I ASIO     [replexec-3] Connecting to localhost:27020
-2020-01-28T14:27:02.947+1100 I REPL     [replexec-0] Caught up to the latest optime known via heartbeats after becoming primary.
-2020-01-28T14:27:02.947+1100 I REPL     [replexec-0] Exited primary catch-up mode.
-2020-01-28T14:27:02.948+1100 I REPL     [replexec-0] Stopping replication producer
-2020-01-28T14:27:04.538+1100 I STORAGE  [rsSync-0] createCollection: config.transactions with generated UUID: 3778078c-3cbd-46b7-bf6d-74b5e9c0c931
-2020-01-28T14:27:04.575+1100 I REPL     [rsSync-0] transition to primary complete; database writes are now permitted
-2020-01-28T14:27:04.847+1100 I NETWORK  [conn13] end connection 127.0.0.1:58692 (6 connections now open)
-2020-01-28T14:27:04.848+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58742 #19 (7 connections now open)
-2020-01-28T14:27:04.849+1100 I NETWORK  [conn19] received client metadata from 127.0.0.1:58742 conn19: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:04.851+1100 I COMMAND  [conn19] CMD: drop config.system.sessions
-2020-01-28T14:27:04.919+1100 I NETWORK  [conn15] end connection 127.0.0.1:58698 (6 connections now open)
-2020-01-28T14:27:05.183+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58743 #20 (7 connections now open)
-2020-01-28T14:27:05.184+1100 I NETWORK  [conn20] received client metadata from 127.0.0.1:58743 conn20: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:05.191+1100 I STORAGE  [conn20] Triggering the first stable checkpoint. Initial Data: Timestamp(1580182012, 1) PrevStable: Timestamp(0, 0) CurrStable: Timestamp(1580182024, 1)
-2020-01-28T14:27:05.231+1100 I COMMAND  [conn19] command config.$cmd command: drop { drop: "system.sessions", writeConcern: { w: "majority" }, $db: "config" } numYields:0 ok:0 errMsg:"ns not found" errName:NamespaceNotFound errCode:26 reslen:230 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, Database: { acquireCount: { W: 1 } } } protocol:op_msg 380ms
-2020-01-28T14:27:05.237+1100 I SHARDING [conn19] initializing sharding state with: { _id: "shardIdentity", configsvrConnectionString: "configRepl/localhost:27033", shardName: "shard01", clusterId: ObjectId('5e2fa9ff5da527f3a7ebc4b7') }
-2020-01-28T14:27:05.246+1100 I NETWORK  [conn19] Starting new replica set monitor for configRepl/localhost:27033
-2020-01-28T14:27:05.252+1100 I SHARDING [thread16] creating distributed lock ping thread for process Giulianos-MacBook-Pro.local:27018:1580182025:3905587222256589893 (sleeping for 30000ms)
-2020-01-28T14:27:05.252+1100 I SHARDING [conn19] initialized sharding components for primary node.
-2020-01-28T14:27:05.263+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor] Successfully connected to localhost:27033 (1 connections now open to localhost:27033 with a 5 second timeout)
-2020-01-28T14:27:05.268+1100 I ASIO     [replSetDistLockPinger] Connecting to localhost:27033
-2020-01-28T14:27:05.273+1100 I ASIO     [replSetDistLockPinger] Connecting to localhost:27033
-2020-01-28T14:27:05.284+1100 I COMMAND  [conn19] setting featureCompatibilityVersion to upgrading to 4.0
-2020-01-28T14:27:05.290+1100 I NETWORK  [conn19] Skip closing connection for connection # 20
-2020-01-28T14:27:05.296+1100 I NETWORK  [conn19] Skip closing connection for connection # 19
-2020-01-28T14:27:05.297+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry] Connecting to localhost:27033
-2020-01-28T14:27:05.302+1100 I NETWORK  [conn19] Skip closing connection for connection # 17
-2020-01-28T14:27:05.308+1100 W SHARDING [replSetDistLockPinger] pinging failed for distributed lock pinger :: caused by :: LockStateChangeFailed: findAndModify query predicate didn't match any lock document
-2020-01-28T14:27:05.314+1100 I NETWORK  [conn19] Skip closing connection for connection # 16
-2020-01-28T14:27:05.329+1100 I NETWORK  [conn19] Skip closing connection for connection # 14
-2020-01-28T14:27:05.335+1100 I NETWORK  [conn19] Skip closing connection for connection # 10
-2020-01-28T14:27:05.346+1100 I NETWORK  [conn19] Skip closing connection for connection # 9
-2020-01-28T14:27:05.351+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58750 #24 (8 connections now open)
-2020-01-28T14:27:05.351+1100 I COMMAND  [conn19] setting featureCompatibilityVersion to 4.0
-2020-01-28T14:27:05.357+1100 I NETWORK  [conn24] received client metadata from 127.0.0.1:58750 conn24: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:05.363+1100 I NETWORK  [conn19] Skip closing connection for connection # 24
-2020-01-28T14:27:05.373+1100 I NETWORK  [conn19] Skip closing connection for connection # 20
-2020-01-28T14:27:05.384+1100 I NETWORK  [conn19] Skip closing connection for connection # 19
-2020-01-28T14:27:05.389+1100 I NETWORK  [conn19] Skip closing connection for connection # 17
-2020-01-28T14:27:05.394+1100 I NETWORK  [conn19] Skip closing connection for connection # 16
-2020-01-28T14:27:05.399+1100 I NETWORK  [conn19] Skip closing connection for connection # 14
-2020-01-28T14:27:05.405+1100 I NETWORK  [conn19] Skip closing connection for connection # 10
-2020-01-28T14:27:05.410+1100 I NETWORK  [conn19] Skip closing connection for connection # 9
-2020-01-28T14:27:05.415+1100 I COMMAND  [conn19] command admin.$cmd command: setFeatureCompatibilityVersion { setFeatureCompatibilityVersion: "4.0", $db: "admin" } numYields:0 reslen:333 locks:{ Global: { acquireCount: { r: 7, w: 6, R: 1 } }, Database: { acquireCount: { w: 2, W: 4 } }, Collection: { acquireCount: { w: 4 } }, Mutex: { acquireCount: { W: 1 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 131ms
-2020-01-28T14:27:05.569+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58762 #26 (9 connections now open)
-2020-01-28T14:27:05.570+1100 I NETWORK  [conn26] received client metadata from 127.0.0.1:58762 conn26: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:05.578+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58764 #27 (10 connections now open)
-2020-01-28T14:27:05.579+1100 I NETWORK  [conn27] received client metadata from 127.0.0.1:58764 conn27: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:05.777+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58766 #28 (11 connections now open)
-2020-01-28T14:27:05.781+1100 I NETWORK  [conn28] received client metadata from 127.0.0.1:58766 conn28: { driver: { name: "NetworkInterfaceTL", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:06.983+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58783 #29 (12 connections now open)
-2020-01-28T14:27:06.992+1100 I NETWORK  [conn29] received client metadata from 127.0.0.1:58783 conn29: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:07.013+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58786 #30 (13 connections now open)
-2020-01-28T14:27:07.017+1100 I NETWORK  [conn30] received client metadata from 127.0.0.1:58786 conn30: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:07.437+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58811 #31 (14 connections now open)
-2020-01-28T14:27:07.447+1100 I NETWORK  [conn31] received client metadata from 127.0.0.1:58811 conn31: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:07.458+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58812 #32 (15 connections now open)
-2020-01-28T14:27:07.462+1100 I NETWORK  [conn32] received client metadata from 127.0.0.1:58812 conn32: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:07.688+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58842 #33 (16 connections now open)
-2020-01-28T14:27:07.697+1100 I NETWORK  [conn33] received client metadata from 127.0.0.1:58842 conn33: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:07.924+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58873 #34 (17 connections now open)
-2020-01-28T14:27:07.928+1100 I NETWORK  [conn34] received client metadata from 127.0.0.1:58873 conn34: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
-2020-01-28T14:27:08.993+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58889 #35 (18 connections now open)
-2020-01-28T14:27:08.995+1100 I NETWORK  [conn35] received client metadata from 127.0.0.1:58889 conn35: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:27:08.999+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58894 #36 (19 connections now open)
-2020-01-28T14:27:09.006+1100 I NETWORK  [conn36] received client metadata from 127.0.0.1:58894 conn36: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:27:09.012+1100 I NETWORK  [conn36] end connection 127.0.0.1:58894 (18 connections now open)
-2020-01-28T14:27:09.012+1100 I NETWORK  [conn35] end connection 127.0.0.1:58889 (17 connections now open)
-2020-01-28T14:27:09.041+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58924 #37 (18 connections now open)
-2020-01-28T14:27:09.042+1100 I NETWORK  [conn37] received client metadata from 127.0.0.1:58924 conn37: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:27:09.044+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58925 #38 (19 connections now open)
-2020-01-28T14:27:09.044+1100 I NETWORK  [conn38] received client metadata from 127.0.0.1:58925 conn38: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:27:09.045+1100 I NETWORK  [conn38] end connection 127.0.0.1:58925 (18 connections now open)
-2020-01-28T14:27:09.045+1100 I NETWORK  [conn37] end connection 127.0.0.1:58924 (17 connections now open)
-2020-01-28T14:27:09.118+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58957 #39 (18 connections now open)
-2020-01-28T14:27:09.119+1100 I NETWORK  [conn39] received client metadata from 127.0.0.1:58957 conn39: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
-2020-01-28T14:27:09.121+1100 I NETWORK  [conn39] end connection 127.0.0.1:58957 (17 connections now open)
-2020-01-28T14:27:12.866+1100 I ASIO     [NetworkInterfaceASIO-Replication] Ending connection to host localhost:27020 due to bad connection status; 1 connections to that host remain open
-2020-01-28T14:27:35.314+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard01/localhost:27018,localhost:27019,localhost:27020
-2020-01-28T14:27:35.318+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard02/localhost:27021,localhost:27022,localhost:27023
-2020-01-28T14:27:35.319+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard03/localhost:27024,localhost:27025,localhost:27026
-2020-01-28T14:27:35.319+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard04/localhost:27027,localhost:27028,localhost:27029
-2020-01-28T14:27:35.320+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard05/localhost:27030,localhost:27031,localhost:27032
+2020-01-28T14:26:41.452+1100 I CONTROL  [initandlisten] MongoDB starting : pid=38111 port=27020 dbpath=/Users/gc/Documents/test_environment/3.7.9/data/shard01/rs3/db 64-bit host=gc.local
+2020-01-28T14:26:41.453+1100 I CONTROL  [initandlisten] db version v3.7.9
+2020-01-28T14:26:41.453+1100 I CONTROL  [initandlisten] git version: 681d1e0bf8d45c366848678811bad6f1a471f20c
+2020-01-28T14:26:41.454+1100 I CONTROL  [initandlisten] allocator: system
+2020-01-28T14:26:41.454+1100 I CONTROL  [initandlisten] modules: none
+2020-01-28T14:26:41.455+1100 I CONTROL  [initandlisten] build environment:
+2020-01-28T14:26:41.456+1100 I CONTROL  [initandlisten]     distarch: x86_64
+2020-01-28T14:26:41.456+1100 I CONTROL  [initandlisten]     target_arch: x86_64
+2020-01-28T14:26:41.457+1100 I CONTROL  [initandlisten] options: { net: { port: 27020 }, processManagement: { fork: true }, replication: { replSet: "shard01" }, sharding: { clusterRole: "shardsvr" }, storage: { dbPath: "/Users/gc/Documents/test_environment/3.7.9/data/shard01/rs3/db", wiredTiger: { engineConfig: { cacheSizeGB: 1.0 } } }, systemLog: { destination: "file", path: "/Users/gc/Documents/test_environment/3.7.9/data/shard01/rs3/mongod.log" } }
+2020-01-28T14:26:41.458+1100 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=1024M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2020-01-28T14:26:41.886+1100 I STORAGE  [initandlisten] WiredTiger message [1580182001:886675][38111:0x1210885c0], txn-recover: Set global recovery timestamp: 0
+2020-01-28T14:26:41.916+1100 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2020-01-28T14:26:41.961+1100 I CONTROL  [initandlisten] 
+2020-01-28T14:26:41.963+1100 I CONTROL  [initandlisten] ** NOTE: This is a development version (3.7.9) of MongoDB.
+2020-01-28T14:26:41.964+1100 I CONTROL  [initandlisten] **       Not recommended for production.
+2020-01-28T14:26:41.965+1100 I CONTROL  [initandlisten] 
+2020-01-28T14:26:41.967+1100 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2020-01-28T14:26:41.968+1100 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2020-01-28T14:26:41.969+1100 I CONTROL  [initandlisten] 
+2020-01-28T14:26:41.970+1100 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2020-01-28T14:26:41.971+1100 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2020-01-28T14:26:41.971+1100 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2020-01-28T14:26:41.972+1100 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2020-01-28T14:26:41.973+1100 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2020-01-28T14:26:41.974+1100 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2020-01-28T14:26:41.974+1100 I CONTROL  [initandlisten] 
+2020-01-28T14:26:41.975+1100 I CONTROL  [initandlisten] 
+2020-01-28T14:26:41.976+1100 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+2020-01-28T14:26:41.979+1100 W SHARDING [initandlisten] Started with --shardsvr, but no shardIdentity document was found on disk in admin.system.version. This most likely means this server has not yet been added to a sharded cluster.
+2020-01-28T14:26:41.981+1100 I STORAGE  [initandlisten] createCollection: local.startup_log with generated UUID: 2f69b51e-ee60-4311-8acd-ca0f620478ee
+2020-01-28T14:26:42.016+1100 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/Users/gc/Documents/test_environment/3.7.9/data/shard01/rs3/db/diagnostic.data'
+2020-01-28T14:26:42.019+1100 I STORAGE  [initandlisten] createCollection: local.replset.oplogTruncateAfterPoint with generated UUID: ef529829-4a1b-4e36-ba3b-5513868df99c
+2020-01-28T14:26:42.062+1100 I STORAGE  [initandlisten] createCollection: local.replset.minvalid with generated UUID: 0514ee09-f4d0-4c00-b8ff-a6954607b429
+2020-01-28T14:26:42.102+1100 I REPL     [initandlisten] Did not find local voted for document at startup.
+2020-01-28T14:26:42.104+1100 I REPL     [initandlisten] Did not find local Rollback ID document at startup. Creating one.
+2020-01-28T14:26:42.105+1100 I STORAGE  [initandlisten] createCollection: local.system.rollback.id with generated UUID: 2eb6f3c5-7527-4cf7-9f2b-2509f9c653fa
+2020-01-28T14:26:42.144+1100 I REPL     [initandlisten] Initialized the rollback ID to 1
+2020-01-28T14:26:42.146+1100 I REPL     [initandlisten] Did not find local replica set configuration document at startup;  NoMatchingDocument: Did not find replica set configuration document in local.system.replset
+2020-01-28T14:26:42.147+1100 I NETWORK  [initandlisten] waiting for connections on port 27020
+2020-01-28T14:26:54.252+1100 I REPL     [replexec-0] New replica set config in use: { _id: "shard01", version: 1, protocolVersion: 1, writeConcernMajorityJournalDefault: true, members: [ { _id: 0, host: "localhost:27018", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "localhost:27019", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "localhost:27020", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, catchUpTimeoutMillis: -1, catchUpTakeoverDelayMillis: 30000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('5e2fa9fcc4e02a320b990cfc') } }
+2020-01-28T14:27:05.515+1100 I NETWORK  [repl writer worker 5] Starting new replica set monitor for configRepl/localhost:27033
+2020-01-28T14:27:05.551+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard01/localhost:27018,localhost:27019,localhost:27020
+2020-01-28T14:27:35.565+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard02/localhost:27021,localhost:27022,localhost:27023
+2020-01-28T14:27:35.567+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard03/localhost:27024,localhost:27025,localhost:27026
+2020-01-28T14:27:35.567+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard04/localhost:27027,localhost:27028,localhost:27029
+2020-01-28T14:27:35.568+1100 I NETWORK  [shard registry reload] Starting new replica set monitor for shard05/localhost:27030,localhost:27031,localhost:27032
+2020-01-28T14:34:38.592+1100 I SHARDING [migrateThread] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T14:34:38.591+1100-5e2fabce2bbdbea998b6f719", server: "gc.local", clientAddr: "", time: new Date(1580182478591), what: "moveChunk.to", ns: "test.products", details: { min: { sku: 23153496 }, max: { sku: 28928914 }, step 1 of 6: 202, step 2 of 6: 219, step 3 of 6: 14698, step 4 of 6: 0, step 5 of 6: 59, step 6 of 6: 252, note: "success" } }
+2020-01-28T14:53:31.076+1100 I SHARDING [migrateThread] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T14:53:31.076+1100-5e2fb03b2bbdbea998b70eed", server: "gc.local", clientAddr: "", time: new Date(1580183611076), what: "moveChunk.to", ns: "test.products", details: { min: { sku: 28928914 }, max: { sku: 30509163 }, step 1 of 6: 169, step 2 of 6: 188, step 3 of 6: 2062, step 4 of 6: 0, step 5 of 6: 52, step 6 of 6: 204, note: "success" } }
+2020-01-28T15:59:39.650+1100 I SHARDING [conn80] Deletion of test.products range [{ sku: 9999265900050000 }, { sku: MaxKey }) will be scheduled after all possibly dependent queries finish
+2020-01-28T15:59:39.652+1100 I SHARDING [conn80] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T15:59:39.652+1100-5e2fbfbb42d5e3b340857469", server: "gc.local", clientAddr: "127.0.0.1:59531", time: new Date(1580187579652), what: "moveChunk.from", ns: "test.products", details: { min: { sku: 9999265900050000 }, max: { sku: MaxKey }, step 1 of 6: 0, step 2 of 6: 47, step 3 of 6: 102, step 4 of 6: 85, step 5 of 6: 423, step 6 of 6: 118, to: "shard02", from: "shard01", note: "success" } }
+2020-01-28T16:01:59.466+1100 I SHARDING [conn80] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T16:01:59.466+1100-5e2fc04742d5e3b3408a48ae", server: "gc.local", clientAddr: "127.0.0.1:59531", time: new Date(1580187719466), what: "moveChunk.from", ns: "test.products", details: { min: { sku: 30509163 }, max: { sku: 280124000.0 }, step 1 of 6: 0, step 2 of 6: 47, step 3 of 6: 319, step 4 of 6: 24849, step 5 of 6: 401, step 6 of 6: 142, to: "shard05", from: "shard01", note: "success" } }
+2020-01-28T16:02:27.344+1100 I SHARDING [conn80] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T16:02:27.343+1100-5e2fc06342d5e3b3408ae017", server: "gc.local", clientAddr: "127.0.0.1:59531", time: new Date(1580187747343), what: "moveChunk.from", ns: "test.products", details: { min: { sku: 280124000.0 }, max: { sku: 702192000.0 }, step 1 of 6: 0, step 2 of 6: 27, step 3 of 6: 445, step 4 of 6: 25618, step 5 of 6: 456, step 6 of 6: 99, to: "shard03", from: "shard01", note: "success" } }
+2020-01-28T16:04:43.964+1100 I SHARDING [conn80] about to log metadata event into changelog: { _id: "gc.local-2020-01-28T16:04:43.964+1100-5e2fc0eb42d5e3b3408f95f4", server: "gc.local", clientAddr: "127.0.0.1:59531", time: new Date(1580187883964), what: "moveChunk.from", ns: "test.products", details: { min: { sku: 702192000.0 }, max: { sku: 1121620000.0 }, step 1 of 6: 0, step 2 of 6: 48, step 3 of 6: 288, step 4 of 6: 23827, step 5 of 6: 415, step 6 of 6: 90, to: "shard04", from: "shard01", note: "success" } }
+2020-01-28T16:14:39.689+1100 I SHARDING [Collection Range Deleter] Deferring deletion of test.products range [{ sku: 30509163 }, { sku: 280124000.0 }) until 2020-01-28T16:16:59.464+1100
+2020-01-28T16:18:30.800+1100 I SHARDING [Collection Range Deleter] Deferring deletion of test.products range [{ sku: 702192000.0 }, { sku: 1121620000.0 }) until 2020-01-28T16:19:43.953+1100
+2020-01-29T15:20:30.800+1100 W SHARDING [ChunkSplitter-80] Finding the split vector for test.products over { sku: 1.0 } keyCount: 29641 numSplits: 1 lookedAt: 19983 took 111ms
+2020-01-29T15:22:30.800+1100 I SHARDING [ChunkSplitter-79] autosplitted test.products chunk: shard: shard01, lastmod: 1106|31||5ddf12dbc2e6060a9c3bdd01, [{ sku: 28928914 }, { sku: 30509163 }) into 3 parts (maxChunkSizeBytes 67108864)
+2020-01-29T15:25:30.800+1100 W SHARDING [ChunkSplitter-80] Finding the split vector for test.products over { sku: 1.0 } keyCount: 29641 numSplits: 1 lookedAt: 19961 took 127ms
+2020-01-29T15:30:30.800+1100 W SHARDING [ChunkSplitter-80] Finding the split vector for test.products over { sku: 1.0 } keyCount: 29641 numSplits: 1 lookedAt: 20087 took 113ms
+2020-01-29T15:45:30.800+1100 W SHARDING [ChunkSplitter-80] Finding the split vector for test.products over { sku: 1.0 } keyCount: 29641 numSplits: 1 lookedAt: 19849 took 303ms
+2020-01-29T15:50:30.800+1100 W SHARDING [ChunkSplitter-82] Finding the split vector for test.products over { sku: 1.0 } keyCount: 29641 numSplits: 1 lookedAt: 20487 took 110ms
+2020-01-29T16:22:30.800+1100 I SHARDING [ChunkSplitter-82] autosplitted test.products chunk: shard: shard01, lastmod: 1106|37||5ddf12dbc2e6060a9c3bdd01, [{ sku: 28928914 }, { sku: 30509163 }) into 3 parts (maxChunkSizeBytes 67108864)
+2020-01-29T16:23:30.800+1100 I SHARDING [ChunkSplitter-82] autosplitted test.products chunk: shard: shard01, lastmod: 1106|16||5ddf12dbc2e6060a9c3bdd01, [{ sku: 23153496 }, { sku: 28928914 }) into 3 parts (maxChunkSizeBytes 67108864)
+2020-01-29T16:34:30.800+1100 I SHARDING [ChunkSplitter-85] autosplitted test.products chunk: shard: shard01, lastmod: 1106|43||5ddf12dbc2e6060a9c3bdd01, [{ sku: 23153496 }, { sku: 28928914 }) into 3 parts (maxChunkSizeBytes 67108864)

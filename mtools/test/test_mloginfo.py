@@ -412,57 +412,90 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'Chunks Moved To This Shard:' in line, lines))
         assert any(map(lambda line: 'Chunk Split Statistics:' in line, lines))
 
+    def test_sharding_missing_information(self):
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: 'no sharding info found.' in line, lines))
+        assert any(map(lambda line: 'no error messages found.' in line, lines))
+        assert any(map(lambda line: 'no chunk migrations found.' in line, lines))
+        assert any(map(lambda line: 'no chunk migrations found.' in line, lines))
+        assert any(map(lambda line: 'no chunk splits found.' in line, lines))
+
     def test_sharding_overview_shard(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
-                                    'test/logfiles/', 'sharding_379_shard.log')
-        self._test_sharding(logfile_path, **{'The role of this node': '(shard)',
-                                             'Shards': '',
-                                             'shard01': 'localhost:27018,localhost:27019,localhost:27020',
-                                             'shard02': 'localhost:27021,localhost:27022,localhost:27023',
-                                             'shard03': 'localhost:27024,localhost:27025,localhost:27026',
-                                             'shard04': 'localhost:27027,localhost:27028,localhost:27029',
-                                             'shard05': 'localhost:27030,localhost:27031,localhost:27032',
-                                             'CSRS': '',
-                                             'configRepl': 'localhost:27033'})
+        self._test_init('sharding_379_shard.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: '(shard)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: 'localhost:27033' in line, lines))
 
     def test_sharding_overview_csrs(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
-                                    'test/logfiles/', 'sharding_379_CSRS.log')
-        self._test_sharding(logfile_path, **{'The role of this node': '(CSRS)',
-                                             'Shards': '',
-                                             'shard01': 'localhost:27018,localhost:27019,localhost:27020',
-                                             'shard02': 'localhost:27021,localhost:27022,localhost:27023',
-                                             'shard03': 'localhost:27024,localhost:27025,localhost:27026',
-                                             'shard04': 'localhost:27027,localhost:27028,localhost:27029',
-                                             'shard05': 'localhost:27030,localhost:27031,localhost:27032',
-                                             'CSRS': '',
-                                             'configRepl': '[ { _id: 0, host: "localhost:27033",' 
-                                                           ' arbiterOnly: false, buildIndexes: true,'
-                                                           ' hidden: false, priority: 1.0, tags: {},'
-                                                           ' slaveDelay: 0, votes: 1 } ]'})
-    
-    def test_sharding_overview_mongos(self):
-        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
-                                    'test/logfiles/', 'sharding_379_mongos.log')
-        self._test_sharding(logfile_path, **{'The role of this node': '(mongos)',
-                                             'Shards': '',
-                                             'shard01': 'localhost:27018,localhost:27019,localhost:27020',
-                                             'shard02': 'localhost:27021,localhost:27022,localhost:27023',
-                                             'shard03': 'localhost:27024,localhost:27025,localhost:27026',
-                                             'shard04': 'localhost:27027,localhost:27028,localhost:27029',
-                                             'shard05': 'localhost:27030,localhost:27031,localhost:27032',
-                                             'CSRS': '',
-                                             'configRepl': 'localhost:27033'})
+        self._test_init('sharding_379_CSRS.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
 
-    def _test_sharding(self, logfile_path, **expected):
-        """ utility test runner for sharding
+        assert any(map(lambda line: '(CSRS)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: '[ { _id: 0, host: "localhost:27033",' 
+                                    ' arbiterOnly: false, buildIndexes: true,'
+                                    ' hidden: false, priority: 1.0, tags: {},'
+                                    ' slaveDelay: 0, votes: 1 } ]' in line, lines))
+        
+    def test_sharding_overview_mongos(self):
+        self._test_init('sharding_379_mongos.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: '(mongos)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: 'localhost:27033' in line, lines))
+
+    def test_sharding_error_messages_exists(self):
+        self._test_init('sharding_379_shard.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert len(list(filter(lambda line: re.match('^  \d .* ', line),
+                          lines))) == 2
+
+    def test_sharding_chunk_migration_from_exists(self):
+        self._test_init('sharding_379_shard.log')
+        self._test_sharding(self.logfile_path, r'  2020-01-28T16', 3)
+
+    def test_sharding_chunk_migration_to_exists(self):
+        self._test_init('sharding_379_shard.log')
+        self._test_sharding(self.logfile_path, r'  2020-01-28T14', 1)
+
+    def test_sharding_chunk_split_statistics_exist(self):
+        self._test_init('sharding_379_shard.log')
+        self._test_sharding(self.logfile_path, r'  2020-01-29T16', 1)
+
+    def _test_sharding(self, logfile_path, pattern, expected):
+        """ utility test runner for rsstate
         """
         self.tool.run('--sharding %s' % logfile_path)
         output = sys.stdout.getvalue()
-        results = self._parse_output(output)
-        for key, value in six.iteritems(expected):
-            print("results[%s] == %s" % (key, value))
-            assert results.get(key) == value
+        lines = output.splitlines()
+        assert len(list(filter(lambda line: re.match(pattern, line),
+                          lines))) == expected
 
     def _parse_output(self, output):
         results = {}
