@@ -532,43 +532,44 @@ class LogFile(InputSource):
                     chunk_migration = (time, chunk_range, moved_from, namespace, note, errmsg)
 
                     self._chunks_moved_to.append(chunk_migration)
-
-            if "ChunkSplitter" in line:
+                
+            if "Finding the split vector for" in line:
                 logevent = LogEvent(line)
-                if "Finding the split vector for" in line:
-                    match = re.search("for (?P<namespace>\S+).*"
-                                      "numSplits: (?P<numSplits>\d+)", line)
-                    if match:
-                        time = logevent.datetime
-                        split_range = None
-                        namespace = match.group("namespace")
-                        numSplits = match.group('numSplits')
-                        success = None
-                        error = None
-                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
-                elif "autosplitted" in line:
-                    match = re.search("autosplitted (?P<namespace>\S+).* "
-                                      "\[(?P<range>.*)\)", line)
-                    if match:
-                        time = logevent.datetime
-                        split_range = match.group("range")
-                        namespace = match.group("namespace")
-                        numSplits = 0
-                        success = True
-                        error = None
-                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
-                elif "Unable to auto-split chunk" in line:
-                    match = re.search("chunk \[(?P<range>.*)\) "
-                                      "in namespace (?P<namespace>\S+)"
-                                      " :: caused by :: (?P<error>\S+): ", line)                    
-                    if match:
-                        time = logevent.datetime
-                        split_range = match.group("range")
-                        namespace = match.group("namespace")
-                        numSplits = 0
-                        success = False
-                        error = match.group("error")
-                        self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                match = re.search("for (?P<namespace>\S+).*"
+                                    "numSplits: (?P<numSplits>\d+)", line)
+                if match:
+                    time = logevent.datetime
+                    split_range = None
+                    namespace = match.group("namespace")
+                    numSplits = match.group('numSplits')
+                    success = None
+                    error = None
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+            elif "autosplitted" in line:
+                logevent = LogEvent(line)
+                match = re.search("autosplitted (?P<namespace>\S+).* "
+                                    "\[(?P<range>.*)\)", line)
+                if match:
+                    time = logevent.datetime
+                    split_range = match.group("range")
+                    namespace = match.group("namespace")
+                    numSplits = 0
+                    success = True
+                    error = None
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+            elif "Unable to auto-split chunk" in line:
+                logevent = LogEvent(line)
+                match = re.search("chunk \[(?P<range>.*)\) "
+                                    "in namespace (?P<namespace>\S+)"
+                                    " :: caused by :: (?P<error>\S+): ", line)                    
+                if match:
+                    time = logevent.datetime
+                    split_range = match.group("range")
+                    namespace = match.group("namespace")
+                    numSplits = 0
+                    success = False
+                    error = match.group("error")
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
             
             prev_line = line
 

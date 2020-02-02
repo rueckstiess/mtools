@@ -136,7 +136,7 @@ class ShardingSection(BaseSection):
         if self.mloginfo.progress_bar_enabled:
             self.mloginfo.update_progress(1.0)
 
-        print("\nError Messages:\n")
+        print("Error Messages:\n")
 
         if not len(errorlines):
             print("  no error messages found.")
@@ -199,7 +199,6 @@ class ShardingSection(BaseSection):
                     elif split.success:
                         split_succeeded_after[split.range] = True
                         successful_count += 1
-                        
 
                 split_summary = OrderedDict()
 
@@ -289,7 +288,7 @@ class ShardingSection(BaseSection):
                 failed_migrations = ""
                 for error, info in failed.items():
                     count, timestamps = info
-                    failed_migrations += f'{count} chunk(s): {timestamps} failed with "{error}".\n'
+                    failed_migrations += f'{count} chunk(s): {timestamps} failed with "{error}".'
 
                 if len(failed_migrations):
                     moved_chunks['failedChunkMigrations'] = failed_migrations
