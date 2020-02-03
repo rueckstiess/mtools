@@ -95,7 +95,8 @@ class ShardingSection(BaseSection):
             # All common error message is lower case so it can be compared to line content
             common_error_message_content = [
                 'failed to update the persisted chunk metadata for collection ... caused by',
-                'cannot accept new chunks because there are still ... deletes from previous migration',
+                'cannot accept new chunks because there are still ... deletes from '
+                'previous migration',
                 'local document ... has same _id as cloned remote document',
                 'local document ... has same _id as reloaded remote document',
                 'batch insertion failed'
@@ -169,13 +170,13 @@ class ShardingSection(BaseSection):
                                      success=success,
                                      error=error)
             chunk_split_groupings.add(split_tuple)
-        
+
         titles = ['  time (/hour)',
                   'namespace',
                   '# split-vectors issued',
                   'successful chunk splits',
                   'failed chunk splits']
-        
+
         if len(chunk_split_groupings) == 0:
             print("  no chunk splits found.")
         else:
@@ -192,7 +193,8 @@ class ShardingSection(BaseSection):
                         count, timestamps = failed_splits.get(split.error, (0, list()))
                         count += 1
                         if split_succeeded_after.get(split.range, False):
-                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] + ' **WAS SUCCESSFUL AFTER**')
+                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
+                                              ' **WAS SUCCESSFUL AFTER**')
                         else:
                             timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
                         failed_splits[split.error] = (count, timestamps)
@@ -269,10 +271,12 @@ class ShardingSection(BaseSection):
                     else:
                         count, timestamps = failed.get(chunk.errorMessage, (0, list()))
                         count += 1
-                        successful_after, timestamp = succeeded_after.get(chunk.range, (False, None))
+                        successful_after, timestamp = succeeded_after.get(chunk.range,
+                                                                          (False, None))
                         if successful_after:
                             timestamp = timestamp.strftime("%H:%M:%S.%f")[:-3]
-                            timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3] + f' BECAME SUCCESSFUL AT: {timestamp}')
+                            timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3] +
+                                              f' BECAME SUCCESSFUL AT: {timestamp}')
                         else:
                             timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3])
                         failed[chunk.errorMessage] = (count, timestamps)
