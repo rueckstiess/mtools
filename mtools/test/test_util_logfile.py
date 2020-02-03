@@ -114,3 +114,88 @@ class TestUtilLogFile(object):
         print(logfile2.hostname)
         assert logfile2.hostname == 'jimoleary.local'
         assert logfile2.port == '27017'
+
+    def test_shard_info(self):
+        """LogFile: test if sharding info is detected (MongoDB 3.4+) """
+
+        # mongos log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_mongos.log')
+        mongos_log = open(logfile_path, 'rb')
+        logfile = LogFile(mongos_log)
+        assert len(logfile.shards) == 5
+
+        # config log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_CSRS.log')
+        csrs_log = open(logfile_path, 'rb')
+        logfile = LogFile(csrs_log)
+        assert len(logfile.shards) == 5
+
+        # shard log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_shard.log')
+        shard_log = open(logfile_path, 'rb')
+        logfile = LogFile(shard_log)
+        assert len(logfile.shards) == 5
+
+    def test_shard_csrs(self):
+        """LogFile: test if sharded cluster CSRS is detected (MongoDB 3.4+) """
+
+        # mongos log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_mongos.log')
+        mongos_log = open(logfile_path, 'rb')
+        logfile = LogFile(mongos_log)
+        assert logfile.csrs == ('configRepl', 'localhost:27033')
+
+        # config log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_CSRS.log')
+        csrs_log = open(logfile_path, 'rb')
+        logfile = LogFile(csrs_log)
+        assert logfile.csrs == ('configRepl', '[ { _id: 0, host: "localhost:27033",'
+                                   ' arbiterOnly: false, buildIndexes: true, hidden: false,'
+                                   ' priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ]')
+
+        # shard log
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_shard.log')
+        shard_log = open(logfile_path, 'rb')
+        logfile = LogFile(shard_log)
+        assert logfile.csrs == ('configRepl', 'localhost:27033')
+
+    def test_shard_chunk_migration_from(self):
+        """
+        LogFile: test if shard chunk migration (from) is detected (MongoDB 3.4+)
+        """
+
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_shard.log')
+        shard_log = open(logfile_path, 'rb')
+        logfile = LogFile(shard_log)
+        chunk_moved_from = logfile.chunks_moved_from[0]
+        assert len(logfile.chunks_moved_from) == 4
+        assert isinstance(chunk_moved_from[0], datetime)
+        assert chunk_moved_from[1] == "min: { sku: 9999265900050000 }, max: { sku: MaxKey }"
+        assert chunk_moved_from[2] == "shard02"
+        assert chunk_moved_from[3] == "test.products"
+        assert chunk_moved_from[4] == "success"
+
+    def test_shard_chunk_migration_to(self):
+        """
+        LogFile: test if shard chunk migration (to) is detected (MongoDB 3.4+)
+        """
+
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/','sharding_379_shard.log')
+        shard_log = open(logfile_path, 'rb')
+        logfile = LogFile(shard_log)
+        chunk_moved_to = logfile.chunks_moved_to[0]
+        assert len(logfile.chunks_moved_to) == 2
+        assert isinstance(chunk_moved_to[0], datetime)
+        assert chunk_moved_to[1] == "min: { sku: 23153496 }, max: { sku: 28928914 }"
+        assert chunk_moved_to[2] == "Unknown"
+        assert chunk_moved_to[3] == "test.products"
+        assert chunk_moved_to[4] == "success"
+
