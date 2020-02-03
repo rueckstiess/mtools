@@ -570,6 +570,17 @@ class LogFile(InputSource):
                     success = False
                     error = match.group("error")
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+            elif "jumbo" in line:
+                logevent = LogEvent(line)
+                match = re.search("migration (?P<namespace>\S+): \[(?P<range>.*)\)", prev_line)
+                if match:
+                    time = logevent.datetime
+                    split_range = match.group("range")
+                    namespace = match.group("namespace")
+                    numSplits = 0
+                    success = False
+                    error = "Jumbo"
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
             
             prev_line = line
 
