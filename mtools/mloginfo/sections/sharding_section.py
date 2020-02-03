@@ -88,9 +88,7 @@ class ShardingSection(BaseSection):
             self.mloginfo.progress_bar_enabled = False
 
         if self.mloginfo.args['errors']:
-
             errorlines = defaultdict(lambda: 0)
-
             for i, logevent in enumerate(logfile):
 
                 # update progress bar every 1000 lines
@@ -100,7 +98,7 @@ class ShardingSection(BaseSection):
 
                         if progress_total:
                             (self.mloginfo.update_progress(float(progress_curr - progress_start) /
-                            progress_total))
+                             progress_total))
 
                 # All common error message is lower case so it can be compared to line content
                 common_error_message_content = [
@@ -135,7 +133,7 @@ class ShardingSection(BaseSection):
 
                 similar_error = False
                 for errorline in errorlines.keys():
-                    similar_error = (SequenceMatcher(None, errorline, error_log_line).ratio() >= 0.7)
+                    similar_error = SequenceMatcher(None, errorline, error_log_line).ratio() >= 0.7
                     if similar_error:
                         errorlines[errorline] += 1
                         break
@@ -154,6 +152,8 @@ class ShardingSection(BaseSection):
             else:
                 for cl in sorted(errorlines, key=lambda x: errorlines[x], reverse=True):
                     print("%3i  %s" % (errorlines[cl], cl))
+        else:
+            print("\nto show sharding errors/warnings, run with --errors.")
 
         if self.mloginfo.args['migrations']:
             print("\nChunks Moved From This Shard:\n")
@@ -164,14 +164,22 @@ class ShardingSection(BaseSection):
 
             print("\nChunk Split Statistics:\n")
             self._print_chunk_statistics()
+        else:
+            print("\nto show chunk migrations/splits, run with --migrations.")
 
         print("")
 
     def _print_chunk_statistics(self):
         """Prints the chunk split statistics in a table"""
-        chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
-                                                             x.namespace))
+        verbose = self.mloginfo.args['verbose']
         self.mloginfo.logfile.chunk_splits.reverse()
+
+        if verbose:
+            chunk_split_groupings = Grouping(group_by=lambda x: (x.time))
+        else:
+            chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
+                                                                 x.namespace))
+
         for chunk_split in self.mloginfo.logfile.chunk_splits:
             time, split_range, namespace, numSplits, success, error = chunk_split
             split_tuple = SplitTuple(time=time,
@@ -182,63 +190,99 @@ class ShardingSection(BaseSection):
                                      error=error)
             chunk_split_groupings.add(split_tuple)
 
-        titles = ['  time (/hour)',
-                  'namespace',
-                  '# split-vectors issued',
-                  'successful chunk splits',
-                  'failed chunk splits']
+        if verbose:
+            titles = ['  time',
+                      'namespace',
+                      '# split-vectors issued',
+                      'chunk split status']
+        else:
+            titles = ['  time (/hour)',
+                      'namespace',
+                      '# split-vectors issued',
+                      'successful chunk splits',
+                      'failed chunk splits']
 
         if len(chunk_split_groupings) == 0:
             print("  no chunk splits found.")
         else:
             table_rows = []
             for group, splits in chunk_split_groupings.items():
-                time, namespace = group
-                successful_count = 0
-                total_number_vectors = 0
-                split_succeeded_after = dict()
-                failed_splits = dict()
-                for split in splits:
-                    total_number_vectors += int(split.numSplits)
-                    if (not split.success) and split.error:
-                        count, timestamps = failed_splits.get(split.error, (0, list()))
-                        count += 1
-                        if split_succeeded_after.get(split.range, False):
-                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
-                                              ' **WAS SUCCESSFUL AFTER**')
-                        else:
-                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
-                        failed_splits[split.error] = (count, timestamps)
-                    elif split.success:
-                        split_succeeded_after[split.range] = True
-                        successful_count += 1
+
+                if verbose:
+                    time = group
+                    split = splits[0]
+                else:
+                    time, namespace = group
+                    successful_count = 0
+                    total_number_vectors = 0
+                    split_succeeded_after = dict()
+                    failed_splits = dict()
+                    for split in splits:
+                        total_number_vectors += int(split.numSplits)
+                        if (not split.success) and split.error:
+                            count, timestamps = failed_splits.get(split.error, (0, list()))
+                            count += 1
+                            if split_succeeded_after.get(split.range, False):
+                                timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
+                                                  ' **WAS SUCCESSFUL AFTER**')
+                            else:
+                                timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
+                            failed_splits[split.error] = (count, timestamps)
+                        elif split.success:
+                            split_succeeded_after[split.range] = True
+                            successful_count += 1
 
                 split_summary = OrderedDict()
 
                 split_summary['time'] = f"  {time}"
                 split_summary['namespace'] = namespace
-                split_summary['numSplitVectors'] = f'{total_number_vectors} split vector(s)'
-                split_summary['successfulSplits'] = f"{successful_count} chunk(s) splitted. "
 
-                failed_split = ""
-                for error, info in failed_splits.items():
-                    count, timestamps = info
-                    failed_split += f'{count} chunk(s): {timestamps} failed with "{error}". '
-
-                if len(failed_split):
-                    split_summary['failedChunkSplits'] = failed_split
+                if verbose:
+                    split_summary['numSplitVectors'] = f'{split.numSplits} split vector(s)'
+                    if (not split.success) and split.error:
+                        if error == "Jumbo":
+                            split_summary['chunkSplitStatus'] = f'Marked as {error}.'
+                        else:
+                            split_summary['chunkSplitStatus'] = f"Failed with {split.error}"
+                    else:
+                        split_summary['chunkSplitStatus'] = ("Successful"
+                                                             if split.success else "Unknown")
                 else:
-                    split_summary['failedChunkSplits'] = "no failed chunk splits."
+                    split_summary['numSplitVectors'] = f'{total_number_vectors} split vector(s)'
+                    split_summary['successfulSplits'] = f"{successful_count} chunk(s) splitted. "
+
+                    failed_split = ""
+                    for error, info in failed_splits.items():
+                        count, timestamps = info
+                        if error == "Jumbo":
+                            failed_split += (f'{count} chunk(s): ' +
+                                             f'{timestamps} marked as {error}.')
+                        else:
+                            failed_split += (f'{count} chunk(s): {timestamps} ' +
+                                             f'failed with "{error}". ')
+
+                    if len(failed_split):
+                        split_summary['failedChunkSplits'] = failed_split
+                    else:
+                        split_summary['failedChunkSplits'] = "no failed chunk splits."
 
                 table_rows.append(split_summary)
 
             print_table(table_rows, titles)
+            if not verbose:
+                print("\nto show individual chunk split statistics, run with --verbose.")
 
     def _print_chunk_migrations(self, chunks, moved_from=False):
+        """Prints the chunk migration statistics in a table depending on flag"""
+        verbose = self.mloginfo.args['verbose']
         chunks.reverse()
-        chunk_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
-                                                       x.movedFromTo,
-                                                       x.namespace))
+
+        if verbose:
+            chunk_groupings = Grouping(group_by=lambda x: (x.time))
+        else:
+            chunk_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
+                                                           x.movedFromTo,
+                                                           x.namespace))
 
         for chunk_moved in chunks:
             time, chunk_range, moved_to_from, namespace, status, error_message = chunk_moved
@@ -250,16 +294,13 @@ class ShardingSection(BaseSection):
                                       errorMessage=error_message)
             chunk_groupings.add(moved_tuple)
 
-        if moved_from:
-            titles = ['  time (/hour)',
-                      'to shard',
+        move_to_from_title = 'from shard' if moved_from else 'to shard'
+        if verbose:
+            titles = ['  time', move_to_from_title,
                       'namespace',
-                      '# chunks migrations attempted',
-                      'successful chunk migrations',
-                      'failed chunk migrations']
+                      'chunk migration status']
         else:
-            titles = ['  time (/hour)',
-                      'from shard',
+            titles = ['  time (/hour)', move_to_from_title,
                       'namespace',
                       '# chunks migrations attempted',
                       'successful chunk migrations',
@@ -270,48 +311,62 @@ class ShardingSection(BaseSection):
         else:
             table_rows = []
             for group, chunks in chunk_groupings.items():
-                time, moved_to_from, namespace = group
 
-                successful_count = 0
-                failed = dict()
-                succeeded_after = dict()
-                for chunk in chunks:
-                    if chunk.migrationStatus == "success":
-                        successful_count += 1
-                        succeeded_after[chunk.range] = (True, chunk.time)
-                    else:
-                        count, timestamps = failed.get(chunk.errorMessage, (0, list()))
-                        count += 1
-                        successful_after, timestamp = succeeded_after.get(chunk.range,
-                                                                          (False, None))
-                        if successful_after:
-                            timestamp = timestamp.strftime("%H:%M:%S.%f")[:-3]
-                            timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3] +
-                                              f' BECAME SUCCESSFUL AT: {timestamp}')
+                if verbose:
+                    time = group
+                    chunk = chunks[0]
+                else:
+                    time, moved_to_from, namespace = group
+
+                    successful_count = 0
+                    failed = dict()
+                    succeeded_after = dict()
+                    for chunk in chunks:
+                        if chunk.migrationStatus == "success":
+                            successful_count += 1
+                            succeeded_after[chunk.range] = (True, chunk.time)
                         else:
-                            timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3])
-                        failed[chunk.errorMessage] = (count, timestamps)
+                            count, timestamps = failed.get(chunk.errorMessage, (0, list()))
+                            count += 1
+                            successful_after, timestamp = succeeded_after.get(chunk.range,
+                                                                              (False, None))
+                            if successful_after:
+                                timestamp = timestamp.strftime("%H:%M:%S.%f")[:-3]
+                                chunk_time = chunk.time.strftime("%H:%M:%S.%f")[:-3]
+                                timestamps.append(chunk_time +
+                                                  f' BECAME SUCCESSFUL AT: {timestamp}')
+                            else:
+                                timestamps.append(chunk.time.strftime("%H:%M:%S.%f")[:-3])
+                            failed[chunk.errorMessage] = (count, timestamps)
 
                 moved_chunks = OrderedDict()
 
                 moved_chunks['time'] = f"  {time}"
                 moved_chunks['movedFromTo'] = moved_to_from
                 moved_chunks['namespace'] = namespace
-                moved_chunks['numberOfChunks'] = f'{len(chunks)} chunk(s)'
-                moved_chunks['successChunkMigrations'] = f"{successful_count} chunk(s) moved"
 
-                failed_migrations = ""
-                for error, info in failed.items():
-                    count, timestamps = info
-                    failed_migrations += f'{count} chunk(s): {timestamps} failed with "{error}".'
-
-                if len(failed_migrations):
-                    moved_chunks['failedChunkMigrations'] = failed_migrations
+                if verbose:
+                    if chunk.migrationStatus == "success":
+                        moved_chunks['chunkMigrationStatus'] = "Successful"
+                    else:
+                        moved_chunks['chunkMigrationStatus'] = f"Failed with {chunk.errorMessage}"
                 else:
-                    moved_chunks['failedChunkMigrations'] = "no failed chunks."
+                    moved_chunks['numberOfChunks'] = f'{len(chunks)} chunk(s)'
+                    moved_chunks['successChunkMigrations'] = f"{successful_count} chunk(s) moved"
+
+                    failed_migrations = ""
+                    for error, info in failed.items():
+                        count, timestamps = info
+                        failed_migrations += (f'{count} chunk(s): {timestamps} '
+                                              'failed with "{error}".')
+
+                    if len(failed_migrations):
+                        moved_chunks['failedChunkMigrations'] = failed_migrations
+                    else:
+                        moved_chunks['failedChunkMigrations'] = "no failed chunks."
 
                 table_rows.append(moved_chunks)
 
             print_table(table_rows, titles)
-            if not self.mloginfo.args['verbose']:
+            if not verbose:
                 print("\nto show individual chunk migration, run with --verbose.")

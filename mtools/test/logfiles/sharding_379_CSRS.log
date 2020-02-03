@@ -314,3 +314,5 @@
 2020-01-28T14:27:07.792+1100 I ASIO     [conn7] Connecting to localhost:27030
 2020-01-28T14:27:07.810+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:58860 #80 (47 connections now open)
 2020-01-28T14:27:07.814+1100 I NETWORK  [conn80] received client metadata from 127.0.0.1:58860 conn80: { driver: { name: "MongoDB Internal Client", version: "3.7.9" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-03T15:47:18.484+1100 I SHARDING [Balancer] Performing a split because migration test.products: [{ sku: 1.0 }, { sku: 2.0 }), from shard02, to shard03 failed for size reasons :: caused by :: ChunkTooBig: Cannot move chunk: the maximum number of documents for a chunk is 98777, the maximum chunk size is 5242880, average document size is 69. Found 1000001 documents in chunk  ns: test.products { sku: 1.0 } -> { sku: 2.0 }
+2020-02-03T15:47:18.485+1100 I SHARDING [Balancer] Marking chunk shard: shard02, lastmod: 4|1||5e379b34895251fcce80be10, [{ sku: 1.0 }, { sku: 2.0 }) as jumbo.

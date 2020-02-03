@@ -401,7 +401,7 @@ class TestMLogInfo(object):
             assert results.get(key) == value
 
     def test_sharding_output(self):
-        self.tool.run('--sharding %s' % self.logfile_path)
+        self.tool.run('--sharding --errors --migrations %s' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any(map(lambda line: 'SHARDING' in line, lines))
@@ -413,7 +413,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'Chunk Split Statistics:' in line, lines))
 
     def test_sharding_missing_information(self):
-        self.tool.run('--sharding %s' % self.logfile_path)
+        self.tool.run('--sharding --errors --migrations %s' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
 
@@ -470,7 +470,7 @@ class TestMLogInfo(object):
 
     def test_sharding_error_messages_exists(self):
         self._test_init('sharding_379_shard.log')
-        self.tool.run('--sharding %s' % self.logfile_path)
+        self.tool.run('--sharding --errors %s' % self.logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert len(list(filter(lambda line: re.match('^  \d .* ', line),
@@ -488,10 +488,16 @@ class TestMLogInfo(object):
         self._test_init('sharding_379_shard.log')
         self._test_sharding(self.logfile_path, r'  2020-01-29T16', 1)
 
+    def test_sharding_jumbo_chunk_exists(self):
+        self._test_init('sharding_379_CSRS.log')
+        self._test_sharding(self.logfile_path, 
+                            r".*1 chunk\(s\): \['15:47:18.485'\] marked as Jumbo.",
+                            1)
+
     def _test_sharding(self, logfile_path, pattern, expected):
-        """ utility test runner for rsstate
+        """ utility test runner for sharding
         """
-        self.tool.run('--sharding %s' % logfile_path)
+        self.tool.run('--sharding --migrations %s' % logfile_path)
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert len(list(filter(lambda line: re.match(pattern, line),
