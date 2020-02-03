@@ -128,7 +128,7 @@ class MTransferTool(BaseCmdLineTool):
 
             collname = ns[len(self.nsprefix):]
             ident = str('table:' + meta[u'ident'])
-            size = bson.decode(sizeStorer[ident])
+            size = bson.decode(sizeStorer[ident.encode()])
             filename = ident[len('table:'):] + '.wt'
             file_ident = 'file:' + filename
             wtmeta_file = wtMeta[file_ident]
@@ -181,9 +181,6 @@ class MTransferTool(BaseCmdLineTool):
         catalog.prev()
         maxID = catalog.get_key()
 
-        # TODO: update the sizeStorer entry for _mdb_catalog
-        # mdb_size = bson.decode(sizeStorer['table:_mdb_catalog'])
-
         for export in bson.decode_file_iter(inf, codec_options=codec_options):
             if not os.path.exists(
                     os.path.join(self.dbpath, self.database, export['filename'])):
@@ -232,7 +229,7 @@ class MTransferTool(BaseCmdLineTool):
             wtMeta[colgroup_uri] = app_metadata + ',collator=,columns=,source="' + file_uri + '",type=file'
             wtMeta[file_uri] = export['wtmeta_file']
 
-            sizeStorer[ident] = bson.encode(export['sizeStorer'])
+            sizeStorer[ident.encode()] = bson.encode(export['sizeStorer'])
 
             # Fix the catalog entry to refer to the new namespace and new table names
             catalog_entry = export['mdb_catalog']
