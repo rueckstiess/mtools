@@ -2,6 +2,54 @@
 Changes to mtools
 =================
 
+version 1.6.1
+~~~~~~~~~~~~~
+ * mtools should use python3 in shebangs (#761)
+ * mloginfo: add timezone to mloginfo summary (#258)
+ * mloginfo --clients: more robust parsing of client metadata (#765)
+ * mloginfo --queries: fix missing patterns for remove command (#742)
+ * mloginfo --queries: add rounding option (#698)
+ * mplotqueries: fix error parsing checkpoint log line (#757)
+
+Thanks to @stennie, @kallimachos, @kevinadi, @niccottrell, and @p-mongo
+for contributions to this release.
+
+version 1.6.0
+~~~~~~~~~~~~~
+Now supporting Python 3.6+ (only)
+
+ * Add support for Python 3.7 and 3.8
+ * Remove support for Python 2.7
+ * Update requirements to modern package versions
+ * Require minimum dependency versions rather than exact
+ * mlaunch: mlaunch with no options should show --help (#749)
+ * mlaunch: Fix --storageEngine confusingly reported as ignored in sharded
+   deployments (#730)
+ * mlaunch: Fix unquoted --wiredTigerEngineConfigString parameter (#683)
+ * mloginfo: mloginfo with no options should show usage info (#751)
+ * mloginfo: Fix for --queries gives AttributeError if there is a field called
+   "query" in the log (#741)
+ * mloginfo: Fix --queries gives `TypeError` for some logs (#697)
+ * mloginfo: Add --checkpoints to show slow WiredTiger checkpoints if
+   available (#707)
+ * mloginfo: Improve --queries to show allowDiskUse for aggregations if
+   available (#708)
+ * mloginfo: Add --clients to show client summary info (#540)
+ * mloginfo: Add --cursors to show cursor information if available (#710)
+ * mloginfo: Add --storagestats to display storage statistics (#711)
+ * mloginfo: Add --transactions to display slow transactions if available (#704)
+ * mloginfo: Include queries without durations in the query count (#680)
+ * mplotqueries: Fix --group-limit throws error in Python 3.x (#688)
+ * mplotqueries: Add --dns to display slow DNS Resolutions if available (#706)
+ * mplotqueries: Add --oplog to display slow oplog entries if available (#705)
+ * Update mention of oldest non-EOL MongoDB server version (3.6 as of Jan 2020)
+ * util/logfile.py: Reading log from stdin hits error on str.decode() in
+   Python 3 (#658)
+
+Thanks to @stennie, @kallimachos, @kevinadi, @savinay-vijay, @mitesh-gosavi,
+@HenryGP, @sindbach, @garycahill, @karlvr, and @josemonteiro
+for contributions to this release.
+
 version 1.5.3
 ~~~~~~~~~~~~~
 * mlaunch: Quote mongos --logpath (to handle paths with spaces)

@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 import json
 import re
@@ -112,15 +112,12 @@ class LogEvent(object):
         self._readTimestamp = None
         self._terminationCause = None
         self._locks = None
-        self._commitedCount = 0
-        self._abortedCount = 0
 
         self._command_calculated = False
         self._command = None
 
         self._counters_calculated = False
         self._allowDiskUse = None
-
 
         self._bytesRead = None
         self._bytesWritten = None
@@ -152,6 +149,9 @@ class LogEvent(object):
         self._level = None
         self._component = None
         self.merge_marker_str = ''
+
+        self._client_metadata_calculated = False
+        self._client_metadata = None
 
     def set_line_str(self, line_str):
         """
@@ -217,9 +217,10 @@ class LogEvent(object):
                 if matchobj:
                     self._duration = int(matchobj.group(1))
             # SERVER-16176 - Logging of slow checkpoints
-            elif "Checkpoint" in self.line_str:
-                groups = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
-                self._duration = int(groups.group(1)) * 1000
+            elif "Checkpoint took" in self.line_str:
+                matchobj = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                if matchobj:
+                    self._duration = int(matchobj.group(1)) * 1000
 
         return self._duration
 
@@ -468,6 +469,9 @@ class LogEvent(object):
             if (self.operation in ['query', 'getmore', 'update', 'remove'] or
                     self.command in ['count', 'findandmodify']):
                 self._pattern = self._find_pattern('query: ')
+                # Fallback check for q: variation (eg "remove" command in 3.6+)
+                if self._pattern is None:
+                    self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
 
@@ -935,6 +939,29 @@ class LogEvent(object):
             else:
                 self._level = False
                 self._component = False
+
+    @property
+    def client_metadata(self):
+        """Return client metadata."""
+        if not self._client_metadata_calculated:
+            self._client_metadata_calculated = True
+
+            line_str = self.line_str
+            if (line_str and line_str.find('client metadata')):
+                try:
+                    metadata_pos = line_str.find("{")
+                    if metadata_pos == -1:
+                        return
+                    else:
+                        metadata = line_str[metadata_pos:]
+                        # Make valid JSON by wrapping field names in quotes
+                        metadata, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:',
+                                              ' \\1 "\\2" : ', metadata)
+                        self._client_metadata = json.loads(metadata)
+                except ValueError:
+                    self._client_metadata = None
+
+        return self._client_metadata
 
     def parse_all(self):
         """

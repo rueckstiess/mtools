@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 from dateutil.tz import tzutc
 from pymongo import ASCENDING, DESCENDING

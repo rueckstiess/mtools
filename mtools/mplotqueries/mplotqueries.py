@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from six.moves import cPickle
 import glob
@@ -75,10 +75,6 @@ class MPlotQueriesTool(LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
-        self.argparser.add_argument('--dns', action='store_true',
-                                    help='slow DNS Resolutions', default=False)
-        self.argparser.add_argument('--oplog', action='store_true',
-                                    help=('plot slow oplog application'))
         self.argparser.add_argument('--type', action='store',
                                     default='scatter',
                                     choices=self.plot_types.keys(),
@@ -129,10 +125,14 @@ class MPlotQueriesTool(LogFileTool):
                                           "displaying it in a window"))
         self.argparser.add_argument('--checkpoints',
                                     action='store_true', default=None,
-                                    help=("Display the slow WiredTiger checkpoints "))
+                                    help=("plot slow WiredTiger checkpoints"))
+        self.argparser.add_argument('--dns', action='store_true',
+                                    help='plot slow DNS resolution', default=False)
+        self.argparser.add_argument('--oplog', action='store_true',
+                                    help=('plot slow oplog application'))
         self.argparser.add_argument('--storagestats',
                                     action='store_true', default=False,
-                                    help=("Plot the storage statistics for insert "
+                                    help=("plot storage statistics for insert "
                                           "and update operations"))
 
         self.legend = None

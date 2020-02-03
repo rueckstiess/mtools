@@ -35,7 +35,7 @@ tox is required for testing mtools and building the documentation:
 
 .. code::
 
-   $ sudo pip install tox
+   $ sudo pip3 install tox
 
 
 Using tox

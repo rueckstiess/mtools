@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 
@@ -535,12 +535,17 @@ class MLaunchTool(BaseCmdLineTool):
                                      "single nodes.")
 
         # replace path with absolute path, but store relative path as well
-        self.relative_dir = self.args['dir']
-        self.dir = os.path.abspath(self.args['dir'])
-        self.args['dir'] = self.dir
+        if ('dir' in self.args and self.args['dir']):
+            self.relative_dir = self.args['dir']
+            self.dir = os.path.abspath(self.args['dir'])
+            self.args['dir'] = self.dir
 
-        # branch out in sub-commands
-        getattr(self, self.args['command'])()
+        if (self.args['command'] is None):
+            self.argparser.print_help()
+            self.argparser.exit()
+        else:
+            # branch out in sub-commands
+            getattr(self, self.args['command'])()
 
     # -- below are the main commands: init, start, stop, list, kill
     def init(self):
@@ -1532,7 +1537,8 @@ class MLaunchTool(BaseCmdLineTool):
             elif i > 0 and arguments[i - 1] in result:
                 # if it doesn't start with a '-', it could be the value of
                 # the last argument, e.g. `--slowms 1000`
-                result.append(arg)
+                # NB: arguments are always quoted
+                result.append(f'"{arg}"')
 
         # return valid arguments as joined string
         return ' '.join(result)

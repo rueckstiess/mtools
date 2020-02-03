@@ -43,6 +43,13 @@ class QuerySection(BaseSection):
                                                                    'mean',
                                                                    '95%',
                                                                    'sum'])
+        helptext = 'Number of decimal places for rounding of calculated stats'
+        self.mloginfo.argparser_sectiongroup.add_argument('--rounding',
+                                                          action='store',
+                                                          type=int,
+                                                          default=1,
+                                                          choices=range(0, 5),
+                                                          help=helptext)
 
     @property
     def active(self):
@@ -54,6 +61,7 @@ class QuerySection(BaseSection):
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
                                                 x.pattern, x.allowDiskUse))
         logfile = self.mloginfo.logfile
+        rounding = self.mloginfo.args['rounding']
 
         if logfile.start and logfile.end:
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
@@ -104,28 +112,23 @@ class QuerySection(BaseSection):
 
             group_events = [le.duration for le in grouping[g]
                             if le.duration is not None]
+            group_events_all = [le.duration for le in grouping[g]]
 
             stats = OrderedDict()
             stats['namespace'] = namespace
             stats['operation'] = op
             stats['pattern'] = pattern
-            stats['count'] = len(group_events)
-            stats['min'] = min(group_events) if group_events else '-'
-            stats['max'] = max(group_events) if group_events else '-'
-            stats['mean'] = 0
+            stats['count'] = len(group_events_all)
+            stats['min'] = min(group_events) if group_events else 0
+            stats['max'] = max(group_events) if group_events else 0
             if np:
-                stats['95%'] = (np.percentile(group_events, 95)
-                                if group_events else '-')
+                stats['95%'] = (round(np.percentile(group_events, 95), rounding)
+                                if group_events else 0)
             else:
                 stats['95%'] = 'n/a'
-            stats['sum'] = sum(group_events) if group_events else '-'
-            stats['mean'] = (stats['sum'] / stats['count']
-                             if group_events else '-')
-
-            if self.mloginfo.args['verbose']:
-                stats['example'] = grouping[g][0]
-                titles.append('example')
-
+            stats['sum'] = sum(group_events) if group_events else 0
+            stats['mean'] = (round(stats['sum'] / stats['count'], rounding)
+                             if group_events else 0)
             stats['allowDiskUse'] = allowDiskUse
             table_rows.append(stats)
 
