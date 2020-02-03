@@ -42,6 +42,14 @@ class ShardingSection(BaseSection):
         self.mloginfo.argparser_sectiongroup.add_argument('--sharding',
                                                           action='store_true',
                                                           help=helptext)
+        helptext = 'toggle output for sharding related errors/warnings'
+        self.mloginfo.argparser_sectiongroup.add_argument('--errors',
+                                                          action='store_true',
+                                                          help=helptext)
+        helptext = 'toggle output for shard chunk migration'
+        self.mloginfo.argparser_sectiongroup.add_argument('--migrations',
+                                                          action='store_true',
+                                                          help=helptext)
 
     @property
     def active(self):
@@ -79,80 +87,83 @@ class ShardingSection(BaseSection):
         else:
             self.mloginfo.progress_bar_enabled = False
 
-        errorlines = defaultdict(lambda: 0)
+        if self.mloginfo.args['errors']:
 
-        for i, logevent in enumerate(logfile):
+            errorlines = defaultdict(lambda: 0)
 
-            # update progress bar every 1000 lines
-            if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
-                if logevent.datetime:
-                    progress_curr = self.mloginfo._datetime_to_epoch(logevent.datetime)
+            for i, logevent in enumerate(logfile):
 
-                    if progress_total:
-                        (self.mloginfo.update_progress(float(progress_curr - progress_start) /
-                         progress_total))
+                # update progress bar every 1000 lines
+                if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
+                    if logevent.datetime:
+                        progress_curr = self.mloginfo._datetime_to_epoch(logevent.datetime)
 
-            # All common error message is lower case so it can be compared to line content
-            common_error_message_content = [
-                'failed to update the persisted chunk metadata for collection ... caused by',
-                'cannot accept new chunks because there are still ... deletes from '
-                'previous migration',
-                'local document ... has same _id as cloned remote document',
-                'local document ... has same _id as reloaded remote document',
-                'batch insertion failed'
-                '[rangedeleter] waiting for open cursors before removing range',
-                'will be scheduled after all possibly dependent queries finish',
-                '[collection range deleter] deferring deletion of '
-            ]
+                        if progress_total:
+                            (self.mloginfo.update_progress(float(progress_curr - progress_start) /
+                            progress_total))
 
-            if (not any(keyword in logevent.line_str.lower() for keyword in
-                        common_error_message_content)):
-                continue
+                # All common error message is lower case so it can be compared to line content
+                common_error_message_content = [
+                    'failed to update the persisted chunk metadata for collection ... caused by',
+                    'cannot accept new chunks because there are still ... deletes from '
+                    'previous migration',
+                    'local document ... has same _id as cloned remote document',
+                    'local document ... has same _id as reloaded remote document',
+                    'batch insertion failed'
+                    '[rangedeleter] waiting for open cursors before removing range',
+                    'will be scheduled after all possibly dependent queries finish',
+                    '[collection range deleter] deferring deletion of '
+                ]
 
-            log_tokens = logevent.split_tokens[3:]
+                if (not any(keyword in logevent.line_str.lower() for keyword in
+                            common_error_message_content)):
+                    continue
 
-            for index, token in enumerate(log_tokens):
-                if re.match(r'\'(.+?)\'', token) or any(char.isdigit() for char in token):
-                    log_tokens[index] = "..."
+                log_tokens = logevent.split_tokens[3:]
 
-            error_log_line = ' '.join(log_tokens)
-            error_log_line = re.sub(r' \S+\.\S+ ', ' XXX ', error_log_line)
-            error_log_line = re.sub(r'\{.*\}', '...', error_log_line)
+                for index, token in enumerate(log_tokens):
+                    if re.match(r'\'(.+?)\'', token) or any(char.isdigit() for char in token):
+                        log_tokens[index] = "..."
 
-            if not errorlines.keys():
-                errorlines[error_log_line] += 1
-                continue
+                error_log_line = ' '.join(log_tokens)
+                error_log_line = re.sub(r' \S+\.\S+ ', ' XXX ', error_log_line)
+                error_log_line = re.sub(r'\{.*\}', '...', error_log_line)
 
-            similar_error = False
-            for errorline in errorlines.keys():
-                similar_error = (SequenceMatcher(None, errorline, error_log_line).ratio() >= 0.7)
-                if similar_error:
-                    errorlines[errorline] += 1
-                    break
+                if not errorlines.keys():
+                    errorlines[error_log_line] += 1
+                    continue
 
-            if not similar_error:
-                errorlines[error_log_line] += 1
+                similar_error = False
+                for errorline in errorlines.keys():
+                    similar_error = (SequenceMatcher(None, errorline, error_log_line).ratio() >= 0.7)
+                    if similar_error:
+                        errorlines[errorline] += 1
+                        break
 
-        # clear progress bar again
-        if self.mloginfo.progress_bar_enabled:
-            self.mloginfo.update_progress(1.0)
+                if not similar_error:
+                    errorlines[error_log_line] += 1
 
-        print("Error Messages:\n")
+            # clear progress bar again
+            if self.mloginfo.progress_bar_enabled:
+                self.mloginfo.update_progress(1.0)
 
-        if not len(errorlines):
-            print("  no error messages found.")
-        else:
-            for cl in sorted(errorlines, key=lambda x: errorlines[x], reverse=True):
-                print("%3i  %s" % (errorlines[cl], cl))
+            print("Error Messages:\n")
 
-        print("\nChunks Moved From This Shard:\n")
-        self._print_chunk_migrations(logfile.chunks_moved_from, moved_from=True)
+            if not len(errorlines):
+                print("  no error messages found.")
+            else:
+                for cl in sorted(errorlines, key=lambda x: errorlines[x], reverse=True):
+                    print("%3i  %s" % (errorlines[cl], cl))
 
-        print("\nChunks Moved To This Shard:\n")
-        self._print_chunk_migrations(logfile.chunks_moved_to)
+        if self.mloginfo.args['migrations']:
+            print("\nChunks Moved From This Shard:\n")
+            self._print_chunk_migrations(logfile.chunks_moved_from, moved_from=True)
 
-        print("\nChunk Split Statistics:\n")
-        self._print_chunk_statistics()
+            print("\nChunks Moved To This Shard:\n")
+            self._print_chunk_migrations(logfile.chunks_moved_to)
+
+            print("\nChunk Split Statistics:\n")
+            self._print_chunk_statistics()
 
         print("")
 
@@ -302,3 +313,5 @@ class ShardingSection(BaseSection):
                 table_rows.append(moved_chunks)
 
             print_table(table_rows, titles)
+            if not self.mloginfo.args['verbose']:
+                print("\nto show individual chunk migration, run with --verbose.")
