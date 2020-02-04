@@ -24,6 +24,8 @@ Usage
             [--restarts]
             [--rsstate]
             [--sharding]
+               [--errors]
+               [--migrations]
             [--storagestats]
             [--transactions]
                [--tsort {duration}]
@@ -433,17 +435,43 @@ This can all be found below.
       CSRS:
          configRepl: example:27033
 
+``--errors``
+^^^^^^^^^^^^
+
+This option toggles if sharding related errors/warnings are
+outputted.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --sharding --errors
+
    Error Messages:
 
       22  ... Deletion of XXX range [...) will be scheduled after all possibly dependent queries finish
 
+This option has no effect unless ``--sharding`` is also specified.
+
+``--migrations``
+^^^^^^^^^^^^^^^^
+
+This option toggles if chunk migrations and split statistics are
+outputted.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --sharding --migrations
+
    Chunks Moved From This Shard:
 
-      TIME (/HOUR)     TO SHARD    NAMESPACE           NUM CHUNKS MIGRATIONS ATTEMPTED    SUCCESSFUL CHUNK MIGRATIONS    FAILED CHUNK MIGRATIONS
+      TIME (/HOUR)     TO SHARD    NAMESPACE           NUM CHUNKS MIGRATIONS ATTEMPTED    SUCCESSFUL CHUNK MIGRATIONS                              FAILED CHUNK MIGRATIONS
 
-      2019-12-18T00    shard01     local.collection    4 chunk(s)                         4 chunk(s) moved               no failed chunks.
-      2019-12-17T23    shard01     local.collection    6 chunk(s)                         5 chunk(s) moved               1 chunk(s): ['23:18:03.270'] failed with "ChunkTooBig".
-      2019-12-17T22    shard01     local.collection    2 chunk(s)                         1 chunk(s) moved               1 chunk(s): ['22:58:59.441 BECAME SUCCESSFUL AT: 22:59:12.153'] failed with "Unknown".
+      2019-12-18T00    shard01     local.collection    4 chunk(s)                         4 chunk(s) moved | Total time spent: 566ms               no failed chunks.
+      2019-12-17T23    shard01     local.collection    6 chunk(s)                         5 chunk(s) moved | Total time spent: 754ms               1 chunk(s): ['23:18:03.270'] failed with "ChunkTooBig".
+      2019-12-17T22    shard01     local.collection    2 chunk(s)                         1 chunk(s) moved | Total time spent: 50ms                1 chunk(s): ['22:58:59.441 BECAME SUCCESSFUL AT: 22:59:12.153'] failed with "Unknown".
 
    Chunks Moved To This Shard:
 
@@ -451,8 +479,15 @@ This can all be found below.
 
    Chunk Split Statistics:
 
-      TIME (/HOUR)     NAMESPACE            NUM SPLIT-VECTORS ISSUED    SUCCESSFUL CHUNK SPLITS    FAILED CHUNK SPLITS
+      TIME (/HOUR)     NAMESPACE            NUM SPLIT-VECTORS ISSUED    SUCCESSFUL CHUNK SPLITS                             FAILED CHUNK SPLITS
 
-      2019-12-18T00    local.collection     6 split vector(s)           4 chunk(s) splitted.       no failed chunk splits.
-      2019-12-17T23    local.collection     85 split vector(s)          58 chunk(s) splitted.      1 chunk(s): ['23:07:27.441'] failed with "LockBusy".
+      2019-12-18T00    local.collection     6 split vector(s)           4 chunk(s) splitted | Total time spent: 645ms       no failed chunk splits.
+      2019-12-17T23    local.collection     85 split vector(s)          58 chunk(s) splitted | Total time spent: 7343ms     1 chunk(s): ['23:07:27.441'] failed with "LockBusy".
+
+To show all the chunk migrations and statistics without grouping run
+mloginfo with the additional ``--verbose`` command.
+
+This option has no effect unless ``--sharding`` is also specified.
+
+Both options can be used in conjunction to output both
 
