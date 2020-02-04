@@ -486,7 +486,7 @@ class TestMLogInfo(object):
 
     def test_sharding_chunk_split_statistics_exist(self):
         self._test_init('sharding_379_shard.log')
-        self._test_sharding(self.logfile_path, r'  2020-01-29T16', 1)
+        self._test_sharding(self.logfile_path, r'  2020-01-29T15', 1)
 
     def test_sharding_jumbo_chunk_exists(self):
         self._test_init('sharding_379_CSRS.log')

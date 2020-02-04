@@ -180,7 +180,8 @@ class TestUtilLogFile(object):
         assert chunk_moved_from[1] == "min: { sku: 9999265900050000 }, max: { sku: MaxKey }"
         assert chunk_moved_from[2] == "shard02"
         assert chunk_moved_from[3] == "test.products"
-        assert chunk_moved_from[4] == "success"
+        assert ('step 6 of 6', '118') in chunk_moved_from[4]
+        assert chunk_moved_from[5] == "success"
 
     def test_shard_chunk_migration_to(self):
         """
@@ -197,5 +198,6 @@ class TestUtilLogFile(object):
         assert chunk_moved_to[1] == "min: { sku: 23153496 }, max: { sku: 28928914 }"
         assert chunk_moved_to[2] == "Unknown"
         assert chunk_moved_to[3] == "test.products"
-        assert chunk_moved_to[4] == "success"
+        assert ('step 6 of 6', '252') in chunk_moved_to[4]
+        assert chunk_moved_to[5] == "success"
 
