@@ -17,8 +17,8 @@ class MTransferTool(BaseCmdLineTool):
     def __init__(self):
         BaseCmdLineTool.__init__(self)
 
-        self.argparser.description = ('Imports and exports databases between MongoDB deployments using '
-                                       'WiredTiger storage with directoryPerDB configuration.')
+        self.argparser.description = ('Import and export databases between MongoDB deployments '
+                                      'for WiredTiger storage with directoryPerDB configuration.')
 
         self.argparser.add_argument('--dbpath', dest='dbpath', default='.', nargs=1,
                                     help='MongoDB database path')
@@ -45,7 +45,7 @@ class MTransferTool(BaseCmdLineTool):
         try:
             storage_raw = open(os.path.join(self.dbpath, 'storage.bson'), 'rb').read()
         except Exception as e:
-            sys.stderr.write('Failed to open storage.bson in "%s": %s\n' % (self.dbpath, e))
+            sys.stderr.write('Failed to open storage.bson in "{0}": {1}\n'.format(self.dbpath, e))
             return
 
         settings = bson.decode(storage_raw)["storage"]["options"]
@@ -61,26 +61,27 @@ class MTransferTool(BaseCmdLineTool):
         self.database = self.args['database'][0]
         self.nsprefix = self.database + '.'
 
-        mtransfer_dir  = os.path.join(self.dbpath, self.database)
+        mtransfer_dir = os.path.join(self.dbpath, self.database)
         mtransfer_file = os.path.join(mtransfer_dir, 'mtransfer.bson')
 
         if self.args['command'] == 'export':
             if not os.path.exists(mtransfer_dir):
-                sys.stderr.write('Expected source directory "%s" does not exist. '
-                                 'Check the database name is correct.\n' % (mtransfer_dir))
+                sys.stderr.write('Expected source directory "{0}" does not exist. '
+                                 'Check the database name is correct.\n'.format(mtransfer_dir))
                 return
             if not self.force and os.path.exists(mtransfer_file):
-                sys.stderr.write('Output file "%s" already exists\n' % (mtransfer_file))
+                sys.stderr.write('Output file "{0}" already exists\n'.format(mtransfer_file))
                 return
             with open(mtransfer_file, 'wb') as outf:
                 self.doExport(outf)
         elif self.args['command'] == 'import':
             if not os.path.exists(mtransfer_dir):
-                sys.stderr.write('Expected target directory "%s" does not exist. '
-                                 'Check the database name is correct.\n' % (mtransfer_dir))
+                sys.stderr.write('Expected target directory "{0}" does not exist. '
+                                 'Check the database name is correct.\n'.format(mtransfer_dir))
                 return
             if not os.path.exists(mtransfer_file):
-                sys.stderr.write('Cannot import: mtransfer file "%s" does not exist.\n' % (mtransfer_file))
+                sys.stderr.write('Cannot import: mtransfer file "{0}" does not exist.\n'.
+                                 format(mtransfer_file))
                 return
             with open(mtransfer_file, 'rb') as inf:
                 self.doImport(inf)
@@ -96,7 +97,7 @@ class MTransferTool(BaseCmdLineTool):
                 self.dbpath,
                 'log=(compressor=snappy,path=journal,recover=error),readonly=true')
         except Exception as e:
-            sys.stderr.write('Failed to open dbpath "%s": %s\n' % (self.dbpath, e))
+            sys.stderr.write('Failed to open dbpath "{0}": {1}\n'.format(self.dbpath, e))
             return
 
         session = conn.open_session()
@@ -153,15 +154,15 @@ class MTransferTool(BaseCmdLineTool):
         try:
             conn = wiredtiger.wiredtiger_open(
                 self.dbpath,
-                'log=(enabled,compressor=snappy,path=journal,recover=error)')
+                'log=(enabled=false,compressor=snappy,path=journal,recover=error)')
         except Exception as e:
-            sys.stderr.write('Failed to open dbpath "%s": %s\n' % (self.dbpath, e))
+            sys.stderr.write('Failed to open dbpath "{0}": {1}\n'.format(self.dbpath, e))
             return
 
         try:
             self._doImport(conn, inf)
         except Exception as e:
-            sys.stderr.write('Import failed: %s' % e)
+            sys.stderr.write('Import failed: {0}'.format(e))
 
         print('Import complete')
 
@@ -177,7 +178,14 @@ class MTransferTool(BaseCmdLineTool):
         sizeStorer = session.open_cursor('table:sizeStorer')
         wtMeta = session.open_cursor('metadata:', None, 'readonly=false')
 
-        # Get the maximum ID in the catalog: we will be appending
+        # Get the maximum file ID in the WT catalog: we will be appending
+        session.create('file:_mtransfer')
+        newfile_meta = wtMeta['file:_mtransfer']
+        self.message('Got new file metadata "{0}"'.format(newfile_meta))
+        session.drop('file:_mtransfer')
+        file_id = int(re.search(r',id=(\d+),', newfile_meta).group(1))
+
+        # Get the maximum ID in the MDB catalog: we will be appending
         catalog.prev()
         maxID = catalog.get_key()
 
@@ -185,8 +193,8 @@ class MTransferTool(BaseCmdLineTool):
             if not os.path.exists(
                     os.path.join(self.dbpath, self.database, export['filename'])):
                 sys.stderr.write(
-                    'File "%s" referenced in export missing during import' %
-                    (export['filename']))
+                    'File "{0}" referenced in export missing during import'.
+                    format(export['filename']))
                 if not self.force:
                     return
 
@@ -196,6 +204,9 @@ class MTransferTool(BaseCmdLineTool):
                     'current version {1} may not be compatible'.
                     format(export['version'], __version__))
                 return
+
+            # Figure out the new namespace
+            ns = self.database + '.' + export['collname']
 
             # First process the indexes
             idxIdent = {}
@@ -207,15 +218,20 @@ class MTransferTool(BaseCmdLineTool):
                 # Do a regular "session.create" for the table, then overwrite
                 # the "file:" metadata with the original
                 app_metadata = app_metadata_re.search(idx['wtmeta_file']).group(0)
-                self.message('For index "%s", app_metadata = "%s"' % (idxName, app_metadata))
-                wtMeta[table_uri] = app_metadata + ',colgroups=,collator=,columns=,key_format=u,value_format=u'
-                wtMeta[colgroup_uri] = app_metadata + ',collator=,columns=,source="' + file_uri + '",type=file'
-                wtMeta[file_uri] = idx['wtmeta_file']
+                # For older style index metadata, update the namespace
+                app_metadata = re.sub(r'"ns" : ".*?"', '"ns" : "{0}"'.format(ns), app_metadata)
+                self.message('For index "{0}", app_metadata = "{1}"'.format(idxName, app_metadata))
+                wtMeta[table_uri] = (app_metadata +
+                                     ',colgroups=,collator=,columns=,key_format=u,value_format=u')
+                wtMeta[colgroup_uri] = (app_metadata +
+                                        ',collator=,columns=,source="' + file_uri + '",type=file')
+                wtMeta[file_uri] = (idx['wtmeta_file'] + ',' + app_metadata +
+                                    (',id={0:d}'.format(file_id)))
+                file_id += 1
                 idxIdent[idxName] = ident
-                self.message('Adding index "%s" with ident "%s"' % (idxName, ident))
+                self.message('Adding index "{0}" with ident "{1}"'.format(idxName, ident))
 
-            # Figure out the new namespace and WT URIs
-            ns = self.database + '.' + export['collname']
+            # Figure out the WT URIs
             ident = self.database + '/' + export['filename'][:-3]
             table_uri = 'table:' + ident
             colgroup_uri = 'colgroup:' + ident
@@ -224,10 +240,14 @@ class MTransferTool(BaseCmdLineTool):
             # Do a regular "session.create" for the table, then overwrite the
             # "file:" metadata with the original
             app_metadata = app_metadata_re.search(export['wtmeta_file']).group(0)
-            self.message('For collection "%s", app_metadata = "%s"' % (ns, app_metadata))
-            wtMeta[table_uri] = app_metadata + ',colgroups=,collator=,columns=,key_format=q,value_format=u'
-            wtMeta[colgroup_uri] = app_metadata + ',collator=,columns=,source="' + file_uri + '",type=file'
-            wtMeta[file_uri] = export['wtmeta_file']
+            self.message('For collection "{0}", app_metadata = "{1}"'.format(ns, app_metadata))
+            wtMeta[table_uri] = (app_metadata +
+                                 ',colgroups=,collator=,columns=,key_format=q,value_format=u')
+            wtMeta[colgroup_uri] = (app_metadata +
+                                    ',collator=,columns=,source="' + file_uri + '",type=file')
+            wtMeta[file_uri] = (export['wtmeta_file'] + ',' + app_metadata +
+                                (',id={0:d}'.format(file_id)))
+            file_id += 1
 
             sizeStorer[ident.encode()] = bson.encode(export['sizeStorer'])
 
@@ -237,8 +257,10 @@ class MTransferTool(BaseCmdLineTool):
             catalog_entry[u'md'][u'ns'] = ns
             catalog_entry[u'ident'] = ident
             catalog_entry[u'idxIdent'] = idxIdent
+            for i in range(len(catalog_entry[u'md'][u'indexes'])):
+                catalog_entry[u'md'][u'indexes'][i][u'spec'][u'ns'] = ns
             maxID += 1
-            self.message('Adding catalog entry %d -> %s' % (maxID, catalog_entry))
+            self.message('Adding catalog entry {0} -> {1}'.format(maxID, catalog_entry))
             catalog[maxID] = bson.encode(catalog_entry, codec_options=codec_options)
 
         session.commit_transaction()
