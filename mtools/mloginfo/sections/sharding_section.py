@@ -253,7 +253,7 @@ class ShardingSection(BaseSection):
             print_table(table_rows, titles)
 
     def _print_chunk_migrations(self, chunks, moved_from=False):
-        """Prints the chunk migration statistics in a table depending on flag"""
+        """Prints the chunk migration statistics in a table depending on to/from flag"""
         verbose = self.mloginfo.args['verbose']
         chunks.reverse()
 
@@ -298,7 +298,6 @@ class ShardingSection(BaseSection):
                     chunk = chunks[0]
                 else:
                     time, moved_to_from, namespace = group
-
                     successful_count = 0
                     total_time_spent = 0
                     failed = dict()
@@ -332,7 +331,8 @@ class ShardingSection(BaseSection):
                     if chunk.migrationStatus == "success":
                         total_time_spent = sum(int(ms) for step, ms in chunk.steps)
                         msg = f"Successful | Total time spent {total_time_spent}ms"
-                        moved_chunks['chunkMigrationStatus'] = msg
+                        step_breakdown = ', '.join(f"{step}: {ms}ms" for step, ms in chunk.steps)
+                        moved_chunks['chunkMigrationStatus'] = msg + f" ({step_breakdown})"
                     else:
                         moved_chunks['chunkMigrationStatus'] = f"Failed with {chunk.errorMessage}"
                 else:
