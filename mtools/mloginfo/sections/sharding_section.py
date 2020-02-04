@@ -23,6 +23,7 @@ SplitTuple = namedtuple('SplitTuple', [
     'namespace',
     'numSplits',
     'success',
+    'timeTaken',
     'error'
 ])
 
@@ -172,33 +173,23 @@ class ShardingSection(BaseSection):
 
     def _print_chunk_statistics(self):
         """Prints the chunk split statistics in a table"""
-        verbose = self.mloginfo.args['verbose']
         self.mloginfo.logfile.chunk_splits.reverse()
 
-        if verbose:
-            time = lambda x: x.time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-            chunk_split_groupings = Grouping(group_by=time)
-        else:
-            chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
+        chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
                                                                  x.namespace))
 
         for chunk_split in self.mloginfo.logfile.chunk_splits:
-            time, split_range, namespace, numSplits, success, error = chunk_split
+            time, split_range, namespace, numSplits, success, timeTaken, error = chunk_split
             split_tuple = SplitTuple(time=time,
                                      range=split_range,
                                      namespace=namespace,
                                      numSplits=numSplits,
                                      success=success,
+                                     timeTaken=timeTaken,
                                      error=error)
             chunk_split_groupings.add(split_tuple)
 
-        if verbose:
-            titles = ['  time',
-                      'namespace',
-                      '# split-vectors issued',
-                      'chunk split status']
-        else:
-            titles = ['  time (/hour)',
+        titles = ['  time (/hour)',
                       'namespace',
                       '# split-vectors issued',
                       'successful chunk splits',
@@ -210,69 +201,56 @@ class ShardingSection(BaseSection):
             table_rows = []
             for group, splits in chunk_split_groupings.items():
 
-                if verbose:
-                    time = group
-                    split = splits[0]
-                else:
-                    time, namespace = group
-                    successful_count = 0
-                    total_number_vectors = 0
-                    split_succeeded_after = dict()
-                    failed_splits = dict()
-                    for split in splits:
-                        total_number_vectors += int(split.numSplits)
-                        if (not split.success) and split.error:
-                            count, timestamps = failed_splits.get(split.error, (0, list()))
-                            count += 1
-                            if split_succeeded_after.get(split.range, False):
-                                timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
-                                                  ' **WAS SUCCESSFUL AFTER**')
-                            else:
-                                timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
-                            failed_splits[split.error] = (count, timestamps)
-                        elif split.success:
-                            split_succeeded_after[split.range] = True
-                            successful_count += 1
+                time, namespace = group
+                successful_count = 0
+                total_number_vectors = 0
+                split_succeeded_after = dict()
+                failed_splits = dict()
+                total_time_taken = 0
+                for split in splits:
+                    total_number_vectors += int(split.numSplits)
+                    if (not split.success) and split.error:
+                        count, timestamps = failed_splits.get(split.error, (0, list()))
+                        count += 1
+                        if split_succeeded_after.get(split.range, False):
+                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
+                                                ' **WAS SUCCESSFUL AFTER**')
+                        else:
+                            timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
+                        failed_splits[split.error] = (count, timestamps)
+                    elif split.success:
+                        split_succeeded_after[split.range] = True
+                        successful_count += 1
+                        total_time_taken += sum(int(ms) for ms in split.timeTaken)
 
                 split_summary = OrderedDict()
 
                 split_summary['time'] = f"  {time}"
                 split_summary['namespace'] = namespace
 
-                if verbose:
-                    split_summary['numSplitVectors'] = f'{split.numSplits} split vector(s)'
-                    if (not split.success) and split.error:
-                        if error == "Jumbo":
-                            split_summary['chunkSplitStatus'] = f'Marked as {error}.'
-                        else:
-                            split_summary['chunkSplitStatus'] = f"Failed with {split.error}"
+                split_summary['numSplitVectors'] = f'{total_number_vectors} split vector(s)'
+                msg = (f"{successful_count} chunk(s) splitted" +
+                        f" | Total time spent: {total_time_taken}ms")
+                split_summary['successfulSplits'] = msg
+
+                failed_split = ""
+                for error, info in failed_splits.items():
+                    count, timestamps = info
+                    if error == "Jumbo":
+                        failed_split += (f'{count} chunk(s): ' +
+                                            f'{timestamps} marked as {error}.')
                     else:
-                        split_summary['chunkSplitStatus'] = ("Successful"
-                                                             if split.success else "Unknown")
+                        failed_split += (f'{count} chunk(s): {timestamps} ' +
+                                            f'failed with "{error}". ')
+
+                if len(failed_split):
+                    split_summary['failedChunkSplits'] = failed_split
                 else:
-                    split_summary['numSplitVectors'] = f'{total_number_vectors} split vector(s)'
-                    split_summary['successfulSplits'] = f"{successful_count} chunk(s) splitted. "
-
-                    failed_split = ""
-                    for error, info in failed_splits.items():
-                        count, timestamps = info
-                        if error == "Jumbo":
-                            failed_split += (f'{count} chunk(s): ' +
-                                             f'{timestamps} marked as {error}.')
-                        else:
-                            failed_split += (f'{count} chunk(s): {timestamps} ' +
-                                             f'failed with "{error}". ')
-
-                    if len(failed_split):
-                        split_summary['failedChunkSplits'] = failed_split
-                    else:
-                        split_summary['failedChunkSplits'] = "no failed chunk splits."
+                    split_summary['failedChunkSplits'] = "no failed chunk splits."
 
                 table_rows.append(split_summary)
 
             print_table(table_rows, titles)
-            if not verbose:
-                print("\nto show individual chunk split statistics, run with --verbose.")
 
     def _print_chunk_migrations(self, chunks, moved_from=False):
         """Prints the chunk migration statistics in a table depending on flag"""
@@ -354,14 +332,14 @@ class ShardingSection(BaseSection):
                 if verbose:
                     if chunk.migrationStatus == "success":
                         total_time_spent = sum(int(ms) for step, ms in chunk.steps)
-                        msg = f"Successful | Total time spent {total_time_spent}"
+                        msg = f"Successful | Total time spent {total_time_spent}ms"
                         moved_chunks['chunkMigrationStatus'] = msg
                     else:
                         moved_chunks['chunkMigrationStatus'] = f"Failed with {chunk.errorMessage}"
                 else:
                     moved_chunks['numberOfChunks'] = f'{len(chunks)} chunk(s)'
                     msg = (f"{successful_count} chunk(s) moved " +
-                           f"| Total time spent: {total_time_spent}")
+                           f"| Total time spent: {total_time_spent}ms")
                     moved_chunks['successChunkMigrations'] = msg
 
                     failed_migrations = ""

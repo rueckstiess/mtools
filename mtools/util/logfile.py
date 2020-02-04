@@ -549,20 +549,22 @@ class LogFile(InputSource):
                     namespace = match.group("namespace")
                     numSplits = match.group('numSplits')
                     success = None
+                    time_taken = 0
                     error = None
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
-            elif "autosplitted" in line:
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
+            elif "splitVector" in line:
                 logevent = LogEvent(line)
-                match = re.search("autosplitted (?P<namespace>\S+).* "
-                                    "\[(?P<range>.*)\)", line)
+                match = re.search('splitVector: "(?P<namespace>\S+)".*,'
+                                  ' (?P<range>min:.*), max.*op_msg (?P<time_taken>\d+)', line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
                     namespace = match.group("namespace")
+                    time_taken = match.group("time_taken")
                     numSplits = 0
                     success = True
                     error = None
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "Unable to auto-split chunk" in line:
                 logevent = LogEvent(line)
                 match = re.search("chunk \[(?P<range>.*)\) "
@@ -574,8 +576,9 @@ class LogFile(InputSource):
                     namespace = match.group("namespace")
                     numSplits = 0
                     success = False
+                    time_taken = 0
                     error = match.group("error")
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "jumbo" in line:
                 logevent = LogEvent(line)
                 match = re.search("migration (?P<namespace>\S+): \[(?P<range>.*)\)", prev_line)
@@ -585,8 +588,9 @@ class LogFile(InputSource):
                     namespace = match.group("namespace")
                     numSplits = 0
                     success = False
+                    time_taken = 0
                     error = "Jumbo"
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, error))
+                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             
             prev_line = line
 
