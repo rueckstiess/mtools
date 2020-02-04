@@ -109,7 +109,7 @@ processes.
 pymongo
 -------
 
-*required for mlaunch*
+*required for mlaunch and mtransfer*
 
 `pymongo <https://api.mongodb.com/python/current/>`__ is MongoDB's official
 Python driver. ``mlaunch`` uses this to configure and query local MongoDB
@@ -131,3 +131,11 @@ numpy
 
 `numpy <https://numpy.scipy.org/>`__ is a Python module for scientific
 computing and numerical calculations.
+
+wiredtiger
+----------
+
+*required for mtransfer*
+
+`WiredTiger <https://github.com/wiredtiger/wiredtiger/>`__ is the default
+storage engine for MongoDB.
