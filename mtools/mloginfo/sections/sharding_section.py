@@ -176,7 +176,7 @@ class ShardingSection(BaseSection):
         self.mloginfo.logfile.chunk_splits.reverse()
 
         chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
-                                                                 x.namespace))
+                                                             x.namespace))
 
         for chunk_split in self.mloginfo.logfile.chunk_splits:
             time, split_range, namespace, numSplits, success, timeTaken, error = chunk_split
@@ -190,10 +190,10 @@ class ShardingSection(BaseSection):
             chunk_split_groupings.add(split_tuple)
 
         titles = ['  time (/hour)',
-                      'namespace',
-                      '# split-vectors issued',
-                      'successful chunk splits',
-                      'failed chunk splits']
+                  'namespace',
+                  '# split-vectors issued',
+                  'successful chunk splits',
+                  'failed chunk splits']
 
         if len(chunk_split_groupings) == 0:
             print("  no chunk splits found.")
@@ -214,7 +214,7 @@ class ShardingSection(BaseSection):
                         count += 1
                         if split_succeeded_after.get(split.range, False):
                             timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3] +
-                                                ' **WAS SUCCESSFUL AFTER**')
+                                              ' **WAS SUCCESSFUL AFTER**')
                         else:
                             timestamps.append(split.time.strftime("%H:%M:%S.%f")[:-3])
                         failed_splits[split.error] = (count, timestamps)
@@ -230,7 +230,7 @@ class ShardingSection(BaseSection):
 
                 split_summary['numSplitVectors'] = f'{total_number_vectors} split vector(s)'
                 msg = (f"{successful_count} chunk(s) splitted" +
-                        f" | Total time spent: {total_time_taken}ms")
+                       f" | Total time spent: {total_time_taken}ms")
                 split_summary['successfulSplits'] = msg
 
                 failed_split = ""
@@ -238,10 +238,10 @@ class ShardingSection(BaseSection):
                     count, timestamps = info
                     if error == "Jumbo":
                         failed_split += (f'{count} chunk(s): ' +
-                                            f'{timestamps} marked as {error}.')
+                                         f'{timestamps} marked as {error}.')
                     else:
                         failed_split += (f'{count} chunk(s): {timestamps} ' +
-                                            f'failed with "{error}". ')
+                                         f'failed with "{error}". ')
 
                 if len(failed_split):
                     split_summary['failedChunkSplits'] = failed_split
@@ -258,8 +258,7 @@ class ShardingSection(BaseSection):
         chunks.reverse()
 
         if verbose:
-            time = lambda x: x.time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-            chunk_groupings = Grouping(group_by=time)
+            chunk_groupings = Grouping(group_by=lambda x: x.time)
         else:
             chunk_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
                                                            x.movedFromTo,
@@ -295,7 +294,7 @@ class ShardingSection(BaseSection):
             for group, chunks in chunk_groupings.items():
 
                 if verbose:
-                    time = group
+                    time = group.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
                     chunk = chunks[0]
                 else:
                     time, moved_to_from, namespace = group
