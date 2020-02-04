@@ -501,13 +501,16 @@ class LogFile(InputSource):
                     
                     if note == "success":
                         errmsg = None
+                        steps = re.findall('(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
                     else:
                         match = re.search(':: caused by :: (?P<errmsg>\S+):', prev_line)
+                        steps = None
                         if match:
                             errmsg = match.group('errmsg')
                         else:
                             errmsg = "Unknown"
-                    chunk_migration = (time, chunk_range, moved_to, namespace, note, errmsg)
+
+                    chunk_migration = (time, chunk_range, moved_to, namespace, steps, note, errmsg)
 
                     self._chunks_moved_from.append(chunk_migration)
 
@@ -523,13 +526,16 @@ class LogFile(InputSource):
                     moved_from = "Unknown"
                     note = match.group('note')
 
-                    match = re.search('errmsg: "(?P<errmsg>.*)"', line)
-                    if match:
-                        errmsg = match.group('errmsg') 
-                    else:
+                    if note == "success":
                         errmsg = None
+                        steps = re.findall('(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
+                    else:
+                        steps = None
+                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
+                        if match:
+                            errmsg = match.group('errmsg')
 
-                    chunk_migration = (time, chunk_range, moved_from, namespace, note, errmsg)
+                    chunk_migration = (time, chunk_range, moved_from, namespace, steps, note, errmsg)
 
                     self._chunks_moved_to.append(chunk_migration)
                 

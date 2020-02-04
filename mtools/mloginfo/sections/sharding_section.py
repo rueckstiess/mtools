@@ -12,6 +12,7 @@ ChunksTuple = namedtuple('ChunksTuple', [
     'range',
     'movedFromTo',
     'namespace',
+    'steps',
     'migrationStatus',
     'errorMessage'
 ])
@@ -175,7 +176,8 @@ class ShardingSection(BaseSection):
         self.mloginfo.logfile.chunk_splits.reverse()
 
         if verbose:
-            chunk_split_groupings = Grouping(group_by=lambda x: (x.time))
+            time = lambda x: x.time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+            chunk_split_groupings = Grouping(group_by=time)
         else:
             chunk_split_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
                                                                  x.namespace))
@@ -278,23 +280,25 @@ class ShardingSection(BaseSection):
         chunks.reverse()
 
         if verbose:
-            chunk_groupings = Grouping(group_by=lambda x: (x.time))
+            time = lambda x: x.time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+            chunk_groupings = Grouping(group_by=time)
         else:
             chunk_groupings = Grouping(group_by=lambda x: (x.time.strftime("%Y-%m-%dT%H"),
                                                            x.movedFromTo,
                                                            x.namespace))
 
         for chunk_moved in chunks:
-            time, chunk_range, moved_to_from, namespace, status, error_message = chunk_moved
+            time, chunk_range, moved_to_from, namespace, steps, status, error_message = chunk_moved
             moved_tuple = ChunksTuple(time=time,
                                       range=chunk_range,
                                       movedFromTo=moved_to_from,
                                       namespace=namespace,
+                                      steps=steps,
                                       migrationStatus=status,
                                       errorMessage=error_message)
             chunk_groupings.add(moved_tuple)
 
-        move_to_from_title = 'from shard' if moved_from else 'to shard'
+        move_to_from_title = 'to shard' if moved_from else 'from shard'
         if verbose:
             titles = ['  time', move_to_from_title,
                       'namespace',
@@ -319,12 +323,14 @@ class ShardingSection(BaseSection):
                     time, moved_to_from, namespace = group
 
                     successful_count = 0
+                    total_time_spent = 0
                     failed = dict()
                     succeeded_after = dict()
                     for chunk in chunks:
                         if chunk.migrationStatus == "success":
                             successful_count += 1
                             succeeded_after[chunk.range] = (True, chunk.time)
+                            total_time_spent += sum(int(ms) for step, ms in chunk.steps)
                         else:
                             count, timestamps = failed.get(chunk.errorMessage, (0, list()))
                             count += 1
@@ -347,18 +353,22 @@ class ShardingSection(BaseSection):
 
                 if verbose:
                     if chunk.migrationStatus == "success":
-                        moved_chunks['chunkMigrationStatus'] = "Successful"
+                        total_time_spent = sum(int(ms) for step, ms in chunk.steps)
+                        msg = f"Successful | Total time spent {total_time_spent}"
+                        moved_chunks['chunkMigrationStatus'] = msg
                     else:
                         moved_chunks['chunkMigrationStatus'] = f"Failed with {chunk.errorMessage}"
                 else:
                     moved_chunks['numberOfChunks'] = f'{len(chunks)} chunk(s)'
-                    moved_chunks['successChunkMigrations'] = f"{successful_count} chunk(s) moved"
+                    msg = (f"{successful_count} chunk(s) moved " +
+                           f"| Total time spent: {total_time_spent}")
+                    moved_chunks['successChunkMigrations'] = msg
 
                     failed_migrations = ""
                     for error, info in failed.items():
                         count, timestamps = info
                         failed_migrations += (f'{count} chunk(s): {timestamps} '
-                                              'failed with "{error}".')
+                                              f'failed with "{error}".')
 
                     if len(failed_migrations):
                         moved_chunks['failedChunkMigrations'] = failed_migrations
