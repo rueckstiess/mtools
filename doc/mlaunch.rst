@@ -101,7 +101,7 @@ Usage
                 [--auth-roles [ROLE [ROLE ...]]]
                 [--initial-user] [--sslCAFile SSLCAFILE]
                 [--sslCRLFile SSLCRLFILE] [--sslAllowInvalidHostnames]
-                [--sslAllowInvalidCertificates] [--sslOnNormalPorts]
+                [--sslAllowInvalidCertificates]
                 [--sslMode {disabled,allowSSL,preferSSL,requireSSL}]
                 [--sslPEMKeyFile SSLPEMKEYFILE]
                 [--sslPEMKeyPassword SSLPEMKEYPASSWORD]
@@ -380,9 +380,6 @@ TLS/SSL options
 
 Server TLS/SSL options
 ^^^^^^^^^^^^^^^^^^^^^^
-
-``--sslOnNormalPorts``
-   Use TLS/SSL on configured ports.
 
 ``--sslMode {disabled,allowSSL,preferSSL,requireSSL}``
    Set the TLS/SSL operation mode.

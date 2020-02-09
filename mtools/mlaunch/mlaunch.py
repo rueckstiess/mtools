@@ -356,8 +356,6 @@ class MLaunchTool(BaseCmdLineTool):
                                     'invalid certificates'))
 
         ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
-        ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true',
-                                     help='use TLS/SSL on configured ports')
         ssl_server_args.add_argument('--sslMode',
                                      help='set the TLS/SSL operation mode',
                                      choices=('disabled allowSSL preferSSL '
