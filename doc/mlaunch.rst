@@ -108,7 +108,6 @@ Usage
                 [--sslClusterFile SSLCLUSTERFILE]
                 [--sslClusterPassword SSLCLUSTERPASSWORD]
                 [--sslDisabledProtocols SSLDISABLEDPROTOCOLS]
-                [--sslWeakCertificateValidation]
                 [--sslAllowConnectionsWithoutCertificates] [--sslFIPSMode]
                 [--sslClientCertificate SSLCLIENTCERTIFICATE]
                 [--sslClientPEMKeyFile SSLCLIENTPEMKEYFILE]
@@ -398,9 +397,6 @@ Server TLS/SSL options
 
 ``--sslDisabledProtocols SSLDISABLEDPROTOCOLS``
    Comma separated list of TLS protocols to disable [TLS1_0,TLS1_1,TLS1_2].
-
-``--sslWeakCertificateValidation``
-   Allow client to connect without presenting a certificate.
 
 ``--sslAllowConnectionsWithoutCertificates``
    Allow client to connect without presenting a certificate.

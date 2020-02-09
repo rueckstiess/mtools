@@ -374,10 +374,6 @@ class MLaunchTool(BaseCmdLineTool):
                                      help=('comma separated list of TLS '
                                            'protocols to disable '
                                            '[TLS1_0,TLS1_1,TLS1_2]'))
-        ssl_server_args.add_argument('--sslWeakCertificateValidation',
-                                     action='store_true',
-                                     help=('allow client to connect without '
-                                           'presenting a certificate'))
         ssl_server_args.add_argument(('--sslAllowConnectionsWithout'
                                       'Certificates'), action='store_true',
                                      help=('allow client to connect without '
