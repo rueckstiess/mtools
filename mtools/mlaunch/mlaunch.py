@@ -339,7 +339,7 @@ class MLaunchTool(BaseCmdLineTool):
                 init_parser.error("The file [%s] does not exist" % arg)
             return arg
 
-        ssl_args = init_parser.add_argument_group('SSL Options')
+        ssl_args = init_parser.add_argument_group('TLS/SSL options')
         ssl_args.add_argument('--sslCAFile',
                               help='Certificate Authority file for SSL',
                               type=is_file)
@@ -355,7 +355,7 @@ class MLaunchTool(BaseCmdLineTool):
                               help=('allow client or server connections with '
                                     'invalid certificates'))
 
-        ssl_server_args = init_parser.add_argument_group('Server SSL Options')
+        ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
         ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true',
                                      help='use ssl on configured ports')
         ssl_server_args.add_argument('--sslMode',
@@ -387,7 +387,7 @@ class MLaunchTool(BaseCmdLineTool):
         ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
                                      help='activate FIPS 140-2 mode')
 
-        ssl_client_args = init_parser.add_argument_group('Client SSL Options')
+        ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
         ssl_client_args.add_argument('--sslClientCertificate',
                                      help='client certificate file for ssl',
                                      type=is_file)
