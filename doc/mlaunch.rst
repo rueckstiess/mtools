@@ -98,7 +98,7 @@ Usage
                 [--port PORT] [--binarypath PATH] [--dir DIR]
                 [--hostname HOSTNAME] [--auth] [--username USERNAME]
                 [--password PASSWORD] [--auth-db DB]
-                [--auth-roles [ROLE [ROLE ...]]]
+                [--auth-roles [ROLE [ROLE ...]]] [--auth-role-docs]
                 [--initial-user] [--sslCAFile SSLCAFILE]
                 [--sslCRLFile SSLCRLFILE] [--sslAllowInvalidHostnames]
                 [--sslAllowInvalidCertificates]
@@ -324,6 +324,9 @@ Authentication Parameters
    server, 1 mongos, and create the user ``thomas`` with password
    ``my_s3cr3t_p4ssw0rd``. It will use the default roles and place the user in
    the ``admin`` database. ``mlaunch`` will
+
+``--auth-role-docs``
+   Use with ``--auth-roles`` to interpret roles specified as JSON documents.
 
 ``--initial-user``
    Create an initial user if auth is enabled (default=true).

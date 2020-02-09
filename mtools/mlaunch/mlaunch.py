@@ -328,6 +328,9 @@ class MLaunchTool(BaseCmdLineTool):
                                        'required to run the stop command '
                                        '(requires --auth, default="%s")'
                                        % ' '.join(self._default_auth_roles)))
+        init_parser.add_argument('--auth-role-docs', action='store_true',
+                                 default=False,
+                                 help='auth-roles are JSON documents')
         init_parser.add_argument('--initial-user', action='store_false',
                                  default=True, dest='initial-user',
                                  help=('create an initial user if auth is '
