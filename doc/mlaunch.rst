@@ -99,7 +99,7 @@ Usage
                 [--hostname HOSTNAME] [--auth] [--username USERNAME]
                 [--password PASSWORD] [--auth-db DB]
                 [--auth-roles [ROLE [ROLE ...]]] [--auth-role-docs]
-                [--initial-user] [--sslCAFile SSLCAFILE]
+                [--no-initial-user] [--sslCAFile SSLCAFILE]
                 [--sslCRLFile SSLCRLFILE] [--sslAllowInvalidHostnames]
                 [--sslAllowInvalidCertificates]
                 [--sslMode {disabled,allowSSL,preferSSL,requireSSL}]
@@ -328,8 +328,8 @@ Authentication Parameters
 ``--auth-role-docs``
    Use with ``--auth-roles`` to interpret roles specified as JSON documents.
 
-``--initial-user``
-   Create an initial user if auth is enabled (default=true).
+``--no-initial-user``
+   Do not create an initial user if auth is enabled.
 
 Optional Parameters
 ^^^^^^^^^^^^^^^^^^^
