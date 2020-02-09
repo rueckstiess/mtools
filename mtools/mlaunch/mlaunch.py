@@ -331,10 +331,10 @@ class MLaunchTool(BaseCmdLineTool):
         init_parser.add_argument('--auth-role-docs', action='store_true',
                                  default=False,
                                  help='auth-roles are JSON documents')
-        init_parser.add_argument('--initial-user', action='store_false',
+        init_parser.add_argument('--no-initial-user', action='store_false',
                                  default=True, dest='initial-user',
-                                 help=('create an initial user if auth is '
-                                       'enabled (default=true)'))
+                                 help=('Do not create an initial user if auth '
+                                       'is enabled'))
 
         # ssl
         def is_file(arg):
