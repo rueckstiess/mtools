@@ -99,6 +99,20 @@ Usage
                 [--hostname HOSTNAME] [--auth] [--username USERNAME]
                 [--password PASSWORD] [--auth-db DB]
                 [--auth-roles [ROLE [ROLE ...]]]
+                [--initial-user] [--sslCAFile SSLCAFILE]
+                [--sslCRLFile SSLCRLFILE] [--sslAllowInvalidHostnames]
+                [--sslAllowInvalidCertificates] [--sslOnNormalPorts]
+                [--sslMode {disabled,allowSSL,preferSSL,requireSSL}]
+                [--sslPEMKeyFile SSLPEMKEYFILE]
+                [--sslPEMKeyPassword SSLPEMKEYPASSWORD]
+                [--sslClusterFile SSLCLUSTERFILE]
+                [--sslClusterPassword SSLCLUSTERPASSWORD]
+                [--sslDisabledProtocols SSLDISABLEDPROTOCOLS]
+                [--sslWeakCertificateValidation]
+                [--sslAllowConnectionsWithoutCertificates] [--sslFIPSMode]
+                [--sslClientCertificate SSLCLIENTCERTIFICATE]
+                [--sslClientPEMKeyFile SSLCLIENTPEMKEYFILE]
+                [--sslClientPEMKeyPassword SSLCLIENTPEMKEYPASSWORD]
 
 For convenience and backwards compatibility, the ``init`` command is the
 default command and can be omitted.
@@ -312,6 +326,8 @@ Authentication Parameters
    ``my_s3cr3t_p4ssw0rd``. It will use the default roles and place the user in
    the ``admin`` database. ``mlaunch`` will
 
+``--initial-user``
+   Create an initial user if auth is enabled (default=true).
 
 Optional Parameters
 ^^^^^^^^^^^^^^^^^^^
@@ -346,6 +362,66 @@ Optional Parameters
 
    This command will look for the ``mongod`` binary in ``./build/bin/mongod``
    instead of the default location.
+
+TLS/SSL options
+^^^^^^^^^^^^^^^
+``--sslCAFile SSLCAFILE``
+   Certificate Authority file for TLS/SSL.
+
+``--sslCRLFile SSLCRLFILE``
+   Certificate Revocation List file for TLS/SSL.
+
+``--sslAllowInvalidHostnames``
+   Allow client and server certificates to provide non-matching hostnames.
+
+``--sslAllowInvalidCertificates``
+   Allow client or server connections with invalid
+   certificates.
+
+Server TLS/SSL options
+^^^^^^^^^^^^^^^^^^^^^^
+
+``--sslOnNormalPorts``
+   Use TLS/SSL on configured ports.
+
+``--sslMode {disabled,allowSSL,preferSSL,requireSSL}``
+   Set the TLS/SSL operation mode.
+
+``--sslPEMKeyFile SSLPEMKEYFILE``
+   PEM file for TLS/SSL.
+
+``--sslPEMKeyPassword SSLPEMKEYPASSWORD``
+   PEM file password.
+
+``--sslClusterFile SSLCLUSTERFILE``
+   Key file for internal TLS/SSL authentication.
+
+``--sslClusterPassword SSLCLUSTERPASSWORD``
+   Internal authentication key file password.
+
+``--sslDisabledProtocols SSLDISABLEDPROTOCOLS``
+   Comma separated list of TLS protocols to disable [TLS1_0,TLS1_1,TLS1_2].
+
+``--sslWeakCertificateValidation``
+   Allow client to connect without presenting a certificate.
+
+``--sslAllowConnectionsWithoutCertificates``
+   Allow client to connect without presenting a certificate.
+
+``--sslFIPSMode``
+   Activate FIPS 140-2 mode.
+
+Client TLS/SSL options
+^^^^^^^^^^^^^^^^^^^^^^
+
+``--sslClientCertificate SSLCLIENTCERTIFICATE``
+   Client certificate file for TLS/SSL.
+
+``--sslClientPEMKeyFile SSLCLIENTPEMKEYFILE``
+   Client PEM file for TLS/SSL.
+
+``--sslClientPEMKeyPassword SSLCLIENTPEMKEYPASSWORD``
+   Client PEM file password.
 
 -----
 
