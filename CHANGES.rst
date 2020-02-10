@@ -2,6 +2,21 @@
 Changes to mtools
 =================
 
+version 1.6.2
+~~~~~~~~~~~~~
+ * Update documentation to reference pip3 instead of pip (#774)
+ * SSL parameters to mlaunch are not documented on website (#666)
+ * Fix JSON serialize crash with bytes instead of str in pattern.py (#764)
+ * mloginfo: Fix --verbose crash (#769)
+ * mlaunch: `mlaunch list` throws typeError for a sharded deployment (#770)
+ * mlaunch: Remove deprecated --sslWeakCertificateValidation
+ * mloginfo: Add new --sharding section (#773)
+ * mloginfo: Add --debug with some extra info on query patterns
+ * mtransfer: Initial implementation of tool to export WiredTiger DBs (#754)
+
+Thanks to @stennie, @michaelcahill, @@Giuliano-C, @bugre, and @sindbach
+for contributions to this release.
+
 version 1.6.1
 ~~~~~~~~~~~~~
  * mtools should use python3 in shebangs (#761)
