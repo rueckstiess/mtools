@@ -17,6 +17,7 @@ Usage
             [--clients]
             [--connections]
             [--cursors]
+            [--debug]
             [--distinct]
             [--queries]
                [--rounding {0,1,2,3,4}]
@@ -49,6 +50,11 @@ Verbosity
 ---------
 ``--verbose``
    shows extra information, depending on the different sections.
+
+Debug
+---------
+``--debug``
+   shows debug information, depending on the different sections.
 
 .. _default-info:
 
