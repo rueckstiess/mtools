@@ -71,6 +71,8 @@ class QuerySection(BaseSection):
             self.mloginfo.progress_bar_enabled = False
 
         for i, le in enumerate(logfile):
+            le._debug = self.mloginfo.args['debug']
+
             # update progress bar every 1000 lines
             if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
                 if le.datetime:

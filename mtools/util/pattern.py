@@ -73,29 +73,29 @@ def shell2json(s):
     return s
 
 
-def json2pattern(s, fDebug = 0):
+def json2pattern(s, debug = False):
     """
     Convert JSON format to a query pattern.
 
     Includes even mongo shell notation without quoted key names.
 
-    Pass fDebug = 1 to print additional info on each step of processing chain
+    Pass debug = True to print additional info on each step of processing chain
     """
     saved_s = s
 
-    if fDebug : print ("\n=======================\n", saved_s, file=sys.stderr)
+    if debug : print ("\n=======================\n", saved_s, file=sys.stderr)
 
     # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
-    if fDebug : print (s, file=sys.stderr) 
+    if debug : print (s, file=sys.stderr) 
 
     # handle shell values that are not valid JSON
     s = shell2json(s)
-    if fDebug : print (s, file=sys.stderr)
+    if debug : print (s, file=sys.stderr)
     
     # convert to 1 where possible, to get rid of things like new Date(...)
     s, _ = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
-    if fDebug : print (s, file=sys.stderr)
+    if debug : print (s, file=sys.stderr)
 
 
     # replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
@@ -104,16 +104,17 @@ def json2pattern(s, fDebug = 0):
     # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
     s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
 
-    if fDebug : print (s, file=sys.stderr)
+    if debug : print (s, file=sys.stderr)
 
     # now convert to dictionary, converting unicode to ascii
     doc = {}
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
     except Exception as err:
-        ## print some context info and return without any extracted query data..
-        print ("json2pattern():json.loads Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  s: ({3})\n".
-            format(err, sys.exc_info()[0], saved_s, s), file=sys.stderr)
+        if debug:
+            ## print some context info and return without any extracted query data..
+            print ("json2pattern():json.loads Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  s: ({3})\n".
+                format(err, sys.exc_info()[0], saved_s, s), file=sys.stderr)
         return None
     except:
         print ("json2pattern():json.loads Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
@@ -124,8 +125,9 @@ def json2pattern(s, fDebug = 0):
         return json.dumps(doc, sort_keys=True, separators=(', ', ': '), ensure_ascii=False)
     except Exception as err:
         ## print some context info and return without any extracted query data..
-        print ("json2pattern():json.dumps Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  doc: ({3})\n".
-            format(err, sys.exc_info()[0], saved_s, doc), file=sys.stderr)
+        if debug:
+            print ("json2pattern():json.dumps Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  doc: ({3})\n".
+                format(err, sys.exc_info()[0], saved_s, doc), file=sys.stderr)
         return None
     except:
         print ("json2pattern():json.dumps Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
@@ -134,8 +136,8 @@ def json2pattern(s, fDebug = 0):
 
 if __name__ == '__main__':
 
-    # define as 1 to get verbose output of regex processing printed to stderr
-    fDebug = 0
+    # define as True to get debug output of regex processing printed to stderr
+    debug = False
 
     tests = { 
         '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, "foo", "bar"]}, "$or": [{a:"1uno"}, {b:"1uno"}] }'                : '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
@@ -159,9 +161,9 @@ if __name__ == '__main__':
     }
 
     for k,v in tests.items():
-        r = json2pattern(k, fDebug)
+        r = json2pattern(k, debug)
         if ( r == v ):
-            if fDebug :
+            if debug :
                 print("OK...: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
             else:
                 print("OK: {0}".format(k))

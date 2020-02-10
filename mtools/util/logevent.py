@@ -60,6 +60,7 @@ class LogEvent(object):
                       'JOURNAL', 'WRITE', 'TOTAL']
 
     def __init__(self, doc_or_str):
+        self._debug = False
         self._year_rollover = False
         if isinstance(doc_or_str, bytes):
             doc_or_str = doc_or_str.decode("utf-8")
@@ -78,6 +79,7 @@ class LogEvent(object):
             self._parse_document()
 
     def _reset(self):
+        self._debug = False
         self._split_tokens_calculated = False
         self._split_tokens = None
 
@@ -1011,7 +1013,7 @@ class LogEvent(object):
             if actual:
                 return search_str
             else:
-                return json2pattern(search_str)
+                return json2pattern(search_str, debug=self._debug)
         else:
             return None
 

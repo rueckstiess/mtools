@@ -16,9 +16,13 @@ class MLogInfoTool(LogFileTool):
 
         self.argparser.description = ('Extracts general information from '
                                       'logfile and prints it to stdout.')
+        self.argparser.add_argument('--debug', action='store_true',
+                                    help=('show debug output '
+                                          '(depends on info section)'))
         self.argparser.add_argument('--verbose', action='store_true',
                                     help=('show more verbose output '
                                           '(depends on info section)'))
+
         inf = 'info sections'
         cmds = ('Below commands activate additional info sections for the '
                 'log file.')
