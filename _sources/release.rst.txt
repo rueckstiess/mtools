@@ -36,8 +36,8 @@ Releasing a new version
 #. Any other cleanup tasks.
 #. (optional) leave the release branch for a few days to give others a chance
    to test it before releasing.
-#. Run ``python setup.py sdist bdist_wheel`` to build the dist packages.
-#. Run ``twine upload dist/*`` to publish the new version to pip (if you have
+#. Run ``python3 setup.py sdist bdist_wheel`` to build the dist packages.
+#. Run ``twine upload dist/*`` to publish the new version to PyPI (if you have
    permissions, otherwise ask someone who does, e.g. @rueckstiess or @stennie).
 #. Merge the release branch into ``master``.
 #. Merge the release branch into ``develop``.

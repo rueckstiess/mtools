@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.6.2
               </div>
             
           
@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Contribute to mtools</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="style.html">Style Guidelines</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Development</a><ul>
@@ -185,7 +186,7 @@ files directly in your local directory and test the changes right away.</p>
 <h2>Using a development branch<a class="headerlink" href="#using-a-development-branch" title="Permalink to this headline">#</a></h2>
 <ol class="arabic">
 <li><p>Remove any existing mtools installation:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip uninstall mtools
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip3 uninstall mtools
 </pre></div>
 </div>
 </li>
@@ -208,14 +209,14 @@ git checkout develop
 </li>
 <li><p>Install the mtools scripts in development mode using either:</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> (recommended as a convenience for installing additional
+<li><p><code class="docutils literal notranslate"><span class="pre">pip3</span></code> (recommended as a convenience for installing additional
 dependencies):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install -e <span class="s1">&#39;/path/to/cloned/repo[all]&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip3 install -e <span class="s1">&#39;/path/to/cloned/repo[all]&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">setup.py</span></code></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo python setup.py develop
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo python3 setup.py develop
 </pre></div>
 </div>
 </li>

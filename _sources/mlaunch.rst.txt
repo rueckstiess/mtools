@@ -98,7 +98,20 @@ Usage
                 [--port PORT] [--binarypath PATH] [--dir DIR]
                 [--hostname HOSTNAME] [--auth] [--username USERNAME]
                 [--password PASSWORD] [--auth-db DB]
-                [--auth-roles [ROLE [ROLE ...]]]
+                [--auth-roles [ROLE [ROLE ...]]] [--auth-role-docs]
+                [--no-initial-user] [--sslCAFile SSLCAFILE]
+                [--sslCRLFile SSLCRLFILE] [--sslAllowInvalidHostnames]
+                [--sslAllowInvalidCertificates]
+                [--sslMode {disabled,allowSSL,preferSSL,requireSSL}]
+                [--sslPEMKeyFile SSLPEMKEYFILE]
+                [--sslPEMKeyPassword SSLPEMKEYPASSWORD]
+                [--sslClusterFile SSLCLUSTERFILE]
+                [--sslClusterPassword SSLCLUSTERPASSWORD]
+                [--sslDisabledProtocols SSLDISABLEDPROTOCOLS]
+                [--sslAllowConnectionsWithoutCertificates] [--sslFIPSMode]
+                [--sslClientCertificate SSLCLIENTCERTIFICATE]
+                [--sslClientPEMKeyFile SSLCLIENTPEMKEYFILE]
+                [--sslClientPEMKeyPassword SSLCLIENTPEMKEYPASSWORD]
 
 For convenience and backwards compatibility, the ``init`` command is the
 default command and can be omitted.
@@ -312,6 +325,11 @@ Authentication Parameters
    ``my_s3cr3t_p4ssw0rd``. It will use the default roles and place the user in
    the ``admin`` database. ``mlaunch`` will
 
+``--auth-role-docs``
+   Use with ``--auth-roles`` to interpret roles specified as JSON documents.
+
+``--no-initial-user``
+   Do not create an initial user if auth is enabled.
 
 Optional Parameters
 ^^^^^^^^^^^^^^^^^^^
@@ -346,6 +364,60 @@ Optional Parameters
 
    This command will look for the ``mongod`` binary in ``./build/bin/mongod``
    instead of the default location.
+
+TLS/SSL options
+^^^^^^^^^^^^^^^
+``--sslCAFile SSLCAFILE``
+   Certificate Authority file for TLS/SSL.
+
+``--sslCRLFile SSLCRLFILE``
+   Certificate Revocation List file for TLS/SSL.
+
+``--sslAllowInvalidHostnames``
+   Allow client and server certificates to provide non-matching hostnames.
+
+``--sslAllowInvalidCertificates``
+   Allow client or server connections with invalid
+   certificates.
+
+Server TLS/SSL options
+^^^^^^^^^^^^^^^^^^^^^^
+
+``--sslMode {disabled,allowSSL,preferSSL,requireSSL}``
+   Set the TLS/SSL operation mode.
+
+``--sslPEMKeyFile SSLPEMKEYFILE``
+   PEM file for TLS/SSL.
+
+``--sslPEMKeyPassword SSLPEMKEYPASSWORD``
+   PEM file password.
+
+``--sslClusterFile SSLCLUSTERFILE``
+   Key file for internal TLS/SSL authentication.
+
+``--sslClusterPassword SSLCLUSTERPASSWORD``
+   Internal authentication key file password.
+
+``--sslDisabledProtocols SSLDISABLEDPROTOCOLS``
+   Comma separated list of TLS protocols to disable [TLS1_0,TLS1_1,TLS1_2].
+
+``--sslAllowConnectionsWithoutCertificates``
+   Allow client to connect without presenting a certificate.
+
+``--sslFIPSMode``
+   Activate FIPS 140-2 mode.
+
+Client TLS/SSL options
+^^^^^^^^^^^^^^^^^^^^^^
+
+``--sslClientCertificate SSLCLIENTCERTIFICATE``
+   Client certificate file for TLS/SSL.
+
+``--sslClientPEMKeyFile SSLCLIENTPEMKEYFILE``
+   Client PEM file for TLS/SSL.
+
+``--sslClientPEMKeyPassword SSLCLIENTPEMKEYPASSWORD``
+   Client PEM file password.
 
 -----
 
@@ -693,3 +765,12 @@ Optional Parameters
 
    This command displays a list of all nodes, their status and port number, and
    in addition, their startup commands.
+
+Disclaimer
+~~~~~~~~~~
+
+This software is not supported by `MongoDB, Inc. <https://www.mongodb.com>`__
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the `Issues
+<https://github.com/rueckstiess/mtools/issues?state=open>`__ section on GitHub.

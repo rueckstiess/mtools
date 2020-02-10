@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.6.2
               </div>
             
           
@@ -96,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
 </ul>
@@ -179,13 +180,16 @@ JSON</p>
 <dt><a class="reference internal" href="mloginfo.html#mloginfo"><span class="std std-ref">mloginfo</span></a></dt><dd><p>returns info about log file, like start and end time, version, binary,
 special sections like restarts, connections, distinct view</p>
 </dd>
-<dt><a class="reference internal" href="mplotqueries.html#mplotqueries"><span class="std std-ref">mplotqueries</span></a></dt><dd><p>visualize log files with different types of plots (requires matplotlib)</p>
+<dt><a class="reference internal" href="mplotqueries.html#mplotqueries"><span class="std std-ref">mplotqueries</span></a></dt><dd><p>visualize log files with different types of plots (requires <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>)</p>
 </dd>
 <dt><a class="reference internal" href="mlogvis.html#mlogvis"><span class="std std-ref">mlogvis</span></a></dt><dd><p>creates a self-contained HTML file that shows an interactive visualization
-in a web browser (as an alternative to mplotqueries)</p>
+in a web browser (as an alternative to <code class="docutils literal notranslate"><span class="pre">mplotqueries</span></code>)</p>
 </dd>
 <dt><a class="reference internal" href="mlaunch.html#mlaunch"><span class="std std-ref">mlaunch</span></a></dt><dd><p>a script to spin up local test environments quickly, including replica sets
-and sharded systems (requires pymongo)</p>
+and sharded systems (requires <code class="docutils literal notranslate"><span class="pre">pymongo</span></code>)</p>
+</dd>
+<dt><a class="reference internal" href="mtransfer.html#mtransfer"><span class="std std-ref">mtransfer</span></a></dt><dd><p>an experimental script to transfer WiredTiger databases between MongoDB
+instances by copying data files (requires <code class="docutils literal notranslate"><span class="pre">pymongo</span></code> and <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code>)</p>
 </dd>
 </dl>
 <p>The <a class="reference external" href="https://github.com/rueckstiess/mtools">mtools source code</a> is available

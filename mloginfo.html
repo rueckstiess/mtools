@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.6.2
               </div>
             
           
@@ -100,6 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#help">Help</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#version">Version</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#verbosity">Verbosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug">Debug</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#default-information">Default Information</a></li>
@@ -112,12 +113,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#transactions-transactions">Transactions (<code class="docutils literal notranslate"><span class="pre">--transactions</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cursors-cursors">Cursors (<code class="docutils literal notranslate"><span class="pre">--cursors</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#storage-stats-storagestats">Storage Stats (<code class="docutils literal notranslate"><span class="pre">--storagestats</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sharding-sharding">Sharding (<code class="docutils literal notranslate"><span class="pre">--sharding</span></code>)</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
 </ul>
@@ -192,12 +196,16 @@ log file. The script also has some options for additional <a class="reference in
          <span class="o">[</span>--clients<span class="o">]</span>
          <span class="o">[</span>--connections<span class="o">]</span>
          <span class="o">[</span>--cursors<span class="o">]</span>
+         <span class="o">[</span>--debug<span class="o">]</span>
          <span class="o">[</span>--distinct<span class="o">]</span>
          <span class="o">[</span>--queries<span class="o">]</span>
             <span class="o">[</span>--rounding <span class="o">{</span><span class="m">0</span>,1,2,3,4<span class="o">}]</span>
             <span class="o">[</span>--sort <span class="o">{</span>namespace,pattern,count,min,max,mean,95%,sum<span class="o">}]</span>
          <span class="o">[</span>--restarts<span class="o">]</span>
          <span class="o">[</span>--rsstate<span class="o">]</span>
+         <span class="o">[</span>--sharding<span class="o">]</span>
+            <span class="o">[</span>--errors<span class="o">]</span>
+            <span class="o">[</span>--migrations<span class="o">]</span>
          <span class="o">[</span>--storagestats<span class="o">]</span>
          <span class="o">[</span>--transactions<span class="o">]</span>
             <span class="o">[</span>--tsort <span class="o">{</span>duration<span class="o">}]</span>
@@ -226,6 +234,13 @@ log file. The script also has some options for additional <a class="reference in
 <h3>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">#</a></h3>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt><dd><p>shows extra information, depending on the different sections.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="debug">
+<h3>Debug<a class="headerlink" href="#debug" title="Permalink to this headline">#</a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--debug</span></code></dt><dd><p>shows debug information, depending on the different sections.</p>
 </dd>
 </dl>
 </div>
@@ -507,6 +522,85 @@ invoice-prod.invoices     insert       <span class="m">12868411</span>     <span
 </pre></div>
 </div>
 </div>
+<div class="section" id="sharding-sharding">
+<h3>Sharding (<code class="docutils literal notranslate"><span class="pre">--sharding</span></code>)<a class="headerlink" href="#sharding-sharding" title="Permalink to this headline">#</a></h3>
+<p>The sharding section returns sharding related information. Information
+includes sharding related configurations, outputs a list of error/warning
+messages grouped by similar patterns, chunk migrations which have sent and
+received by the associated node in the log and chunk split statistics grouping
+by the hour.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --sharding
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SHARDING
+
+Overview:
+
+   The role of this node: <span class="o">(</span>shard<span class="o">)</span>
+   Shards:
+      shard01: example:27018,example:27019,example:27020
+      shard02: example:27021,example:27022,example:27023
+      shard03: example:27024,example:27025,example:27026
+   CSRS:
+      configRepl: example:27033
+</pre></div>
+</div>
+<div class="section" id="errors">
+<h4><code class="docutils literal notranslate"><span class="pre">--errors</span></code><a class="headerlink" href="#errors" title="Permalink to this headline">#</a></h4>
+<p>This option can be added alongside <code class="docutils literal notranslate"><span class="pre">--sharding</span></code> to also display
+the error section</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --sharding --errors
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Error Messages:
+
+   <span class="m">22</span>  ... Deletion of XXX range <span class="o">[</span>...<span class="o">)</span> will be scheduled after all possibly dependent queries finish
+</pre></div>
+</div>
+<p>This option has no effect unless <code class="docutils literal notranslate"><span class="pre">--sharding</span></code> is also specified.</p>
+</div>
+<div class="section" id="migrations">
+<h4><code class="docutils literal notranslate"><span class="pre">--migrations</span></code><a class="headerlink" href="#migrations" title="Permalink to this headline">#</a></h4>
+<p>This option can be added alongside <code class="docutils literal notranslate"><span class="pre">--sharding</span></code> to also display
+both chunk migrations and split statistics.</p>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mloginfo mongod.log --sharding --migrations
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Chunks Moved From This Shard:
+
+   TIME <span class="o">(</span>/HOUR<span class="o">)</span>     TO SHARD    NAMESPACE           NUM CHUNKS MIGRATIONS ATTEMPTED    SUCCESSFUL CHUNK MIGRATIONS                              FAILED CHUNK MIGRATIONS
+
+   <span class="m">2019</span>-12-18T00    shard01     local.collection    <span class="m">4</span> chunk<span class="o">(</span>s<span class="o">)</span>                         <span class="m">4</span> chunk<span class="o">(</span>s<span class="o">)</span> moved <span class="p">|</span> Total <span class="nb">time</span> spent: 566ms               no failed chunks.
+   <span class="m">2019</span>-12-17T23    shard01     local.collection    <span class="m">6</span> chunk<span class="o">(</span>s<span class="o">)</span>                         <span class="m">5</span> chunk<span class="o">(</span>s<span class="o">)</span> moved <span class="p">|</span> Total <span class="nb">time</span> spent: 754ms               <span class="m">1</span> chunk<span class="o">(</span>s<span class="o">)</span>: <span class="o">[</span><span class="s1">&#39;23:18:03.270&#39;</span><span class="o">]</span> failed with <span class="s2">&quot;ChunkTooBig&quot;</span>.
+   <span class="m">2019</span>-12-17T22    shard01     local.collection    <span class="m">2</span> chunk<span class="o">(</span>s<span class="o">)</span>                         <span class="m">1</span> chunk<span class="o">(</span>s<span class="o">)</span> moved <span class="p">|</span> Total <span class="nb">time</span> spent: 50ms                <span class="m">1</span> chunk<span class="o">(</span>s<span class="o">)</span>: <span class="o">[</span><span class="s1">&#39;22:58:59.441 BECAME SUCCESSFUL AT: 22:59:12.153&#39;</span><span class="o">]</span> failed with <span class="s2">&quot;Unknown&quot;</span>.
+
+Chunks Moved To This Shard:
+
+   no chunk migrations found.
+
+Chunk Split Statistics:
+
+   TIME <span class="o">(</span>/HOUR<span class="o">)</span>     NAMESPACE            NUM SPLIT-VECTORS ISSUED    SUCCESSFUL CHUNK SPLITS                             FAILED CHUNK SPLITS
+
+   <span class="m">2019</span>-12-18T00    local.collection     <span class="m">6</span> split vector<span class="o">(</span>s<span class="o">)</span>           <span class="m">4</span> chunk<span class="o">(</span>s<span class="o">)</span> splitted <span class="p">|</span> Total <span class="nb">time</span> spent: 645ms       no failed chunk splits.
+   <span class="m">2019</span>-12-17T23    local.collection     <span class="m">85</span> split vector<span class="o">(</span>s<span class="o">)</span>          <span class="m">58</span> chunk<span class="o">(</span>s<span class="o">)</span> splitted <span class="p">|</span> Total <span class="nb">time</span> spent: 7343ms     <span class="m">1</span> chunk<span class="o">(</span>s<span class="o">)</span>: <span class="o">[</span><span class="s1">&#39;23:07:27.441&#39;</span><span class="o">]</span> failed with <span class="s2">&quot;LockBusy&quot;</span>.
+</pre></div>
+</div>
+<p>To show all the chunk migrations and statistics without grouping run
+mloginfo with the additional <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> command.</p>
+<p>This option has no effect unless <code class="docutils literal notranslate"><span class="pre">--sharding</span></code> is also specified.</p>
+</div>
+</div>
+</div>
+<div class="section" id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">#</a></h2>
+<p>This software is not supported by <a class="reference external" href="https://www.mongodb.com">MongoDB, Inc.</a>
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the <a class="reference external" href="https://github.com/rueckstiess/mtools/issues?state=open">Issues</a> section on GitHub.</p>
 </div>
 </div>
 

@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.6.2
               </div>
             
           
@@ -93,13 +93,14 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-with-pip">Installation with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-with-pip3">Installation with pip3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-from-source">Installation from source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#psutil">psutil</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymongo">pymongo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#matplotlib">matplotlib</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#numpy">numpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wiredtiger">wiredtiger</a></li>
 </ul>
 </li>
 </ul>
@@ -109,6 +110,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
 </ul>
@@ -192,29 +194,28 @@ mtools. Other versions of Python are not currently supported.</p>
 </dd>
 </dl>
 </div>
-<div class="section" id="installation-with-pip">
-<h2>Installation with pip<a class="headerlink" href="#installation-with-pip" title="Permalink to this headline">#</a></h2>
-<p>The easiest way to install mtools is via <code class="docutils literal notranslate"><span class="pre">pip</span></code>. From the command line, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools
+<div class="section" id="installation-with-pip3">
+<h2>Installation with pip3<a class="headerlink" href="#installation-with-pip3" title="Permalink to this headline">#</a></h2>
+<p>The easiest way to install mtools is via <code class="docutils literal notranslate"><span class="pre">pip3</span></code>. From the command line, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools
 </pre></div>
 </div>
 <p>Some mtools scripts have additional <a class="reference internal" href="#dependencies">dependencies</a>. To install all optional
 dependencies use:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>all<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
-<p>You need to have <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed for this to work. If you don’t have <code class="docutils literal notranslate"><span class="pre">pip</span></code>
-installed yet, try <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">easy_install</span> <span class="pre">pip</span></code> from the command line first, or
-follow the instructions provided on the <a class="reference external" href="http://www.pip-installer.org/en/latest/installing.html#using-the-installer">pip installation page</a>.</p>
-<p>Depending on your user rights, <code class="docutils literal notranslate"><span class="pre">pip</span></code> may complain about not having
+<p>You need to have Python 3.6 or newer installed. <code class="docutils literal notranslate"><span class="pre">pip3</span></code> should be included as
+part of the default install for supported versions of Python 3.</p>
+<p>Depending on your user rights, <code class="docutils literal notranslate"><span class="pre">pip3</span></code> may complain about not having
 permissions to install into the system directory.</p>
-<p>In that case, you either need to add <code class="docutils literal notranslate"><span class="pre">sudo</span></code> in front of the <code class="docutils literal notranslate"><span class="pre">pip</span></code> command
+<p>In that case, you either need to add <code class="docutils literal notranslate"><span class="pre">sudo</span></code> in front of the <code class="docutils literal notranslate"><span class="pre">pip3</span></code> command
 to install into a system directory, or append <code class="docutils literal notranslate"><span class="pre">--user</span></code> to install into your
 home directory.</p>
 </div>
 <div class="section" id="installation-from-source">
 <h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Permalink to this headline">#</a></h2>
-<p>If <code class="docutils literal notranslate"><span class="pre">pip</span></code> is not available and you want to install mtools from source, you can
+<p>If <code class="docutils literal notranslate"><span class="pre">pip3</span></code> is not available and you want to install mtools from source, you can
 get the source code by cloning the <a class="reference external" href="https://github.com/rueckstiess/mtools">mtools github repository</a>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git://github.com/rueckstiess/mtools.git
 </pre></div>
@@ -237,12 +238,12 @@ scripts directly from the command line.</p>
 <p>The full list of requirements (some of which are already included in the Python
 standard library) can be found in the <a class="reference external" href="https://github.com/rueckstiess/mtools/blob/develop/requirements.txt">requirements.txt</a> file.</p>
 <p>To install all dependencies for full feature support, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>all<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>all<span class="o">]</span>
 </pre></div>
 </div>
 <p>To install dependencies for a subset of mtools utilities, specify one or more
 script names as a comma-separated list:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>mlaunch,mloginfo<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>mlaunch,mloginfo<span class="o">]</span>
 </pre></div>
 </div>
 <div class="section" id="psutil">
@@ -253,7 +254,7 @@ processes.</p>
 </div>
 <div class="section" id="pymongo">
 <h3>pymongo<a class="headerlink" href="#pymongo" title="Permalink to this headline">#</a></h3>
-<p><em>required for mlaunch</em></p>
+<p><em>required for mlaunch and mtransfer</em></p>
 <p><a class="reference external" href="https://api.mongodb.com/python/current/">pymongo</a> is MongoDB’s official
 Python driver. <code class="docutils literal notranslate"><span class="pre">mlaunch</span></code> uses this to configure and query local MongoDB
 deployments.</p>
@@ -270,6 +271,12 @@ environments across platforms.</p>
 <p><em>required for matplotlib (in mplotqueries)</em></p>
 <p><a class="reference external" href="https://numpy.scipy.org/">numpy</a> is a Python module for scientific
 computing and numerical calculations.</p>
+</div>
+<div class="section" id="wiredtiger">
+<h3>wiredtiger<a class="headerlink" href="#wiredtiger" title="Permalink to this headline">#</a></h3>
+<p><em>required for mtransfer</em></p>
+<p><a class="reference external" href="https://github.com/wiredtiger/wiredtiger/">WiredTiger</a> is the default
+storage engine for MongoDB.</p>
 </div>
 </div>
 </div>

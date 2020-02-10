@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.1
+                1.6.2
               </div>
             
           
@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Contribute to mtools</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="style.html">Style Guidelines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="development.html">Development</a></li>
@@ -202,8 +203,8 @@ version to be released.</p></li>
 <li><p>Any other cleanup tasks.</p></li>
 <li><p>(optional) leave the release branch for a few days to give others a chance
 to test it before releasing.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span> <span class="pre">bdist_wheel</span></code> to build the dist packages.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">upload</span> <span class="pre">dist/*</span></code> to publish the new version to pip (if you have
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">setup.py</span> <span class="pre">sdist</span> <span class="pre">bdist_wheel</span></code> to build the dist packages.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">upload</span> <span class="pre">dist/*</span></code> to publish the new version to PyPI (if you have
 permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stennie).</p></li>
 <li><p>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p></li>
 <li><p>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
