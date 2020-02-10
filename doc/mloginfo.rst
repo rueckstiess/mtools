@@ -23,6 +23,9 @@ Usage
                [--sort {namespace,pattern,count,min,max,mean,95%,sum}]
             [--restarts]
             [--rsstate]
+            [--sharding]
+               [--errors]
+               [--migrations]
             [--storagestats]
             [--transactions]
                [--tsort {duration}]
@@ -393,6 +396,94 @@ For example:
    invoice-prod.invoices     insert       12768411     22233323        86313                12344
    invoice-prod.invoices     insert       12868411     22233323        86313                12344
 
+Sharding (``--sharding``)
+-----------------------------------------
+
+The sharding section returns sharding related information. Information
+includes sharding related configurations, outputs a list of error/warning
+messages grouped by similar patterns, chunk migrations which have sent and
+received by the associated node in the log and chunk split statistics grouping
+by the hour.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --sharding
+
+.. code-block:: bash
+
+   SHARDING
+
+   Overview:
+
+      The role of this node: (shard)
+      Shards:
+         shard01: example:27018,example:27019,example:27020
+         shard02: example:27021,example:27022,example:27023
+         shard03: example:27024,example:27025,example:27026
+      CSRS:
+         configRepl: example:27033
+
+``--errors``
+^^^^^^^^^^^^
+
+This option can be added alongside ``--sharding`` to also display
+the error section
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --sharding --errors
+
+.. code-block:: bash
+
+   Error Messages:
+
+      22  ... Deletion of XXX range [...) will be scheduled after all possibly dependent queries finish
+
+This option has no effect unless ``--sharding`` is also specified.
+
+``--migrations``
+^^^^^^^^^^^^^^^^
+
+This option can be added alongside ``--sharding`` to also display
+both chunk migrations and split statistics.
+
+For example:
+
+.. code-block:: bash
+
+   mloginfo mongod.log --sharding --migrations
+
+.. code-block:: bash
+
+   Chunks Moved From This Shard:
+
+      TIME (/HOUR)     TO SHARD    NAMESPACE           NUM CHUNKS MIGRATIONS ATTEMPTED    SUCCESSFUL CHUNK MIGRATIONS                              FAILED CHUNK MIGRATIONS
+
+      2019-12-18T00    shard01     local.collection    4 chunk(s)                         4 chunk(s) moved | Total time spent: 566ms               no failed chunks.
+      2019-12-17T23    shard01     local.collection    6 chunk(s)                         5 chunk(s) moved | Total time spent: 754ms               1 chunk(s): ['23:18:03.270'] failed with "ChunkTooBig".
+      2019-12-17T22    shard01     local.collection    2 chunk(s)                         1 chunk(s) moved | Total time spent: 50ms                1 chunk(s): ['22:58:59.441 BECAME SUCCESSFUL AT: 22:59:12.153'] failed with "Unknown".
+
+   Chunks Moved To This Shard:
+
+      no chunk migrations found.
+
+   Chunk Split Statistics:
+
+      TIME (/HOUR)     NAMESPACE            NUM SPLIT-VECTORS ISSUED    SUCCESSFUL CHUNK SPLITS                             FAILED CHUNK SPLITS
+
+      2019-12-18T00    local.collection     6 split vector(s)           4 chunk(s) splitted | Total time spent: 645ms       no failed chunk splits.
+      2019-12-17T23    local.collection     85 split vector(s)          58 chunk(s) splitted | Total time spent: 7343ms     1 chunk(s): ['23:07:27.441'] failed with "LockBusy".
+
+To show all the chunk migrations and statistics without grouping run
+mloginfo with the additional ``--verbose`` command.
+
+This option has no effect unless ``--sharding`` is also specified.
+
+=======
 Disclaimer
 ~~~~~~~~~~
 

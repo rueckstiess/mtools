@@ -400,6 +400,160 @@ class TestMLogInfo(object):
             print("results[%s] == %s" % (key, value))
             assert results.get(key) == value
 
+    def test_sharding_missing_information(self):
+        self.tool.run('--sharding --errors --migrations %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: 'no sharding info found.' in line, lines))
+        assert any(map(lambda line: 'no error messages found.' in line, lines))
+        assert any(map(lambda line: 'no chunk migrations found.' in line, lines))
+        assert any(map(lambda line: 'no chunk migrations found.' in line, lines))
+        assert any(map(lambda line: 'no chunk splits found.' in line, lines))
+
+    def test_sharding_overview_shard(self):
+        self._test_init('sharding_360_shard.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: '(shard)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: 'localhost:27033' in line, lines))
+
+    def test_sharding_overview_csrs(self):
+        self._test_init('sharding_360_CSRS.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: '(CSRS)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: '[ { _id: 0, host: "localhost:27033",' 
+                                    ' arbiterOnly: false, buildIndexes: true,'
+                                    ' hidden: false, priority: 1.0, tags: {},'
+                                    ' slaveDelay: 0, votes: 1 } ]' in line, lines))
+        
+    def test_sharding_overview_mongos(self):
+        self._test_init('sharding_360_mongos.log')
+        self.tool.run('--sharding %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        assert any(map(lambda line: '(mongos)' in line, lines))
+        assert any(map(lambda line: 'shard01' in line, lines))
+        assert any(map(lambda line: 'localhost:27018,'
+                                    'localhost:27019,'
+                                    'localhost:27020' in line, lines))
+        assert any(map(lambda line: 'configRepl' in line, lines))
+        assert any(map(lambda line: 'localhost:27033' in line, lines))
+
+    def test_sharding_error_messages_exists(self):
+        self._test_init('sharding_360_shard.log')
+        self.tool.run('--sharding --errors %s' % self.logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        # Find errors which match the format "  <count> <error_message>"
+        assert len(list(filter(lambda line: re.match('^  \d .* ', line),
+                          lines))) == 1
+
+    def test_sharding_chunk_migration_from_exists(self):
+        self._test_init('sharding_360_shard.log')
+        table_header = "TO SHARD"
+        table_rows = []
+        table_rows.append(
+            ["2020-02-07T12",
+             "shard03",
+             "test.products",
+             "1 chunk(s)",
+             "1 chunk(s) moved | Total time spent: 16144ms",
+             "no failed chunks."]
+        )
+        table_rows.append(
+            ["2020-02-07T12",
+             "shard02",
+             "test.products",
+             "1 chunk(s)",
+             "1 chunk(s) moved | Total time spent: 13987ms",
+             "no failed chunks."]
+        )
+        number_of_rows = 2
+        self._test_sharding(self.logfile_path, table_header, table_rows, number_of_rows)
+
+    def test_sharding_chunk_migration_to_exists(self):
+        self._test_init('sharding_360_shard.log')
+        table_header = "FROM SHARD"
+        table_rows = []
+        table_rows.append(
+            ["2020-02-07T12",
+             "Unknown",
+             "test.products",
+             "1 chunk(s)",
+             "1 chunk(s) moved | Total time spent: 13676ms",
+             "no failed chunks."]
+        )
+        number_of_rows = 1
+        self._test_sharding(self.logfile_path, table_header, table_rows, number_of_rows)
+
+    def test_sharding_chunk_split_statistics_exist(self):
+        self._test_init('sharding_360_shard.log')
+        table_header = "# SPLIT-VECTORS ISSUED"
+        table_rows = []
+        table_rows.append(
+            ["2020-02-07T12",
+             "test.products",
+             "2 split vector(s)",
+             "1 chunk(s) splitted | Total time spent: 14ms",
+             "no failed chunk splits."]
+        )
+        number_of_rows = 1
+        self._test_sharding(self.logfile_path, table_header, table_rows, number_of_rows)
+
+    def test_sharding_jumbo_chunk_exists(self):
+        self._test_init('sharding_360_CSRS.log')
+        table_header = "# SPLIT-VECTORS ISSUED"
+        table_rows = []
+        table_rows.append(
+            ["2020-02-07T15",
+             "test.products",
+             "0 split vector(s)",
+             "0 chunk(s) splitted | Total time spent: 0ms",
+             "1 chunk(s): ['15:47:18.485'] marked as Jumbo."]
+        )
+        number_of_rows = 1
+        self._test_sharding(self.logfile_path, table_header, table_rows, number_of_rows)
+
+    def _test_sharding(self, logfile_path, table_header, table_rows, number_of_rows):
+        """ utility test runner for sharding tables
+        """
+        self.tool.run('--sharding --migrations %s' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+
+        for index, line in enumerate(lines):
+            if re.search(f'{table_header}', line):
+                # Skip the new lines between header and row
+                table_index = index + 2
+                break
+
+        # Only grab lines which should be the rows for the wanted table
+        searched_table = lines[table_index: table_index+number_of_rows]
+        
+        # Filter through to compare table rows
+        for index, row in enumerate(searched_table):
+            # Strip all tabs in line
+            split_row = list(filter(None, re.sub(r'\s{2,}', '/', row).split("/")))
+            assert (split_row == table_rows[index])
+
     def _parse_output(self, output):
         results = {}
         for line in output.splitlines():
