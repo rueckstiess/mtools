@@ -1,0 +1,475 @@
+2020-02-07T11:59:07.616+1100 I CONTROL  [initandlisten] MongoDB starting : pid=94212 port=27033 dbpath=/3.6.0/data/configRepl/rs1/db 64-bit host=gc.local
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] db version v3.6.0
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] git version: a57d8e71e6998a2d0afde7edc11bd23e5661c915
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 0.9.8zh 14 Jan 2016
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] allocator: system
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] modules: none
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] build environment:
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten]     distarch: x86_64
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten]     target_arch: x86_64
+2020-02-07T11:59:07.617+1100 I CONTROL  [initandlisten] options: { net: { port: 27033 }, processManagement: { fork: true }, replication: { replSet: "configRepl" }, sharding: { clusterRole: "configsvr" }, storage: { dbPath: "/3.6.0/data/configRepl/rs1/db", wiredTiger: { engineConfig: { cacheSizeGB: 1.0 } } }, systemLog: { destination: "file", path: "/3.6.0/data/configRepl/rs1/mongod.log" } }
+2020-02-07T11:59:07.618+1100 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=1024M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] 
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] 
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] 
+2020-02-07T11:59:07.730+1100 I CONTROL  [initandlisten] 
+2020-02-07T11:59:07.731+1100 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+2020-02-07T11:59:07.733+1100 I STORAGE  [initandlisten] createCollection: local.startup_log with no UUID.
+2020-02-07T11:59:07.767+1100 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/3.6.0/data/configRepl/rs1/db/diagnostic.data'
+2020-02-07T11:59:07.767+1100 I SHARDING [initandlisten] first cluster operation detected, adding sharding hook to enable versioning and authentication to remote servers
+2020-02-07T11:59:07.771+1100 I SHARDING [thread1] creating distributed lock ping thread for process ConfigServer (sleeping for 30000ms)
+2020-02-07T11:59:07.771+1100 I SHARDING [shard registry reload] Periodic reload of shard registry failed  :: caused by :: ReadConcernMajorityNotAvailableYet: could not get updated shard list from config server due to Read concern majority reads are currently not possible.; will retry after 30s
+2020-02-07T11:59:07.771+1100 I STORAGE  [initandlisten] createCollection: local.me with no UUID.
+2020-02-07T11:59:07.803+1100 I STORAGE  [initandlisten] createCollection: local.replset.minvalid with no UUID.
+2020-02-07T11:59:07.831+1100 I REPL     [initandlisten] Did not find local voted for document at startup.
+2020-02-07T11:59:07.832+1100 I REPL     [initandlisten] Did not find local Rollback ID document at startup. Creating one.
+2020-02-07T11:59:07.832+1100 I STORAGE  [initandlisten] createCollection: local.system.rollback.id with no UUID.
+2020-02-07T11:59:07.861+1100 I REPL     [initandlisten] Did not find local replica set configuration document at startup;  NoMatchingDocument: Did not find replica set configuration document in local.system.replset
+2020-02-07T11:59:07.862+1100 I NETWORK  [initandlisten] waiting for connections on port 27033
+2020-02-07T11:59:07.891+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64664 #1 (1 connection now open)
+2020-02-07T11:59:07.893+1100 I NETWORK  [conn1] received client metadata from 127.0.0.1:64664 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:07.894+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64669 #2 (2 connections now open)
+2020-02-07T11:59:07.894+1100 I NETWORK  [conn2] received client metadata from 127.0.0.1:64669 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:07.895+1100 I NETWORK  [conn2] end connection 127.0.0.1:64669 (1 connection now open)
+2020-02-07T11:59:07.895+1100 I NETWORK  [conn1] end connection 127.0.0.1:64664 (0 connections now open)
+2020-02-07T11:59:07.896+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64670 #3 (1 connection now open)
+2020-02-07T11:59:07.897+1100 I NETWORK  [conn3] received client metadata from 127.0.0.1:64670 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:07.897+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64671 #4 (2 connections now open)
+2020-02-07T11:59:07.897+1100 I NETWORK  [conn4] received client metadata from 127.0.0.1:64671 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:07.898+1100 I REPL     [conn4] replSetInitiate admin command received from client
+2020-02-07T11:59:07.899+1100 I REPL     [conn4] replSetInitiate config object with 1 members parses ok
+2020-02-07T11:59:07.899+1100 I REPL     [conn4] ******
+2020-02-07T11:59:07.899+1100 I REPL     [conn4] creating replication oplog of size: 192MB...
+2020-02-07T11:59:07.899+1100 I STORAGE  [conn4] createCollection: local.oplog.rs with no UUID.
+2020-02-07T11:59:07.914+1100 I STORAGE  [conn4] Starting WiredTigerRecordStoreThread local.oplog.rs
+2020-02-07T11:59:07.915+1100 I STORAGE  [conn4] The size storer reports that the oplog contains 0 records totaling to 0 bytes
+2020-02-07T11:59:07.915+1100 I STORAGE  [conn4] Scanning the oplog to determine where to place markers for truncation
+2020-02-07T11:59:08.017+1100 I REPL     [conn4] ******
+2020-02-07T11:59:08.018+1100 I STORAGE  [conn4] createCollection: local.system.replset with no UUID.
+2020-02-07T11:59:08.057+1100 I COMMAND  [conn4] Assigning UUID de532d82-20e6-4d74-a632-3fee1ec65ec0 to collection local.system.rollback.id
+2020-02-07T11:59:08.059+1100 I COMMAND  [conn4] Assigning UUID 9ee702ae-deee-4e5e-a75b-7db7650c637f to collection local.system.replset
+2020-02-07T11:59:08.059+1100 I COMMAND  [conn4] Assigning UUID 8455a59d-17bc-4d8f-a6ed-f3a2e2a9d058 to collection local.me
+2020-02-07T11:59:08.059+1100 I COMMAND  [conn4] Assigning UUID 6cb438fc-6876-419d-b9e4-865037da7d8b to collection local.startup_log
+2020-02-07T11:59:08.059+1100 I COMMAND  [conn4] Assigning UUID b6c22584-6857-4514-9bc2-32f42d243344 to collection local.replset.minvalid
+2020-02-07T11:59:08.059+1100 I COMMAND  [conn4] Assigning UUID 01fd0043-11d5-4184-8b26-a995c39cfb13 to collection local.oplog.rs
+2020-02-07T11:59:08.059+1100 I STORAGE  [conn4] createCollection: admin.system.version with provided UUID: 8534ea49-ef79-47a7-9371-932c027a2135
+2020-02-07T11:59:08.088+1100 I COMMAND  [conn4] setting featureCompatibilityVersion to 3.6
+2020-02-07T11:59:08.088+1100 I NETWORK  [conn4] Skip closing connection for connection # 4
+2020-02-07T11:59:08.088+1100 I NETWORK  [conn4] Skip closing connection for connection # 3
+2020-02-07T11:59:08.088+1100 I REPL     [conn4] New replica set config in use: { _id: "configRepl", version: 1, configsvr: true, protocolVersion: 1, members: [ { _id: 0, host: "localhost:27033", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, catchUpTimeoutMillis: -1, catchUpTakeoverDelayMillis: 30000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('5e3cb65beac25df28767affe') } }
+2020-02-07T11:59:08.088+1100 I REPL     [conn4] This node is localhost:27033 in the config
+2020-02-07T11:59:08.088+1100 I REPL     [conn4] transition to STARTUP2 from STARTUP
+2020-02-07T11:59:08.088+1100 I REPL     [conn4] Starting replication storage threads
+2020-02-07T11:59:08.089+1100 I REPL     [conn4] transition to RECOVERING from STARTUP2
+2020-02-07T11:59:08.089+1100 I REPL     [conn4] Starting replication fetcher thread
+2020-02-07T11:59:08.089+1100 I REPL     [conn4] Starting replication applier thread
+2020-02-07T11:59:08.089+1100 I REPL     [conn4] Starting replication reporter thread
+2020-02-07T11:59:08.089+1100 I COMMAND  [conn4] command local.oplog.rs appName: "mlaunch v1.6.2-dev" command: replSetInitiate { replSetInitiate: { _id: "configRepl", members: [ { _id: 0, host: "localhost:27033" } ] }, $db: "admin", $readPreference: { mode: "primaryPreferred" } } numYields:0 reslen:207 locks:{ Global: { acquireCount: { r: 32, w: 20, W: 2 }, acquireWaitCount: { W: 1 }, timeAcquiringMicros: { W: 161 } }, Database: { acquireCount: { r: 4, w: 4, W: 16 }, acquireWaitCount: { W: 1 }, timeAcquiringMicros: { W: 1300 } }, Collection: { acquireCount: { r: 2, w: 2 } }, oplog: { acquireCount: { r: 2, w: 3 } } } protocol:op_msg 191ms
+2020-02-07T11:59:08.090+1100 I NETWORK  [conn4] end connection 127.0.0.1:64671 (1 connection now open)
+2020-02-07T11:59:08.090+1100 I NETWORK  [conn3] end connection 127.0.0.1:64670 (0 connections now open)
+2020-02-07T11:59:08.090+1100 I REPL     [rsSync] transition to SECONDARY from RECOVERING
+2020-02-07T11:59:08.091+1100 I REPL     [rsSync] conducting a dry run election to see if we could be elected. current term: 0
+2020-02-07T11:59:08.091+1100 I REPL     [replexec-0] dry election run succeeded, running for election in term 1
+2020-02-07T11:59:08.091+1100 I STORAGE  [replexec-0] createCollection: local.replset.election with generated UUID: 06de5b28-ea9e-4efb-9322-b9d757bc3c07
+2020-02-07T11:59:08.123+1100 I REPL     [replexec-0] election succeeded, assuming primary role in term 1
+2020-02-07T11:59:08.124+1100 I REPL     [replexec-0] transition to PRIMARY from SECONDARY
+2020-02-07T11:59:08.124+1100 I REPL     [replexec-0] Entering primary catch-up mode.
+2020-02-07T11:59:08.124+1100 I REPL     [replexec-0] Exited primary catch-up mode.
+2020-02-07T11:59:09.644+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64712 #5 (1 connection now open)
+2020-02-07T11:59:09.644+1100 I NETWORK  [conn5] received client metadata from 127.0.0.1:64712 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:09.650+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64713 #6 (2 connections now open)
+2020-02-07T11:59:09.650+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64714 #7 (3 connections now open)
+2020-02-07T11:59:09.650+1100 I NETWORK  [conn6] received client metadata from 127.0.0.1:64713 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:09.650+1100 I NETWORK  [conn7] received client metadata from 127.0.0.1:64714 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:09.653+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64715 #8 (4 connections now open)
+2020-02-07T11:59:09.653+1100 I NETWORK  [conn8] received client metadata from 127.0.0.1:64715 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:10.095+1100 I STORAGE  [rsSync] createCollection: config.chunks with generated UUID: 6e533fdd-08d7-402b-9869-21149780dde5
+2020-02-07T11:59:10.204+1100 I INDEX    [rsSync] build index on: config.chunks properties: { v: 2, unique: true, key: { ns: 1, min: 1 }, name: "ns_1_min_1", ns: "config.chunks" }
+2020-02-07T11:59:10.204+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.217+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.218+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "chunks", indexes: [ { name: "ns_1_min_1", key: { ns: 1, min: 1 }, unique: true } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 14, w: 5, W: 1 } }, Database: { acquireCount: { r: 4, w: 4, W: 1 } }, Collection: { acquireCount: { r: 3, w: 2 } }, oplog: { acquireCount: { r: 1, w: 3 } } } protocol:op_msg 122ms
+2020-02-07T11:59:10.272+1100 I INDEX    [rsSync] build index on: config.chunks properties: { v: 2, unique: true, key: { ns: 1, shard: 1, min: 1 }, name: "ns_1_shard_1_min_1", ns: "config.chunks" }
+2020-02-07T11:59:10.272+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.291+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.343+1100 I INDEX    [rsSync] build index on: config.chunks properties: { v: 2, unique: true, key: { ns: 1, lastmod: 1 }, name: "ns_1_lastmod_1", ns: "config.chunks" }
+2020-02-07T11:59:10.343+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.367+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.368+1100 I STORAGE  [rsSync] createCollection: config.migrations with generated UUID: e0ed8e6f-a839-4b6a-b726-e0297757c7f8
+2020-02-07T11:59:10.516+1100 I INDEX    [rsSync] build index on: config.migrations properties: { v: 2, unique: true, key: { ns: 1, min: 1 }, name: "ns_1_min_1", ns: "config.migrations" }
+2020-02-07T11:59:10.521+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.561+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.567+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "migrations", indexes: [ { name: "ns_1_min_1", key: { ns: 1, min: 1 }, unique: true } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 21, w: 12, W: 1 } }, Database: { acquireCount: { r: 4, w: 8, W: 4 } }, Collection: { acquireCount: { r: 3, w: 5 } }, oplog: { acquireCount: { r: 1, w: 7 } } } protocol:op_msg 199ms
+2020-02-07T11:59:10.568+1100 I STORAGE  [rsSync] createCollection: config.shards with generated UUID: 8ea74bf4-313a-4396-a8f7-0c58e9e9ffdd
+2020-02-07T11:59:10.718+1100 I INDEX    [rsSync] build index on: config.shards properties: { v: 2, unique: true, key: { host: 1 }, name: "host_1", ns: "config.shards" }
+2020-02-07T11:59:10.724+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.749+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.756+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "shards", indexes: [ { name: "host_1", key: { host: 1 }, unique: true } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 24, w: 15, W: 1 } }, Database: { acquireCount: { r: 4, w: 10, W: 5 } }, Collection: { acquireCount: { r: 3, w: 6 } }, oplog: { acquireCount: { r: 1, w: 9 } } } protocol:op_msg 187ms
+2020-02-07T11:59:10.756+1100 I STORAGE  [rsSync] createCollection: config.locks with generated UUID: 7ad0826c-6382-4659-b7a5-0d0e1b7c2205
+2020-02-07T11:59:10.931+1100 I INDEX    [rsSync] build index on: config.locks properties: { v: 2, key: { ts: 1 }, name: "ts_1", ns: "config.locks" }
+2020-02-07T11:59:10.942+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:10.976+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:10.983+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "locks", indexes: [ { name: "ts_1", key: { ts: 1 }, unique: false } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 27, w: 18, W: 1 } }, Database: { acquireCount: { r: 4, w: 12, W: 6 } }, Collection: { acquireCount: { r: 3, w: 7 } }, oplog: { acquireCount: { r: 1, w: 11 } } } protocol:op_msg 227ms
+2020-02-07T11:59:11.040+1100 I INDEX    [rsSync] build index on: config.locks properties: { v: 2, key: { state: 1, process: 1 }, name: "state_1_process_1", ns: "config.locks" }
+2020-02-07T11:59:11.046+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:11.100+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:11.106+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "locks", indexes: [ { name: "state_1_process_1", key: { state: 1, process: 1 }, unique: false } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 29, w: 20, W: 1 } }, Database: { acquireCount: { r: 4, w: 13, W: 7 } }, Collection: { acquireCount: { r: 3, w: 8 } }, oplog: { acquireCount: { r: 1, w: 12 } } } protocol:op_msg 117ms
+2020-02-07T11:59:11.113+1100 I STORAGE  [rsSync] createCollection: config.lockpings with generated UUID: 7dc45994-74b7-44c6-87b3-7df4cb85161a
+2020-02-07T11:59:11.344+1100 I INDEX    [rsSync] build index on: config.lockpings properties: { v: 2, key: { ping: 1 }, name: "ping_1", ns: "config.lockpings" }
+2020-02-07T11:59:11.349+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:11.390+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:11.397+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "lockpings", indexes: [ { name: "ping_1", key: { ping: 1 }, unique: false } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 32, w: 23, W: 1 } }, Database: { acquireCount: { r: 4, w: 15, W: 8 } }, Collection: { acquireCount: { r: 3, w: 9 } }, oplog: { acquireCount: { r: 1, w: 14 } } } protocol:op_msg 284ms
+2020-02-07T11:59:11.415+1100 I STORAGE  [rsSync] createCollection: config.tags with generated UUID: 0949b503-e5c9-4fab-96f5-e5d893a3bc64
+2020-02-07T11:59:11.617+1100 I INDEX    [rsSync] build index on: config.tags properties: { v: 2, unique: true, key: { ns: 1, min: 1 }, name: "ns_1_min_1", ns: "config.tags" }
+2020-02-07T11:59:11.623+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:11.656+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:11.663+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "tags", indexes: [ { name: "ns_1_min_1", key: { ns: 1, min: 1 }, unique: true } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 35, w: 26, W: 1 } }, Database: { acquireCount: { r: 4, w: 17, W: 9 } }, Collection: { acquireCount: { r: 3, w: 10 } }, oplog: { acquireCount: { r: 1, w: 16 } } } protocol:op_msg 248ms
+2020-02-07T11:59:11.736+1100 I INDEX    [rsSync] build index on: config.tags properties: { v: 2, key: { ns: 1, tag: 1 }, name: "ns_1_tag_1", ns: "config.tags" }
+2020-02-07T11:59:11.741+1100 I INDEX    [rsSync] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2020-02-07T11:59:11.781+1100 I INDEX    [rsSync] build index done.  scanned 0 total records. 0 secs
+2020-02-07T11:59:11.788+1100 I COMMAND  [rsSync] command config.$cmd command: createIndexes { createIndexes: "tags", indexes: [ { name: "ns_1_tag_1", key: { ns: 1, tag: 1 }, unique: false } ], $db: "config" } numYields:0 reslen:303 locks:{ Global: { acquireCount: { r: 37, w: 28, W: 1 } }, Database: { acquireCount: { r: 4, w: 18, W: 10 } }, Collection: { acquireCount: { r: 3, w: 11 } }, oplog: { acquireCount: { r: 1, w: 17 } } } protocol:op_msg 118ms
+2020-02-07T11:59:11.796+1100 I STORAGE  [rsSync] createCollection: config.version with generated UUID: debb190f-fb2d-4b2b-a8a7-41813445df63
+2020-02-07T11:59:11.931+1100 I COMMAND  [rsSync] command config.version command: insert { insert: "version", bypassDocumentValidation: false, ordered: true, documents: [ { _id: 1, minCompatibleVersion: 5, currentVersion: 6, clusterId: ObjectId('5e3cb65feac25df28767b019') } ], writeConcern: { w: 1, wtimeout: 0 }, $db: "config" } ninserted:1 keysInserted:1 numYields:0 reslen:294 locks:{ Global: { acquireCount: { r: 44, w: 33, W: 1 } }, Database: { acquireCount: { r: 5, w: 22, W: 11 } }, Collection: { acquireCount: { r: 4, w: 13 } }, oplog: { acquireCount: { r: 1, w: 19 } } } protocol:op_msg 134ms
+2020-02-07T11:59:11.937+1100 I SHARDING [Balancer] CSRS balancer is starting
+2020-02-07T11:59:11.937+1100 I STORAGE  [rsSync] createCollection: config.transactions with generated UUID: 95ef897c-09c4-4a2d-b045-68921919789f
+2020-02-07T11:59:12.061+1100 I COMMAND  [rsSync] command config.transactions command: create { create: "transactions", $db: "config" } numYields:0 reslen:227 locks:{ Global: { acquireCount: { r: 51, w: 36, W: 1 } }, Database: { acquireCount: { r: 7, w: 24, W: 12 } }, Collection: { acquireCount: { r: 6, w: 14 } }, oplog: { acquireCount: { r: 1, w: 20 } } } protocol:op_msg 124ms
+2020-02-07T11:59:12.067+1100 I REPL     [rsSync] transition to primary complete; database writes are now permitted
+2020-02-07T11:59:12.078+1100 I COMMAND  [conn6] command admin.system.keys command: find { find: "system.keys", filter: { purpose: "HMAC", expiresAt: { $gt: Timestamp(0, 0) } }, sort: { expiresAt: 1 }, readConcern: { level: "majority", afterOpTime: { ts: Timestamp(0, 0), t: -1 } }, maxTimeMS: 30000, $readPreference: { mode: "nearest" }, $replData: 1, $clusterTime: { clusterTime: Timestamp(0, 0), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } }, $configServerState: { opTime: { ts: Timestamp(0, 0), t: -1 } }, $db: "admin" } planSummary: EOF keysExamined:0 docsExamined:0 cursorExhausted:1 numYields:0 nreturned:0 reslen:481 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_msg 2426ms
+2020-02-07T11:59:12.078+1100 I COMMAND  [conn7] command config.version command: find { find: "version", readConcern: { level: "majority", afterOpTime: { ts: Timestamp(0, 0), t: -1 } }, maxTimeMS: 30000, $readPreference: { mode: "nearest" }, $replData: 1, $clusterTime: { clusterTime: Timestamp(0, 0), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } }, $configServerState: { opTime: { ts: Timestamp(0, 0), t: -1 } }, $db: "config" } planSummary: COLLSCAN keysExamined:0 docsExamined:1 cursorExhausted:1 numYields:0 nreturned:1 reslen:564 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_msg 2425ms
+2020-02-07T11:59:12.078+1100 I COMMAND  [conn8] command config.shards command: find { find: "shards", readConcern: { level: "majority", afterOpTime: { ts: Timestamp(0, 0), t: -1 } }, maxTimeMS: 30000, $readPreference: { mode: "nearest" }, $replData: 1, $clusterTime: { clusterTime: Timestamp(0, 0), signature: { hash: BinData(0, 0000000000000000000000000000000000000000), keyId: 0 } }, $configServerState: { opTime: { ts: Timestamp(0, 0), t: -1 } }, $db: "config" } planSummary: COLLSCAN keysExamined:0 docsExamined:0 cursorExhausted:1 numYields:0 nreturned:0 reslen:477 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_msg 2424ms
+2020-02-07T11:59:12.079+1100 I SHARDING [Balancer] CSRS balancer thread is recovering
+2020-02-07T11:59:12.079+1100 I COMMAND  [ftdc] serverStatus was very slow: { after basic: 0, after asserts: 0, after backgroundFlushing: 0, after connections: 0, after dur: 0, after extra_info: 0, after globalLock: 0, after locks: 0, after logicalSessionRecordCache: 0, after network: 0, after opLatencies: 0, after opcounters: 0, after opcountersRepl: 0, after repl: 0, after security: 0, after storageEngine: 0, after wiredTiger: 1071, at end: 1071 }
+2020-02-07T11:59:12.082+1100 I STORAGE  [monitoring keys for HMAC] createCollection: admin.system.keys with generated UUID: b1fb7179-e094-460e-b0e4-6232723234cb
+2020-02-07T11:59:12.096+1100 I SHARDING [Balancer] CSRS balancer thread is recovered
+2020-02-07T11:59:12.236+1100 I COMMAND  [monitoring keys for HMAC] command admin.system.keys command: insert { insert: "system.keys", bypassDocumentValidation: false, ordered: true, documents: [ { _id: 6790502857306013704, purpose: "HMAC", key: BinData(0, 0522732C3384652D89AA4ED5B33DE6F6B9E6166E), expiresAt: Timestamp(1588813151, 0) } ], writeConcern: { w: "majority", wtimeout: 15000 }, $db: "admin" } ninserted:1 keysInserted:1 numYields:0 reslen:294 locks:{ Global: { acquireCount: { r: 7, w: 5 } }, Database: { acquireCount: { r: 1, w: 2, W: 3 } }, Collection: { acquireCount: { r: 1, w: 2 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 153ms
+2020-02-07T11:59:14.094+1100 I STORAGE  [conn7] createCollection: config.mongos with generated UUID: fcaf17f1-a5a0-4c38-93ff-49008a8d223e
+2020-02-07T11:59:14.137+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64770 #9 (5 connections now open)
+2020-02-07T11:59:14.137+1100 I NETWORK  [conn9] received client metadata from 127.0.0.1:64770 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-0", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:14.140+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64771 #10 (6 connections now open)
+2020-02-07T11:59:14.140+1100 I NETWORK  [conn10] received client metadata from 127.0.0.1:64771 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-1", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:14.142+1100 I NETWORK  [conn7] Starting new replica set monitor for shard01/localhost:27018,localhost:27019,localhost:27020
+2020-02-07T11:59:14.143+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27019 (1 connections now open to localhost:27019 with a 5 second timeout)
+2020-02-07T11:59:14.143+1100 I NETWORK  [conn7] Successfully connected to localhost:27020 (1 connections now open to localhost:27020 with a 5 second timeout)
+2020-02-07T11:59:14.144+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27018 (1 connections now open to localhost:27018 with a 5 second timeout)
+2020-02-07T11:59:14.144+1100 W NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Unable to reach primary for set shard01
+2020-02-07T11:59:14.647+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:15.148+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:15.654+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:16.157+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:16.663+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:17.165+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:17.672+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:18.179+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:18.685+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:19.194+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:19.698+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:20.205+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:20.707+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:21.213+1100 W NETWORK  [conn7] Unable to reach primary for set shard01
+2020-02-07T11:59:21.719+1100 I ASIO     [AddShard-TaskExecutor-0] Connecting to localhost:27018
+2020-02-07T11:59:21.736+1100 I ASIO     [AddShard-TaskExecutor-0] Successfully connected to localhost:27018, took 17ms (1 connections now open to localhost:27018)
+2020-02-07T11:59:21.804+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64779 #11 (7 connections now open)
+2020-02-07T11:59:21.809+1100 I NETWORK  [conn11] received client metadata from 127.0.0.1:64779 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.809+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64780 #12 (8 connections now open)
+2020-02-07T11:59:21.809+1100 I NETWORK  [conn12] received client metadata from 127.0.0.1:64780 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.817+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64781 #13 (9 connections now open)
+2020-02-07T11:59:21.821+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64782 #14 (10 connections now open)
+2020-02-07T11:59:21.821+1100 I NETWORK  [conn13] received client metadata from 127.0.0.1:64781 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.821+1100 I NETWORK  [conn14] received client metadata from 127.0.0.1:64782 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.827+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64783 #15 (11 connections now open)
+2020-02-07T11:59:21.832+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64784 #16 (12 connections now open)
+2020-02-07T11:59:21.833+1100 I NETWORK  [conn15] received client metadata from 127.0.0.1:64783 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.839+1100 I NETWORK  [conn16] received client metadata from 127.0.0.1:64784 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:21.956+1100 I SHARDING [conn7] going to insert new entry for shard into config.shards: { _id: "shard01", host: "shard01/localhost:27018,localhost:27019,localhost:27020", state: 1 }
+2020-02-07T11:59:21.979+1100 I STORAGE  [conn7] createCollection: config.changelog with generated UUID: 3fdfba12-ee0d-42d6-8824-a8137db25318
+2020-02-07T11:59:21.992+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64787 #17 (13 connections now open)
+2020-02-07T11:59:21.998+1100 I NETWORK  [conn17] received client metadata from 127.0.0.1:64787 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.022+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64788 #18 (14 connections now open)
+2020-02-07T11:59:22.025+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T11:59:22.025+1100-5e3cb66aeac25df28767b056", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037162025), what: "addShard", ns: "", details: { name: "shard01", host: "shard01/localhost:27018,localhost:27019,localhost:27020" } }
+2020-02-07T11:59:22.025+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64789 #19 (15 connections now open)
+2020-02-07T11:59:22.026+1100 I NETWORK  [conn18] received client metadata from 127.0.0.1:64788 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.032+1100 I NETWORK  [conn19] received client metadata from 127.0.0.1:64789 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.047+1100 I COMMAND  [conn7] command admin.$cmd appName: "mlaunch v1.6.2-dev" command: _configsvrAddShard { _configsvrAddShard: "shard01/localhost:27018,localhost:27019,localhost:27020", name: "shard01", lsid: { id: UUID("f546b3bd-12b6-416b-8f4a-08937936495c") }, $queryOptions: { $readPreference: { mode: "primary" } }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037154, 2), signature: { hash: BinData(0, F18703D3C44598077D9A376580DE2F4B5E8E2BE2), keyId: 6790502857306013704 } }, $client: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:64769", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037154, 2), t: 1 } }, $db: "admin" } numYields:0 reslen:457 locks:{ Global: { acquireCount: { r: 14, w: 6 } }, Database: { acquireCount: { r: 4, w: 5, W: 1 } }, Collection: { acquireCount: { r: 4, w: 2 } }, Metadata: { acquireCount: { W: 1 } }, Mutex: { acquireCount: { W: 2 } }, oplog: { acquireCount: { w: 3 } } } protocol:op_msg 7904ms
+2020-02-07T11:59:22.062+1100 I NETWORK  [conn7] Starting new replica set monitor for shard02/localhost:27021,localhost:27022,localhost:27023
+2020-02-07T11:59:22.069+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27023 (1 connections now open to localhost:27023 with a 5 second timeout)
+2020-02-07T11:59:22.070+1100 I NETWORK  [conn7] Successfully connected to localhost:27021 (1 connections now open to localhost:27021 with a 5 second timeout)
+2020-02-07T11:59:22.076+1100 I ASIO     [AddShard-TaskExecutor-0] Connecting to localhost:27021
+2020-02-07T11:59:22.076+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27022 (1 connections now open to localhost:27022 with a 5 second timeout)
+2020-02-07T11:59:22.083+1100 I ASIO     [AddShard-TaskExecutor-0] Successfully connected to localhost:27021, took 7ms (1 connections now open to localhost:27021)
+2020-02-07T11:59:22.119+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27018
+2020-02-07T11:59:22.130+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27018, took 11ms (1 connections now open to localhost:27018)
+2020-02-07T11:59:22.184+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64803 #20 (16 connections now open)
+2020-02-07T11:59:22.189+1100 I NETWORK  [conn20] received client metadata from 127.0.0.1:64803 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.195+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64804 #21 (17 connections now open)
+2020-02-07T11:59:22.199+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64805 #22 (18 connections now open)
+2020-02-07T11:59:22.199+1100 I NETWORK  [conn21] received client metadata from 127.0.0.1:64804 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.205+1100 I NETWORK  [conn22] received client metadata from 127.0.0.1:64805 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.205+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64806 #23 (19 connections now open)
+2020-02-07T11:59:22.206+1100 I NETWORK  [conn23] received client metadata from 127.0.0.1:64806 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.206+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64807 #24 (20 connections now open)
+2020-02-07T11:59:22.217+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64808 #25 (21 connections now open)
+2020-02-07T11:59:22.218+1100 I NETWORK  [conn24] received client metadata from 127.0.0.1:64807 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.223+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64809 #26 (22 connections now open)
+2020-02-07T11:59:22.223+1100 I NETWORK  [conn25] received client metadata from 127.0.0.1:64808 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.234+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64810 #27 (23 connections now open)
+2020-02-07T11:59:22.234+1100 I NETWORK  [conn26] received client metadata from 127.0.0.1:64809 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.246+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64811 #28 (24 connections now open)
+2020-02-07T11:59:22.246+1100 I NETWORK  [conn27] received client metadata from 127.0.0.1:64810 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.257+1100 I NETWORK  [conn28] received client metadata from 127.0.0.1:64811 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.363+1100 I SHARDING [conn7] going to insert new entry for shard into config.shards: { _id: "shard02", host: "shard02/localhost:27021,localhost:27022,localhost:27023", state: 1 }
+2020-02-07T11:59:22.398+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T11:59:22.398+1100-5e3cb66aeac25df28767b07f", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037162398), what: "addShard", ns: "", details: { name: "shard02", host: "shard02/localhost:27021,localhost:27022,localhost:27023" } }
+2020-02-07T11:59:22.422+1100 I COMMAND  [conn7] command admin.$cmd appName: "mlaunch v1.6.2-dev" command: _configsvrAddShard { _configsvrAddShard: "shard02/localhost:27021,localhost:27022,localhost:27023", name: "shard02", lsid: { id: UUID("f546b3bd-12b6-416b-8f4a-08937936495c") }, $queryOptions: { $readPreference: { mode: "primary" } }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037162, 3), signature: { hash: BinData(0, ABBFF993170A336462D5984D2B7329C213C8481C), keyId: 6790502857306013704 } }, $client: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:64769", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037162, 2), t: 1 } }, $db: "admin" } numYields:0 reslen:457 locks:{ Global: { acquireCount: { r: 10, w: 4 } }, Database: { acquireCount: { r: 3, w: 4 } }, Collection: { acquireCount: { r: 3, w: 2 } }, Metadata: { acquireCount: { W: 1 } }, Mutex: { acquireCount: { W: 2 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 360ms
+2020-02-07T11:59:22.437+1100 I NETWORK  [conn7] Starting new replica set monitor for shard03/localhost:27024,localhost:27025,localhost:27026
+2020-02-07T11:59:22.458+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27026 (1 connections now open to localhost:27026 with a 5 second timeout)
+2020-02-07T11:59:22.459+1100 I NETWORK  [conn7] Successfully connected to localhost:27024 (1 connections now open to localhost:27024 with a 5 second timeout)
+2020-02-07T11:59:22.465+1100 I ASIO     [AddShard-TaskExecutor-0] Connecting to localhost:27024
+2020-02-07T11:59:22.477+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27025 (1 connections now open to localhost:27025 with a 5 second timeout)
+2020-02-07T11:59:22.477+1100 I ASIO     [AddShard-TaskExecutor-0] Successfully connected to localhost:27024, took 12ms (1 connections now open to localhost:27024)
+2020-02-07T11:59:22.535+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64834 #29 (25 connections now open)
+2020-02-07T11:59:22.538+1100 I NETWORK  [conn29] received client metadata from 127.0.0.1:64834 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.543+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64835 #30 (26 connections now open)
+2020-02-07T11:59:22.554+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64836 #31 (27 connections now open)
+2020-02-07T11:59:22.554+1100 I NETWORK  [conn30] received client metadata from 127.0.0.1:64835 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.560+1100 I NETWORK  [conn31] received client metadata from 127.0.0.1:64836 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.567+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64837 #32 (28 connections now open)
+2020-02-07T11:59:22.578+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64838 #33 (29 connections now open)
+2020-02-07T11:59:22.578+1100 I NETWORK  [conn32] received client metadata from 127.0.0.1:64837 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.585+1100 I NETWORK  [conn33] received client metadata from 127.0.0.1:64838 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.596+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64840 #34 (30 connections now open)
+2020-02-07T11:59:22.608+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64839 #35 (31 connections now open)
+2020-02-07T11:59:22.608+1100 I NETWORK  [conn34] received client metadata from 127.0.0.1:64840 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.620+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64841 #36 (32 connections now open)
+2020-02-07T11:59:22.620+1100 I NETWORK  [conn35] received client metadata from 127.0.0.1:64839 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.632+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64842 #37 (33 connections now open)
+2020-02-07T11:59:22.632+1100 I NETWORK  [conn36] received client metadata from 127.0.0.1:64841 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.644+1100 I NETWORK  [conn37] received client metadata from 127.0.0.1:64842 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.770+1100 I SHARDING [conn7] going to insert new entry for shard into config.shards: { _id: "shard03", host: "shard03/localhost:27024,localhost:27025,localhost:27026", state: 1 }
+2020-02-07T11:59:22.776+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T11:59:22.776+1100-5e3cb66aeac25df28767b09d", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037162776), what: "addShard", ns: "", details: { name: "shard03", host: "shard03/localhost:27024,localhost:27025,localhost:27026" } }
+2020-02-07T11:59:22.783+1100 I COMMAND  [conn7] command admin.$cmd appName: "mlaunch v1.6.2-dev" command: _configsvrAddShard { _configsvrAddShard: "shard03/localhost:27024,localhost:27025,localhost:27026", name: "shard03", lsid: { id: UUID("f546b3bd-12b6-416b-8f4a-08937936495c") }, $queryOptions: { $readPreference: { mode: "primary" } }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037162, 8), signature: { hash: BinData(0, ABBFF993170A336462D5984D2B7329C213C8481C), keyId: 6790502857306013704 } }, $client: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:64769", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037162, 8), t: 1 } }, $db: "admin" } numYields:0 reslen:457 locks:{ Global: { acquireCount: { r: 10, w: 4 } }, Database: { acquireCount: { r: 3, w: 4 } }, Collection: { acquireCount: { r: 3, w: 2 } }, Metadata: { acquireCount: { W: 1 } }, Mutex: { acquireCount: { W: 2 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 346ms
+2020-02-07T11:59:22.788+1100 I NETWORK  [conn7] Starting new replica set monitor for shard04/localhost:27027,localhost:27028,localhost:27029
+2020-02-07T11:59:22.790+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27029 (1 connections now open to localhost:27029 with a 5 second timeout)
+2020-02-07T11:59:22.790+1100 I NETWORK  [conn7] Successfully connected to localhost:27027 (1 connections now open to localhost:27027 with a 5 second timeout)
+2020-02-07T11:59:22.790+1100 I ASIO     [AddShard-TaskExecutor-0] Connecting to localhost:27027
+2020-02-07T11:59:22.791+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27028 (1 connections now open to localhost:27028 with a 5 second timeout)
+2020-02-07T11:59:22.792+1100 I ASIO     [AddShard-TaskExecutor-0] Successfully connected to localhost:27027, took 2ms (1 connections now open to localhost:27027)
+2020-02-07T11:59:22.799+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64868 #38 (34 connections now open)
+2020-02-07T11:59:22.804+1100 I NETWORK  [conn38] received client metadata from 127.0.0.1:64868 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.807+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64869 #39 (35 connections now open)
+2020-02-07T11:59:22.807+1100 I NETWORK  [conn39] received client metadata from 127.0.0.1:64869 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.807+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64870 #40 (36 connections now open)
+2020-02-07T11:59:22.807+1100 I NETWORK  [conn40] received client metadata from 127.0.0.1:64870 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.813+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64872 #41 (37 connections now open)
+2020-02-07T11:59:22.813+1100 I NETWORK  [conn41] received client metadata from 127.0.0.1:64872 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.813+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64873 #42 (38 connections now open)
+2020-02-07T11:59:22.819+1100 I NETWORK  [conn42] received client metadata from 127.0.0.1:64873 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.826+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64875 #43 (39 connections now open)
+2020-02-07T11:59:22.830+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64876 #44 (40 connections now open)
+2020-02-07T11:59:22.830+1100 I NETWORK  [conn43] received client metadata from 127.0.0.1:64875 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.830+1100 I NETWORK  [conn44] received client metadata from 127.0.0.1:64876 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.832+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64878 #45 (41 connections now open)
+2020-02-07T11:59:22.837+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64879 #46 (42 connections now open)
+2020-02-07T11:59:22.837+1100 I NETWORK  [conn45] received client metadata from 127.0.0.1:64878 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.842+1100 I NETWORK  [conn46] received client metadata from 127.0.0.1:64879 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.935+1100 I SHARDING [conn7] going to insert new entry for shard into config.shards: { _id: "shard04", host: "shard04/localhost:27027,localhost:27028,localhost:27029", state: 1 }
+2020-02-07T11:59:22.942+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T11:59:22.942+1100-5e3cb66aeac25df28767b0bb", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037162942), what: "addShard", ns: "", details: { name: "shard04", host: "shard04/localhost:27027,localhost:27028,localhost:27029" } }
+2020-02-07T11:59:22.949+1100 I COMMAND  [conn7] command admin.$cmd appName: "mlaunch v1.6.2-dev" command: _configsvrAddShard { _configsvrAddShard: "shard04/localhost:27027,localhost:27028,localhost:27029", name: "shard04", lsid: { id: UUID("f546b3bd-12b6-416b-8f4a-08937936495c") }, $queryOptions: { $readPreference: { mode: "primary" } }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037162, 13), signature: { hash: BinData(0, ABBFF993170A336462D5984D2B7329C213C8481C), keyId: 6790502857306013704 } }, $client: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:64769", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037162, 13), t: 1 } }, $db: "admin" } numYields:0 reslen:457 locks:{ Global: { acquireCount: { r: 10, w: 4 } }, Database: { acquireCount: { r: 3, w: 4 } }, Collection: { acquireCount: { r: 3, w: 2 } }, Metadata: { acquireCount: { W: 1 } }, Mutex: { acquireCount: { W: 2 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 161ms
+2020-02-07T11:59:22.954+1100 I NETWORK  [conn7] Starting new replica set monitor for shard05/localhost:27030,localhost:27031,localhost:27032
+2020-02-07T11:59:22.955+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27032 (1 connections now open to localhost:27032 with a 5 second timeout)
+2020-02-07T11:59:22.955+1100 I NETWORK  [conn7] Successfully connected to localhost:27030 (1 connections now open to localhost:27030 with a 5 second timeout)
+2020-02-07T11:59:22.955+1100 I ASIO     [AddShard-TaskExecutor-0] Connecting to localhost:27030
+2020-02-07T11:59:22.956+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27031 (1 connections now open to localhost:27031 with a 5 second timeout)
+2020-02-07T11:59:22.957+1100 I ASIO     [AddShard-TaskExecutor-0] Successfully connected to localhost:27030, took 2ms (1 connections now open to localhost:27030)
+2020-02-07T11:59:22.965+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64911 #47 (43 connections now open)
+2020-02-07T11:59:22.969+1100 I NETWORK  [conn47] received client metadata from 127.0.0.1:64911 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.977+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64912 #48 (44 connections now open)
+2020-02-07T11:59:22.977+1100 I NETWORK  [conn48] received client metadata from 127.0.0.1:64912 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.978+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64913 #49 (45 connections now open)
+2020-02-07T11:59:22.979+1100 I NETWORK  [conn49] received client metadata from 127.0.0.1:64913 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.984+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64914 #50 (46 connections now open)
+2020-02-07T11:59:22.990+1100 I NETWORK  [conn50] received client metadata from 127.0.0.1:64914 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:22.991+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64916 #51 (47 connections now open)
+2020-02-07T11:59:22.991+1100 I NETWORK  [conn51] received client metadata from 127.0.0.1:64916 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:23.013+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64918 #52 (48 connections now open)
+2020-02-07T11:59:23.021+1100 I NETWORK  [conn52] received client metadata from 127.0.0.1:64918 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:23.021+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64919 #53 (49 connections now open)
+2020-02-07T11:59:23.027+1100 I NETWORK  [conn53] received client metadata from 127.0.0.1:64919 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:23.028+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64921 #54 (50 connections now open)
+2020-02-07T11:59:23.028+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64922 #55 (51 connections now open)
+2020-02-07T11:59:23.028+1100 I NETWORK  [conn54] received client metadata from 127.0.0.1:64921 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:23.028+1100 I NETWORK  [conn55] received client metadata from 127.0.0.1:64922 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:23.126+1100 I SHARDING [conn7] going to insert new entry for shard into config.shards: { _id: "shard05", host: "shard05/localhost:27030,localhost:27031,localhost:27032", state: 1 }
+2020-02-07T11:59:23.132+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T11:59:23.132+1100-5e3cb66beac25df28767b0d9", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037163132), what: "addShard", ns: "", details: { name: "shard05", host: "shard05/localhost:27030,localhost:27031,localhost:27032" } }
+2020-02-07T11:59:23.140+1100 I COMMAND  [conn7] command admin.$cmd appName: "mlaunch v1.6.2-dev" command: _configsvrAddShard { _configsvrAddShard: "shard05/localhost:27030,localhost:27031,localhost:27032", name: "shard05", lsid: { id: UUID("f546b3bd-12b6-416b-8f4a-08937936495c") }, $queryOptions: { $readPreference: { mode: "primary" } }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037162, 18), signature: { hash: BinData(0, ABBFF993170A336462D5984D2B7329C213C8481C), keyId: 6790502857306013704 } }, $client: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:64769", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037162, 18), t: 1 } }, $db: "admin" } numYields:0 reslen:457 locks:{ Global: { acquireCount: { r: 10, w: 4 } }, Database: { acquireCount: { r: 3, w: 4 } }, Collection: { acquireCount: { r: 3, w: 2 } }, Metadata: { acquireCount: { W: 1 } }, Mutex: { acquireCount: { W: 2 } }, oplog: { acquireCount: { w: 2 } } } protocol:op_msg 186ms
+2020-02-07T11:59:24.155+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64959 #56 (52 connections now open)
+2020-02-07T11:59:24.155+1100 I NETWORK  [conn56] received client metadata from 127.0.0.1:64959 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-2", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:24.187+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64987 #57 (53 connections now open)
+2020-02-07T11:59:24.189+1100 I NETWORK  [conn57] received client metadata from 127.0.0.1:64987 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.191+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64993 #58 (54 connections now open)
+2020-02-07T11:59:24.192+1100 I NETWORK  [conn58] received client metadata from 127.0.0.1:64993 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.193+1100 I NETWORK  [conn58] end connection 127.0.0.1:64993 (53 connections now open)
+2020-02-07T11:59:24.193+1100 I NETWORK  [conn57] end connection 127.0.0.1:64987 (52 connections now open)
+2020-02-07T11:59:24.230+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65026 #59 (53 connections now open)
+2020-02-07T11:59:24.230+1100 I NETWORK  [conn59] received client metadata from 127.0.0.1:65026 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.230+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65027 #60 (54 connections now open)
+2020-02-07T11:59:24.230+1100 I NETWORK  [conn60] received client metadata from 127.0.0.1:65027 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.232+1100 I NETWORK  [conn60] end connection 127.0.0.1:65027 (53 connections now open)
+2020-02-07T11:59:24.232+1100 I NETWORK  [conn59] end connection 127.0.0.1:65026 (52 connections now open)
+2020-02-07T11:59:24.243+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65043 #61 (53 connections now open)
+2020-02-07T11:59:24.243+1100 I NETWORK  [conn61] received client metadata from 127.0.0.1:65043 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.243+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65044 #62 (54 connections now open)
+2020-02-07T11:59:24.244+1100 I NETWORK  [conn62] received client metadata from 127.0.0.1:65044 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.244+1100 I NETWORK  [conn62] end connection 127.0.0.1:65044 (53 connections now open)
+2020-02-07T11:59:24.244+1100 I NETWORK  [conn61] end connection 127.0.0.1:65043 (52 connections now open)
+2020-02-07T11:59:32.147+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27021
+2020-02-07T11:59:32.151+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27021, took 4ms (1 connections now open to localhost:27021)
+2020-02-07T11:59:32.152+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27024
+2020-02-07T11:59:32.154+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27024, took 2ms (1 connections now open to localhost:27024)
+2020-02-07T11:59:32.155+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27027
+2020-02-07T11:59:32.156+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27027, took 1ms (1 connections now open to localhost:27027)
+2020-02-07T11:59:32.156+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27030
+2020-02-07T11:59:32.158+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27030, took 2ms (1 connections now open to localhost:27030)
+2020-02-07T11:59:37.783+1100 W SHARDING [replSetDistLockPinger] pinging failed for distributed lock pinger :: caused by :: LockStateChangeFailed: findAndModify query predicate didn't match any lock document
+2020-02-07T11:59:54.178+1100 I SHARDING [conn7] distributed lock 'test-movePrimary' acquired for 'createDatabase', ts : 5e3cb68aeac25df28767b150
+2020-02-07T11:59:54.191+1100 I SHARDING [conn7] distributed lock 'test' acquired for 'createDatabase', ts : 5e3cb68aeac25df28767b154
+2020-02-07T11:59:54.198+1100 I SHARDING [conn7] Placing [test] on: shard01
+2020-02-07T11:59:54.198+1100 I STORAGE  [conn7] createCollection: config.databases with generated UUID: dd1b66a4-5d29-41fa-a3f7-2d2b849a3dd3
+2020-02-07T11:59:54.245+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb68aeac25df28767b154' unlocked.
+2020-02-07T11:59:54.252+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb68aeac25df28767b150' unlocked.
+2020-02-07T12:00:12.093+1100 I NETWORK  [conn6] end connection 127.0.0.1:64713 (51 connections now open)
+2020-02-07T12:00:21.846+1100 I NETWORK  [conn13] end connection 127.0.0.1:64781 (50 connections now open)
+2020-02-07T12:00:21.846+1100 I NETWORK  [conn15] end connection 127.0.0.1:64783 (49 connections now open)
+2020-02-07T12:00:22.047+1100 I NETWORK  [conn18] end connection 127.0.0.1:64788 (48 connections now open)
+2020-02-07T12:00:22.243+1100 I NETWORK  [conn24] end connection 127.0.0.1:64807 (47 connections now open)
+2020-02-07T12:00:22.262+1100 I NETWORK  [conn26] end connection 127.0.0.1:64809 (46 connections now open)
+2020-02-07T12:00:22.262+1100 I NETWORK  [conn27] end connection 127.0.0.1:64810 (45 connections now open)
+2020-02-07T12:00:22.291+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65190 #63 (46 connections now open)
+2020-02-07T12:00:22.294+1100 I NETWORK  [conn63] received client metadata from 127.0.0.1:65190 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:00:22.620+1100 I NETWORK  [conn32] end connection 127.0.0.1:64837 (45 connections now open)
+2020-02-07T12:00:22.833+1100 I NETWORK  [conn43] end connection 127.0.0.1:64875 (44 connections now open)
+2020-02-07T12:00:22.864+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65191 #64 (45 connections now open)
+2020-02-07T12:00:22.865+1100 I NETWORK  [conn64] received client metadata from 127.0.0.1:65191 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:00:23.031+1100 I NETWORK  [conn52] end connection 127.0.0.1:64918 (44 connections now open)
+2020-02-07T12:00:52.668+1100 I NETWORK  [conn36] end connection 127.0.0.1:64841 (43 connections now open)
+2020-02-07T12:00:52.680+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65193 #65 (44 connections now open)
+2020-02-07T12:00:52.684+1100 I NETWORK  [conn65] received client metadata from 127.0.0.1:65193 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:00:52.994+1100 I NETWORK  [conn49] end connection 127.0.0.1:64913 (43 connections now open)
+2020-02-07T12:00:53.044+1100 I NETWORK  [conn55] end connection 127.0.0.1:64922 (42 connections now open)
+2020-02-07T12:00:54.194+1100 I NETWORK  [conn8] end connection 127.0.0.1:64715 (41 connections now open)
+2020-02-07T12:00:57.424+1100 I SHARDING [conn7] distributed lock 'test-movePrimary' acquired for 'enableSharding', ts : 5e3cb6c9eac25df28767b214
+2020-02-07T12:00:57.431+1100 I SHARDING [conn7] distributed lock 'test' acquired for 'enableSharding', ts : 5e3cb6c9eac25df28767b216
+2020-02-07T12:00:57.432+1100 I SHARDING [conn7] Enabling sharding for database [test] in config db
+2020-02-07T12:00:57.445+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb6c9eac25df28767b216' unlocked.
+2020-02-07T12:00:57.452+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb6c9eac25df28767b214' unlocked.
+2020-02-07T12:01:16.030+1100 I SHARDING [conn7] distributed lock 'test-movePrimary' acquired for 'shardCollection', ts : 5e3cb6dceac25df28767b23d
+2020-02-07T12:01:16.036+1100 I SHARDING [conn7] distributed lock 'test' acquired for 'shardCollection', ts : 5e3cb6dceac25df28767b23f
+2020-02-07T12:01:16.043+1100 I SHARDING [conn7] distributed lock 'test.products' acquired for 'shardCollection', ts : 5e3cb6dceac25df28767b241
+2020-02-07T12:01:16.045+1100 I NETWORK  [conn7] Successfully connected to shard01/localhost:27018,localhost:27019,localhost:27020 (1 connections now open to shard01/localhost:27018,localhost:27019,localhost:27020 with a 0 second timeout)
+2020-02-07T12:01:16.055+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb6dceac25df28767b241' unlocked.
+2020-02-07T12:01:16.062+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb6dceac25df28767b23f' unlocked.
+2020-02-07T12:01:16.068+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb6dceac25df28767b23d' unlocked.
+2020-02-07T12:01:22.303+1100 I NETWORK  [conn63] end connection 127.0.0.1:65190 (40 connections now open)
+2020-02-07T12:01:22.674+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65196 #66 (41 connections now open)
+2020-02-07T12:01:22.674+1100 I NETWORK  [conn66] received client metadata from 127.0.0.1:65196 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:01:22.681+1100 I NETWORK  [conn35] end connection 127.0.0.1:64839 (40 connections now open)
+2020-02-07T12:01:22.832+1100 I NETWORK  [conn39] end connection 127.0.0.1:64869 (39 connections now open)
+2020-02-07T12:01:22.870+1100 I NETWORK  [conn46] end connection 127.0.0.1:64879 (38 connections now open)
+2020-02-07T12:01:52.874+1100 I NETWORK  [conn64] end connection 127.0.0.1:65191 (37 connections now open)
+2020-02-07T12:02:22.690+1100 I NETWORK  [conn65] end connection 127.0.0.1:65193 (36 connections now open)
+2020-02-07T12:02:52.680+1100 I NETWORK  [conn33] end connection 127.0.0.1:64838 (35 connections now open)
+2020-02-07T12:03:14.078+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65220 #67 (36 connections now open)
+2020-02-07T12:03:14.078+1100 I NETWORK  [conn67] received client metadata from 127.0.0.1:65220 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-4", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:14.082+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65221 #68 (37 connections now open)
+2020-02-07T12:03:14.082+1100 I NETWORK  [conn68] received client metadata from 127.0.0.1:65221 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-6", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:14.091+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65222 #69 (38 connections now open)
+2020-02-07T12:03:14.091+1100 I NETWORK  [conn69] received client metadata from 127.0.0.1:65222 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-3", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:14.094+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65223 #70 (39 connections now open)
+2020-02-07T12:03:14.094+1100 I NETWORK  [conn70] received client metadata from 127.0.0.1:65223 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-5", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:14.098+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65224 #71 (40 connections now open)
+2020-02-07T12:03:14.098+1100 I NETWORK  [conn71] received client metadata from 127.0.0.1:65224 conn: { driver: { name: "NetworkInterfaceASIO-TaskExecutorPool-7", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:53.830+1100 I SHARDING [conn7] distributed lock 'test-movePrimary' acquired for 'shardCollection', ts : 5e3cb779eac25df28767b459
+2020-02-07T12:03:53.837+1100 I SHARDING [conn7] distributed lock 'test' acquired for 'shardCollection', ts : 5e3cb779eac25df28767b45c
+2020-02-07T12:03:53.844+1100 I SHARDING [conn7] distributed lock 'test.products' acquired for 'shardCollection', ts : 5e3cb779eac25df28767b45e
+2020-02-07T12:03:53.852+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb779eac25df28767b45e' unlocked.
+2020-02-07T12:03:53.859+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb779eac25df28767b45c' unlocked.
+2020-02-07T12:03:53.865+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb779eac25df28767b459' unlocked.
+2020-02-07T12:04:07.878+1100 I SHARDING [thread73] distributed lock 'config-movePrimary' acquired for 'shardCollection', ts : 5e3cb787eac25df28767b488
+2020-02-07T12:04:07.885+1100 I SHARDING [thread73] distributed lock 'config' acquired for 'shardCollection', ts : 5e3cb787eac25df28767b48b
+2020-02-07T12:04:07.892+1100 I SHARDING [thread73] distributed lock 'config.system.sessions' acquired for 'shardCollection', ts : 5e3cb787eac25df28767b48d
+2020-02-07T12:04:07.893+1100 I NETWORK  [thread73] Starting new replica set monitor for configRepl/localhost:27033
+2020-02-07T12:04:07.894+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65227 #72 (41 connections now open)
+2020-02-07T12:04:07.894+1100 I NETWORK  [conn72] received client metadata from 127.0.0.1:65227 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:04:07.895+1100 I NETWORK  [thread73] Successfully connected to localhost:27033 (1 connections now open to localhost:27033 with a 5 second timeout)
+2020-02-07T12:04:07.895+1100 I NETWORK  [thread73] Successfully connected to configRepl/localhost:27033 (1 connections now open to configRepl/localhost:27033 with a 0 second timeout)
+2020-02-07T12:04:07.896+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65228 #73 (42 connections now open)
+2020-02-07T12:04:07.896+1100 I NETWORK  [conn73] received client metadata from 127.0.0.1:65228 conn: { driver: { name: "MongoDB Internal Client", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:04:07.980+1100 I SHARDING [thread73] CMD: shardcollection: { _configsvrShardCollection: "config.system.sessions", key: { _id: 1 }, unique: false, numInitialChunks: 0, writeConcern: { w: "majority", wtimeout: 60000 }, $db: "admin" }
+2020-02-07T12:04:07.990+1100 I SHARDING [thread73] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T12:04:07.990+1100-5e3cb787eac25df28767b496", server: "gc.local", clientAddr: "", time: new Date(1581037447990), what: "shardCollection.start", ns: "config.system.sessions", details: { shardKey: { _id: 1 }, collection: "config.system.sessions", uuid: UUID("f4db6132-9004-4779-a672-3e960a8c0949"), primary: "shard01:shard01/localhost:27018,localhost:27019,localhost:27020", numChunks: 1 } }
+2020-02-07T12:04:07.997+1100 I SHARDING [thread73] going to create 1 chunk(s) for: config.system.sessions using new epoch 5e3cb787eac25df28767b49b
+2020-02-07T12:04:08.020+1100 I STORAGE  [thread73] createCollection: config.collections with generated UUID: 4c3a9671-4862-4c01-ab45-6b04b986c33c
+2020-02-07T12:04:08.262+1100 I SHARDING [thread73] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T12:04:08.261+1100-5e3cb788eac25df28767b4a0", server: "gc.local", clientAddr: "", time: new Date(1581037448261), what: "shardCollection.end", ns: "config.system.sessions", details: { version: "1|0||5e3cb787eac25df28767b49b" } }
+2020-02-07T12:04:08.289+1100 I SHARDING [thread73] distributed lock with ts: 5e3cb787eac25df28767b48d' unlocked.
+2020-02-07T12:04:08.302+1100 I SHARDING [thread73] distributed lock with ts: 5e3cb787eac25df28767b48b' unlocked.
+2020-02-07T12:04:08.323+1100 I SHARDING [thread73] distributed lock with ts: 5e3cb787eac25df28767b488' unlocked.
+2020-02-07T12:04:08.330+1100 I COMMAND  [thread73] command admin.$cmd command: _configsvrShardCollection { _configsvrShardCollection: "config.system.sessions", key: { _id: 1 }, unique: false, numInitialChunks: 0, writeConcern: { w: "majority", wtimeout: 60000 }, $db: "admin" } numYields:0 reslen:310 locks:{ Global: { acquireCount: { r: 35, w: 23 } }, Database: { acquireCount: { r: 6, w: 22, W: 1 } }, Collection: { acquireCount: { r: 6, w: 11 } }, Metadata: { acquireCount: { W: 2 } }, Mutex: { acquireCount: { W: 1 } }, oplog: { acquireCount: { w: 11 } } } protocol:op_msg 466ms
+2020-02-07T12:04:08.335+1100 I SHARDING [thread73] Refreshing chunks for collection config.system.sessions based on version 0|0||000000000000000000000000
+2020-02-07T12:04:08.336+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 1 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:08.342+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27020
+2020-02-07T12:04:08.348+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27022
+2020-02-07T12:04:08.349+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27026
+2020-02-07T12:04:08.354+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27028
+2020-02-07T12:04:08.360+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27031
+2020-02-07T12:04:08.377+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27020, took 35ms (1 connections now open to localhost:27020)
+2020-02-07T12:04:08.383+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27026, took 41ms (1 connections now open to localhost:27026)
+2020-02-07T12:04:08.388+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27022, took 46ms (1 connections now open to localhost:27022)
+2020-02-07T12:04:08.395+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27028, took 53ms (1 connections now open to localhost:27028)
+2020-02-07T12:04:08.400+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27031, took 58ms (1 connections now open to localhost:27031)
+2020-02-07T12:04:08.407+1100 I NETWORK  [NetworkInterfaceASIO-TaskExecutorPool-0-0] Marking host localhost:27020 as failed :: caused by :: NotMaster: not master
+2020-02-07T12:04:08.413+1100 I NETWORK  [NetworkInterfaceASIO-TaskExecutorPool-0-0] Marking host localhost:27026 as failed :: caused by :: NotMaster: not master
+2020-02-07T12:04:08.413+1100 I NETWORK  [NetworkInterfaceASIO-TaskExecutorPool-0-0] Marking host localhost:27022 as failed :: caused by :: NotMaster: not master
+2020-02-07T12:04:08.419+1100 I NETWORK  [NetworkInterfaceASIO-TaskExecutorPool-0-0] Marking host localhost:27028 as failed :: caused by :: NotMaster: not master
+2020-02-07T12:04:08.424+1100 I NETWORK  [NetworkInterfaceASIO-TaskExecutorPool-0-0] Marking host localhost:27031 as failed :: caused by :: NotMaster: not master
+2020-02-07T12:04:08.430+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27018
+2020-02-07T12:04:08.447+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27018, took 17ms (1 connections now open to localhost:27018)
+2020-02-07T12:04:11.413+1100 I SHARDING [conn7] distributed lock 'test-movePrimary' acquired for 'shardCollection', ts : 5e3cb78beac25df28767b4a9
+2020-02-07T12:04:11.419+1100 I SHARDING [conn7] distributed lock 'test' acquired for 'shardCollection', ts : 5e3cb78beac25df28767b4ab
+2020-02-07T12:04:11.426+1100 I SHARDING [conn7] distributed lock 'test.products' acquired for 'shardCollection', ts : 5e3cb78beac25df28767b4ad
+2020-02-07T12:04:11.676+1100 I SHARDING [conn7] CMD: shardcollection: { _configsvrShardCollection: "test.products", key: { sku: 1.0 }, unique: false, numInitialChunks: 0, lsid: { id: UUID("3b74eb10-ca8e-4cf0-b1db-ceaeb37d53da") }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037444, 1), signature: { hash: BinData(0, 9869FEFF7DE6EF8A3321BF9D459A7DF1D2EDE6C4), keyId: 6790502857306013704 } }, $client: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.1" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:65219", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037444, 1), t: 1 } }, $db: "admin" }
+2020-02-07T12:04:11.676+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T12:04:11.676+1100-5e3cb78beac25df28767b4b2", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037451676), what: "shardCollection.start", ns: "test.products", details: { shardKey: { sku: 1.0 }, collection: "test.products", uuid: UUID("6bf25135-b39a-47f4-b112-b0f1c8bae44a"), primary: "shard01:shard01/localhost:27018,localhost:27019,localhost:27020", numChunks: 1 } }
+2020-02-07T12:04:11.924+1100 I SHARDING [conn7] going to create 3 chunk(s) for: test.products using new epoch 5e3cb78beac25df28767b4b7
+2020-02-07T12:04:12.131+1100 I SHARDING [conn7] about to log metadata event into changelog: { _id: "gc.local-2020-02-07T12:04:12.131+1100-5e3cb78ceac25df28767b4c0", server: "gc.local", clientAddr: "127.0.0.1:64714", time: new Date(1581037452131), what: "shardCollection.end", ns: "test.products", details: { version: "1|2||5e3cb78beac25df28767b4b7" } }
+2020-02-07T12:04:12.134+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65235 #74 (43 connections now open)
+2020-02-07T12:04:12.143+1100 I NETWORK  [conn74] received client metadata from 127.0.0.1:65235 conn: { driver: { name: "NetworkInterfaceASIO-ShardRegistry", version: "3.6.0" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:04:12.159+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb78beac25df28767b4ad' unlocked.
+2020-02-07T12:04:12.171+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb78beac25df28767b4ab' unlocked.
+2020-02-07T12:04:12.183+1100 I SHARDING [conn7] distributed lock with ts: 5e3cb78beac25df28767b4a9' unlocked.
+2020-02-07T12:04:12.183+1100 I COMMAND  [conn7] command admin.$cmd appName: "MongoDB Shell" command: _configsvrShardCollection { _configsvrShardCollection: "test.products", key: { sku: 1.0 }, unique: false, numInitialChunks: 0, lsid: { id: UUID("3b74eb10-ca8e-4cf0-b1db-ceaeb37d53da") }, writeConcern: { w: "majority", wtimeout: 60000 }, $replData: 1, $clusterTime: { clusterTime: Timestamp(1581037444, 1), signature: { hash: BinData(0, 9869FEFF7DE6EF8A3321BF9D459A7DF1D2EDE6C4), keyId: 6790502857306013704 } }, $client: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.1" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" }, mongos: { host: "gc.local:27017", client: "127.0.0.1:65219", version: "3.6.0" } }, $configServerState: { opTime: { ts: Timestamp(1581037444, 1), t: 1 } }, $db: "admin" } numYields:0 reslen:507 locks:{ Global: { acquireCount: { r: 36, w: 24 } }, Database: { acquireCount: { r: 6, w: 24 } }, Collection: { acquireCount: { r: 6, w: 12 } }, Metadata: { acquireCount: { W: 2 } }, Mutex: { acquireCount: { W: 1 } }, oplog: { acquireCount: { w: 12 } } } protocol:op_msg 777ms
+2020-02-07T12:04:12.646+1100 I SHARDING [Balancer] Refreshing chunks for collection config.system.sessions based on version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:12.647+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 0 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:12.648+1100 I SHARDING [Balancer] Refreshing chunks for collection test.products based on version 0|0||000000000000000000000000
+2020-02-07T12:04:12.649+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection test.products took 0 ms and found version 1|2||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:12.653+1100 I SHARDING [Balancer] Refreshing chunks for collection config.system.sessions based on version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:12.653+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 0 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:12.653+1100 I SHARDING [Balancer] Refreshing chunks for collection test.products based on version 1|2||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:12.654+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection test.products took 0 ms and found version 1|2||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:12.665+1100 I SHARDING [Balancer] distributed lock 'test.products' acquired for 'Migrating chunk(s) in collection test.products', ts : 5e3cb65beac25df28767aff3
+2020-02-07T12:04:26.685+1100 I SHARDING [NetworkInterfaceASIO-ShardRegistry-0] distributed lock with ts: '5e3cb65beac25df28767aff3' and _id: 'test.products' unlocked.
+2020-02-07T12:04:26.691+1100 I STORAGE  [Balancer] createCollection: config.actionlog with generated UUID: 7fbd5204-f838-458f-b569-fd01755e0ea7
+2020-02-07T12:04:26.717+1100 I SHARDING [Balancer] about to log metadata event into actionlog: { _id: "gc.local-2020-02-07T12:04:26.717+1100-5e3cb79aeac25df28767b552", server: "gc.local", clientAddr: "", time: new Date(1581037466717), what: "balancer.round", ns: "", details: { executionTimeMillis: 14058, errorOccured: false, candidateChunks: 1, chunksMoved: 1 } }
+2020-02-07T12:04:27.732+1100 I SHARDING [Balancer] Refreshing chunks for collection config.system.sessions based on version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:27.733+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 0 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:27.733+1100 I SHARDING [Balancer] Refreshing chunks for collection test.products based on version 1|2||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:27.733+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection test.products took 0 ms and found version 2|1||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:27.737+1100 I SHARDING [Balancer] Refreshing chunks for collection config.system.sessions based on version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:27.737+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 0 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:27.737+1100 I SHARDING [Balancer] Refreshing chunks for collection test.products based on version 2|1||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:27.738+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection test.products took 0 ms and found version 2|1||5e3cb78beac25df28767b4b7
+2020-02-07T12:04:27.749+1100 I SHARDING [Balancer] distributed lock 'test.products' acquired for 'Migrating chunk(s) in collection test.products', ts : 5e3cb65beac25df28767aff3
+2020-02-07T15:47:18.484+1100 I SHARDING [Balancer] Performing a split because migration test.products: [{ sku: 1.0 }, { sku: 2.0 }), from shard02, to shard03 failed for size reasons :: caused by :: ChunkTooBig: Cannot move chunk: the maximum number of documents for a chunk is 98777, the maximum chunk size is 5242880, average document size is 69. Found 1000001 documents in chunk  ns: test.products { sku: 1.0 } -> { sku: 2.0 }
+2020-02-07T15:47:18.485+1100 I SHARDING [Balancer] Marking chunk shard: shard02, lastmod: 4|1||5e379b34895251fcce80be10, [{ sku: 1.0 }, { sku: 2.0 }) as jumbo.

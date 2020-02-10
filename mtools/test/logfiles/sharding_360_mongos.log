@@ -1,0 +1,149 @@
+2020-02-07T11:59:09.612+1100 I CONTROL  [main] 
+2020-02-07T11:59:09.613+1100 I CONTROL  [main] ** WARNING: Access control is not enabled for the database.
+2020-02-07T11:59:09.614+1100 I CONTROL  [main] **          Read and write access to data and configuration is unrestricted.
+2020-02-07T11:59:09.615+1100 I CONTROL  [main] 
+2020-02-07T11:59:09.616+1100 I CONTROL  [main] ** WARNING: This server is bound to localhost.
+2020-02-07T11:59:09.617+1100 I CONTROL  [main] **          Remote systems will be unable to connect to this server. 
+2020-02-07T11:59:09.618+1100 I CONTROL  [main] **          Start the server with --bind_ip <address> to specify which IP 
+2020-02-07T11:59:09.619+1100 I CONTROL  [main] **          addresses it should serve responses from, or with --bind_ip_all to
+2020-02-07T11:59:09.620+1100 I CONTROL  [main] **          bind to all interfaces. If this behavior is desired, start the
+2020-02-07T11:59:09.621+1100 I CONTROL  [main] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2020-02-07T11:59:09.622+1100 I CONTROL  [main] 
+2020-02-07T11:59:09.623+1100 I SHARDING [mongosMain] mongos version v3.6.0
+2020-02-07T11:59:09.623+1100 I CONTROL  [mongosMain] git version: a57d8e71e6998a2d0afde7edc11bd23e5661c915
+2020-02-07T11:59:09.624+1100 I CONTROL  [mongosMain] OpenSSL version: OpenSSL 0.9.8zh 14 Jan 2016
+2020-02-07T11:59:09.624+1100 I CONTROL  [mongosMain] allocator: system
+2020-02-07T11:59:09.625+1100 I CONTROL  [mongosMain] modules: none
+2020-02-07T11:59:09.625+1100 I CONTROL  [mongosMain] build environment:
+2020-02-07T11:59:09.626+1100 I CONTROL  [mongosMain]     distarch: x86_64
+2020-02-07T11:59:09.627+1100 I CONTROL  [mongosMain]     target_arch: x86_64
+2020-02-07T11:59:09.627+1100 I CONTROL  [mongosMain] db version v3.6.0
+2020-02-07T11:59:09.627+1100 I CONTROL  [mongosMain] git version: a57d8e71e6998a2d0afde7edc11bd23e5661c915
+2020-02-07T11:59:09.628+1100 I CONTROL  [mongosMain] OpenSSL version: OpenSSL 0.9.8zh 14 Jan 2016
+2020-02-07T11:59:09.629+1100 I CONTROL  [mongosMain] allocator: system
+2020-02-07T11:59:09.629+1100 I CONTROL  [mongosMain] modules: none
+2020-02-07T11:59:09.629+1100 I CONTROL  [mongosMain] build environment:
+2020-02-07T11:59:09.630+1100 I CONTROL  [mongosMain]     distarch: x86_64
+2020-02-07T11:59:09.630+1100 I CONTROL  [mongosMain]     target_arch: x86_64
+2020-02-07T11:59:09.631+1100 I CONTROL  [mongosMain] options: { net: { port: 27017 }, processManagement: { fork: true }, sharding: { configDB: "configRepl/localhost:27033" }, systemLog: { destination: "file", path: "/3.6.0/data/mongos.log" } }
+2020-02-07T11:59:09.641+1100 I NETWORK  [mongosMain] Starting new replica set monitor for configRepl/localhost:27033
+2020-02-07T11:59:09.643+1100 I SHARDING [thread1] creating distributed lock ping thread for process gc.local:27017:1581037149:-8371395382258009805 (sleeping for 30000ms)
+2020-02-07T11:59:09.645+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27033 (1 connections now open to localhost:27033 with a 5 second timeout)
+2020-02-07T11:59:09.646+1100 W NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Unable to reach primary for set configRepl
+2020-02-07T11:59:09.647+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27033
+2020-02-07T11:59:09.648+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27033
+2020-02-07T11:59:09.651+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27033, took 4ms (2 connections now open to localhost:27033)
+2020-02-07T11:59:09.651+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27033
+2020-02-07T11:59:09.652+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27033, took 5ms (3 connections now open to localhost:27033)
+2020-02-07T11:59:09.653+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27033, took 2ms (3 connections now open to localhost:27033)
+2020-02-07T11:59:10.151+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
+2020-02-07T11:59:10.662+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
+2020-02-07T11:59:11.177+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
+2020-02-07T11:59:11.690+1100 W NETWORK  [replSetDistLockPinger] Unable to reach primary for set configRepl
+2020-02-07T11:59:12.237+1100 W SHARDING [replSetDistLockPinger] pinging failed for distributed lock pinger :: caused by :: LockStateChangeFailed: findAndModify query predicate didn't match any lock document
+2020-02-07T11:59:14.091+1100 I FTDC     [mongosMain] Initializing full-time diagnostic data capture with directory '/3.6.0/data/mongos.diagnostic.data'
+2020-02-07T11:59:14.095+1100 I NETWORK  [mongosMain] waiting for connections on port 27017
+2020-02-07T11:59:14.107+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64766 #1 (1 connection now open)
+2020-02-07T11:59:14.109+1100 I NETWORK  [conn1] received client metadata from 127.0.0.1:64766 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:14.114+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64767 #2 (2 connections now open)
+2020-02-07T11:59:14.119+1100 I NETWORK  [conn2] received client metadata from 127.0.0.1:64767 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:14.124+1100 I NETWORK  [conn2] end connection 127.0.0.1:64767 (1 connection now open)
+2020-02-07T11:59:14.125+1100 I NETWORK  [conn1] end connection 127.0.0.1:64766 (0 connections now open)
+2020-02-07T11:59:14.126+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64768 #3 (1 connection now open)
+2020-02-07T11:59:14.130+1100 I NETWORK  [conn3] received client metadata from 127.0.0.1:64768 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:14.132+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64769 #4 (2 connections now open)
+2020-02-07T11:59:14.133+1100 I NETWORK  [conn4] received client metadata from 127.0.0.1:64769 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:14.135+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27033
+2020-02-07T11:59:14.137+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27033, took 2ms (1 connections now open to localhost:27033)
+2020-02-07T11:59:14.139+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-1-0] Connecting to localhost:27033
+2020-02-07T11:59:14.140+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-1-0] Successfully connected to localhost:27033, took 1ms (1 connections now open to localhost:27033)
+2020-02-07T11:59:22.053+1100 I NETWORK  [conn4] Starting new replica set monitor for shard01/localhost:27018,localhost:27019,localhost:27020
+2020-02-07T11:59:22.062+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27018 (1 connections now open to localhost:27018 with a 5 second timeout)
+2020-02-07T11:59:22.076+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27020 (1 connections now open to localhost:27020 with a 5 second timeout)
+2020-02-07T11:59:22.090+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27019 (1 connections now open to localhost:27019 with a 5 second timeout)
+2020-02-07T11:59:22.429+1100 I NETWORK  [conn4] Starting new replica set monitor for shard02/localhost:27021,localhost:27022,localhost:27023
+2020-02-07T11:59:22.452+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27021 (1 connections now open to localhost:27021 with a 5 second timeout)
+2020-02-07T11:59:22.465+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27023 (1 connections now open to localhost:27023 with a 5 second timeout)
+2020-02-07T11:59:22.477+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27022 (1 connections now open to localhost:27022 with a 5 second timeout)
+2020-02-07T11:59:22.785+1100 I NETWORK  [conn4] Starting new replica set monitor for shard03/localhost:27024,localhost:27025,localhost:27026
+2020-02-07T11:59:22.788+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27024 (1 connections now open to localhost:27024 with a 5 second timeout)
+2020-02-07T11:59:22.790+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27026 (1 connections now open to localhost:27026 with a 5 second timeout)
+2020-02-07T11:59:22.793+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27025 (1 connections now open to localhost:27025 with a 5 second timeout)
+2020-02-07T11:59:22.950+1100 I NETWORK  [conn4] Starting new replica set monitor for shard04/localhost:27027,localhost:27028,localhost:27029
+2020-02-07T11:59:22.953+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27027 (1 connections now open to localhost:27027 with a 5 second timeout)
+2020-02-07T11:59:22.956+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27029 (1 connections now open to localhost:27029 with a 5 second timeout)
+2020-02-07T11:59:22.958+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27028 (1 connections now open to localhost:27028 with a 5 second timeout)
+2020-02-07T11:59:23.141+1100 I NETWORK  [conn4] Starting new replica set monitor for shard05/localhost:27030,localhost:27031,localhost:27032
+2020-02-07T11:59:23.144+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27031 (1 connections now open to localhost:27031 with a 5 second timeout)
+2020-02-07T11:59:23.147+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27030 (1 connections now open to localhost:27030 with a 5 second timeout)
+2020-02-07T11:59:23.149+1100 I NETWORK  [ReplicaSetMonitor-TaskExecutor-0] Successfully connected to localhost:27032 (1 connections now open to localhost:27032 with a 5 second timeout)
+2020-02-07T11:59:24.150+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-2-0] Connecting to localhost:27033
+2020-02-07T11:59:24.156+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-2-0] Successfully connected to localhost:27033, took 6ms (1 connections now open to localhost:27033)
+2020-02-07T11:59:24.162+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64960 #5 (3 connections now open)
+2020-02-07T11:59:24.163+1100 I NETWORK  [conn5] received client metadata from 127.0.0.1:64960 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.167+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64965 #6 (4 connections now open)
+2020-02-07T11:59:24.172+1100 I NETWORK  [conn6] received client metadata from 127.0.0.1:64965 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.174+1100 I NETWORK  [conn6] end connection 127.0.0.1:64965 (3 connections now open)
+2020-02-07T11:59:24.174+1100 I NETWORK  [conn5] end connection 127.0.0.1:64960 (2 connections now open)
+2020-02-07T11:59:24.194+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64994 #7 (3 connections now open)
+2020-02-07T11:59:24.195+1100 I NETWORK  [conn7] received client metadata from 127.0.0.1:64994 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.196+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:64995 #8 (4 connections now open)
+2020-02-07T11:59:24.197+1100 I NETWORK  [conn8] received client metadata from 127.0.0.1:64995 conn: { driver: { name: "PyMongo", version: "3.10.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.14.6" }, platform: "CPython 3.8.1.final.0", application: { name: "mlaunch v1.6.2-dev" } }
+2020-02-07T11:59:24.197+1100 I NETWORK  [conn8] end connection 127.0.0.1:64995 (3 connections now open)
+2020-02-07T11:59:24.197+1100 I NETWORK  [conn7] end connection 127.0.0.1:64994 (2 connections now open)
+2020-02-07T11:59:24.244+1100 I NETWORK  [conn4] end connection 127.0.0.1:64769 (1 connection now open)
+2020-02-07T11:59:24.244+1100 I NETWORK  [conn3] end connection 127.0.0.1:64768 (0 connections now open)
+2020-02-07T11:59:28.678+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65045 #9 (1 connection now open)
+2020-02-07T11:59:28.679+1100 I NETWORK  [conn9] received client metadata from 127.0.0.1:65045 conn: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.1" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T11:59:54.258+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-3-0] Connecting to localhost:27018
+2020-02-07T11:59:54.263+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-3-0] Successfully connected to localhost:27018, took 5ms (1 connections now open to localhost:27018)
+2020-02-07T12:00:12.089+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Ending idle connection to host localhost:27033 because the pool meets constraints; 2 connections to that host remain open
+2020-02-07T12:00:37.451+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-4-0] Connecting to localhost:27018
+2020-02-07T12:00:37.455+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-4-0] Successfully connected to localhost:27018, took 4ms (1 connections now open to localhost:27018)
+2020-02-07T12:00:54.191+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Ending idle connection to host localhost:27033 because the pool meets constraints; 1 connections to that host remain open
+2020-02-07T12:01:20.247+1100 I NETWORK  [conn9] end connection 127.0.0.1:65045 (0 connections now open)
+2020-02-07T12:01:39.676+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65199 #10 (1 connection now open)
+2020-02-07T12:01:39.677+1100 I NETWORK  [conn10] received client metadata from 127.0.0.1:65199 conn: { driver: { name: "mongo-go-driver", version: "v1.1.2" }, os: { type: "darwin", architecture: "amd64" }, platform: "go1.12.9" }
+2020-02-07T12:01:39.680+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65200 #11 (2 connections now open)
+2020-02-07T12:01:39.681+1100 I NETWORK  [conn11] received client metadata from 127.0.0.1:65200 conn: { driver: { name: "mongo-go-driver", version: "v1.1.2" }, os: { type: "darwin", architecture: "amd64" }, platform: "go1.12.9", application: { name: "mongoimport" } }
+2020-02-07T12:01:39.691+1100 I SHARDING [conn11] distributed lock 'test-movePrimary' acquired for 'dropCollection', ts : 5e3cb6f3a6e6a7bd24ad6115
+2020-02-07T12:01:39.701+1100 I SHARDING [conn11] distributed lock 'test' acquired for 'dropCollection', ts : 5e3cb6f3a6e6a7bd24ad6116
+2020-02-07T12:01:39.709+1100 I SHARDING [conn11] distributed lock 'test.products' acquired for 'dropCollection', ts : 5e3cb6f3a6e6a7bd24ad6117
+2020-02-07T12:01:39.713+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27018
+2020-02-07T12:01:39.715+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27018, took 2ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:39.760+1100 I SHARDING [conn11] distributed lock with ts: 5e3cb6f3a6e6a7bd24ad6117' unlocked.
+2020-02-07T12:01:39.778+1100 I SHARDING [conn11] distributed lock with ts: 5e3cb6f3a6e6a7bd24ad6116' unlocked.
+2020-02-07T12:01:39.797+1100 I SHARDING [conn11] distributed lock with ts: 5e3cb6f3a6e6a7bd24ad6115' unlocked.
+2020-02-07T12:01:39.816+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-5-0] Connecting to localhost:27018
+2020-02-07T12:01:39.818+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-5-0] Successfully connected to localhost:27018, took 2ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:39.923+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-6-0] Connecting to localhost:27018
+2020-02-07T12:01:39.939+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-6-0] Successfully connected to localhost:27018, took 16ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:39.984+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-7-0] Connecting to localhost:27018
+2020-02-07T12:01:39.990+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-7-0] Successfully connected to localhost:27018, took 6ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:40.037+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Connecting to localhost:27018
+2020-02-07T12:01:40.042+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-0-0] Successfully connected to localhost:27018, took 5ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:40.084+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-1-0] Connecting to localhost:27018
+2020-02-07T12:01:40.089+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-1-0] Successfully connected to localhost:27018, took 5ms (1 connections now open to localhost:27018)
+2020-02-07T12:01:40.136+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-2-0] Connecting to localhost:27018
+2020-02-07T12:01:40.141+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-2-0] Successfully connected to localhost:27018, took 5ms (1 connections now open to localhost:27018)
+2020-02-07T12:02:03.212+1100 I NETWORK  [conn10] end connection 127.0.0.1:65199 (1 connection now open)
+2020-02-07T12:02:03.215+1100 I NETWORK  [conn11] end connection 127.0.0.1:65200 (0 connections now open)
+2020-02-07T12:03:08.735+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:65219 #12 (1 connection now open)
+2020-02-07T12:03:08.736+1100 I NETWORK  [conn12] received client metadata from 127.0.0.1:65219 conn: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.1" }, os: { type: "Darwin", name: "Mac OS X", architecture: "x86_64", version: "18.7.0" } }
+2020-02-07T12:03:14.075+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-4-0] Connecting to localhost:27033
+2020-02-07T12:03:14.078+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-4-0] Successfully connected to localhost:27033, took 3ms (1 connections now open to localhost:27033)
+2020-02-07T12:03:14.080+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-6-0] Connecting to localhost:27033
+2020-02-07T12:03:14.082+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-6-0] Successfully connected to localhost:27033, took 2ms (1 connections now open to localhost:27033)
+2020-02-07T12:03:14.089+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-3-0] Connecting to localhost:27033
+2020-02-07T12:03:14.091+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-3-0] Successfully connected to localhost:27033, took 2ms (1 connections now open to localhost:27033)
+2020-02-07T12:03:14.093+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-5-0] Connecting to localhost:27033
+2020-02-07T12:03:14.095+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-5-0] Successfully connected to localhost:27033, took 2ms (1 connections now open to localhost:27033)
+2020-02-07T12:03:14.096+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-7-0] Connecting to localhost:27033
+2020-02-07T12:03:14.098+1100 I ASIO     [NetworkInterfaceASIO-TaskExecutorPool-7-0] Successfully connected to localhost:27033, took 2ms (1 connections now open to localhost:27033)
+2020-02-07T12:04:01.136+1100 I SHARDING [conn12] Refreshing chunks for collection test.products based on version 0|0||000000000000000000000000
+2020-02-07T12:04:01.139+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection test.products took 3 and found the collection is not sharded
+2020-02-07T12:04:12.120+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Connecting to localhost:27033
+2020-02-07T12:04:12.148+1100 I ASIO     [NetworkInterfaceASIO-ShardRegistry-0] Successfully connected to localhost:27033, took 28ms (2 connections now open to localhost:27033)
+2020-02-07T12:04:14.095+1100 I SHARDING [thread14] Refreshing chunks for collection config.system.sessions based on version 0|0||000000000000000000000000
+2020-02-07T12:04:14.110+1100 I SHARDING [ConfigServerCatalogCacheLoader-0] Refresh for collection config.system.sessions took 15 ms and found version 1|0||5e3cb787eac25df28767b49b
+2020-02-07T12:04:50.953+1100 I NETWORK  [conn12] end connection 127.0.0.1:65219 (0 connections now open)
