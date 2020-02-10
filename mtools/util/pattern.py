@@ -3,16 +3,14 @@
 import json
 import re
 
-import six
+import sys
 
 
 def _decode_pattern_list(data):
     rv = []
     contains_dict = False
     for item in data:
-        if isinstance(item, six.text_type):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
+        if isinstance(item, list):
             item = _decode_pattern_list(item)
         elif isinstance(item, dict):
             item = _decode_pattern_dict(item)
@@ -28,10 +26,10 @@ def _decode_pattern_list(data):
 
 def _decode_pattern_dict(data):
     rv = {}
-    for key, value in six.iteritems(data):
+    for key, value in data.items():
         if isinstance(key, bytes):
             key = key.encode('utf-8')
-        if isinstance(key, six.text_type):
+        if isinstance(key, str):
             if key in ['$in', '$gt', '$gte', '$lt', '$lte', '$exists']:
                 return 1
             if key == '$nin':
@@ -75,53 +73,98 @@ def shell2json(s):
     return s
 
 
-def json2pattern(s):
+def json2pattern(s, fDebug = 0):
     """
     Convert JSON format to a query pattern.
 
     Includes even mongo shell notation without quoted key names.
+
+    Pass fDebug = 1 to print additional info on each step of processing chain
     """
+    saved_s = s
+
+    if fDebug : print ("\n=======================\n", saved_s, file=sys.stderr)
+
     # make valid JSON by wrapping field names in quotes
     s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
+    if fDebug : print (s, file=sys.stderr) 
+
     # handle shell values that are not valid JSON
     s = shell2json(s)
+    if fDebug : print (s, file=sys.stderr)
+    
     # convert to 1 where possible, to get rid of things like new Date(...)
-    s, n = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
+    s, _ = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
+    if fDebug : print (s, file=sys.stderr)
+
+
+    # replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
+    # updated regex, using positive lookahead and lookbehind to check for a " (quote) 
+    # right after '['  and before ']' to correctly handle cases where a ']' is part of the value and 
+    # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
+    s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+
+    if fDebug : print (s, file=sys.stderr)
+
     # now convert to dictionary, converting unicode to ascii
+    doc = {}
     try:
         doc = json.loads(s, object_hook=_decode_pattern_dict)
-        return json.dumps(doc, sort_keys=True, separators=(', ', ': '))
-    except ValueError as ex:
+    except Exception as err:
+        ## print some context info and return without any extracted query data..
+        print ("json2pattern():json.loads Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  s: ({3})\n".
+            format(err, sys.exc_info()[0], saved_s, s), file=sys.stderr)
         return None
+    except:
+        print ("json2pattern():json.loads Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        raise
+
+
+    try:
+        return json.dumps(doc, sort_keys=True, separators=(', ', ': '), ensure_ascii=False)
+    except Exception as err:
+        ## print some context info and return without any extracted query data..
+        print ("json2pattern():json.dumps Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  doc: ({3})\n".
+            format(err, sys.exc_info()[0], saved_s, doc), file=sys.stderr)
+        return None
+    except:
+        print ("json2pattern():json.dumps Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        raise
 
 
 if __name__ == '__main__':
 
-    s = ('{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, '
-         'c: {$nin: [1, "foo", "bar"]}, "$or": [{a:1}, {b:1}] }')
-    print(json2pattern(s))
+    # define as 1 to get verbose output of regex processing printed to stderr
+    fDebug = 0
 
-    s = ('{a: {$gt: 2, $lt: 4}, '
-         '"b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }')
-    print(json2pattern(s))
+    tests = { 
+        '{d: {$gt: 2, $lt: 4}, b: {$gte: 3}, c: {$nin: [1, "foo", "bar"]}, "$or": [{a:"1uno"}, {b:"1uno"}] }'                : '{"$or": [{"a": 1}, {"b": 1}], "b": 1, "c": {"$nin": 1}, "d": 1}',
+        '{a: {$gt: 2, $lt: 4}, "b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }'                                              : '{"$or": [{"a": 1}, {"b": 1}], "a": 1, "b": {"$nin": 1}}', 
+        "{a: {$gt: 2, $lt: 4}, b: {$in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"a": 1, "b": 1}', 
+        "{ sk: -1182239108, _id: { $in: [ ObjectId('1234564863acd10e5cbf5f6e'), ObjectId('1234564863acd10e5cbf5f7e') ] } }"  : '{"_id": 1, "sk": 1}', 
+        '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }'                                                                   : '{"a": 1, "b": {"c": 1, "d": 1}, "e": 1}', 
+        '{ _id: ObjectId(\'528556616dde23324f233168\'), config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }' : '{"_id": 1, "config": {"_id": 1, "host": 1}, "ns": 1}',
 
-    s = ('{a: {$gt: 2, $lt: 4}, '
-         '"b": {$nin: [1, 2, 3]}, "$or": [{a:1}, {b:1}] }')
-    print(json2pattern(s))
+        # 20191231 - bugre - issue#764 - adding some more test cases.. based on our mongodb logs (mongod 4.0.3)
+        r'{_id: ObjectId(\'528556616dde23324f233168\'), curList: [ "€", "XYZ", "Krown"], allowedSnacks: 1000 }'              : '{"_id": 1, "allowedSnacks": 1, "curList": [1]}', 
+        r'{_id: "test", curList: [ "1onum]pas", "ab\]c" ] }'                                                                 : '{"_id": 1, "curList": [1]}',
+        r'{ $and: [ { mode: ObjectId(\'5aafd085edb85e0dc09dd985\') }, { _id: { $ne: ObjectId(\'5e015519877718752d63dd9c\') } }, ' 
+            '{ snack: { $in: [ "BLA", "RUN", "BLE" ] } }, { $or: [ { $and: [ { kind: "Solar" }, { wind: true }, '
+            '{ beginTime: { $gte: new Date(1577134729858) } } ] }, { $and: [ { kind: "event" }, { endTime: { $gte: new Date(1577739529858) } } ] } ] } ] }'  : 
+                '{"$and": [{"mode": 1}, {"_id": {"$ne": 1}}, {"snack": 1}, {"$or": [{"$and": [{"kind": 1}, {"wind": 1}, {"beginTime": 1}]}, {"$and": [{"kind": 1}, {"endTime": 1}]}]}]}',
+        
+        # @niccottrell use case and 2nd one extrapolating the 1st one. 
+        r'{ urls: { $all: [ "https://surtronic.info/" ] } }'                      : '{"urls": {"$all": [1]}}',
+        r'{ urls: { $all: [ "https://surtronic.info/", "http://url2.com" ] } }'   : '{"urls": {"$all": [1]}}'
+    }
 
-    s = ("{a: {$gt: 2, $lt: 4}, "
-         "b: {$in: [ ObjectId('1234564863acd10e5cbf5f6e'), "
-         "ObjectId('1234564863acd10e5cbf5f7e') ] } }")
-    print(json2pattern(s))
+    for k,v in tests.items():
+        r = json2pattern(k, fDebug)
+        if ( r == v ):
+            if fDebug :
+                print("OK...: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
+            else:
+                print("OK: {0}".format(k))
 
-    s = ("{ sk: -1182239108, "
-         "_id: { $in: [ ObjectId('1234564863acd10e5cbf5f6e'), "
-         "ObjectId('1234564863acd10e5cbf5f7e') ] } }")
-    print(json2pattern(s))
-
-    s = '{ a: 1, b: { c: 2, d: "text" }, e: "more test" }'
-    print(json2pattern(s))
-
-    s = ('{ _id: ObjectId(\'528556616dde23324f233168\'), '
-         'config: { _id: 2, host: "localhost:27017" }, ns: "local.oplog.rs" }')
-    print(json2pattern(s))
+        else:
+            print("\nERROR **: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
