@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mtransfer &mdash; mtools  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/mtools.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contribute to mtools" href="contributing.html" />
+    <link rel="prev" title="mplotqueries" href="mplotqueries.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mtools
+          
+
+          
+            
+            <img src="_static/mtools.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.6.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mtransfer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#caveats">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-parameters">General Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#help">Help</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version">Version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verbosity">Verbosity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#database-path">Database Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command">Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#database">Database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-database-transfer-and-rename">Example Database Transfer and Rename</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#on-the-origin-server">On the origin server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#on-the-destination-server">On the destination server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changes to mtools</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mtools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>mtransfer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mtransfer">
+<span id="id1"></span><h1>mtransfer<a class="headerlink" href="#mtransfer" title="Permalink to this headline">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> allows WiredTiger databases to be exported from one MongoDB
+instance and imported into another.</p>
+<div class="section" id="caveats">
+<h2>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> script is EXPERIMENTAL and has a number of important usage caveats:</p>
+<ul class="simple">
+<li><p>MongoDB must be started with the <code class="docutils literal notranslate"><span class="pre">--directoryperdb</span></code> flag.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> does not work with sharding, the encrypted storage engine, or
+MMAPv1 data files.</p></li>
+<li><p>To export or import a database, MongoDB must not be running using either the
+source or destination database paths.</p></li>
+<li><p>A database must be imported to all nodes in a replica set or query results
+will be inconsistent.</p></li>
+<li><p>A database cannot be imported to any node in the replica set it was exported
+from. Collections have unique identifiers, and this would violate that uniqueness.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> currently only supports database files compressed with the
+default <cite>snappy</cite> library.</p></li>
+</ul>
+<p>While there are some sanity checks built into the script, manipulating MongoDB
+files directly is inherently dangerous. Take care to test and backup your data.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> script requires the
+<a class="reference external" href="https://pypi.org/project/wiredtiger/">wiredtiger Python library</a>
+which is currently not installed by default with <code class="docutils literal notranslate"><span class="pre">mtools</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code> library can be installed via <code class="docutils literal notranslate"><span class="pre">pip</span></code> or built from source,
+but in either case requires:</p>
+<ul class="simple">
+<li><p>A C compiler.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">snappy</span></code> and <code class="docutils literal notranslate"><span class="pre">zlib</span></code> development packages installed.</p></li>
+</ul>
+<p>To install via <code class="docutils literal notranslate"><span class="pre">pip</span></code> use either of:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>mtransfer<span class="o">]</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install wiredtiger
+</pre></div>
+</div>
+<p>If you are encountering errors using or installing the <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code> module
+via <cite>pip</cite>, you may need to <a class="reference external" href="http://source.wiredtiger.com/develop/build-posix.html">Build and install WiredTiger from source</a>.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mtransfer <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>--verbose<span class="o">]</span> <span class="o">[</span>--dbpath DBPATH<span class="o">]</span>
+                  <span class="o">{</span>export,import<span class="o">}</span> database
+</pre></div>
+</div>
+</div>
+<div class="section" id="general-parameters">
+<h2>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline">#</a></h2>
+<div class="section" id="help">
+<h3>Help<a class="headerlink" href="#help" title="Permalink to this headline">#</a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></dt><dd><p>shows the help text and exits.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="version">
+<h3>Version<a class="headerlink" href="#version" title="Permalink to this headline">#</a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--version</span></code></dt><dd><p>shows the version number and exits.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="verbosity">
+<h3>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">#</a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--verbose</span></code></dt><dd><p>shows extra information</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> reads or writes the data files in a MongoDB instance
+using the WiredTiger storage engine.</p>
+<div class="section" id="database-path">
+<h3>Database Path<a class="headerlink" href="#database-path" title="Permalink to this headline">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--dbpath</span> <span class="pre">path</span></code> the path to the MongoDB database files (defaults to
+the current working directory where the script is run).</p>
+</div>
+<div class="section" id="command">
+<h3>Command<a class="headerlink" href="#command" title="Permalink to this headline">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">export</span></code>
+creates a file <code class="docutils literal notranslate"><span class="pre">mtransfer.bson</span></code> in the specified database directory.
+This must be copied along with the other files in the directory to the
+destination server(s).</p>
+<p><code class="docutils literal notranslate"><span class="pre">import</span></code> reads the <code class="docutils literal notranslate"><span class="pre">mtransfer.bson</span></code> file from the specified database
+directory and updates MongoDB’s metadata to include the database.</p>
+</div>
+<div class="section" id="database">
+<h3>Database<a class="headerlink" href="#database" title="Permalink to this headline">#</a></h3>
+<p>The name of the database to export / import.  The MongoDB database name
+must match the directory name on disk for the export, and the MongoDB
+database name will be set to the directory name for the import.</p>
+</div>
+</div>
+<div class="section" id="example-database-transfer-and-rename">
+<h2>Example Database Transfer and Rename<a class="headerlink" href="#example-database-transfer-and-rename" title="Permalink to this headline">#</a></h2>
+<div class="section" id="on-the-origin-server">
+<h3>On the origin server<a class="headerlink" href="#on-the-origin-server" title="Permalink to this headline">#</a></h3>
+<p>Before starting, ensure MongoDB is not running.</p>
+<ol class="arabic simple">
+<li><p>Change into the origin directory and create ‘olddb/mtransfer.bson’
+with exported metadata:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /from/dbpath
+mtransfer <span class="nb">export</span> olddb
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Copy the database files to the destination</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rsync -av olddb destination:/to/dbpath
+</pre></div>
+</div>
+</div>
+<div class="section" id="on-the-destination-server">
+<h3>On the destination server<a class="headerlink" href="#on-the-destination-server" title="Permalink to this headline">#</a></h3>
+<p>Before starting, ensure MongoDB is not running.</p>
+<ol class="arabic simple" start="3">
+<li><p>Rename the database directory (optional)</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /to/dbpath
+mv olddb newdb
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Import the database (with the new name, if renamed)</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mtransfer import newdb
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Start <code class="docutils literal notranslate"><span class="pre">mongod</span></code> and confirm the transferred database
+is now available.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">#</a></h2>
+<p>This software is not supported by <a class="reference external" href="https://www.mongodb.com">MongoDB, Inc.</a>
+under any of their commercial support subscriptions or otherwise. Any usage of
+mtools is at your own risk. Bug reports, feature requests and questions can be
+posted in the <a class="reference external" href="https://github.com/rueckstiess/mtools/issues?state=open">Issues</a> section on GitHub.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="contributing.html" class="btn btn-neutral float-right" title="Contribute to mtools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mplotqueries.html" class="btn btn-neutral float-left" title="mplotqueries" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
