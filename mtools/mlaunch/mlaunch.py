@@ -330,11 +330,11 @@ class MLaunchTool(BaseCmdLineTool):
                                        % ' '.join(self._default_auth_roles)))
         init_parser.add_argument('--auth-role-docs', action='store_true',
                                  default=False,
-                                 help='auth-roles are json documents')
+                                 help='auth-roles are JSON documents')
         init_parser.add_argument('--no-initial-user', action='store_false',
                                  default=True, dest='initial-user',
-                                 help=('create an initial user if auth is '
-                                       'enabled (default=true)'))
+                                 help=('Do not create an initial user if auth '
+                                       'is enabled'))
 
         # ssl
         def is_file(arg):
@@ -342,12 +342,12 @@ class MLaunchTool(BaseCmdLineTool):
                 init_parser.error("The file [%s] does not exist" % arg)
             return arg
 
-        ssl_args = init_parser.add_argument_group('SSL Options')
+        ssl_args = init_parser.add_argument_group('TLS/SSL options')
         ssl_args.add_argument('--sslCAFile',
-                              help='Certificate Authority file for SSL',
+                              help='Certificate Authority file for TLS/SSL',
                               type=is_file)
         ssl_args.add_argument('--sslCRLFile',
-                              help='Certificate Revocation List file for SSL',
+                              help='Certificate Revocation List file for TLS/SSL',
                               type=is_file)
         ssl_args.add_argument('--sslAllowInvalidHostnames',
                               action='store_true',
@@ -358,19 +358,17 @@ class MLaunchTool(BaseCmdLineTool):
                               help=('allow client or server connections with '
                                     'invalid certificates'))
 
-        ssl_server_args = init_parser.add_argument_group('Server SSL Options')
-        ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true',
-                                     help='use ssl on configured ports')
+        ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
         ssl_server_args.add_argument('--sslMode',
-                                     help='set the SSL operation mode',
+                                     help='set the TLS/SSL operation mode',
                                      choices=('disabled allowSSL preferSSL '
                                               'requireSSL'.split()))
         ssl_server_args.add_argument('--sslPEMKeyFile',
-                                     help='PEM file for ssl', type=is_file)
+                                     help='PEM file for TLS/SSL', type=is_file)
         ssl_server_args.add_argument('--sslPEMKeyPassword',
                                      help='PEM file password')
         ssl_server_args.add_argument('--sslClusterFile',
-                                     help=('key file for internal SSL '
+                                     help=('key file for internal TLS/SSL '
                                            'authentication'), type=is_file)
         ssl_server_args.add_argument('--sslClusterPassword',
                                      help=('internal authentication key '
@@ -379,10 +377,6 @@ class MLaunchTool(BaseCmdLineTool):
                                      help=('comma separated list of TLS '
                                            'protocols to disable '
                                            '[TLS1_0,TLS1_1,TLS1_2]'))
-        ssl_server_args.add_argument('--sslWeakCertificateValidation',
-                                     action='store_true',
-                                     help=('allow client to connect without '
-                                           'presenting a certificate'))
         ssl_server_args.add_argument(('--sslAllowConnectionsWithout'
                                       'Certificates'), action='store_true',
                                      help=('allow client to connect without '
@@ -390,12 +384,12 @@ class MLaunchTool(BaseCmdLineTool):
         ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
                                      help='activate FIPS 140-2 mode')
 
-        ssl_client_args = init_parser.add_argument_group('Client SSL Options')
+        ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
         ssl_client_args.add_argument('--sslClientCertificate',
-                                     help='client certificate file for ssl',
+                                     help='client certificate file for TLS/SSL',
                                      type=is_file)
         ssl_client_args.add_argument('--sslClientPEMKeyFile',
-                                     help='client PEM file for ssl',
+                                     help='client PEM file for TLS/SSL',
                                      type=is_file)
         ssl_client_args.add_argument('--sslClientPEMKeyPassword',
                                      help='client PEM file password')

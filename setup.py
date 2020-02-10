@@ -17,12 +17,14 @@ try:
     # simplify the default install experience, particularly where a build
     # toolchain is required.
     extras_requires = {
-        "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.8.0', 'psutil>=5.6.3'],
-        "mlaunch": ['pymongo>=3.8.0', 'psutil>=5.6.3'],
+        "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.9.0',
+                'psutil>=5.6.3'],
+        "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3'],
         "mlogfilter": [],
         "mloginfo": ['numpy>=1.16.4'],
         "mlogvis": [],
         "mplotqueries": ['matplotlib>=3.1.1', 'numpy>=1.16.4'],
+        "mtransfer": ['pymongo==3.9.0', 'wiredtiger>=3.2.1'],
     }
 
     try:
@@ -49,6 +51,7 @@ except ImportError:
                 'mtools.mlogvis',
                 'mtools.mplotqueries',
                 'mtools.mgenerate',
+                'mtools.mtransfer',
                 'mtools.test',
                 'mtools.util',
                 'mtools.mlogfilter.filters',
@@ -87,7 +90,8 @@ setup(
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
             "mlogvis=mtools.mlogvis.mlogvis:main",
-            "mplotqueries=mtools.mplotqueries.mplotqueries:main"
+            "mplotqueries=mtools.mplotqueries.mplotqueries:main",
+            "mtransfer=mtools.mtransfer.mtransfer:main",
         ],
     },
     author='Thomas Rueckstiess',

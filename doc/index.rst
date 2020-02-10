@@ -17,6 +17,7 @@ utility to quickly set up complex MongoDB test environments on a local machine.
    mloginfo.rst
    mlogvis.rst
    mplotqueries.rst
+   mtransfer.rst
    contributing.rst
    changelog.rst
 
@@ -36,15 +37,19 @@ The following tools are in the mtools collection:
    special sections like restarts, connections, distinct view
 
 :ref:`mplotqueries`
-   visualize log files with different types of plots (requires matplotlib)
+   visualize log files with different types of plots (requires ``matplotlib``)
 
 :ref:`mlogvis`
    creates a self-contained HTML file that shows an interactive visualization
-   in a web browser (as an alternative to mplotqueries)
+   in a web browser (as an alternative to ``mplotqueries``)
 
 :ref:`mlaunch`
    a script to spin up local test environments quickly, including replica sets
-   and sharded systems (requires pymongo)
+   and sharded systems (requires ``pymongo``)
+
+:ref:`mtransfer`
+   an experimental script to transfer WiredTiger databases between MongoDB
+   instances by copying data files (requires ``pymongo`` and ``wiredtiger``)
 
 The `mtools source code <https://github.com/rueckstiess/mtools>`__ is available
 on GitHub under an `Apache 2.0 license
