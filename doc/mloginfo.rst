@@ -489,7 +489,6 @@ mloginfo with the additional ``--verbose`` command.
 
 This option has no effect unless ``--sharding`` is also specified.
 
-=======
 Disclaimer
 ~~~~~~~~~~
 

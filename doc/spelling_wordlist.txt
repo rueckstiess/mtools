@@ -3,6 +3,7 @@ admin
 args
 auth
 binarypath
+bson
 bucketsize
 compat
 config
@@ -28,6 +29,7 @@ github
 grep
 hardcoded
 hostname
+hostnames
 indentifiers
 ini
 init
@@ -51,6 +53,7 @@ mongod
 mongos
 mplotqueries
 mtools
+mtransfer
 Namespace
 namespace
 nInserted

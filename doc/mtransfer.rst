@@ -138,7 +138,7 @@ Before starting, ensure MongoDB is not running.
 3. Rename the database directory (optional)
 
 .. code-block:: bash
-  
+
   cd /to/dbpath
   mv olddb newdb
 
