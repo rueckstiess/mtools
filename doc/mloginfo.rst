@@ -399,27 +399,17 @@ For example:
 Sharding (``--sharding``)
 -----------------------------------------
 
-Outputs information of sharding configuration. Includes groupings of
-similar error/warning messages that are specific to sharding. A breakdown
-of chunk migration activity is included, specifying the source/destination
-shard, the number of chunk migrations attempted within the hour, and the
-ratio of successful to failed migrations. Failed chunk migrations specify
-when the failure occurred in formatted as [hours:minutes:seconds:milliseconds]
-but also notes if it precedes to be successful in the future (within the hour
-time frame). It also outputs chunk split statistics, which has a similar output
-as the chunk migration tables.
+The sharding section returns sharding related information. Information
+includes sharding related configurations, outputs a list of error/warning
+messages grouped by similar patterns, chunk migrations which have sent and
+received by the associated node in the log and chunk split statistics grouping
+by the hour.
 
 For example:
 
 .. code-block:: bash
 
    mloginfo mongod.log --sharding
-
-In addition to the default information, this command also outputs sharding
-related configurations, outputs a list of error/warning messages grouped by
-similar patterns, chunk migrations which have sent and received by the
-associated node in the log and chunk split statistics grouping by the hour.
-This can all be found below.
 
 .. code-block:: bash
 
@@ -438,14 +428,16 @@ This can all be found below.
 ``--errors``
 ^^^^^^^^^^^^
 
-This option toggles if sharding related errors/warnings are
-outputted.
+This option can be added alongside ``--sharding`` to also display
+the error section
 
 For example:
 
 .. code-block:: bash
 
    mloginfo mongod.log --sharding --errors
+
+.. code-block:: bash
 
    Error Messages:
 
@@ -456,14 +448,16 @@ This option has no effect unless ``--sharding`` is also specified.
 ``--migrations``
 ^^^^^^^^^^^^^^^^
 
-This option toggles if chunk migrations and split statistics are
-outputted.
+This option can be added alongside ``--sharding`` to also display
+both chunk migrations and split statistics.
 
 For example:
 
 .. code-block:: bash
 
    mloginfo mongod.log --sharding --migrations
+
+.. code-block:: bash
 
    Chunks Moved From This Shard:
 
@@ -489,5 +483,4 @@ mloginfo with the additional ``--verbose`` command.
 
 This option has no effect unless ``--sharding`` is also specified.
 
-Both options can be used in conjunction to output both
 
