@@ -2,6 +2,12 @@
 Changes to mtools
 =================
 
+version 1.6.3
+~~~~~~~~~~~~~
+ * Require minimum of Python 3.6 in setup.py (#778)
+
+Thanks to @stennie and @sindbach for contributions to this release.
+
 version 1.6.2
 ~~~~~~~~~~~~~
  * Update documentation to reference pip3 instead of pip (#774)
