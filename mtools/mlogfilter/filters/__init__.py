@@ -6,3 +6,4 @@ from .tablescan_filter import TableScanFilter
 from .word_filter import WordFilter
 from .mask_filter import MaskFilter
 from .transaction_filter import TransactionFilter
+from .queryratio_filter import QueryRatioFilter

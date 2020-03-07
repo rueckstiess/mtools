@@ -355,6 +355,14 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.planSummary == "IXSCAN")
 
+    def test_queryRatio(self):
+        logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+                                    'test/logfiles/', 'mongod_4.0.13_queryratio.log')
+        self.tool.run('%s --queryratio 1000' % logfile_path)
+        output = sys.stdout.getvalue()
+        lines = output.splitlines()
+        assert(len(lines) == 3)
+
     def test_word(self):
         self.tool.run('%s --word lock' % self.logfile_path)
         output = sys.stdout.getvalue()
