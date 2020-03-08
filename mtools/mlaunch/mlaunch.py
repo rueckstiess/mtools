@@ -1691,10 +1691,6 @@ class MLaunchTool(BaseCmdLineTool):
                       % (name, self.config_docs[name]))
             print("replica set '%s' initialized." % name)
 
-        print("waiting for localhost:%i to elect a primary" % port)
-        con = self.client(['localhost:%i' % port], replicaSet=name, serverSelectionTimeoutMS=30000)
-        con['admin'].command({'ping': 1})
-
     def _add_user(self, port, name, password, database, roles):
         con = self.client('localhost:%i' % port)
         v = con['admin'].command('isMaster').get('maxWireVersion', 0)
