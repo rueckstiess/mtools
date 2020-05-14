@@ -152,7 +152,7 @@ In addition to the default information, this command will also output the
 ^^^^^^^^^^^^^^
 
 This option adjusts the rounding for calculated statistics like mean and
-95%-ile.
+95 percentile.
 
 For example:
 

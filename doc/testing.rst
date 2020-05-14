@@ -37,6 +37,16 @@ tox is required for testing mtools and building the documentation:
 
    $ sudo pip3 install tox
 
+``mplotqueries`` uses the `matplotlib <https://matplotlib.org/>`__ library, which requires the
+`FreeType package <https://www.freetype.org/>`__. If you encounter an error that indicates the
+FreeType package is missing, install FreeType using your system package manager.
+
+For example, on Ubuntu run:
+
+.. code::
+
+   $ sudo apt-get install libfreetype6-dev libxft-dev
+
 
 Using tox
 ~~~~~~~~~
