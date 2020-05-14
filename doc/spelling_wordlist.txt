@@ -5,6 +5,7 @@ auth
 binarypath
 bson
 bucketsize
+canonicalized
 compat
 config
 configdb
@@ -39,6 +40,7 @@ Javascript
 keyfile
 localhost
 logevent
+matcher
 metadata
 mgenerate
 mixedCase
@@ -61,6 +63,7 @@ nModified
 nosetests
 nreturned
 nscanned
+olddb
 oplog
 planSummary
 programmatically
@@ -90,7 +93,9 @@ username
 util
 versioned
 versioning
+whitespace
 wiki
+wiredtiger
 wiredTigerCacheSizeGB
 writeConflicts
 XCode
