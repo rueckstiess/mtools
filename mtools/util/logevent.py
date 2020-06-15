@@ -959,6 +959,14 @@ class LogEvent(object):
                         # Make valid JSON by wrapping field names in quotes
                         metadata, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:',
                                               ' \\1 "\\2" : ', metadata)
+
+                        # Replace double-quoted platform values with single quote
+                        platform = re.search(r'platform.*\s+"(.*)"', metadata)
+                        if (platform):
+                            platform = platform.group(1)
+                            platform_esc, _ = re.subn(r'"', r"'", platform)
+                            metadata, _ = re.subn(platform, platform_esc, metadata)
+
                         self._client_metadata = json.loads(metadata)
                 except ValueError:
                     self._client_metadata = None
