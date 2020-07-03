@@ -961,7 +961,7 @@ class LogEvent(object):
                                               ' \\1 "\\2" : ', metadata)
 
                         # Replace double-quoted platform values with single quote
-                        platform = re.search(r'platform.*\s+"(.*)"', metadata)
+                        platform = re.search(r'"platform"\s+:\s+"(.*)"', metadata)
                         if (platform):
                             platform = platform.group(1)
                             platform_esc, _ = re.subn(r'"', r"'", platform)
