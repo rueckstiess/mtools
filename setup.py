@@ -20,8 +20,8 @@ try:
     # toolchain is required.
     extras_requires = {
         "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.9.0',
-                'psutil>=5.6.3'],
-        "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3'],
+                'psutil>=5.6.3,<5.7.0'],
+        "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3,<5.7.0'],
         "mlogfilter": [],
         "mloginfo": ['numpy>=1.16.4'],
         "mlogvis": [],
