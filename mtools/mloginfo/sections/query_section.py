@@ -104,7 +104,7 @@ class QuerySection(BaseSection):
             return
 
         titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)',
-                  'max (ms)', 'mean (ms)', '95%-ile (ms)', 'sum (ms)',
+                  'max (ms)', '95%-ile (ms)', 'sum (ms)', 'mean (ms)',
                   'allowDiskUse']
         table_rows = []
 
