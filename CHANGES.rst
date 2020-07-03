@@ -12,7 +12,7 @@ version 1.6.4
  * mlogvis: Update link to d3js to be protocol-less (#797)
  * Add freetype to testing prerequisites (#800)
 
-Thanks to @stennie, @p, @kallimachos, @sindbach, and @borsucok
+Thanks to @stennie, @p, @kallimachos, @sindbach, @kevinadi, and @borsucok
 for contributions to this release.
 
 version 1.6.3
