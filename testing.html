@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.3
+                1.6.4
               </div>
             
           
@@ -202,6 +202,13 @@ as fixed behavior.</p>
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">#</a></h2>
 <p>tox is required for testing mtools and building the documentation:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo pip3 install tox
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mplotqueries</span></code> uses the <a class="reference external" href="https://matplotlib.org/">matplotlib</a> library, which requires the
+<a class="reference external" href="https://www.freetype.org/">FreeType package</a>. If you encounter an error that indicates the
+FreeType package is missing, install FreeType using your system package manager.</p>
+<p>For example, on Ubuntu run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo apt-get install libfreetype6-dev libxft-dev
 </pre></div>
 </div>
 </div>
