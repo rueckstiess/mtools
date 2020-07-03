@@ -2,6 +2,19 @@
 Changes to mtools
 =================
 
+version 1.6.4
+~~~~~~~~~~~~~
+ * mlaunch: Fix psutil 5.7.0 issue on Windows 10 (#810)
+ * mlaunch: Wait for each RS to elect a primary (#790)
+ * mloginfo: Fix --clients misses old nodejs clients (#808)
+ * mloginfo: Fix --clients misses driver connections with embedded quotes (#803)
+ * mloginfo: Fix --queries returns impossible 95%-ile (#791)
+ * mlogvis: Update link to d3js to be protocol-less (#797)
+ * Add freetype to testing prerequisites (#800)
+
+Thanks to @stennie, @p, @kallimachos, @sindbach, and @borsucok
+for contributions to this release.
+
 version 1.6.3
 ~~~~~~~~~~~~~
  * Require minimum of Python 3.6 in setup.py (#778)
