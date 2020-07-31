@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import argparse
+import functools
 import json
 import os
 import re
@@ -142,6 +143,28 @@ def shutdown_host(port, username=None, password=None, authdb=None):
         pass
     else:
         mc.close()
+
+
+@functools.lru_cache()
+def check_mongo_server_output(binary, argument):
+    """Call mongo[d|s] with arguments such as --help or --version.
+
+    This is used only to check the server's output. We expect the server to
+    exit immediately.
+    """
+    try:
+        proc = subprocess.Popen(['%s' % binary, argument],
+                                stderr=subprocess.STDOUT,
+                                stdout=subprocess.PIPE, shell=False)
+    except OSError as exc:
+        print('Failed to launch %s' % binary)
+        raise exc
+
+    out, err = proc.communicate()
+    if proc.returncode:
+        raise OSError(out or err)
+
+    return out
 
 
 class MLaunchTool(BaseCmdLineTool):
@@ -812,18 +835,8 @@ class MLaunchTool(BaseCmdLineTool):
         binary = "mongod"
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
-        try:
-            ret = subprocess.Popen(['%s' % binary, '--version'],
-                                   stderr=subprocess.STDOUT,
-                                   stdout=subprocess.PIPE, shell=False)
-        except OSError as e:
-            print('Failed to launch %s' % binary)
-            raise e
 
-        out, err = ret.communicate()
-        if ret.returncode:
-            raise OSError(out or err)
-
+        out = check_mongo_server_output(binary, '--version')
         buf = BytesIO(out)
         current_version = buf.readline().strip().decode('utf-8')
         # remove prefix "db version v"
@@ -1489,10 +1502,7 @@ class MLaunchTool(BaseCmdLineTool):
         # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join(self.args['binarypath'], binary)
-        ret = (subprocess.Popen(['%s' % binary, '--help'],
-               stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=False))
-
-        out, err = ret.communicate()
+        out = check_mongo_server_output(binary, '--help')
         accepted_arguments = []
         # extract all arguments starting with a '-'
         for line in [option for option in out.decode('utf-8').split('\n')]:
