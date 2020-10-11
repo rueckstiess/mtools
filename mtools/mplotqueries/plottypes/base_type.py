@@ -9,11 +9,9 @@ try:
     from matplotlib import cm
 except ImportError:
     raise ImportError("Can't import matplotlib. See "
-                      "github.com/rueckstiess/mtools/blob/master/INSTALL.md "
-                      "for instructions how to install matplotlib or try "
-                      "mlogvis instead, which is a simplified version of "
-                      "mplotqueries that visualizes the logfile in a "
-                      "web browser.")
+                      "https://matplotlib.org/users/installing.html "
+                      "for instructions on how to install matplotlib."
+                      "Error: " + str(e))
 
 
 class BasePlotType(object):
