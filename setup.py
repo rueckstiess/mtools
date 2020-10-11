@@ -52,7 +52,6 @@ except ImportError:
                 'mtools.mloginfo',
                 'mtools.mlogvis',
                 'mtools.mplotqueries',
-                'mtools.mgenerate',
                 'mtools.mtransfer',
                 'mtools.test',
                 'mtools.util',
@@ -87,7 +86,6 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "mgenerate=mtools.mgenerate.mgenerate:main",
             "mlaunch=mtools.mlaunch.mlaunch:main",
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
