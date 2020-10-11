@@ -24,7 +24,6 @@ try:
         "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3,<5.7.0'],
         "mlogfilter": [],
         "mloginfo": ['numpy>=1.16.4'],
-        "mlogvis": [],
         "mplotqueries": ['matplotlib>=3.1.1', 'numpy>=1.16.4'],
         "mtransfer": ['pymongo==3.9.0', 'wiredtiger>=3.2.1'],
     }
@@ -50,7 +49,6 @@ except ImportError:
                 'mtools.mlaunch',
                 'mtools.mlogfilter',
                 'mtools.mloginfo',
-                'mtools.mlogvis',
                 'mtools.mplotqueries',
                 'mtools.mtransfer',
                 'mtools.test',
@@ -89,7 +87,6 @@ setup(
             "mlaunch=mtools.mlaunch.mlaunch:main",
             "mlogfilter=mtools.mlogfilter.mlogfilter:main",
             "mloginfo=mtools.mloginfo.mloginfo:main",
-            "mlogvis=mtools.mlogvis.mlogvis:main",
             "mplotqueries=mtools.mplotqueries.mplotqueries:main",
             "mtransfer=mtools.mtransfer.mtransfer:main",
         ],

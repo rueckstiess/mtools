@@ -50,7 +50,6 @@ mlogfilter
 mloginfo
 mlogmerge
 mlogversion
-mlogvis
 mongod
 mongos
 mplotqueries

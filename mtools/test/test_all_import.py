@@ -3,9 +3,8 @@ from functools import wraps
 # tools without any external dependencies
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.mloginfo.mloginfo import MLogInfoTool
-from mtools.mlogvis.mlogvis import MLogVisTool
 
-tools = [MLogFilterTool, MLogVisTool, MLogInfoTool]
+tools = [MLogFilterTool, MLogInfoTool]
 
 
 # mlaunch depends on pymongo
