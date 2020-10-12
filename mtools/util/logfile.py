@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-
 import os
 import re
 import sys
@@ -58,6 +56,21 @@ class LogFile(InputSource):
         # make sure bounds are calculated before starting to iterate,
         # including potential year rollovers
         self._calculate_bounds()
+
+    def __getstate__(self):
+        """
+        Return state values to be pickled.
+        """
+        if (self.name != '<stdin>'):
+            return (self.name)
+        else:
+            return ()
+
+    def __setstate__(self, state):
+        """
+        Restore state from the unpickled state values.
+        """
+        self.name = state
 
     @property
     def start(self):
