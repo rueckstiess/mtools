@@ -29,10 +29,6 @@ The following tools are in the mtools collection:
 `mplotqueries <http://rueckstiess.github.io/mtools/mplotqueries.html>`__
    visualize log files with different types of plots (requires ``matplotlib``)
 
-`mlogvis <http://rueckstiess.github.io/mtools/mlogvis.html>`__
-   creates a self-contained HTML file that shows an interactive visualization
-   in a web browser (as an alternative to mplotqueries)
-
 `mlaunch <http://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
    and sharded systems (requires ``pymongo``)
