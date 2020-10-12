@@ -8,8 +8,6 @@ from datetime import datetime
 import dateutil.parser
 from dateutil.tz import tzutc
 
-from six.moves import range
-
 from mtools.util.pattern import json2pattern
 
 

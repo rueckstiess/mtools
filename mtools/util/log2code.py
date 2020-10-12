@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-
 import os
 import re
 # import sys
 # import argparse
-from six.moves import zip_longest as izip_longest
-from six.moves import cPickle
+from itertools import zip_longest
+import pickle
 
 import mtools
 
@@ -20,7 +18,7 @@ def import_l2c_db():
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
     if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
-        av, lv, lbw, lcl = cPickle.load(open(os.path.join(data_path,
+        av, lv, lbw, lcl = pickle.load(open(os.path.join(data_path,
                                                           'log2code.pickle'),
                                              'rb'))
         return av, lv, lbw, lcl
@@ -153,7 +151,7 @@ class Log2CodeConverter(object):
 
     def combine(self, pattern, variable):
         """Combine a pattern and variable parts to be a line string again."""
-        inter_zip = izip_longest(variable, pattern, fillvalue='')
+        inter_zip = zip_longest(variable, pattern, fillvalue='')
         interleaved = [elt for pair in inter_zip for elt in pair]
         return ''.join(interleaved)
 

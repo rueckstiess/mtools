@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from six.moves import cPickle
+import pickle
 import os
 import re
 import subprocess
@@ -307,7 +307,7 @@ if __name__ == '__main__':
              .update({'pattern': instance['pattern']}, instance,
                      upsert=True)())
 
-    cPickle.dump((versions, logs_versions, logs_by_word, log_code_lines),
+    pickle.dump((versions, logs_versions, logs_by_word, log_code_lines),
                  open('log2code.pickle', 'wb'), -1)
 
     print("%i unique log messages imported and written to log2code.pickle"
