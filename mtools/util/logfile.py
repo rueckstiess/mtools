@@ -453,7 +453,7 @@ class LogFile(InputSource):
         else:
             return False
 
-        version = re.search(r'(\d\.\d\.\d+)', logevent.line_str)
+        version = re.search(r'(?:db|mongos) version v(\d\.\d\.\d+)', logevent.line_str)
 
         if version:
             version = version.group(1)
