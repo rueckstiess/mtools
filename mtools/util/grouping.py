@@ -3,8 +3,6 @@
 
 import re
 
-import six
-
 from mtools.util import OrderedDict
 
 
@@ -111,7 +109,7 @@ class Grouping(object):
         group is removed instead.
         """
         # sort groups by number of elements
-        self.groups = OrderedDict(sorted(six.iteritems(self.groups),
+        self.groups = OrderedDict(sorted(self.groups.items(),
                                          key=lambda x: len(x[1]),
                                          reverse=True))
 

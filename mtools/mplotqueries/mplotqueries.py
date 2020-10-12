@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from six.moves import cPickle
 import glob
 import inspect
 import os
+import pickle
 import sys
 import uuid
 from datetime import timedelta
@@ -317,7 +317,7 @@ class MPlotQueriesTool(LogFileTool):
 
         # dump plots and handle exceptions
         try:
-            cPickle.dump(self.plot_instances, open(target_file, 'wb'), -1)
+            pickle.dump(self.plot_instances, open(target_file, 'wb'), -1)
             print("Created overlay: %s" % uid)
         except Exception as e:
             print("Error: %s" % e)
@@ -335,7 +335,7 @@ class MPlotQueriesTool(LogFileTool):
         target_files = glob.glob(os.path.join(target_path, '*'))
         for f in target_files:
             try:
-                overlay = cPickle.load(open(f, 'rb'))
+                overlay = pickle.load(open(f, 'rb'))
             except Exception:
                 print("Couldn't read overlay %s, skipping." % f)
                 continue

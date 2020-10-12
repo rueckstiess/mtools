@@ -4,8 +4,6 @@ import sys
 from datetime import timedelta, date
 from random import randrange
 
-import six
-
 import mtools
 from mtools.mloginfo.mloginfo import MLogInfoTool
 from mtools.util.logfile import LogFile
@@ -396,7 +394,7 @@ class TestMLogInfo(object):
         self.tool.run('--rsinfo %s' % logfile_path)
         output = sys.stdout.getvalue()
         results = self._parse_output(output)
-        for key, value in six.iteritems(expected):
+        for key, value in expected.items():
             print("results[%s] == %s" % (key, value))
             assert results.get(key) == value
 
