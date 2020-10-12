@@ -345,13 +345,14 @@ class LogFile(InputSource):
                 if restart:
                     self._restarts.append((restart, logevent))
 
-            if "starting :" in line or "starting:" in line:
-                # look for hostname, port
-                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
-                                  line)
-                if match:
-                    self._hostname = match.group('host')
-                    self._port = match.group('port')
+            # look for hostname and port which will be logged with pid
+            if not self._hostname:
+                if " pid=" in line:
+                    match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
+                                    line)
+                    if match:
+                        self._hostname = match.group('host')
+                        self._port = match.group('port')
 
             """ For 3.0 the "[initandlisten] options:" long entry contained the
                 "engine" field if WiredTiger was the storage engine. There were
