@@ -317,7 +317,10 @@ class MPlotQueriesTool(LogFileTool):
 
         # dump plots and handle exceptions
         try:
-            pickle.dump(self.plot_instances, open(target_file, 'wb'), -1)
+            # Pickle protocol version 4 was added in Python 3.4. It adds
+            # support for very large objects, pickling more kinds of objects,
+            # and some data format optimizations.
+            pickle.dump(self.plot_instances, open(target_file, 'wb'), protocol=4)
             print("Created overlay: %s" % uid)
         except Exception as e:
             print("Error: %s" % e)
