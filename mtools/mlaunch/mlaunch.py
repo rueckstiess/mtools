@@ -70,7 +70,7 @@ class MongoConnection(Connection):
 
 
 def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
-                  ssl_pymongo_options=None):
+                  ssl_pymongo_options=None, tls_pymongo_options=None):
     """
     Ping server and wait for response.
 
@@ -91,7 +91,9 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
             return False
         try:
             # make connection and ping host
-            con = MongoConnection(host, **(ssl_pymongo_options or {}))
+            con = MongoConnection(host,
+                                  **(ssl_pymongo_options or {}),
+                                  **(tls_pymongo_options or {}))
             con.admin.command('ping')
 
             if to_start:
@@ -197,8 +199,15 @@ class MLaunchTool(BaseCmdLineTool):
         self.ssl_server_args = ''
         self.ssl_pymongo_options = {}
 
+        # tls configuration to start mongod or mongos, or create a MongoClient
+        self.tls_server_args = ''
+        self.tls_pymongo_options = {}
+
         # indicate if running in testing mode
         self.test = test
+
+        # version of MongoDB server
+        self.current_version = self.getMongoDVersion()
 
     def run(self, arguments=None):
         """
@@ -357,67 +366,127 @@ class MLaunchTool(BaseCmdLineTool):
                                  help=('Do not create an initial user if auth '
                                        'is enabled'))
 
-        # ssl
         def is_file(arg):
             if not os.path.exists(os.path.expanduser(arg)):
                 init_parser.error("The file [%s] does not exist" % arg)
             return arg
 
-        ssl_args = init_parser.add_argument_group('TLS/SSL options')
-        ssl_args.add_argument('--sslCAFile',
-                              help='Certificate Authority file for TLS/SSL',
-                              type=is_file)
-        ssl_args.add_argument('--sslCRLFile',
-                              help='Certificate Revocation List file for TLS/SSL',
-                              type=is_file)
-        ssl_args.add_argument('--sslAllowInvalidHostnames',
-                              action='store_true',
-                              help=('allow client and server certificates to '
-                                    'provide non-matching hostnames'))
-        ssl_args.add_argument('--sslAllowInvalidCertificates',
-                              action='store_true',
-                              help=('allow client or server connections with '
-                                    'invalid certificates'))
+        # MongoDB 4.2 adds TLS options to replace the corresponding SSL options
+        # https://docs.mongodb.com/manual/release-notes/4.2/#new-tls-options
+        if (LooseVersion(self.current_version) >= LooseVersion("4.2.0")):
+            # tls
+            tls_args = init_parser.add_argument_group('TLS options')
+            tls_args.add_argument('--tlsCAFile',
+                                  help='Certificate Authority file for TLS',
+                                  type=is_file)
+            tls_args.add_argument('--tlsCRLFile',
+                                  help='Certificate Revocation List file for TLS',
+                                  type=is_file)
+            tls_args.add_argument('--tlsAllowInvalidHostnames',
+                                  action='store_true',
+                                  help=('allow client and server certificates to '
+                                        'provide non-matching hostnames'))
+            tls_args.add_argument('--tlsAllowInvalidCertificates',
+                                  action='store_true',
+                                  help=('allow client or server connections with '
+                                        'invalid certificates'))
 
-        ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
-        ssl_server_args.add_argument('--sslMode',
-                                     help='set the TLS/SSL operation mode',
-                                     choices=('disabled allowSSL preferSSL '
-                                              'requireSSL'.split()))
-        ssl_server_args.add_argument('--sslPEMKeyFile',
-                                     help='PEM file for TLS/SSL', type=is_file)
-        ssl_server_args.add_argument('--sslPEMKeyPassword',
-                                     help='PEM file password')
-        ssl_server_args.add_argument('--sslClusterFile',
-                                     help=('key file for internal TLS/SSL '
-                                           'authentication'), type=is_file)
-        ssl_server_args.add_argument('--sslClusterPassword',
-                                     help=('internal authentication key '
-                                           'file password'))
-        ssl_server_args.add_argument('--sslDisabledProtocols',
-                                     help=('comma separated list of TLS '
-                                           'protocols to disable '
-                                           '[TLS1_0,TLS1_1,TLS1_2]'))
-        ssl_server_args.add_argument(('--sslAllowConnectionsWithout'
-                                      'Certificates'), action='store_true',
-                                     help=('allow client to connect without '
-                                           'presenting a certificate'))
-        ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
-                                     help='activate FIPS 140-2 mode')
+            tls_server_args = init_parser.add_argument_group('Server TLS options')
+            tls_server_args.add_argument('--tlsMode',
+                                         help='set the TLS operation mode',
+                                         choices=('disabled allowTLS preferTLS '
+                                                  'requireTLS'.split()))
+            tls_server_args.add_argument('--tlsCertificateKeyFile',
+                                         help='PEM file for TLS', type=is_file)
+            tls_server_args.add_argument('--tlsCertificateKeyFilePassword',
+                                         help='PEM file password')
+            tls_server_args.add_argument('--tlsClusterFile',
+                                         help=('key file for internal TLS '
+                                               'authentication'), type=is_file)
+            tls_server_args.add_argument('--tlsClusterPassword',
+                                         help=('internal authentication key '
+                                               'file password'))
+            tls_server_args.add_argument('--tlsDisabledProtocols',
+                                         help=('comma separated list of TLS '
+                                               'protocols to disable '
+                                               '[TLS1_0,TLS1_1,TLS1_2]'))
+            tls_server_args.add_argument('--tlsAllowConnectionsWithoutCertificates',
+                                         action='store_true',
+                                         help=('allow client to connect without '
+                                               'presenting a certificate'))
+            tls_server_args.add_argument('--tlsFIPSMode', action='store_true',
+                                         help='activate FIPS 140-2 mode')
 
-        ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
-        ssl_client_args.add_argument('--sslClientCertificate',
-                                     help='client certificate file for TLS/SSL',
-                                     type=is_file)
-        ssl_client_args.add_argument('--sslClientPEMKeyFile',
-                                     help='client PEM file for TLS/SSL',
-                                     type=is_file)
-        ssl_client_args.add_argument('--sslClientPEMKeyPassword',
-                                     help='client PEM file password')
+            tls_client_args = init_parser.add_argument_group('Client TLS options')
+            tls_client_args.add_argument('--tlsClientCertificate',
+                                         help='client certificate file for TLS',
+                                         type=is_file)
+            tls_client_args.add_argument('--tlsClientCertificateKeyFile',
+                                         help='client certificate key file for TLS',
+                                         type=is_file)
+            tls_client_args.add_argument('--tlsClientCertificateKeyFilePassword',
+                                         help='client certificate key file password')
 
-        self.ssl_args = ssl_args
-        self.ssl_client_args = ssl_client_args
-        self.ssl_server_args = ssl_server_args
+            self.tls_args = tls_args
+            self.tls_client_args = tls_client_args
+            self.tls_server_args = tls_server_args
+        else:
+            # ssl
+            ssl_args = init_parser.add_argument_group('TLS/SSL options')
+            ssl_args.add_argument('--sslCAFile',
+                                  help='Certificate Authority file for TLS/SSL',
+                                  type=is_file)
+            ssl_args.add_argument('--sslCRLFile',
+                                  help='Certificate Revocation List file for TLS/SSL',
+                                  type=is_file)
+            ssl_args.add_argument('--sslAllowInvalidHostnames',
+                                  action='store_true',
+                                  help=('allow client and server certificates to '
+                                        'provide non-matching hostnames'))
+            ssl_args.add_argument('--sslAllowInvalidCertificates',
+                                  action='store_true',
+                                  help=('allow client or server connections with '
+                                        'invalid certificates'))
+
+            ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
+            ssl_server_args.add_argument('--sslMode',
+                                         help='set the TLS/SSL operation mode',
+                                         choices=('disabled allowSSL preferSSL '
+                                                  'requireSSL'.split()))
+            ssl_server_args.add_argument('--sslPEMKeyFile',
+                                         help='PEM file for TLS/SSL', type=is_file)
+            ssl_server_args.add_argument('--sslPEMKeyPassword',
+                                         help='PEM file password')
+            ssl_server_args.add_argument('--sslClusterFile',
+                                         help=('key file for internal TLS/SSL '
+                                               'authentication'), type=is_file)
+            ssl_server_args.add_argument('--sslClusterPassword',
+                                         help=('internal authentication key '
+                                               'file password'))
+            ssl_server_args.add_argument('--sslDisabledProtocols',
+                                         help=('comma separated list of TLS '
+                                               'protocols to disable '
+                                               '[TLS1_0,TLS1_1,TLS1_2]'))
+            ssl_server_args.add_argument('--sslAllowConnectionsWithoutCertificates',
+                                         action='store_true',
+                                         help=('allow client to connect without '
+                                               'presenting a certificate'))
+            ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
+                                         help='activate FIPS 140-2 mode')
+
+            ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
+            ssl_client_args.add_argument('--sslClientCertificate',
+                                         help='client certificate file for TLS/SSL',
+                                         type=is_file)
+            ssl_client_args.add_argument('--sslClientPEMKeyFile',
+                                         help='client PEM file for TLS/SSL',
+                                         type=is_file)
+            ssl_client_args.add_argument('--sslClientPEMKeyPassword',
+                                         help='client PEM file password')
+
+            self.ssl_args = ssl_args
+            self.ssl_client_args = ssl_client_args
+            self.ssl_server_args = ssl_server_args
 
         # start command
         start_parser = subparsers.add_parser('start',
@@ -580,6 +649,7 @@ class MLaunchTool(BaseCmdLineTool):
             first_init = True
 
         self.ssl_pymongo_options = self._get_ssl_pymongo_options(self.args)
+        self.tls_pymongo_options = self._get_tls_pymongo_options(self.args)
 
         if (self._get_ssl_server_args() and not
                 self.args['sslAllowConnectionsWithoutCertificates'] and not
@@ -588,25 +658,28 @@ class MLaunchTool(BaseCmdLineTool):
             sys.stderr.write('warning: server requires certificates but no'
                              ' --sslClientCertificate provided\n')
 
+        if (self._get_tls_server_args() and not
+                self.args['tlsAllowConnectionsWithoutCertificates'] and not
+                self.args['tlsClientCertificate'] and not
+                self.args['tlsClientCertificateKeyFile']):
+            sys.stderr.write('warning: server requires certificates but no'
+                             ' --tlsClientCertificate provided\n')
         # number of default config servers
         if self.args['config'] == -1:
             self.args['config'] = 1
 
-        # Check if config replicaset is applicable to this version
-        current_version = self.getMongoDVersion()
-
         # Exit with error if --csrs is set and MongoDB < 3.1.0
         if (self.args['csrs'] and
-                LooseVersion(current_version) < LooseVersion("3.1.0") and
-                LooseVersion(current_version) != LooseVersion("0.0.0")):
+                LooseVersion(self.current_version) < LooseVersion("3.1.0") and
+                LooseVersion(self.current_version) != LooseVersion("0.0.0")):
             errmsg = (" \n * The '--csrs' option requires MongoDB version "
                       "3.2.0 or greater, the current version is %s.\n"
-                      % current_version)
+                      % self.current_version)
             raise SystemExit(errmsg)
 
         # add the 'csrs' parameter as default for MongoDB >= 3.3.0
-        if (LooseVersion(current_version) >= LooseVersion("3.3.0") or
-                LooseVersion(current_version) == LooseVersion("0.0.0")):
+        if (LooseVersion(self.current_version) >= LooseVersion("3.3.0") or
+                LooseVersion(self.current_version) == LooseVersion("0.0.0")):
             self.args['csrs'] = True
 
         # construct startup strings
@@ -849,12 +922,13 @@ class MLaunchTool(BaseCmdLineTool):
         except Exception:
             pass
 
-        if self.args['verbose']:
+        if self.args and self.args['verbose']:
             print("Detected mongod version: %s" % current_version)
         return current_version
 
     def client(self, host_and_port, **kwargs):
         kwargs.update(self.ssl_pymongo_options)
+        kwargs.update(self.tls_pymongo_options)
         return MongoConnection(host_and_port, **kwargs)
 
     def stop(self):
@@ -1148,8 +1222,8 @@ class MLaunchTool(BaseCmdLineTool):
                 raise SystemExit("Can't read %s, use 'mlaunch init ...' first."
                                  % startup_file)
 
-        self.ssl_pymongo_options = self._get_ssl_pymongo_options(
-            self.loaded_args)
+        self.ssl_pymongo_options = self._get_ssl_pymongo_options(self.loaded_args)
+        self.tls_pymongo_options = self._get_tls_pymongo_options(self.loaded_args)
 
         # reset cluster_* variables
         self.cluster_tree = {}
@@ -1369,7 +1443,7 @@ class MLaunchTool(BaseCmdLineTool):
         for port in ports:
             threads.append(threading.Thread(target=wait_for_host, args=(
                 port, interval, timeout, to_start, queue,
-                self.ssl_pymongo_options)))
+                self.ssl_pymongo_options, self.tls_pymongo_options)))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
             print("waiting for nodes %s..."
@@ -1547,6 +1621,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _get_ssl_server_args(self):
         s = ''
+        if not self.ssl_server_args:
+            return s
+
         for parser in self.ssl_args, self.ssl_server_args:
             for action in parser._group_actions:
                 name = action.dest
@@ -1561,6 +1638,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _get_ssl_pymongo_options(self, args):
         opts = {}
+        if not self.ssl_server_args:
+            return opts
+
         for parser in [self.ssl_server_args]:
             for action in parser._group_actions:
                 name = action.dest
@@ -1589,6 +1669,59 @@ class MLaunchTool(BaseCmdLineTool):
                         opts['ssl_ca_certs'] = value
                     elif name == 'sslCRLFile':
                         opts['ssl_crlfile'] = value
+
+        return opts
+
+    def _get_tls_server_args(self):
+        s = ''
+        if not self.tls_server_args:
+            return s
+
+        for parser in self.tls_args, self.tls_server_args:
+            for action in parser._group_actions:
+                name = action.dest
+                value = self.args.get(name)
+                if value:
+                    if value is True:
+                        s += ' --%s' % (name,)
+                    else:
+                        s += ' --%s "%s"' % (name, value)
+
+        return s
+
+    def _get_tls_pymongo_options(self, args):
+        opts = {}
+        if not self.tls_server_args:
+            return opts
+
+        for parser in [self.tls_server_args]:
+            for action in parser._group_actions:
+                name = action.dest
+                value = args.get(name)
+                if value:
+                    opts['tls'] = True
+                    opts['tls_cert_reqs'] = ssl.CERT_NONE
+        for parser in self.tls_args, self.tls_client_args:
+            for action in parser._group_actions:
+                name = action.dest
+                value = args.get(name)
+                if value:
+                    opts['tls'] = True
+
+                    # TLS parameters require PyMongo 3.9.0+
+                    # https://api.mongodb.com/python/3.9.0/changelog.html
+                    if name == 'tlsCertificateKeyFile':
+                        opts['tlsCertificateKeyFile'] = value
+                    elif name == 'tlsCertificateKeyFilePassword':
+                        opts['tlsCertificateKeyFilePassword'] = value
+                    elif name == 'tlsAllowInvalidCertificates':
+                        opts['tlsAllowInvalidCertificates'] = ssl.CERT_OPTIONAL
+                    elif name == 'tlsAllowInvalidHostnames':
+                        opts['tlsAllowInvalidHostnames'] = False
+                    elif name == 'tlsCAFile':
+                        opts['tlsCAFile'] = value
+                    elif name == 'tlsCRLFile':
+                        opts['tlsCRLFile'] = value
 
         return opts
 
@@ -1705,7 +1838,8 @@ class MLaunchTool(BaseCmdLineTool):
         set_name = ismaster.get('setName')
         if set_name:
             con.close()
-            con = self.client('localhost:%i'%port, replicaSet=set_name, serverSelectionTimeoutMS=10000)
+            con = self.client('localhost:%i' % port, replicaSet=set_name,
+                              serverSelectionTimeoutMS=10000)
         v = ismaster.get('maxWireVersion', 0)
         if v >= 7:
             # Until drivers have implemented SCRAM-SHA-256, use old mechanism.
@@ -1833,8 +1967,6 @@ class MLaunchTool(BaseCmdLineTool):
     def _construct_sharded(self):
         """Construct command line strings for a sharded cluster."""
 
-        current_version = self.getMongoDVersion()
-
         num_mongos = self.args['mongos'] if self.args['mongos'] > 0 else 1
         shard_names = self._get_shard_names(self.args)
 
@@ -1842,14 +1974,14 @@ class MLaunchTool(BaseCmdLineTool):
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
             if (self.args['single'] and
-                    LooseVersion(current_version) >= LooseVersion("3.6.0")):
+                    LooseVersion(self.current_version) >= LooseVersion("3.6.0")):
                 errmsg = " \n * In MongoDB 3.6 and above a Shard must be " \
                          "made up of a replica set. Please use --replicaset " \
                          "option when starting a sharded cluster.*"
                 raise SystemExit(errmsg)
 
             elif (self.args['single'] and
-                    LooseVersion(current_version) < LooseVersion("3.6.0")):
+                    LooseVersion(self.current_version) < LooseVersion("3.6.0")):
                 self.shard_connection_str.append(
                     self._construct_single(
                         self.dir, nextport, name=shard, extra='--shardsvr'))
@@ -2006,11 +2138,9 @@ class MLaunchTool(BaseCmdLineTool):
                                              'mongod')):
             extra += ' --wiredTigerCacheSizeGB 1 '
 
-        current_version = self.getMongoDVersion()
-
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
-                and LooseVersion(current_version) >= LooseVersion("3.6.0")
+                and LooseVersion(self.current_version) >= LooseVersion("3.6.0")
                 and (self.args['sharded'] or self.args['replicaset'])
                 and '--bind_ip' not in extra):
             os.removedirs(dbpath)
