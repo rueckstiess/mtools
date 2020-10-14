@@ -7,11 +7,11 @@ from mtools.util.log2code import Log2CodeConverter
 
 try:
     from matplotlib.dates import date2num, num2date
-except ImportError:
+except ImportError as error:
     raise ImportError("Can't import matplotlib. See "
                       "https://matplotlib.org/users/installing.html "
                       "for instructions on how to install matplotlib."
-                      "Error: " + str(e))
+                      "Error: " + str(error))
 
 
 class HistogramPlotType(BasePlotType):
