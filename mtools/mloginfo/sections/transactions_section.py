@@ -92,7 +92,9 @@ class TransactionSection(BaseSection):
         # can be used in future
         for g in grouping:
             # calculate statistics for this group
-            datetime, txnNumber, autocommit, readConcern, timeActiveMicros, timeInactiveMicros, duration = g
+            (datetime, txnNumber, autocommit, readConcern, timeActiveMicros,
+             timeInactiveMicros, duration) = g
+
             stats = OrderedDict()
             stats['datetime'] = str(datetime)
             stats['txnNumber'] = txnNumber

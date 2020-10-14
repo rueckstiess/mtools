@@ -2,11 +2,11 @@ from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
 try:
     from matplotlib.dates import date2num
-except ImportError:
+except ImportError as error:
     raise ImportError("Can't import matplotlib. See "
                       "https://matplotlib.org/users/installing.html "
                       "for instructions on how to install matplotlib."
-                      "Error: " + str(e))
+                      "Error: " + str(error))
 
 
 class EventPlotType(BasePlotType):
