@@ -36,7 +36,7 @@ dependencies use:
 
 .. code-block:: bash
 
-   pip3 install mtools[all]
+   pip3 install 'mtools[all]'
 
 You need to have Python 3.6 or newer installed. ``pip3`` should be included as
 part of the default install for supported versions of Python 3.
@@ -89,14 +89,14 @@ To install all dependencies for full feature support, run:
 
 .. code-block:: bash
 
-   pip3 install mtools[all]
+   pip3 install 'mtools[all]'
 
 To install dependencies for a subset of mtools utilities, specify one or more
 script names as a comma-separated list:
 
 .. code-block:: bash
 
-   pip3 install mtools[mlaunch,mloginfo]
+   pip3 install 'mtools[mlaunch,mloginfo]'
 
 psutil
 ------

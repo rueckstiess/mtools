@@ -35,24 +35,24 @@ The ``mtransfer`` script requires the
 `wiredtiger Python library <https://pypi.org/project/wiredtiger/>`__
 which is currently not installed by default with ``mtools``.
 
-The ``wiredtiger`` library can be installed via ``pip`` or built from source,
+The ``wiredtiger`` library can be installed via ``pip3`` or built from source,
 but in either case requires:
 
 - A C compiler.
 - The ``snappy`` and ``zlib`` development packages installed.
 
-To install via ``pip`` use either of:
+To install via ``pip3`` use either of:
 
 .. code-block:: bash
 
-   pip install mtools[mtransfer]
+   pip3 install 'mtools[mtransfer]'
 
 .. code-block:: bash
 
-   pip install wiredtiger
+   pip3 install wiredtiger
 
 If you are encountering errors using or installing the ``wiredtiger`` module
-via `pip`, you may need to `Build and install WiredTiger from source
+via `pip3`, you may need to `Build and install WiredTiger from source
 <http://source.wiredtiger.com/develop/build-posix.html>`__.
 
 Usage
