@@ -70,11 +70,11 @@ More information about switching to Development Mode can be found on the page [m
 
 To install all additional dependencies for full feature support, run:
 
-    pip3 install mtools[all]
+    pip3 install 'mtools[all]'
 
 To install dependencies for a subset of mtools utilities, specify one or more script names as a comma-separated list:
 
-    pip3 install mtools[mlaunch,mloginfo]
+    pip3 install 'mtools[mlaunch,mloginfo]'
 
 #### psutil
 
