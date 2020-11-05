@@ -318,7 +318,7 @@ Authentication Parameters
 
    .. code-block:: bash
 
-      mlaunch --sharded 2 --single --auth --auth-user thomas --auth-password my_s3cr3t_p4ssw0rd
+      mlaunch --sharded 2 --single --auth --username thomas --password my_s3cr3t_p4ssw0rd
 
    This command would start a sharded cluster with 2 single shards, 1 config
    server, 1 mongos, and create the user ``thomas`` with password
