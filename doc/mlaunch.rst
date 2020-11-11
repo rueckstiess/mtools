@@ -685,7 +685,7 @@ Usage
 
 .. code-block:: bash
 
-   mlaunch list [--dir DIR] [--startup] [--tags]
+   mlaunch list [-h] [--dir DIR] [--json] [--tags] [--startup] [--verbose]
 
 For example:
 
@@ -721,6 +721,10 @@ this case, the environment was started with:
 
 Optional Parameters
 ^^^^^^^^^^^^^^^^^^^
+
+``--json``
+   This option outputs the results in JSON format, which may be useful for
+   integration with other tools or scripts.
 
 ``--tags``
    This option additionally shows a column with all the tags that the instance
