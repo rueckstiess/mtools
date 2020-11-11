@@ -574,6 +574,8 @@ class MLaunchTool(BaseCmdLineTool):
         list_parser.add_argument('--dir', action='store', default='./data',
                                  help=('base directory to list nodes '
                                        '(default=./data/)'))
+        list_parser.add_argument('--json', action='store_true', default=False,
+                                 help=('output in JSON format '))
         list_parser.add_argument('--tags', action='store_true', default=False,
                                  help=('outputs the tags for each instance. '
                                        'Tags can be used to target instances '
@@ -1132,12 +1134,15 @@ class MLaunchTool(BaseCmdLineTool):
                     # if not running, use stored startup_info
                     doc['startup command'] = startup[str(doc['port'])]
 
-        print_docs.append(None)
-        print()
-        print_table(print_docs)
-        if self.loaded_args.get('auth'):
-            print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
-                                       self.loaded_args.get('password')))
+        if (self.args['json']):
+            print(json.dumps(print_docs))
+        else:
+            print()
+            print_docs.append(None)
+            print_table(print_docs)
+            if self.loaded_args.get('auth'):
+                print('\tauth: "%s:%s"' % (self.loaded_args.get('username'),
+                                        self.loaded_args.get('password')))
 
     def kill(self):
         self.discover()
