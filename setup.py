@@ -25,6 +25,8 @@ try:
         "mtransfer": ['pymongo==3.9.0', 'wiredtiger>=3.2.1'],
     }
 
+    install_requires = []
+    
     try:
         import argparse
     except ImportError:
