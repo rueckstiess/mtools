@@ -113,11 +113,12 @@ def json2pattern(s, debug = False):
     except Exception as err:
         if debug:
             ## print some context info and return without any extracted query data..
-            print ("json2pattern():json.loads Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  s: ({3})\n".
-                format(err, sys.exc_info()[0], saved_s, s), file=sys.stderr)
+            msg = '''json2pattern():json.loads Exception:\n  Error: {err} : {sys.exc_info()[0]}\n'''
+            msg = msg + f'''  saved_s: ({saved_s})\n  s: ({s})\n'''
+            print(msg)
         return None
     except:
-        print ("json2pattern():json.loads Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        print (f'''json2pattern():json.loads Unexpected error: saved_s: ({saved_s}) sys.exc_info():{sys.exc_info()[0]}''' )
         raise
 
 
@@ -126,11 +127,12 @@ def json2pattern(s, debug = False):
     except Exception as err:
         ## print some context info and return without any extracted query data..
         if debug:
-            print ("json2pattern():json.dumps Exception:\n  Error: {1} : {0}\n  saved_s: ({2})\n  doc: ({3})\n".
-                format(err, sys.exc_info()[0], saved_s, doc), file=sys.stderr)
+            msg = f'''json2pattern():json.dumps Exception:\n  '''
+            msg = msg + f'''Error: {sys.exc_info()[0]} : {err}\n  saved_s: ({saved_s})\n  doc: ({doc})\n'''
+            sys.stderr.write(msg)
         return None
     except:
-        print ("json2pattern():json.dumps Unexpected error: save_s: ({0}) sys.exc_info():{1}".format(saved_s, sys.exc_info()[0]) )
+        print(f'''json2pattern():json.dumps Unexpected error: saved_s: ({saved_s}) sys.exc_info():{sys.exc_info()[0]}''')
         raise
 
 
@@ -164,9 +166,9 @@ if __name__ == '__main__':
         r = json2pattern(k, debug)
         if ( r == v ):
             if debug :
-                print("OK...: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
+                print(f'''OK...: {k}\n  Expect: {v}\n  Output: {r}\n\n''')
             else:
-                print("OK: {0}".format(k))
+                print(f'''OK: {k}''')
 
         else:
-            print("\nERROR **: {0}\n  Expect: {1}\n  Output: {2}\n\n".format(k,v,r))
+            print(f'''\nERROR **: {k}\n  Expect: {v}\n  Output: {r}\n\n''')

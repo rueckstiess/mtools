@@ -1192,12 +1192,6 @@ class LogEvent(object):
         yields = 'numYields:%i' % self._numYields if 'numYield' in doc else ''
         duration = '%ims' % self.duration if self.duration is not None else ''
 
-        self._line_str = ("[{thread}] {operation} {namespace} {payload} "
-                          "{scanned} {yields} locks(micros) {locks} "
-                          "{duration}".format(datetime=self.datetime,
-                                              thread=self.thread,
-                                              operation=self.operation,
-                                              namespace=self.namespace,
-                                              payload=payload, scanned=scanned,
-                                              yields=yields, locks=locks,
-                                              duration=duration))
+        self._line_str = (f'''[{self.thread}] {self.operation} {self.namespace} {payload} '''
+                          f'''{scanned} {yields} locks(micros) {locks} '''
+                          f'''{duration}''')
