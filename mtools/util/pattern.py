@@ -113,9 +113,8 @@ def json2pattern(s, debug = False):
     except Exception as err:
         if debug:
             ## print some context info and return without any extracted query data..
-            msg = '''json2pattern():json.loads Exception:\n  Error: {err} : {sys.exc_info()[0]}\n'''
-            msg = msg + f'''  saved_s: ({saved_s})\n  s: ({s})\n'''
-            print(msg)
+            msg = f'''json2pattern():json.loads Exception:\n  Error: {err} : {sys.exc_info()[0]}\n  saved_s: ({saved_s})\n  s: ({s})\n'''
+            print(msg, file=sys.stderr)
         return None
     except:
         print (f'''json2pattern():json.loads Unexpected error: saved_s: ({saved_s}) sys.exc_info():{sys.exc_info()[0]}''' )
@@ -127,9 +126,8 @@ def json2pattern(s, debug = False):
     except Exception as err:
         ## print some context info and return without any extracted query data..
         if debug:
-            msg = f'''json2pattern():json.dumps Exception:\n  '''
-            msg = msg + f'''Error: {sys.exc_info()[0]} : {err}\n  saved_s: ({saved_s})\n  doc: ({doc})\n'''
-            sys.stderr.write(msg)
+            msg = f'''json2pattern():json.dumps Exception:\n  Error: {sys.exc_info()[0]} : {err}\n  saved_s: ({saved_s})\n  doc: ({doc})\n'''
+            print(msg, file=sys.stderr)
         return None
     except:
         print(f'''json2pattern():json.dumps Unexpected error: saved_s: ({saved_s}) sys.exc_info():{sys.exc_info()[0]}''')
