@@ -64,7 +64,7 @@ class MongoConnection(Connection):
                 kwargs.remove('serverSelectionTimeoutMS')
 
         # Set client application name for MongoDB 3.4+ servers
-        kwargs['appName'] = 'mlaunch v{0}'.format(__version__)
+        kwargs['appName'] = f'''mlaunch v{__version__}'''
 
         Connection.__init__(self, *args, **kwargs)
 
@@ -220,8 +220,7 @@ class MLaunchTool(BaseCmdLineTool):
         # to run can call different sub-commands
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument('--version', action='version',
-                                    version="mtools version {0} || Python {1}".
-                                    format(__version__, sys.version))
+                                    version=f'''mtools version {__version__} || Python {sys.version}''')
         self.argparser.add_argument('--no-progressbar', action='store_true',
                                     default=False,
                                     help='disables progress bar')

@@ -45,6 +45,5 @@ class LogCodeLine(object):
         s = "%s\n" % (" <var> ".join(self.pattern))
         for version in sorted(self.versions):
             for filename, lineno, loglevel, trigger in self.matches[version]:
-                s += ("{:>10}: in {}:{}, loglevel {}, trigger {}\n"
-                      .format(version, filename, lineno, loglevel, trigger))
+                s += (f'''{version:>10}: in {filename}:{lineno}, loglevel {loglevel}, trigger {trigger}\n''')
         return s
