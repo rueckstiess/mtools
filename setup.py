@@ -9,20 +9,20 @@ import sys
 try:
     from setuptools import setup, find_packages
 
-    python_requires='>=3.6'
+    python_requires='>=3.7'
 
     # Additional dependencies from requirements.txt that should be installed
     # for full mtools feature support. These are optional dependencies to
     # simplify the default install experience, particularly where a build
     # toolchain is required.
     extras_requires = {
-        "all": ['matplotlib>=3.1.1', 'numpy>=1.16.4', 'pymongo>=3.9.0',
-                'psutil>=5.6.3,<5.7.0'],
-        "mlaunch": ['pymongo>=3.9.0', 'psutil>=5.6.3,<5.7.0'],
+        "all": ['numpy>=1.21.4', 'matplotlib>=3.5.0', 'pymongo>=3.12.1',
+                'psutil>=5.8.0'],
+        "mlaunch": ['pymongo>=3.12.1', 'psutil>=5.8.0'],
         "mlogfilter": [],
-        "mloginfo": ['numpy>=1.16.4'],
-        "mplotqueries": ['matplotlib>=3.1.1', 'numpy>=1.16.4'],
-        "mtransfer": ['pymongo==3.9.0', 'wiredtiger>=3.2.1'],
+        "mloginfo": ['numpy>=1.21.4'],
+        "mplotqueries": ['numpy>=1.21.4', 'matplotlib>=3.5.0'],
+        "mtransfer": ['pymongo==3.12.1', 'wiredtiger>=3.2.1'],
     }
 
     install_requires = []
@@ -102,7 +102,6 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'
