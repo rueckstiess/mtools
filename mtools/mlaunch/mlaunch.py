@@ -699,10 +699,22 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['auth'] and first_init:
             if not os.path.exists(self.dir):
                 os.makedirs(self.dir)
-            keyfile = os.path.join(self.dir, "keyfile")
-            os.system('openssl rand -base64 753 > %s' % keyfile)
-            if os.name != 'nt':
-                os.system('chmod 600 %s' % keyfile)
+
+            if '--keyFile' in self.unknown_args:
+                # Check if keyfile is readable
+                keyfile = None
+                try:
+                    keyfile_idx = self.unknown_args.index('--keyFile') + 1
+                    keyfile_path = self.unknown_args[keyfile_idx]
+                    keyfile = self._read_key_file(keyfile_path)
+                except:
+                    print(f'\n WARNING: Specified keyFile does not appear readable: {keyfile_path}\n')
+            else:
+                keyfile = os.path.join(self.dir, "keyfile")
+                print(f'Generating keyfile: {keyfile}')
+                os.system('openssl rand -base64 753 > "%s"' % keyfile)
+                if os.name != 'nt':
+                    os.system(f'chmod 600 "{keyfile}"')
 
         # if not all ports are free, complain and suggest alternatives.
         all_ports = self.get_tagged(['all'])
@@ -2128,8 +2140,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['auth']:
-            key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
-            auth_param = '--keyFile %s' % key_path
+            auth_param = '--auth'
+            if '--keyFile' not in self.unknown_args:
+                key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
+                auth_param = f'{auth_param} --keyFile "{key_path}"'
 
         if self.unknown_args:
             config = '--configsvr' in extra
@@ -2181,8 +2195,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         auth_param = ''
         if self.args['auth']:
-            key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
-            auth_param = '--keyFile %s' % key_path
+            auth_param = '--auth'
+            if '--keyFile' not in self.unknown_args:
+                key_path = os.path.abspath(os.path.join(self.dir, 'keyfile'))
+                auth_param = f'{auth_param} --keyFile "{key_path}"'
 
         if self.unknown_args:
             extra = self._filter_valid_arguments(self.unknown_args,
@@ -2205,10 +2221,13 @@ class MLaunchTool(BaseCmdLineTool):
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
 
-    def _read_key_file(self):
-        with open(os.path.join(self.dir, 'keyfile'), 'rb') as f:
-            return ''.join(f.readlines())
-
+    def _read_key_file(self, keyfile=None):
+        if not keyfile:
+            with open(os.path.join(self.dir, 'keyfile'), 'rb') as f:
+                return ''.join(f.readlines())
+        else:
+            with open(keyfile, 'rb') as f:
+                return ''.join(f.readlines())
 
 def main():
     tool = MLaunchTool()
