@@ -709,7 +709,6 @@ class MLaunchTool(BaseCmdLineTool):
                     keyfile = self._read_key_file(keyfile_path)
                 except:
                     print(f'\n WARNING: Specified keyFile does not appear readable: {keyfile_path}\n')
-                    # raise SystemExit(f'Cannot read keyFile: {keyfile_path}')
             else:
                 keyfile = os.path.join(self.dir, "keyfile")
                 print(f'Generating keyfile: {keyfile}')
@@ -2222,7 +2221,7 @@ class MLaunchTool(BaseCmdLineTool):
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
 
-    def _read_key_file(self, keyfile = None):
+    def _read_key_file(self, keyfile=None):
         if not keyfile:
             with open(os.path.join(self.dir, 'keyfile'), 'rb') as f:
                 return ''.join(f.readlines())
