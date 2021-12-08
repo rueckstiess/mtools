@@ -195,7 +195,7 @@ class TestMLaunch(object):
         # insert a document and wait to replicate to 2 secondaries
         # (10 sec timeout)
         mc = MongoClient('localhost:%i' % self.port)
-        mc.test.smokeWait.insert({}, w=2, wtimeout=10 * 60 * 1000)
+        mc.test.smokeWait.insert_one({}, w=2, wtimeout=10 * 60 * 1000)
 
     @unittest.skip('incompatible with 3.4 CSRS')
     def test_sharded_status(self):
