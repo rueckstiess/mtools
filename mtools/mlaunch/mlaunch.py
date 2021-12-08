@@ -122,19 +122,15 @@ def shutdown_host(port, username=None, password=None, authdb=None):
     """
     host = 'localhost:%i' % port
     try:
-        mc = MongoConnection(host)
+        if username and password and authdb:
+            if authdb != "admin":
+                raise RuntimeError("given username/password is not for "
+                                    "admin database")
+            mc = MongoConnection(host, username=username, password=password)
+        else:
+            mc = MongoConnection(host)
+        
         try:
-            if username and password and authdb:
-                if authdb != "admin":
-                    raise RuntimeError("given username/password is not for "
-                                       "admin database")
-                else:
-                    try:
-                        mc.admin.authenticate(name=username, password=password)
-                    except OperationFailure:
-                        # perhaps auth is not required
-                        pass
-
             mc.admin.command('shutdown', force=True)
         except AutoReconnect:
             pass
@@ -1870,13 +1866,13 @@ class MLaunchTool(BaseCmdLineTool):
             password = None
 
         try:
-            con[database].add_user(name, password=password, roles=roles,
+            con[database].command("createUser", name, pwd=password, roles=roles,
                                    **opts)
         except OperationFailure as e:
             raise e
         except TypeError as e:
             if pymongo_version < (2, 5, 0):
-                con[database].add_user(name, password=password, **opts)
+                con[database].add_user(name, pwd=password, **opts)
                 warnings.warn("Your pymongo version is too old to support "
                               "auth roles. Added a legacy user with root "
                               "access. To support roles, you need to upgrade "

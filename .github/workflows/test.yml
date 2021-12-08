@@ -25,11 +25,5 @@ jobs:
       - name: Run Main Test
         run: |
           python -m pip install -U pip
-          python -m pip install tox pymongo==${{ matrix.pymongo-version }}
+          python -m pip install tox tox-gh pymongo==${{ matrix.pymongo-version }}
           tox
-      - name: Run other tests
-        run: |
-          tox -e flake8
-          tox -e doc
-          tox -e idocstyle
-          tox -e pydocstyle
