@@ -7,17 +7,14 @@ import time
 import unittest
 
 from bson import SON
-from nose.plugins.attrib import attr
-from nose.plugins.skip import SkipTest
-from nose.tools import raises, timed
+
+import pytest
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
-# temporarily skipping mlaunch tests until issues are sorted out
-raise SkipTest
-
+pytestmark = pytest.mark.skip("skip all mlaunch tests for now")
 
 class TestMLaunch(object):
     """
@@ -37,7 +34,7 @@ class TestMLaunch(object):
         self.use_auth = False
         self.data_dir = ''
 
-    def setup(self):
+    def setup_method(self):
         """Start up method to create mlaunch tool and find free port."""
         self.tool = MLaunchTool(test=True)
 
@@ -45,7 +42,7 @@ class TestMLaunch(object):
         if os.path.exists(self.base_dir):
             shutil.rmtree(self.base_dir)
 
-    def teardown(self):
+    def teardown_method(self):
         """Tear down method after each test, removes data directory."""
 
         # kill all running processes
@@ -87,7 +84,7 @@ class TestMLaunch(object):
 
     # -- tests below ---
 
-    @raises(ConnectionFailure)
+    @pytest.mark.xfail(raises=ConnectionFailure)
     def test_test(self):
         """TestMLaunch setup and teardown test."""
 
@@ -184,8 +181,8 @@ class TestMLaunch(object):
         assert sum(1 for memb in conf['members']
                    if 'arbiterOnly' in memb and memb['arbiterOnly']) == 1
 
-    @timed(60)
-    @attr('slow')
+    @pytest.mark.timeout(60)
+    @pytest.mark.slow
     def test_replicaset_ismaster(self):
         """Start replica set and verify that first node becomes primary."""
 
@@ -482,8 +479,8 @@ class TestMLaunch(object):
         assert all(self.tool.is_running(node) for node in nodes)
 
     @unittest.skip('tags implementation not up to date')
-    @timed(180)
-    @attr('slow')
+    @pytest.mark.timeout(180)
+    @pytest.mark.slow
     def test_kill_partial(self):
         """Test killing and restarting tagged groups on different tags."""
 
@@ -584,7 +581,7 @@ class TestMLaunch(object):
 
             self.run_tool("start")
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_init_init_replicaset(self):
         """mlaunch: test calling init a second time on the replica set."""
 
@@ -615,8 +612,8 @@ class TestMLaunch(object):
 
             self.run_tool("start")
 
-    @attr('slow')
-    @attr('auth')
+    @pytest.mark.slow
+    @pytest.mark.auth
     def test_repeat_all_with_auth(self):
         """Repeates all tests in this class (excluding itself) with auth."""
         tests = [t for t in inspect.getmembers(self,
@@ -637,7 +634,7 @@ class TestMLaunch(object):
 
         self.use_auth = False
 
-    @attr('auth')
+    @pytest.mark.auth
     def test_replicaset_with_name(self):
         """mlaunch: test calling init on the replica set with given name."""
 
@@ -653,7 +650,7 @@ class TestMLaunch(object):
     # TODO
     # - test functionality of --binarypath, --verbose
 
-    # All tests that use auth need to be decorated with @attr('auth')
+    # All tests that use auth need to be decorated with @pytest.mark.auth
 
     def helper_adding_default_user(self, environment):
         """Helper function for the next test: test_adding_default_user()."""
@@ -671,7 +668,7 @@ class TestMLaunch(object):
                     for x in user['roles']]) == set(self.tool.
                                                     _default_auth_roles))
 
-    @attr('auth')
+    @pytest.mark.auth
     def test_adding_default_user(self):
         envs = (
             "--single",
@@ -687,7 +684,7 @@ class TestMLaunch(object):
                     ', with ' + env)
             yield (method, env)
 
-    @attr('auth')
+    @pytest.mark.auth
     def test_adding_default_user_no_mongos(self):
         """mlaunch: test that even with --mongos 0 there is a user created."""
 
@@ -704,7 +701,7 @@ class TestMLaunch(object):
                     for x in user['roles']]) == set(self.tool.
                                                     _default_auth_roles))
 
-    @attr('auth')
+    @pytest.mark.auth
     def test_adding_custom_user(self):
         """mlaunch: test custom username and password and custom roles."""
 
@@ -824,7 +821,7 @@ class TestMLaunch(object):
             assert(self.tool.startup_info[str(self.port)].
                    startswith('/some/other/path/mongod'))
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_single_and_arbiter(self):
         """mlaunch: test --single with --arbiter error."""
 

@@ -38,7 +38,7 @@ def all_tools(fn):
             # test tool here ...
     """
     @wraps(fn)
-    # copies __name__ of the original function, nose requires the name
+    # copies __name__ of the original function, pytest requires the name
     # to start with "test_"
     def new_func():
         for tool in tools:

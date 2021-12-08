@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import re
@@ -6,13 +7,19 @@ from datetime import datetime, timedelta
 from random import randrange
 
 from dateutil import parser
-from nose.plugins.skip import SkipTest
-from nose.tools import raises
+import pytest
 
 import mtools
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
+
+
+@pytest.fixture(scope="function", autouse=True)
+def patch_io(monkeypatch, capsys):
+    monkeypatch.setattr('sys.stdin', io.StringIO('my input'))
+    sys.stdin.name = 'foo'
+    sys.stdin.isatty = lambda: True
 
 
 def random_date(start, end):
@@ -26,7 +33,7 @@ def random_date(start, end):
 class TestMLogFilter(object):
     """Test functionality around the mlogfilter tool."""
 
-    def setup(self):
+    def setup_method(self):
         """Start up method to create mlaunch tool and find free port."""
         self.tool = MLogFilterTool()
 
@@ -196,11 +203,6 @@ class TestMLogFilter(object):
         assert output.strip() == ''
 
     def test_human(self):
-        # need to skip this test for python 2.6.x because thousands separator
-        # format is not compatible
-        if sys.version_info < (2, 7):
-            raise SkipTest
-
         self.tool.run('%s --slow --thread conn8 --human' % self.logfile_path)
         output = sys.stdout.getvalue().rstrip()
         assert(output.endswith('(0hr 0min 1secs 324ms) 1,324ms'))
@@ -214,7 +216,7 @@ class TestMLogFilter(object):
             le = LogEvent(line)
             assert(le.duration >= 145 and le.duration <= 500)
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_invalid_log(self):
         # load text file
         invalid_logfile_path = os.path.join(os.path.dirname(mtools.__file__),
@@ -420,7 +422,7 @@ class TestMLogFilter(object):
                    (le.datetime >= event2 - padding and
                     le.datetime <= event2 + padding))
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_no_logfile(self):
         """Test that not providing at least 1 log file throws clean error."""
 
@@ -472,12 +474,12 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         assert len(output.splitlines()) == 0
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_invalid_level(self):
         self._test_base('mongod_278.log')
         self.tool.run(' %s --level C' % self.logfile_path)
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_invalid_component(self):
         self._test_base('mongod_278.log')
         self.tool.run(' %s --component FAKE' % self.logfile_path)

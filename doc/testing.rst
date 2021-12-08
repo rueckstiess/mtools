@@ -8,7 +8,7 @@ mtools uses the following testing tools:
 
 -  `tox <https://tox.readthedocs.io/en/latest/>`__ for creating a standardized
    test environment
--  `nose testing framework <https://github.com/nose-devs/nose>`__ for unit
+-  `pytest testing framework <https://github.com/pytest-dev/pytest>`__ for unit
    testing
 -  `flake8 <http://flake8.pycqa.org/en/latest/>`__ for style checking
 -  `isort <https://readthedocs.org/projects/isort/>`__ for import structure
@@ -86,7 +86,7 @@ certain tests.
        -r{toxinidir}/requirements.txt
        -r{toxinidir}/test-requirements.txt
    whitelist_externals = make
-   commands = nosetests --detailed-errors --verbose --with-coverage --cover-package=mtools
+   commands = pytest -v --cov mtools --cov-branch --cov-report term-missing:skip-covered
 
    [testenv:doc]
    deps =
@@ -111,7 +111,7 @@ certain tests.
    [testenv:isort]
    deps = isort
    commands =
-       isort -c --diff -s .tox -o dateutil -o numpy -o pymongo -o bson -o nose
+       isort -c --diff -s .tox -o dateutil -o numpy -o pymongo -o bson -o pytest
 
    [testenv:pydocstyle]
    deps = pydocstyle

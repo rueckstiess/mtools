@@ -696,7 +696,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # exit if running in testing mode
         if self.test:
-            sys.exit(0)
+            return
 
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:

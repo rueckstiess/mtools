@@ -84,7 +84,7 @@ GitHub milestones and git tags are named with a prefix `v`, for example `v1.0.1`
 
 1. Create a release branch, named `release-x.y.z` where `x.y.z` is the version to be released.
 2. Increase the version in `./mtools/version.py` from `x.y.z-dev` to `x.y.z`.
-3. Run tests via `nosetests` and make sure they pass
+3. Run tests via `pytest` and make sure they pass
 4. Update README.md and CHANGES.md accordingly
 5. Any other cleanup tasks
 6. (optional) leave the release branch for a few days to give others a chance to test it before releasing
@@ -96,12 +96,12 @@ GitHub milestones and git tags are named with a prefix `v`, for example `v1.0.1`
 
 ### Testing
 
-mtools uses the [nose testing framework](https://github.com/nose-devs/nose). You can install it with `sudo pip install nose` or you can just run the test suite, which will take care of all the testing dependencies:
+mtools uses the [pytest testing framework](https://github.com/pytest-dev/pytest). You can install it with `sudo pip install pytest` or you can just run the test suite, which will take care of all the testing dependencies:
 
     python setup.py test
 
-If you want to run the tests manually, go into the `mtools/test/` directory and run `nosetests`. The full test suite may take a while, as some of the tests have to set up and tear down replica sets and sharded clusters, especially for mlaunch testing. You can skip the slow tests with this command:
+If you want to run the tests manually, go into the `mtools/test/` directory and run `pytest`. The full test suite may take a while, as some of the tests have to set up and tear down replica sets and sharded clusters, especially for mlaunch testing. You can skip the slow tests with this command:
 
-    nosetests -a '!slow'
+    pytest -m 'not slow'
 
 If you implement a new feature anywhere in mlaunch, please write a test function or test class for the feature. If you fix a bug, please re-run the test suite after the code change and make sure the tests still pass. Please think carefully before changing a code and its related test concurrently, so it still tests the expected behavior and not what you consider as "fixed behavior".

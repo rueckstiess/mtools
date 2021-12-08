@@ -1,12 +1,22 @@
+import io
 import os
 import re
 import sys
 from datetime import timedelta, date
 from random import randrange
 
+import pytest
+
 import mtools
 from mtools.mloginfo.mloginfo import MLogInfoTool
 from mtools.util.logfile import LogFile
+
+
+@pytest.fixture(scope="function", autouse=True)
+def patch_io(monkeypatch, capsys):
+    monkeypatch.setattr('sys.stdin', io.StringIO('my input'))
+    sys.stdin.name = 'foo'
+    sys.stdin.isatty = lambda: True
 
 
 def random_date(start, end):
@@ -22,16 +32,17 @@ def random_date(start, end):
 class TestMLogInfo(object):
     """This class tests functionality around the mloginfo tool."""
 
-    def setup(self):
+    def setup_method(self):
         """Startup method to create mloginfo tool."""
         self.tool = MLogInfoTool()
         self._test_init()
 
-    def _test_init(self, filename='mongod_225.log'):
+    @classmethod
+    def _test_init(cls, filename='mongod_225.log'):
         # load logfile(s)
-        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),
+        cls.logfile_path = os.path.join(os.path.dirname(mtools.__file__),
                                          'test/logfiles/', filename)
-        self.logfile = LogFile(open(self.logfile_path, 'rb'))
+        cls.logfile = LogFile(open(cls.logfile_path, 'rb'))
 
     def test_basic(self):
         self.tool.run('%s' % self.logfile_path)
