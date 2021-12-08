@@ -56,6 +56,9 @@ class MongoConnection(Connection):
     """
 
     def __init__(self, *args, **kwargs):
+        if pymongo_version[0] >= 4:
+            if 'directConnection' not in kwargs:
+                kwargs['directConnection'] = True
         if pymongo_version[0] >= 3:
             if 'serverSelectionTimeoutMS' not in kwargs:
                 kwargs['serverSelectionTimeoutMS'] = 1
