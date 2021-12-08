@@ -25,6 +25,8 @@ jobs:
       - name: Run Main Test
         run: |
           python -m pip install -U pip
+          # Use tox-gh to configure the python environment
+          # See https://github.com/tox-dev/tox-gh
           python -m pip install tox tox_gh pymongo==${{ matrix.pymongo-version }}
-          tox
+          tox4
  
