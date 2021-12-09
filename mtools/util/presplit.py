@@ -99,12 +99,12 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
     if verbose:
         print('chunk distribution:', end=' ')
         chunk_group = con['config']['chunks'].aggregate([
-           { '$match': { 'ns': namespace }},
-           { '$group', 
-                { '_id': '$shard',
-                  'nChunks': { '$sum': 1 }
-                }
-           }
+            { '$match': { 'ns': 'test.test2' }},
+            { '$group': { 
+                '_id': '$shard',
+                'nChunks': { '$sum': 1 }, 
+                'shard': {'$first': '$shard'}}
+            }
         ])
         print(', '.join(["%s: %i" % (ch['shard'], ch['nChunks'])
                          for ch in chunk_group]))
