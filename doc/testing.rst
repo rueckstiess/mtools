@@ -8,7 +8,7 @@ mtools uses the following testing tools:
 
 -  `tox <https://tox.readthedocs.io/en/latest/>`__ for creating a standardized
    test environment
--  `pytest testing framework <https://github.com/pytest-dev/pytest>`__ for unit
+-  `pytest testing framework <https://pytest.org>`__ for unit
    testing
 -  `flake8 <http://flake8.pycqa.org/en/latest/>`__ for style checking
 -  `isort <https://readthedocs.org/projects/isort/>`__ for import structure

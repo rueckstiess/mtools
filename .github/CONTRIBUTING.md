@@ -96,7 +96,7 @@ GitHub milestones and git tags are named with a prefix `v`, for example `v1.0.1`
 
 ### Testing
 
-mtools uses the [pytest testing framework](https://github.com/pytest-dev/pytest). You can install it with `sudo pip install pytest` or you can just run the test suite, which will take care of all the testing dependencies:
+mtools uses the [pytest testing framework](https://pytest.org). You can install it with `sudo pip install pytest` or you can just run the test suite, which will take care of all the testing dependencies:
 
     python setup.py test
 
