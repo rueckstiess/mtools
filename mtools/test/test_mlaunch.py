@@ -214,8 +214,8 @@ class TestMLaunch(object):
         mc = MongoClient('localhost:%i' % (self.port))
 
         # check for 2 shards and 1 mongos
-        assert mc['config']['shards'].count_documents() == 2
-        assert mc['config']['mongos'].count_documents() == 1
+        assert mc['config']['shards'].count_documents({}) == 2
+        assert mc['config']['mongos'].count_documents({}) == 1
 
     def helper_output_has_line_with(self, keywords, output):
         """Check if output contains a line where all keywords are present."""

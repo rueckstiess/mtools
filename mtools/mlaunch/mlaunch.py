@@ -768,7 +768,7 @@ class MLaunchTool(BaseCmdLineTool):
                 con = self.client('localhost:%i' % mongos[0])
 
                 shards_to_add = len(self.shard_connection_str)
-                nshards = con['config']['shards'].count_documents()
+                nshards = con['config']['shards'].count_documents({})
                 if nshards < shards_to_add:
                     if self.args['replicaset']:
                         print("adding shards. can take up to 30 seconds...")
@@ -779,7 +779,7 @@ class MLaunchTool(BaseCmdLineTool):
                                                  shard_names))
                 while True:
                     try:
-                        nshards = con['config']['shards'].count_documents()
+                        nshards = con['config']['shards'].count_documents({})
                     except Exception:
                         nshards = 0
                     if nshards >= shards_to_add:
