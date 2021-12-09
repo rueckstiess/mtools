@@ -28,16 +28,11 @@ except ImportError:
     import queue as Queue
 
 try:
-    try:
-        from pymongo import MongoClient as Connection
-        from pymongo import version_tuple as pymongo_version
-        from bson import SON
-        from io import BytesIO
-        from distutils.version import LooseVersion
-    except ImportError:
-        from pymongo import Connection
-        from pymongo import version_tuple as pymongo_version
-        from bson import SON
+    from pymongo import MongoClient as Connection
+    from pymongo import version_tuple as pymongo_version
+    from bson import SON
+    from io import BytesIO
+    from distutils.version import LooseVersion
 
     from pymongo.errors import ConnectionFailure, AutoReconnect
     from pymongo.errors import OperationFailure, ConfigurationError
