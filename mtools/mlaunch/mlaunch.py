@@ -52,19 +52,12 @@ class MongoConnection(Connection):
     MongoConnection class.
 
     Wrapper around Connection (itself conditionally a MongoClient or
-    pymongo.Connection) to specify timeout if pymongo >= 3.0.
+    pymongo.Connection) to specify timeout and directConnection.
     """
 
     def __init__(self, *args, **kwargs):
-        if pymongo_version[0] >= 4:
-            if 'directConnection' not in kwargs:
-                kwargs['directConnection'] = True
-        if pymongo_version[0] >= 3:
-            if 'serverSelectionTimeoutMS' not in kwargs:
-                kwargs['serverSelectionTimeoutMS'] = 1
-        else:
-            if 'serverSelectionTimeoutMS' in kwargs:
-                kwargs.remove('serverSelectionTimeoutMS')
+        kwargs.setdefault('directConnection', True)
+        kwargs.setdefault('serverSelectionTimeoutMS', 1)
 
         # Set client application name for MongoDB 3.4+ servers
         kwargs['appName'] = f'''mlaunch v{__version__}'''
