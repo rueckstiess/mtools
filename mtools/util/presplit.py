@@ -102,11 +102,10 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
             { '$match': { 'ns': namespace }},
             { '$group': { 
                 '_id': '$shard',
-                'nChunks': { '$sum': 1 }, 
-                'shard': {'$first': '$shard'}}
+                'nChunks': { '$sum': 1 }}
             }
         ])
-        print(', '.join(["%s: %i" % (ch['shard'], ch['nChunks'])
+        print(', '.join(["%s: %i" % (ch['_id'], ch['nChunks'])
                          for ch in chunk_group]))
 
 
