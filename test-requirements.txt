@@ -1,2 +1,3 @@
-coverage
-nose
+pytest-cov
+pytest
+tox

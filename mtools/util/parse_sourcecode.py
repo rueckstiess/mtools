@@ -304,7 +304,7 @@ if __name__ == '__main__':
 
         if write_to_db:
             (mc['log2code']['instances']
-             .update({'pattern': instance['pattern']}, instance,
+             .update_one({'pattern': instance['pattern']}, instance,
                      upsert=True)())
 
     pickle.dump((versions, logs_versions, logs_by_word, log_code_lines),

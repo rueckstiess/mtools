@@ -65,7 +65,7 @@ class ProfileCollection(InputSource):
 
         self.coll_handle = mc[database][collection]
 
-        if self.coll_handle.count() == 0:
+        if self.coll_handle.count_documents({}, limit=1) == 0:
             raise SystemExit("can't find any data in %s.%s collection. "
                              "Please check database and collection name."
                              % (database, collection))
@@ -88,7 +88,7 @@ class ProfileCollection(InputSource):
     def num_events(self):
         """Lazy evaluation of the number of events."""
         if not self._num_events:
-            self._num_events = self.coll_handle.count()
+            self._num_events = self.coll_handle.count_documents({})
         return self._num_events
 
     def next(self):

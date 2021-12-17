@@ -4,8 +4,7 @@ import os
 import shutil
 from distutils.version import LooseVersion
 
-from nose.plugins.skip import SkipTest
-from nose.tools import raises
+import pytest
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
@@ -14,20 +13,20 @@ class TestMLaunch(object):
 
     # Setup & teardown functions
 
-    def setUp(self):
+    def setup_method(self):
         self.base_dir = 'data_test_mlaunch'
         self.tool = MLaunchTool(test=True)
         self.tool.args = {'verbose': False}
         self.mongod_version = self.tool.getMongoDVersion()
 
-    def tearDown(self):
+    def teardown_method(self):
         self.tool = None
         if os.path.exists(self.base_dir):
             shutil.rmtree(self.base_dir)
 
     # Helper functions
 
-    @raises(SystemExit)
+    @pytest.mark.xfail(raises=SystemExit)
     def run_tool(self, arg_str):
         """Wrapper to call self.tool.run() with or without auth."""
         # name data directory according to test method name
@@ -90,24 +89,29 @@ class TestMLaunch(object):
     def check_csrs(self):
         """Check if CSRS is supported, skip test if unsupported."""
         if LooseVersion(self.mongod_version) < LooseVersion('3.1.0'):
-            raise SkipTest('CSRS not supported by MongoDB < 3.1.0')
+            raise pytest.skip('CSRS not supported by MongoDB < 3.1.0')
 
     def check_sccc(self):
         """Check if SCCC is supported, skip test if unsupported."""
         if LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
-            raise SkipTest('SCCC not supported by MongoDB >= 3.3.0')
+            raise pytest.skip('SCCC not supported by MongoDB >= 3.3.0')
 
     def check_3_4(self):
         """Check for MongoDB 3.4, skip test otherwise."""
         if LooseVersion(self.mongod_version) < LooseVersion('3.4.0'):
-            raise SkipTest('MongoDB version is < 3.4.0')
+            raise pytest.skip('MongoDB version is < 3.4.0')
 
     def check_3_6(self):
         """Check for MongoDB 3.6, skip test otherwise."""
         if LooseVersion(self.mongod_version) < LooseVersion('3.6.0'):
-            raise SkipTest('MongoDB version is < 3.6.0')
+            raise pytest.skip('MongoDB version is < 3.6.0')
 
-    @raises(IOError)
+    def check_over_3_6(self):
+        """Check for over MongoDB 3.6, skip test otherwise."""
+        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
+            raise pytest.skip('MongoDB version is >= 3.6.0')
+
+    @pytest.mark.xfail(raises=IOError)
     def raises_ioerror(self):
         """Check for IOError exceptions"""
         self.read_config()
@@ -160,10 +164,9 @@ class TestMLaunch(object):
 
     def test_sharded_single(self):
         """mlaunch should start 1 config, 2 single shards 1 mongos."""
+        self.check_over_3_6()
         self.run_tool('init --sharded 2 --single')
-        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
-            self.raises_ioerror()
-        elif LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
+        if LooseVersion(self.mongod_version) >= LooseVersion('3.3.0'):
             cmdlist = (
                 [set(['"mongod"', '--dbpath', '--logpath', '--port', '--fork',
                       '--replSet', '--configsvr'])] +
@@ -370,19 +373,17 @@ class TestMLaunch(object):
     def test_sharded_two_mongos_csrs(self):
         """mlaunch should start 2 mongos (CSRS)."""
         self.check_csrs()
+        self.check_over_3_6()
         self.run_tool('init --sharded 2 --single --config 1 --mongos 2 --csrs')
-        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
-            self.raises_ioerror()
-        else:
-            cmdlist = (
-                [set(['"mongod"', '--port', '--logpath', '--dbpath',
-                      '--configsvr', '--fork', '--replSet'])] +
-                [set(['"mongod"', '--port', '--shardsvr', '--logpath',
-                      '--dbpath', '--fork'])] * 2 +
-                [set(['"mongos"', '--port', '--logpath', '--configdb',
-                      '--fork'])] * 2
-                )
-            self.cmdlist_assert(cmdlist)
+        cmdlist = (
+            [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                    '--configsvr', '--fork', '--replSet'])] +
+            [set(['"mongod"', '--port', '--shardsvr', '--logpath',
+                    '--dbpath', '--fork'])] * 2 +
+            [set(['"mongos"', '--port', '--logpath', '--configdb',
+                    '--fork'])] * 2
+            )
+        self.cmdlist_assert(cmdlist)
 
     def test_sharded_three_mongos_sccc(self):
         """mlaunch should start 3 mongos (SCCC)."""
@@ -420,19 +421,17 @@ class TestMLaunch(object):
         mlaunch should create csrs by default -- single node shards (3.4).
         """
         self.check_3_4()
+        self.check_over_3_6()
         self.run_tool('init --sharded 2 --single')
-        if LooseVersion(self.mongod_version) >= LooseVersion('3.6.0'):
-            self.raises_ioerror()
-        else:
-            cmdlist = (
-                [set(['"mongod"', '--port', '--logpath', '--dbpath',
-                      '--configsvr', '--fork', '--replSet'])] +
-                [set(['"mongod"', '--port', '--logpath', '--dbpath',
-                      '--shardsvr', '--fork'])] * 2 +
-                [set(['"mongos"', '--port', '--logpath', '--configdb',
-                      '--fork'])]
-                )
-            self.cmdlist_assert(cmdlist)
+        cmdlist = (
+            [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                    '--configsvr', '--fork', '--replSet'])] +
+            [set(['"mongod"', '--port', '--logpath', '--dbpath',
+                    '--shardsvr', '--fork'])] * 2 +
+            [set(['"mongos"', '--port', '--logpath', '--configdb',
+                    '--fork'])]
+            )
+        self.cmdlist_assert(cmdlist)
 
     def test_default_replicaset_3_4(self):
         """mlaunch should create csrs by default -- replicaset shards (3.4)."""
@@ -514,7 +513,7 @@ class TestMLaunch(object):
             )
         self.cmdlist_assert(cmdlist)
 
-    @raises(IOError)
+    @pytest.mark.xfail(raises=SystemExit)
     def test_hostname_3_6(self):
         """
         mlaunch should not start if hostname is specified but not bind_ip.

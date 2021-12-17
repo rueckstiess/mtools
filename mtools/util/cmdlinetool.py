@@ -101,14 +101,6 @@ class BaseCmdLineTool(object):
                                     help='disables progress bar')
         self.is_stdin = not sys.stdin.isatty()
 
-        # Set stdout encoding to utf-8 if not set
-        # Need to check for nose because it monkey patches sys.stdout:
-        #     https://github.com/nose-devs/nose/issues/1065
-        if ('nose' not in sys.modules.keys()
-                and hasattr(sys.stdout, 'encoding')
-                and not sys.stdout.encoding):
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
-
     def run(self, arguments=None, get_unknowns=False):
         """
         Init point to execute the script.

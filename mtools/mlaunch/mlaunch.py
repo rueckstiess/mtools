@@ -28,16 +28,11 @@ except ImportError:
     import queue as Queue
 
 try:
-    try:
-        from pymongo import MongoClient as Connection
-        from pymongo import version_tuple as pymongo_version
-        from bson import SON
-        from io import BytesIO
-        from distutils.version import LooseVersion
-    except ImportError:
-        from pymongo import Connection
-        from pymongo import version_tuple as pymongo_version
-        from bson import SON
+    from pymongo import MongoClient as Connection
+    from pymongo import version_tuple as pymongo_version
+    from bson import SON
+    from io import BytesIO
+    from distutils.version import LooseVersion
 
     from pymongo.errors import ConnectionFailure, AutoReconnect
     from pymongo.errors import OperationFailure, ConfigurationError
@@ -52,16 +47,12 @@ class MongoConnection(Connection):
     MongoConnection class.
 
     Wrapper around Connection (itself conditionally a MongoClient or
-    pymongo.Connection) to specify timeout if pymongo >= 3.0.
+    pymongo.Connection) to specify timeout and directConnection.
     """
 
     def __init__(self, *args, **kwargs):
-        if pymongo_version[0] >= 3:
-            if 'serverSelectionTimeoutMS' not in kwargs:
-                kwargs['serverSelectionTimeoutMS'] = 1
-        else:
-            if 'serverSelectionTimeoutMS' in kwargs:
-                kwargs.remove('serverSelectionTimeoutMS')
+        kwargs.setdefault('directConnection', True)
+        kwargs.setdefault('serverSelectionTimeoutMS', 1)
 
         # Set client application name for MongoDB 3.4+ servers
         kwargs['appName'] = f'''mlaunch v{__version__}'''
@@ -119,19 +110,15 @@ def shutdown_host(port, username=None, password=None, authdb=None):
     """
     host = 'localhost:%i' % port
     try:
-        mc = MongoConnection(host)
+        if username and password and authdb:
+            if authdb != "admin":
+                raise RuntimeError("given username/password is not for "
+                                    "admin database")
+            mc = MongoConnection(host, username=username, password=password)
+        else:
+            mc = MongoConnection(host)
+        
         try:
-            if username and password and authdb:
-                if authdb != "admin":
-                    raise RuntimeError("given username/password is not for "
-                                       "admin database")
-                else:
-                    try:
-                        mc.admin.authenticate(name=username, password=password)
-                    except OperationFailure:
-                        # perhaps auth is not required
-                        pass
-
             mc.admin.command('shutdown', force=True)
         except AutoReconnect:
             pass
@@ -693,7 +680,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # exit if running in testing mode
         if self.test:
-            sys.exit(0)
+            return
 
         # check if authentication is enabled, make key file
         if self.args['auth'] and first_init:
@@ -769,7 +756,7 @@ class MLaunchTool(BaseCmdLineTool):
                 con = self.client('localhost:%i' % mongos[0])
 
                 shards_to_add = len(self.shard_connection_str)
-                nshards = con['config']['shards'].count()
+                nshards = con['config']['shards'].count_documents({})
                 if nshards < shards_to_add:
                     if self.args['replicaset']:
                         print("adding shards. can take up to 30 seconds...")
@@ -780,7 +767,7 @@ class MLaunchTool(BaseCmdLineTool):
                                                  shard_names))
                 while True:
                     try:
-                        nshards = con['config']['shards'].count()
+                        nshards = con['config']['shards'].count_documents({})
                     except Exception:
                         nshards = 0
                     if nshards >= shards_to_add:
@@ -1867,19 +1854,10 @@ class MLaunchTool(BaseCmdLineTool):
             password = None
 
         try:
-            con[database].add_user(name, password=password, roles=roles,
+            con[database].command("createUser", name, pwd=password, roles=roles,
                                    **opts)
         except OperationFailure as e:
             raise e
-        except TypeError as e:
-            if pymongo_version < (2, 5, 0):
-                con[database].add_user(name, password=password, **opts)
-                warnings.warn("Your pymongo version is too old to support "
-                              "auth roles. Added a legacy user with root "
-                              "access. To support roles, you need to upgrade "
-                              "to pymongo >= 2.5.0")
-            else:
-                raise e
 
     def _get_processes(self):
         all_ports = self.get_tagged(['running'])
