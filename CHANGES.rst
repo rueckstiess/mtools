@@ -2,6 +2,28 @@
 Changes to mtools
 =================
 
+version 1.7.0
+~~~~~~~~~~~~~
+ * Update for PyMongo 4 and add GitHub Actions (#845)
+ * Replace Nose with an actively maintained unit testing library (#842)
+ * Remove usage of "six" library (#786)
+ * Add Python 3.9 compatibility (#813)
+ * Add Python 3.10 compatibility (#841)
+ * Python 3.6 End-of-Life (#840)
+ * Replace OG Python string formatting with f-strings (#787)
+ * mlaunch: Cache the server's help and version output (#817)
+ * mlaunch: Fix --auth does not quote --keyFile parameter (#830)
+ * mlaunch: Add `mlaunch list --json` (#832)
+ * mlaunch: Add TLS aliases for SSL options (#784)
+ * mlaunch: Handle missing MongoDB binaries more gracefully (#846)
+ * mloginfo: Incorrectly shows multiple versions (#815)
+ * mloginfo: Reports host name as unknown for 3.6 logs (#819)
+ * mlogvis: Deprecate mlogvis (#776)
+ * mplotqueries: --overlay example not working (#818)
+
+Thanks to @stennie, @blink1073, @ShaneHarvey, @joedougherty, @ajdavis,
+@virajut, @niccottrell, and @podollb for contributions to this release.
+
 version 1.6.4
 ~~~~~~~~~~~~~
  * mlaunch: Fix psutil 5.7.0 issue on Windows 10 (#810)
