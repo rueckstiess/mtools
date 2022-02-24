@@ -907,7 +907,11 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
 
-        out = check_mongo_server_output(binary, '--version')
+        try:
+            out = check_mongo_server_output(binary, '--version')
+        except Exception:
+            return "0.0"
+
         buf = BytesIO(out)
         current_version = buf.readline().strip().decode('utf-8')
         # remove prefix "db version v"
@@ -1577,7 +1581,13 @@ class MLaunchTool(BaseCmdLineTool):
         # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join(self.args['binarypath'], binary)
-        out = check_mongo_server_output(binary, '--help')
+
+        try:
+            out = check_mongo_server_output(binary, '--help')
+        except Exception:
+            raise SystemExit("Fatal error trying get output from `%s`."
+                "Is the binary in your path?" % binary)
+
         accepted_arguments = []
         # extract all arguments starting with a '-'
         for line in [option for option in out.decode('utf-8').split('\n')]:
