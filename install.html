@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.4
+                1.7.0
               </div>
             
           
@@ -108,7 +108,6 @@
 <li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
@@ -179,17 +178,17 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
 <p>The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.6, 3.7, and 3.8.</p>
+Python 3.7, 3.8, and 3.9.</p>
 <p>Some of the tools have additional dependencies, which are listed under the
 specific tool’s section.</p>
 <p>The mtools suite is only tested with actively supported (non End-of-Life)
-versions of the MongoDB server. As of January 2020, that includes MongoDB 3.6
-or newer.</p>
+versions of the MongoDB server. As of December 2021, that includes
+MongoDB 4.0 or newer.</p>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">#</a></h2>
 <dl>
-<dt>Python</dt><dd><p>You need to have Python 3.6.x, 3.7.x, or 3.8.x installed in order to use
-mtools. Other versions of Python are not currently supported.</p>
+<dt>Python</dt><dd><p>You need to have Python 3.7.x, 3.8.x, or 3.9.x installed in order to
+use mtools. Other versions of Python are not currently supported or tested.</p>
 <p>To check your Python version, run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> on the command line.</p>
 </dd>
 </dl>
@@ -202,10 +201,10 @@ mtools. Other versions of Python are not currently supported.</p>
 </div>
 <p>Some mtools scripts have additional <a class="reference internal" href="#dependencies">dependencies</a>. To install all optional
 dependencies use:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>all<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install <span class="s1">&#39;mtools[all]&#39;</span>
 </pre></div>
 </div>
-<p>You need to have Python 3.6 or newer installed. <code class="docutils literal notranslate"><span class="pre">pip3</span></code> should be included as
+<p>You need to have Python 3.7 or newer installed. <code class="docutils literal notranslate"><span class="pre">pip3</span></code> should be included as
 part of the default install for supported versions of Python 3.</p>
 <p>Depending on your user rights, <code class="docutils literal notranslate"><span class="pre">pip3</span></code> may complain about not having
 permissions to install into the system directory.</p>
@@ -238,12 +237,12 @@ scripts directly from the command line.</p>
 <p>The full list of requirements (some of which are already included in the Python
 standard library) can be found in the <a class="reference external" href="https://github.com/rueckstiess/mtools/blob/develop/requirements.txt">requirements.txt</a> file.</p>
 <p>To install all dependencies for full feature support, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>all<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install <span class="s1">&#39;mtools[all]&#39;</span>
 </pre></div>
 </div>
 <p>To install dependencies for a subset of mtools utilities, specify one or more
 script names as a comma-separated list:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install mtools<span class="o">[</span>mlaunch,mloginfo<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install <span class="s1">&#39;mtools[mlaunch,mloginfo]&#39;</span>
 </pre></div>
 </div>
 <div class="section" id="psutil">

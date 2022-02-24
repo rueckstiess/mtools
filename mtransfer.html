@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.4
+                1.7.0
               </div>
             
           
@@ -95,7 +95,6 @@
 <li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">mtransfer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#caveats">Caveats</a></li>
@@ -213,21 +212,21 @@ files directly is inherently dangerous. Take care to test and backup your data.<
 <p>The <code class="docutils literal notranslate"><span class="pre">mtransfer</span></code> script requires the
 <a class="reference external" href="https://pypi.org/project/wiredtiger/">wiredtiger Python library</a>
 which is currently not installed by default with <code class="docutils literal notranslate"><span class="pre">mtools</span></code>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code> library can be installed via <code class="docutils literal notranslate"><span class="pre">pip</span></code> or built from source,
+<p>The <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code> library can be installed via <code class="docutils literal notranslate"><span class="pre">pip3</span></code> or built from source,
 but in either case requires:</p>
 <ul class="simple">
 <li><p>A C compiler.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">snappy</span></code> and <code class="docutils literal notranslate"><span class="pre">zlib</span></code> development packages installed.</p></li>
 </ul>
-<p>To install via <code class="docutils literal notranslate"><span class="pre">pip</span></code> use either of:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mtools<span class="o">[</span>mtransfer<span class="o">]</span>
+<p>To install via <code class="docutils literal notranslate"><span class="pre">pip3</span></code> use either of:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install <span class="s1">&#39;mtools[mtransfer]&#39;</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install wiredtiger
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install wiredtiger
 </pre></div>
 </div>
 <p>If you are encountering errors using or installing the <code class="docutils literal notranslate"><span class="pre">wiredtiger</span></code> module
-via <cite>pip</cite>, you may need to <a class="reference external" href="http://source.wiredtiger.com/develop/build-posix.html">Build and install WiredTiger from source</a>.</p>
+via <cite>pip3</cite>, you may need to <a class="reference external" href="http://source.wiredtiger.com/develop/build-posix.html">Build and install WiredTiger from source</a>.</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">#</a></h2>

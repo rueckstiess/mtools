@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.6.4
+                1.7.0
               </div>
             
           
@@ -95,7 +95,6 @@
 <li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Contribute to mtools</a><ul class="current">
@@ -181,7 +180,7 @@
 <ul class="simple">
 <li><p><a class="reference external" href="https://tox.readthedocs.io/en/latest/">tox</a> for creating a standardized
 test environment</p></li>
-<li><p><a class="reference external" href="https://github.com/nose-devs/nose">nose testing framework</a> for unit
+<li><p><a class="reference external" href="https://pytest.org">pytest testing framework</a> for unit
 testing</p></li>
 <li><p><a class="reference external" href="http://flake8.pycqa.org/en/latest/">flake8</a> for style checking</p></li>
 <li><p><a class="reference external" href="https://readthedocs.org/projects/isort/">isort</a> for import structure
@@ -239,7 +238,7 @@ certain tests.</p>
     <span class="o">-</span><span class="n">r</span><span class="p">{</span><span class="n">toxinidir</span><span class="p">}</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
     <span class="o">-</span><span class="n">r</span><span class="p">{</span><span class="n">toxinidir</span><span class="p">}</span><span class="o">/</span><span class="n">test</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 <span class="n">whitelist_externals</span> <span class="o">=</span> <span class="n">make</span>
-<span class="n">commands</span> <span class="o">=</span> <span class="n">nosetests</span> <span class="o">--</span><span class="n">detailed</span><span class="o">-</span><span class="n">errors</span> <span class="o">--</span><span class="n">verbose</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">coverage</span> <span class="o">--</span><span class="n">cover</span><span class="o">-</span><span class="n">package</span><span class="o">=</span><span class="n">mtools</span>
+<span class="n">commands</span> <span class="o">=</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">cov</span> <span class="n">mtools</span> <span class="o">--</span><span class="n">cov</span><span class="o">-</span><span class="n">branch</span> <span class="o">--</span><span class="n">cov</span><span class="o">-</span><span class="n">report</span> <span class="n">term</span><span class="o">-</span><span class="n">missing</span><span class="p">:</span><span class="n">skip</span><span class="o">-</span><span class="n">covered</span>
 
 <span class="p">[</span><span class="n">testenv</span><span class="p">:</span><span class="n">doc</span><span class="p">]</span>
 <span class="n">deps</span> <span class="o">=</span>
@@ -264,7 +263,7 @@ certain tests.</p>
 <span class="p">[</span><span class="n">testenv</span><span class="p">:</span><span class="n">isort</span><span class="p">]</span>
 <span class="n">deps</span> <span class="o">=</span> <span class="n">isort</span>
 <span class="n">commands</span> <span class="o">=</span>
-    <span class="n">isort</span> <span class="o">-</span><span class="n">c</span> <span class="o">--</span><span class="n">diff</span> <span class="o">-</span><span class="n">s</span> <span class="o">.</span><span class="n">tox</span> <span class="o">-</span><span class="n">o</span> <span class="n">dateutil</span> <span class="o">-</span><span class="n">o</span> <span class="n">numpy</span> <span class="o">-</span><span class="n">o</span> <span class="n">pymongo</span> <span class="o">-</span><span class="n">o</span> <span class="n">bson</span> <span class="o">-</span><span class="n">o</span> <span class="n">nose</span>
+    <span class="n">isort</span> <span class="o">-</span><span class="n">c</span> <span class="o">--</span><span class="n">diff</span> <span class="o">-</span><span class="n">s</span> <span class="o">.</span><span class="n">tox</span> <span class="o">-</span><span class="n">o</span> <span class="n">dateutil</span> <span class="o">-</span><span class="n">o</span> <span class="n">numpy</span> <span class="o">-</span><span class="n">o</span> <span class="n">pymongo</span> <span class="o">-</span><span class="n">o</span> <span class="n">bson</span> <span class="o">-</span><span class="n">o</span> <span class="n">pytest</span>
 
 <span class="p">[</span><span class="n">testenv</span><span class="p">:</span><span class="n">pydocstyle</span><span class="p">]</span>
 <span class="n">deps</span> <span class="o">=</span> <span class="n">pydocstyle</span>

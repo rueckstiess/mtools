@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.6.4
+                1.7.0
               </div>
             
           
@@ -94,11 +94,11 @@
 <li class="toctree-l1"><a class="reference internal" href="mlaunch.html">mlaunch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mlogfilter.html">mlogfilter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mloginfo.html">mloginfo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mlogvis.html">mlogvis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mplotqueries.html">mplotqueries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mtransfer.html">mtransfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribute to mtools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changes to mtools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-7-0">version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-6-4">version 1.6.4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-6-3">version 1.6.3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-6-2">version 1.6.2</a></li>
@@ -204,6 +204,31 @@
             
   <div class="section" id="changes-to-mtools">
 <h1>Changes to mtools<a class="headerlink" href="#changes-to-mtools" title="Permalink to this headline">#</a></h1>
+<div class="section" id="version-1-7-0">
+<h2>version 1.7.0<a class="headerlink" href="#version-1-7-0" title="Permalink to this headline">#</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Update for PyMongo 4 and add GitHub Actions (#845)</p></li>
+<li><p>Replace Nose with an actively maintained unit testing library (#842)</p></li>
+<li><p>Remove usage of “six” library (#786)</p></li>
+<li><p>Add Python 3.9 compatibility (#813)</p></li>
+<li><p>Add Python 3.10 compatibility (#841)</p></li>
+<li><p>Python 3.6 End-of-Life (#840)</p></li>
+<li><p>Replace OG Python string formatting with f-strings (#787)</p></li>
+<li><p>mlaunch: Cache the server’s help and version output (#817)</p></li>
+<li><p>mlaunch: Fix –auth does not quote –keyFile parameter (#830)</p></li>
+<li><p>mlaunch: Add <cite>mlaunch list –json</cite> (#832)</p></li>
+<li><p>mlaunch: Add TLS aliases for SSL options (#784)</p></li>
+<li><p>mlaunch: Handle missing MongoDB binaries more gracefully (#846)</p></li>
+<li><p>mloginfo: Incorrectly shows multiple versions (#815)</p></li>
+<li><p>mloginfo: Reports host name as unknown for 3.6 logs (#819)</p></li>
+<li><p>mlogvis: Deprecate mlogvis (#776)</p></li>
+<li><p>mplotqueries: –overlay example not working (#818)</p></li>
+</ul>
+</div></blockquote>
+<p>Thanks to &#64;stennie, &#64;blink1073, &#64;ShaneHarvey, &#64;joedougherty, &#64;ajdavis,
+&#64;virajut, &#64;niccottrell, and &#64;podollb for contributions to this release.</p>
+</div>
 <div class="section" id="version-1-6-4">
 <h2>version 1.6.4<a class="headerlink" href="#version-1-6-4" title="Permalink to this headline">#</a></h2>
 <blockquote>
