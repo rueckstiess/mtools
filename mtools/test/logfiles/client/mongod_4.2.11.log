@@ -1,0 +1,503 @@
+2020-03-12T00:00:01.935+0000 I  CONTROL  [signalProcessingThread] pid=83759 port=27017 64-bit host=ip-10-118-120-0.ec2.internal
+2020-03-12T00:00:01.936+0000 I  CONTROL  [signalProcessingThread] Replica Set Config: { _id: "rs1", version: 388, protocolVersion: 1, writeConcernMajorityJournalDefault: true, members: [ { _id: 100, host: "10.118.25.211:27017", arbiterOnly: false, buildIndexes: true, hidden: true, priority: 0.0, tags: {}, slaveDelay: 0, votes: 0 }, { _id: 109, host: "node3.acme.com:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 110, host: "node2.acme.com:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 111, host: "node1.acme.com:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 112, host: "10.114.189.255:27017", arbiterOnly: false, buildIndexes: true, hidden: true, priority: 0.0, tags: {}, slaveDelay: 0, votes: 0 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, catchUpTimeoutMillis: 60000, catchUpTakeoverDelayMillis: 30000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 } } }
+2020-03-12T00:00:01.936+0000 I  CONTROL  [signalProcessingThread] Replica Set Member State: PRIMARY
+2020-03-12T00:00:01.936+0000 I  CONTROL  [signalProcessingThread] db version v4.2.11
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] git version: ea38428f0c6742c7c2c7f677e73d79e17a2aab96
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] allocator: tcmalloc
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] modules: enterprise 
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] build environment:
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread]     distmod: amazon2
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread]     distarch: x86_64
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread]     target_arch: x86_64
+2020-03-12T00:00:01.937+0000 I  CONTROL  [signalProcessingThread] options: { config: "/etc/mongod.conf", net: { bindIp: "0.0.0.0", port: 27017 }, processManagement: { fork: true, pidFilePath: "/var/run/mongodb/mongod.pid", timeZoneInfo: "/usr/share/zoneinfo" }, replication: { oplogSizeMB: 122880, replSetName: "rs1" }, security: { authorization: "enabled", keyFile: "/var/lib/mongo/keyfile" }, storage: { dbPath: "/data", engine: "wiredTiger", journal: { enabled: true } }, systemLog: { destination: "file", logAppend: true, path: "/var/log/mongodb/mongod.log" } }
+2020-03-12T00:00:06.340+0000 I  ACCESS   [conn888] Successfully authenticated as principal service-user on Main from client 88.888.88.88:18194
+2020-03-12T00:00:02.257+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50202 #6677825 (6306 connections now open)
+2020-03-12T00:00:02.257+0000 I  NETWORK  [conn6677825] received client metadata from 10.118.67.176:50202 conn6677825: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:02.405+0000 I  NETWORK  [conn6677825] end connection 10.118.67.176:50202 (6305 connections now open)
+2020-03-12T00:00:06.218+0000 I  NETWORK  [listener] connection accepted from 10.118.21.82:18194 #6677826 (6306 connections now open)
+2020-03-12T00:00:06.238+0000 I  NETWORK  [conn6677826] received client metadata from 10.118.21.82:18194 conn6677826: { driver: { name: "nodejs", version: "3.5.8" }, os: { type: "Linux", name: "linux", architecture: "x64", version: "4.14.246-198.474.amzn2.x86_64" }, platform: "'Node.js v12.22.7, LE (unified)" }
+2020-03-12T00:00:06.340+0000 I  ACCESS   [conn6677826] Successfully authenticated as principal service-user on Main from client 10.118.21.82:18194
+2020-03-12T00:00:06.377+0000 I  NETWORK  [listener] connection accepted from 10.118.21.82:2065 #6677827 (6307 connections now open)
+2020-03-12T00:00:06.378+0000 I  NETWORK  [conn6677827] received client metadata from 10.118.21.82:2065 conn6677827: { driver: { name: "nodejs", version: "3.5.8" }, os: { type: "Linux", name: "linux", architecture: "x64", version: "4.14.246-198.474.amzn2.x86_64" }, platform: "'Node.js v12.22.7, LE (unified)" }
+2020-03-12T00:00:06.384+0000 I  ACCESS   [conn6677827] Successfully authenticated as principal service-user on Main from client 10.118.21.82:2065
+2020-03-12T00:00:07.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45920 #6677828 (6308 connections now open)
+2020-03-12T00:00:07.042+0000 I  NETWORK  [conn6677828] received client metadata from 127.0.0.1:45920 conn6677828: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:07.043+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45922 #6677829 (6309 connections now open)
+2020-03-12T00:00:07.043+0000 I  NETWORK  [conn6677829] received client metadata from 127.0.0.1:45922 conn6677829: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:07.050+0000 I  ACCESS   [conn6677829] Successfully authenticated as principal adv-monitoring on admin from client 127.0.0.1:45922
+2020-03-12T00:00:07.068+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45924 #6677830 (6310 connections now open)
+2020-03-12T00:00:07.068+0000 I  NETWORK  [conn6677830] received client metadata from 127.0.0.1:45924 conn6677830: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:07.070+0000 I  NETWORK  [conn6677830] end connection 127.0.0.1:45924 (6309 connections now open)
+2020-03-12T00:00:07.071+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40222 #6677831 (6310 connections now open)
+2020-03-12T00:00:07.071+0000 I  NETWORK  [conn6677831] received client metadata from 10.118.120.0:40222 conn6677831: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:07.076+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40226 #6677832 (6311 connections now open)
+2020-03-12T00:00:07.076+0000 I  NETWORK  [conn6677832] received client metadata from 10.118.120.0:40226 conn6677832: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:07.083+0000 I  ACCESS   [conn6677832] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40226
+2020-03-12T00:00:07.224+0000 I  NETWORK  [conn6677831] end connection 10.118.120.0:40222 (6310 connections now open)
+2020-03-12T00:00:07.224+0000 I  NETWORK  [conn6677832] end connection 10.118.120.0:40226 (6309 connections now open)
+2020-03-12T00:00:07.224+0000 I  NETWORK  [conn6677829] end connection 127.0.0.1:45922 (6308 connections now open)
+2020-03-12T00:00:07.224+0000 I  NETWORK  [conn6677828] end connection 127.0.0.1:45920 (6307 connections now open)
+2020-03-12T00:00:08.081+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43810 #6677833 (6308 connections now open)
+2020-03-12T00:00:08.081+0000 I  NETWORK  [conn6677833] received client metadata from 10.118.63.36:43810 conn6677833: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:08.244+0000 I  NETWORK  [conn6677833] end connection 10.118.63.36:43810 (6307 connections now open)
+2020-03-12T00:00:11.845+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57212 #6677834 (6308 connections now open)
+2020-03-12T00:00:11.845+0000 I  NETWORK  [conn6677834] received client metadata from 10.118.25.211:57212 conn6677834: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:11.965+0000 I  NETWORK  [conn6677834] end connection 10.118.25.211:57212 (6307 connections now open)
+2020-03-12T00:00:17.257+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50232 #6677835 (6308 connections now open)
+2020-03-12T00:00:17.258+0000 I  NETWORK  [conn6677835] received client metadata from 10.118.67.176:50232 conn6677835: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:17.401+0000 I  NETWORK  [conn6677835] end connection 10.118.67.176:50232 (6307 connections now open)
+2020-03-12T00:00:22.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45936 #6677836 (6308 connections now open)
+2020-03-12T00:00:22.041+0000 I  NETWORK  [conn6677836] received client metadata from 127.0.0.1:45936 conn6677836: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:22.043+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45938 #6677837 (6309 connections now open)
+2020-03-12T00:00:22.043+0000 I  NETWORK  [conn6677837] received client metadata from 127.0.0.1:45938 conn6677837: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:22.049+0000 I  ACCESS   [conn6677837] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:45938
+2020-03-12T00:00:22.066+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45940 #6677838 (6310 connections now open)
+2020-03-12T00:00:22.067+0000 I  NETWORK  [conn6677838] received client metadata from 127.0.0.1:45940 conn6677838: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:22.068+0000 I  NETWORK  [conn6677838] end connection 127.0.0.1:45940 (6309 connections now open)
+2020-03-12T00:00:22.070+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40238 #6677839 (6310 connections now open)
+2020-03-12T00:00:22.070+0000 I  NETWORK  [conn6677839] received client metadata from 10.118.120.0:40238 conn6677839: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:22.233+0000 I  NETWORK  [conn6677839] end connection 10.118.120.0:40238 (6309 connections now open)
+2020-03-12T00:00:22.234+0000 I  NETWORK  [conn6677837] end connection 127.0.0.1:45938 (6308 connections now open)
+2020-03-12T00:00:22.234+0000 I  NETWORK  [conn6677836] end connection 127.0.0.1:45936 (6307 connections now open)
+2020-03-12T00:00:23.084+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43826 #6677840 (6308 connections now open)
+2020-03-12T00:00:23.085+0000 I  NETWORK  [conn6677840] received client metadata from 10.118.63.36:43826 conn6677840: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:23.230+0000 I  NETWORK  [conn6677840] end connection 10.118.63.36:43826 (6307 connections now open)
+2020-03-12T00:00:26.848+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57234 #6677841 (6308 connections now open)
+2020-03-12T00:00:26.848+0000 I  NETWORK  [conn6677841] received client metadata from 10.118.25.211:57234 conn6677841: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:26.961+0000 I  NETWORK  [conn6677841] end connection 10.118.25.211:57234 (6307 connections now open)
+2020-03-12T00:00:32.267+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50268 #6677842 (6308 connections now open)
+2020-03-12T00:00:32.267+0000 I  NETWORK  [conn6677842] received client metadata from 10.118.67.176:50268 conn6677842: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:32.400+0000 I  NETWORK  [conn6677842] end connection 10.118.67.176:50268 (6307 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:46913 #6677843 (6308 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:23518 #6677844 (6309 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:37554 #6677845 (6310 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:38918 #6677846 (6311 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677844] received client metadata from 10.118.70.65:23518 conn6677844: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:24004 #6677847 (6312 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677845] received client metadata from 10.118.70.65:37554 conn6677845: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:37966 #6677848 (6313 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:47355 #6677849 (6314 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677847] received client metadata from 10.118.70.65:24004 conn6677847: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:26653 #6677850 (6315 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677848] received client metadata from 10.118.70.65:37966 conn6677848: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.861+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:26595 #6677851 (6316 connections now open)
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677843] received client metadata from 10.118.70.65:46913 conn6677843: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.861+0000 I  NETWORK  [conn6677846] received client metadata from 10.118.70.65:38918 conn6677846: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.862+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:8263 #6677852 (6317 connections now open)
+2020-03-12T00:00:35.862+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:13327 #6677853 (6318 connections now open)
+2020-03-12T00:00:35.862+0000 I  NETWORK  [conn6677851] received client metadata from 10.118.70.65:26595 conn6677851: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.862+0000 I  NETWORK  [conn6677852] received client metadata from 10.118.70.65:8263 conn6677852: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.862+0000 I  NETWORK  [conn6677850] received client metadata from 10.118.70.65:26653 conn6677850: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.862+0000 I  NETWORK  [conn6677853] received client metadata from 10.118.70.65:13327 conn6677853: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.862+0000 I  NETWORK  [conn6677849] received client metadata from 10.118.70.65:47355 conn6677849: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.918+0000 I  ACCESS   [conn6677848] Successfully authenticated as principal main-service on admin from client 10.118.70.65:37966
+2020-03-12T00:00:35.919+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:62129 #6677854 (6319 connections now open)
+2020-03-12T00:00:35.937+0000 I  NETWORK  [conn6677854] received client metadata from 10.118.70.65:62129 conn6677854: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:35.938+0000 I  ACCESS   [conn6677843] Successfully authenticated as principal main-service on admin from client 10.118.70.65:46913
+2020-03-12T00:00:35.939+0000 I  ACCESS   [conn6677850] Successfully authenticated as principal main-service on admin from client 10.118.70.65:26653
+2020-03-12T00:00:35.957+0000 I  ACCESS   [conn6677846] Successfully authenticated as principal main-service on admin from client 10.118.70.65:38918
+2020-03-12T00:00:35.958+0000 I  ACCESS   [conn6677851] Successfully authenticated as principal main-service on admin from client 10.118.70.65:26595
+2020-03-12T00:00:35.958+0000 I  ACCESS   [conn6677849] Successfully authenticated as principal main-service on admin from client 10.118.70.65:47355
+2020-03-12T00:00:35.997+0000 I  ACCESS   [conn6677853] Successfully authenticated as principal main-service on admin from client 10.118.70.65:13327
+2020-03-12T00:00:36.014+0000 I  ACCESS   [conn6677845] Successfully authenticated as principal main-service on admin from client 10.118.70.65:37554
+2020-03-12T00:00:36.076+0000 I  ACCESS   [conn6677844] Successfully authenticated as principal main-service on admin from client 10.118.70.65:23518
+2020-03-12T00:00:36.076+0000 I  ACCESS   [conn6677852] Successfully authenticated as principal main-service on admin from client 10.118.70.65:8263
+2020-03-12T00:00:37.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45960 #6677855 (6320 connections now open)
+2020-03-12T00:00:37.042+0000 I  NETWORK  [conn6677855] received client metadata from 127.0.0.1:45960 conn6677855: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:37.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45962 #6677856 (6321 connections now open)
+2020-03-12T00:00:37.043+0000 I  NETWORK  [conn6677856] received client metadata from 127.0.0.1:45962 conn6677856: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:37.049+0000 I  ACCESS   [conn6677856] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:45962
+2020-03-12T00:00:37.068+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45964 #6677857 (6322 connections now open)
+2020-03-12T00:00:37.069+0000 I  NETWORK  [conn6677857] received client metadata from 127.0.0.1:45964 conn6677857: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:37.071+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40262 #6677858 (6323 connections now open)
+2020-03-12T00:00:37.071+0000 I  NETWORK  [conn6677857] end connection 127.0.0.1:45964 (6322 connections now open)
+2020-03-12T00:00:37.071+0000 I  NETWORK  [conn6677858] received client metadata from 10.118.120.0:40262 conn6677858: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:37.072+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40266 #6677859 (6323 connections now open)
+2020-03-12T00:00:37.073+0000 I  NETWORK  [conn6677859] received client metadata from 10.118.120.0:40266 conn6677859: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:37.079+0000 I  ACCESS   [conn6677859] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40266
+2020-03-12T00:00:37.217+0000 I  NETWORK  [conn6677859] end connection 10.118.120.0:40266 (6322 connections now open)
+2020-03-12T00:00:37.217+0000 I  NETWORK  [conn6677858] end connection 10.118.120.0:40262 (6321 connections now open)
+2020-03-12T00:00:37.218+0000 I  NETWORK  [conn6677856] end connection 127.0.0.1:45962 (6320 connections now open)
+2020-03-12T00:00:37.218+0000 I  NETWORK  [conn6677855] end connection 127.0.0.1:45960 (6319 connections now open)
+2020-03-12T00:00:38.080+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43840 #6677860 (6320 connections now open)
+2020-03-12T00:00:38.080+0000 I  NETWORK  [conn6677860] received client metadata from 10.118.63.36:43840 conn6677860: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:38.212+0000 I  NETWORK  [conn6677860] end connection 10.118.63.36:43840 (6319 connections now open)
+2020-03-12T00:00:41.845+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57248 #6677861 (6320 connections now open)
+2020-03-12T00:00:41.846+0000 I  NETWORK  [conn6677861] received client metadata from 10.118.25.211:57248 conn6677861: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:41.964+0000 I  NETWORK  [conn6677861] end connection 10.118.25.211:57248 (6319 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677473] end connection 10.118.70.65:29165 (6318 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677468] end connection 10.118.70.65:53713 (6316 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677469] end connection 10.118.70.65:53097 (6317 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677467] end connection 10.118.70.65:27028 (6315 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677465] end connection 10.118.70.65:52788 (6313 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677474] end connection 10.118.70.65:58526 (6312 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677472] end connection 10.118.70.65:2774 (6314 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677470] end connection 10.118.70.65:6070 (6311 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677475] end connection 10.118.70.65:44888 (6310 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677466] end connection 10.118.70.65:44318 (6309 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677464] end connection 10.118.70.65:3807 (6308 connections now open)
+2020-03-12T00:00:44.221+0000 I  NETWORK  [conn6677471] end connection 10.118.70.65:14404 (6307 connections now open)
+2020-03-12T00:00:47.258+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50306 #6677862 (6308 connections now open)
+2020-03-12T00:00:47.258+0000 I  NETWORK  [conn6677862] received client metadata from 10.118.67.176:50306 conn6677862: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:47.393+0000 I  NETWORK  [conn6677862] end connection 10.118.67.176:50306 (6307 connections now open)
+2020-03-12T00:00:52.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45978 #6677863 (6308 connections now open)
+2020-03-12T00:00:52.041+0000 I  NETWORK  [conn6677863] received client metadata from 127.0.0.1:45978 conn6677863: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:52.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45980 #6677864 (6309 connections now open)
+2020-03-12T00:00:52.043+0000 I  NETWORK  [conn6677864] received client metadata from 127.0.0.1:45980 conn6677864: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:52.049+0000 I  ACCESS   [conn6677864] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:45980
+2020-03-12T00:00:52.066+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:45982 #6677865 (6310 connections now open)
+2020-03-12T00:00:52.066+0000 I  NETWORK  [conn6677865] received client metadata from 127.0.0.1:45982 conn6677865: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:52.068+0000 I  NETWORK  [conn6677865] end connection 127.0.0.1:45982 (6309 connections now open)
+2020-03-12T00:00:52.068+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40278 #6677866 (6310 connections now open)
+2020-03-12T00:00:52.069+0000 I  NETWORK  [conn6677866] received client metadata from 10.118.120.0:40278 conn6677866: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:52.070+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40280 #6677867 (6311 connections now open)
+2020-03-12T00:00:52.071+0000 I  NETWORK  [conn6677867] received client metadata from 10.118.120.0:40280 conn6677867: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:52.077+0000 I  ACCESS   [conn6677867] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40280
+2020-03-12T00:00:52.217+0000 I  NETWORK  [conn6677867] end connection 10.118.120.0:40280 (6310 connections now open)
+2020-03-12T00:00:52.217+0000 I  NETWORK  [conn6677866] end connection 10.118.120.0:40278 (6309 connections now open)
+2020-03-12T00:00:52.217+0000 I  NETWORK  [conn6677864] end connection 127.0.0.1:45980 (6308 connections now open)
+2020-03-12T00:00:52.217+0000 I  NETWORK  [conn6677863] end connection 127.0.0.1:45978 (6307 connections now open)
+2020-03-12T00:00:53.082+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43862 #6677868 (6308 connections now open)
+2020-03-12T00:00:53.082+0000 I  NETWORK  [conn6677868] received client metadata from 10.118.63.36:43862 conn6677868: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:53.222+0000 I  NETWORK  [conn6677868] end connection 10.118.63.36:43862 (6307 connections now open)
+2020-03-12T00:00:55.746+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40290 #6677869 (6308 connections now open)
+2020-03-12T00:00:55.746+0000 I  NETWORK  [conn6677869] received client metadata from 10.118.120.0:40290 conn6677869: { driver: { name: "mongo-go-driver", version: "v1.3.4" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.15.15", application: { name: "MongoDB Backup Module v11.5.1.7087 (git: f409444470c4888d80a6d1fa577203c7b8c78215)" } }
+2020-03-12T00:00:55.752+0000 I  ACCESS   [conn6677869] Successfully authenticated as principal backups on admin from client 10.118.120.0:40290
+2020-03-12T00:00:56.845+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57268 #6677870 (6309 connections now open)
+2020-03-12T00:00:56.845+0000 I  NETWORK  [conn6677870] received client metadata from 10.118.25.211:57268 conn6677870: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:00:56.957+0000 I  NETWORK  [conn6677870] end connection 10.118.25.211:57268 (6308 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677630] end connection 10.118.42.20:57268 (6307 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677623] end connection 10.118.42.20:17095 (6306 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677626] end connection 10.118.42.20:19475 (6305 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677629] end connection 10.118.42.20:29876 (6303 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677620] end connection 10.118.42.20:18575 (6302 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677631] received client metadata from 10.118.42.20:43683 conn6677631: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677621] end connection 10.118.42.20:29101 (6304 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677627] end connection 10.118.42.20:32359 (6301 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677628] received client metadata from 10.118.42.20:18395 conn6677628: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677622] received client metadata from 10.118.42.20:43185 conn6677622: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677624] end connection 10.118.42.20:57675 (6300 connections now open)
+2020-03-12T00:00:58.096+0000 I  NETWORK  [conn6677625] end connection 10.118.42.20:55003 (6299 connections now open)
+2020-03-12T00:00:58.134+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:43943 #6677871 (6300 connections now open)
+2020-03-12T00:00:58.135+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:58555 #6677872 (6301 connections now open)
+2020-03-12T00:00:58.148+0000 I  NETWORK  [conn6677871] received client metadata from 10.118.42.20:43943 conn6677871: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.151+0000 I  ACCESS   [conn6677631] Successfully authenticated as principal main-service on admin from client 10.118.42.20:43683
+2020-03-12T00:00:58.151+0000 I  NETWORK  [conn6677872] received client metadata from 10.118.42.20:58555 conn6677872: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.161+0000 I  ACCESS   [conn6677622] Successfully authenticated as principal main-service on admin from client 10.118.42.20:43185
+2020-03-12T00:00:58.220+0000 I  NETWORK  [conn6677631] end connection 10.118.42.20:43683 (6300 connections now open)
+2020-03-12T00:00:58.220+0000 I  NETWORK  [conn6677622] end connection 10.118.42.20:43185 (6299 connections now open)
+2020-03-12T00:00:58.227+0000 I  NETWORK  [conn6677628] end connection 10.118.42.20:18395 (6298 connections now open)
+2020-03-12T00:00:58.230+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:17071 #6677873 (6299 connections now open)
+2020-03-12T00:00:58.230+0000 I  NETWORK  [conn6677873] received client metadata from 10.118.42.20:17071 conn6677873: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.264+0000 I  ACCESS   [conn6677873] Successfully authenticated as principal main-service on admin from client 10.118.42.20:17071
+2020-03-12T00:00:58.460+0000 I  NETWORK  [conn6677619] end connection 10.118.70.65:5808 (6298 connections now open)
+2020-03-12T00:00:58.460+0000 I  NETWORK  [conn6677617] received client metadata from 10.118.70.65:42350 conn6677617: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.460+0000 I  NETWORK  [conn6677616] received client metadata from 10.118.70.65:18940 conn6677616: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.460+0000 I  NETWORK  [conn6677618] received client metadata from 10.118.70.65:44583 conn6677618: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.460+0000 I  NETWORK  [conn6677615] received client metadata from 10.118.70.65:53434 conn6677615: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677613] received client metadata from 10.118.70.65:4385 conn6677613: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677609] received client metadata from 10.118.70.65:28757 conn6677609: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677612] received client metadata from 10.118.70.65:5180 conn6677612: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677614] received client metadata from 10.118.70.65:1265 conn6677614: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677610] received client metadata from 10.118.70.65:2923 conn6677610: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677611] received client metadata from 10.118.70.65:27946 conn6677611: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.461+0000 I  NETWORK  [conn6677608] received client metadata from 10.118.70.65:55520 conn6677608: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.561+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:17253 #6677874 (6299 connections now open)
+2020-03-12T00:00:58.598+0000 I  NETWORK  [conn6677874] received client metadata from 10.118.70.65:17253 conn6677874: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.599+0000 I  ACCESS   [conn6677609] Successfully authenticated as principal main-service on admin from client 10.118.70.65:28757
+2020-03-12T00:00:58.599+0000 I  ACCESS   [conn6677614] Successfully authenticated as principal main-service on admin from client 10.118.70.65:1265
+2020-03-12T00:00:58.599+0000 I  ACCESS   [conn6677608] Successfully authenticated as principal main-service on admin from client 10.118.70.65:55520
+2020-03-12T00:00:58.604+0000 I  ACCESS   [conn6677618] Successfully authenticated as principal main-service on admin from client 10.118.70.65:44583
+2020-03-12T00:00:58.615+0000 I  ACCESS   [conn6677615] Successfully authenticated as principal main-service on admin from client 10.118.70.65:53434
+2020-03-12T00:00:58.615+0000 I  ACCESS   [conn6677616] Successfully authenticated as principal main-service on admin from client 10.118.70.65:18940
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677608] end connection 10.118.70.65:55520 (6298 connections now open)
+2020-03-12T00:00:58.616+0000 I  ACCESS   [conn6677612] Successfully authenticated as principal main-service on admin from client 10.118.70.65:5180
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677609] end connection 10.118.70.65:28757 (6297 connections now open)
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677616] end connection 10.118.70.65:18940 (6296 connections now open)
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677610] end connection 10.118.70.65:2923 (6295 connections now open)
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677615] end connection 10.118.70.65:53434 (6294 connections now open)
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677614] end connection 10.118.70.65:1265 (6293 connections now open)
+2020-03-12T00:00:58.616+0000 I  NETWORK  [conn6677612] end connection 10.118.70.65:5180 (6292 connections now open)
+2020-03-12T00:00:58.618+0000 I  NETWORK  [conn6677617] end connection 10.118.70.65:42350 (6291 connections now open)
+2020-03-12T00:00:58.619+0000 I  NETWORK  [conn6677618] end connection 10.118.70.65:44583 (6290 connections now open)
+2020-03-12T00:00:58.621+0000 I  NETWORK  [conn6677611] end connection 10.118.70.65:27946 (6289 connections now open)
+2020-03-12T00:00:58.623+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:29729 #6677875 (6290 connections now open)
+2020-03-12T00:00:58.624+0000 I  NETWORK  [conn6677875] received client metadata from 10.118.70.65:29729 conn6677875: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:00:58.638+0000 I  ACCESS   [conn6677875] Successfully authenticated as principal main-service on admin from client 10.118.70.65:29729
+2020-03-12T00:01:02.257+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50348 #6677876 (6291 connections now open)
+2020-03-12T00:01:02.257+0000 I  NETWORK  [conn6677876] received client metadata from 10.118.67.176:50348 conn6677876: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:02.391+0000 I  NETWORK  [conn6677876] end connection 10.118.67.176:50348 (6290 connections now open)
+2020-03-12T00:01:05.446+0000 I  NETWORK  [conn6677643] end connection 10.118.42.20:54690 (6289 connections now open)
+2020-03-12T00:01:05.446+0000 I  NETWORK  [conn6677634] end connection 10.118.42.20:40401 (6288 connections now open)
+2020-03-12T00:01:05.446+0000 I  NETWORK  [conn6677635] end connection 10.118.42.20:3812 (6287 connections now open)
+2020-03-12T00:01:05.446+0000 I  NETWORK  [conn6677637] end connection 10.118.42.20:29480 (6286 connections now open)
+2020-03-12T00:01:05.447+0000 I  NETWORK  [conn6677636] end connection 10.118.42.20:56609 (6284 connections now open)
+2020-03-12T00:01:05.447+0000 I  NETWORK  [conn6677639] end connection 10.118.42.20:56941 (6283 connections now open)
+2020-03-12T00:01:05.447+0000 I  NETWORK  [conn6677642] end connection 10.118.42.20:27195 (6282 connections now open)
+2020-03-12T00:01:05.446+0000 I  NETWORK  [conn6677640] end connection 10.118.42.20:39943 (6285 connections now open)
+2020-03-12T00:01:05.447+0000 I  NETWORK  [conn6677638] end connection 10.118.42.20:15453 (6281 connections now open)
+2020-03-12T00:01:05.451+0000 I  NETWORK  [conn6677632] end connection 10.118.42.20:4037 (6280 connections now open)
+2020-03-12T00:01:05.451+0000 I  NETWORK  [conn6677633] end connection 10.118.42.20:14996 (6279 connections now open)
+2020-03-12T00:01:05.451+0000 I  NETWORK  [conn6677641] end connection 10.118.42.20:56460 (6278 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676890] end connection 10.118.70.65:23089 (6277 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676897] end connection 10.118.70.65:64147 (6276 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676891] end connection 10.118.70.65:51485 (6275 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676893] end connection 10.118.70.65:59480 (6274 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676896] end connection 10.118.70.65:38104 (6269 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676895] end connection 10.118.70.65:36578 (6268 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676898] end connection 10.118.70.65:8051 (6272 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676900] end connection 10.118.70.65:56574 (6270 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676901] end connection 10.118.70.65:12215 (6273 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676892] end connection 10.118.70.65:4963 (6267 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676894] end connection 10.118.70.65:14991 (6266 connections now open)
+2020-03-12T00:01:05.485+0000 I  NETWORK  [conn6676899] end connection 10.118.70.65:12688 (6271 connections now open)
+2020-03-12T00:01:05.487+0000 I  NETWORK  [conn6676984] end connection 10.118.70.65:53599 (6265 connections now open)
+2020-03-12T00:01:05.487+0000 I  NETWORK  [conn6676985] end connection 10.118.70.65:29350 (6264 connections now open)
+2020-03-12T00:01:05.487+0000 I  NETWORK  [conn6676978] end connection 10.118.70.65:53863 (6263 connections now open)
+2020-03-12T00:01:05.487+0000 I  NETWORK  [conn6676982] end connection 10.118.70.65:14639 (6262 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676979] end connection 10.118.70.65:1820 (6261 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676981] end connection 10.118.70.65:1827 (6260 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676976] end connection 10.118.70.65:53672 (6259 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676977] end connection 10.118.70.65:5250 (6258 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676983] end connection 10.118.70.65:40818 (6257 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676986] end connection 10.118.70.65:42057 (6256 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676980] end connection 10.118.70.65:19123 (6255 connections now open)
+2020-03-12T00:01:05.488+0000 I  NETWORK  [conn6676975] end connection 10.118.70.65:57156 (6254 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677854] end connection 10.118.70.65:62129 (6253 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677844] end connection 10.118.70.65:23518 (6252 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677850] end connection 10.118.70.65:26653 (6249 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677843] end connection 10.118.70.65:46913 (6250 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677851] end connection 10.118.70.65:26595 (6251 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677849] end connection 10.118.70.65:47355 (6248 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677847] end connection 10.118.70.65:24004 (6246 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677848] end connection 10.118.70.65:37966 (6247 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677852] end connection 10.118.70.65:8263 (6243 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677845] end connection 10.118.70.65:37554 (6244 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677846] end connection 10.118.70.65:38918 (6245 connections now open)
+2020-03-12T00:01:06.758+0000 I  NETWORK  [conn6677853] end connection 10.118.70.65:13327 (6242 connections now open)
+2020-03-12T00:01:07.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46012 #6677877 (6243 connections now open)
+2020-03-12T00:01:07.041+0000 I  NETWORK  [conn6677877] received client metadata from 127.0.0.1:46012 conn6677877: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:07.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46014 #6677878 (6244 connections now open)
+2020-03-12T00:01:07.042+0000 I  NETWORK  [conn6677878] received client metadata from 127.0.0.1:46014 conn6677878: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:07.049+0000 I  ACCESS   [conn6677878] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:46014
+2020-03-12T00:01:07.065+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46016 #6677879 (6245 connections now open)
+2020-03-12T00:01:07.066+0000 I  NETWORK  [conn6677879] received client metadata from 127.0.0.1:46016 conn6677879: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:07.067+0000 I  NETWORK  [conn6677879] end connection 127.0.0.1:46016 (6244 connections now open)
+2020-03-12T00:01:07.067+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40312 #6677880 (6245 connections now open)
+2020-03-12T00:01:07.068+0000 I  NETWORK  [conn6677880] received client metadata from 10.118.120.0:40312 conn6677880: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:07.070+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40316 #6677881 (6246 connections now open)
+2020-03-12T00:01:07.070+0000 I  NETWORK  [conn6677881] received client metadata from 10.118.120.0:40316 conn6677881: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:07.077+0000 I  ACCESS   [conn6677881] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40316
+2020-03-12T00:01:07.214+0000 I  NETWORK  [conn6677880] end connection 10.118.120.0:40312 (6245 connections now open)
+2020-03-12T00:01:07.214+0000 I  NETWORK  [conn6677881] end connection 10.118.120.0:40316 (6244 connections now open)
+2020-03-12T00:01:07.214+0000 I  NETWORK  [conn6677877] end connection 127.0.0.1:46012 (6243 connections now open)
+2020-03-12T00:01:07.214+0000 I  NETWORK  [conn6677878] end connection 127.0.0.1:46014 (6242 connections now open)
+2020-03-12T00:01:08.097+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43890 #6677882 (6243 connections now open)
+2020-03-12T00:01:08.097+0000 I  NETWORK  [conn6677882] received client metadata from 10.118.63.36:43890 conn6677882: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:08.227+0000 I  NETWORK  [conn6677882] end connection 10.118.63.36:43890 (6242 connections now open)
+2020-03-12T00:01:11.845+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57292 #6677883 (6243 connections now open)
+2020-03-12T00:01:11.846+0000 I  NETWORK  [conn6677883] received client metadata from 10.118.25.211:57292 conn6677883: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:11.963+0000 I  NETWORK  [conn6677883] end connection 10.118.25.211:57292 (6242 connections now open)
+2020-03-12T00:01:15.438+0000 I  NETWORK  [listener] connection accepted from 10.118.3.83:4290 #6677884 (6243 connections now open)
+2020-03-12T00:01:15.494+0000 I  NETWORK  [conn6677884] received client metadata from 10.118.3.83:4290 conn6677884: { driver: { name: "mongo-java-driver", version: "unknown" }, os: { type: "Linux", name: "Linux", architecture: "amd64", version: "4.14.246-198.474.amzn2.x86_64" }, platform: "Java/Amazon.com Inc./1.8.0_312-b07" }
+2020-03-12T00:01:15.860+0000 I  ACCESS   [conn6677884] Successfully authenticated as principal etl-service on Main from client 10.118.3.83:4290
+2020-03-12T00:01:17.256+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50378 #6677885 (6244 connections now open)
+2020-03-12T00:01:17.256+0000 I  NETWORK  [conn6677885] received client metadata from 10.118.67.176:50378 conn6677885: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:17.383+0000 I  NETWORK  [conn6677885] end connection 10.118.67.176:50378 (6243 connections now open)
+2020-03-12T00:01:22.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46034 #6677886 (6244 connections now open)
+2020-03-12T00:01:22.042+0000 I  NETWORK  [conn6677886] received client metadata from 127.0.0.1:46034 conn6677886: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:22.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46036 #6677887 (6245 connections now open)
+2020-03-12T00:01:22.043+0000 I  NETWORK  [conn6677887] received client metadata from 127.0.0.1:46036 conn6677887: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:22.049+0000 I  ACCESS   [conn6677887] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:46036
+2020-03-12T00:01:22.067+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46038 #6677888 (6246 connections now open)
+2020-03-12T00:01:22.067+0000 I  NETWORK  [conn6677888] received client metadata from 127.0.0.1:46038 conn6677888: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:22.069+0000 I  NETWORK  [conn6677888] end connection 127.0.0.1:46038 (6245 connections now open)
+2020-03-12T00:01:22.071+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40336 #6677889 (6246 connections now open)
+2020-03-12T00:01:22.071+0000 I  NETWORK  [conn6677889] received client metadata from 10.118.120.0:40336 conn6677889: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:22.224+0000 I  NETWORK  [conn6677889] end connection 10.118.120.0:40336 (6245 connections now open)
+2020-03-12T00:01:22.224+0000 I  NETWORK  [conn6677887] end connection 127.0.0.1:46036 (6244 connections now open)
+2020-03-12T00:01:22.224+0000 I  NETWORK  [conn6677886] end connection 127.0.0.1:46034 (6243 connections now open)
+2020-03-12T00:01:23.081+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43904 #6677890 (6244 connections now open)
+2020-03-12T00:01:23.081+0000 I  NETWORK  [conn6677890] received client metadata from 10.118.63.36:43904 conn6677890: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:23.211+0000 I  NETWORK  [conn6677890] end connection 10.118.63.36:43904 (6243 connections now open)
+2020-03-12T00:01:25.727+0000 I  NETWORK  [conn6677322] end connection 10.114.13.18:58529 (6242 connections now open)
+2020-03-12T00:01:26.848+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57310 #6677891 (6243 connections now open)
+2020-03-12T00:01:26.848+0000 I  NETWORK  [conn6677891] received client metadata from 10.118.25.211:57310 conn6677891: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:26.964+0000 I  NETWORK  [conn6677891] end connection 10.118.25.211:57310 (6242 connections now open)
+2020-03-12T00:01:29.823+0000 I  NETWORK  [conn6677324] end connection 10.114.13.18:58550 (6241 connections now open)
+2020-03-12T00:01:31.871+0000 I  NETWORK  [conn6677284] end connection 10.114.13.18:58084 (6240 connections now open)
+2020-03-12T00:01:31.871+0000 I  NETWORK  [conn6677281] end connection 10.114.13.18:58067 (6239 connections now open)
+2020-03-12T00:01:31.871+0000 I  NETWORK  [conn6677282] end connection 10.114.13.18:58068 (6238 connections now open)
+2020-03-12T00:01:32.258+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50422 #6677892 (6239 connections now open)
+2020-03-12T00:01:32.258+0000 I  NETWORK  [conn6677892] received client metadata from 10.118.67.176:50422 conn6677892: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:32.411+0000 I  NETWORK  [conn6677892] end connection 10.118.67.176:50422 (6238 connections now open)
+2020-03-12T00:01:37.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46056 #6677893 (6239 connections now open)
+2020-03-12T00:01:37.041+0000 I  NETWORK  [conn6677893] received client metadata from 127.0.0.1:46056 conn6677893: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:37.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46058 #6677894 (6240 connections now open)
+2020-03-12T00:01:37.043+0000 I  NETWORK  [conn6677894] received client metadata from 127.0.0.1:46058 conn6677894: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:37.049+0000 I  ACCESS   [conn6677894] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:46058
+2020-03-12T00:01:37.065+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46060 #6677895 (6241 connections now open)
+2020-03-12T00:01:37.066+0000 I  NETWORK  [conn6677895] received client metadata from 127.0.0.1:46060 conn6677895: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:37.067+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40356 #6677896 (6242 connections now open)
+2020-03-12T00:01:37.067+0000 I  NETWORK  [conn6677896] received client metadata from 10.118.120.0:40356 conn6677896: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:37.068+0000 I  NETWORK  [conn6677895] end connection 127.0.0.1:46060 (6241 connections now open)
+2020-03-12T00:01:37.070+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40362 #6677897 (6242 connections now open)
+2020-03-12T00:01:37.070+0000 I  NETWORK  [conn6677897] received client metadata from 10.118.120.0:40362 conn6677897: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:37.077+0000 I  ACCESS   [conn6677897] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40362
+2020-03-12T00:01:37.219+0000 I  NETWORK  [conn6677896] end connection 10.118.120.0:40356 (6241 connections now open)
+2020-03-12T00:01:37.220+0000 I  NETWORK  [conn6677897] end connection 10.118.120.0:40362 (6240 connections now open)
+2020-03-12T00:01:37.220+0000 I  NETWORK  [conn6677894] end connection 127.0.0.1:46058 (6239 connections now open)
+2020-03-12T00:01:37.220+0000 I  NETWORK  [conn6677893] end connection 127.0.0.1:46056 (6238 connections now open)
+2020-03-12T00:01:38.089+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43920 #6677898 (6239 connections now open)
+2020-03-12T00:01:38.089+0000 I  NETWORK  [conn6677898] received client metadata from 10.118.63.36:43920 conn6677898: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:38.232+0000 I  NETWORK  [conn6677898] end connection 10.118.63.36:43920 (6238 connections now open)
+2020-03-12T00:01:41.847+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57334 #6677899 (6239 connections now open)
+2020-03-12T00:01:41.848+0000 I  NETWORK  [conn6677899] received client metadata from 10.118.25.211:57334 conn6677899: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:41.961+0000 I  NETWORK  [conn6677899] end connection 10.118.25.211:57334 (6238 connections now open)
+2020-03-12T00:01:42.446+0000 I  ACCESS   [conn3480] Successfully authenticated as principal __system on local from client 10.118.63.36:56970
+2020-03-12T00:01:42.447+0000 I  ACCESS   [conn3481] Successfully authenticated as principal __system on local from client 10.118.63.36:56972
+2020-03-12T00:01:42.490+0000 I  ACCESS   [conn3481] Successfully authenticated as principal __system on local from client 10.118.63.36:56972
+2020-03-12T00:01:42.567+0000 I  ACCESS   [conn3481] Successfully authenticated as principal __system on local from client 10.118.63.36:56972
+2020-03-12T00:01:42.607+0000 I  ACCESS   [conn3481] Successfully authenticated as principal __system on local from client 10.118.63.36:56972
+2020-03-12T00:01:47.260+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50458 #6677900 (6239 connections now open)
+2020-03-12T00:01:47.260+0000 I  NETWORK  [conn6677900] received client metadata from 10.118.67.176:50458 conn6677900: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:47.394+0000 I  NETWORK  [conn6677900] end connection 10.118.67.176:50458 (6238 connections now open)
+2020-03-12T00:01:47.958+0000 I  NETWORK  [listener] connection accepted from 10.118.2.37:38621 #6677901 (6239 connections now open)
+2020-03-12T00:01:47.998+0000 I  NETWORK  [conn6677901] received client metadata from 10.118.2.37:38621 conn6677901: { driver: { name: "mongo-java-driver", version: "unknown" }, os: { type: "Linux", name: "Linux", architecture: "amd64", version: "4.14.246-198.474.amzn2.x86_64" }, platform: "Java/Amazon.com Inc./1.8.0_312-b07" }
+2020-03-12T00:01:48.443+0000 I  ACCESS   [conn6677901] Successfully authenticated as principal etl-service on Main from client 10.118.2.37:38621
+2020-03-12T00:01:52.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46072 #6677902 (6240 connections now open)
+2020-03-12T00:01:52.041+0000 I  NETWORK  [conn6677902] received client metadata from 127.0.0.1:46072 conn6677902: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:52.042+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46074 #6677903 (6241 connections now open)
+2020-03-12T00:01:52.042+0000 I  NETWORK  [conn6677903] received client metadata from 127.0.0.1:46074 conn6677903: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:52.049+0000 I  ACCESS   [conn6677903] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:46074
+2020-03-12T00:01:52.077+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46076 #6677904 (6242 connections now open)
+2020-03-12T00:01:52.077+0000 I  NETWORK  [conn6677904] received client metadata from 127.0.0.1:46076 conn6677904: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:52.079+0000 I  NETWORK  [conn6677904] end connection 127.0.0.1:46076 (6241 connections now open)
+2020-03-12T00:01:52.079+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40374 #6677905 (6242 connections now open)
+2020-03-12T00:01:52.080+0000 I  NETWORK  [conn6677905] received client metadata from 10.118.120.0:40374 conn6677905: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:52.081+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40378 #6677906 (6243 connections now open)
+2020-03-12T00:01:52.081+0000 I  NETWORK  [conn6677906] received client metadata from 10.118.120.0:40378 conn6677906: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:52.088+0000 I  ACCESS   [conn6677906] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40378
+2020-03-12T00:01:52.237+0000 I  NETWORK  [conn6677905] end connection 10.118.120.0:40374 (6242 connections now open)
+2020-03-12T00:01:52.237+0000 I  NETWORK  [conn6677906] end connection 10.118.120.0:40378 (6241 connections now open)
+2020-03-12T00:01:52.237+0000 I  NETWORK  [conn6677903] end connection 127.0.0.1:46074 (6240 connections now open)
+2020-03-12T00:01:52.237+0000 I  NETWORK  [conn6677902] end connection 127.0.0.1:46072 (6239 connections now open)
+2020-03-12T00:01:53.081+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43940 #6677907 (6240 connections now open)
+2020-03-12T00:01:53.081+0000 I  NETWORK  [conn6677907] received client metadata from 10.118.63.36:43940 conn6677907: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:53.213+0000 I  NETWORK  [conn6677907] end connection 10.118.63.36:43940 (6239 connections now open)
+2020-03-12T00:01:56.847+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57350 #6677908 (6240 connections now open)
+2020-03-12T00:01:56.847+0000 I  NETWORK  [conn6677908] received client metadata from 10.118.25.211:57350 conn6677908: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:01:56.957+0000 I  NETWORK  [conn6677908] end connection 10.118.25.211:57350 (6239 connections now open)
+2020-03-12T00:01:58.483+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:29993 #6677909 (6240 connections now open)
+2020-03-12T00:01:58.483+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:3838 #6677910 (6241 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:29483 #6677911 (6242 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:54442 #6677912 (6243 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:2101 #6677913 (6244 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677911] received client metadata from 10.118.70.65:29483 conn6677911: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:14667 #6677914 (6245 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:46007 #6677915 (6246 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677913] received client metadata from 10.118.70.65:2101 conn6677913: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677910] received client metadata from 10.118.70.65:3838 conn6677910: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677912] received client metadata from 10.118.70.65:54442 conn6677912: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:57678 #6677916 (6247 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677914] received client metadata from 10.118.70.65:14667 conn6677914: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677909] received client metadata from 10.118.70.65:29993 conn6677909: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [listener] connection accepted from 10.118.70.65:43529 #6677917 (6248 connections now open)
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677915] received client metadata from 10.118.70.65:46007 conn6677915: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677916] received client metadata from 10.118.70.65:57678 conn6677916: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.484+0000 I  NETWORK  [conn6677917] received client metadata from 10.118.70.65:43529 conn6677917: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:01:58.597+0000 I  ACCESS   [conn6677913] Successfully authenticated as principal main-service on admin from client 10.118.70.65:2101
+2020-03-12T00:01:58.597+0000 I  ACCESS   [conn6677909] Successfully authenticated as principal main-service on admin from client 10.118.70.65:29993
+2020-03-12T00:01:58.597+0000 I  ACCESS   [conn6677911] Successfully authenticated as principal main-service on admin from client 10.118.70.65:29483
+2020-03-12T00:01:58.597+0000 I  ACCESS   [conn6677912] Successfully authenticated as principal main-service on admin from client 10.118.70.65:54442
+2020-03-12T00:01:58.629+0000 I  ACCESS   [conn6677916] Successfully authenticated as principal main-service on admin from client 10.118.70.65:57678
+2020-03-12T00:01:58.629+0000 I  ACCESS   [conn6677910] Successfully authenticated as principal main-service on admin from client 10.118.70.65:3838
+2020-03-12T00:01:58.629+0000 I  ACCESS   [conn6677914] Successfully authenticated as principal main-service on admin from client 10.118.70.65:14667
+2020-03-12T00:01:58.630+0000 I  ACCESS   [conn6677917] Successfully authenticated as principal main-service on admin from client 10.118.70.65:43529
+2020-03-12T00:01:58.635+0000 I  ACCESS   [conn6677915] Successfully authenticated as principal main-service on admin from client 10.118.70.65:46007
+2020-03-12T00:02:00.543+0000 I  NETWORK  [conn6677208] end connection 10.114.13.18:57424 (6247 connections now open)
+2020-03-12T00:02:02.258+0000 I  NETWORK  [listener] connection accepted from 10.118.67.176:50498 #6677918 (6248 connections now open)
+2020-03-12T00:02:02.259+0000 I  NETWORK  [conn6677918] received client metadata from 10.118.67.176:50498 conn6677918: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:02.389+0000 I  NETWORK  [conn6677918] end connection 10.118.67.176:50498 (6247 connections now open)
+2020-03-12T00:02:04.778+0000 I  ACCESS   [conn3489] Successfully authenticated as principal __system on local from client 10.114.189.255:34686
+2020-03-12T00:02:04.778+0000 I  ACCESS   [conn3488] Successfully authenticated as principal __system on local from client 10.114.189.255:34688
+2020-03-12T00:02:04.791+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:40887 #6677919 (6248 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:40479 #6677920 (6249 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:6797 #6677921 (6250 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677919] received client metadata from 10.118.42.20:40887 conn6677919: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:44123 #6677922 (6251 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:16591 #6677923 (6252 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677921] received client metadata from 10.118.42.20:6797 conn6677921: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677920] received client metadata from 10.118.42.20:40479 conn6677920: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:18896 #6677924 (6253 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677922] received client metadata from 10.118.42.20:44123 conn6677922: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:58781 #6677925 (6254 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677923] received client metadata from 10.118.42.20:16591 conn6677923: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677924] received client metadata from 10.118.42.20:18896 conn6677924: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:30420 #6677926 (6255 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:31479 #6677927 (6256 connections now open)
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677925] received client metadata from 10.118.42.20:58781 conn6677925: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.792+0000 I  NETWORK  [conn6677926] received client metadata from 10.118.42.20:30420 conn6677926: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.793+0000 I  NETWORK  [conn6677927] received client metadata from 10.118.42.20:31479 conn6677927: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:04.813+0000 I  ACCESS   [conn3488] Successfully authenticated as principal __system on local from client 10.114.189.255:34688
+2020-03-12T00:02:04.848+0000 I  ACCESS   [conn6677921] Successfully authenticated as principal main-service on admin from client 10.118.42.20:6797
+2020-03-12T00:02:04.848+0000 I  ACCESS   [conn6677919] Successfully authenticated as principal main-service on admin from client 10.118.42.20:40887
+2020-03-12T00:02:04.849+0000 I  ACCESS   [conn6677920] Successfully authenticated as principal main-service on admin from client 10.118.42.20:40479
+2020-03-12T00:02:04.849+0000 I  ACCESS   [conn6677926] Successfully authenticated as principal main-service on admin from client 10.118.42.20:30420
+2020-03-12T00:02:04.849+0000 I  ACCESS   [conn6677922] Successfully authenticated as principal main-service on admin from client 10.118.42.20:44123
+2020-03-12T00:02:04.850+0000 I  ACCESS   [conn6677925] Successfully authenticated as principal main-service on admin from client 10.118.42.20:58781
+2020-03-12T00:02:04.857+0000 I  ACCESS   [conn3488] Successfully authenticated as principal __system on local from client 10.114.189.255:34688
+2020-03-12T00:02:04.860+0000 I  ACCESS   [conn6677924] Successfully authenticated as principal main-service on admin from client 10.118.42.20:18896
+2020-03-12T00:02:04.863+0000 I  ACCESS   [conn6677927] Successfully authenticated as principal main-service on admin from client 10.118.42.20:31479
+2020-03-12T00:02:04.881+0000 I  ACCESS   [conn6677923] Successfully authenticated as principal main-service on admin from client 10.118.42.20:16591
+2020-03-12T00:02:04.892+0000 I  ACCESS   [conn3488] Successfully authenticated as principal __system on local from client 10.114.189.255:34688
+2020-03-12T00:02:07.041+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46096 #6677928 (6257 connections now open)
+2020-03-12T00:02:07.041+0000 I  NETWORK  [conn6677928] received client metadata from 127.0.0.1:46096 conn6677928: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:07.043+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46098 #6677929 (6258 connections now open)
+2020-03-12T00:02:07.043+0000 I  NETWORK  [conn6677929] received client metadata from 127.0.0.1:46098 conn6677929: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:07.049+0000 I  ACCESS   [conn6677929] Successfully authenticated as principal monitoring on admin from client 127.0.0.1:46098
+2020-03-12T00:02:07.066+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:46100 #6677930 (6259 connections now open)
+2020-03-12T00:02:07.066+0000 I  NETWORK  [conn6677930] received client metadata from 127.0.0.1:46100 conn6677930: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:07.068+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40396 #6677931 (6260 connections now open)
+2020-03-12T00:02:07.068+0000 I  NETWORK  [conn6677930] end connection 127.0.0.1:46100 (6259 connections now open)
+2020-03-12T00:02:07.068+0000 I  NETWORK  [conn6677931] received client metadata from 10.118.120.0:40396 conn6677931: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:07.070+0000 I  NETWORK  [listener] connection accepted from 10.118.120.0:40402 #6677932 (6260 connections now open)
+2020-03-12T00:02:07.070+0000 I  NETWORK  [conn6677932] received client metadata from 10.118.120.0:40402 conn6677932: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:07.078+0000 I  ACCESS   [conn6677932] Successfully authenticated as principal monitoring on admin from client 10.118.120.0:40402
+2020-03-12T00:02:07.236+0000 I  NETWORK  [conn6677931] end connection 10.118.120.0:40396 (6259 connections now open)
+2020-03-12T00:02:07.236+0000 I  NETWORK  [conn6677932] end connection 10.118.120.0:40402 (6258 connections now open)
+2020-03-12T00:02:07.236+0000 I  NETWORK  [conn6677929] end connection 127.0.0.1:46098 (6257 connections now open)
+2020-03-12T00:02:07.236+0000 I  NETWORK  [conn6677928] end connection 127.0.0.1:46096 (6256 connections now open)
+2020-03-12T00:02:08.081+0000 I  NETWORK  [listener] connection accepted from 10.118.63.36:43964 #6677933 (6257 connections now open)
+2020-03-12T00:02:08.082+0000 I  NETWORK  [conn6677933] received client metadata from 10.118.63.36:43964 conn6677933: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:08.221+0000 I  NETWORK  [conn6677933] end connection 10.118.63.36:43964 (6256 connections now open)
+2020-03-12T00:02:11.845+0000 I  NETWORK  [listener] connection accepted from 10.118.25.211:57366 #6677934 (6257 connections now open)
+2020-03-12T00:02:11.845+0000 I  NETWORK  [conn6677934] received client metadata from 10.118.25.211:57366 conn6677934: { driver: { name: "PyMongo", version: "3.8.0" }, os: { type: "Linux", name: "", architecture: "x86_64", version: "4.14.186-146.268.amzn2.x86_64" }, platform: "CPython 2.7.16.final.0" }
+2020-03-12T00:02:11.958+0000 I  NETWORK  [conn6677934] end connection 10.118.25.211:57366 (6256 connections now open)
+2020-03-12T00:02:12.817+0000 I  NETWORK  [listener] connection accepted from 10.118.3.83:53563 #6677935 (6257 connections now open)
+2020-03-12T00:02:12.870+0000 I  NETWORK  [conn6677935] received client metadata from 10.118.3.83:53563 conn6677935: { driver: { name: "mongo-java-driver", version: "unknown" }, os: { type: "Linux", name: "Linux", architecture: "amd64", version: "4.14.246-198.474.amzn2.x86_64" }, platform: "Java/Amazon.com Inc./1.8.0_312-b07" }
+2020-03-12T00:02:13.279+0000 I  ACCESS   [conn6677935] Successfully authenticated as principal etl-service on Main from client 10.118.3.83:53563
+2020-03-12T00:02:15.942+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:36967 #6677936 (6258 connections now open)
+2020-03-12T00:02:15.942+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:62496 #6677937 (6259 connections now open)
+2020-03-12T00:02:15.942+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:20408 #6677938 (6260 connections now open)
+2020-03-12T00:02:15.942+0000 I  NETWORK  [conn6677936] received client metadata from 10.118.42.20:36967 conn6677936: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:21942 #6677939 (6261 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677937] received client metadata from 10.118.42.20:62496 conn6677937: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:35160 #6677940 (6262 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677938] received client metadata from 10.118.42.20:20408 conn6677938: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:59438 #6677941 (6263 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677939] received client metadata from 10.118.42.20:21942 conn6677939: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:63529 #6677942 (6264 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:12616 #6677943 (6265 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677940] received client metadata from 10.118.42.20:35160 conn6677940: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677941] received client metadata from 10.118.42.20:59438 conn6677941: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [conn6677942] received client metadata from 10.118.42.20:63529 conn6677942: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:20840 #6677944 (6266 connections now open)
+2020-03-12T00:02:15.943+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:60000 #6677945 (6267 connections now open)
+2020-03-12T00:02:15.944+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:49929 #6677946 (6268 connections now open)
+2020-03-12T00:02:15.944+0000 I  NETWORK  [listener] connection accepted from 10.118.42.20:59932 #6677947 (6269 connections now open)
+2020-03-12T00:02:15.944+0000 I  NETWORK  [conn6677943] received client metadata from 10.118.42.20:12616 conn6677943: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.944+0000 I  NETWORK  [conn6677945] received client metadata from 10.118.42.20:60000 conn6677945: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.944+0000 I  NETWORK  [conn6677944] received client metadata from 10.118.42.20:20840 conn6677944: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }
+2020-03-12T00:02:15.945+0000 I  NETWORK  [conn6677946] received client metadata from 10.118.42.20:49929 conn6677946: { driver: { name: "mongo-go-driver", version: "v1.5.3" }, os: { type: "linux", architecture: "amd64" }, platform: "go1.17.1" }

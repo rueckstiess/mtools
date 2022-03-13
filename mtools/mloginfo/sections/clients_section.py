@@ -55,13 +55,11 @@ class ClientSection(BaseSection):
         # the IPs connecting and the Database Users authenticating.
         dva_info = {};
 
-        # Dict where the key is a Connection ID and the value is info about the
-        # DriverVersionApp connecting and the Database User authenticating.
-        conn_info = {}
+        # Dict where the key is a Connection ID and the value is the
+        # DriverVersionApp.
+        conn_dva = {}
 
-        # List of connection IDs (with trailing spaces) that we've already seen
-        # in looping through the log file.
-        seen_conn_ids = []
+        # Loop through each log event
         for logevent in self.mloginfo.logfile:
             line = logevent.line_str
 
@@ -70,8 +68,19 @@ class ClientSection(BaseSection):
             # (2) "received client metadata"
             # (3) "Successfully authenticated as"
 
+            # If a connection ID is being reused, reset conn_info.
+            if line.find("connection accepted from") != -1:
+
+                # Get the connection ID
+                conn_id = _parse_connection_accepted_log(logevent)
+
+                # If we've seen the connection ID before, reset the dict.
+                if conn_id in conn_dva:
+                    print("Connection IDs have reset!")
+                    conn_dva = {}
+
             # Save info from parsing the "client metadata" log line.
-            if line.find("client metadata") != -1:
+            elif line.find("client metadata") != -1:
                 dva, ip, conn_id = _parse_client_metadata_log(logevent)
 
                 # Initialize the dva_info dict for this DriverVersionApp
@@ -86,58 +95,33 @@ class ClientSection(BaseSection):
                     dva_info[dva]['ips'][ip] += 1
 
 
-                # Populate the 'conn_info' dict which maps:
-                #   - ConnectionID to
-                #   - a dict with the DriverVersionApp & DB User
-                #
-                # This dict is populated by looking at two different log lines.
-                if conn_id not in conn_info:
-                    conn_info[conn_id] = {
-                        "driver_version_app": dva,
-                        "db_user": None
-                    }
+                # Populate the 'conn_dva' dict mapping the Connection ID to the
+                # DriverVersionApp.
+                if conn_id not in conn_dva:
+                    conn_dva[conn_id] = dva
                 else:
-                    raise RuntimeError(
-                        "Unexpected! The 'client metadata' log line including "
-                        "the driver info should have appeared earlier than  "
-                        "the 'authenticated' log line.")
-
-            # Ensure that connection IDs aren't being reused in the same file.
-            elif line.find("connection accepted from") != -1:
-
-                # Get the connection ID
-                conn_id = _parse_connection_accepted_log(logevent)
-
-                # Raise an exception of the connection ID was seen before.
-                if conn_id in seen_conn_ids:
                     raise Exception(
-                        "Connection ID '{}' was repeated!".format(conn_id))
-
-                # Keep track of seen connection IDs
-                seen_conn_ids.append(conn_id)
+                        "Unexpected! This 'client metadata' log line including "
+                        "the driver info should have appeared earlier than "
+                        "the 'authenticated as' line."
+                    )
 
             # Save info from parsing the connection "authenticated" log line.
             elif line.find("Successfully authenticated as") != -1:
-                ip, db_user, conn_id = _parse_authentication_log(logevent)
-
-
-                # Populate the 'conn_info' dict which maps:
-                #   - ConnectionID to
-                #   - a dict with DriverVersion & DBUser
-                #
-                # This dict is populated by looking at two different log lines.
-                if conn_id in conn_info:
-                    conn_info[conn_id]['db_user'] = db_user
+                db_user, conn_id = _parse_authentication_log(logevent)
 
                 # Keep track of how many times each DB User authenticated for
                 # by a given DriverVersionApp.
-                if conn_id in conn_info:
-                    dva = conn_info[conn_id]['driver_version_app']
-                    user = conn_info[conn_id]['db_user']
-                    if user not in dva_info[dva]['users']:
-                        dva_info[dva]['users'][user] = 1
+                if conn_id in conn_dva:
+                    dva = conn_dva[conn_id]
+                    if db_user not in dva_info[dva]['users']:
+                        dva_info[dva]['users'][db_user] = 1
                     else:
-                        dva_info[dva]['users'][user] += 1
+                        dva_info[dva]['users'][db_user] += 1
+                else:
+                    # Sometimes there will be no client metadata information
+                    # that appears before the 'authenticated as' log line.
+                    pass
             else:
                 continue
 
@@ -243,17 +227,16 @@ def _parse_connection_accepted_log(logevent):
     conn_id = tokens[4].lstrip("#")
     return conn_id
 
-# Parse the "Successfully authenticated as" log line for the IP, DB User, and
+# Parse the "Successfully authenticated as" log line for the DB User and
 # the Connection ID.
 def _parse_authentication_log(logevent):
     line = logevent.line_str
 
-    pos = line.find(" from client ")
+    pos = line.find(" authenticated as ")
     tokens = line.split(" ")
     db_user = "{}@{}".format(tokens[8], tokens[10])
-    ip = tokens[13].split(":")[0]
 
     pos = line.split(' ')
     conn_id = tokens[3].split("conn")[1].split("]")[0]
 
-    return ip, db_user, conn_id
+    return db_user, conn_id
