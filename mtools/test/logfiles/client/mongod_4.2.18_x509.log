@@ -1,0 +1,334 @@
+2022-02-24T20:10:27.972+0000 W  NETWORK  [main] Server certificate has no compatible Subject Alternative Name. This may prevent TLS clients from connecting
+2022-02-24T20:10:27.972+0000 I  CONTROL  [main] Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'
+2022-02-24T20:10:27.973+0000 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2022-02-24T20:10:27.975+0000 W  ASIO     [main] No TransportLayer configured during NetworkInterface startup
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] MongoDB starting : pid=3590 port=27017 dbpath=/home/ec2-user/./db/server1 64-bit host=ip-172-31-9-178.us-west-2.compute.internal
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] db version v4.2.18
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] git version: f65ce5e25c0b26a00d091a4d24eec1a8b3a4c016
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] OpenSSL version: OpenSSL 1.0.2k-fips  26 Jan 2017
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] allocator: tcmalloc
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] modules: enterprise 
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] build environment:
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten]     distmod: amazon2
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten]     distarch: x86_64
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten]     target_arch: x86_64
+2022-02-24T20:10:27.980+0000 I  CONTROL  [initandlisten] options: { net: { port: 27017, tls: { CAFile: "root-ca.pem", allowInvalidHostnames: true, certificateKeyFile: "server1.pem", clusterFile: "server1.pem", mode: "requireTLS" } }, processManagement: { fork: true }, replication: { replSet: "set509" }, security: { clusterAuthMode: "x509" }, storage: { dbPath: "./db/server1" }, systemLog: { destination: "file", path: "./db/server1.log" } }
+2022-02-24T20:10:27.983+0000 I  STORAGE  [initandlisten] Detected data files in /home/ec2-user/./db/server1 created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2022-02-24T20:10:27.983+0000 I  STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=1419M,cache_overflow=(file_max=0M),session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress],
+2022-02-24T20:10:28.665+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:665086][3590:0x7f07301d30c0], txn-recover: Recovering log 1 through 2
+2022-02-24T20:10:28.740+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:740915][3590:0x7f07301d30c0], txn-recover: Recovering log 2 through 2
+2022-02-24T20:10:28.814+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:814884][3590:0x7f07301d30c0], txn-recover: Main recovery loop: starting at 1/48768 to 2/256
+2022-02-24T20:10:28.815+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:815262][3590:0x7f07301d30c0], txn-recover: Recovering log 1 through 2
+2022-02-24T20:10:28.866+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:866783][3590:0x7f07301d30c0], txn-recover: Recovering log 2 through 2
+2022-02-24T20:10:28.910+0000 I  STORAGE  [initandlisten] WiredTiger message [1645733428:910214][3590:0x7f07301d30c0], txn-recover: Set global recovery timestamp: (1645733424, 4)
+2022-02-24T20:10:28.922+0000 I  RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(1645733424, 4)
+2022-02-24T20:10:28.925+0000 I  STORAGE  [initandlisten] No table logging settings modifications are required for existing WiredTiger tables. Logging enabled? 0
+2022-02-24T20:10:28.925+0000 I  STORAGE  [initandlisten] Starting OplogTruncaterThread local.oplog.rs
+2022-02-24T20:10:28.925+0000 I  STORAGE  [initandlisten] The size storer reports that the oplog contains 11 records totaling to 2440 bytes
+2022-02-24T20:10:28.925+0000 I  STORAGE  [initandlisten] Scanning the oplog to determine where to place markers for truncation
+2022-02-24T20:10:28.926+0000 I  STORAGE  [initandlisten] WiredTiger record store oplog processing took 0ms
+2022-02-24T20:10:28.926+0000 I  STORAGE  [initandlisten] Timestamp monitor starting
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] ** WARNING: This server will not perform X.509 hostname validation
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] ** This may allow your server to make or accept connections to
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] ** untrusted parties
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] 
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2022-02-24T20:10:28.928+0000 I  CONTROL  [initandlisten] 
+2022-02-24T20:10:28.931+0000 I  STORAGE  [initandlisten] Flow Control is enabled on this deployment.
+2022-02-24T20:10:28.933+0000 I  FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/home/ec2-user/./db/server1/diagnostic.data'
+2022-02-24T20:10:28.935+0000 I  REPL     [initandlisten] Rollback ID is 1
+2022-02-24T20:10:28.936+0000 I  REPL     [initandlisten] Recovering from stable timestamp: Timestamp(1645733424, 4) (top of oplog: { ts: Timestamp(1645733424, 4), t: 1 }, appliedThrough: { ts: Timestamp(0, 0), t: -1 }, TruncateAfter: Timestamp(0, 0))
+2022-02-24T20:10:28.936+0000 I  REPL     [initandlisten] Starting recovery oplog application at the stable timestamp: Timestamp(1645733424, 4)
+2022-02-24T20:10:28.936+0000 I  REPL     [initandlisten] No oplog entries to apply for recovery. Start point is at the top of the oplog.
+2022-02-24T20:10:28.937+0000 I  REPL     [replexec-0] New replica set config in use: { _id: "set509", version: 1, protocolVersion: 1, writeConcernMajorityJournalDefault: true, members: [ { _id: 0, host: "localhost:27017", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: true, heartbeatIntervalMillis: 2000, heartbeatTimeoutSecs: 10, electionTimeoutMillis: 10000, catchUpTimeoutMillis: -1, catchUpTakeoverDelayMillis: 30000, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 }, replicaSetId: ObjectId('6217e62ba777dd5ccf92b89b') } }
+2022-02-24T20:10:28.937+0000 I  REPL     [replexec-0] This node is localhost:27017 in the config
+2022-02-24T20:10:28.937+0000 I  REPL     [replexec-0] transition to STARTUP2 from STARTUP
+2022-02-24T20:10:28.937+0000 I  REPL     [replexec-0] Starting replication storage threads
+2022-02-24T20:10:28.938+0000 I  REPL     [replexec-0] transition to RECOVERING from STARTUP2
+2022-02-24T20:10:28.938+0000 I  REPL     [replexec-0] Starting replication fetcher thread
+2022-02-24T20:10:28.938+0000 I  REPL     [replexec-0] Starting replication applier thread
+2022-02-24T20:10:28.938+0000 I  REPL     [replexec-0] Starting replication reporter thread
+2022-02-24T20:10:28.938+0000 I  NETWORK  [LogicalSessionCacheRefresh] Starting new replica set monitor for set509/localhost:27017
+2022-02-24T20:10:28.938+0000 I  REPL     [rsSync-0] Starting oplog application
+2022-02-24T20:10:28.939+0000 I  CONTROL  [LogicalSessionCacheReap] Sessions collection is not set up; waiting until next sessions reap interval: config.system.sessions does not exist
+2022-02-24T20:10:28.939+0000 I  CONNPOOL [ReplicaSetMonitor-TaskExecutor] Connecting to localhost:27017
+2022-02-24T20:10:28.939+0000 I  REPL     [rsSync-0] transition to SECONDARY from RECOVERING
+2022-02-24T20:10:28.939+0000 I  ELECTION [rsSync-0] conducting a dry run election to see if we could be elected. current term: 1
+2022-02-24T20:10:28.939+0000 I  ELECTION [replexec-0] dry election run succeeded, running for election in term 2
+2022-02-24T20:10:28.940+0000 I  ELECTION [replexec-0] election succeeded, assuming primary role in term 2
+2022-02-24T20:10:28.940+0000 I  REPL     [replexec-0] transition to PRIMARY from SECONDARY
+2022-02-24T20:10:28.940+0000 I  REPL     [replexec-0] Resetting sync source to empty, which was :27017
+2022-02-24T20:10:28.940+0000 I  REPL     [replexec-0] Entering primary catch-up mode.
+2022-02-24T20:10:28.940+0000 I  REPL     [replexec-0] Exited primary catch-up mode.
+2022-02-24T20:10:28.940+0000 I  REPL     [replexec-0] Stopping replication producer
+2022-02-24T20:10:28.940+0000 I  REPL     [ReplBatcher] Oplog buffer has been drained in term 2
+2022-02-24T20:10:28.940+0000 I  REPL     [ReplBatcher] Oplog buffer has been drained in term 2
+2022-02-24T20:10:28.951+0000 I  NETWORK  [listener] Listening on /tmp/mongodb-27017.sock
+2022-02-24T20:10:28.951+0000 I  NETWORK  [listener] Listening on 127.0.0.1
+2022-02-24T20:10:28.951+0000 I  NETWORK  [listener] waiting for connections on port 27017 ssl
+2022-02-24T20:10:28.951+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58436 #2 (1 connection now open)
+2022-02-24T20:10:28.951+0000 I  REPL     [RstlKillOpThread] Starting to kill user operations
+2022-02-24T20:10:28.951+0000 I  REPL     [RstlKillOpThread] Stopped killing user operations
+2022-02-24T20:10:28.951+0000 I  REPL     [RstlKillOpThread] State transition ops metrics: { lastStateTransition: "stepUp", userOpsKilled: 0, userOpsRunning: 0 }
+2022-02-24T20:10:28.954+0000 I  REPL     [rsSync-0] transition to primary complete; database writes are now permitted
+2022-02-24T20:10:28.958+0000 W  NETWORK  [ReplicaSetMonitor-TaskExecutor] The server certificate does not match the host name. Hostname: localhost does not match CN: server1
+2022-02-24T20:10:28.958+0000 W  NETWORK  [conn2] Client connecting with server's own TLS certificate
+2022-02-24T20:10:28.959+0000 I  NETWORK  [conn2] received client metadata from 127.0.0.1:58436 conn2: { driver: { name: "NetworkInterfaceTL", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:10:28.960+0000 I  ACCESS   [conn2]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=server1,OU=MyServers,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:10:28.960+0000 I  ACCESS   [conn2] Successfully authenticated as principal CN=server1,OU=MyServers,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58436
+2022-02-24T20:10:28.960+0000 I  NETWORK  [ReplicaSetMonitor-TaskExecutor] Confirmed replica set for set509 is set509/localhost:27017
+2022-02-24T20:10:28.960+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58438 #4 (2 connections now open)
+2022-02-24T20:10:28.967+0000 W  NETWORK  [LogicalSessionCacheRefresh] The server certificate does not match the host name. Hostname: localhost does not match CN: server1
+2022-02-24T20:10:28.967+0000 W  NETWORK  [conn4] Client connecting with server's own TLS certificate
+2022-02-24T20:10:28.967+0000 I  NETWORK  [conn4] received client metadata from 127.0.0.1:58438 conn4: { driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:10:28.967+0000 I  NETWORK  [LogicalSessionCacheRefresh] Successfully connected to localhost:27017 (1 connections now open to localhost:27017 with a 0 second timeout)
+2022-02-24T20:10:28.967+0000 I  ACCESS   [conn4]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=server1,OU=MyServers,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:10:28.967+0000 I  ACCESS   [conn4] Successfully authenticated as principal CN=server1,OU=MyServers,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58438
+2022-02-24T20:10:28.968+0000 I  CONTROL  [LogicalSessionCacheRefresh] Sessions collection is not set up; waiting until next sessions refresh interval: config.system.sessions does not exist
+2022-02-24T20:10:28.968+0000 I  NETWORK  [conn4] end connection 127.0.0.1:58438 (1 connection now open)
+2022-02-24T20:15:28.938+0000 I  CONTROL  [LogicalSessionCacheReap] Sessions collection is not set up; waiting until next sessions reap interval: config.system.sessions does not exist
+2022-02-24T20:15:28.938+0000 I  STORAGE  [LogicalSessionCacheRefresh] createCollection: config.system.sessions with provided UUID: a9760430-c878-4c2a-9646-8255a9cda589 and options: { uuid: UUID("a9760430-c878-4c2a-9646-8255a9cda589") }
+2022-02-24T20:15:28.946+0000 I  INDEX    [LogicalSessionCacheRefresh] index build: done building index _id_ on ns config.system.sessions
+2022-02-24T20:15:28.954+0000 I  INDEX    [LogicalSessionCacheRefresh] index build: starting on config.system.sessions properties: { v: 2, key: { lastUse: 1 }, name: "lsidTTLIndex", ns: "config.system.sessions", expireAfterSeconds: 1800 } using method: Hybrid
+2022-02-24T20:15:28.954+0000 I  INDEX    [LogicalSessionCacheRefresh] build may temporarily use up to 200 megabytes of RAM
+2022-02-24T20:15:28.954+0000 I  INDEX    [LogicalSessionCacheRefresh] index build: collection scan done. scanned 0 total records in 0 seconds
+2022-02-24T20:15:28.955+0000 I  INDEX    [LogicalSessionCacheRefresh] index build: inserted 0 keys from external sorter into index in 0 seconds
+2022-02-24T20:15:28.956+0000 I  INDEX    [LogicalSessionCacheRefresh] index build: done building index lsidTTLIndex on ns config.system.sessions
+2022-02-24T20:15:28.960+0000 I  CONNPOOL [ReplicaSetMonitor-TaskExecutor] Dropping all pooled connections to localhost:27017 due to ShutdownInProgress: Pool for localhost:27017 has expired.
+2022-02-24T20:15:28.960+0000 I  NETWORK  [conn2] end connection 127.0.0.1:58436 (0 connections now open)
+2022-02-24T20:21:57.214+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58440 #5 (1 connection now open)
+2022-02-24T20:21:57.220+0000 I  NETWORK  [conn5] received client metadata from 127.0.0.1:58440 conn5: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:21:57.223+0000 I  ACCESS   [conn5]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:21:57.224+0000 I  ACCESS   [conn5] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58440
+2022-02-24T20:22:20.681+0000 I  NETWORK  [conn5] end connection 127.0.0.1:58440 (0 connections now open)
+2022-02-24T20:22:29.119+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58442 #6 (1 connection now open)
+2022-02-24T20:22:29.125+0000 I  NETWORK  [conn6] received client metadata from 127.0.0.1:58442 conn6: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:22:51.518+0000 I  NETWORK  [conn6] end connection 127.0.0.1:58442 (0 connections now open)
+2022-02-24T20:22:53.385+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58444 #7 (1 connection now open)
+2022-02-24T20:22:53.394+0000 I  NETWORK  [conn7] received client metadata from 127.0.0.1:58444 conn7: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:22:53.408+0000 I  ACCESS   [conn7]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:22:53.408+0000 I  ACCESS   [conn7] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58444
+2022-02-24T20:23:04.074+0000 I  NETWORK  [conn7] end connection 127.0.0.1:58444 (0 connections now open)
+2022-02-24T20:25:25.420+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58446 #8 (1 connection now open)
+2022-02-24T20:25:25.425+0000 I  NETWORK  [conn8] received client metadata from 127.0.0.1:58446 conn8: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:25:25.425+0000 I  ACCESS   [conn8]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:25:25.425+0000 I  ACCESS   [conn8] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58446
+2022-02-24T20:25:47.872+0000 I  STORAGE  [conn8] createCollection: test.foo with generated UUID: c47ff919-9807-404d-b333-0dd8a73be159 and options: {}
+2022-02-24T20:25:47.882+0000 I  INDEX    [conn8] index build: done building index _id_ on ns test.foo
+2022-02-24T20:25:54.092+0000 I  NETWORK  [conn8] end connection 127.0.0.1:58446 (0 connections now open)
+2022-02-24T20:29:43.358+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58462 #9 (1 connection now open)
+2022-02-24T20:29:43.363+0000 I  NETWORK  [conn9] received client metadata from 127.0.0.1:58462 conn9: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:29:43.363+0000 I  ACCESS   [conn9]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:29:43.363+0000 I  ACCESS   [conn9] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58462
+2022-02-24T20:29:43.373+0000 W  CONTROL  [conn9] Use of deprecated server parameter 'disableNonSSLConnectionLogging', please use 'disableNonTLSConnectionLogging' instead.
+2022-02-24T20:29:43.373+0000 W  NETWORK  [conn9] Use of deprecated server parameter 'sslMode', please use 'tlsMode' instead.
+2022-02-24T20:29:43.373+0000 W  CONTROL  [conn9] Use of deprecated server parameter 'sslWithholdClientCertificate', please use 'tlsWithholdClientCertificate' instead.
+2022-02-24T20:29:43.381+0000 I  ACCESS   [conn9] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("3bcc5c82-15fa-45d2-b83f-56f8ec227366") }, $clusterTime: { clusterTime: Timestamp(1645734578, 1), signature: { hash: BinData(0, A19A83F8473D43917959F1B2F2F9E80C5D2486C0), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:29:43.383+0000 I  NETWORK  [conn9] end connection 127.0.0.1:58462 (0 connections now open)
+2022-02-24T20:30:10.701+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58464 #10 (1 connection now open)
+2022-02-24T20:30:10.707+0000 I  NETWORK  [conn10] received client metadata from 127.0.0.1:58464 conn10: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:30:10.707+0000 I  ACCESS   [conn10]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:30:10.707+0000 I  ACCESS   [conn10] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58464
+2022-02-24T20:30:14.153+0000 I  NETWORK  [conn10] end connection 127.0.0.1:58464 (0 connections now open)
+2022-02-24T20:30:19.601+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58466 #11 (1 connection now open)
+2022-02-24T20:30:19.606+0000 I  NETWORK  [conn11] received client metadata from 127.0.0.1:58466 conn11: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:30:19.606+0000 I  ACCESS   [conn11]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:30:19.606+0000 I  ACCESS   [conn11] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58466
+2022-02-24T20:30:19.624+0000 I  ACCESS   [conn11] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("665ae544-6d32-4860-9a9b-0ce32b54d803") }, $clusterTime: { clusterTime: Timestamp(1645734618, 1), signature: { hash: BinData(0, D44E61A74C898648E523021869C6B093DB04A9BE), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:30:19.626+0000 I  NETWORK  [conn11] end connection 127.0.0.1:58466 (0 connections now open)
+2022-02-24T20:31:26.869+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58468 #12 (1 connection now open)
+2022-02-24T20:31:26.874+0000 I  NETWORK  [conn12] received client metadata from 127.0.0.1:58468 conn12: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:31:26.874+0000 I  ACCESS   [conn12]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:31:26.874+0000 I  ACCESS   [conn12] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58468
+2022-02-24T20:31:26.893+0000 I  ACCESS   [conn12] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("bae60738-3dde-4751-8a4f-95d494ed0240") }, $clusterTime: { clusterTime: Timestamp(1645734678, 1), signature: { hash: BinData(0, 61937761BDC206F9F9F2FDD236C2633585A24F69), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:31:26.895+0000 I  NETWORK  [conn12] end connection 127.0.0.1:58468 (0 connections now open)
+2022-02-24T20:32:36.049+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58470 #13 (1 connection now open)
+2022-02-24T20:32:36.058+0000 I  NETWORK  [conn13] received client metadata from 127.0.0.1:58470 conn13: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:32:36.059+0000 I  ACCESS   [conn13]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:32:36.059+0000 I  ACCESS   [conn13] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58470
+2022-02-24T20:32:36.068+0000 I  NETWORK  [conn13] end connection 127.0.0.1:58470 (0 connections now open)
+2022-02-24T20:32:58.326+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58472 #14 (1 connection now open)
+2022-02-24T20:32:58.332+0000 I  NETWORK  [conn14] received client metadata from 127.0.0.1:58472 conn14: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:32:58.332+0000 I  ACCESS   [conn14]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:32:58.332+0000 I  ACCESS   [conn14] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58472
+2022-02-24T20:33:08.125+0000 I  NETWORK  [conn14] end connection 127.0.0.1:58472 (0 connections now open)
+2022-02-24T20:33:13.741+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58474 #15 (1 connection now open)
+2022-02-24T20:33:13.748+0000 I  NETWORK  [conn15] received client metadata from 127.0.0.1:58474 conn15: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:33:13.748+0000 I  ACCESS   [conn15]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:33:13.748+0000 I  ACCESS   [conn15] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58474
+2022-02-24T20:33:13.761+0000 I  NETWORK  [conn15] end connection 127.0.0.1:58474 (0 connections now open)
+2022-02-24T20:33:28.048+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58476 #16 (1 connection now open)
+2022-02-24T20:33:28.053+0000 I  NETWORK  [conn16] received client metadata from 127.0.0.1:58476 conn16: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:33:28.053+0000 I  ACCESS   [conn16]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:33:28.053+0000 I  ACCESS   [conn16] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58476
+2022-02-24T20:33:28.135+0000 I  NETWORK  [conn16] end connection 127.0.0.1:58476 (0 connections now open)
+2022-02-24T20:34:17.995+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58478 #17 (1 connection now open)
+2022-02-24T20:34:17.999+0000 I  NETWORK  [conn17] received client metadata from 127.0.0.1:58478 conn17: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:34:17.999+0000 I  ACCESS   [conn17]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:34:17.999+0000 I  ACCESS   [conn17] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58478
+2022-02-24T20:34:18.018+0000 I  ACCESS   [conn17] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("7f8fc73f-4f85-4139-a408-2b5b4efc2a51") }, $clusterTime: { clusterTime: Timestamp(1645734848, 1), signature: { hash: BinData(0, 0074B9B46903036CD5FE6681B68C56FB548A20DF), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:34:18.020+0000 I  NETWORK  [conn17] end connection 127.0.0.1:58478 (0 connections now open)
+2022-02-24T20:34:26.695+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58480 #18 (1 connection now open)
+2022-02-24T20:34:26.700+0000 I  NETWORK  [conn18] received client metadata from 127.0.0.1:58480 conn18: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:34:26.700+0000 I  ACCESS   [conn18]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:34:26.700+0000 I  ACCESS   [conn18] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58480
+2022-02-24T20:34:26.718+0000 I  ACCESS   [conn18] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("b33460b1-814d-4ae3-8dcf-e9352786556d") }, $clusterTime: { clusterTime: Timestamp(1645734858, 1), signature: { hash: BinData(0, BAC3C135D97D1D1C05DA651DB9D39AC419F77E68), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:34:26.721+0000 I  NETWORK  [conn18] end connection 127.0.0.1:58480 (0 connections now open)
+2022-02-24T20:37:28.263+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58482 #19 (1 connection now open)
+2022-02-24T20:37:28.268+0000 I  NETWORK  [conn19] received client metadata from 127.0.0.1:58482 conn19: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:37:28.269+0000 I  ACCESS   [conn19]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:37:28.269+0000 I  ACCESS   [conn19] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58482
+2022-02-24T20:37:28.288+0000 I  ACCESS   [conn19] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("758cc319-c3f8-4174-8a47-8d948df949ea") }, $clusterTime: { clusterTime: Timestamp(1645735038, 1), signature: { hash: BinData(0, C58C6A17B2AD029C90EB973E54E2FE20C241288A), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:37:28.290+0000 I  NETWORK  [conn19] end connection 127.0.0.1:58482 (0 connections now open)
+2022-02-24T20:37:44.376+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58484 #20 (1 connection now open)
+2022-02-24T20:37:44.392+0000 I  NETWORK  [conn20] received client metadata from 127.0.0.1:58484 conn20: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:37:44.393+0000 I  ACCESS   [conn20]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:37:44.393+0000 I  ACCESS   [conn20] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58484
+2022-02-24T20:37:57.900+0000 I  NETWORK  [conn20] end connection 127.0.0.1:58484 (0 connections now open)
+2022-02-24T20:38:54.954+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58486 #21 (1 connection now open)
+2022-02-24T20:38:54.959+0000 I  NETWORK  [conn21] received client metadata from 127.0.0.1:58486 conn21: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:38:54.959+0000 I  ACCESS   [conn21]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:38:54.959+0000 I  ACCESS   [conn21] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58486
+2022-02-24T20:38:54.963+0000 I  NETWORK  [conn21] end connection 127.0.0.1:58486 (0 connections now open)
+2022-02-24T20:39:04.309+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58488 #22 (1 connection now open)
+2022-02-24T20:39:04.313+0000 I  NETWORK  [conn22] received client metadata from 127.0.0.1:58488 conn22: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:39:04.313+0000 I  ACCESS   [conn22]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:39:04.314+0000 I  ACCESS   [conn22] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58488
+2022-02-24T20:39:04.329+0000 I  ACCESS   [conn22] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("138c1eb0-b437-407f-8d8b-920aa318f5b9") }, $clusterTime: { clusterTime: Timestamp(1645735139, 1), signature: { hash: BinData(0, 4CB185A1E75BE6679069805976FC2E3971C9CFCB), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:39:04.331+0000 I  NETWORK  [conn22] end connection 127.0.0.1:58488 (0 connections now open)
+2022-02-24T20:39:21.354+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58490 #23 (1 connection now open)
+2022-02-24T20:39:21.358+0000 I  NETWORK  [conn23] received client metadata from 127.0.0.1:58490 conn23: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:39:21.358+0000 I  ACCESS   [conn23]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:39:21.358+0000 I  ACCESS   [conn23] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58490
+2022-02-24T20:39:37.164+0000 I  ACCESS   [conn23] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("2c04c9b4-e8bd-4497-a68f-60280752e1d5") }, $clusterTime: { clusterTime: Timestamp(1645735169, 1), signature: { hash: BinData(0, BB8EB201EF6728E0537EE1CE76A7EA692EF24E41), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:39:37.166+0000 I  NETWORK  [conn23] end connection 127.0.0.1:58490 (0 connections now open)
+2022-02-24T20:44:52.407+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58492 #24 (1 connection now open)
+2022-02-24T20:44:52.411+0000 I  NETWORK  [conn24] received client metadata from 127.0.0.1:58492 conn24: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:44:52.411+0000 I  ACCESS   [conn24]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:44:52.411+0000 I  ACCESS   [conn24] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58492
+2022-02-24T20:44:52.454+0000 I  ACCESS   [conn24] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("6761aedc-153c-48db-bf4e-cdcf2b6d21d6") }, $clusterTime: { clusterTime: Timestamp(1645735489, 1), signature: { hash: BinData(0, 43E0F19F80BD405F157EA3CC373629F00F547020), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:44:52.506+0000 I  NETWORK  [conn24] end connection 127.0.0.1:58492 (0 connections now open)
+2022-02-24T20:45:16.026+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58494 #25 (1 connection now open)
+2022-02-24T20:45:16.030+0000 I  NETWORK  [conn25] received client metadata from 127.0.0.1:58494 conn25: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:45:16.030+0000 I  ACCESS   [conn25]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:45:16.030+0000 I  ACCESS   [conn25] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58494
+2022-02-24T20:45:16.072+0000 I  ACCESS   [conn25] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("3daeb7e5-ffe0-465f-a436-5705abdbd9ad") }, $clusterTime: { clusterTime: Timestamp(1645735509, 1), signature: { hash: BinData(0, 50765779D2264EA6EB286508107C2880ED6CA048), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:45:16.152+0000 I  NETWORK  [conn25] end connection 127.0.0.1:58494 (0 connections now open)
+2022-02-24T20:47:12.671+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58504 #26 (1 connection now open)
+2022-02-24T20:47:12.676+0000 I  NETWORK  [conn26] received client metadata from 127.0.0.1:58504 conn26: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:47:12.676+0000 I  ACCESS   [conn26]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:47:12.676+0000 I  ACCESS   [conn26] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58504
+2022-02-24T20:47:12.693+0000 I  ACCESS   [conn26] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("21d0dcf5-b564-4746-bffe-8af200549c1a") }, $clusterTime: { clusterTime: Timestamp(1645735629, 1), signature: { hash: BinData(0, 86999167C748B14FAF6ABE8CA6D1201724B278DF), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:47:12.695+0000 I  NETWORK  [conn26] end connection 127.0.0.1:58504 (0 connections now open)
+2022-02-24T20:48:38.084+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58506 #27 (1 connection now open)
+2022-02-24T20:48:38.089+0000 I  NETWORK  [conn27] received client metadata from 127.0.0.1:58506 conn27: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:48:38.089+0000 I  ACCESS   [conn27]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:48:38.090+0000 I  ACCESS   [conn27] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58506
+2022-02-24T20:48:38.109+0000 I  ACCESS   [conn27] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("bb77815f-a9bc-4418-ad10-495b8b56a6f0") }, $clusterTime: { clusterTime: Timestamp(1645735709, 1), signature: { hash: BinData(0, 999A8AD8F57553DDCD61F833C425CF4C63E0053B), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:48:38.112+0000 I  NETWORK  [conn27] end connection 127.0.0.1:58506 (0 connections now open)
+2022-02-24T20:49:44.777+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58508 #28 (1 connection now open)
+2022-02-24T20:49:44.781+0000 I  NETWORK  [conn28] received client metadata from 127.0.0.1:58508 conn28: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:49:44.781+0000 I  ACCESS   [conn28]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:49:44.781+0000 I  ACCESS   [conn28] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58508
+2022-02-24T20:49:44.806+0000 I  ACCESS   [conn28] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("6223ef58-75a4-44a8-bd89-aed912eb7463") }, $clusterTime: { clusterTime: Timestamp(1645735779, 1), signature: { hash: BinData(0, ABB7391DC552FAB1FDC857E9C5D797D99290A41D), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:49:44.808+0000 I  NETWORK  [conn28] end connection 127.0.0.1:58508 (0 connections now open)
+2022-02-24T20:50:25.253+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58510 #29 (1 connection now open)
+2022-02-24T20:50:25.257+0000 I  NETWORK  [conn29] received client metadata from 127.0.0.1:58510 conn29: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:50:25.258+0000 I  ACCESS   [conn29]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:50:25.258+0000 I  ACCESS   [conn29] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58510
+2022-02-24T20:50:25.285+0000 I  ACCESS   [conn29] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("9d51671f-cc8a-42b0-a97e-907d133b2a03") }, $clusterTime: { clusterTime: Timestamp(1645735819, 1), signature: { hash: BinData(0, 085006A2398D754EB8AA5EC6500E53A947CDE57C), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:50:25.287+0000 I  NETWORK  [conn29] end connection 127.0.0.1:58510 (0 connections now open)
+2022-02-24T20:51:40.698+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58518 #30 (1 connection now open)
+2022-02-24T20:51:40.710+0000 I  NETWORK  [conn30] received client metadata from 127.0.0.1:58518 conn30: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:51:40.715+0000 I  ACCESS   [conn30]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:51:40.715+0000 I  ACCESS   [conn30] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58518
+2022-02-24T20:51:40.747+0000 I  ACCESS   [conn30] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("2b4e5d3a-e631-495e-b1c6-721b32b0c3a3") }, $clusterTime: { clusterTime: Timestamp(1645735899, 1), signature: { hash: BinData(0, 29E09FCF9697BB0B49B7638F58D6A89B40B5EC11), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:51:40.755+0000 I  NETWORK  [conn30] end connection 127.0.0.1:58518 (0 connections now open)
+2022-02-24T20:52:35.108+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58520 #31 (1 connection now open)
+2022-02-24T20:52:35.112+0000 I  NETWORK  [conn31] received client metadata from 127.0.0.1:58520 conn31: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:52:35.112+0000 I  ACCESS   [conn31]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:52:35.112+0000 I  ACCESS   [conn31] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58520
+2022-02-24T20:52:35.131+0000 I  ACCESS   [conn31] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("e8d31328-1b33-49a5-ac19-d768900c2473") }, $clusterTime: { clusterTime: Timestamp(1645735949, 1), signature: { hash: BinData(0, 348E5422F3715BF8F0BD17FB802E097AAD8F25BF), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:52:35.134+0000 I  NETWORK  [conn31] end connection 127.0.0.1:58520 (0 connections now open)
+2022-02-24T20:53:22.581+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58522 #32 (1 connection now open)
+2022-02-24T20:53:22.586+0000 I  NETWORK  [conn32] received client metadata from 127.0.0.1:58522 conn32: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:53:22.586+0000 I  ACCESS   [conn32]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:53:22.586+0000 I  ACCESS   [conn32] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58522
+2022-02-24T20:53:22.606+0000 I  ACCESS   [conn32] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("68c3a00a-ac9e-43e6-99b8-a621ed0c1ef4") }, $clusterTime: { clusterTime: Timestamp(1645735999, 1), signature: { hash: BinData(0, 58D397E2271420786A9BB164E775D3AA3F3FE422), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:53:22.609+0000 I  NETWORK  [conn32] end connection 127.0.0.1:58522 (0 connections now open)
+2022-02-24T20:54:11.294+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58524 #33 (1 connection now open)
+2022-02-24T20:54:11.298+0000 I  NETWORK  [conn33] received client metadata from 127.0.0.1:58524 conn33: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:54:11.303+0000 I  ACCESS   [conn33]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:54:11.303+0000 I  ACCESS   [conn33] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58524
+2022-02-24T20:54:24.491+0000 I  ACCESS   [conn33] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("2177f9cd-7443-4b51-aa24-5bdfe1879906") }, $clusterTime: { clusterTime: Timestamp(1645736049, 1), signature: { hash: BinData(0, B3D7290B4718900538897D5E6535022253857438), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:56:55.768+0000 I  NETWORK  [conn33] end connection 127.0.0.1:58524 (0 connections now open)
+2022-02-24T20:59:11.217+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58526 #34 (1 connection now open)
+2022-02-24T20:59:11.221+0000 I  NETWORK  [conn34] received client metadata from 127.0.0.1:58526 conn34: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T20:59:11.221+0000 I  ACCESS   [conn34]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:59:11.221+0000 I  ACCESS   [conn34] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58526
+2022-02-24T20:59:13.751+0000 I  ACCESS   [conn34]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T20:59:13.751+0000 I  ACCESS   [conn34] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58526
+2022-02-24T20:59:50.537+0000 I  ACCESS   [conn34] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("53f3745a-ee69-4563-a2ec-4fbc81146f3d") }, $clusterTime: { clusterTime: Timestamp(1645736389, 1), signature: { hash: BinData(0, 372A3973689BE017A4F9B5E826C7EC37940C9892), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T20:59:50.543+0000 I  NETWORK  [conn34] end connection 127.0.0.1:58526 (0 connections now open)
+2022-02-24T21:00:02.355+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58528 #35 (1 connection now open)
+2022-02-24T21:00:02.365+0000 I  NETWORK  [conn35] received client metadata from 127.0.0.1:58528 conn35: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:00:02.365+0000 I  ACCESS   [conn35]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:00:02.366+0000 I  ACCESS   [conn35] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58528
+2022-02-24T21:00:39.574+0000 I  ACCESS   [conn35] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection" }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("1ab9ff8a-b5ce-4da9-b238-7a9b0e9a435c") }, $clusterTime: { clusterTime: Timestamp(1645736428, 5), signature: { hash: BinData(0, 1E0BE0D7712DF48023DA8CBE5135AE1D7222BAC9), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T21:04:45.376+0000 I  ACCESS   [conn35] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection", authorizedCollections: true }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("1ab9ff8a-b5ce-4da9-b238-7a9b0e9a435c") }, $clusterTime: { clusterTime: Timestamp(1645736569, 1), signature: { hash: BinData(0, D3ACF7C478A62E634BFC2F364C8F5064D8CCCE51), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T21:04:51.074+0000 I  ACCESS   [conn35] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: { type: "collection", authorizedCollections: false }, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("1ab9ff8a-b5ce-4da9-b238-7a9b0e9a435c") }, $clusterTime: { clusterTime: Timestamp(1645736679, 1), signature: { hash: BinData(0, 2C9B15F4D89AA4B0C8788BF239D02B75EAEF3B33), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T21:07:17.301+0000 I  ACCESS   [conn35] Unauthorized: not authorized on admin to execute command { find: "users", filter: {}, lsid: { id: UUID("1ab9ff8a-b5ce-4da9-b238-7a9b0e9a435c") }, $clusterTime: { clusterTime: Timestamp(1645736829, 1), signature: { hash: BinData(0, 30B895CED2A48EE65C520F4EBD9038CFB140A4C0), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T21:08:56.506+0000 I  ACCESS   [conn35] TypeMismatch: "roles" had the wrong type. Expected array, found object
+2022-02-24T21:10:47.259+0000 I  ACCESS   [conn35] TypeMismatch: "grantRolesToUser" had the wrong type. Expected string, found binData
+2022-02-24T21:11:47.681+0000 I  ACCESS   [conn35] Unauthorized: not authorized on admin to execute command { listCollections: 1.0, filter: {}, nameOnly: false, authorizedCollections: false, lsid: { id: UUID("1ab9ff8a-b5ce-4da9-b238-7a9b0e9a435c") }, $clusterTime: { clusterTime: Timestamp(1645737049, 1), signature: { hash: BinData(0, E345F5C79987D27FE9F2434340432764FB5F5856), keyId: 7068371212539265029 } }, $db: "admin" }
+2022-02-24T21:15:53.369+0000 I  NETWORK  [conn35] end connection 127.0.0.1:58528 (0 connections now open)
+2022-02-24T21:16:00.275+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58544 #36 (1 connection now open)
+2022-02-24T21:16:00.279+0000 I  NETWORK  [conn36] received client metadata from 127.0.0.1:58544 conn36: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:16:00.280+0000 I  ACCESS   [conn36]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:16:00.280+0000 I  ACCESS   [conn36] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58544
+2022-02-24T21:16:00.372+0000 I  NETWORK  [conn36] end connection 127.0.0.1:58544 (0 connections now open)
+2022-02-24T21:16:08.296+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58546 #37 (1 connection now open)
+2022-02-24T21:16:08.300+0000 I  NETWORK  [conn37] received client metadata from 127.0.0.1:58546 conn37: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:16:08.300+0000 I  ACCESS   [conn37]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:16:08.300+0000 I  ACCESS   [conn37] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58546
+2022-02-24T21:16:08.396+0000 I  NETWORK  [conn37] end connection 127.0.0.1:58546 (0 connections now open)
+2022-02-24T21:17:09.208+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58548 #38 (1 connection now open)
+2022-02-24T21:17:09.214+0000 I  NETWORK  [conn38] received client metadata from 127.0.0.1:58548 conn38: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:17:09.214+0000 I  ACCESS   [conn38]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:17:09.214+0000 I  ACCESS   [conn38] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58548
+2022-02-24T21:17:09.363+0000 I  NETWORK  [conn38] end connection 127.0.0.1:58548 (0 connections now open)
+2022-02-24T21:17:44.238+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58550 #39 (1 connection now open)
+2022-02-24T21:17:44.242+0000 I  NETWORK  [conn39] received client metadata from 127.0.0.1:58550 conn39: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:17:44.242+0000 I  ACCESS   [conn39]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:17:44.242+0000 I  ACCESS   [conn39] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58550
+2022-02-24T21:17:44.306+0000 I  NETWORK  [conn39] end connection 127.0.0.1:58550 (0 connections now open)
+2022-02-24T21:18:33.651+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58552 #40 (1 connection now open)
+2022-02-24T21:18:33.656+0000 I  NETWORK  [conn40] received client metadata from 127.0.0.1:58552 conn40: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:18:33.656+0000 I  ACCESS   [conn40]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:18:33.656+0000 I  ACCESS   [conn40] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58552
+2022-02-24T21:18:33.790+0000 I  NETWORK  [conn40] end connection 127.0.0.1:58552 (0 connections now open)
+2022-02-24T21:20:38.972+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58554 #41 (1 connection now open)
+2022-02-24T21:20:38.976+0000 I  NETWORK  [conn41] received client metadata from 127.0.0.1:58554 conn41: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:20:38.977+0000 I  ACCESS   [conn41]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:20:38.977+0000 I  ACCESS   [conn41] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58554
+2022-02-24T21:22:29.602+0000 I  NETWORK  [conn41] end connection 127.0.0.1:58554 (0 connections now open)
+2022-02-24T21:22:59.349+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58556 #42 (1 connection now open)
+2022-02-24T21:22:59.353+0000 I  NETWORK  [conn42] received client metadata from 127.0.0.1:58556 conn42: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:22:59.354+0000 I  ACCESS   [conn42]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:22:59.354+0000 I  ACCESS   [conn42] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58556
+2022-02-24T21:23:06.784+0000 I  NETWORK  [conn42] end connection 127.0.0.1:58556 (0 connections now open)
+2022-02-24T21:23:21.158+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58558 #43 (1 connection now open)
+2022-02-24T21:23:21.163+0000 I  NETWORK  [conn43] received client metadata from 127.0.0.1:58558 conn43: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T21:23:21.163+0000 I  ACCESS   [conn43]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T21:23:21.163+0000 I  ACCESS   [conn43] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58558
+2022-02-24T21:24:38.668+0000 I  NETWORK  [conn43] end connection 127.0.0.1:58558 (0 connections now open)
+2022-02-24T23:59:37.053+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:58644 #44 (1 connection now open)
+2022-02-24T23:59:37.058+0000 I  NETWORK  [conn44] received client metadata from 127.0.0.1:58644 conn44: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.18" }, os: { type: "Linux", name: "Amazon Linux release 2 (Karoo)", architecture: "x86_64", version: "Kernel 5.10.96-90.460.amzn2.x86_64" } }
+2022-02-24T23:59:37.058+0000 I  ACCESS   [conn44]  authenticate db: $external { authenticate: 1, mechanism: "MONGODB-X509", user: "CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US", $db: "$external" }
+2022-02-24T23:59:37.058+0000 I  ACCESS   [conn44] Successfully authenticated as principal CN=client1,OU=MyClients,O=MongoDB,L=Phoenix,ST=AZ,C=US on $external from client 127.0.0.1:58644
+2022-02-24T23:59:40.441+0000 I  NETWORK  [conn44] end connection 127.0.0.1:58644 (0 connections now open)
