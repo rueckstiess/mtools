@@ -1915,7 +1915,7 @@ class MLaunchTool(BaseCmdLineTool):
                   for x in self.config_docs[self.args['name']]['members']])
         rs_name = self.config_docs[self.args['name']]['_id']
         mrsc = self.client(hosts, replicaSet=rs_name,
-                           serverSelectionTimeoutMS=30000)
+                           serverSelectionTimeoutMS=30000, directConnection=False)
 
         if mrsc.is_primary:
             # update cluster tags now that we have a primary
