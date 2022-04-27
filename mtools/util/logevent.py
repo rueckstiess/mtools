@@ -474,7 +474,8 @@ class LogEvent(object):
                     self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
-
+            elif self.command == 'aggregate':
+                self._pattern = self._find_pattern('pipeline: ')
         return self._pattern
 
     @property
@@ -500,6 +501,8 @@ class LogEvent(object):
             elif self.command == 'find':
                 self._actual_query = self._find_pattern('filter: ',
                                                         actual=True)
+            elif self.command == 'aggregate':
+                self._pattern = self._find_pattern('pipeline: ', actual=True)
 
         return self._actual_query
 
@@ -1006,9 +1009,9 @@ class LogEvent(object):
         brace_counter = 0
         search_str = self.line_str[start_idx + len(trigger):]
 
-        for match in re.finditer(r'{|}', search_str):
+        for match in re.finditer(r'\[|{|}|\]', search_str):
             stop_idx = match.start()
-            if search_str[stop_idx] == '{':
+            if search_str[stop_idx] in ['{', '[']:
                 brace_counter += 1
             else:
                 brace_counter -= 1
