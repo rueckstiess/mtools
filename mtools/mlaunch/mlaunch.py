@@ -781,7 +781,7 @@ class MLaunchTool(BaseCmdLineTool):
                                                        ('name', name)]))
                         except Exception as e:
                             if self.args['verbose']:
-                                print('%s will retry in a moment.' % e)
+                                print('Shard addition failed: %s; will retry in a moment.' % e)
                             continue
 
                         if res['ok']:
@@ -791,7 +791,7 @@ class MLaunchTool(BaseCmdLineTool):
                                 break
                         else:
                             if self.args['verbose']:
-                                print(res + ' - will retry')
+                                print('Shard addition failed: ' + res + ' - will retry')
 
                     time.sleep(1)
 
@@ -1843,7 +1843,7 @@ class MLaunchTool(BaseCmdLineTool):
                                           self.config_docs[name]})
                     break
                 except OperationFailure as e:
-                    print(str(e) + " - will retry")
+                    print('Replica set initialization failed: %s - will retry' % e)
                     time.sleep(1)
 
             if self.args['verbose']:
