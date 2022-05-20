@@ -144,7 +144,7 @@ def check_mongo_server_output(binary, argument):
                                 stderr=subprocess.STDOUT,
                                 stdout=subprocess.PIPE, shell=False)
     except OSError as exc:
-        print('Failed to launch %s' % binary)
+        print('Failed to launch %s: %s' % (binary, exc))
         raise exc
 
     out, err = proc.communicate()
