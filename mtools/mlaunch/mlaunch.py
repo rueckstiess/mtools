@@ -1584,9 +1584,9 @@ class MLaunchTool(BaseCmdLineTool):
 
         try:
             out = check_mongo_server_output(binary, '--help')
-        except Exception:
-            raise SystemExit("Fatal error trying get output from `%s`."
-                "Is the binary in your path?" % binary)
+        except Exception as exc:
+            raise SystemExit("Fatal error trying get output from `%s`: %s. "
+                "Is the binary in your path?" % (exc, binary))
 
         accepted_arguments = []
         # extract all arguments starting with a '-'
