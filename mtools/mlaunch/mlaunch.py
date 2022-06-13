@@ -47,7 +47,7 @@ class MongoConnection(Connection):
     MongoConnection class.
 
     Wrapper around Connection (itself conditionally a MongoClient or
-    pymongo.Connection) to specify timeout and directConnection.
+    pymongo.Connection) to specify timeout.
     """
 
     def __init__(self, *args, **kwargs):
