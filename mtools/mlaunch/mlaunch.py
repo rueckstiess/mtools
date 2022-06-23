@@ -1762,11 +1762,15 @@ class MLaunchTool(BaseCmdLineTool):
             shard_names = [None]
         return shard_names
 
+    def _get_log_path(self, command_str):
+        match = re.search(r'--logpath ([^\s]+)', command_str)
+        return match.group(1)
+
     def _get_last_error_log(self, command_str):
-        logpath = re.search(r'--logpath ([^\s]+)', command_str)
+        log_path = self._get_log_path(command_str)
         loglines = ''
         try:
-            with open(logpath.group(1), 'rb') as logfile:
+            with open(log_path, 'rb') as logfile:
                 for line in logfile:
                     if not line.startswith('----- BEGIN BACKTRACE -----'):
                         loglines += line
@@ -1811,9 +1815,10 @@ class MLaunchTool(BaseCmdLineTool):
             except subprocess.CalledProcessError as e:
                 print(e.output)
                 print(self._get_last_error_log(command_str), file=sys.stderr)
+                log_path = self._get_log_path(command_str)
                 raise SystemExit("can't start process, return code %i. "
-                                 "tried to launch: %s"
-                                 % (e.returncode, command_str))
+                                 "tried to launch: %s\nlog: %s"
+                                 % (e.returncode, command_str, log_path))
 
         if wait:
             self.wait_for(ports)
