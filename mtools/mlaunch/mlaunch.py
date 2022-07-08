@@ -1853,19 +1853,12 @@ class MLaunchTool(BaseCmdLineTool):
             con.close()
             con = self.client('localhost:%i' % port, replicaSet=set_name,
                               serverSelectionTimeoutMS=10000)
-        v = ismaster.get('maxWireVersion', 0)
-        if v >= 7:
-            # Until drivers have implemented SCRAM-SHA-256, use old mechanism.
-            opts = {'mechanisms': ['SCRAM-SHA-1']}
-        else:
-            opts = {}
 
         if database == "$external":
             password = None
 
         try:
-            con[database].command("createUser", name, pwd=password, roles=roles,
-                                   **opts)
+            con[database].command("createUser", name, pwd=password, roles=roles)
         except OperationFailure as e:
             raise e
 
