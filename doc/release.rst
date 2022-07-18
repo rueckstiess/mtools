@@ -10,8 +10,8 @@ Bug fixes and minor feature additions are released periodically as part of
 micro releases. Minor releases will include more significant changes, including
 interface changes. We're not sure yet what a major release constitutes :-).
 
-The development version has the suffix ``dev`` attached. For example
-``1.0.1-dev`` is the development version leading up to a ``1.0.1`` release.
+The development version has the suffix ``dev0`` attached. For example
+``1.0.1-dev0`` is the development version leading up to a ``1.0.1`` release.
 
 Minor and major releases might have release candidates leading up to the final
 release. Those are marked with the suffix ``rcX`` where ``X``
@@ -27,7 +27,7 @@ Releasing a new version
 
 #. Create a release branch, named ``release-x.y.z`` where ``x.y.z`` is the
    version to be released.
-#. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev`` to
+#. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev0`` to
    ``x.y.z``.
 #. Make sure tests are passing in Python 3.6, 3.7, and 3.8 via
    ``tox -re py36,py37,py38``.
@@ -43,4 +43,4 @@ Releasing a new version
 #. Merge the release branch into ``develop``.
 #. Delete the ``release-x.y.z`` branch.
 #. Bump the version on the develop branch (in ``./mtools/version.py``) to
-   ``x.y.(z+1)-dev``.
+   ``x.y.(z+1)-dev0``.

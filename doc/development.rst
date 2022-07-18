@@ -62,7 +62,7 @@ Using a development branch
       mlogf<tab>
 
    This should auto-complete to ``mlogfilter``. Also confirm the current
-   version, which should end in ``-dev`` for the ``develop`` branch:
+   version, which should end in ``-dev0`` for the ``develop`` branch:
 
    .. code-block:: bash
 

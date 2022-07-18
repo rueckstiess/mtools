@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
 """Mtools version."""
 
-__version__ = '1.7.1-dev'
+__version__ = '1.7.1-dev0'
