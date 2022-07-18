@@ -51,7 +51,6 @@ class MongoConnection(Connection):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('directConnection', True)
         kwargs.setdefault('serverSelectionTimeoutMS', 1)
 
         # Set client application name for MongoDB 3.4+ servers
@@ -82,7 +81,7 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
             return False
         try:
             # make connection and ping host
-            con = MongoConnection(host,
+            con = MongoConnection(host, directConnection=True,
                                   **(ssl_pymongo_options or {}),
                                   **(tls_pymongo_options or {}))
             con.admin.command('ping')
@@ -114,9 +113,10 @@ def shutdown_host(port, username=None, password=None, authdb=None):
             if authdb != "admin":
                 raise RuntimeError("given username/password is not for "
                                     "admin database")
-            mc = MongoConnection(host, username=username, password=password)
+            mc = MongoConnection(host, username=username, password=password,
+                                 directConnection=True)
         else:
-            mc = MongoConnection(host)
+            mc = MongoConnection(host, directConnection=True)
         
         try:
             mc.admin.command('shutdown', force=True)
@@ -1363,7 +1363,7 @@ class MLaunchTool(BaseCmdLineTool):
             port = i + current_port
 
             try:
-                mc = self.client('localhost:%i' % port)
+                mc = self.client('localhost:%i' % port, directConnection=True)
                 mc.admin.command('ping')
                 running = True
 
@@ -1382,7 +1382,7 @@ class MLaunchTool(BaseCmdLineTool):
     def is_running(self, port):
         """Return True if a host on a specific port is running."""
         try:
-            con = self.client('localhost:%s' % port)
+            con = self.client('localhost:%s' % port, directConnection=True)
             con.admin.command('ping')
             return True
         except (AutoReconnect, ConnectionFailure, OperationFailure):
@@ -1830,7 +1830,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print('Skipping replica set initialization for %s' % name)
             return
 
-        con = self.client('localhost:%i' % port)
+        con = self.client('localhost:%i' % port, directConnection=True)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
             return rs_status
@@ -1852,12 +1852,6 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _add_user(self, port, name, password, database, roles):
         con = self.client('localhost:%i' % port, serverSelectionTimeoutMS=10000)
-        ismaster = con['admin'].command('isMaster')
-        set_name = ismaster.get('setName')
-        if set_name:
-            con.close()
-            con = self.client('localhost:%i' % port, replicaSet=set_name,
-                              serverSelectionTimeoutMS=10000)
 
         if database == "$external":
             password = None
