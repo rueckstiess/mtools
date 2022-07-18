@@ -910,7 +910,7 @@ class MLaunchTool(BaseCmdLineTool):
         try:
             out = check_mongo_server_output(binary, '--version')
         except Exception:
-            return "0.0"
+            return "0.0.0"
 
         buf = BytesIO(out)
         current_version = buf.readline().strip().decode('utf-8')
