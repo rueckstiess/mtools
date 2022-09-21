@@ -12,7 +12,7 @@ easily be stopped and started again.
 In addition to all the listed parameters of **mlaunch** below, you can pass in
 any arbitrary options that a ``mongos`` or ``mongod`` binary would understand,
 and **mlaunch** will pass them on to the correct binary. This includes the
-``-f`` or ``--config`` option to pass on a config file with further options.
+``-f`` option to read further options from a MongoDB configuration file.
 
 
 Usage
