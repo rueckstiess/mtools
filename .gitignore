@@ -31,3 +31,9 @@ _build
 
 # Visual Studio Code (vscode) config
 .vscode
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
