@@ -416,63 +416,64 @@ class MLaunchTool(BaseCmdLineTool):
             self.tls_args = tls_args
             self.tls_client_args = tls_client_args
             self.tls_server_args = tls_server_args
-        else:
-            # ssl
-            ssl_args = init_parser.add_argument_group('TLS/SSL options')
-            ssl_args.add_argument('--sslCAFile',
-                                  help='Certificate Authority file for TLS/SSL',
-                                  type=is_file)
-            ssl_args.add_argument('--sslCRLFile',
-                                  help='Certificate Revocation List file for TLS/SSL',
-                                  type=is_file)
-            ssl_args.add_argument('--sslAllowInvalidHostnames',
-                                  action='store_true',
-                                  help=('allow client and server certificates to '
-                                        'provide non-matching hostnames'))
-            ssl_args.add_argument('--sslAllowInvalidCertificates',
-                                  action='store_true',
-                                  help=('allow client or server connections with '
-                                        'invalid certificates'))
 
-            ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
-            ssl_server_args.add_argument('--sslMode',
-                                         help='set the TLS/SSL operation mode',
-                                         choices=('disabled allowSSL preferSSL '
-                                                  'requireSSL'.split()))
-            ssl_server_args.add_argument('--sslPEMKeyFile',
-                                         help='PEM file for TLS/SSL', type=is_file)
-            ssl_server_args.add_argument('--sslPEMKeyPassword',
-                                         help='PEM file password')
-            ssl_server_args.add_argument('--sslClusterFile',
-                                         help=('key file for internal TLS/SSL '
-                                               'authentication'), type=is_file)
-            ssl_server_args.add_argument('--sslClusterPassword',
-                                         help=('internal authentication key '
-                                               'file password'))
-            ssl_server_args.add_argument('--sslDisabledProtocols',
-                                         help=('comma separated list of TLS '
-                                               'protocols to disable '
-                                               '[TLS1_0,TLS1_1,TLS1_2]'))
-            ssl_server_args.add_argument('--sslAllowConnectionsWithoutCertificates',
-                                         action='store_true',
-                                         help=('allow client to connect without '
-                                               'presenting a certificate'))
-            ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
-                                         help='activate FIPS 140-2 mode')
+        # ssl options were aliased to tls, but are still available in
+        # server versions through MongoDB 6.0
+        ssl_args = init_parser.add_argument_group('TLS/SSL options')
+        ssl_args.add_argument('--sslCAFile',
+                                help='Certificate Authority file for TLS/SSL',
+                                type=is_file)
+        ssl_args.add_argument('--sslCRLFile',
+                                help='Certificate Revocation List file for TLS/SSL',
+                                type=is_file)
+        ssl_args.add_argument('--sslAllowInvalidHostnames',
+                                action='store_true',
+                                help=('allow client and server certificates to '
+                                    'provide non-matching hostnames'))
+        ssl_args.add_argument('--sslAllowInvalidCertificates',
+                                action='store_true',
+                                help=('allow client or server connections with '
+                                    'invalid certificates'))
 
-            ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
-            ssl_client_args.add_argument('--sslClientCertificate',
-                                         help='client certificate file for TLS/SSL',
-                                         type=is_file)
-            ssl_client_args.add_argument('--sslClientPEMKeyFile',
-                                         help='client PEM file for TLS/SSL',
-                                         type=is_file)
-            ssl_client_args.add_argument('--sslClientPEMKeyPassword',
-                                         help='client PEM file password')
+        ssl_server_args = init_parser.add_argument_group('Server TLS/SSL options')
+        ssl_server_args.add_argument('--sslMode',
+                                        help='set the TLS/SSL operation mode',
+                                        choices=('disabled allowSSL preferSSL '
+                                                'requireSSL'.split()))
+        ssl_server_args.add_argument('--sslPEMKeyFile',
+                                        help='PEM file for TLS/SSL', type=is_file)
+        ssl_server_args.add_argument('--sslPEMKeyPassword',
+                                        help='PEM file password')
+        ssl_server_args.add_argument('--sslClusterFile',
+                                        help=('key file for internal TLS/SSL '
+                                            'authentication'), type=is_file)
+        ssl_server_args.add_argument('--sslClusterPassword',
+                                        help=('internal authentication key '
+                                            'file password'))
+        ssl_server_args.add_argument('--sslDisabledProtocols',
+                                        help=('comma separated list of TLS '
+                                            'protocols to disable '
+                                            '[TLS1_0,TLS1_1,TLS1_2]'))
+        ssl_server_args.add_argument('--sslAllowConnectionsWithoutCertificates',
+                                        action='store_true',
+                                        help=('allow client to connect without '
+                                            'presenting a certificate'))
+        ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
+                                        help='activate FIPS 140-2 mode')
 
-            self.ssl_args = ssl_args
-            self.ssl_client_args = ssl_client_args
-            self.ssl_server_args = ssl_server_args
+        ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
+        ssl_client_args.add_argument('--sslClientCertificate',
+                                        help='client certificate file for TLS/SSL',
+                                        type=is_file)
+        ssl_client_args.add_argument('--sslClientPEMKeyFile',
+                                        help='client PEM file for TLS/SSL',
+                                        type=is_file)
+        ssl_client_args.add_argument('--sslClientPEMKeyPassword',
+                                        help='client PEM file password')
+
+        self.ssl_args = ssl_args
+        self.ssl_client_args = ssl_client_args
+        self.ssl_server_args = ssl_server_args
 
         # start command
         start_parser = subparsers.add_parser('start',
