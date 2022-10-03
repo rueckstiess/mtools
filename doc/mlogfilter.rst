@@ -13,6 +13,8 @@ If several log files are provided, **mlogfilter** will merge them by timestamp
 and insert a marker at the beginning of each line, before applying any of the
 other filters.
 
+NOTE: logv2 format (MongoDB 4.4+) is not supported yet.
+
 Usage
 ~~~~~
 

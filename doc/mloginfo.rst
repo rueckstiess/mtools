@@ -7,6 +7,7 @@ mloginfo
 **mloginfo** takes a log file and reports :ref:`default-info` about the
 log file. The script also has some options for additional :ref:`info-sections`.
 
+NOTE: logv2 format (MongoDB 4.4+) is not supported yet.
 
 Usage
 ~~~~~

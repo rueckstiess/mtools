@@ -7,6 +7,8 @@ mplotqueries
 **mplotqueries** is a tool to visualize operations in MongoDB log files. It has
 several different plot types and can group information in various ways.
 
+NOTE: logv2 format (MongoDB 4.4+) is not supported yet.
+
 Usage
 ~~~~~
 
