@@ -144,8 +144,9 @@ def check_mongo_server_output(binary, argument):
                                 stderr=subprocess.STDOUT,
                                 stdout=subprocess.PIPE, shell=False)
     except OSError as exc:
-        print('Failed to launch %s: %s' % (binary, exc))
-        raise exc
+        print('Failed to launch %s' % binary)
+        raise SystemExit(exc)
+
 
     out, err = proc.communicate()
     if proc.returncode:
@@ -193,7 +194,13 @@ class MLaunchTool(BaseCmdLineTool):
         # indicate if running in testing mode
         self.test = test
 
-        # version of MongoDB server
+        # find mongod version to determine avail options for arg parser in run()
+        # consider --binarypath if set
+        for i in range(1,len(sys.argv)):
+            if (sys.argv[i] == "--binarypath") and (i+1 < len(sys.argv)):
+                self.args = dict()
+                self.args['binarypath'] = sys.argv[i+1]
+                break
         self.current_version = self.getMongoDVersion()
 
     def run(self, arguments=None):
@@ -927,8 +934,7 @@ class MLaunchTool(BaseCmdLineTool):
         except Exception:
             pass
 
-        if self.args and self.args['verbose']:
-            print("Detected mongod version: %s" % current_version)
+        print("Detected mongod version: %s" % current_version)
         return current_version
 
     def client(self, host_and_port, **kwargs):
