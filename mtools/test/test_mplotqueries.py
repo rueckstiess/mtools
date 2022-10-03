@@ -55,11 +55,3 @@ class TestMPlotQueries(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert any('SCATTER plot' in line for line in lines)
-
-    @pytest.mark.skip(reason='Skipping interactive test')
-    def test_storagestats(self, filename='mongod_4.0.10_storagestats.log'):
-        self.logfile_path = os.path.join(os.path.dirname(mtools.__file__),'test/logfiles/', filename)
-        self.tool.run('%s --storagestats --yaxis bytesRead' % self.logfile_path)
-        output = sys.stdout.getvalue()
-        lines = output.splitlines()
-        assert any(map(lambda line: 'SCATTER plot' in line, lines))

@@ -128,10 +128,6 @@ class MPlotQueriesTool(LogFileTool):
                                     help='plot slow DNS resolution', default=False)
         self.argparser.add_argument('--oplog', action='store_true',
                                     help=('plot slow oplog application'))
-        self.argparser.add_argument('--storagestats',
-                                    action='store_true', default=False,
-                                    help=("plot storage statistics for insert "
-                                          "and update operations"))
 
         self.legend = None
 
@@ -225,10 +221,6 @@ class MPlotQueriesTool(LogFileTool):
                         (logevent.component != "REPL" or
                             not re.search("applied op:", logevent.line_str))):
                     continue
-
-                if (self.args['storagestats']):
-                    if (op_or_cmd(logevent) not in ['insert', 'update']):
-                        continue
 
                 # adjust times if --optime-start is enabled
                 if (self.args['optime_start'] and

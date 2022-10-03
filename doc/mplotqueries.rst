@@ -19,7 +19,6 @@ Usage
                 [--logscale]
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
-                [--storagestats]
                 [additional plot type parameters]
                 [--dns]
                 [--checkpoints]
@@ -108,13 +107,6 @@ OpLog
    shows the number of slow operation detected in the log and the number of
    operations (points) plotted on the graph. The oplog will produce a scatter
    plot with respect to duration(milliseconds) and the date.
-
-Storage Statistics
-------------------
-``--storagestats``
-   The read storage statistics can be plotted on the graph with the use of
-   ``--storagestats`` flag. The number of bytes read at particular time is
-   mapped onto the graph.
 
 Groupings
 ~~~~~~~~~
