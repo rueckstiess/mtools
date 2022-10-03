@@ -45,15 +45,17 @@ Requirements and Installation Instructions
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.7, 3.8, and 3.9.
+Python 3.7, 3.8, 3.9, and 3.10.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the `installation instructions
 <http://rueckstiess.github.io/mtools/install.html>`__ for more information.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
-versions of the MongoDB server. As of December 2021, that includes
-MongoDB 4.0 or newer.
+versions of the MongoDB server. As of October 2022, that includes
+MongoDB 4.2 or newer.
+
+NOTE: logv2 format (MongoDB 4.4+) is not fully supported yet.
 
 Recent Changes
 --------------
