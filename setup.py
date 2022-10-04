@@ -17,13 +17,13 @@ try:
     # toolchain is required.
     base_extras_requires = ['python-dateutil>=2.8.2']
     extras_requires = {
-        "all": ['numpy>=1.21.4', 'matplotlib>=3.5.0', 'pymongo>=3.12.2,<5.0.0',
+        "all": ['numpy>=1.21.4', 'matplotlib>=3.5.0', 'pymongo>=4.0.0,<5.0.0',
                 'psutil>=5.8.0'] + base_extras_requires,
-        "mlaunch": ['pymongo>=3.12.2,<5.0.0', 'psutil>=5.8.0'] + base_extras_requires,
+        "mlaunch": ['pymongo>=4.0.0,<5.0.0', 'psutil>=5.8.0'] + base_extras_requires,
         "mlogfilter": base_extras_requires.copy(),
         "mloginfo": ['numpy>=1.21.4'] + base_extras_requires,
         "mplotqueries": ['numpy>=1.21.4', 'matplotlib>=3.5.0'] + base_extras_requires,
-        "mtransfer": ['pymongo>=3.12.2,<5.0.0', 'wiredtiger>=3.2.1'] + base_extras_requires,
+        "mtransfer": ['pymongo>=4.0.0,<5.0.0', 'wiredtiger>=3.2.1'] + base_extras_requires,
     }
 
     install_requires = []
