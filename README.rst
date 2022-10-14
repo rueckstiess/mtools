@@ -17,28 +17,28 @@ What's in the box?
 
 The following tools are in the mtools collection:
 
-`mlogfilter <http://rueckstiess.github.io/mtools/mlogfilter.html>`__
+`mlogfilter <https://rueckstiess.github.io/mtools/mlogfilter.html>`__
    slices log files by time, merges log files, filters slow queries, finds
    table scans, shortens log lines, filters by other attributes, convert to
    JSON
 
-`mloginfo <http://rueckstiess.github.io/mtools/mloginfo.html>`__
+`mloginfo <https://rueckstiess.github.io/mtools/mloginfo.html>`__
    returns info about log file, like start and end time, version, binary,
    special sections like restarts, connections, distinct view
 
-`mplotqueries <http://rueckstiess.github.io/mtools/mplotqueries.html>`__
+`mplotqueries <https://rueckstiess.github.io/mtools/mplotqueries.html>`__
    visualize log files with different types of plots (requires ``matplotlib``)
 
-`mlaunch <http://rueckstiess.github.io/mtools/mlaunch.html>`__
+`mlaunch <https://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
    and sharded systems (requires ``pymongo``)
 
-`mtransfer <http://rueckstiess.github.io/mtools/mtransfer.html>`__
+`mtransfer <https://rueckstiess.github.io/mtools/mtransfer.html>`__
    an experimental script to transfer databases between MongoDB instances by
    copying WiredTiger data files (requires ``pymongo`` and ``wiredtiger``)
 
 For more information, see the `mtools documentation
-<http://rueckstiess.github.io/mtools>`__.
+<https://rueckstiess.github.io/mtools>`__.
 
 Requirements and Installation Instructions
 ------------------------------------------
@@ -49,7 +49,7 @@ Python 3.7, 3.8, 3.9, and 3.10.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the `installation instructions
-<http://rueckstiess.github.io/mtools/install.html>`__ for more information.
+<https://rueckstiess.github.io/mtools/install.html>`__ for more information.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
 versions of the MongoDB server. As of October 2022, that includes
@@ -60,14 +60,14 @@ NOTE: logv2 format (MongoDB 4.4+) is not fully supported yet.
 Recent Changes
 --------------
 
-See `Changes to mtools <http://rueckstiess.github.io/mtools/changelog.html>`__
+See `Changes to mtools <https://rueckstiess.github.io/mtools/changelog.html>`__
 for a list of changes from previous versions of mtools.
 
 Contribute to mtools
 --------------------
 
 If you'd like to contribute to mtools, please read the `contributor page
-<http://rueckstiess.github.io/mtools/contributing.html>`__ for instructions.
+<https://rueckstiess.github.io/mtools/contributing.html>`__ for instructions.
 
 Disclaimer
 ----------
