@@ -1720,7 +1720,6 @@ class MLaunchTool(BaseCmdLineTool):
                 value = args.get(name)
                 if value:
                     opts['tls'] = True
-                    opts['tls_cert_reqs'] = ssl.CERT_NONE
         for parser in self.tls_args, self.tls_client_args:
             for action in parser._group_actions:
                 name = action.dest
