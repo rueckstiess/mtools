@@ -1734,7 +1734,7 @@ class MLaunchTool(BaseCmdLineTool):
                     elif name == 'tlsCertificateKeyFilePassword':
                         opts['tlsCertificateKeyFilePassword'] = value
                     elif name == 'tlsAllowInvalidCertificates':
-                        opts['tlsAllowInvalidCertificates'] = ssl.CERT_OPTIONAL
+                        opts['tlsAllowInvalidCertificates'] = True
                     elif name == 'tlsAllowInvalidHostnames':
                         opts['tlsAllowInvalidHostnames'] = False
                     elif name == 'tlsCAFile':
