@@ -2155,6 +2155,7 @@ class MLaunchTool(BaseCmdLineTool):
             raise SystemExit(errmsg)
 
         extra += self._get_ssl_server_args()
+        extra += self._get_tls_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
@@ -2191,6 +2192,7 @@ class MLaunchTool(BaseCmdLineTool):
                                                  "mongos") + extra
 
         extra += ' ' + self._get_ssl_server_args()
+        extra += ' ' + self._get_tls_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
