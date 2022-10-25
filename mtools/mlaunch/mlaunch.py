@@ -1736,7 +1736,7 @@ class MLaunchTool(BaseCmdLineTool):
                     elif name == 'tlsAllowInvalidCertificates':
                         opts['tlsAllowInvalidCertificates'] = True
                     elif name == 'tlsAllowInvalidHostnames':
-                        opts['tlsAllowInvalidHostnames'] = False
+                        opts['tlsAllowInvalidHostnames'] = True
                     elif name == 'tlsCAFile':
                         opts['tlsCAFile'] = value
                     elif name == 'tlsCRLFile':
