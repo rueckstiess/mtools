@@ -411,11 +411,8 @@ class MLaunchTool(BaseCmdLineTool):
                                          help='activate FIPS 140-2 mode')
 
             tls_client_args = init_parser.add_argument_group('Client TLS options')
-            tls_client_args.add_argument('--tlsClientCertificate',
-                                         help='client certificate file for TLS',
-                                         type=is_file)
             tls_client_args.add_argument('--tlsClientCertificateKeyFile',
-                                         help='client certificate key file for TLS',
+                                         help='client certificate cert and key file for TLS',
                                          type=is_file)
             tls_client_args.add_argument('--tlsClientCertificateKeyFilePassword',
                                          help='client certificate key file password')
@@ -656,10 +653,9 @@ class MLaunchTool(BaseCmdLineTool):
 
         if (self._get_tls_server_args() and not
                 self.args['tlsAllowConnectionsWithoutCertificates'] and not
-                self.args['tlsClientCertificate'] and not
                 self.args['tlsClientCertificateKeyFile']):
             sys.stderr.write('warning: server requires certificates but no'
-                             ' --tlsClientCertificate provided\n')
+                             ' --tlsClientCertificateKeyFile provided\n')
         # number of default config servers
         if self.args['config'] == -1:
             self.args['config'] = 1
@@ -1729,9 +1725,9 @@ class MLaunchTool(BaseCmdLineTool):
 
                     # TLS parameters require PyMongo 3.9.0+
                     # https://api.mongodb.com/python/3.9.0/changelog.html
-                    if name == 'tlsCertificateKeyFile':
+                    if name == 'tlsClientCertificateKeyFile':
                         opts['tlsCertificateKeyFile'] = value
-                    elif name == 'tlsCertificateKeyFilePassword':
+                    elif name == 'tlsClientCertificateKeyFilePassword':
                         opts['tlsCertificateKeyFilePassword'] = value
                     elif name == 'tlsAllowInvalidCertificates':
                         opts['tlsAllowInvalidCertificates'] = True
