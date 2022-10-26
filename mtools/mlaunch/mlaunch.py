@@ -32,7 +32,7 @@ try:
     from pymongo import version_tuple as pymongo_version
     from bson import SON
     from io import BytesIO
-    from distutils.version import LooseVersion
+    from packaging import version
 
     from pymongo.errors import ConnectionFailure, AutoReconnect
     from pymongo.errors import OperationFailure, ConfigurationError
@@ -288,14 +288,15 @@ class MLaunchTool(BaseCmdLineTool):
                                        'several singles or replica sets. '
                                        'Provide either list of shard names or '
                                        'number of shards.'))
-        init_parser.add_argument('--config', action='store', default=-1,
+        init_parser.add_argument('--config', action='store', default=1,
                                  type=int, metavar='NUM',
                                  help=('adds NUM config servers to sharded '
-                                       'setup (requires --sharded, default=1, '
-                                       'with --csrs default=3)'))
-        init_parser.add_argument('--csrs', default=False, action='store_true',
-                                 help=('deploy config servers as a replica '
-                                       'set (requires MongoDB >= 3.2.0)'))
+                                       'setup (requires --sharded, default=1)'))
+
+        # As of MongoDB 3.6, all config servers must be CSRS
+        init_parser.add_argument('--csrs', default=True, action='store_true',
+                                 help=argparse.SUPPRESS)
+
         init_parser.add_argument('--mongos', action='store', default=1,
                                  type=int, metavar='NUM',
                                  help=('starts NUM mongos processes (requires '
@@ -366,7 +367,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # MongoDB 4.2 adds TLS options to replace the corresponding SSL options
         # https://docs.mongodb.com/manual/release-notes/4.2/#new-tls-options
-        if (LooseVersion(self.current_version) >= LooseVersion("4.2.0")):
+        if (version.parse(self.current_version) >= version.parse("4.2.0")):
             # tls
             tls_args = init_parser.add_argument_group('TLS options')
             tls_args.add_argument('--tlsCAFile',
@@ -664,18 +665,9 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['config'] == -1:
             self.args['config'] = 1
 
-        # Exit with error if --csrs is set and MongoDB < 3.1.0
-        if (self.args['csrs'] and
-                LooseVersion(self.current_version) < LooseVersion("3.1.0") and
-                LooseVersion(self.current_version) != LooseVersion("0.0.0")):
-            errmsg = (" \n * The '--csrs' option requires MongoDB version "
-                      "3.2.0 or greater, the current version is %s.\n"
-                      % self.current_version)
-            raise SystemExit(errmsg)
-
         # add the 'csrs' parameter as default for MongoDB >= 3.3.0
-        if (LooseVersion(self.current_version) >= LooseVersion("3.3.0") or
-                LooseVersion(self.current_version) == LooseVersion("0.0.0")):
+        if (version.parse(self.current_version) >= version.parse("3.3.0") or
+                version.parse(self.current_version) == version.parse("0.0.0")):
             self.args['csrs'] = True
 
         # construct startup strings
@@ -1357,15 +1349,6 @@ class MLaunchTool(BaseCmdLineTool):
         # add config server to cluster tree
         self.cluster_tree.setdefault('config', []).append(port)
 
-        # If not CSRS, set the number of config servers to be 1 or 3
-        # This is needed, otherwise `mlaunch init --sharded 2 --replicaset
-        # --config 2` on <3.3.0 will crash
-        if not self.args.get('csrs') and self.args['command'] == 'init':
-            if num_config >= 3:
-                num_config = 3
-            else:
-                num_config = 1
-
         for i in range(num_config):
             port = i + current_port
 
@@ -1617,6 +1600,8 @@ class MLaunchTool(BaseCmdLineTool):
                 argname = arg.split('=', 1)[0]
                 if (binary.endswith('mongod') and config and
                         argname in self.UNSUPPORTED_CONFIG_ARGS):
+                    if self.args['verbose']:
+                        print(f"Unsupported config arg: {argname}")
                     continue
                 elif argname in accepted_arguments or re.match(r'-v+', arg):
                     result.append(arg)
@@ -1976,19 +1961,11 @@ class MLaunchTool(BaseCmdLineTool):
         # create shards as stand-alones or replica sets
         nextport = self.args['port'] + num_mongos
         for shard in shard_names:
-            if (self.args['single'] and
-                    LooseVersion(self.current_version) >= LooseVersion("3.6.0")):
+            if self.args['single']:
                 errmsg = " \n * In MongoDB 3.6 and above a Shard must be " \
                          "made up of a replica set. Please use --replicaset " \
                          "option when starting a sharded cluster.*"
                 raise SystemExit(errmsg)
-
-            elif (self.args['single'] and
-                    LooseVersion(self.current_version) < LooseVersion("3.6.0")):
-                self.shard_connection_str.append(
-                    self._construct_single(
-                        self.dir, nextport, name=shard, extra='--shardsvr'))
-                nextport += 1
             elif self.args['replicaset']:
                 self.shard_connection_str.append(
                     self._construct_replset(
@@ -2002,22 +1979,9 @@ class MLaunchTool(BaseCmdLineTool):
         # start up config server(s)
         config_string = []
 
-        # SCCC config servers (MongoDB <3.3.0)
-        if not self.args['csrs'] and self.args['config'] >= 3:
-            config_names = ['config1', 'config2', 'config3']
-        else:
-            config_names = ['config']
-
         # CSRS config servers (MongoDB >=3.1.0)
-        if self.args['csrs']:
-            config_string.append(self._construct_config(self.dir, nextport,
+        config_string.append(self._construct_config(self.dir, nextport,
                                                         "configRepl", True))
-        else:
-            for name in config_names:
-                self._construct_config(self.dir, nextport, name)
-                config_string.append('%s:%i' % (self.args['hostname'],
-                                                nextport))
-                nextport += 1
 
         # multiple mongos use <datadir>/mongos/ as subdir for log files
         if num_mongos > 1:
@@ -2145,7 +2109,7 @@ class MLaunchTool(BaseCmdLineTool):
 
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
-                and LooseVersion(self.current_version) >= LooseVersion("3.6.0")
+                and version.parse(self.current_version) >= version.parse("3.6.0")
                 and (self.args['sharded'] or self.args['replicaset'])
                 and '--bind_ip' not in extra):
             os.removedirs(dbpath)
