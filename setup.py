@@ -18,8 +18,8 @@ try:
     base_extras_requires = ['python-dateutil>=2.8.2,<3.0.0']
     extras_requires = {
         "all": ['numpy>=1.23.4', 'matplotlib>=3.6.1,<4.0.0', 'pymongo>=4.3.2,<5.0.0',
-                '5.9.3,<6.0.0'] + base_extras_requires,
-        "mlaunch": ['pymongo>=4.3.2,<5.0.0', '5.9.3,<6.0.0'] + base_extras_requires,
+                'psutil>=5.9.3,<6.0.0'] + base_extras_requires,
+        "mlaunch": ['pymongo>=4.3.2,<5.0.0', 'psutil>=5.9.3,<6.0.0'] + base_extras_requires,
         "mlogfilter": base_extras_requires.copy(),
         "mloginfo": ['numpy>=1.23.4'] + base_extras_requires,
         "mplotqueries": ['numpy>=1.23.4', 'matplotlib>=3.6.1,<4.0.0'] + base_extras_requires,
