@@ -1,0 +1,219 @@
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] pid=16278 port=27997 64-bit host=h084732.mongolab.com
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] db version v3.0.15
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] git version: b8ff507269c382bc100fc52f75f48d54cd42ec3b
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] build info: Linux ip-10-142-230-168 2.6.18-194.el5xen #1 SMP Tue Mar 16 22:01:26 EDT 2010 x86_64 BOOST_LIB_VERSION=1_49
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] allocator: tcmalloc
+2022-03-13T09:40:30.246-0700 I CONTROL  [conn12813903] options: { net: { http: { enabled: false }, maxIncomingConnections: 20000, port: 27997 }, processManagement: { fork: true, pidFilePath: "/mnt/n-dbh99-a1/data/s-dbh99-a1/pid.txt" }, replication: { replSet: "rs-mongolab" }, security: { authorization: "enabled", keyFile: "/mnt/var/data/s-dbh99-a1/keyFile" }, storage: { dbPath: "/mnt/n-dbh99-a1/data/s-dbh99-a1", directoryPerDB: true }, systemLog: { destination: "file", logAppend: true, path: "/mnt/var/logs/s-dbh99-a1/mongodb.log" } }
+2022-03-13T09:40:32.809-0700 I NETWORK  [conn12813903] end connection 127.0.0.1:48962 (10 connections now open)
+2022-03-13T09:40:32.810-0700 I NETWORK  [conn12813899] end connection 127.0.0.1:48956 (9 connections now open)
+2022-03-13T09:40:32.810-0700 I NETWORK  [conn12813898] end connection 127.0.0.1:48954 (8 connections now open)
+2022-03-13T09:40:38.675-0700 I NETWORK  [conn12813896] end connection 172.31.17.74:47392 (7 connections now open)
+2022-03-13T09:40:38.676-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47394 #12813904 (8 connections now open)
+2022-03-13T09:40:38.690-0700 I ACCESS   [conn12813904] Successfully authenticated as principal __system on local
+2022-03-13T09:40:42.043-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48968 #12813905 (9 connections now open)
+2022-03-13T09:40:42.045-0700 I NETWORK  [conn12813905] end connection 127.0.0.1:48968 (8 connections now open)
+2022-03-13T09:40:42.046-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48970 #12813906 (9 connections now open)
+2022-03-13T09:40:42.048-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48972 #12813907 (10 connections now open)
+2022-03-13T09:40:42.057-0700 I ACCESS   [conn12813907] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:40:42.060-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48974 #12813908 (11 connections now open)
+2022-03-13T09:40:42.061-0700 I NETWORK  [conn12813908] end connection 127.0.0.1:48974 (10 connections now open)
+2022-03-13T09:40:42.063-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48976 #12813909 (11 connections now open)
+2022-03-13T09:40:42.064-0700 I NETWORK  [conn12813909] end connection 127.0.0.1:48976 (10 connections now open)
+2022-03-13T09:40:42.154-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48978 #12813910 (11 connections now open)
+2022-03-13T09:40:42.168-0700 I ACCESS   [conn12813910] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:40:42.571-0700 I NETWORK  [conn12813902] end connection 172.31.16.37:58123 (10 connections now open)
+2022-03-13T09:40:42.572-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58125 #12813911 (11 connections now open)
+2022-03-13T09:40:42.586-0700 I ACCESS   [conn12813911] Successfully authenticated as principal __system on local
+2022-03-13T09:40:43.324-0700 I NETWORK  [conn12813910] end connection 127.0.0.1:48978 (10 connections now open)
+2022-03-13T09:40:43.325-0700 I NETWORK  [conn12813907] end connection 127.0.0.1:48972 (9 connections now open)
+2022-03-13T09:40:43.325-0700 I NETWORK  [conn12813906] end connection 127.0.0.1:48970 (8 connections now open)
+2022-03-13T09:40:53.724-0700 I CONTROL  [signalProcessingThread] got signal 15 (Terminated), will terminate after current cmd ends
+2022-03-13T09:40:53.725-0700 I REPL     [signalProcessingThread] Stopping replication applier threads
+2022-03-13T09:40:54.594-0700 I STORAGE  [conn12813911] got request after shutdown()
+2022-03-13T09:40:54.697-0700 I STORAGE  [conn12813904] got request after shutdown()
+2022-03-13T09:40:55.276-0700 I STORAGE  [conn10848175] got request after shutdown()
+2022-03-13T09:40:58.173-0700 I CONTROL  [signalProcessingThread] now exiting
+2022-03-13T09:40:58.173-0700 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2022-03-13T09:40:58.173-0700 I NETWORK  [signalProcessingThread] closing listening socket: 6
+2022-03-13T09:40:58.173-0700 I NETWORK  [signalProcessingThread] closing listening socket: 7
+2022-03-13T09:40:58.173-0700 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27997.sock
+2022-03-13T09:40:58.174-0700 I NETWORK  [signalProcessingThread] shutdown: going to flush diaglog...
+2022-03-13T09:40:58.174-0700 I NETWORK  [signalProcessingThread] shutdown: going to close sockets...
+2022-03-13T09:40:58.174-0700 I STORAGE  [signalProcessingThread] shutdown: waiting for fs preallocator...
+2022-03-13T09:40:58.174-0700 I STORAGE  [signalProcessingThread] shutdown: final commit...
+2022-03-13T09:40:58.174-0700 I NETWORK  [conn11569232] end connection 172.19.96.43:38522 (4 connections now open)
+2022-03-13T09:40:58.174-0700 I JOURNAL  [signalProcessingThread] journalCleanup...
+2022-03-13T09:40:58.174-0700 I JOURNAL  [signalProcessingThread] removeJournalFiles
+2022-03-13T09:40:58.174-0700 I NETWORK  [conn12513677] end connection 172.19.88.103:40604 (3 connections now open)
+2022-03-13T09:40:58.175-0700 I NETWORK  [conn10848190] end connection 172.19.88.103:47460 (2 connections now open)
+2022-03-13T09:40:58.175-0700 I NETWORK  [conn10848188] end connection 172.19.88.103:47444 (1 connection now open)
+2022-03-13T09:40:58.176-0700 I NETWORK  [conn10848174] end connection 172.19.88.103:47424 (0 connections now open)
+2022-03-13T09:40:58.182-0700 I JOURNAL  [signalProcessingThread] Terminating durability thread ...
+2022-03-13T09:40:58.276-0700 I JOURNAL  [journal writer] Journal writer thread stopped
+2022-03-13T09:40:58.283-0700 I JOURNAL  [durability] Durability thread stopped
+2022-03-13T09:40:58.284-0700 I STORAGE  [signalProcessingThread] shutdown: closing all files...
+2022-03-13T09:40:58.449-0700 I STORAGE  [signalProcessingThread] closeAllFiles() finished
+2022-03-13T09:40:58.449-0700 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2022-03-13T09:40:58.449-0700 I CONTROL  [signalProcessingThread] dbexit:  rc: 0
+2022-03-13T09:41:00.203-0700 I CONTROL  ***** SERVER RESTARTED *****
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] MongoDB starting : pid=6529 port=27997 dbpath=/mnt/n-dbh99-a1/data/s-dbh99-a1 64-bit host=h084732.mongolab.com
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] db version v3.0.15
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] git version: b8ff507269c382bc100fc52f75f48d54cd42ec3b
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] build info: Linux ip-10-142-230-168 2.6.18-194.el5xen #1 SMP Tue Mar 16 22:01:26 EDT 2010 x86_64 BOOST_LIB_VERSION=1_49
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] allocator: tcmalloc
+2022-03-13T09:41:00.241-0700 I CONTROL  [initandlisten] options: { net: { http: { enabled: false }, maxIncomingConnections: 20000, port: 27997 }, processManagement: { fork: true, pidFilePath: "/mnt/n-dbh99-a1/data/s-dbh99-a1/pid.txt" }, replication: { replSet: "rs-mongolab" }, security: { authorization: "enabled", keyFile: "/mnt/var/data/s-dbh99-a1/keyFile" }, storage: { dbPath: "/mnt/n-dbh99-a1/data/s-dbh99-a1", directoryPerDB: true }, systemLog: { destination: "file", logAppend: true, path: "/mnt/var/logs/s-dbh99-a1/mongodb.log" } }
+2022-03-13T09:41:00.256-0700 I JOURNAL  [initandlisten] journal dir=/mnt/n-dbh99-a1/data/s-dbh99-a1/journal
+2022-03-13T09:41:00.256-0700 I JOURNAL  [initandlisten] recover : no journal files present, no recovery needed
+2022-03-13T09:41:00.261-0700 I JOURNAL  [durability] Durability thread started
+2022-03-13T09:41:00.262-0700 I JOURNAL  [journal writer] Journal writer thread started
+2022-03-13T09:41:00.264-0700 I CONTROL  [initandlisten] 
+2022-03-13T09:41:00.264-0700 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. rlimits set to 31866 processes, 65535 files. Number of processes should be at least 32767.5 : 0.5 times number of files.
+2022-03-13T09:41:00.323-0700 I NETWORK  [initandlisten] waiting for connections on port 27997
+2022-03-13T09:41:00.360-0700 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs-mongolab", version: 15, members: [ { _id: 0, host: "dbh99-a0.mongolab.com:27997", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "dbh99-ar0.mongolab.com:27997", arbiterOnly: true, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "dbh99-a1.mongolab.com:27997", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 0.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: false, heartbeatTimeoutSecs: 10, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 } } }
+2022-03-13T09:41:00.360-0700 I REPL     [ReplicationExecutor] This node is dbh99-a1.mongolab.com:27997 in the config
+2022-03-13T09:41:00.360-0700 I REPL     [ReplicationExecutor] transition to STARTUP2
+2022-03-13T09:41:00.360-0700 I REPL     [ReplicationExecutor] Starting replication applier threads
+2022-03-13T09:41:00.360-0700 I REPL     [ReplicationExecutor] transition to RECOVERING
+2022-03-13T09:41:00.361-0700 I REPL     [ReplicationExecutor] transition to SECONDARY
+2022-03-13T09:41:00.385-0700 I REPL     [ReplicationExecutor] Member dbh99-ar0.mongolab.com:27997 is now in state ARBITER
+2022-03-13T09:41:00.387-0700 I REPL     [ReplicationExecutor] Member dbh99-a0.mongolab.com:27997 is now in state PRIMARY
+2022-03-13T09:41:01.292-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:49994 #1 (1 connection now open)
+2022-03-13T09:41:01.364-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:49996 #2 (2 connections now open)
+2022-03-13T09:41:01.364-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:49998 #3 (3 connections now open)
+2022-03-13T09:41:02.180-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58131 #4 (4 connections now open)
+2022-03-13T09:41:02.190-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47400 #5 (5 connections now open)
+2022-03-13T09:41:02.194-0700 I ACCESS   [conn4] Successfully authenticated as principal __system on local
+2022-03-13T09:41:02.214-0700 I ACCESS   [conn5] Successfully authenticated as principal __system on local
+2022-03-13T09:41:03.067-0700 I NETWORK  [initandlisten] connection accepted from 172.19.96.43:37804 #6 (6 connections now open)
+2022-03-13T09:41:03.083-0700 I ACCESS   [conn6] Successfully authenticated as principal portal_B on mongolab
+2022-03-13T09:41:03.361-0700 I REPL     [ReplicationExecutor] syncing from primary: dbh99-a0.mongolab.com:27997
+2022-03-13T09:41:03.385-0700 I REPL     [SyncSourceFeedback] replset setting syncSourceFeedback to dbh99-a0.mongolab.com:27997
+2022-03-13T09:41:08.195-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50004 #7 (7 connections now open)
+2022-03-13T09:41:08.813-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50006 #8 (8 connections now open)
+2022-03-13T09:41:23.908-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48992 #9 (9 connections now open)
+2022-03-13T09:41:23.909-0700 I NETWORK  [conn9] end connection 127.0.0.1:48992 (8 connections now open)
+2022-03-13T09:41:23.911-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48994 #10 (9 connections now open)
+2022-03-13T09:41:23.913-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48996 #11 (10 connections now open)
+2022-03-13T09:41:23.923-0700 I ACCESS   [conn11] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:41:23.925-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:48998 #12 (11 connections now open)
+2022-03-13T09:41:23.927-0700 I NETWORK  [conn12] end connection 127.0.0.1:48998 (10 connections now open)
+2022-03-13T09:41:23.929-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49000 #13 (11 connections now open)
+2022-03-13T09:41:23.930-0700 I NETWORK  [conn13] end connection 127.0.0.1:49000 (10 connections now open)
+2022-03-13T09:41:24.021-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49002 #14 (11 connections now open)
+2022-03-13T09:41:24.035-0700 I ACCESS   [conn14] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:41:28.415-0700 I NETWORK  [conn14] end connection 127.0.0.1:49002 (10 connections now open)
+2022-03-13T09:41:28.416-0700 I NETWORK  [conn11] end connection 127.0.0.1:48996 (9 connections now open)
+2022-03-13T09:41:28.416-0700 I NETWORK  [conn10] end connection 127.0.0.1:48994 (8 connections now open)
+2022-03-13T09:41:32.213-0700 I NETWORK  [conn4] end connection 172.31.16.37:58131 (7 connections now open)
+2022-03-13T09:41:32.215-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58133 #15 (8 connections now open)
+2022-03-13T09:41:32.229-0700 I ACCESS   [conn15] Successfully authenticated as principal __system on local
+2022-03-13T09:41:32.235-0700 I NETWORK  [conn5] end connection 172.31.17.74:47400 (7 connections now open)
+2022-03-13T09:41:32.236-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47402 #16 (8 connections now open)
+2022-03-13T09:41:32.250-0700 I ACCESS   [conn16] Successfully authenticated as principal __system on local
+2022-03-13T09:41:40.258-0700 I CONTROL  [signalProcessingThread] got signal 15 (Terminated), will terminate after current cmd ends
+2022-03-13T09:41:40.258-0700 I REPL     [signalProcessingThread] Stopping replication applier threads
+2022-03-13T09:41:41.361-0700 I STORAGE  [conn1] got request after shutdown()
+2022-03-13T09:41:41.438-0700 I STORAGE  [conn2] got request after shutdown()
+2022-03-13T09:41:41.440-0700 I STORAGE  [conn3] got request after shutdown()
+2022-03-13T09:41:42.235-0700 I STORAGE  [conn15] got request after shutdown()
+2022-03-13T09:41:42.255-0700 I STORAGE  [conn16] got request after shutdown()
+2022-03-13T09:41:43.086-0700 I STORAGE  [conn6] got request after shutdown()
+2022-03-13T09:41:43.503-0700 I CONTROL  [signalProcessingThread] now exiting
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] closing listening socket: 6
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] closing listening socket: 7
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27997.sock
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] shutdown: going to flush diaglog...
+2022-03-13T09:41:43.503-0700 I NETWORK  [signalProcessingThread] shutdown: going to close sockets...
+2022-03-13T09:41:43.503-0700 I STORAGE  [signalProcessingThread] shutdown: waiting for fs preallocator...
+2022-03-13T09:41:43.503-0700 I STORAGE  [signalProcessingThread] shutdown: final commit...
+2022-03-13T09:41:43.503-0700 I NETWORK  [conn8] end connection 172.19.88.103:50006 (1 connection now open)
+2022-03-13T09:41:43.503-0700 I NETWORK  [conn7] end connection 172.19.88.103:50004 (1 connection now open)
+2022-03-13T09:41:43.503-0700 I JOURNAL  [signalProcessingThread] journalCleanup...
+2022-03-13T09:41:43.503-0700 I JOURNAL  [signalProcessingThread] removeJournalFiles
+2022-03-13T09:41:43.507-0700 I JOURNAL  [signalProcessingThread] Terminating durability thread ...
+2022-03-13T09:41:43.606-0700 I JOURNAL  [journal writer] Journal writer thread stopped
+2022-03-13T09:41:43.606-0700 I JOURNAL  [durability] Durability thread stopped
+2022-03-13T09:41:43.606-0700 I STORAGE  [signalProcessingThread] shutdown: closing all files...
+2022-03-13T09:41:43.609-0700 I STORAGE  [signalProcessingThread] closeAllFiles() finished
+2022-03-13T09:41:43.609-0700 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2022-03-13T09:41:43.609-0700 I CONTROL  [signalProcessingThread] dbexit:  rc: 0
+2022-03-13T09:41:49.587-0700 I CONTROL  ***** SERVER RESTARTED *****
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] MongoDB starting : pid=6627 port=27997 dbpath=/mnt/n-dbh99-a1/data/s-dbh99-a1 64-bit host=h084732.mongolab.com
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] db version v3.0.15
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] git version: b8ff507269c382bc100fc52f75f48d54cd42ec3b
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] build info: Linux ip-10-142-230-168 2.6.18-194.el5xen #1 SMP Tue Mar 16 22:01:26 EDT 2010 x86_64 BOOST_LIB_VERSION=1_49
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] allocator: tcmalloc
+2022-03-13T09:41:49.625-0700 I CONTROL  [initandlisten] options: { net: { http: { enabled: false }, maxIncomingConnections: 20000, port: 27997 }, processManagement: { fork: true, pidFilePath: "/mnt/n-dbh99-a1/data/s-dbh99-a1/pid.txt" }, replication: { replSet: "rs-mongolab" }, security: { authorization: "enabled", keyFile: "/mnt/var/data/s-dbh99-a1/keyFile" }, storage: { dbPath: "/mnt/n-dbh99-a1/data/s-dbh99-a1", directoryPerDB: true }, systemLog: { destination: "file", logAppend: true, path: "/mnt/var/logs/s-dbh99-a1/mongodb.log" } }
+2022-03-13T09:41:49.638-0700 I JOURNAL  [initandlisten] journal dir=/mnt/n-dbh99-a1/data/s-dbh99-a1/journal
+2022-03-13T09:41:49.638-0700 I JOURNAL  [initandlisten] recover : no journal files present, no recovery needed
+2022-03-13T09:41:49.645-0700 I JOURNAL  [durability] Durability thread started
+2022-03-13T09:41:49.645-0700 I JOURNAL  [journal writer] Journal writer thread started
+2022-03-13T09:41:49.648-0700 I CONTROL  [initandlisten] 
+2022-03-13T09:41:49.648-0700 I CONTROL  [initandlisten] ** WARNING: soft rlimits too low. rlimits set to 31866 processes, 65535 files. Number of processes should be at least 32767.5 : 0.5 times number of files.
+2022-03-13T09:41:49.680-0700 I NETWORK  [initandlisten] waiting for connections on port 27997
+2022-03-13T09:41:49.714-0700 I REPL     [ReplicationExecutor] New replica set config in use: { _id: "rs-mongolab", version: 15, members: [ { _id: 0, host: "dbh99-a0.mongolab.com:27997", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 1, host: "dbh99-ar0.mongolab.com:27997", arbiterOnly: true, buildIndexes: true, hidden: false, priority: 1.0, tags: {}, slaveDelay: 0, votes: 1 }, { _id: 2, host: "dbh99-a1.mongolab.com:27997", arbiterOnly: false, buildIndexes: true, hidden: false, priority: 0.0, tags: {}, slaveDelay: 0, votes: 1 } ], settings: { chainingAllowed: false, heartbeatTimeoutSecs: 10, getLastErrorModes: {}, getLastErrorDefaults: { w: 1, wtimeout: 0 } } }
+2022-03-13T09:41:49.714-0700 I REPL     [ReplicationExecutor] This node is dbh99-a1.mongolab.com:27997 in the config
+2022-03-13T09:41:49.714-0700 I REPL     [ReplicationExecutor] transition to STARTUP2
+2022-03-13T09:41:49.714-0700 I REPL     [ReplicationExecutor] Starting replication applier threads
+2022-03-13T09:41:49.714-0700 I REPL     [ReplicationExecutor] transition to RECOVERING
+2022-03-13T09:41:49.716-0700 I REPL     [ReplicationExecutor] transition to SECONDARY
+2022-03-13T09:41:49.740-0700 I REPL     [ReplicationExecutor] Member dbh99-ar0.mongolab.com:27997 is now in state ARBITER
+2022-03-13T09:41:49.741-0700 I REPL     [ReplicationExecutor] Member dbh99-a0.mongolab.com:27997 is now in state PRIMARY
+2022-03-13T09:41:51.518-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58146 #1 (1 connection now open)
+2022-03-13T09:41:51.520-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47415 #2 (2 connections now open)
+2022-03-13T09:41:51.533-0700 I ACCESS   [conn1] Successfully authenticated as principal __system on local
+2022-03-13T09:41:51.534-0700 I ACCESS   [conn2] Successfully authenticated as principal __system on local
+2022-03-13T09:41:52.716-0700 I REPL     [ReplicationExecutor] syncing from primary: dbh99-a0.mongolab.com:27997
+2022-03-13T09:41:52.733-0700 I REPL     [SyncSourceFeedback] replset setting syncSourceFeedback to dbh99-a0.mongolab.com:27997
+2022-03-13T09:41:53.504-0700 I NETWORK  [initandlisten] connection accepted from 172.19.96.43:38000 #3 (3 connections now open)
+2022-03-13T09:41:53.520-0700 I ACCESS   [conn3] Successfully authenticated as principal portal_B on mongolab
+2022-03-13T09:41:53.527-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50028 #4 (4 connections now open)
+2022-03-13T09:41:53.527-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50030 #5 (5 connections now open)
+2022-03-13T09:41:53.527-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50032 #6 (6 connections now open)
+2022-03-13T09:41:58.296-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50036 #7 (7 connections now open)
+2022-03-13T09:41:58.912-0700 I NETWORK  [initandlisten] connection accepted from 172.19.88.103:50038 #8 (8 connections now open)
+2022-03-13T09:42:21.548-0700 I NETWORK  [conn2] end connection 172.31.17.74:47415 (7 connections now open)
+2022-03-13T09:42:21.549-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47417 #9 (8 connections now open)
+2022-03-13T09:42:21.551-0700 I NETWORK  [conn1] end connection 172.31.16.37:58146 (7 connections now open)
+2022-03-13T09:42:21.552-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58148 #10 (8 connections now open)
+2022-03-13T09:42:21.562-0700 I ACCESS   [conn9] Successfully authenticated as principal __system on local
+2022-03-13T09:42:21.566-0700 I ACCESS   [conn10] Successfully authenticated as principal __system on local
+2022-03-13T09:42:51.577-0700 I NETWORK  [conn9] end connection 172.31.17.74:47417 (7 connections now open)
+2022-03-13T09:42:51.578-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47419 #11 (8 connections now open)
+2022-03-13T09:42:51.582-0700 I NETWORK  [conn10] end connection 172.31.16.37:58148 (7 connections now open)
+2022-03-13T09:42:51.584-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58150 #12 (8 connections now open)
+2022-03-13T09:42:51.592-0700 I ACCESS   [conn11] Successfully authenticated as principal __system on local
+2022-03-13T09:42:51.598-0700 I ACCESS   [conn12] Successfully authenticated as principal __system on local
+2022-03-13T09:42:59.874-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49028 #13 (9 connections now open)
+2022-03-13T09:42:59.876-0700 I NETWORK  [conn13] end connection 127.0.0.1:49028 (8 connections now open)
+2022-03-13T09:42:59.877-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49030 #14 (9 connections now open)
+2022-03-13T09:42:59.879-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49032 #15 (10 connections now open)
+2022-03-13T09:42:59.889-0700 I ACCESS   [conn15] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:42:59.891-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49034 #16 (11 connections now open)
+2022-03-13T09:42:59.892-0700 I NETWORK  [conn16] end connection 127.0.0.1:49034 (10 connections now open)
+2022-03-13T09:42:59.894-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49036 #17 (11 connections now open)
+2022-03-13T09:42:59.896-0700 I NETWORK  [conn17] end connection 127.0.0.1:49036 (10 connections now open)
+2022-03-13T09:42:59.982-0700 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:49038 #18 (11 connections now open)
+2022-03-13T09:42:59.997-0700 I ACCESS   [conn18] Successfully authenticated as principal mongolab_sysu_ItckV on admin
+2022-03-13T09:43:03.024-0700 I NETWORK  [conn18] end connection 127.0.0.1:49038 (10 connections now open)
+2022-03-13T09:43:03.025-0700 I NETWORK  [conn15] end connection 127.0.0.1:49032 (9 connections now open)
+2022-03-13T09:43:03.025-0700 I NETWORK  [conn14] end connection 127.0.0.1:49030 (8 connections now open)
+2022-03-13T09:43:21.606-0700 I NETWORK  [conn11] end connection 172.31.17.74:47419 (7 connections now open)
+2022-03-13T09:43:21.608-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47421 #19 (8 connections now open)
+2022-03-13T09:43:21.613-0700 I NETWORK  [conn12] end connection 172.31.16.37:58150 (7 connections now open)
+2022-03-13T09:43:21.614-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58152 #20 (8 connections now open)
+2022-03-13T09:43:21.622-0700 I ACCESS   [conn19] Successfully authenticated as principal __system on local
+2022-03-13T09:43:21.629-0700 I ACCESS   [conn20] Successfully authenticated as principal __system on local
+2022-03-13T09:43:51.637-0700 I NETWORK  [conn19] end connection 172.31.17.74:47421 (7 connections now open)
+2022-03-13T09:43:51.638-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47423 #21 (8 connections now open)
+2022-03-13T09:43:51.646-0700 I NETWORK  [conn20] end connection 172.31.16.37:58152 (7 connections now open)
+2022-03-13T09:43:51.647-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58154 #22 (8 connections now open)
+2022-03-13T09:43:51.652-0700 I ACCESS   [conn21] Successfully authenticated as principal __system on local
+2022-03-13T09:43:51.661-0700 I ACCESS   [conn22] Successfully authenticated as principal __system on local
+2022-03-13T09:44:21.666-0700 I NETWORK  [conn21] end connection 172.31.17.74:47423 (7 connections now open)
+2022-03-13T09:44:21.667-0700 I NETWORK  [initandlisten] connection accepted from 172.31.17.74:47425 #23 (8 connections now open)
+2022-03-13T09:44:21.678-0700 I NETWORK  [conn22] end connection 172.31.16.37:58154 (7 connections now open)
+2022-03-13T09:44:21.679-0700 I NETWORK  [initandlisten] connection accepted from 172.31.16.37:58156 #24 (8 connections now open)
+2022-03-13T09:44:21.681-0700 I ACCESS   [conn23] Successfully authenticated as principal __system on local
+2022-03-13T09:44:21.693-0700 I ACCESS   [conn24] Successfully authenticated as principal __system on local
