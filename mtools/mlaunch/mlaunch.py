@@ -1828,16 +1828,21 @@ class MLaunchTool(BaseCmdLineTool):
                 print("initializing replica set '%s' with configuration: %s"
                       % (name, self.config_docs[name]))
             
+            initiated = False
             for i in range(maxwait):
                 try:
                     con['admin'].command({'replSetInitiate':
                                           self.config_docs[name]})
+                    initiated = True
                     break
                 except OperationFailure as e:
                     print('Replica set initialization failed: %s - will retry' % e)
                     time.sleep(1)
 
-            print("replica set '%s' initialized." % name)
+            if initiated:
+                print(f"replica set '{name}' initialized.")
+            else:
+                raise SystemExit(f"replica set '{name}' failed to initialize.")
 
     def _add_user(self, port, name, password, database, roles):
         con = self.client('localhost:%i' % port, serverSelectionTimeoutMS=10000)
