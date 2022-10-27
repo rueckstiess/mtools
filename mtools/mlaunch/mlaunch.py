@@ -1642,34 +1642,34 @@ class MLaunchTool(BaseCmdLineTool):
         if not self.ssl_server_args:
             return opts
 
+        # Map SSL parameters to TLS equivalents for PyMongo 4.0+
+        # https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#renamed-uri-options
         for parser in [self.ssl_server_args]:
             for action in parser._group_actions:
                 name = action.dest
                 value = args.get(name)
                 if value:
-                    opts['ssl'] = True
-                    opts['ssl_cert_reqs'] = ssl.CERT_NONE
+                    opts['tls'] = True
+                    opts['tlsAllowInvalidCertificates'] = True
         for parser in self.ssl_args, self.ssl_client_args:
             for action in parser._group_actions:
                 name = action.dest
                 value = args.get(name)
                 if value:
-                    opts['ssl'] = True
+                    opts['tls'] = True
 
                     if name == 'sslClientCertificate':
-                        opts['ssl_certfile'] = value
-                    elif name == 'sslClientPEMKeyFile':
-                        opts['ssl_keyfile'] = value
+                        opts['tlsCertificateKeyFile'] = value
                     elif name == 'sslClientPEMKeyPassword':
-                        opts['ssl_pem_passphrase'] = value
+                        opts['tlsCertificateKeyFilePassword'] = value
                     elif name == 'sslAllowInvalidCertificates':
-                        opts['ssl_cert_reqs'] = ssl.CERT_OPTIONAL
+                        opts['tlsAllowInvalidCertificates'] = True
                     elif name == 'sslAllowInvalidHostnames':
-                        opts['ssl_match_hostname'] = False
+                        opts['tlsAllowInvalidHostnames'] = True
                     elif name == 'sslCAFile':
-                        opts['ssl_ca_certs'] = value
+                        opts['tlsCAFile'] = value
                     elif name == 'sslCRLFile':
-                        opts['ssl_crlfile'] = value
+                        opts['tlsCRLFile'] = value
 
         return opts
 
