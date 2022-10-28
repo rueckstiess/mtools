@@ -1,6 +1,31 @@
 =================
 Changes to mtools
 =================
+version 1.7.1
+~~~~~~~~~~~~~
+ * mlaunch: Bump PyMongo requirement to 4.0+ (#884)
+ * mlaunch: Fix TLS issues (#885)
+ * mlaunch: Print rs initialization announcement prior to init (#868)
+ * mlaunch: Exit with unsuccessful status if replica set can't be
+   initiated after retries (#659)
+ * mlaunch: Fix version detection using configured mongod (#866)
+ * mlaunch: Sharded Cluster creation fails (#849)
+ * mlaunch: Use default SASL/SCRAM mechanisms when creating users (#880)
+ * mlaunch: Remove support for legacy SCCC config servers (#888)
+ * mlaunch: Improve diagnostics in mlaunch (#869)
+ * mlaunch: Output the log path when mongod/mongos launch (#877)
+ * mlaunch: Update default mongodb version to "0.0.0" (#878)
+ * mlaunch: Do not pass invalid option --auth to mongos (#870)
+ * mlaunch: docs incorrectly suggest --config can be used
+   for config file (#872)
+ * mloginfo: Improve --clients with more metadata info (#850)
+ * mloginfo: Cannot extract metadata from some log lines (#871)
+ * Fix dateutil dependency bug (#864)
+ * mtools[mlaunch] does not install with pymongo 4 (#856)
+ * Update dependencies and set upper version constraints (#889)
+
+Thanks to @stennie, @p-mongo, @autarch, @akung0324, @matthewdale,
+and @ShaneHarvey for contributions to this release.
 
 version 1.7.0
 ~~~~~~~~~~~~~
