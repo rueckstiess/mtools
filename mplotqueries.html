@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.7.1
               </div>
             
           
@@ -107,7 +107,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#checkpoints">Checkpoints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dns">DNS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#oplog">OpLog</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#storage-statistics">Storage Statistics</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#groupings">Groupings</a><ul>
@@ -203,6 +202,7 @@
 <span id="id1"></span><h1>mplotqueries<a class="headerlink" href="#mplotqueries" title="Permalink to this headline">#</a></h1>
 <p><strong>mplotqueries</strong> is a tool to visualize operations in MongoDB log files. It has
 several different plot types and can group information in various ways.</p>
+<p>NOTE: logv2 format (MongoDB 4.4+) is not supported yet.</p>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">#</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mplotqueries <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> logfile <span class="o">[</span>logfile ...<span class="o">]</span>
@@ -210,7 +210,6 @@ several different plot types and can group information in various ways.</p>
              <span class="o">[</span>--logscale<span class="o">]</span>
              <span class="o">[</span>--type <span class="o">{</span>nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event<span class="o">}</span> <span class="o">]</span>
              <span class="o">[</span>--overlay <span class="o">[</span> <span class="o">{</span>add,list,reset<span class="o">}</span> <span class="o">]]</span>
-             <span class="o">[</span>--storagestats<span class="o">]</span>
              <span class="o">[</span>additional plot <span class="nb">type</span> parameters<span class="o">]</span>
              <span class="o">[</span>--dns<span class="o">]</span>
              <span class="o">[</span>--checkpoints<span class="o">]</span>
@@ -313,15 +312,6 @@ grouped by hostname using the <code class="docutils literal notranslate"><span c
 shows the number of slow operation detected in the log and the number of
 operations (points) plotted on the graph. The oplog will produce a scatter
 plot with respect to duration(milliseconds) and the date.</p>
-</dd>
-</dl>
-</div>
-<div class="section" id="storage-statistics">
-<h3>Storage Statistics<a class="headerlink" href="#storage-statistics" title="Permalink to this headline">#</a></h3>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">--storagestats</span></code></dt><dd><p>The read storage statistics can be plotted on the graph with the use of
-<code class="docutils literal notranslate"><span class="pre">--storagestats</span></code> flag. The number of bytes read at particular time is
-mapped onto the graph.</p>
 </dd>
 </dl>
 </div>

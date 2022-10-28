@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.7.0
+                1.7.1
               </div>
             
           
@@ -180,8 +180,8 @@ as it was already pretty stable and usable at that stage.</p>
 <p>Bug fixes and minor feature additions are released periodically as part of
 micro releases. Minor releases will include more significant changes, including
 interface changes. We’re not sure yet what a major release constitutes :-).</p>
-<p>The development version has the suffix <code class="docutils literal notranslate"><span class="pre">dev</span></code> attached. For example
-<code class="docutils literal notranslate"><span class="pre">1.0.1-dev</span></code> is the development version leading up to a <code class="docutils literal notranslate"><span class="pre">1.0.1</span></code> release.</p>
+<p>The development version has the suffix <code class="docutils literal notranslate"><span class="pre">dev0</span></code> attached. For example
+<code class="docutils literal notranslate"><span class="pre">1.0.1-dev0</span></code> is the development version leading up to a <code class="docutils literal notranslate"><span class="pre">1.0.1</span></code> release.</p>
 <p>Minor and major releases might have release candidates leading up to the final
 release. Those are marked with the suffix <code class="docutils literal notranslate"><span class="pre">rcX</span></code> where <code class="docutils literal notranslate"><span class="pre">X</span></code>
 is a number starting at 0. For example, version <code class="docutils literal notranslate"><span class="pre">1.2.0-rc2</span></code> is the 3rd
@@ -193,7 +193,7 @@ release candidate for upcoming release version <code class="docutils literal not
 <ol class="arabic simple">
 <li><p>Create a release branch, named <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> where <code class="docutils literal notranslate"><span class="pre">x.y.z</span></code> is the
 version to be released.</p></li>
-<li><p>Increase the version in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code> from <code class="docutils literal notranslate"><span class="pre">x.y.z-dev</span></code> to
+<li><p>Increase the version in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code> from <code class="docutils literal notranslate"><span class="pre">x.y.z-dev0</span></code> to
 <code class="docutils literal notranslate"><span class="pre">x.y.z</span></code>.</p></li>
 <li><p>Make sure tests are passing in Python 3.6, 3.7, and 3.8 via
 <code class="docutils literal notranslate"><span class="pre">tox</span> <span class="pre">-re</span> <span class="pre">py36,py37,py38</span></code>.</p></li>
@@ -209,7 +209,7 @@ permissions, otherwise ask someone who does, e.g. &#64;rueckstiess or &#64;stenn
 <li><p>Merge the release branch into <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
 <li><p>Delete the <code class="docutils literal notranslate"><span class="pre">release-x.y.z</span></code> branch.</p></li>
 <li><p>Bump the version on the develop branch (in <code class="docutils literal notranslate"><span class="pre">./mtools/version.py</span></code>) to
-<code class="docutils literal notranslate"><span class="pre">x.y.(z+1)-dev</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">x.y.(z+1)-dev0</span></code>.</p></li>
 </ol>
 </div>
 </div>
