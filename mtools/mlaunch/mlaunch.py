@@ -133,7 +133,7 @@ def shutdown_host(port, username=None, password=None, authdb=None):
 
 
 @functools.lru_cache()
-def check_mongo_server_output(binary, argument):
+def check_mongo_server_output(binary, argument, fatal = True):
     """Call mongo[d|s] with arguments such as --help or --version.
 
     This is used only to check the server's output. We expect the server to
@@ -144,9 +144,11 @@ def check_mongo_server_output(binary, argument):
                                 stderr=subprocess.STDOUT,
                                 stdout=subprocess.PIPE, shell=False)
     except OSError as exc:
-        print('Failed to launch %s' % binary)
-        raise SystemExit(exc)
-
+        if fatal:
+            print(f"Fatal error: failed to launch [{binary}].\n"
+                "Please ensure this binary is found in your $PATH "
+                "or specified with --binarypath.\n")
+            raise SystemExit(exc)
 
     out, err = proc.communicate()
     if proc.returncode:
@@ -201,7 +203,7 @@ class MLaunchTool(BaseCmdLineTool):
                 self.args = dict()
                 self.args['binarypath'] = sys.argv[i+1]
                 break
-        self.current_version = self.getMongoDVersion()
+        self.current_version = self.getMongoDVersion(False)
 
     def run(self, arguments=None):
         """
@@ -898,13 +900,13 @@ class MLaunchTool(BaseCmdLineTool):
     # but with release candidates we get abck something like
     # "db version v3.4.0-rc2". This code exact the "major.minor.revision"
     # part of the string
-    def getMongoDVersion(self):
+    def getMongoDVersion(self, fatal = True):
         binary = "mongod"
         if self.args and self.args.get('binarypath'):
             binary = os.path.join(self.args['binarypath'], binary)
 
         try:
-            out = check_mongo_server_output(binary, '--version')
+            out = check_mongo_server_output(binary, '--version', fatal)
         except Exception:
             return "0.0.0"
 
