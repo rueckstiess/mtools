@@ -1,6 +1,11 @@
 =================
 Changes to mtools
 =================
+
+version 1.7.2
+~~~~~~~~~~~~~
+ * mlaunch: mlaunch init --help should not require mongod (#894)
+
 version 1.7.1
 ~~~~~~~~~~~~~
  * mlaunch: Bump PyMongo requirement to 4.0+ (#884)
