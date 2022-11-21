@@ -6,11 +6,10 @@ from mtools.util.log2code import Log2CodeConverter
 
 try:
     from matplotlib.dates import date2num, num2date
-except ImportError as error:
-    raise ImportError("Can't import matplotlib. See "
-                      "https://matplotlib.org/users/installing.html "
-                      "for instructions on how to install matplotlib."
-                      "Error: " + str(error))
+except ImportError as e:
+    raise ImportError(f"Can't import matplotlib: {str(e)}\n\n"
+                       "For installation instructions, see:\n"
+                       "   https://matplotlib.org/stable/users/installing/index.html")
 
 
 class RangePlotType(BasePlotType):
