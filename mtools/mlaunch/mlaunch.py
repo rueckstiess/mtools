@@ -37,9 +37,9 @@ try:
     from pymongo.errors import ConnectionFailure, AutoReconnect
     from pymongo.errors import OperationFailure, ConfigurationError
 except ImportError as e:
-    raise ImportError("Can't import pymongo. See "
-                      "https://api.mongodb.com/python/current/ for "
-                      "instructions on how to install pymongo: " + str(e))
+    raise ImportError(f"Can't import pymongo: {str(e)}\n\n"
+                       "For instructions on how to install pymongo, see:\n"
+                       "   https://www.mongodb.com/docs/drivers/pymongo/#installation")
 
 
 class MongoConnection(Connection):

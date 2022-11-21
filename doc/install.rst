@@ -111,9 +111,9 @@ pymongo
 
 *required for mlaunch and mtransfer*
 
-`pymongo <https://api.mongodb.com/python/current/>`__ is MongoDB's official
-Python driver. ``mlaunch`` uses this to configure and query local MongoDB
-deployments.
+`pymongo <https://www.mongodb.com/docs/drivers/pymongo/#installation>`__
+is MongoDB's official Python driver. ``mlaunch`` uses this to configure
+and query local MongoDB deployments.
 
 matplotlib
 ----------

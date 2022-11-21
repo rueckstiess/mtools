@@ -12,10 +12,10 @@ try:
     except ImportError:
         from pymongo import Connection
     from pymongo.errors import ConnectionFailure, AutoReconnect
-except ImportError:
-    raise ImportError("Can't import pymongo. "
-                      "See http://api.mongodb.org/python/current/ "
-                      "for instructions on how to install pymongo.")
+except ImportError as e:
+    raise ImportError(f"Can't import pymongo: {str(e)}\n\n"
+                       "For instructions on how to install pymongo, see:\n"
+                       "   https://www.mongodb.com/docs/drivers/pymongo/#installation")
 
 
 class ProfileCollection(InputSource):
