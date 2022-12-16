@@ -943,9 +943,9 @@ class LogFile(InputSource):
 
         # FIXME
         if self.logformat == LogFormat.LEGACY:
-            _find_sharding_info_legacy(self)
+            self._find_sharding_info_legacy()
         else:
-            _find_sharding_info_logv2(self)
+            self._find_sharding_info_logv2()
 
 
     def fast_forward(self, start_dt):
