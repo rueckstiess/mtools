@@ -647,7 +647,12 @@ class LogFile(InputSource):
         # get start datetime
         for line in self.filehandle:
             # LogEvent will determine the LogFormat
-            logevent = LogEvent(line)
+            try:
+                logevent = LogEvent(line)
+            except Exception as e:
+                print(f"Error at line {lines_checked}: {e}",
+                      file=sys.stderr)
+
             lines_checked += 1
             if logevent.datetime:
                 self._start = logevent.datetime

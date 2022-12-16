@@ -1300,10 +1300,14 @@ class LogEvent(object):
             if doc['attr'].get('type') == 'command':
                 command = doc['attr']['command']
 
-                if command.get('filter'):
-                    self._pattern = json2pattern(command['filter'], self._debug)
-                elif command.get('pipeline'):
-                    self._pattern = json2pattern(command['pipeline'], self._debug)
+                if isinstance(command, dict):
+                    try:
+                        if command.get('filter'):
+                            self._pattern = json2pattern(command['filter'], self._debug)
+                        elif command.get('pipeline'):
+                            self._pattern = json2pattern(command['pipeline'], self._debug)
+                    except Exception as e:
+                        print(f"Exception: {e} for {doc}")
 
                 # The command name isn't explicitly listed but
                 # should be the first element when an ordered
