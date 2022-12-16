@@ -1307,7 +1307,8 @@ class LogEvent(object):
                         elif command.get('pipeline'):
                             self._pattern = json2pattern(command['pipeline'], self._debug)
                     except Exception as e:
-                        print(f"Exception: {e} for {doc}")
+                        if self._debug:
+                            print(f"Exception: {e} for {doc}",file=sys.stderr)
 
                 # The command name isn't explicitly listed but
                 # should be the first element when an ordered
