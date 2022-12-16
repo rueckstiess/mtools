@@ -10,7 +10,7 @@ Some of the tools have additional dependencies, which are listed under the
 specific tool's section.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
-versions of the MongoDB server. As of November 2022, that includes
+versions of the MongoDB server. As of December 2022, that includes
 MongoDB 4.2 or newer.
 
 Prerequisites

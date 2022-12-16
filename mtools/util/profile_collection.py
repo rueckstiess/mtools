@@ -5,6 +5,7 @@ from pymongo import ASCENDING, DESCENDING
 
 from mtools.util.input_source import InputSource
 from mtools.util.logevent import LogEvent
+from mtools.util.logformat import LogFormat
 
 try:
     try:

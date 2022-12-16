@@ -1,5 +1,7 @@
 from .base_section import BaseSection
 
+from mtools.util.logformat import LogFormat
+
 try:
     from mtools.util.profile_collection import ProfileCollection
 except ImportError:
@@ -34,9 +36,9 @@ class RestartSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
-        if ProfileCollection and isinstance(self.mloginfo.logfile,
-                                            ProfileCollection):
-            print("\n    not available for system.profile collections\n")
+        if self.mloginfo.logfile.logformat == LogFormat.PROFILE:
+            print("\nERROR: mloginfo --restarts does not support "
+                  "system.profile collections\n")
             return
 
         for version, logevent in self.mloginfo.logfile.restarts:

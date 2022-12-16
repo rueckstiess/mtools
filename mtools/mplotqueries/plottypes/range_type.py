@@ -2,7 +2,6 @@ import argparse
 from datetime import timedelta
 
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
-from mtools.util.log2code import Log2CodeConverter
 
 try:
     from matplotlib.dates import date2num, num2date
@@ -16,7 +15,6 @@ class RangePlotType(BasePlotType):
 
     plot_type_str = 'range'
     sort_order = 2
-    l2cc = Log2CodeConverter()
 
     def __init__(self, args=None, unknown_args=None):
         BasePlotType.__init__(self, args, unknown_args)
@@ -35,13 +33,6 @@ class RangePlotType(BasePlotType):
     def accept_line(self, logevent):
         """Return True if the log line does not have a duration."""
         return True
-
-    def log2code(self, logevent):
-        codeline = self.l2cc(logevent.line_str)
-        if codeline:
-            return ' ... '.join(codeline.pattern)
-        else:
-            return None
 
     def plot_group(self, group, idx, axis):
         y_min, y_max = axis.get_ylim()

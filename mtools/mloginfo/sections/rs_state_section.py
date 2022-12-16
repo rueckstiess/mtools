@@ -1,7 +1,7 @@
 from .base_section import BaseSection
 from mtools.util import OrderedDict
 from mtools.util.print_table import print_table
-
+from mtools.util.logformat import LogFormat
 
 class RsStateSection(BaseSection):
     """
@@ -30,6 +30,10 @@ class RsStateSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
+        if self.mloginfo.logfile.logformat not in (LogFormat.LOGV2, LogFormat.LEGACY):
+            print(f"\nERROR: unsupported log format: {logfile.logformat}\n")
+            return
+
         titles = ['date', 'host', 'state/message']
         table_rows = []
 

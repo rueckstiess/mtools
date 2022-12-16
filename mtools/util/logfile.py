@@ -8,6 +8,7 @@ from math import ceil
 
 from mtools.util.input_source import InputSource
 from mtools.util.logevent import LogEvent
+from mtools.util.logformat import LogFormat
 
 
 class LogFile(InputSource):
@@ -17,8 +18,9 @@ class LogFile(InputSource):
         """Provide logfile as open file stream or stdin."""
         self.filehandle = filehandle
         self.name = filehandle.name
-
         self.from_stdin = filehandle.name == "<stdin>"
+
+        self._logformat = None
         self._bounds_calculated = False
         self._start = None
         self._end = None
@@ -26,6 +28,7 @@ class LogFile(InputSource):
         self._num_lines = None
         self._restarts = None
         self._binary = None
+        self._clusterrole = None
         self._timezone = None
         self._hostname = None
         self._port = None
@@ -71,6 +74,15 @@ class LogFile(InputSource):
         Restore state from the unpickled state values.
         """
         self.name = state
+
+    @property
+    def logformat(self):
+        """
+        Determine type of logfile: LEGACY, LOGV2, PROFILE
+        """
+        if not self._logformat:
+            self._calculate_bounds()
+        return self._logformat
 
     @property
     def start(self):
@@ -126,6 +138,7 @@ class LogFile(InputSource):
         """Lazy evaluation of the whether the logfile has any level lines."""
         if self._has_level is None:
             self._iterate_lines()
+
         return self._has_level
 
     @property
@@ -168,6 +181,13 @@ class LogFile(InputSource):
         if not self._num_lines:
             self._iterate_lines()
         return self._binary
+
+    @property
+    def clusterrole(self):
+        """Lazy evaluation of the clusterRole."""
+        if not self._num_lines:
+            self._iterate_lines()
+        return self._clusterrole
 
     @property
     def hostname(self):
@@ -335,126 +355,112 @@ class LogFile(InputSource):
         """Return the number of lines in a log file."""
         return self.num_lines
 
-    def _iterate_lines(self):
-        """Count number of lines (can be expensive)."""
-        self._num_lines = 0
-        self._restarts = []
-        self._rs_state = []
-        
-        ln = 0
-        for ln, line in enumerate(self.filehandle):
-            if isinstance(line, bytes):
-                line = line.decode("utf-8", "replace")
+    def __extract_metadata_legacy(self, line):
+        """Extract metadata from legacy log line format"""
 
-            if (self._has_level is None and
-                    line[28:31].strip() in LogEvent.log_levels and
-                    line[31:39].strip() in LogEvent.log_components):
-                self._has_level = True
+        if (self._has_level is None and
+                line[28:31].strip() in LogEvent.log_levels and
+                line[31:39].strip() in LogEvent.log_components):
+            self._has_level = True
 
-            # find version string (fast check to eliminate most lines)
-            if "version" in line[:100]:
-                logevent = LogEvent(line)
-                restart = self._check_for_restart(logevent)
-                if restart:
-                    self._restarts.append((restart, logevent))
+        # find version string (fast check to eliminate most lines)
+        if "version" in line[:100]:
+            logevent = LogEvent(line)
+            restart = self._check_for_restart_legacy(logevent)
+            if restart:
+                self._restarts.append((restart, logevent))
 
-            # look for hostname and port which will be logged with pid
-            if not self._hostname:
-                if " pid=" in line:
-                    match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
-                                    line)
-                    if match:
-                        self._hostname = match.group('host')
-                        self._port = match.group('port')
-
-            """ For 3.0 the "[initandlisten] options:" long entry contained the
-                "engine" field if WiredTiger was the storage engine. There were
-                only two engines, MMAPv1 and WiredTiger
-            """
-            if "[initandlisten] options:" in line:
-                match = re.search('replSet: "(?P<replSet>\S+)"', line)
+        # look for hostname and port which will be logged with pid
+        if not self._hostname:
+            if " pid=" in line:
+                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
+                                line)
                 if match:
-                    self._repl_set = match.group('replSet')
+                    self._hostname = match.group('host')
+                    self._port = match.group('port')
 
-                match = re.search('engine: "(?P<engine>\S+)"', line)
-                if match:
-                    self._storage_engine = match.group('engine')
-                else:
-                    self._storage_engine = 'mmapv1'
+        """ For 3.0 the "[initandlisten] options:" long entry contained the
+            "engine" field if WiredTiger was the storage engine. There were
+            only two engines, MMAPv1 and WiredTiger
+        """
+        if "[initandlisten] options:" in line:
+            match = re.search('replSet: "(?P<replSet>\S+)"', line)
+            if match:
+                self._repl_set = match.group('replSet')
 
-            """ For 3.2 the "[initandlisten] options:" no longer contains the
-                "engine" field So now we have to look for the "[initandlisten]
-                wiredtiger_open config:" which was present in 3.0, but would
-                now tell us definitively that wiredTiger is being used
-            """
-            if "[initandlisten] wiredtiger_open config:" in line:
-                self._storage_engine = 'wiredTiger'
+            match = re.search('engine: "(?P<engine>\S+)"', line)
+            if match:
+                self._storage_engine = match.group('engine')
+            else:
+                self._storage_engine = 'mmapv1'
 
-            if "command admin.$cmd command: { replSetInitiate:" in line:
-                match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                  'members: (?P<replSetMembers>[^]]+ ])', line)
-                if match:
-                    self._repl_set = match.group('replSet')
-                    self._repl_set_members = match.group('replSetMembers')
+        """ For 3.2 the "[initandlisten] options:" no longer contains the
+            "engine" field So now we have to look for the "[initandlisten]
+            wiredtiger_open config:" which was present in 3.0, but would
+            now tell us definitively that wiredTiger is being used
+        """
+        if "[initandlisten] wiredtiger_open config:" in line:
+            self._storage_engine = 'wiredTiger'
 
-            # Replica set config logging in MongoDB 3.0+
-            new_config = ("New replica set config in use: ")
-            if new_config in line:
-                match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                  'version: (?P<replSetVersion>\d+), ', line)
-                if match:
-                    self._repl_set = match.group('replSet')
-                    self._repl_set_version = match.group('replSetVersion')
-                match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', line)
-                if match:
-                    self._repl_set_protocol = match.group('replSetProtocol')
-                match = re.search('members: (?P<replSetMembers>[^]]+ ])', line)
-                if match:
-                    self._repl_set_members = match.group('replSetMembers')
+        if "command admin.$cmd command: { replSetInitiate:" in line:
+            match = re.search('{ _id: "(?P<replSet>\S+)", '
+                                'members: (?P<replSetMembers>[^]]+ ])', line)
+            if match:
+                self._repl_set = match.group('replSet')
+                self._repl_set_members = match.group('replSetMembers')
 
+        # Replica set config logging in MongoDB 3.0+
+        new_config = ("New replica set config in use: ")
+        if new_config in line:
+            match = re.search('{ _id: "(?P<replSet>\S+)", '
+                                'version: (?P<replSetVersion>\d+), ', line)
+            if match:
+                self._repl_set = match.group('replSet')
+                self._repl_set_version = match.group('replSetVersion')
+            match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', line)
+            if match:
+                self._repl_set_protocol = match.group('replSetProtocol')
+            match = re.search('members: (?P<replSetMembers>[^]]+ ])', line)
+            if match:
+                self._repl_set_members = match.group('replSetMembers')
 
-            # if ("is now in state" in line and
-            #        next(state for state in states if line.endswith(state))):
-            if "is now in state" in line:
-                tokens = line.split()
+        # if ("is now in state" in line and
+        #        next(state for state in states if line.endswith(state))):
+        if "is now in state" in line:
+            tokens = line.split()
+            # 2.6
+            if tokens[1].endswith(']'):
+                pos = 4
+            else:
+                pos = 5
+            host = tokens[pos]
+            rs_state = tokens[-1]
+            state = (host, rs_state, LogEvent(line))
+            self._rs_state.append(state)
+            return
+
+        if "[rsMgr] replSet" in line:
+            tokens = line.split()
+            if self._hostname:
+                host = self._hostname + ':' + self._port
+            else:
+                host = os.path.basename(self.name)
+            host += ' (self)'
+            if tokens[-1] in self.states:
+                rs_state = tokens[-1]
+            else:
                 # 2.6
                 if tokens[1].endswith(']'):
-                    pos = 4
+                    pos = 2
                 else:
-                    pos = 5
-                host = tokens[pos]
-                rs_state = tokens[-1]
-                state = (host, rs_state, LogEvent(line))
-                self._rs_state.append(state)
-                continue
+                    pos = 6
+                rs_state = ' '.join(tokens[pos:])
 
-            if "[rsMgr] replSet" in line:
-                tokens = line.split()
-                if self._hostname:
-                    host = self._hostname + ':' + self._port
-                else:
-                    host = os.path.basename(self.name)
-                host += ' (self)'
-                if tokens[-1] in self.states:
-                    rs_state = tokens[-1]
-                else:
-                    # 2.6
-                    if tokens[1].endswith(']'):
-                        pos = 2
-                    else:
-                        pos = 6
-                    rs_state = ' '.join(tokens[pos:])
+            state = (host, rs_state, LogEvent(line))
+            self._rs_state.append(state)
+            return
 
-                state = (host, rs_state, LogEvent(line))
-                self._rs_state.append(state)
-                continue
-
-        self._num_lines = ln + 1
-
-        # reset logfile
-        self.filehandle.seek(0)
-
-    def _check_for_restart(self, logevent):
+    def _check_for_restart_legacy(self, logevent):
 
         if (logevent.thread == 'initandlisten' and
                 "db version v" in logevent.line_str):
@@ -475,6 +481,156 @@ class LogFile(InputSource):
         else:
             return False
 
+    def _check_for_restart_logv2(self, doc):
+        if not doc['ctx'] in ('initandlisten', 'mongosMain'):
+            return
+
+        if not self._hostname:
+            if doc['msg'] == 'MongoDB starting':
+                self._hostname = doc['attr'].get('host')
+
+        if not self._clusterrole:
+            if doc['msg'] == 'Options set by command line':
+                if doc['attr']['options'].get('sharding'):
+                    self._clusterrole = \
+                        doc['attr']['options']['sharding'].get('clusterRole')
+
+        if not self._port:
+            if doc['msg'] == 'MongoDB starting':
+                self._port = doc['attr'].get('port')
+            elif doc['msg'] == 'Options set by command line':
+                if doc['attr']['options'].get('net'):
+                    self._port = doc['attr']['options']['net'].get('port')
+                else:
+                    # process will be listening on default port
+                    if self._clusterrole is None:
+                        self._port = 27017
+                    elif self._clusterrole == 'shardsvr':
+                        self._port = 27018
+                    elif self._clusterrole == 'configsvr':
+                        self._port = 27019
+
+        if not self._storage_engine or not self._repl_set:
+            if doc['msg'] == 'Options set by command line':
+                if doc['attr']['options'].get('storage'):
+                    self._storage_engine = \
+                        doc['attr']['options']['storage'].get('engine', 'wiredTiger')
+                if doc['attr']['options'].get('replication'):
+                    self._repl_set = \
+                        doc['attr']['options']['replication'].get('replSetName')
+
+        # Which binary and version is running?
+        version = False
+        if doc['msg'] == 'Build Info':
+            version = doc['attr']['buildInfo'].get('version', False)
+            if doc['ctx'] == 'mongosMain':
+                self._binary = 'mongos'
+            else:
+                self._binary = 'mongod'
+
+        return version
+
+    # FIXME
+    def __extract_metadata_logv2(self, line):
+        """Extract metadata from logv2 JSON format"""
+        le = LogEvent(line, True)
+        doc = le.doc
+
+        # logv2 always has levels & components
+        if self._has_level is None:
+            self._has_level = True
+
+        if not doc:
+            return
+
+        if doc['ctx'] in ('initandlisten', 'mongosMain'):
+            restart = self._check_for_restart_logv2(doc)
+            if restart:
+                self._restarts.append((restart, le))
+
+        # TODO: add storage engine detection
+        self._storage_engine = 'wiredTiger'
+        # if "command admin.$cmd command: { replSetInitiate:" in doc:
+        #     match = re.search('{ _id: "(?P<replSet>\S+)", '
+        #                         'members: (?P<replSetMembers>[^]]+ ])', doc)
+        #     if match:
+        #         self._repl_set = match.group('replSet')
+        #         self._repl_set_members = match.group('replSetMembers')
+
+        # Replica set config logging in MongoDB 3.0+
+        # new_config = ("New replica set config in use: ")
+        # if new_config in doc:
+        #     match = re.search('{ _id: "(?P<replSet>\S+)", '
+        #                         'version: (?P<replSetVersion>\d+), ', doc)
+        #     if match:
+        #         self._repl_set = match.group('replSet')
+        #         self._repl_set_version = match.group('replSetVersion')
+        #     match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', doc)
+        #     if match:
+        #         self._repl_set_protocol = match.group('replSetProtocol')
+        #     match = re.search('members: (?P<replSetMembers>[^]]+ ])', doc)
+        #     if match:
+        #         self._repl_set_members = match.group('replSetMembers')
+
+
+        # if ("is now in state" in line and
+        #        next(state for state in states if line.endswith(state))):
+        # if "is now in state" in doc:
+        #     tokens = doc.split()
+        #     # 2.6
+        #     if tokens[1].endswith(']'):
+        #         pos = 4
+        #     else:
+        #         pos = 5
+        #     host = tokens[pos]
+        #     rs_state = tokens[-1]
+        #     state = (host, rs_state, LogEvent(doc))
+        #     self._rs_state.append(state)
+        #     return
+
+        # if "[rsMgr] replSet" in doc:
+        #     tokens = doc.split()
+        #     if self._hostname:
+        #         host = self._hostname + ':' + self._port
+        #     else:
+        #         host = os.path.basename(self.name)
+        #     host += ' (self)'
+        #     if tokens[-1] in self.states:
+        #         rs_state = tokens[-1]
+        #     else:
+        #         # 2.6
+        #         if tokens[1].endswith(']'):
+        #             pos = 2
+        #         else:
+        #             pos = 6
+        #         rs_state = ' '.join(tokens[pos:])
+
+        #     state = (host, rs_state, LogEvent(line))
+        #     self._rs_state.append(state)
+        #     return
+
+
+    def _iterate_lines(self):
+        """Count number of lines (can be expensive)."""
+        self._num_lines = 0
+        self._restarts = []
+        self._rs_state = []
+
+        ln = 0
+        for ln, line in enumerate(self.filehandle):
+            if isinstance(line, bytes):
+                line = line.decode("utf-8", "replace")
+
+            if self.logformat == LogFormat.LOGV2:
+                self.__extract_metadata_logv2(line)
+            else:
+                self.__extract_metadata_legacy(line)
+
+        self._num_lines = ln + 1
+
+        # reset logfile
+        self.filehandle.seek(0)
+
     def _calculate_bounds(self):
         """Calculate beginning and end of logfile."""
         if self._bounds_calculated:
@@ -490,6 +646,7 @@ class LogFile(InputSource):
 
         # get start datetime
         for line in self.filehandle:
+            # LogEvent will determine the LogFormat
             logevent = LogEvent(line)
             lines_checked += 1
             if logevent.datetime:
@@ -497,12 +654,13 @@ class LogFile(InputSource):
                 self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
                 self._datetime_nextpos = logevent._datetime_nextpos
+                self._logformat = logevent.logformat
                 break
-            if lines_checked > max_start_lines:
+            if lines_checked >= max_start_lines:
                 break
 
         # sanity check before attempting to find end date
-        if (self._start is None):
+        if (self._logformat is None):
             raise SystemExit("Error: <%s> does not appear to be a supported "
                              "MongoDB log file format" % self.filehandle.name)
 
@@ -588,9 +746,9 @@ class LogFile(InputSource):
             # reached end of file
             return None
 
-    def _find_sharding_info(self):
+    def _find_sharding_info_legacy(self):
         """
-        Iterate over file and find any sharding related information
+        Iterate over legacy log file and find any sharding related info
         """
         self._shards = []
         self._chunks_moved_from = []
@@ -758,6 +916,36 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+
+    # FIXME
+    def _find_sharding_info_logv2(self):
+        """
+        Iterate over logv2 file and find any sharding related info
+        """
+        self._shards = []
+        self._chunks_moved_from = []
+        self._chunks_moved_to = []
+        self._chunk_splits = []
+
+        print(f"Sharding info extraction is not yet supported for: {self.logformat} ",
+              file=sys.stderr)
+
+    def _find_sharding_info(self):
+        """
+        Iterate over file and find any sharding related information
+        """
+        self._shards = []
+        self._chunks_moved_from = []
+        self._chunks_moved_to = []
+        self._chunk_splits = []
+        
+        prev_line = ""
+
+        # FIXME
+        if self.logformat == LogFormat.LEGACY:
+            _find_sharding_info_legacy(self)
+        else:
+            _find_sharding_info_logv2(self)
 
 
     def fast_forward(self, start_dt):

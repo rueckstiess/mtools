@@ -85,9 +85,7 @@ class MPlotQueriesTool(LogFileTool):
                                           "Possible values depend on type of "
                                           "plot. All basic plot types can "
                                           "group on 'namespace','hostname' 'operation', "
-                                          "'thread', 'pattern', range and "
-                                          "histogram plots can additionally "
-                                          "group on 'log2code'. The group can "
+                                          "'thread', 'pattern'. The group can "
                                           "also be a regular expression."))
         self.argparser.add_argument('--group-limit', metavar='N', type=int,
                                     default=None,

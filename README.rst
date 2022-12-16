@@ -25,13 +25,14 @@ The following tools are in the mtools collection:
 `mloginfo <https://rueckstiess.github.io/mtools/mloginfo.html>`__
    returns info about log file, like start and end time, version, binary,
    special sections like restarts, connections, distinct view
+   (requires ``numpy``)
 
 `mplotqueries <https://rueckstiess.github.io/mtools/mplotqueries.html>`__
    visualize log files with different types of plots (requires ``matplotlib``)
 
 `mlaunch <https://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
-   and sharded systems (requires ``pymongo``)
+   and sharded systems (requires ``pymongo``, ``psutil``, ``packaging``)
 
 `mtransfer <https://rueckstiess.github.io/mtools/mtransfer.html>`__
    an experimental script to transfer databases between MongoDB instances by
@@ -52,10 +53,8 @@ specific tool's section. See the `installation instructions
 <https://rueckstiess.github.io/mtools/install.html>`__ for more information.
 
 The mtools suite is only tested with actively supported (non End-of-Life)
-versions of the MongoDB server. As of October 2022, that includes
+versions of the MongoDB server. As of December 2022, that includes
 MongoDB 4.2 or newer.
-
-NOTE: logv2 format (MongoDB 4.4+) is not fully supported yet.
 
 Recent Changes
 --------------

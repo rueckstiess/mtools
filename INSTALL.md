@@ -3,7 +3,7 @@ Installation Instructions for mtools
 
 ### Python
 
-You need to have Python 3.6 or newer installed in order to use mtools.
+You need to have Python 3.7 or newer installed in order to use mtools.
 Older versions of Python are not supported.
 
 To check your Python version, run `python --version` on the command line.

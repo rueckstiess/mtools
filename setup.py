@@ -79,9 +79,6 @@ setup(
     name='mtools',
     version=__version__,
     packages=packages,
-    package_data={
-        'mtools': ['data/log2code.pickle', 'data/index.html'],
-    },
     entry_points={
         "console_scripts": [
             "mlaunch=mtools.mlaunch.mlaunch:main",

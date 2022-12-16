@@ -5,6 +5,7 @@ from .base_section import BaseSection
 from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
+from mtools.util.logformat import LogFormat
 
 try:
     import numpy as np

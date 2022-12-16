@@ -3,6 +3,7 @@ import json
 from collections import defaultdict
 
 from .base_section import BaseSection
+from mtools.util.logformat import LogFormat
 
 try:
     from mtools.util.profile_collection import ProfileCollection
@@ -46,9 +47,9 @@ class ClientSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
-        if ProfileCollection and isinstance(self.mloginfo.logfile,
-                                            ProfileCollection):
-            print("\n    not available for system.profile collections\n")
+        if self.mloginfo.logfile.logformat != LogFormat.LEGACY:
+            print("\nERROR: mloginfo --clients currently only supports "
+                  "legacy log files\n(MongoDB 4.0 or older)\n")
             return
 
         # Dict where the key is a DriverVersionApp and the value is info about

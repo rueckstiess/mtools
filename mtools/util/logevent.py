@@ -9,7 +9,7 @@ import dateutil.parser
 from dateutil.tz import tzutc
 
 from mtools.util.pattern import json2pattern
-
+from mtools.util.logformat import LogFormat
 
 class DateTimeEncoder(json.JSONEncoder):
     """Custom datetime encoder for json output."""
@@ -57,27 +57,42 @@ class LogEvent(object):
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
 
-    def __init__(self, doc_or_str):
+    def __init__(self, doc_or_str, fulldoc = True, pretty = True):
         self._debug = False
+        self._doc = {}
         self._year_rollover = False
+        self.logformat = None
+
         if isinstance(doc_or_str, bytes):
             doc_or_str = doc_or_str.decode("utf-8")
 
-        if isinstance(doc_or_str, str) or (sys.version_info.major == 2 and
-                                           isinstance(doc_or_str, unicode)):
-            # create from string, remove line breaks at end of _line_str
-            self.from_string = True
-            self._line_str = doc_or_str.rstrip()
-            self._profile_doc = None
-            self._reset()
-        else:
-            self.from_string = False
-            self._profile_doc = doc_or_str
-            # docs don't need to be parsed lazily, they are fast
-            self._parse_document()
+        if isinstance(doc_or_str, str):
+            if doc_or_str.startswith('{'):
+                self.from_string = False
+                doc = json.loads(doc_or_str)
+                if fulldoc:
+                    self._doc = doc
+                self._parse_logv2(doc)
+                self.logformat = LogFormat.LOGV2
+                #except Exception as e:
+                   # print(f"An exception occured parsing logv2: {e}")
+            elif isinstance(doc_or_str, str):
+                # Create from string, remove line breaks at end of _line_str
+                self.logformat = LogFormat.LEGACY
+                self.from_string = True
+                self._line_str = doc_or_str.rstrip()
+
+                # Legacy log lines will be parsed lazily
+                self._reset()
+            else:
+                # Assume this is a system.profile document
+                self.from_string = False
+                self.logformat = LogFormat.PROFILE
+                if fulldoc:
+                    self._doc = doc_or_str
+                self._parse_profile_doc(doc_or_str)
 
     def _reset(self):
-        self._debug = False
         self._split_tokens_calculated = False
         self._split_tokens = None
 
@@ -136,9 +151,14 @@ class LogEvent(object):
         self._ninserted = None        # nInserted
         self._ndeleted = None         # nDeleted
 
+        self._cursorid = None
+        self._reapedtime = None
+
         self._numYields = None
         self._planSummary = None
         self._actualPlanSummary = None
+        self._queryHash = None
+        self._hasSortStage = None
         self._writeConflicts = None
         self._r = None
         self._w = None
@@ -156,28 +176,41 @@ class LogEvent(object):
     def set_line_str(self, line_str):
         """
         Set line_str.
-        Line_str is only writeable if LogEvent was created from a string,
-        not from a system.profile documents.
+        Line_str is only writeable if LogEvent was created from a string
         """
         if not self.from_string:
-            raise ValueError("can't set line_str for LogEvent created from "
-                             "system.profile documents.")
+            raise ValueError("Can only set_line_str() for LogEvent created from "
+                             "a string (eg legacy log file format).")
 
         if line_str != self._line_str:
             self._line_str = line_str.rstrip()
             self._reset()
 
-    def get_line_str(self):
+    def get_line_str(self, pretty = True):
         """Return line_str depending on source, logfile or system.profile."""
-        if self.from_string:
-            return ' '.join([s for s in [self.merge_marker_str,
-                                         self._datetime_str,
-                                         self._line_str] if s])
+
+        if self.logformat == LogFormat.LOGV2:
+            if pretty:
+                # Printable line string (eg for mplotqueries)
+                return json.dumps(self.doc, indent = 3)
+            else:
+                # Compact line string (eg for mlogfilter)
+                return json.dumps(self.doc)
         else:
-            return ' '.join([s for s in [self._datetime_str,
-                                         self._line_str] if s])
+            if self.from_string:
+                return ' '.join([s for s in [self.merge_marker_str,
+                                            self._datetime_str,
+                                            self._line_str] if s])
+            else:
+                return ' '.join([s for s in [self._datetime_str,
+                                            self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
+
+    @property
+    def doc (self):
+        """Return full document if available"""
+        return self._doc
 
     @property
     def split_tokens(self):
@@ -227,6 +260,9 @@ class LogEvent(object):
     # SERVER-41349 - get hostname from the DNS log line
     @property
     def hostname(self):
+        if self.logformat == LogFormat.LOGV2:
+            return self._hostname
+
         line_str = self.line_str
         groups = re.search("DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
@@ -236,6 +272,9 @@ class LogEvent(object):
     @property
     def cursor(self):
         """Pull the cursor information if available (lazy)."""
+        if self.logformat == LogFormat.LOGV2:
+            return self._cursorid
+
         line_str = self.line_str
         # SERVER-28604 Checking reaped cursor information
         groups = re.search("Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
@@ -786,6 +825,10 @@ class LogEvent(object):
         return self._w
 
     def _extract_counters(self):
+
+        if self.logformat != LogFormat.LEGACY:
+            return
+
         """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
@@ -922,6 +965,10 @@ class LogEvent(object):
 
     def _extract_level(self):
         """Extract level and component if available (lazy)."""
+
+        if self.logformat != LogFormat.LEGACY:
+            return
+
         if self._level is None:
             split_tokens = self.split_tokens
 
@@ -943,6 +990,10 @@ class LogEvent(object):
     @property
     def client_metadata(self):
         """Return client metadata."""
+
+        if self.logformat != LogFormat.LEGACY:
+            return
+
         if not self._client_metadata_calculated:
             self._client_metadata_calculated = True
 
@@ -1093,14 +1144,16 @@ class LogEvent(object):
 
     def to_json(self, labels=None):
         """Convert LogEvent object to valid JSON."""
-        output = self.to_dict(labels)
+        if self.logformat == LogFormat.LOGV2:
+            output = self.doc
+        else:
+            output = self.to_dict(labels)
+
         return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
 
-    def _parse_document(self):
+    def _parse_profile_doc(self, doc):
         """Parse system.profile doc, copy all values to member variables."""
         self._reset()
-
-        doc = self._profile_doc
 
         self._split_tokens_calculated = True
         self._split_tokens = None
@@ -1192,6 +1245,73 @@ class LogEvent(object):
         yields = 'numYields:%i' % self._numYields if 'numYield' in doc else ''
         duration = '%ims' % self.duration if self.duration is not None else ''
 
+        # Imitate legacy log line format
         self._line_str = (f'''[{self.thread}] {self.operation} {self.namespace} {payload} '''
                           f'''{scanned} {yields} locks(micros) {locks} '''
                           f'''{duration}''')
+
+    def _parse_logv2(self, doc):
+        """Parse logv2 format"""
+        self._reset()
+
+        self.counters_calculated = True
+
+        self._datetime = self._match_datetime_pattern([doc['t']['$date']])
+        self._datetime_calculated = True
+
+        self._level = doc['s'] # Level aka severity
+        self._component = doc['c']
+        self._level_calculated = True
+
+        # Thread name or execution context
+        self._thread = doc['ctx']
+        self._threadcalculated = True
+
+        # operation: insert, update, remove, query, command, getmore, None
+        # namespace: the namespace of the operation, or None
+        # command: the type of command, if the operation was a "command"
+        # pattern: the query pattern for queries, updates, counts, etc
+        if 'attr' in doc:
+            self._duration = doc['attr'].get('durationMillis')
+            self._namespace = doc['attr'].get('ns')
+            if self._namespace is None:
+                # Some contexts use namespace instead of ns:
+                #   initandlisten, LogicalSessionCacheRefresh,
+                #   IndexBuildsCoordinatorMongod, ...
+                self._namespace= doc['attr'].get('namespace')
+            self._operation = doc['attr'].get('type')
+            self._planSummary = doc['attr'].get('planSummary')
+            self._queryHash = doc['attr'].get('queryHash')
+            self._hasSortStage = doc['attr'].get('hasSortStage')
+            self._numYields = doc['attr'].get('numYields')
+            self._nscanned = doc['attr'].get('keysExamined')
+            self._nscannedObjects = doc['attr'].get('docsExamined')
+            self._ntoreturn = doc['attr'].get('ntoreturn')
+            self._nupdated = doc['attr'].get('nModified')
+            self._nreturned = doc['attr'].get('nReturned')
+            if self._nreturned is None:
+                # nReturned or nMatched (updates)
+                self._nreturned = doc['attr'].get('nMatched')
+            self._ninserted = doc['attr'].get('nInserted')
+            self._ndeleted = doc['attr'].get('nDeleted')
+            self._cursorid = doc['attr'].get('cursorid')
+            # self._reapedtime  # TODO: https://jira.mongodb.org/browse/SERVER-28604
+
+            if doc['attr'].get('type') == 'command':
+                command = doc['attr']['command']
+
+                if command.get('filter'):
+                    self._pattern = json2pattern(command['filter'], self._debug)
+                elif command.get('pipeline'):
+                    self._pattern = json2pattern(command['pipeline'], self._debug)
+
+                # The command name isn't explicitly listed but
+                # should be the first element when an ordered
+                # dict is iterated
+                self._command = next(iter(command))
+
+        self._operation_calculated = True
+        self._duration_calculated = True
+        self._command_calculated = True
+        self._split_tokens = None
+        self._split_tokens_calculated = True

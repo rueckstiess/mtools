@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from .base_section import BaseSection
-from mtools.util.log2code import Log2CodeConverter
+from mtools.util.logformat import LogFormat
 
 try:
     from mtools.util.profile_collection import ProfileCollection
@@ -19,35 +19,37 @@ class DistinctSection(BaseSection):
     """
 
     name = "distinct"
-    log2code = Log2CodeConverter()
 
     def __init__(self, mloginfo):
         BaseSection.__init__(self, mloginfo)
 
         # add --restarts flag to argparser
-        helptext = ('outputs distinct list of all log line by message '
-                    'type (slow)')
+        helptext = ('outputs distinct list of all log line by message ')
         self.mloginfo.argparser_sectiongroup.add_argument('--distinct',
                                                           action='store_true',
                                                           help=helptext)
 
+        helptext = ('minimum number of occurences to include in --distinct (default: 5)')
+        self.mloginfo.argparser_sectiongroup.add_argument('--distinctmin',
+                                                          action='store',
+                                                          type=int,
+                                                          default=5,
+                                                          help=helptext)
+
     @property
     def active(self):
-        """Rreturn boolean if this section is active."""
+        """Return boolean if this section is active."""
         return self.mloginfo.args['distinct']
 
     def run(self):
-        """Run each line through log2code and group by matched pattern."""
-        if ProfileCollection and isinstance(self.mloginfo.logfile,
-                                            ProfileCollection):
-            print("\n    not available for system.profile collections\n")
-            return
-
-        codelines = defaultdict(lambda: 0)
-        non_matches = 0
-
+        """Group by matched pattern."""
         # get log file information
         logfile = self.mloginfo.logfile
+
+        if logfile.logformat != LogFormat.LOGV2:
+            print(f"\nERROR: unsupported log format: {logfile.logformat}\n")
+            return
+
         if logfile.start and logfile.end and not self.mloginfo.args['verbose']:
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
             progress_total = (self.mloginfo._datetime_to_epoch(logfile.end) -
@@ -55,41 +57,35 @@ class DistinctSection(BaseSection):
         else:
             self.mloginfo.progress_bar_enabled = False
 
+        codelines = defaultdict(lambda: 0)
+        non_matches = 0
+
         for i, logevent in enumerate(self.mloginfo.logfile):
-            cl, _ = self.log2code(logevent.line_str)
+            cl = {
+                'pattern': f"{logevent.doc.get('msg')}"
+            }
 
             # update progress bar every 1000 lines
             if self.mloginfo.progress_bar_enabled and (i % 1000 == 0):
                 if logevent.datetime:
-                    progress_curr = self.mloginfo._datetime_to_epoch(logevent
-                                                                     .datetime)
-                    (self.mloginfo
-                     .update_progress(float(progress_curr - progress_start) /
-                                      progress_total))
+                    try:
+                        progress_curr = self.mloginfo._datetime_to_epoch(logevent
+                                                                        .datetime)
+                        (self.mloginfo
+                        .update_progress(float(progress_curr - progress_start) /
+                                        progress_total))
+                    except Exception as e:
+                        if self.mloginfo.args['verbose']:
+                            print(f"update_progress() exception: {e.msg}")
 
-            if cl:
-                codelines[cl.pattern] += 1
+            if not self.mloginfo.args['verbose']:
+                # Skip some generally uninteresting lines
+                if logevent.doc.get('ctx') in ('initandlisten','WTCheckpointThread'):
+                    non_matches += 1
+                else:
+                    codelines[cl.get('pattern')] += 1
             else:
-                if logevent.operation:
-                    # skip operations (command, insert, update, delete,
-                    # query, getmore)
-                    continue
-                if not logevent.thread:
-                    # skip the lines that don't have a thread name
-                    # (usually map/reduce or assertions)
-                    continue
-                if len(logevent.split_tokens) - logevent.datetime_nextpos <= 1:
-                    # skip empty log messages (after thread name)
-                    continue
-                if ("warning: log line attempted" in logevent.line_str and
-                        "over max size" in logevent.line_str):
-                    # skip lines that are too long
-                    continue
-
-                # everything else is a real non-match
-                non_matches += 1
-                if self.mloginfo.args['verbose']:
-                    print("couldn't match:" + logevent)
+                codelines[cl.get('pattern')] += 1
 
         # clear progress bar again
         if self.mloginfo.progress_bar_enabled:
@@ -99,10 +95,13 @@ class DistinctSection(BaseSection):
             print('')
 
         for cl in sorted(codelines, key=lambda x: codelines[x], reverse=True):
-            print("%8i  %s" % (codelines[cl], " ... ".join(cl)))
+            if not self.mloginfo.args['verbose'] and codelines[cl] < self.mloginfo.args['distinctmin']:
+                non_matches += codelines[cl]
+            else:
+                print("%8i  %s" % (codelines[cl], cl))
 
         print('')
         if non_matches > 0:
-            print("distinct couldn't match %i lines" % non_matches)
+            print(f"Distinct ignored {non_matches} less informative lines")
             if not self.mloginfo.args['verbose']:
-                print("to show non-matched lines, run with --verbose.")
+                print("To show ignored lines, run with --verbose")

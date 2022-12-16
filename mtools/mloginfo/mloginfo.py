@@ -6,7 +6,7 @@ import sys
 
 import mtools.mloginfo.sections as sections
 from mtools.util.cmdlinetool import LogFileTool
-
+from mtools.util.logformat import LogFormat
 
 class MLogInfoTool(LogFileTool):
 
@@ -62,14 +62,19 @@ class MLogInfoTool(LogFileTool):
                                                       "%H:%M:%S.%f")[:-3]
                             if self.logfile.start else "unknown")
 
-            print("     source: %s" % self.logfile.name)
-            print("       host: %s"
+            print(f"     source: {self.logfile.name}")
+            print(f"     format: {self.logfile.logformat}")
+            print(f"       host: %s"
                   % (self.logfile.hostname + ':' + str(self.logfile.port)
                      if self.logfile.hostname else "unknown"))
-            print("      start: %s" % (start_time))
-            print("        end: %s" % (end_time))
 
-            print("date format: %s" % self.logfile.datetime_format)
+            if self.logfile.repl_set:
+                print(f"    replSet: {self.logfile.repl_set}")
+
+            print(f"      start: {start_time}")
+            print(f"        end: {end_time}")
+
+            print(f"date format: {self.logfile.datetime_format}")
 
             # self.logfile.timezone is a dateutil.tzinfo object
             tzdt = datetime.datetime.now(self.logfile.timezone)
@@ -77,9 +82,11 @@ class MLogInfoTool(LogFileTool):
                 timezone = tzdt.tzname()
             else:
                 timezone = f"UTC {tzdt.strftime('%z')}"
-            print("   timezone: %s" % timezone)
-            print("     length: %s" % len(self.logfile))
-            print("     binary: %s" % (self.logfile.binary or "unknown"))
+            print(f"   timezone: {timezone}")
+            print(f"     length: {len(self.logfile)}")
+            print(f"     binary: %s" % (self.logfile.binary or "unknown"))
+            if self.logfile.clusterrole:
+                print(f"clusterRole: {self.logfile.clusterrole}")
 
             version = (' -> '.join(self.logfile.versions) or "unknown")
 
@@ -91,7 +98,9 @@ class MLogInfoTool(LogFileTool):
                     version = '>= 2.4.x ctime (milliseconds present)'
                 elif (self.logfile.datetime_format == "iso8601-utc" or
                       self.logfile.datetime_format == "iso8601-local"):
-                    if self.logfile.has_level:
+                    if self.logfile.logformat == LogFormat.LOGV2:
+                        version = '>= 4.4 (iso8601 format, level, component)'
+                    elif self.logfile.has_level:
                         version = '>= 3.0 (iso8601 format, level, component)'
                     else:
                         version = '= 2.6.x (iso8601 format)'

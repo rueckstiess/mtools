@@ -1,5 +1,5 @@
 from .base_section import BaseSection
-
+from mtools.util.logformat import LogFormat
 
 class RsInfoSection(BaseSection):
     """
@@ -27,6 +27,11 @@ class RsInfoSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
+        if self.mloginfo.logfile.logformat == LogFormat.PROFILE:
+            print("\nERROR: mloginfo --restarts does not support "
+                  "system.profile collections\n")
+            return
+
         if self.mloginfo.logfile.repl_set:
             print("    rs name: %s" % self.mloginfo.logfile.repl_set)
             print(" rs members: %s"

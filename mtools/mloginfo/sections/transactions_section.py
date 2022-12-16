@@ -1,10 +1,12 @@
 import re
 from collections import namedtuple
 from operator import itemgetter
+
 from mtools.util import OrderedDict
 from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 from .base_section import BaseSection
+from mtools.util.logformat import LogFormat
 
 LogTuple = namedtuple('LogTuple', ['datetime', 'txnNumber', 'autocommit', 'readConcern',
                                    'timeActiveMicros', 'timeInactiveMicros', 'duration'])
@@ -31,7 +33,6 @@ class TransactionSection(BaseSection):
         # add --tsort flag to argparser for transaction sort
         self.mloginfo.argparser_sectiongroup.add_argument('--tsort',
                                                           action='store',
-
                                                           choices=['duration'])
 
     @property

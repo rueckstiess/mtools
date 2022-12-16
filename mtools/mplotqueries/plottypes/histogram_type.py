@@ -3,7 +3,6 @@ import argparse
 import numpy as np
 
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
-from mtools.util.log2code import Log2CodeConverter
 
 try:
     from matplotlib.dates import date2num, num2date
@@ -26,7 +25,6 @@ class HistogramPlotType(BasePlotType):
                  'day': 86400, 'd': 86400}
     sort_order = 1
     default_group_by = 'namespace'
-    l2cc = Log2CodeConverter()
 
     def __init__(self, args=None, unknown_args=None):
         BasePlotType.__init__(self, args, unknown_args)
@@ -63,13 +61,6 @@ class HistogramPlotType(BasePlotType):
         type of plot.
         """
         return True
-
-    def log2code(self, logevent):
-        codeline = self.l2cc(logevent.line_str)
-        if codeline:
-            return ' ... '.join(codeline.pattern)
-        else:
-            return None
 
     def plot_group(self, group, idx, axis):
         raise NotImplementedError("Not implemented for histogram plots.")

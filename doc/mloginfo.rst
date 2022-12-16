@@ -214,9 +214,9 @@ Distinct (``--distinct``)
 -------------------------
 
 The distinct section goes through the log file and group all the lines together
-by the type of message (it uses the "log2code" matcher). It will then output a
-line per group, sorted by the largest group descending. This will return a good
-overview of the log file of what kind of lines appear in the file.
+by the type of message. It will then output a line per group, sorted by the
+largest group descending. This will return a good overview of the log file
+of what kind of lines appear in the file.
 
 This operation can take some time if the log file is big.
 
@@ -248,8 +248,8 @@ lines, as shown below.
    distinct couldn't match 6 lines
    to show non-matched lines, run with --verbose.
 
-If some lines can't be matched with the ``log2code`` matcher, the number of
-unmatched lines is printed at the end. To show all the lines that couldn't be
+If some lines can't be matched, the number of unmatched lines is
+printed at the end. To show all the lines that couldn't be
 matched, run mloginfo with the additional ``--verbose`` command.
 
 Connections (``--connections``)

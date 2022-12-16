@@ -4,6 +4,7 @@ from mtools.util.grouping import Grouping
 from mtools.util.print_table import print_table
 from operator import itemgetter
 from .base_section import BaseSection
+from mtools.util.logformat import LogFormat
 
 LogTuple = namedtuple('LogTuple', ['datetime', 'cursorid', 'reapedtime'])
 
@@ -31,8 +32,12 @@ class CursorSection(BaseSection):
 
     def run(self):
         """Run this section and print out information."""
-        grouping = Grouping(group_by=lambda x: (x.datetime, x.cursorid, x.reapedtime))
         logfile = self.mloginfo.logfile
+        if logfile.logformat not in (LogFormat.LOGV2, LogFormat.LEGACY):
+            print(f"\nERROR: unsupported log format: {logfile.logformat}\n")
+            return
+
+        grouping = Grouping(group_by=lambda x: (x.datetime, x.cursorid, x.reapedtime))
 
         if logfile.start and logfile.end:
             progress_start = self.mloginfo._datetime_to_epoch(logfile.start)
@@ -52,7 +57,7 @@ class CursorSection(BaseSection):
                                                 progress_start) /
                                           progress_total))
 
-            if 'Cursor id' in le.line_str:
+            if le.cursor:
                 lt = LogTuple(le.datetime, le.cursor, le._reapedtime)
                 grouping.add(lt)
 
