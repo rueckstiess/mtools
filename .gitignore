@@ -37,3 +37,7 @@ _build
 .AppleDouble
 .LSOverride
 ._*
+
+# local testing
+logs/
+logv2/
