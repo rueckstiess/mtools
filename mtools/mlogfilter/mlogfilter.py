@@ -45,9 +45,13 @@ class MLogFilterTool(LogFileTool):
                                           'as hr,min,sec,ms for easier '
                                           'readability.'))
         self.argparser.add_argument('--json', action='store_true',
-                                    help=('outputs all matching lines in json '
+                                    help=('outputs all matching lines in JSON '
                                           'format rather than the native '
                                           'log line.'))
+        self.argparser.add_argument('--pretty', action='store_true',
+                                    default=False,
+                                    help=('print JSON output on multiple lines '
+                                          'with indentation for readability.'))
         self.argparser.add_argument('--markers', action='store', nargs='*',
                                     default=['filename'],
                                     help=('use markers when merging several '
@@ -97,9 +101,9 @@ class MLogFilterTool(LogFileTool):
                                          force=True)
 
         if self.args['json']:
-            print(logevent.to_json())
+            print(logevent.to_json(self.args['pretty']))
             return
-        line = logevent.line_str
+        line = logevent.get_line_str(self.args['pretty'])
 
         if length:
             if len(line) > length:
