@@ -57,7 +57,7 @@ class LogEvent(object):
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
 
-    def __init__(self, doc_or_str, fulldoc = True, pretty = True):
+    def __init__(self, doc_or_str, fulldoc = True, pretty = False):
         self._debug = False
         self._doc = {}
         self._year_rollover = False
@@ -186,7 +186,7 @@ class LogEvent(object):
             self._line_str = line_str.rstrip()
             self._reset()
 
-    def get_line_str(self, pretty = True):
+    def get_line_str(self, pretty = False):
         """Return line_str depending on source, logfile or system.profile."""
 
         if self.logformat == LogFormat.LOGV2:

@@ -38,7 +38,7 @@ class EventPlotType(BasePlotType):
     def clicked(self, event):
         group = event.artist._mt_group
         line_id = event.artist._mt_line_id
-        print(self.groups[group][line_id].line_str)
+        print(self.groups[group][line_id].get_line_str(True))
 
 
 class RSStatePlotType(EventPlotType):

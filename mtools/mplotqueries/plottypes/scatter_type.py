@@ -95,7 +95,7 @@ class ScatterPlotType(BasePlotType):
         major, minor, _ = mpl_version.split('.')
         if (int(major), int(minor)) < (1, 2) or not event.mouseevent.dblclick:
             for i in indices:
-                print(self.groups[group][i].line_str)
+                print(self.groups[group][i].get_line_str(True))
 
         else:
             # toggle durline
