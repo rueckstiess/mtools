@@ -192,7 +192,7 @@ def test_logevent_actual_sort_parsing():
     le = LogEvent(line_pattern_26_c)
     assert(le.actual_sort) == '{ b: 1.0 }'
 
-@pytest.mark.skip(reason='TODO: update profile parsing')
+# @pytest.mark.skip(reason='TODO: update profile parsing')
 def test_logevent_profile_pattern_parsing():
     le = LogEvent(profile_doc1)
     assert(le.pattern == '{"test": 1}')
@@ -203,7 +203,7 @@ def test_logevent_profile_pattern_parsing():
     le = LogEvent(profile_doc3)
     assert(le.pattern == '{"test": 1}')
 
-@pytest.mark.skip(reason='TODO: update profile parsing')
+# @pytest.mark.skip(reason='TODO: update profile parsing')
 def test_logevent_profile_sort_pattern_parsing():
     le = LogEvent(profile_doc1)
     assert(le.sort_pattern is None)

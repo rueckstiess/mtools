@@ -84,13 +84,13 @@ class LogEvent(object):
 
                 # Legacy log lines will be parsed lazily
                 self._reset()
-            else:
-                # Assume this is a system.profile document
-                self.from_string = False
-                self.logformat = LogFormat.PROFILE
-                if fulldoc:
-                    self._doc = doc_or_str
-                self._parse_profile_doc(doc_or_str)
+        else:
+            # Assume this is a system.profile document
+            self.from_string = False
+            self.logformat = LogFormat.PROFILE
+            if fulldoc:
+                self._doc = doc_or_str
+            self._parse_profile_doc(doc_or_str)
 
     def _reset(self):
         self._split_tokens_calculated = False
