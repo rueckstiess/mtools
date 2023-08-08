@@ -82,6 +82,10 @@ def values2pattern(x, debug = False):
         return 1
 
 
+def add_double_quotes_to_key(s):
+    s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
+    return s
+
 def json2pattern(s, debug = False):
     """
     Convert JSON format to a query pattern.
@@ -105,7 +109,7 @@ def json2pattern(s, debug = False):
 
         if debug : print ("\n=== json2pattern() from legacy string\n", saved_s, file=sys.stderr)
 
-        s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
+        s = add_double_quotes_to_key(s)
         if debug : print (s, file=sys.stderr)
 
         # handle shell values that are not valid JSON

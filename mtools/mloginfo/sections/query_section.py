@@ -12,7 +12,7 @@ try:
 except ImportError:
     np = None
 
-LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
+LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern', 'sort',
                                    'duration', 'allowDiskUse'])
 
 
@@ -60,7 +60,7 @@ class QuerySection(BaseSection):
     def run(self):
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
-                                                x.pattern, x.allowDiskUse))
+                                                x.pattern, x.sort, x.allowDiskUse))
         logfile = self.mloginfo.logfile
         rounding = self.mloginfo.args['rounding']
 
@@ -89,7 +89,7 @@ class QuerySection(BaseSection):
                     le.command in ['count', 'findandmodify',
                                    'geonear', 'find', 'aggregate']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
-                              pattern=le.pattern, duration=le.duration,
+                              pattern=le.pattern, sort=le.sort, duration=le.duration,
                               allowDiskUse=le.allowDiskUse)
                 grouping.add(lt)
 
@@ -104,14 +104,14 @@ class QuerySection(BaseSection):
             print('no queries found.')
             return
 
-        titles = ['namespace', 'operation', 'pattern', 'count', 'min (ms)',
+        titles = ['namespace', 'operation', 'pattern', 'sort', 'count', 'min (ms)',
                   'max (ms)', '95%-ile (ms)', 'sum (ms)', 'mean (ms)',
                   'allowDiskUse']
         table_rows = []
 
         for g in grouping:
             # calculate statistics for this group
-            namespace, op, pattern, allowDiskUse = g
+            namespace, op, pattern, st, allowDiskUse = g
 
             group_events = [le.duration for le in grouping[g]
                             if le.duration is not None]
@@ -121,6 +121,7 @@ class QuerySection(BaseSection):
             stats['namespace'] = namespace
             stats['operation'] = op
             stats['pattern'] = pattern
+            stats['sort'] = st
             stats['count'] = len(group_events_all)
             stats['min'] = min(group_events) if group_events else 0
             stats['max'] = max(group_events) if group_events else 0

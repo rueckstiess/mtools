@@ -8,7 +8,7 @@ from datetime import datetime
 import dateutil.parser
 from dateutil.tz import tzutc
 
-from mtools.util.pattern import json2pattern
+from mtools.util.pattern import json2pattern, add_double_quotes_to_key
 from mtools.util.logformat import LogFormat
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -113,6 +113,7 @@ class LogEvent(object):
         self._namespace = None
 
         self._pattern = None
+        self._sort = None
         self._sort_pattern = None
         self._actual_query = None
         self._actual_sort = None
@@ -513,8 +514,20 @@ class LogEvent(object):
                     self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
+            elif self.command == 'aggregate':
+                self._pattern = self._find_pattern('pipeline: ')
 
         return self._pattern
+
+    @property
+    def sort(self):
+        if not self._sort:
+            sort_str = self._find_pattern('sort: ', actual=True)
+            s = None
+            if sort_str:
+                s = add_double_quotes_to_key(sort_str)
+            self._sort = s
+        return self._sort
 
     @property
     def sort_pattern(self):
@@ -540,6 +553,8 @@ class LogEvent(object):
                 self._actual_query = self._find_pattern('filter: ',
                                                         actual=True)
 
+            elif self.command == 'aggregate':
+                self._pattern = self._find_pattern('pipeline: ', actual=True)
         return self._actual_query
 
     @property
@@ -1034,6 +1049,7 @@ class LogEvent(object):
         operation = self.operation
         namespace = self.namespace
         pattern = self.pattern
+        sort = self.sort
         nscanned = self.nscanned
         nscannedObjects = self.nscannedObjects
         ntoreturn = self.ntoreturn
@@ -1056,15 +1072,15 @@ class LogEvent(object):
         stop_idx = 0
         brace_counter = 0
         search_str = self.line_str[start_idx + len(trigger):]
-
-        for match in re.finditer(r'{|}', search_str):
+        for match in re.finditer(r'\[|{|}|\]', search_str):
             stop_idx = match.start()
-            if search_str[stop_idx] == '{':
+            if search_str[stop_idx] in {'{', '['}:
                 brace_counter += 1
             else:
                 brace_counter -= 1
             if brace_counter == 0:
                 break
+
         search_str = search_str[:stop_idx + 1].strip()
         if search_str:
             if actual:
