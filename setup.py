@@ -9,7 +9,7 @@ import sys
 try:
     from setuptools import setup, find_packages
 
-    python_requires='>=3.7'
+    python_requires='>=3.8'
 
     # Additional dependencies from requirements.txt that should be installed
     # for full mtools feature support. These are optional dependencies to
@@ -100,7 +100,6 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
