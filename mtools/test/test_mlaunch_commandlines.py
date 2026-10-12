@@ -2,6 +2,7 @@ import inspect
 import json
 import os
 import shutil
+import sys
 from packaging import version
 
 import pytest
@@ -76,7 +77,11 @@ class TestMLaunch(object):
         cfg, cmdlist = self.read_config()
         cmdset = [set(x) for x in self.cmdlist_filter(cmdlist)]
         assert len(cmdlist) == len(cmdlisttest)
+        # 8.2+ on macOS omits --fork; the process is detached in Python.
+        drop_fork = self.tool._macos_fork_unsupported()
         for observed, expected in zip(cmdset, cmdlisttest):
+            if drop_fork:
+                expected = set(expected) - {'--fork'}
             # if mongod, account for some extra observed parameter
             # (e.g. wiredTigerCacheSizeGB)
             if '"mongod"' in expected:
@@ -312,3 +317,38 @@ class TestMLaunch(object):
         """
         self.run_tool('init --replicaset --hostname this_host')
         self.read_config()
+
+
+class TestMacosForkLaunch(object):
+    """Fork handling does not need a running server."""
+
+    def setup_method(self):
+        self.tool = MLaunchTool(test=True)
+
+    def test_version_gate(self):
+        on_macos = sys.platform == 'darwin'
+        self.tool.current_version = '8.0.32'
+        assert self.tool._macos_fork_unsupported() is False
+        self.tool.current_version = '8.2.0'
+        assert self.tool._macos_fork_unsupported() is on_macos
+        self.tool.current_version = '9.0.2'
+        assert self.tool._macos_fork_unsupported() is on_macos
+
+    def test_launch_argv_strips_nohup_and_fork(self):
+        self.tool.current_version = '9.0.2'
+        cmd = ('nohup "mongod" --dbpath "/data/db" --logpath "/data/mongod.log" '
+               '--port 27017 --fork > /dev/null 2>&1 &')
+        argv = self.tool._launch_argv(cmd)
+        assert argv[0] == 'mongod'
+        assert '--fork' not in argv
+        assert '--port' in argv
+        assert argv[argv.index('--port') + 1] == '27017'
+        assert self.tool._get_log_path(cmd) == '/data/mongod.log'
+        assert self.tool._needs_python_detach(cmd) is True
+
+    def test_fork_kept_below_82(self):
+        self.tool.current_version = '7.0.14'
+        cmd = '"mongod" --dbpath "/data/db" --logpath "/data/mongod.log" --port 27017 --fork'
+        argv = self.tool._launch_argv(cmd)
+        assert '--fork' in argv
+        assert self.tool._needs_python_detach(cmd) is False
