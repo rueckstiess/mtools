@@ -27,6 +27,7 @@ Usage
               [--markers MARKERS [MARKERS ...]] [--timezone N [N ...]]
               [--namespace NS] [--operation OP] [--thread THREAD]
               [--slow [SLOW]]  [--fast [FAST]] [--scan]
+              [--queryratio RATIO]
               [--word WORD [WORD ...]]
               [--from FROM [FROM ...]] [--to TO [TO ...]]
 
@@ -248,6 +249,14 @@ Collection Scans
    must be larger than 100. These values have proven useful to detect potential
    collection scans. For confirmed collection scans, instead use
    ``--planSummary COLLSCAN``.
+
+``--queryratio RATIO``
+   Returns lines where ``docsExamined / nreturned`` is greater than
+   ``RATIO``. A line with ``nreturned`` of 0 is treated as 1. This matches
+   the Atlas "Query Targeting: Scanned Objects / Returned" alert, including
+   queries that examine fewer than 10000 documents and so do not match
+   ``--scan``. Lines that have no ``docsExamined`` counter use ``nscanned``
+   (``keysExamined``).
 
 Keywords
 --------
