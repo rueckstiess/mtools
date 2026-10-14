@@ -17,10 +17,10 @@ def import_l2c_db():
     Checks if the log2code.pickle exists first, otherwise raises ImportError.
     """
     data_path = os.path.join(os.path.dirname(mtools.__file__), 'data')
-    if os.path.exists(os.path.join(data_path, 'log2code.pickle')):
-        av, lv, lbw, lcl = pickle.load(open(os.path.join(data_path,
-                                                          'log2code.pickle'),
-                                             'rb'))
+    pickle_path = os.path.join(data_path, 'log2code.pickle')
+    if os.path.exists(pickle_path):
+        with open(pickle_path, 'rb') as handle:
+            av, lv, lbw, lcl = pickle.load(handle)
         return av, lv, lbw, lcl
     else:
 

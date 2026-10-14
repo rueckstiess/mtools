@@ -304,8 +304,9 @@ if __name__ == '__main__':
              .update_one({'pattern': instance['pattern']}, instance,
                      upsert=True)())
 
-    pickle.dump((versions, logs_versions, logs_by_word, log_code_lines),
-                 open('log2code.pickle', 'wb'), -1)
+    with open('log2code.pickle', 'wb') as handle:
+        pickle.dump((versions, logs_versions, logs_by_word, log_code_lines),
+                    handle, -1)
 
     print("%i unique log messages imported and written to log2code.pickle"
           % len(log_code_lines))
