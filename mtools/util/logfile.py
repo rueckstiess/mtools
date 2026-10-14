@@ -10,6 +10,40 @@ from mtools.util.input_source import InputSource
 from mtools.util.logevent import LogEvent
 from mtools.util.logformat import LogFormat
 
+# Legacy records open with the same shapes LogEvent accepts at column 0.
+_ISO8601_RECORD_RE = re.compile(
+    r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}')
+_CTIME_RECORD_RE = re.compile(
+    r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+'
+    r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+'
+    r'\d{1,2}\s+\d{2}:\d{2}:\d{2}')
+
+
+def _is_legacy_record(line):
+    """True when a physical line opens an ISO-8601 or ctime record."""
+    if _ISO8601_RECORD_RE.match(line):
+        return True
+    return _CTIME_RECORD_RE.match(line) is not None
+
+
+def _is_record_start(line):
+    """True when a physical line opens a legacy or structured record."""
+    if not line:
+        return False
+    if line.startswith('{'):
+        return True
+    return _is_legacy_record(line)
+
+
+def _has_duration_suffix(line):
+    """True when a line ends in the timed-operation ``<digits>ms`` form."""
+    if not line.endswith('ms'):
+        return False
+    if 'Scheduled new oplog query' in line:
+        return False
+    tail = line[line.rfind(' ') + 1:-2].replace(',', '')
+    return tail.isdigit()
+
 
 class LogFile(InputSource):
     """Log file wrapper class. Handles open file streams or stdin."""
@@ -53,6 +87,8 @@ class LogFile(InputSource):
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
+        # One physical line held for stdin, which cannot seek back.
+        self._pending_line = None
 
         self._has_level = None
 
@@ -150,56 +186,55 @@ class LogFile(InputSource):
 
     @property
     def num_lines(self):
-        """
-        Lazy evaluation of the number of lines.
+        """Number of log records. Stdin returns None.
 
-        Returns None for stdin input currently.
+        Physical lines that wrap inside one query count as one record.
         """
         if self.from_stdin:
             return None
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._num_lines
 
     @property
     def restarts(self):
         """Lazy evaluation of all restarts."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._restarts
 
     @property
     def rs_state(self):
         """Lazy evaluation of all restarts."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._rs_state
 
     @property
     def binary(self):
         """Lazy evaluation of the binary name."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._binary
 
     @property
     def clusterrole(self):
         """Lazy evaluation of the clusterRole."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._clusterrole
 
     @property
     def hostname(self):
         """Lazy evaluation of the binary name."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._hostname
 
     @property
     def port(self):
         """Lazy evaluation of the binary name."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._port
 
@@ -215,35 +250,35 @@ class LogFile(InputSource):
     @property
     def repl_set(self):
         """Return the replSet (if available)."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._repl_set
 
     @property
     def repl_set_members(self):
         """Return the replSet (if available)."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._repl_set_members
 
     @property
     def repl_set_version(self):
         """Return the replSet (if available)."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._repl_set_version
 
     @property
     def repl_set_protocol(self):
         """Return the replSet protocolVersion (if available)."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._repl_set_protocol
 
     @property
     def storage_engine(self):
         """Return storage engine if available."""
-        if not self._num_lines:
+        if self._num_lines is None:
             self._iterate_lines()
         return self._storage_engine
 
@@ -283,18 +318,78 @@ class LogFile(InputSource):
         return self._chunk_splits
 
 
-    def next(self):
-        """Get next line, adjust for year rollover and hint datetime format."""
-        # use readline here because next() iterator uses internal readahead
-        # buffer so seek position is wrong
-        line = self.filehandle.readline()
+    def _seek(self, offset, whence=0):
+        """Move the file position and drop a held stdin line."""
+        self._pending_line = None
+        self.filehandle.seek(offset, whence)
 
+    def _readline(self):
+        """Read one physical line. None means EOF.
+
+        readline() keeps the seek position accurate. Iterating the file
+        object buffers ahead of that position.
+        """
+        line = self.filehandle.readline()
         if isinstance(line, bytes):
             line = line.decode('utf-8', 'replace')
-
         if line == '':
+            return None
+        return line.rstrip('\r\n')
+
+    def _next_physical_line(self):
+        if self._pending_line is not None:
+            line = self._pending_line
+            self._pending_line = None
+            return line
+        return self._readline()
+
+    def _peek_physical_line(self):
+        """Look at the next physical line and leave it to be read again."""
+        if self._pending_line is not None:
+            return self._pending_line
+        if self.from_stdin:
+            self._pending_line = self._readline()
+            return self._pending_line
+        pos = self.filehandle.tell()
+        line = self._readline()
+        if line is not None:
+            self._seek(pos)
+        return line
+
+    def _read_record(self):
+        """Return the next log record, or None at EOF.
+
+        A query can contain a newline, so one record may span physical
+        lines. Lines that follow a legacy timestamp belong to that
+        record until the next timestamp. A structured log line starts
+        with ``{`` and stays a single line. Once a legacy record ends in
+        a duration suffix such as ``129ms``, a later non-timestamp line
+        is skipped so a banner cannot remove that duration.
+        """
+        line = self._next_physical_line()
+        while line is not None and not _is_record_start(line):
+            line = self._next_physical_line()
+        if line is None:
+            return None
+        if line.startswith('{'):
+            return line
+
+        parts = [line]
+        while True:
+            nxt = self._peek_physical_line()
+            if nxt is None or _is_legacy_record(nxt):
+                break
+            if _has_duration_suffix(parts[-1]):
+                self._next_physical_line()
+                continue
+            parts.append(self._next_physical_line())
+        return ' '.join(parts)
+
+    def next(self):
+        """Get next record, adjust for year rollover and hint datetime format."""
+        line = self._read_record()
+        if line is None:
             raise StopIteration
-        line = line.rstrip('\n')
         le = LogEvent(line)
 
         # hint format and nextpos from previous line
@@ -333,7 +428,7 @@ class LogFile(InputSource):
 
                 # future iterations start from the beginning
                 if not self.from_stdin:
-                    self.filehandle.seek(0)
+                    self._seek(0)
 
                 # return (instead of raising StopIteration exception) per PEP 479
                 return
@@ -352,7 +447,7 @@ class LogFile(InputSource):
                'RECOVERING', 'ROLLBACK', 'ARBITER', 'UNKNOWN'])
 
     def __len__(self):
-        """Return the number of lines in a log file."""
+        """Return the number of log records in a log file."""
         return self.num_lines
 
     def __extract_metadata_legacy(self, line):
@@ -611,25 +706,27 @@ class LogFile(InputSource):
 
 
     def _iterate_lines(self):
-        """Count number of lines (can be expensive)."""
+        """Count log records and collect metadata. Can be expensive."""
         self._num_lines = 0
         self._restarts = []
         self._rs_state = []
+        self._pending_line = None
 
-        ln = 0
-        for ln, line in enumerate(self.filehandle):
-            if isinstance(line, bytes):
-                line = line.decode("utf-8", "replace")
-
+        count = 0
+        while True:
+            record = self._read_record()
+            if record is None:
+                break
+            count += 1
             if self.logformat == LogFormat.LOGV2:
-                self.__extract_metadata_logv2(line)
+                self.__extract_metadata_logv2(record)
             else:
-                self.__extract_metadata_legacy(line)
+                self.__extract_metadata_legacy(record)
 
-        self._num_lines = ln + 1
+        self._num_lines = count
 
         # reset logfile
-        self.filehandle.seek(0)
+        self._seek(0)
 
     def _calculate_bounds(self):
         """Calculate beginning and end of logfile."""
@@ -671,9 +768,9 @@ class LogFile(InputSource):
 
         # get end datetime (lines are at most 10k,
         # go back 30k at most to make sure we catch one)
-        self.filehandle.seek(0, 2)
+        self._seek(0, 2)
         self._filesize = self.filehandle.tell()
-        self.filehandle.seek(-min(self._filesize, 30000), 2)
+        self._seek(-min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
             logevent = LogEvent(line)
@@ -689,7 +786,7 @@ class LogFile(InputSource):
             self._year_rollover = False
 
         # reset logfile
-        self.filehandle.seek(0)
+        self._seek(0)
         self._bounds_calculated = True
 
         return True
@@ -705,14 +802,14 @@ class LogFile(InputSource):
 
         # jump back 15k characters (at most) and find last newline char
         jump_back = min(self.filehandle.tell(), 15000)
-        self.filehandle.seek(-jump_back, 1)
+        self._seek(-jump_back, 1)
         buff = self.filehandle.read(jump_back)
-        self.filehandle.seek(curr_pos, 0)
+        self._seek(curr_pos, 0)
 
         if prev and self.prev_pos is not None and self.prev_pos == curr_pos:
             # Number of characters to show before/after the log offset
             error_context = 300
-            self.filehandle.seek(-error_context, 1)
+            self._seek(-error_context, 1)
             buff = self.filehandle.read(curr_pos)
             hr = "-" * 60
             print("Fatal log parsing loop detected trying to find previous "
@@ -735,10 +832,10 @@ class LogFile(InputSource):
 
         # move back to last newline char
         if newline_pos == -1:
-            self.filehandle.seek(0)
+            self._seek(0)
             return self.next()
 
-        self.filehandle.seek(newline_pos - jump_back + 1, 1)
+        self._seek(newline_pos - jump_back + 1, 1)
 
         # roll forward until we found a line with a datetime
         try:
@@ -920,7 +1017,7 @@ class LogFile(InputSource):
             prev_line = line
 
         # reset logfile
-        self.filehandle.seek(0)
+        self._seek(0)
 
     # FIXME
     def _find_sharding_info_logv2(self):
@@ -971,20 +1068,20 @@ class LogFile(InputSource):
             step_size = max_mark
 
             # check if start_dt is already smaller than first datetime
-            self.filehandle.seek(0)
+            self._seek(0)
             le = self.next()
             if le.datetime and le.datetime >= start_dt:
-                self.filehandle.seek(0)
+                self._seek(0)
                 return
 
             le = None
-            self.filehandle.seek(0)
+            self._seek(0)
 
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
 
-                self.filehandle.seek(step_size, 1)
+                self._seek(step_size, 1)
                 le = self._find_curr_line()
                 if not le:
                     break
@@ -1000,6 +1097,6 @@ class LogFile(InputSource):
             # now walk backwards until we found a truly smaller line
             while self.filehandle.tell() >= 2 and (le.datetime is None or
                                                    le.datetime >= start_dt):
-                self.filehandle.seek(-2, 1)
+                self._seek(-2, 1)
 
                 le = self._find_curr_line(prev=True)
