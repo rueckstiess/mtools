@@ -5,6 +5,7 @@ import functools
 import json
 import os
 import re
+import shlex
 import signal
 import socket
 import ssl
@@ -1784,12 +1785,13 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
+                    # start /b is a cmd.exe builtin, so Windows keeps a shell.
                     subprocess.check_call(command_str, shell=True)
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
                     time.sleep(5)
                 else:
-                    subprocess.check_output([command_str], shell=True,
+                    subprocess.check_output(shlex.split(command_str),
                                             stderr=subprocess.STDOUT)
 
                 binary = command_str.split()[0]
