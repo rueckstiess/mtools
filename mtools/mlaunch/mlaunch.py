@@ -4,6 +4,7 @@ import argparse
 import functools
 import json
 import os
+import queue as Queue
 import re
 import signal
 import socket
@@ -21,11 +22,6 @@ from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
 from mtools.version import __version__
-
-try:
-    import Queue
-except ImportError:
-    import queue as Queue
 
 try:
     from pymongo import MongoClient as Connection
