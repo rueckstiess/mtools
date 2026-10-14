@@ -983,7 +983,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         matches = self._get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
-            raise SystemExit('no nodes started.')
+            # Every node is already up. Scripts re-run start, so this is
+            # success rather than an error.
+            print('all nodes already running.')
+            return
 
         # start config servers first
         config_matches = self.get_tagged(['config']).intersection(matches)
