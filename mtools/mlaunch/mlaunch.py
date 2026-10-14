@@ -1869,7 +1869,26 @@ class MLaunchTool(BaseCmdLineTool):
             return False
         return False
 
-    def _spawn_and_wait(self, command_str, port, timeout=300):
+    def _spawn_and_wait(self, command_str, port, timeout=300,
+                        lock_retry=30):
+        """Like _spawn_once, but retry while the dbpath lock is still held.
+
+        A previous mongod on the same dbpath can still be releasing its lock
+        after mlaunch stop returns. mongod then exits with code 100 and
+        DBPathInUse; retry for up to lock_retry seconds instead of failing.
+        """
+        deadline = time.time() + lock_retry
+        while True:
+            try:
+                return self._spawn_once(command_str, port, timeout)
+            except subprocess.CalledProcessError as e:
+                if (e.returncode == 100 and 'DBPathInUse' in (e.output or '')
+                        and time.time() < deadline):
+                    time.sleep(0.5)
+                    continue
+                raise
+
+    def _spawn_once(self, command_str, port, timeout=300):
         """Start mongod/mongos in a new session and wait until it listens.
 
         This replaces --fork: the caller does not return until startup has

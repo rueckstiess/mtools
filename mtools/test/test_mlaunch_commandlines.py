@@ -395,3 +395,29 @@ class TestMacosForkLaunch(object):
         msg = str(exc.value)
         assert '/nonexistent/mongod' in msg
         assert '27017' in msg
+
+    def test_spawn_retries_while_dbpath_locked(self):
+        import subprocess
+        calls = []
+
+        def fake_once(command_str, port, timeout=300):
+            calls.append(1)
+            if len(calls) < 3:
+                raise subprocess.CalledProcessError(
+                    100, command_str, output='... DBPathInUse: Unable to lock')
+            return 'proc'
+        self.tool._spawn_once = fake_once
+        assert self.tool._spawn_and_wait('mongod', 27017, lock_retry=10) == 'proc'
+        assert len(calls) == 3
+
+    def test_spawn_other_errors_not_retried(self):
+        import subprocess
+        calls = []
+
+        def fake_once(command_str, port, timeout=300):
+            calls.append(1)
+            raise subprocess.CalledProcessError(48, command_str, output='Address already in use')
+        self.tool._spawn_once = fake_once
+        with pytest.raises(subprocess.CalledProcessError):
+            self.tool._spawn_and_wait('mongod', 27017, lock_retry=10)
+        assert len(calls) == 1
