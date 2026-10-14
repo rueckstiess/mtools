@@ -116,6 +116,13 @@ Usage
 For convenience and backwards compatibility, the ``init`` command is the
 default command and can be omitted.
 
+When ``init`` finishes it prints a ``connection:`` line with a MongoDB URI
+for the cluster. A stand-alone node uses its host and port. A replica set
+lists every member, including an arbiter, and sets ``replicaSet``. A sharded
+cluster lists the ``mongos`` hosts. With ``--mongos 0`` there is no router
+left running, so ``init`` prints one URI per shard instead. ``--auth`` adds
+the initial user, with the password percent-encoded, and ``authSource``.
+
 Required Parameters
 ^^^^^^^^^^^^^^^^^^^
 The ``init`` command requires **exactly one** of the following two parameters

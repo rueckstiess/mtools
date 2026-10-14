@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import ipaddress
 import json
 import os
 import queue as Queue
@@ -15,6 +16,7 @@ import threading
 import time
 import warnings
 from collections import defaultdict
+from urllib.parse import quote_plus
 from operator import itemgetter
 
 import psutil
@@ -623,6 +625,84 @@ class MLaunchTool(BaseCmdLineTool):
             # branch out in sub-commands
             getattr(self, self.args['command'])()
 
+    def connection_string(self):
+        """Return the MongoDB URI for the cluster ``init`` provisions."""
+        hostname = self.args.get('hostname') or 'localhost'
+        port = int(self.args.get('port') or 27017)
+        options = []
+
+        if self.args.get('sharded'):
+            mongos = self.args.get('mongos')
+            if mongos is None:
+                mongos = 1
+            if mongos > 0:
+                hosts = [self._join_host(hostname, port + i)
+                         for i in range(mongos)]
+            else:
+                return '\n'.join(self._shard_uris())
+        elif self.args.get('replicaset'):
+            name = self.args.get('name') or 'replset'
+            members = self.config_docs.get(name, {}).get('members', [])
+            hosts = [self._format_hostport(member['host'])
+                     for member in members]
+            if not hosts:
+                hosts = [self._join_host(hostname, port)]
+            options.append('replicaSet=%s' % quote_plus(name))
+        else:
+            hosts = [self._join_host(hostname, port)]
+
+        return self._mongodb_uri(hosts, options)
+
+    def _shard_uris(self):
+        """URIs for shard replica sets when no mongos is left running."""
+        uris = []
+        for shard in self.shard_connection_str:
+            name, _, hosts = shard.partition('/')
+            hostlist = [self._format_hostport(host)
+                        for host in hosts.split(',') if host]
+            options = ['replicaSet=%s' % quote_plus(name)]
+            uris.append(self._mongodb_uri(hostlist, options))
+        return uris
+
+    def _mongodb_uri(self, hosts, options):
+        """Build a ``mongodb://`` URI, including auth and TLS when set."""
+        options = list(options)
+        userinfo = ''
+        if self.args.get('auth') and self.args.get('initial-user', True):
+            username = quote_plus(str(self.args.get('username') or 'user'))
+            password = quote_plus(str(self.args.get('password') or 'password'))
+            userinfo = '%s:%s@' % (username, password)
+            auth_db = quote_plus(str(self.args.get('auth_db') or 'admin'))
+            options.append('authSource=%s' % auth_db)
+        mode = self.args.get('tlsMode') or self.args.get('sslMode')
+        if mode in ('requireTLS', 'preferTLS', 'requireSSL', 'preferSSL'):
+            options.append('tls=true')
+        body = '%s%s' % (userinfo, ','.join(hosts))
+        if options:
+            return 'mongodb://%s/?%s' % (body, '&'.join(options))
+        return 'mongodb://%s' % body
+
+    @staticmethod
+    def _join_host(hostname, port):
+        """Return ``host:port``, with brackets when host is IPv6."""
+        try:
+            address = ipaddress.ip_address(hostname)
+        except ValueError:
+            address = None
+        if isinstance(address, ipaddress.IPv6Address):
+            return '[%s]:%s' % (hostname, port)
+        return '%s:%s' % (hostname, port)
+
+    @staticmethod
+    def _format_hostport(value):
+        """Bracket an IPv6 address inside an existing ``host:port``."""
+        if value.startswith('['):
+            return value
+        host, sep, port = value.rpartition(':')
+        if sep and ':' in host:
+            return '[%s]:%s' % (host, port)
+        return value
+
     # -- below are the main commands: init, start, stop, list, kill
     def init(self):
         """
@@ -886,6 +966,10 @@ class MLaunchTool(BaseCmdLineTool):
         if self.args['auth'] and self.args['initial-user']:
             print('Username "%s", password "%s"'
                   % (self.args['username'], self.args['password']))
+
+        for uri in self.connection_string().splitlines():
+            if uri:
+                print('connection: %s' % uri)
 
         if self.args['verbose']:
             print("done.")

@@ -305,6 +305,55 @@ class TestMLaunch(object):
             )
         self.cmdlist_assert(cmdlist)
 
+    def test_connection_string_single(self):
+        self.run_tool('init --single')
+        assert self.tool.connection_string() == 'mongodb://localhost:27017'
+
+    def test_connection_string_replicaset(self):
+        self.run_tool('init --replicaset --nodes 3 --name testrs')
+        expected = ('mongodb://localhost:27017,localhost:27018,'
+                    'localhost:27019/?replicaSet=testrs')
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_includes_arbiter(self):
+        self.run_tool('init --replicaset --nodes 2 --arbiter --name testrs')
+        expected = ('mongodb://localhost:27017,localhost:27018,'
+                    'localhost:27019/?replicaSet=testrs')
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_auth_quotes_password(self):
+        self.run_tool('init --single --auth --username alice '
+                      '--password p@ss --auth-db app')
+        expected = 'mongodb://alice:p%40ss@localhost:27017/?authSource=app'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_auth_without_user(self):
+        self.run_tool('init --single --auth --no-initial-user')
+        assert self.tool.connection_string() == 'mongodb://localhost:27017'
+
+    def test_connection_string_sharded_mongos(self):
+        self.run_tool('init --sharded 2 --replicaset --mongos 2')
+        expected = 'mongodb://localhost:27017,localhost:27018'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_sharded_without_mongos(self):
+        self.run_tool('init --sharded 2 --replicaset --nodes 1 --mongos 0')
+        uri = self.tool.connection_string()
+        assert uri == (
+            'mongodb://localhost:27018/?replicaSet=shard01\n'
+            'mongodb://localhost:27019/?replicaSet=shard02')
+
+    def test_connection_string_brackets_ipv6(self):
+        self.run_tool('init --replicaset --nodes 1 --hostname ::1 '
+                      '--bind_ip ::1')
+        expected = 'mongodb://[::1]:27017/?replicaSet=replset'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_require_tls(self):
+        self.run_tool('init --single --sslMode requireSSL')
+        expected = 'mongodb://localhost:27017/?tls=true'
+        assert self.tool.connection_string() == expected
+
     @pytest.mark.xfail(raises=SystemExit)
     def test_invalid_hostname(self):
         """
