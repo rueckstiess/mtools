@@ -19,7 +19,7 @@ def print_table(rows, override_headers=None, uppercase_headers=True):
     template = (' ' * 4).join(tmp)
 
     for row in rows:
-        if type(row) == str:
+        if isinstance(row, str):
             print(row)
         elif row is None:
             print()

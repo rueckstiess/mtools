@@ -1109,7 +1109,7 @@ class MLaunchTool(BaseCmdLineTool):
         startup = self.startup_info
 
         # print tags as well
-        for doc in [x for x in print_docs if type(x) == OrderedDict]:
+        for doc in [x for x in print_docs if isinstance(x, OrderedDict)]:
             try:
                 doc['pid'] = processes[doc['port']].pid
             except KeyError:
@@ -1150,7 +1150,7 @@ class MLaunchTool(BaseCmdLineTool):
         sig = self.args.get('signal') or 'SIGTERM'
         if os.name == 'nt':
             sig = signal.CTRL_BREAK_EVENT
-        if type(sig) == int:
+        if isinstance(sig, int):
             pass
         elif isinstance(sig, str):
             try:
@@ -1384,7 +1384,7 @@ class MLaunchTool(BaseCmdLineTool):
         """
         # if tags is a simple string, make it a list (note: tuples like
         # ('mongos', 2) must be in a surrounding list)
-        if not hasattr(tags, '__iter__') and type(tags) == str:
+        if not hasattr(tags, '__iter__') and isinstance(tags, str):
             tags = [tags]
 
         nodes = set(self.cluster_tags['all'])

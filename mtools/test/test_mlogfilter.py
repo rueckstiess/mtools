@@ -142,7 +142,7 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             line_dict = json.loads(line)
             assert(line_dict)
-            assert(type(line_dict) == dict)
+            assert isinstance(line_dict, dict)
 
     def test_shorten_50(self):
         self.tool.run('%s --shorten 50' % self.logfile_path)
