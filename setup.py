@@ -9,21 +9,21 @@ import sys
 try:
     from setuptools import setup, find_packages
 
-    python_requires='>=3.8'
+    python_requires='>=3.11'
 
     # Additional dependencies from requirements.txt that should be installed
     # for full mtools feature support. These are optional dependencies to
     # simplify the default install experience, particularly where a build
     # toolchain is required.
-    base_extras_requires = ['python-dateutil>=2.8.2,<3.0.0']
+    base_extras_requires = ['python-dateutil>=2.9.0,<3.0.0']
     extras_requires = {
-        "all": ['numpy>=1.21.6', 'matplotlib>=3.5.3,<4.0.0', 'pymongo>=4.3.2,<5.0.0',
-                'psutil>=5.9.3,<6.0.0', 'packaging>=21.3'] + base_extras_requires,
-        "mlaunch": ['pymongo>=4.3.2,<5.0.0', 'psutil>=5.9.3,<6.0.0', 'packaging>=21.3'] + base_extras_requires,
+        "all": ['numpy>=2.2,<2.6', 'matplotlib>=3.8,<4.0.0', 'pymongo>=4.18.3,<5.0.0',
+                'psutil>=6,<8', 'packaging>=24'] + base_extras_requires,
+        "mlaunch": ['pymongo>=4.18.3,<5.0.0', 'psutil>=6,<8', 'packaging>=24'] + base_extras_requires,
         "mlogfilter": base_extras_requires.copy(),
-        "mloginfo": ['numpy>=1.21.6'] + base_extras_requires,
-        "mplotqueries": ['numpy>=1.21.6', 'matplotlib>=3.5.3,<4.0.0'] + base_extras_requires,
-        "mtransfer": ['pymongo>=4.3.2,<5.0.0', 'wiredtiger>=3.2.1'] + base_extras_requires,
+        "mloginfo": ['numpy>=2.2,<2.6'] + base_extras_requires,
+        "mplotqueries": ['numpy>=2.2,<2.6', 'matplotlib>=3.8,<4.0.0'] + base_extras_requires,
+        "mtransfer": ['pymongo>=4.18.3,<5.0.0', 'wiredtiger>=3.2.1'] + base_extras_requires,
     }
 
     install_requires = []
@@ -100,10 +100,10 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Database',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11'
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14'
     ],
     keywords='MongoDB logs testing',
     extras_require=extras_requires,

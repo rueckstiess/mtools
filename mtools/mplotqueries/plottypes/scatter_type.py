@@ -5,6 +5,16 @@ from operator import itemgetter
 
 from mtools.mplotqueries.plottypes.base_type import BasePlotType
 
+
+def _plot_dates(axis, x, y, *args, **kwargs):
+    """Plot Matplotlib date numbers.
+
+    ``x`` is already ``date2num`` output. ``Axes.plot_date`` was removed in
+    Matplotlib 3.11; mark the axis as dates and use ``Axes.plot``.
+    """
+    axis.xaxis.axis_date()
+    return axis.plot(x, y, *args, **kwargs)[0]
+
 try:
     from matplotlib import __version__ as mpl_version
     import matplotlib.pyplot as plt
@@ -61,7 +71,6 @@ class ScatterPlotType(BasePlotType):
 
         color, marker = self.color_map(group)
 
-        # duration plots require y coordinate and use plot_date
         if self.regex_mode:
             y = [float(re.search(self.field, logevent.line_str)
                        .group(1)) for logevent in self.groups[group]]
@@ -73,9 +82,9 @@ class ScatterPlotType(BasePlotType):
             axis.semilogy()
 
         group_label = group.replace('$', r'\$')
-        artist = axis.plot_date(x, y, color=color, markeredgecolor='k',
-                                marker=marker, alpha=0.8,
-                                markersize=7, picker=5, label=group_label)[0]
+        artist = _plot_dates(axis, x, y, color=color, markeredgecolor='k',
+                             marker=marker, alpha=0.8,
+                             markersize=7, picker=5, label=group_label)
         # add meta-data for picking
         artist._mt_plot_type = self
         artist._mt_group = group
@@ -156,7 +165,6 @@ class DurationLineType(ScatterPlotType):
 
         color, marker = self.color_map(group)
 
-        # duration plots require y coordinate and use plot_date
         y = [getattr(logevent, 'duration')
              for logevent in self.groups[group]]
 
@@ -171,11 +179,10 @@ class DurationLineType(ScatterPlotType):
         labels = set()
 
         for i, (xs, xe, ye) in enumerate(zip(x_start, x_end, y)):
-            artist = axis.plot_date([xs, xe], [0, ye], '-', color=color,
-                                    alpha=0.8, linewidth=2,
-                                    markersize=7, picker=5,
-                                    label=None if group in labels else group
-                                    )[0]
+            artist = _plot_dates(axis, [xs, xe], [0, ye], '-', color=color,
+                                 alpha=0.8, linewidth=2,
+                                 markersize=7, picker=5,
+                                 label=None if group in labels else group)
 
             labels.add(group)
 
@@ -218,8 +225,8 @@ class NScannedNPlotType(ScatterPlotType):
              (float(getattr(logevent, 'nreturned'))
               if getattr(logevent, 'nreturned') != 0 else 1.0)
              for logevent in self.groups[group]]
-        artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.8,
-                                markersize=7, picker=5, label=group)[0]
+        artist = _plot_dates(axis, x, y, color=color, marker=marker, alpha=0.8,
+                             markersize=7, picker=5, label=group)
         # add meta-data for picking
         artist._mt_plot_type = self
         artist._mt_group = group
@@ -257,8 +264,8 @@ class DocsExaminedPlotType(ScatterPlotType):
              (float(getattr(logevent, 'nreturned'))
               if getattr(logevent, 'nreturned') != 0 else 1.0)
              for logevent in self.groups[group]]
-        artist = axis.plot_date(x, y, color=color, marker=marker, alpha=0.8,
-                                markersize=7, picker=5, label=group)[0]
+        artist = _plot_dates(axis, x, y, color=color, marker=marker, alpha=0.8,
+                             markersize=7, picker=5, label=group)
         # add meta-data for picking
         artist._mt_plot_type = self
         artist._mt_group = group
