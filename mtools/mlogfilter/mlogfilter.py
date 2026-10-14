@@ -46,8 +46,10 @@ class MLogFilterTool(LogFileTool):
                                           'readability.'))
         self.argparser.add_argument('--json', action='store_true',
                                     help=('outputs all matching lines in JSON '
-                                          'format rather than the native '
-                                          'log line.'))
+                                          'format rather than the native log '
+                                          'line. Legacy lines use structured '
+                                          'log field names (t, s, c, ctx, '
+                                          'msg, attr).'))
         self.argparser.add_argument('--pretty', action='store_true',
                                     default=False,
                                     help=('print JSON output on multiple lines '
@@ -101,7 +103,7 @@ class MLogFilterTool(LogFileTool):
                                          force=True)
 
         if self.args['json']:
-            print(logevent.to_json(self.args['pretty']))
+            print(logevent.to_json(pretty=self.args['pretty']))
             return
         line = logevent.get_line_str(self.args['pretty'])
 
