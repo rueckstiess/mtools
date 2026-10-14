@@ -2,6 +2,7 @@ import inspect
 import json
 import os
 import shutil
+import subprocess
 import sys
 from packaging import version
 
@@ -421,3 +422,117 @@ class TestMacosForkLaunch(object):
         with pytest.raises(subprocess.CalledProcessError):
             self.tool._spawn_and_wait('mongod', 27017, lock_retry=10)
         assert len(calls) == 1
+
+    @pytest.mark.skipif(os.name == 'nt', reason='POSIX process capture')
+    def test_spawn_reports_console_when_log_is_missing(self, tmp_path):
+        script = tmp_path / 'fake-mongod.sh'
+        script.write_text(
+            '#!/bin/sh\n'
+            'echo "Can\'t initialize rotatable log file"\n'
+            'echo "BadValue: fork+exec is incompatible with macOS" >&2\n'
+            'exit 2\n'
+        )
+        script.chmod(0o755)
+        cmd = '"%s" --port 27017' % script
+        with pytest.raises(subprocess.CalledProcessError) as exc:
+            self.tool._spawn_and_wait(cmd, 27017, timeout=5)
+        assert exc.value.returncode == 2
+        assert 'rotatable log file' in exc.value.output
+        assert 'fork+exec' in exc.value.output
+
+    def test_retry_ignores_dbpath_in_use_from_earlier_attempt(
+            self, tmp_path, monkeypatch):
+        import mtools.mlaunch.mlaunch as mlaunch
+        log_path = tmp_path / 'mongod.log'
+        log_path.write_text('DBPathInUse: previous attempt\n')
+        calls = []
+
+        def fake_popen(argv, **kwargs):
+            calls.append(1)
+            with open(log_path, 'a') as handle:
+                handle.write('Fatal: missing data directory\n')
+            return _Exited(100)
+
+        monkeypatch.setattr(mlaunch.subprocess, 'Popen', fake_popen)
+        cmd = 'mongod --logpath "%s" --port 27017' % log_path
+        with pytest.raises(subprocess.CalledProcessError) as exc:
+            self.tool._spawn_and_wait(cmd, 27017, lock_retry=1)
+        assert len(calls) == 1
+        assert 'missing data directory' in exc.value.output
+        assert 'previous attempt' not in exc.value.output
+
+    def test_retry_sees_new_dbpath_in_use_after_old_backtrace(
+            self, tmp_path, monkeypatch):
+        import mtools.mlaunch.mlaunch as mlaunch
+        log_path = tmp_path / 'mongod.log'
+        log_path.write_text('----- BEGIN BACKTRACE -----\nold frame\n')
+        calls = []
+
+        def fake_popen(argv, **kwargs):
+            calls.append(1)
+            with open(log_path, 'a') as handle:
+                handle.write('DBPathInUse: Unable to lock\n')
+            if len(calls) >= 2:
+                return _Exited(None)
+            return _Exited(100)
+
+        monkeypatch.setattr(mlaunch.subprocess, 'Popen', fake_popen)
+        monkeypatch.setattr(
+            self.tool, '_process_is_listening', lambda proc, port: True)
+        cmd = 'mongod --logpath "%s" --port 27017' % log_path
+        self.tool._spawn_and_wait(cmd, 27017, lock_retry=5)
+        assert len(calls) == 2
+
+    def test_retry_sees_dbpath_in_use_when_log_shrinks(
+            self, tmp_path, monkeypatch):
+        import mtools.mlaunch.mlaunch as mlaunch
+        log_path = tmp_path / 'mongod.log'
+        log_path.write_text(('x' * 300) + '\nDBPathInUse: old\n')
+        calls = []
+
+        def fake_popen(argv, **kwargs):
+            calls.append(1)
+            # Same inode, shorter file: mongod truncated the log.
+            with open(log_path, 'w') as handle:
+                handle.write('DBPathInUse: this attempt\n')
+            if len(calls) >= 2:
+                return _Exited(None)
+            return _Exited(100)
+
+        monkeypatch.setattr(mlaunch.subprocess, 'Popen', fake_popen)
+        monkeypatch.setattr(
+            self.tool, '_process_is_listening', lambda proc, port: True)
+        cmd = 'mongod --logpath "%s" --port 27017' % log_path
+        self.tool._spawn_and_wait(cmd, 27017, lock_retry=5)
+        assert len(calls) == 2
+
+    def test_retry_sees_dbpath_in_use_when_log_is_replaced(
+            self, tmp_path, monkeypatch):
+        import mtools.mlaunch.mlaunch as mlaunch
+        log_path = tmp_path / 'mongod.log'
+        log_path.write_text(('x' * 300) + '\nDBPathInUse: old\n')
+        calls = []
+
+        def fake_popen(argv, **kwargs):
+            calls.append(1)
+            os.remove(log_path)
+            log_path.write_text('DBPathInUse: replaced file\n')
+            if len(calls) >= 2:
+                return _Exited(None)
+            return _Exited(100)
+
+        monkeypatch.setattr(mlaunch.subprocess, 'Popen', fake_popen)
+        monkeypatch.setattr(
+            self.tool, '_process_is_listening', lambda proc, port: True)
+        cmd = 'mongod --logpath "%s" --port 27017' % log_path
+        self.tool._spawn_and_wait(cmd, 27017, lock_retry=5)
+        assert len(calls) == 2
+
+
+class _Exited(object):
+    def __init__(self, code):
+        self.pid = 4242
+        self._code = code
+
+    def poll(self):
+        return self._code

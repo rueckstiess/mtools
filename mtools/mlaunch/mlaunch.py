@@ -11,6 +11,7 @@ import socket
 import ssl
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import warnings
@@ -1882,6 +1883,8 @@ class MLaunchTool(BaseCmdLineTool):
             try:
                 return self._spawn_once(command_str, port, timeout)
             except subprocess.CalledProcessError as e:
+                # output is only this attempt. An older DBPathInUse line
+                # in an appended log must not extend the retry.
                 if (e.returncode == 100 and 'DBPathInUse' in (e.output or '')
                         and time.time() < deadline):
                     time.sleep(0.5)
@@ -1897,51 +1900,138 @@ class MLaunchTool(BaseCmdLineTool):
         the same port does not count.
         """
         argv = self._launch_argv(command_str)
+        mark = self._log_mark(command_str)
+        stdout_fh = stderr_fh = None
+        stdout_path = stderr_path = None
         try:
-            proc = subprocess.Popen(
-                argv,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
-                close_fds=True,
-            )
-        except OSError as e:
-            raise SystemExit("can't start %s on port %s: %s"
-                             % (argv[0] if argv else command_str, port,
-                                e.strerror or e))
-        deadline = time.time() + timeout
-        while True:
-            returncode = proc.poll()
-            if returncode is not None:
-                output = self._get_last_error_log(command_str) or ''
-                raise subprocess.CalledProcessError(
-                    returncode, command_str, output=output)
-            if self._process_is_listening(proc, port):
-                return proc
-            if time.time() > deadline:
-                log_path = self._get_log_path(command_str)
-                raise SystemExit(
-                    "still starting %s on port %s after %ss (pid %s). "
-                    "left the process running.\nlog: %s"
-                    % (os.path.basename(argv[0]), port, timeout, proc.pid,
-                       log_path))
-            time.sleep(0.2)
+            # Files, not pipes: a full pipe can stall mongod before it
+            # opens its own log. DEVNULL drops errors that never reach
+            # --logpath (bad options, a rejected --fork, an unopenable log).
+            stdout_fh = tempfile.NamedTemporaryFile(
+                prefix='mlaunch-', suffix='.out', delete=False)
+            stderr_fh = tempfile.NamedTemporaryFile(
+                prefix='mlaunch-', suffix='.err', delete=False)
+            stdout_path = stdout_fh.name
+            stderr_path = stderr_fh.name
+            os.set_inheritable(stdout_fh.fileno(), True)
+            os.set_inheritable(stderr_fh.fileno(), True)
+            try:
+                proc = subprocess.Popen(
+                    argv,
+                    stdin=subprocess.DEVNULL,
+                    stdout=stdout_fh,
+                    stderr=stderr_fh,
+                    start_new_session=True,
+                    close_fds=True,
+                )
+            except OSError as e:
+                raise SystemExit("can't start %s on port %s: %s"
+                                 % (argv[0] if argv else command_str, port,
+                                    e.strerror or e))
+            finally:
+                stdout_fh.close()
+                stderr_fh.close()
+                stdout_fh = stderr_fh = None
 
-    def _get_last_error_log(self, command_str):
+            deadline = time.time() + timeout
+            while True:
+                returncode = proc.poll()
+                if returncode is not None:
+                    output = self._attempt_output(
+                        command_str, mark, stdout_path, stderr_path)
+                    raise subprocess.CalledProcessError(
+                        returncode, command_str, output=output)
+                if self._process_is_listening(proc, port):
+                    return proc
+                if time.time() > deadline:
+                    detail = self._attempt_output(
+                        command_str, mark, stdout_path, stderr_path)
+                    log_path = self._get_log_path(command_str)
+                    extra = ('\n' + detail) if detail else ''
+                    raise SystemExit(
+                        "still starting %s on port %s after %ss (pid %s). "
+                        "left the process running.%s\nlog: %s"
+                        % (os.path.basename(argv[0]) if argv else 'mongod',
+                           port, timeout, proc.pid, extra, log_path))
+                time.sleep(0.2)
+        finally:
+            for handle in (stdout_fh, stderr_fh):
+                if handle is not None:
+                    handle.close()
+            for path in (stdout_path, stderr_path):
+                if path:
+                    try:
+                        os.unlink(path)
+                    except OSError:
+                        pass
+
+    def _log_mark(self, command_str):
+        """(device, inode, size) of the log before this spawn.
+
+        None when there is no log yet. A later read starts at this size
+        so an appended file does not replay earlier attempts.
+        """
         log_path = self._get_log_path(command_str)
-        loglines = ''
         if not log_path:
-            return loglines
+            return None
         try:
+            st = os.stat(log_path)
+        except OSError:
+            return None
+        return (st.st_dev, st.st_ino, st.st_size)
+
+    def _read_log_since(self, command_str, mark):
+        """Log text written after mark.
+
+        A shorter file or a new inode means mongod replaced the log, so
+        this attempt owns the whole file. A text backtrace still ends the
+        read, as it did before.
+        """
+        log_path = self._get_log_path(command_str)
+        if not log_path:
+            return ''
+        try:
+            st = os.stat(log_path)
             with open(log_path, 'rb') as logfile:
+                offset = 0
+                if mark is not None:
+                    dev, ino, size = mark
+                    if ((st.st_dev, st.st_ino) == (dev, ino)
+                            and st.st_size >= size):
+                        offset = size
+                logfile.seek(offset)
+                chunks = []
                 for line in logfile:
                     if line.startswith(b'----- BEGIN BACKTRACE -----'):
                         break
-                    loglines += line.decode('utf-8', 'replace')
-        except IOError:
-            pass
-        return loglines
+                    chunks.append(line.decode('utf-8', 'replace'))
+        except OSError:
+            return ''
+        return ''.join(chunks)
+
+    def _read_capture(self, *paths):
+        parts = []
+        for path in paths:
+            if not path:
+                continue
+            try:
+                with open(path, 'rb') as handle:
+                    data = handle.read(65536)
+            except OSError:
+                continue
+            text = data.decode('utf-8', 'replace').strip()
+            if text:
+                parts.append(text)
+        return '\n'.join(parts)
+
+    def _attempt_output(self, command_str, mark, stdout_path, stderr_path):
+        """Console text plus the log bytes this attempt added."""
+        captured = self._read_capture(stdout_path, stderr_path)
+        log_text = self._read_log_since(command_str, mark).strip()
+        return '\n'.join(part for part in (captured, log_text) if part)
+
+    def _get_last_error_log(self, command_str):
+        return self._read_log_since(command_str, None)
 
     def _start_on_ports(self, ports, wait=False, override_auth=False):
         if override_auth and self.args['verbose']:
@@ -1989,7 +2079,12 @@ class MLaunchTool(BaseCmdLineTool):
 
             except subprocess.CalledProcessError as e:
                 print(e.output)
-                print(self._get_last_error_log(command_str), file=sys.stderr)
+                # Detach already put this attempt's console text and new
+                # log bytes in e.output. The shell path still logs to the
+                # file and leaves stdout empty.
+                if not self._needs_python_detach(command_str):
+                    print(self._get_last_error_log(command_str),
+                          file=sys.stderr)
                 log_path = self._get_log_path(command_str)
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s\nlog: %s"
