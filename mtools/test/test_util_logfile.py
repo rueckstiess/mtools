@@ -1,8 +1,11 @@
+import json
 import os
 from datetime import datetime
 import re
 
 from dateutil.tz import tzoffset, tzutc
+
+import pytest
 
 import mtools
 from mtools.util.logevent import LogEvent
@@ -211,4 +214,55 @@ class TestUtilLogFile(object):
         assert chunk_moved_to[3] == "test.products"
         assert ('step 6 of 6', '213') in chunk_moved_to[4]
         assert chunk_moved_to[5] == "success"
+
+
+VALID_LOG_LINE = (
+    "2014-04-09T23:16:20.437-0400 [initandlisten] "
+    "MongoDB starting : pid=4037 port=27019\n"
+)
+
+
+class TestLogFileParseErrors(object):
+    """A parse failure names the log line and still raises."""
+
+    def test_open_reports_invalid_json_on_the_first_line(self, tmp_path, capsys):
+        path = tmp_path / "bad.log"
+        path.write_text("{not json\n")
+
+        with open(path, "rb") as handle:
+            with pytest.raises(json.JSONDecodeError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "line 1" in error
+        assert "bad.log" in error
+
+    def test_next_reports_invalid_json_after_a_valid_line(self, tmp_path, capsys):
+        path = tmp_path / "mixed.log"
+        path.write_text(VALID_LOG_LINE + "{not json\n" + VALID_LOG_LINE)
+
+        with open(path, "rb") as handle:
+            logfile = LogFile(handle)
+            capsys.readouterr()
+            assert logfile.next().datetime
+            with pytest.raises(json.JSONDecodeError):
+                logfile.next()
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "line 2" in error
+
+    def test_end_scan_reports_invalid_json(self, tmp_path, capsys):
+        path = tmp_path / "tail.log"
+        path.write_text(VALID_LOG_LINE + "{not json\n")
+
+        with open(path, "rb") as handle:
+            with pytest.raises(json.JSONDecodeError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "near the end" in error
+        assert "tail.log" in error
 

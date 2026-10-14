@@ -53,6 +53,8 @@ class LogFile(InputSource):
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
+        # Lines returned by next(), counted from the start of this read.
+        self._lines_read = 0
 
         self._has_level = None
 
@@ -294,23 +296,31 @@ class LogFile(InputSource):
 
         if line == '':
             raise StopIteration
+        self._lines_read += 1
         line = line.rstrip('\n')
-        le = LogEvent(line)
+        try:
+            le = LogEvent(line)
 
-        # hint format and nextpos from previous line
-        if self._datetime_format and self._datetime_nextpos is not None:
-            ret = le.set_datetime_hint(self._datetime_format,
-                                       self._datetime_nextpos,
-                                       self.year_rollover)
-            if not ret:
-                # logevent indicates timestamp format has changed,
-                # invalidate hint info
-                self._datetime_format = None
-                self._datetime_nextpos = None
-        elif le.datetime:
-            # gather new hint info from another logevent
-            self._datetime_format = le.datetime_format
-            self._datetime_nextpos = le._datetime_nextpos
+            # hint format and nextpos from previous line
+            if self._datetime_format and self._datetime_nextpos is not None:
+                ret = le.set_datetime_hint(self._datetime_format,
+                                           self._datetime_nextpos,
+                                           self.year_rollover)
+                if not ret:
+                    # logevent indicates timestamp format has changed,
+                    # invalidate hint info
+                    self._datetime_format = None
+                    self._datetime_nextpos = None
+            elif le.datetime:
+                # gather new hint info from another logevent
+                self._datetime_format = le.datetime_format
+                self._datetime_nextpos = le._datetime_nextpos
+        except StopIteration:
+            raise
+        except Exception as exc:
+            self._report_parse_error(
+                line, exc, "%s line %i" % (self.name, self._lines_read))
+            raise
 
         return le
 
@@ -646,14 +656,15 @@ class LogFile(InputSource):
 
         # get start datetime
         for line in self.filehandle:
+            lines_checked += 1
             # LogEvent will determine the LogFormat
             try:
                 logevent = LogEvent(line)
-            except Exception as e:
-                print(f"Error at line {lines_checked}: {e}",
-                      file=sys.stderr)
+            except Exception as exc:
+                self._report_parse_error(
+                    line, exc, "%s line %i" % (self.name, lines_checked))
+                raise
 
-            lines_checked += 1
             if logevent.datetime:
                 self._start = logevent.datetime
                 self._timezone = logevent.datetime.tzinfo
@@ -676,7 +687,12 @@ class LogFile(InputSource):
         self.filehandle.seek(-min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
-            logevent = LogEvent(line)
+            try:
+                logevent = LogEvent(line)
+            except Exception as exc:
+                self._report_parse_error(
+                    line, exc, "%s near the end" % self.name)
+                raise
             if logevent.datetime:
                 self._end = logevent.datetime
                 break
@@ -693,6 +709,22 @@ class LogFile(InputSource):
         self._bounds_calculated = True
 
         return True
+
+    def _report_parse_error(self, line, exc, location):
+        """Print the log line that failed to parse.
+
+        The caller re-raises. Skipping the line would drop events with
+        no signal that the log was incomplete.
+        """
+        if isinstance(line, bytes):
+            text = line.decode('utf-8', 'replace')
+        else:
+            text = line
+        text = text.rstrip('\r\n')
+        if len(text) > 500:
+            text = text[:500] + '...'
+        print("Error parsing %s: %s\n%s" % (location, exc, text),
+              file=sys.stderr)
 
     def _find_curr_line(self, prev=False):
         """
