@@ -5,8 +5,10 @@ class TableScanFilter(BaseFilter):
     """
     TableScanFilter class.
 
-    Accept only if the line contains a nscanned:[0-9] nreturned:[0-9] where
-    the ratio of nscanned:nreturned is > 100 and nscanned > 10000.
+    ``--scan`` accepts a line when nscanned > 10000 and
+    nscanned / nreturned > 100. ``--queryratio RATIO`` accepts a line when
+    docsExamined / nreturned is greater than RATIO. nreturned of 0 is
+    treated as 1 so the ratio stays defined.
     """
 
     filterArgs = [
@@ -16,14 +18,24 @@ class TableScanFilter(BaseFilter):
                      '(nscanned>10000 and ratio of nscanned to '
                      'nreturned>100); to see confirmed collection scans, '
                      'use --planSummary COLLSCAN.')
+            }),
+        ('--queryratio', {
+            'action': 'store',
+            'type': float,
+            'metavar': 'RATIO',
+            'help': ('only output lines where docsExamined / nreturned '
+                     'is greater than RATIO. nreturned of 0 is treated '
+                     'as 1. Lines that have no docsExamined use '
+                     'nscanned (keysExamined).')
             })
         ]
 
     def __init__(self, mlogfilter):
         BaseFilter.__init__(self, mlogfilter)
-
-        if 'scan' in self.mlogfilter.args:
-            self.active = self.mlogfilter.args['scan']
+        args = self.mlogfilter.args
+        self.scan = bool(args.get('scan'))
+        self.queryratio = args.get('queryratio')
+        self.active = self.scan or self.queryratio is not None
 
     def accept(self, logevent):
         """
@@ -32,13 +44,29 @@ class TableScanFilter(BaseFilter):
         Overwrite BaseFilter.accept() and return True if the provided
         logevent should be accepted (causing output), or False if not.
         """
-        ns = logevent.nscanned
-        nr = logevent.nreturned
+        if self.scan and not self._exceeds(
+                logevent.nscanned, logevent.nreturned, 100, 10000):
+            return False
+        if self.queryratio is not None:
+            examined = logevent.nscannedObjects
+            if examined is None:
+                examined = logevent.nscanned
+            returned = logevent.nreturned
+            if not self._exceeds(examined, returned, self.queryratio):
+                return False
+        return self.active
 
-        if ns is not None and nr is not None:
-            if nr == 0:
-                # avoid division by 0 errors
-                nr = 1
-            return (ns > 10000 and ns / nr > 100)
+    @staticmethod
+    def _exceeds(examined, returned, ratio, minimum=None):
+        """Return True when examined/returned is above ratio.
 
-        return False
+        ``minimum`` is an optional exclusive lower bound on ``examined``,
+        used by ``--scan``. A returned count of 0 is treated as 1.
+        """
+        if examined is None or returned is None:
+            return False
+        if minimum is not None and not examined > minimum:
+            return False
+        if returned == 0:
+            returned = 1
+        return examined / returned > ratio
