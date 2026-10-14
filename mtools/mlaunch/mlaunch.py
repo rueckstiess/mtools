@@ -1166,22 +1166,30 @@ class MLaunchTool(BaseCmdLineTool):
                 except AttributeError:
                     raise SystemExit("can't parse signal '%s', use integer or "
                                      "signal name (SIGxxx)." % sig)
+        signalled = []
         for port in processes:
             # only send signal to matching processes
             if port in matches:
                 p = processes[port]
                 p.send_signal(sig)
+                signalled.append(p)
                 if self.args['verbose']:
                     print(" %s on port %i, pid=%i" % (p.name, port, p.pid))
 
         print("sent signal %s to %i process%s."
               % (sig, len(matches), '' if len(matches) == 1 else 'es'))
 
-        # there is a very brief period in which nodes are not reachable
-        # anymore, but the port is not torn down fully yet and an immediate
-        # start command would fail. This very short sleep prevents that case,
-        # and it is practically not noticable by users.
-        time.sleep(0.1)
+        # A shutdown signal returns before mongod has released its dbpath
+        # lock and port. Without --fork, an immediate start can race it and
+        # fail with DBPathInUse, so wait for terminating processes to exit.
+        if os.name != 'nt' and sig in (signal.SIGTERM, signal.SIGINT,
+                                       signal.SIGKILL):
+            _, alive = psutil.wait_procs(signalled, timeout=60)
+            if alive:
+                print("still shutting down after 60s: pid %s"
+                      % ', '.join(str(p.pid) for p in alive))
+        else:
+            time.sleep(0.1)
 
         # refresh discover
         self.discover()
