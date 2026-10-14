@@ -1761,12 +1761,58 @@ class MLaunchTool(BaseCmdLineTool):
             path = path[1:-1]
         return path
 
-    def _macos_fork_unsupported(self):
-        """MongoDB 8.2+ rejects --fork on macOS (fork+exec is incompatible)."""
+    def _binary_version(self, binary):
+        """Version string reported by a specific mongod/mongos binary.
+
+        Cached per path. Returns None when the binary cannot be run or its
+        output cannot be parsed.
+        """
+        cache = self.__dict__.setdefault('_binary_version_cache', {})
+        if binary in cache:
+            return cache[binary]
+        version = None
+        try:
+            out = subprocess.check_output([binary, '--version'],
+                                          stderr=subprocess.STDOUT,
+                                          timeout=30)
+            match = re.search(r'version v?(\d+\.\d+\.\d+)',
+                              out.decode('utf-8', 'replace'))
+            if match:
+                version = match.group(1)
+        except (OSError, subprocess.SubprocessError):
+            pass
+        cache[binary] = version
+        return version
+
+    def _command_version(self, command_str):
+        """Version of the binary a stored startup command will run.
+
+        Falls back to self.current_version when the binary can't be probed.
+        """
+        try:
+            argv = shlex.split(command_str.strip())
+        except ValueError:
+            argv = []
+        if argv and argv[0] == 'nohup':
+            argv = argv[1:]
+        if argv:
+            version = self._binary_version(argv[0])
+            if version:
+                return version
+        return self.current_version
+
+    def _macos_fork_unsupported(self, version=None):
+        """MongoDB 8.2+ rejects --fork on macOS (fork+exec is incompatible).
+
+        version defaults to self.current_version. Pass the version of the
+        binary in a stored startup command when relaunching.
+        """
         if sys.platform != 'darwin':
             return False
+        if version is None:
+            version = self.current_version
         try:
-            major_s, minor_s = self.current_version.split('.')[:2]
+            major_s, minor_s = version.split('.')[:2]
             major, minor = int(major_s), int(minor_s)
         except (AttributeError, TypeError, ValueError, IndexError):
             return False
@@ -1785,7 +1831,7 @@ class MLaunchTool(BaseCmdLineTool):
         stripped = command_str.strip()
         if stripped.startswith('nohup ') or stripped.endswith('&'):
             return True
-        return self._macos_fork_unsupported()
+        return self._macos_fork_unsupported(self._command_version(command_str))
 
     def _launch_argv(self, command_str):
         """Argv for a startup command, without shell daemonization."""
@@ -1795,7 +1841,8 @@ class MLaunchTool(BaseCmdLineTool):
             cmd = cmd[6:].strip()
         cmd = re.sub(r'\s*>\s*/dev/null(?:\s+2>&1)?\s*&\s*$', '', cmd).strip()
         argv = shlex.split(cmd)
-        if backgrounded or self._macos_fork_unsupported():
+        if backgrounded or self._macos_fork_unsupported(
+                self._command_version(command_str)):
             argv = [arg for arg in argv if arg != '--fork']
         return argv
 
@@ -1823,14 +1870,19 @@ class MLaunchTool(BaseCmdLineTool):
         the same port does not count.
         """
         argv = self._launch_argv(command_str)
-        proc = subprocess.Popen(
-            argv,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-            close_fds=True,
-        )
+        try:
+            proc = subprocess.Popen(
+                argv,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+                close_fds=True,
+            )
+        except OSError as e:
+            raise SystemExit("can't start %s on port %s: %s"
+                             % (argv[0] if argv else command_str, port,
+                                e.strerror or e))
         deadline = time.time() + timeout
         while True:
             returncode = proc.poll()

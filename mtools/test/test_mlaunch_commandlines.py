@@ -324,15 +324,27 @@ class TestMacosForkLaunch(object):
 
     def setup_method(self):
         self.tool = MLaunchTool(test=True)
+        # Don't probe real binaries; tests set current_version explicitly.
+        self.tool._binary_version = lambda binary: None
 
-    def test_version_gate(self):
-        on_macos = sys.platform == 'darwin'
+    @pytest.mark.parametrize('platform,expected', [
+        ('darwin', True), ('linux', False), ('win32', False)])
+    def test_version_gate(self, monkeypatch, platform, expected):
+        monkeypatch.setattr(sys, 'platform', platform)
         self.tool.current_version = '8.0.32'
         assert self.tool._macos_fork_unsupported() is False
+        self.tool.current_version = '8.1.9'
+        assert self.tool._macos_fork_unsupported() is False
         self.tool.current_version = '8.2.0'
-        assert self.tool._macos_fork_unsupported() is on_macos
+        assert self.tool._macos_fork_unsupported() is expected
         self.tool.current_version = '9.0.2'
-        assert self.tool._macos_fork_unsupported() is on_macos
+        assert self.tool._macos_fork_unsupported() is expected
+
+    def test_version_gate_unparseable(self, monkeypatch):
+        monkeypatch.setattr(sys, 'platform', 'darwin')
+        for v in (None, '0.0.0', 'garbage', '8'):
+            self.tool.current_version = v
+            assert self.tool._macos_fork_unsupported() is False
 
     def test_launch_argv_strips_nohup_and_fork(self):
         self.tool.current_version = '9.0.2'
@@ -346,9 +358,40 @@ class TestMacosForkLaunch(object):
         assert self.tool._get_log_path(cmd) == '/data/mongod.log'
         assert self.tool._needs_python_detach(cmd) is True
 
-    def test_fork_kept_below_82(self):
+    @pytest.mark.parametrize('platform', ['darwin', 'linux'])
+    def test_fork_kept_below_82(self, monkeypatch, platform):
+        monkeypatch.setattr(sys, 'platform', platform)
         self.tool.current_version = '7.0.14'
         cmd = '"mongod" --dbpath "/data/db" --logpath "/data/mongod.log" --port 27017 --fork'
         argv = self.tool._launch_argv(cmd)
         assert '--fork' in argv
         assert self.tool._needs_python_detach(cmd) is False
+
+    def test_stored_binary_version_wins(self, monkeypatch):
+        """Persisted --binarypath 8.2+ binary, PATH reports something else."""
+        monkeypatch.setattr(sys, 'platform', 'darwin')
+        self.tool.current_version = '0.0.0'
+        self.tool._binary_version = (
+            lambda binary: '8.2.1' if binary == '/opt/m82/bin/mongod' else None)
+        cmd = ('"/opt/m82/bin/mongod" --dbpath "/data/db" '
+               '--logpath "/data/mongod.log" --port 27017 --fork')
+        assert self.tool._needs_python_detach(cmd) is True
+        assert '--fork' not in self.tool._launch_argv(cmd)
+
+    def test_stored_binary_older_keeps_fork(self, monkeypatch):
+        monkeypatch.setattr(sys, 'platform', 'darwin')
+        self.tool.current_version = '9.0.2'
+        self.tool._binary_version = lambda binary: '7.0.14'
+        cmd = ('"/opt/m70/bin/mongod" --dbpath "/data/db" '
+               '--logpath "/data/mongod.log" --port 27017 --fork')
+        assert self.tool._needs_python_detach(cmd) is False
+        assert '--fork' in self.tool._launch_argv(cmd)
+
+    def test_spawn_missing_binary_is_clean_exit(self):
+        cmd = ('"/nonexistent/mongod" --dbpath "/data/db" '
+               '--logpath "/data/mongod.log" --port 27017')
+        with pytest.raises(SystemExit) as exc:
+            self.tool._spawn_and_wait(cmd, 27017, timeout=1)
+        msg = str(exc.value)
+        assert '/nonexistent/mongod' in msg
+        assert '27017' in msg
