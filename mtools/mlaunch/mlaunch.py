@@ -1810,6 +1810,11 @@ class MLaunchTool(BaseCmdLineTool):
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s\nlog: %s"
                                  % (e.returncode, command_str, log_path))
+            except OSError as e:
+                # Direct exec raises this when the binary is missing.
+                # The shell path used to surface that as CalledProcessError.
+                raise SystemExit("can't start process: %s\ntried to launch: %s"
+                                 % (e, command_str))
 
         if wait:
             self.wait_for(ports)
