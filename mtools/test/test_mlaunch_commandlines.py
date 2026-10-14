@@ -312,3 +312,36 @@ class TestMLaunch(object):
         """
         self.run_tool('init --replicaset --hostname this_host')
         self.read_config()
+
+
+class TestStripKeyFile(object):
+    """override_auth must remove the whole --keyFile value."""
+
+    def test_quoted_path_with_spaces_is_removed(self):
+        command = (
+            '"mongod" --replSet shard01 '
+            '--dbpath "/Users/bobbytables 1/tmp/data/shard01/rs1/db" '
+            '--logpath "/Users/bobbytables 1/tmp/data/shard01/rs1/mongod.log" '
+            '--port 27018 --fork '
+            '--keyFile "/Users/bobbytables 1/tmp/data/keyfile" '
+            '--shardsvr')
+        stripped = MLaunchTool._strip_keyfile(command)
+
+        assert '--keyFile' not in stripped
+        assert 'keyfile' not in stripped
+        assert '--dbpath "/Users/bobbytables 1/tmp/data/shard01/rs1/db"' in stripped
+        assert '--logpath "/Users/bobbytables 1/tmp/data/shard01/rs1/mongod.log"' in stripped
+        assert '--shardsvr' in stripped
+
+    def test_bare_and_single_quoted_values_are_removed(self):
+        bare = MLaunchTool._strip_keyfile(
+            'mongod --keyFile /tmp/keyfile --shardsvr')
+        assert '--keyFile' not in bare
+        assert '/tmp/keyfile' not in bare
+        assert '--shardsvr' in bare
+
+        quoted = MLaunchTool._strip_keyfile(
+            "mongod --keyFile '/tmp/my key' --shardsvr")
+        assert '--keyFile' not in quoted
+        assert '/tmp/my key' not in quoted
+        assert '--shardsvr' in quoted
