@@ -121,7 +121,9 @@ def json2pattern(s, debug = False):
         # updated regex, using positive lookahead and lookbehind to check for a " (quote) 
         # right after '['  and before ']' to correctly handle cases where a ']' is part of the value and 
         # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
-        s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))(.+)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+        # Non-greedy so each quoted array is replaced on its own. A greedy
+        # match runs from the first opening bracket to the last close.
+        s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))(.+?)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
 
         if debug : print (s, file=sys.stderr)
 
