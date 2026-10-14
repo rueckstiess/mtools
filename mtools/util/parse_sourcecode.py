@@ -3,10 +3,10 @@
 import pickle
 import os
 import re
+import shutil
 import subprocess
 import sys
 from collections import defaultdict
-from distutils.spawn import find_executable
 
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -16,7 +16,7 @@ from mtools.util.logcodeline import LogCodeLine
 # Path to a local git clone from https://github.com/mongodb/mongo.git
 mongodb_path = "/usr/local/src/mongo/"
 
-git_path = find_executable('git')
+git_path = shutil.which('git')
 pattern_id = 0
 
 
@@ -32,16 +32,14 @@ def source_files(mongodb_path):
 
 
 def get_all_versions():
-    pr = subprocess.Popen(git_path + " checkout master",
+    pr = subprocess.Popen([git_path, "checkout", "master"],
                           cwd=mongodb_path,
-                          shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
     pr.communicate()
 
-    pr = subprocess.Popen(git_path + " tag",
+    pr = subprocess.Popen([git_path, "tag"],
                           cwd=mongodb_path,
-                          shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
@@ -65,9 +63,8 @@ def get_all_versions():
 
 def switch_version(version):
     print("Switching to %s" % version)
-    pr = subprocess.Popen(git_path + " checkout %s" % version,
+    pr = subprocess.Popen([git_path, "checkout", version],
                           cwd=os.path.dirname(mongodb_path),
-                          shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
