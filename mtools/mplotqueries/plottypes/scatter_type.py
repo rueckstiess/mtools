@@ -13,6 +13,10 @@ def _plot_dates(axis, x, y, *args, **kwargs):
     Matplotlib 3.11; mark the axis as dates and use ``Axes.plot``.
     """
     axis.xaxis.axis_date()
+    # plot_date defaulted to fmt='o' (markers, no line). plot() draws a
+    # solid line unless the caller passed a format string.
+    if not args:
+        kwargs.setdefault("linestyle", "none")
     return axis.plot(x, y, *args, **kwargs)[0]
 
 try:

@@ -39,7 +39,7 @@ dependencies use:
 
    pip3 install 'mtools[all]'
 
-You need to have Python 3.7 or newer installed. ``pip3`` should be included as
+You need to have Python 3.11 or newer installed. ``pip3`` should be included as
 part of the default install for supported versions of Python 3.
 
 Depending on your user rights, ``pip3`` may complain about not having
