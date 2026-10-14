@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "mtools"
 dynamic = ["version"]
 description = "Useful scripts to parse and visualize MongoDB log files, launch test environments, and reproduce issues."
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "Apache-2.0"
 license-files = ["LICENSE.md"]
 authors = [{name = "Thomas Rueckstiess", email = "thomas@rueckstiess.net"}]
@@ -16,7 +16,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Database",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
