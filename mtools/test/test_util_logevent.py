@@ -66,6 +66,44 @@ line_truncated_24 = ("Wed Jan 28 00:31:16.302 [conn12345] warning: log line "
                      "reslen:256993 1445ms")
 line_fassert = ("***aborting after fassert() failure")
 line_empty = ("")
+line_app_name_shell = (
+    '2019-06-18T12:04:12.693+0100 I COMMAND  [conn2] command '
+    'local.myCollection appName: "MongoDB Shell" command: create '
+    '{ create: "myCollection", $db: "local" } numYields:0 37ms')
+line_app_name_api = (
+    '2019-06-18T12:02:00.506+0100 I COMMAND  [conn111441] command '
+    'invoice-prod.invoices appName: "B2BReadApi" command: insert '
+    '{ insert: "invoices" } 144ms')
+line_app_name_mlaunch = (
+    '2020-02-07T11:59:08.089+1100 I COMMAND  [conn4] command '
+    'local.oplog.rs appName: "mlaunch v1.6.2-dev" command: replSetInitiate '
+    '{ replSetInitiate: 1 } 191ms')
+line_app_name_update = (
+    '2019-06-18T12:13:26.796+0100 I WRITE    [conn2] update '
+    'local.myCollection appName: "MongoDB Shell" command: '
+    '{ q: { name: "ASD" } } 2ms')
+line_app_name_nested = (
+    '2019-06-18T11:59:48.232+0100 I COMMAND  [conn2] command admin.$cmd '
+    'appName: "MongoDB Shell" command: isMaster { isMaster: 1, client: '
+    '{ application: { name: "Other App" } }, $db: "admin" } 0ms')
+line_app_name_in_query = (
+    '2019-06-18T12:00:00.000+0100 I COMMAND  [conn3] command test.foo '
+    'command: find { find: "foo", filter: { appName: "other" } } 1ms')
+line_client_metadata = (
+    '2019-06-18T11:59:01.265+0100 I NETWORK  [conn1] received client '
+    'metadata from 127.0.0.1:54540 conn1: { application: { name: '
+    '"MongoDB Shell" }, driver: { name: "MongoDB Internal Client", '
+    'version: "4.0.10" } }')
+logv2_app_name = (
+    '{"t":{"$date":"2022-11-22T00:00:02.933+01:00"},"s":"I","c":"COMMAND",'
+    '"id":51803,"ctx":"conn1","msg":"Slow query","attr":{"type":"command",'
+    '"ns":"test.foo","appName":"MongoDB Shell","command":{"find":"foo",'
+    '"filter":{"a":1}},"durationMillis":5}}')
+logv2_no_app_name = (
+    '{"t":{"$date":"2022-11-22T00:00:02.933+01:00"},"s":"I","c":"COMMAND",'
+    '"id":51803,"ctx":"conn1","msg":"Slow query","attr":{"type":"command",'
+    '"ns":"test.foo","command":{"find":"foo","filter":{"a":1}},'
+    '"durationMillis":5}}')
 line_new_oplog_query = ('2018-05-01T21:57:45.989+0000 I REPL [replication-0] Scheduled new oplog query Fetcher source: host.name database: local query: { find: "oplog.rs", filter: { ts: { $gte: Timestamp(1525211859, 1) } }, tailable: true, oplogReplay: true, awaitData: true, maxTimeMS: 60000, batchSize: 13981010, term: 1, readConcern: { afterClusterTime: Timestamp(1525211859, 1) } } query metadata: { $replData: 1, $oplogQueryData: 1, $readPreference: { mode: "secondaryPreferred" } } active: 1 findNetworkTimeout: 65000ms getMoreNetworkTimeout: 7500ms shutting down?: 0 first: 1 firstCommandScheduler: RemoteCommandRetryScheduler request: RemoteCommand 16543 -- target:host.name db:local cmd:{ find: "oplog.rs", filter: { ts: { $gte: Timestamp(1525211859, 1) } }, tailable: true, oplogReplay: true, awaitData: true, maxTimeMS: 60000, batchSize: 13981010, term: 1, readConcern: { afterClusterTime: Timestamp(1525211859, 1) } } active: 1 callbackHandle.valid: 1 callbackHandle.cancelled: 0 attempt: 1 retryPolicy: RetryPolicyImpl maxAttempts: 1 maxTimeMillis: -1ms')
 
 # fake system.profile documents
@@ -374,3 +412,54 @@ def test_level_filter_d_matches_verbosity_and_d2_is_exact():
     assert _level_filter(['D2']).accept(legacy)
     assert not _level_filter(['D2']).accept(plain)
     assert not _level_filter(['D1']).accept(legacy)
+
+
+def test_logevent_app_name():
+    """Parse the per-operation appName prefix and structured attr.appName."""
+    le = LogEvent(line_app_name_shell)
+    assert(le._app_name is None)
+    assert(le.operation == 'command')
+    assert(le.namespace == 'local.myCollection')
+    assert(le.command == 'create')
+    assert(le.app_name == 'MongoDB Shell')
+
+    le = LogEvent(line_app_name_api)
+    assert(le.app_name == 'B2BReadApi')
+    assert(le.command == 'insert')
+
+    le = LogEvent(line_app_name_mlaunch)
+    assert(le.app_name == 'mlaunch v1.6.2-dev')
+    assert(le.command == 'replsetinitiate')
+
+    le = LogEvent(line_app_name_update)
+    assert(le.app_name == 'MongoDB Shell')
+    assert(le.operation == 'update')
+    assert(le.namespace == 'local.myCollection')
+    assert(le.command is None)
+
+    # Nested application.name is the handshake document, not this field.
+    le = LogEvent(line_app_name_nested)
+    assert(le.app_name == 'MongoDB Shell')
+
+    # A query predicate named appName is not the connection's app name.
+    le = LogEvent(line_app_name_in_query)
+    assert(le.app_name is None)
+    assert(le.command == 'find')
+
+    le = LogEvent(line_command_26_a)
+    assert(le.app_name is None)
+
+    le = LogEvent(line_client_metadata)
+    assert(le.app_name is None)
+
+    le = LogEvent(profile_doc1)
+    assert(le.app_name is None)
+
+    le = LogEvent(logv2_app_name)
+    assert(le.app_name == 'MongoDB Shell')
+    assert(le.namespace == 'test.foo')
+    assert(le.command == 'find')
+
+    le = LogEvent(logv2_no_app_name)
+    assert(le.app_name is None)
+    assert(le.command == 'find')

@@ -33,6 +33,7 @@ class LogEvent(object):
     operation: insert, update, remove, query, command, getmore, None
     namespace: the namespace of the operation, or None
     command: the type of command, if the operation was a "command"
+    app_name: client application name from an operation line, or None
     pattern: the query pattern for queries, updates, counts, etc
     ...
     Certain operations also add the number of affected/scanned documents.
@@ -144,6 +145,8 @@ class LogEvent(object):
 
         self._command_calculated = False
         self._command = None
+        self._app_name_calculated = False
+        self._app_name = None
 
         self._counters_calculated = False
         self._allowDiskUse = None
@@ -587,6 +590,26 @@ class LogEvent(object):
                     pass
 
         return self._command
+
+    @property
+    def app_name(self):
+        """Extract the client application name, if the line has one."""
+        if not self._app_name_calculated:
+            self._app_name_calculated = True
+            if self.logformat == LogFormat.LEGACY:
+                self._app_name = self._legacy_app_name()
+        return self._app_name
+
+    def _legacy_app_name(self):
+        # The command body can contain an appName field of its own.
+        # The prefix is the quoted value immediately before command:.
+        if not self._line_str:
+            return None
+        match = re.search(r'appName:\s+"([^"]*)"\s+command:',
+                          self._line_str)
+        if not match:
+            return None
+        return match.group(1)
 
     @property
     def nscanned(self):
@@ -1309,6 +1332,7 @@ class LogEvent(object):
             self._ninserted = doc['attr'].get('nInserted')
             self._ndeleted = doc['attr'].get('nDeleted')
             self._cursorid = doc['attr'].get('cursorid')
+            self._app_name = doc['attr'].get('appName')
             # self._reapedtime  # TODO: https://jira.mongodb.org/browse/SERVER-28604
 
             if doc['attr'].get('type') == 'command':
@@ -1332,5 +1356,6 @@ class LogEvent(object):
         self._operation_calculated = True
         self._duration_calculated = True
         self._command_calculated = True
+        self._app_name_calculated = True
         self._split_tokens = None
         self._split_tokens_calculated = True
