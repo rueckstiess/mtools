@@ -77,15 +77,15 @@ certain tests.
 .. code::
 
    [tox]
-   minversion = 2.3
-   envlist = py36
+   minversion = 4.31
+   envlist = py311, py312, py313, py314
    skipsdist = True
 
    [testenv]
    deps =
        -r{toxinidir}/requirements.txt
        -r{toxinidir}/test-requirements.txt
-   whitelist_externals = make
+   allowlist_externals = make
    commands = pytest -v --cov mtools --cov-branch --cov-report term-missing:skip-covered
 
    [testenv:doc]
@@ -152,7 +152,7 @@ tox.ini options
 
 [testenv]
    -  **deps**: packages required by ``[testenv]``.
-   -  **whitelist_exernals**: commands sourced from the local operating system
+   -  **allowlist_externals**: commands sourced from the local operating system
       instead of being downloaded and installed by tox
 
 [testenv:NAME]
