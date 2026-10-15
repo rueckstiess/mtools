@@ -4,6 +4,7 @@ import argparse
 import functools
 import json
 import os
+import queue as Queue
 import re
 import shlex
 import signal
@@ -23,11 +24,6 @@ from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
 from mtools.version import __version__
-
-try:
-    import Queue
-except ImportError:
-    import queue as Queue
 
 try:
     from pymongo import MongoClient as Connection
@@ -988,7 +984,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         matches = self._get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
-            raise SystemExit('no nodes started.')
+            # Every node is already up. Scripts re-run start, so this is
+            # success rather than an error.
+            print('all nodes already running.')
+            return
 
         # start config servers first
         config_matches = self.get_tagged(['config']).intersection(matches)
@@ -1115,7 +1114,7 @@ class MLaunchTool(BaseCmdLineTool):
         startup = self.startup_info
 
         # print tags as well
-        for doc in [x for x in print_docs if type(x) == OrderedDict]:
+        for doc in [x for x in print_docs if isinstance(x, OrderedDict)]:
             try:
                 doc['pid'] = processes[doc['port']].pid
             except KeyError:
@@ -1156,7 +1155,7 @@ class MLaunchTool(BaseCmdLineTool):
         sig = self.args.get('signal') or 'SIGTERM'
         if os.name == 'nt':
             sig = signal.CTRL_BREAK_EVENT
-        if type(sig) == int:
+        if isinstance(sig, int):
             pass
         elif isinstance(sig, str):
             try:
@@ -1398,7 +1397,7 @@ class MLaunchTool(BaseCmdLineTool):
         """
         # if tags is a simple string, make it a list (note: tuples like
         # ('mongos', 2) must be in a surrounding list)
-        if not hasattr(tags, '__iter__') and type(tags) == str:
+        if not hasattr(tags, '__iter__') and isinstance(tags, str):
             tags = [tags]
 
         nodes = set(self.cluster_tags['all'])
@@ -2048,6 +2047,7 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
+                    # start /b is a cmd.exe builtin, so Windows keeps a shell.
                     subprocess.check_call(command_str, shell=True)
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
@@ -2065,7 +2065,7 @@ class MLaunchTool(BaseCmdLineTool):
                         print("launching: %s on port %s" % (binary, port))
                     self._spawn_and_wait(command_str, port)
                 else:
-                    subprocess.check_output([command_str], shell=True,
+                    subprocess.check_output(shlex.split(command_str),
                                             stderr=subprocess.STDOUT)
 
                     binary = command_str.split()[0]
@@ -2089,6 +2089,11 @@ class MLaunchTool(BaseCmdLineTool):
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s\nlog: %s"
                                  % (e.returncode, command_str, log_path))
+            except OSError as e:
+                # Direct exec raises this when the binary is missing.
+                # The shell path used to surface that as CalledProcessError.
+                raise SystemExit("can't start process: %s\ntried to launch: %s"
+                                 % (e, command_str))
 
         if wait:
             self.wait_for(ports)
