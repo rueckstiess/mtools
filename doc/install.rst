@@ -71,7 +71,7 @@ Then ``cd`` into the mtools directory and run:
 
 .. code-block:: bash
 
-   sudo python setup.py install
+   pip3 install .
 
 This will install mtools into your Python's site-packages folder, create links
 to the scripts and set everything up. You should now be able to use all the

@@ -148,11 +148,6 @@ class MLogFilterTool(LogFileTool):
 
         For example: 1200300 becomes 1,200,300.
         """
-        # below thousands separator syntax only works for
-        # python 2.7, skip for 2.6
-        if sys.version_info < (2, 7):
-            return line
-
         last_index = 0
         try:
             # find the index of the last } character

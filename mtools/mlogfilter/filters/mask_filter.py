@@ -121,9 +121,9 @@ class MaskFilter(DateTimeFilter):
                 start_point, end_point = self._pad_event(e)
                 continue
 
-            next_start = (e[0] if type(e) == tuple else e) - self.mask_half_td
+            next_start = (e[0] if isinstance(e, tuple) else e) - self.mask_half_td
             if next_start <= end_point:
-                end_point = ((e[1] if type(e) == tuple else e) +
+                end_point = ((e[1] if isinstance(e, tuple) else e) +
                              self.mask_half_td)
             else:
                 mask_list.append((start_point, end_point))
@@ -135,7 +135,7 @@ class MaskFilter(DateTimeFilter):
         self.mask_list = mask_list
 
     def _pad_event(self, event):
-        if type(event) == tuple:
+        if isinstance(event, tuple):
             start_point = event[0] - self.mask_half_td
             end_point = event[1] + self.mask_half_td
         else:

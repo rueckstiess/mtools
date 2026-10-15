@@ -164,8 +164,10 @@ class DateTimeBoundaries(object):
             if dct['operator'] == '-':
                 mult *= -1
 
-            dt = dt + eval('timedelta(%s=%i)' % (dct['unit'],
-                                                 mult * int(dct['value'])))
+            # %i in the old eval() call truncated month and year
+            # multipliers. Keep that truncation.
+            amount = int(mult * int(dct['value']))
+            dt = dt + timedelta(**{dct['unit']: amount})
 
         # if parsed datetime is out of bounds and no year specified,
         # try to adjust year

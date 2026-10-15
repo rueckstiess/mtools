@@ -17,7 +17,6 @@ try:
     import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
-    from matplotlib import __version__ as mpl_version
     import mtools.mplotqueries.plottypes as plottypes
     import re
 
@@ -671,14 +670,8 @@ class MPlotQueriesTool(LogFileTool):
 
         handles, labels = axis.get_legend_handles_labels()
         if len(labels) > 0:
-            # only change fontsize if supported
-            major, minor, _ = mpl_version.split('.')
-            if (int(major), int(minor)) >= (1, 3):
-                self.legend = axis.legend(loc='upper left', frameon=False,
-                                          numpoints=1, fontsize=9)
-            else:
-                self.legend = axis.legend(loc='upper left', frameon=False,
-                                          numpoints=1)
+            self.legend = axis.legend(loc='upper left', frameon=False,
+                                      numpoints=1, fontsize=9)
 
         if self.args['type'] == 'scatter':
             # enable legend picking for scatter plots

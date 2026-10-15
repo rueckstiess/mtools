@@ -20,7 +20,6 @@ def _plot_dates(axis, x, y, *args, **kwargs):
     return axis.plot(x, y, *args, **kwargs)[0]
 
 try:
-    from matplotlib import __version__ as mpl_version
     import matplotlib.pyplot as plt
     from matplotlib.dates import date2num
     from matplotlib.patches import Polygon
@@ -104,9 +103,7 @@ class ScatterPlotType(BasePlotType):
         group = event.artist._mt_group
         indices = event.ind
 
-        # double click only supported on 1.2 or later
-        major, minor, _ = mpl_version.split('.')
-        if (int(major), int(minor)) < (1, 2) or not event.mouseevent.dblclick:
+        if not event.mouseevent.dblclick:
             for i in indices:
                 print(self.groups[group][i].get_line_str(True))
 
