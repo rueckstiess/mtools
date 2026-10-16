@@ -1010,7 +1010,7 @@ class LogEvent(ProfileParserMixin, object):
         if self._level is None:
             split_tokens = self.split_tokens
 
-            if not split_tokens:
+            if len(split_tokens) < 3:
                 self._level = False
                 self._component = False
                 return
@@ -1180,14 +1180,81 @@ class LogEvent(ProfileParserMixin, object):
 
         return output
 
-    def to_json(self, labels=None):
-        """Convert LogEvent object to valid JSON."""
+    def _legacy_message(self):
+        """Return the legacy line with the timestamp, severity, and context removed."""
+        tokens = self.split_tokens or []
+        index = self.datetime_nextpos or 0
+        thread = self.thread
+        if thread and index < len(tokens):
+            if tokens[index].strip('[]') == thread:
+                index += 1
+        return ' '.join(tokens[index:])
+
+    def to_structured(self):
+        """
+        Return a legacy line as a MongoDB 4.4 structured log document.
+
+        Field names match logv2 (``t``, ``s``, ``c``, ``ctx``, ``msg``,
+        ``attr``). Values are the best parse of the plaintext line. A logv2
+        line is already in this shape and is returned unchanged.
+        """
+        if self.logformat == LogFormat.LOGV2:
+            return self.doc
+
+        names = (
+            ('namespace', 'ns'),
+            ('operation', 'type'),
+            ('command', 'command'),
+            ('duration', 'durationMillis'),
+            ('nscanned', 'keysExamined'),
+            ('nscannedObjects', 'docsExamined'),
+            ('nreturned', 'nReturned'),
+            ('ninserted', 'nInserted'),
+            ('nupdated', 'nModified'),
+            ('ndeleted', 'nDeleted'),
+            ('numYields', 'numYields'),
+            ('planSummary', 'planSummary'),
+            ('pattern', 'queryPattern'),
+        )
+        attr = {}
+        for source, dest in names:
+            value = getattr(self, source, None)
+            if value is None or value is False:
+                continue
+            if dest == 'nReturned' and self.operation == 'update':
+                # legacy updates report nMatched, which is parsed into
+                # nreturned
+                dest = 'nMatched'
+            attr[dest] = value
+
+        when = self.datetime
+        level = self.level if isinstance(self.level, str) else None
+        component = self.component if isinstance(self.component, str) else None
+        return {
+            't': {'$date': when.isoformat() if when else None},
+            's': level,
+            'c': component,
+            'ctx': self.thread,
+            'msg': self._legacy_message(),
+            'attr': attr,
+        }
+
+    def to_json(self, pretty=False):
+        """Convert LogEvent object to valid JSON.
+
+        ``pretty`` indents the document. Legacy lines are emitted as
+        structured log documents. logv2 lines are passed through.
+        """
         if self.logformat == LogFormat.LOGV2:
             output = self.doc
+        elif self.logformat == LogFormat.LEGACY:
+            output = self.to_structured()
         else:
-            output = self.to_dict(labels)
+            output = self.to_dict()
 
-        return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
+        indent = 2 if pretty else None
+        return json.dumps(output, cls=DateTimeEncoder, indent=indent,
+                          ensure_ascii=False)
 
     def _parse_logv2(self, doc):
         """Parse logv2 format"""

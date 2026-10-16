@@ -463,3 +463,21 @@ def test_logevent_app_name():
     le = LogEvent(logv2_no_app_name)
     assert(le.app_name is None)
     assert(le.command == 'find')
+
+
+def test_one_token_line_has_no_level():
+    """A banner line with a single token parses without IndexError."""
+    le = LogEvent('****************************')
+    assert le.level is None or le.level is False
+    assert le.to_structured()['s'] is None
+
+
+def test_structured_update_reports_nmatched():
+    line = ('2019-06-18T12:08:59.026+0100 I WRITE    [conn1] update '
+            'test.foo command: { q: { a: 1 }, u: { $set: { b: 1 } } } '
+            'planSummary: COLLSCAN keysExamined:0 docsExamined:5 '
+            'nMatched:3 nModified:2 numYields:0 locks:{} 12ms')
+    attr = LogEvent(line).to_structured()['attr']
+    assert attr['nMatched'] == 3
+    assert 'nReturned' not in attr
+    assert attr['nModified'] == 2
