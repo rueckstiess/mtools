@@ -154,6 +154,51 @@ def check_mongo_server_output(binary, argument, fatal = True):
     return out
 
 
+def _normalize_command(command):
+    """Collapse whitespace outside quotes and strip the ends.
+
+    Spaces inside single or double quotes stay, including paths that
+    contain spaces. An empty ``""`` token stays, so a Windows
+    ``start /b "" "mongod.exe"`` prefix is unchanged.
+    """
+    if not command:
+        return command
+    # only ASCII shell whitespace; a no-break space in a path is literal
+    blanks = ' \t\r\n'
+    out = []
+    quote = None
+    escaped = False
+    prev_space = False
+    started = False
+    for ch in command.strip(blanks):
+        if quote:
+            out.append(ch)
+            if escaped:
+                escaped = False
+            elif ch == '\\' and quote == '"':
+                # backslash escapes the next character inside double quotes
+                escaped = True
+            elif ch == quote:
+                quote = None
+            prev_space = False
+            continue
+        if ch in ('"', "'"):
+            quote = ch
+            out.append(ch)
+            prev_space = False
+            started = True
+            continue
+        if ch in blanks:
+            if started and not prev_space:
+                out.append(' ')
+            prev_space = True
+            continue
+        out.append(ch)
+        prev_space = False
+        started = True
+    return ''.join(out).rstrip(blanks)
+
+
 class MLaunchTool(BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
@@ -1493,20 +1538,25 @@ class MLaunchTool(BaseCmdLineTool):
         """Store startup params and config in datadir/.mlaunch_startup."""
         datapath = self.dir
 
+        startup_info = {
+            port: _normalize_command(command)
+            for port, command in self.startup_info.items()
+        }
         out_dict = {
             'protocol_version': 2,
             'mtools_version': __version__,
             'parsed_args': self.args,
             'unknown_args': self.unknown_args,
-            'startup_info': self.startup_info
+            'startup_info': startup_info
         }
 
         if not os.path.exists(datapath):
             os.makedirs(datapath)
+        startup_file = os.path.join(datapath, '.mlaunch_startup')
         try:
-            json.dump(out_dict,
-                      open(os.path.join(datapath,
-                                        '.mlaunch_startup'), 'w'), indent=-1)
+            with open(startup_file, 'w') as handle:
+                json.dump(out_dict, handle, indent=2)
+                handle.write('\n')
         except Exception as ex:
             print("ERROR STORING Parameters:", ex)
 
