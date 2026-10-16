@@ -17,7 +17,7 @@ import threading
 import time
 import warnings
 from collections import defaultdict
-from urllib.parse import quote_plus
+from urllib.parse import quote, quote_plus
 from operator import itemgetter
 
 import psutil
@@ -670,14 +670,30 @@ class MLaunchTool(BaseCmdLineTool):
         options = list(options)
         userinfo = ''
         if self.args.get('auth') and self.args.get('initial-user', True):
-            username = quote_plus(str(self.args.get('username') or 'user'))
-            password = quote_plus(str(self.args.get('password') or 'password'))
-            userinfo = '%s:%s@' % (username, password)
-            auth_db = quote_plus(str(self.args.get('auth_db') or 'admin'))
-            options.append('authSource=%s' % auth_db)
+            # userinfo is percent-encoded; quote_plus would turn spaces
+            # into '+', which the URI parser keeps as a literal plus
+            username = quote(str(self.args.get('username') or 'user'), safe='')
+            auth_db = str(self.args.get('auth_db') or 'admin')
+            if auth_db == '$external':
+                # x.509 users authenticate with the client certificate
+                userinfo = '%s@' % username
+                options.append('authMechanism=MONGODB-X509')
+            else:
+                password = quote(str(self.args.get('password') or 'password'),
+                                 safe='')
+                userinfo = '%s:%s@' % (username, password)
+            options.append('authSource=%s' % quote(auth_db, safe=''))
         mode = self.args.get('tlsMode') or self.args.get('sslMode')
         if mode in ('requireTLS', 'preferTLS', 'requireSSL', 'preferSSL'):
             options.append('tls=true')
+            ca_file = self.args.get('tlsCAFile') or self.args.get('sslCAFile')
+            if ca_file:
+                options.append('tlsCAFile=%s' % quote(str(ca_file), safe=''))
+            cert_file = (self.args.get('tlsClientCertificateKeyFile') or
+                         self.args.get('sslClientCertificate'))
+            if cert_file:
+                options.append('tlsCertificateKeyFile=%s'
+                               % quote(str(cert_file), safe=''))
         body = '%s%s' % (userinfo, ','.join(hosts))
         if options:
             return 'mongodb://%s/?%s' % (body, '&'.join(options))

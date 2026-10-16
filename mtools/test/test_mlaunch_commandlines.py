@@ -392,3 +392,33 @@ class TestMLaunchStartWhenRunning(object):
         with pytest.raises(SystemExit) as exc:
             self.tool.start()
         assert 'older version of mlaunch' in str(exc.value)
+
+
+def _uri_for(**args):
+    """Build a URI from parsed args without starting mongod."""
+    from mtools.mlaunch.mlaunch import MLaunchTool
+    tool = MLaunchTool.__new__(MLaunchTool)
+    tool.args = args
+    return tool._mongodb_uri(['localhost:27017'], [])
+
+
+def test_uri_userinfo_encodes_spaces_as_percent_20():
+    uri = _uri_for(auth=True, username='al ice', password='p ss+',
+                   auth_db='admin')
+    assert uri == ('mongodb://al%20ice:p%20ss%2B@localhost:27017/'
+                   '?authSource=admin')
+
+
+def test_uri_x509_user_has_no_password():
+    uri = _uri_for(auth=True, username='CN=client,O=Org', password='x',
+                   auth_db='$external')
+    assert uri == ('mongodb://CN%3Dclient%2CO%3DOrg@localhost:27017/'
+                   '?authMechanism=MONGODB-X509&authSource=%24external')
+
+
+def test_uri_tls_includes_ca_and_client_certificate():
+    uri = _uri_for(tlsMode='requireTLS', tlsCAFile='/certs/ca.pem',
+                   tlsClientCertificateKeyFile='/certs/client.pem')
+    assert uri == ('mongodb://localhost:27017/?tls=true'
+                   '&tlsCAFile=%2Fcerts%2Fca.pem'
+                   '&tlsCertificateKeyFile=%2Fcerts%2Fclient.pem')
