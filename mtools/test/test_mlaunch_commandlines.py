@@ -10,6 +10,7 @@ import pytest
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
+ @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skip starting mongod in CI environment")
 
 class TestMLaunch(object):
 
