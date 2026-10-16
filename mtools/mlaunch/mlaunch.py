@@ -1901,6 +1901,17 @@ class MLaunchTool(BaseCmdLineTool):
         match = re.search(r'--logpath ([^\s]+)', command_str)
         return match.group(1)
 
+    @staticmethod
+    def _strip_keyfile(command_str):
+        """Remove --keyFile and its value from a stored command line.
+
+        The value may be a quoted path that contains spaces. Matching only
+        non-space characters stops inside that path and leaves a broken
+        quote for the shell.
+        """
+        return re.sub(
+            r'''--keyFile\s+("[^"]*"|'[^']*'|\S+)''', '', command_str)
+
     def _get_last_error_log(self, command_str):
         log_path = self._get_log_path(command_str)
         loglines = ''
@@ -1926,7 +1937,7 @@ class MLaunchTool(BaseCmdLineTool):
             if override_auth:
                 # this is to set up sharded clusters without auth first,
                 # then relaunch with auth
-                command_str = re.sub(r'--keyFile \S+', '', command_str)
+                command_str = self._strip_keyfile(command_str)
 
             try:
                 if os.name == 'nt':
