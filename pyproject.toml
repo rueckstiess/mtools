@@ -7,7 +7,7 @@ name = "mtools"
 dynamic = ["version"]
 description = "Useful scripts to parse and visualize MongoDB log files, launch test environments, and reproduce issues."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE.md"]
 authors = [{name = "Thomas Rueckstiess", email = "thomas@rueckstiess.net"}]
@@ -16,38 +16,39 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Database",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = []
 
 [project.optional-dependencies]
 all = [
-    "numpy>=1.21.6",
-    "matplotlib>=3.5.3,<4.0.0",
-    "pymongo>=4.3.2,<5.0.0",
-    "psutil>=5.9.3,<6.0.0",
-    "packaging>=21.3",
-    "python-dateutil>=2.8.2,<3.0.0",
+    "numpy>=2.2,<2.6",
+    "matplotlib>=3.8,<4.0.0",
+    "pymongo>=4.18.3,<5.0.0",
+    "psutil>=6,<8",
+    "packaging>=24",
+    "python-dateutil>=2.9.0,<3.0.0",
 ]
 mlaunch = [
-    "pymongo>=4.3.2,<5.0.0",
-    "psutil>=5.9.3,<6.0.0",
-    "packaging>=21.3",
-    "python-dateutil>=2.8.2,<3.0.0",
+    "pymongo>=4.18.3,<5.0.0",
+    "psutil>=6,<8",
+    "packaging>=24",
+    "python-dateutil>=2.9.0,<3.0.0",
 ]
-mlogfilter = ["python-dateutil>=2.8.2,<3.0.0"]
-mloginfo = ["numpy>=1.21.6", "python-dateutil>=2.8.2,<3.0.0"]
+mlogfilter = ["python-dateutil>=2.9.0,<3.0.0"]
+mloginfo = ["numpy>=2.2,<2.6", "python-dateutil>=2.9.0,<3.0.0"]
 mplotqueries = [
-    "numpy>=1.21.6",
-    "matplotlib>=3.5.3,<4.0.0",
-    "python-dateutil>=2.8.2,<3.0.0",
+    "numpy>=2.2,<2.6",
+    "matplotlib>=3.8,<4.0.0",
+    "python-dateutil>=2.9.0,<3.0.0",
 ]
 mtransfer = [
-    "pymongo>=4.3.2,<5.0.0",
+    "pymongo>=4.18.3,<5.0.0",
     "wiredtiger>=3.2.1",
-    "python-dateutil>=2.8.2,<3.0.0",
+    "python-dateutil>=2.9.0,<3.0.0",
 ]
 
 [project.urls]

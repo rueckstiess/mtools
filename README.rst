@@ -46,7 +46,7 @@ Requirements and Installation Instructions
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.8, 3.9, 3.10, and 3.11.
+Python 3.11, 3.12, 3.13, and 3.14.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section. See the `installation instructions
