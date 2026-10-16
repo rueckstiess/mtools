@@ -620,6 +620,19 @@ class TestStdinFromTimezone(object):
         self._run_stdin(monkeypatch, text, "--from 2022-11-22T00:00:00")
         assert "utc-line" in capsys.readouterr().out
 
+    def test_stdin_time_only_from_uses_the_first_day(self, monkeypatch,
+                                                    capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from 00:00:03")
+        output = capsys.readouterr().out
+        assert "first" not in output
+        assert "second" in output
+
+    def test_stdin_from_start_offset(self, monkeypatch, capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from start +1s")
+        output = capsys.readouterr().out
+        assert "first" not in output
+        assert "second" in output
+
     def test_file_and_stdin_accept_the_same_lines(self, tmp_path):
         path = tmp_path / "my.log"
         path.write_bytes(self.payload.encode())

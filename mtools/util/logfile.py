@@ -336,9 +336,23 @@ class LogFile(ShardingInfoMixin, InputSource):
             saved.append(logevent)
             if logevent.datetime is not None and logevent.datetime.tzinfo:
                 found = logevent.datetime.tzinfo
+                self._stream_start = logevent
                 break
         self._readahead = saved + self._readahead
         return found
+
+    def first_dated_from_stream(self):
+        """First timestamp seen by timezone_from_stream(), if it has a year.
+
+        Only ISO 8601 timestamps carry a year. A ctime timestamp gets the
+        current year, which is a guess, so it is not returned.
+        """
+        logevent = getattr(self, '_stream_start', None)
+        if logevent is None:
+            return None
+        if not (logevent.datetime_format or '').startswith('iso8601'):
+            return None
+        return logevent.datetime
 
     def __iter__(self):
         """
