@@ -4,7 +4,9 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Needs Ubuntu LTS with supported mongodb-version server package
+    # MongoDB 8.0 is supported on Ubuntu 20.04, 22.04, and 24.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
