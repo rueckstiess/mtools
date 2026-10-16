@@ -350,3 +350,27 @@ def test_single_line_logfile_keeps_its_record_count():
     assert len(logfile) == 1836
     assert sum(1 for _ in logfile) == 1836
 
+
+
+def test_fast_forward_steps_back_over_multi_line_records():
+    """Seeking backwards lands on record starts, not continuation lines."""
+    from datetime import timezone
+    records = []
+    for i in range(200):
+        records.append(
+            '2016-06-14T23:%02d:%02d.000Z I WRITE    [conn1] update mydb.c '
+            'query: { a: "x\n' % (i // 60, i % 60) +
+            ('continuation line %d\n' % i) * 30 +
+            'end" } nMatched:1 %dms\n' % (100 + i))
+    logfile = _logfile(''.join(records))
+    logfile.fast_forward(datetime(2016, 6, 14, 23, 1, 40,
+                                  tzinfo=timezone.utc))
+    le = logfile.next()
+    assert le.datetime == datetime(2016, 6, 14, 23, 1, 40,
+                                   tzinfo=timezone.utc)
+    assert le.duration == 200
+
+
+def test_duration_suffix_ignores_trailing_whitespace():
+    from mtools.util.logfile import _has_duration_suffix
+    assert _has_duration_suffix('update mydb.c query: { a: 1 } 129ms  ')

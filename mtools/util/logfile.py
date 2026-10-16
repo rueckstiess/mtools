@@ -38,6 +38,7 @@ def _is_record_start(line):
 
 def _has_duration_suffix(line):
     """True when a line ends in the timed-operation ``<digits>ms`` form."""
+    line = line.rstrip()
     if not line.endswith('ms'):
         return False
     if 'Scheduled new oplog query' in line:
@@ -381,8 +382,9 @@ class LogFile(ShardingInfoMixin, InputSource):
             if nxt is None or _is_legacy_record(nxt):
                 break
             if _has_duration_suffix(parts[-1]):
-                self._next_physical_line()
-                continue
+                # the record is complete; leftover lines are skipped by
+                # the next read
+                break
             parts.append(self._next_physical_line())
         return ' '.join(parts)
 
@@ -792,6 +794,36 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         return True
 
+    def _prev_record_newline(self, buff, jump_back, curr_pos):
+        """Index in buff of the newline before the previous record.
+
+        A record can span several physical lines, so stepping back one line
+        can land inside the record we are already on. Walk back over lines
+        until we pass the start of the current record and reach the start of
+        the one before it. Returns -1 when that is not inside buff.
+        """
+        newline = b'\n' if isinstance(buff, bytes) else '\n'
+        # read the rest of the line at curr_pos so it can be tested whole
+        self._seek(curr_pos, 0)
+        tail = self.filehandle.readline()
+        self._seek(curr_pos, 0)
+        text = buff + tail
+        found = 0
+        pos = jump_back
+        while True:
+            nl = text.rfind(newline, 0, pos)
+            if nl == -1:
+                return -1
+            end = text.find(newline, nl + 1)
+            line = text[nl + 1:] if end == -1 else text[nl + 1:end]
+            if isinstance(line, bytes):
+                line = line.decode('utf-8', 'replace')
+            if _is_record_start(line.rstrip('\r')):
+                found += 1
+                if found == 2:
+                    return nl
+            pos = nl
+
     def _find_curr_line(self, prev=False):
         """
         Internal helper function.
@@ -824,12 +856,12 @@ class LogFile(ShardingInfoMixin, InputSource):
         else:
             self.prev_pos = curr_pos
 
-        if isinstance(buff, bytes):
-            buff = buff.decode("utf-8", "replace")
-
-        newline_pos = buff.rfind('\n')
         if prev:
-            newline_pos = buff[:newline_pos].rfind('\n')
+            newline_pos = self._prev_record_newline(buff, jump_back, curr_pos)
+        else:
+            if isinstance(buff, bytes):
+                buff = buff.decode("utf-8", "replace")
+            newline_pos = buff.rfind('\n')
 
         # move back to last newline char
         if newline_pos == -1:
