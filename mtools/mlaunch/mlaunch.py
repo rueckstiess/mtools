@@ -270,6 +270,22 @@ def _normalize_command(command):
     return ''.join(out).rstrip(blanks)
 
 
+_SERVER_VERSION_RE = re.compile(r'(\d+\.\d+\.\d+)')
+
+
+def _extract_server_version(text):
+    """Return the first X.Y.Z version found in text, or None.
+
+    Handles output such as "db version v7.0.14", release candidates
+    ("v8.0.0-rc2") and dev builds ("v8.3.0-alpha6-261-g43a317d-patch"),
+    which all map to the plain X.Y.Z release version.
+    """
+    if not text:
+        return None
+    match = _SERVER_VERSION_RE.search(text)
+    return match.group(1) if match else None
+
+
 class MLaunchTool(BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
@@ -1137,19 +1153,8 @@ class MLaunchTool(BaseCmdLineTool):
         except Exception:
             return "0.0.0"
 
-        buf = BytesIO(out)
-        current_version = buf.readline().strip().decode('utf-8')
-        # remove prefix "db version v"
-        if current_version.rindex('v') > 0:
-            current_version = current_version.rpartition('v')[2]
-
-        # remove suffix making assumption that all release candidates
-        # equal revision 0
-        try:
-            if current_version.rindex('-') > 0:  # release candidate?
-                current_version = current_version.rpartition('-')[0]
-        except Exception:
-            pass
+        first_line = BytesIO(out).readline().decode('utf-8', 'replace')
+        current_version = _extract_server_version(first_line) or "0.0.0"
 
         print("Detected mongod version: %s" % current_version)
         return current_version
@@ -2084,10 +2089,7 @@ class MLaunchTool(BaseCmdLineTool):
             out = subprocess.check_output([binary, '--version'],
                                           stderr=subprocess.STDOUT,
                                           timeout=30)
-            match = re.search(r'version v?(\d+\.\d+\.\d+)',
-                              out.decode('utf-8', 'replace'))
-            if match:
-                version = match.group(1)
+            version = _extract_server_version(out.decode('utf-8', 'replace'))
         except (OSError, subprocess.SubprocessError):
             pass
         cache[binary] = version
