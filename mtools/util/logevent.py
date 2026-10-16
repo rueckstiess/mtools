@@ -530,7 +530,8 @@ class LogEvent(ProfileParserMixin, object):
         if not self._pattern:
 
             # trigger evaluation of operation
-            if (self.operation in ['query', 'getmore', 'update', 'remove'] or
+            if (self.operation in ['query', 'getmore', 'update', 'remove',
+                                   'insert'] or
                     self.command in ['count', 'findandmodify']):
                 self._pattern = self._find_pattern('query: ')
                 # Fallback check for q: variation (eg "remove" command in 3.6+)
@@ -538,6 +539,17 @@ class LogEvent(ProfileParserMixin, object):
                     self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
+            elif self.command == 'insert':
+                # documents is an array. _find_pattern reads one object,
+                # so start it at the first document rather than the '['.
+                marker = self.line_str.find('documents:')
+                brace = (-1 if marker == -1 else
+                         self.line_str.find('{', marker))
+                if brace != -1:
+                    self._pattern = self._find_pattern(
+                        self.line_str[marker:brace])
+            elif self.command == 'insert':
+                self._pattern = self._find_pattern('documents: ')
 
         return self._pattern
 
