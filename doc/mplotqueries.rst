@@ -66,6 +66,13 @@ Custom Title
    quoted in strings. The title of a plot is shown above the graph. A file read
    in from ``stdin`` does not use a title.
 
+Legend
+------
+The legend lists each group drawn on the plot. Zooming or panning the
+axes keeps a group only while one of its markers is inside the current
+view. Groups return when the view includes them again. The ``-`` key
+still shows or hides the whole legend.
+
 Operation Start Time
 --------------------
 ``--optime-start``
