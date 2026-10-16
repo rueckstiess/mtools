@@ -14,7 +14,7 @@ from pymongo.errors import ConnectionFailure
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
-pytestmark = pytest.mark.skip("skip all mlaunch tests for now")
+pytestmark = pytest.mark.skipif(True, reason="skip all mlaunch tests for now")
 
 class TestMLaunch(object):
     """
