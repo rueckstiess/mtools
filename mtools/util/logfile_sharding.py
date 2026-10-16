@@ -152,9 +152,9 @@ class ShardingInfoMixin(object):
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "Unable to auto-split chunk" in line:
                 logevent = LogEvent(line)
-                match = re.search("chunk \[(?P<range>.*)\) "
-                                  'in namespace (?P<namespace>\S+)'
-                                  ' :: caused by :: (?P<error>\S+): ', line)                    
+                match = re.search(r"chunk \[(?P<range>.*)\) "
+                                  r'in namespace (?P<namespace>\S+)'
+                                  r' :: caused by :: (?P<error>\S+): ', line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
@@ -166,7 +166,7 @@ class ShardingInfoMixin(object):
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "jumbo" in line:
                 logevent = LogEvent(line)
-                match = re.search('migration (?P<namespace>\S+): \[(?P<range>.*)\)', prev_line)
+                match = re.search(r'migration (?P<namespace>\S+): \[(?P<range>.*)\)', prev_line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
