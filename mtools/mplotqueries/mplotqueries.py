@@ -638,11 +638,13 @@ class MPlotQueriesTool(LogFileTool):
     def _series_in_view(self, handle, xmin, xmax, ymin, ymax):
         """Return True when any artist in this series meets the view."""
         group = getattr(handle, '_mt_group', None)
+        plot_type = getattr(handle, '_mt_plot_type', None)
         if group is None:
             related = [handle]
         else:
             related = [artist for artist in self.artists
-                       if getattr(artist, '_mt_group', None) == group]
+                       if getattr(artist, '_mt_group', None) == group and
+                       getattr(artist, '_mt_plot_type', None) is plot_type]
             if handle not in related:
                 related.append(handle)
         # hidden series stay listed so they can be toggled back on

@@ -128,3 +128,19 @@ def test_bar_is_in_view_by_its_extent(tmp_path):
     assert tool._artist_in_view(bars, 0, 10.5, 0, 1)
     assert tool._artist_in_view(bars[0], 10.5, 20, 0, 1)
     assert not tool._artist_in_view(bars, 12, 20, 0, 1)
+
+
+def test_series_match_on_plot_type_as_well_as_group(tmp_path):
+    """Overlays can reuse a group name; only the same plot type counts."""
+    path = tmp_path / 'legend.log'
+    path.write_text(LOG)
+    tool = _plot(path)
+    axis = plt.gca()
+    handle = next(a for a in tool.artists
+                  if getattr(a, '_mt_group', None) == 'test.early')
+    other = axis.plot([date2num(_when(4))], [50])[0]
+    other._mt_group = 'test.early'
+    other._mt_plot_type = object()
+    tool.artists.append(other)
+    xmin, xmax = date2num([_when(3, 30), _when(5)])
+    assert not tool._series_in_view(handle, xmin, xmax, 0, 100)
