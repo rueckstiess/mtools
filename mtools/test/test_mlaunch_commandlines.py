@@ -313,6 +313,51 @@ class TestMLaunch(object):
         self.run_tool('init --replicaset --hostname this_host')
         self.read_config()
 
+    def test_default_dial_host_is_localhost(self):
+        """A normal launch is dialed at localhost."""
+        self.tool.args = {'command': 'init', 'hostname': 'localhost'}
+        self.tool.unknown_args = []
+        assert self.tool._node_address(27017) == 'localhost:27017'
+
+    def test_hostname_is_used_when_bind_includes_ipv4(self):
+        """--hostname is the dial host when an IPv4 bind address exists."""
+        self.tool.args = {'command': 'init', 'hostname': 'db.example.com'}
+        self.tool.unknown_args = ['--bind_ip', '127.0.0.1,::1']
+        assert self.tool._dial_host() == 'db.example.com'
+        assert self.tool._node_address(27018) == 'db.example.com:27018'
+
+    def test_ipv6_only_bind_is_dialed_instead_of_localhost(self):
+        """--bind_ip ::1 is dialed directly. PyMongo treats localhost as IPv4."""
+        self.tool.args = {'command': 'init', 'hostname': 'localhost'}
+        self.tool.unknown_args = ['--ipv6', '--bind_ip', '::1']
+        assert self.tool._dial_host() == '::1'
+        assert self.tool._node_address(27017) == '[::1]:27017'
+
+    def test_bind_ip_equals_form_and_brackets(self):
+        """--bind_ip=::1 and a bracketed address both dial that address."""
+        self.tool.args = {'command': 'init', 'hostname': 'localhost'}
+        self.tool.unknown_args = ['--bind_ip=[::1]']
+        assert self.tool._node_address(27017) == '[::1]:27017'
+
+    def test_unspecified_ipv6_bind_dials_loopback(self):
+        """--bind_ip :: listens on every IPv6 interface. Dial ::1."""
+        self.tool.args = {'command': 'init', 'hostname': 'localhost'}
+        self.tool.unknown_args = ['--bind_ip', '::']
+        assert self.tool._dial_host() == '::1'
+
+    def test_later_command_uses_stored_bind_ip(self):
+        """start/stop keep the bind address stored at init."""
+        self.tool.args = {'command': 'start'}
+        self.tool.unknown_args = []
+        self.tool.loaded_args = {'hostname': 'localhost'}
+        self.tool.loaded_unknown_args = ['--bind_ip', '::1']
+        assert self.tool._node_address(27017) == '[::1]:27017'
+
+    def test_init_parses_bind_ip_into_the_dial_host(self):
+        """The reported init command dials ::1 rather than localhost."""
+        self.run_tool('init --single --hostname localhost --bind_ip ::1')
+        assert self.tool._node_address(self.tool.args['port']) == '[::1]:27017'
+
 
 class TestMLaunchStartWhenRunning(object):
     """start() when the environment is already up. No mongod is launched."""
