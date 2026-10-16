@@ -85,8 +85,9 @@ class QuerySection(BaseSection):
                                                 progress_start) /
                                           progress_total))
 
-            if (le.operation in ['query', 'getmore', 'update', 'remove'] or
-                    le.command in ['count', 'findandmodify',
+            if (le.operation in ['query', 'getmore', 'update', 'remove',
+                                 'insert'] or
+                    le.command in ['count', 'findandmodify', 'insert',
                                    'geonear', 'find', 'aggregate']):
                 lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
                               pattern=le.pattern, duration=le.duration,
