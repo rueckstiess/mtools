@@ -30,8 +30,7 @@ Note that some mtools scripts have [additional dependencies](https://github.com/
 
 #### Installation from source
 
-If `pip3` is not available and you want to install mtools from source, you can
-get the source code by cloning the
+To install mtools from source, clone the
 [mtools github repository](https://github.com/rueckstiess/mtools):
 
     git clone git://github.com/rueckstiess/mtools.git
@@ -42,7 +41,7 @@ Or download the tarball from <https://pypi.python.org/pypi/mtools> and extract i
 
 Then `cd` into the mtools directory and run:
 
-    sudo python setup.py install
+    pip3 install .
 
 This will install mtools into your Python's site-packages folder, create links to the
 scripts and set everything up. You should now be able to use all the scripts directly
@@ -51,17 +50,10 @@ from the command line.
 #### Development Mode source installation
 
 If you want to contribute to mtools development or test beta and release candidate versions,
-you should install mtools from a source checkout in "Development Mode" using either of:
-
- * `pip3` (recommended as a convenience for installing additional dependencies)
-```
-    sudo pip3 install -e'/path/to/cloned/repo[all]'
-```
-
- * `setup.py`
+you should install mtools from a source checkout in "Development Mode":
 
 ```
-    sudo python3 setup.py develop
+    pip3 install -e '/path/to/cloned/repo[all]'
 ```
 
 More information about switching to Development Mode can be found on the page [mtools Development Mode](https://github.com/rueckstiess/mtools/wiki/Development-Mode-for-mtools).
