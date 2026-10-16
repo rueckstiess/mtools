@@ -83,15 +83,18 @@ class LogEvent(ProfileParserMixin, object):
             doc_or_str = doc_or_str.decode("utf-8")
 
         if isinstance(doc_or_str, str):
-            if doc_or_str.startswith('{'):
+            if self.logformat is None and doc_or_str.startswith('{'):
+                # Try to parse as JSON (logv2)
                 self.from_string = False
-                doc = json.loads(doc_or_str)
-                if fulldoc:
-                    self._doc = doc
-                self._parse_logv2(doc)
-                self.logformat = LogFormat.LOGV2
-                #except Exception as e:
-                   # print(f"An exception occured parsing logv2: {e}")
+                try:
+                    doc = json.loads(doc_or_str)
+                    if fulldoc:
+                        self._doc = doc
+                    self._parse_logv2(doc)
+                    self.logformat = LogFormat.LOGV2
+                except json.JSONDecodeError as e:
+                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
+                    print(f"Attempted to     parse as JSON: {doc_or_str}")
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
@@ -269,7 +272,7 @@ class LogEvent(ProfileParserMixin, object):
                     self._duration = int(matchobj.group(1))
             # SERVER-16176 - Logging of slow checkpoints
             elif "Checkpoint took" in self.line_str:
-                matchobj = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                matchobj = re.search(r"Checkpoint took ([\d]+) seconds to complete", self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1)) * 1000
 
@@ -282,7 +285,7 @@ class LogEvent(ProfileParserMixin, object):
             return self._hostname
 
         line_str = self.line_str
-        groups = re.search("DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
+        groups = re.search(r"DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
         return self._hostname
 
@@ -295,9 +298,13 @@ class LogEvent(ProfileParserMixin, object):
 
         line_str = self.line_str
         # SERVER-28604 Checking reaped cursor information
-        groups = re.search("Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
-        self._cursorid = groups.group(1)
-        self._reapedtime = groups.group(2)
+        groups = re.search(r"Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
+        if groups:
+            self._cursorid = groups.group(1)
+            self._reapedtime = groups.group(2)
+        else:
+            self._cursorid = None  # or handle the case appropriately
+            self._reaped = None
 
         return self._cursorid
 
