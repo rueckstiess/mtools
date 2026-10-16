@@ -24,6 +24,27 @@ def _decode_pattern_list(data):
     return rv
 
 
+def _collapse_coordinates(value):
+    """Replace GeoJSON ``coordinates`` with the placeholder ``1``.
+
+    A ``$geoWithin`` or ``$geoIntersects`` polygon is different on every
+    query. Keeping the vertices stops ``mloginfo --queries`` from grouping
+    those queries by shape.
+    """
+    if isinstance(value, list):
+        # e.g. the geometries of a GeometryCollection
+        return [_collapse_coordinates(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    collapsed = {}
+    for key, item in value.items():
+        if key == 'coordinates':
+            collapsed[key] = 1
+        else:
+            collapsed[key] = _collapse_coordinates(item)
+    return collapsed
+
+
 def _decode_pattern_dict(data):
     rv = {}
     for key, value in data.items():
@@ -41,6 +62,9 @@ def _decode_pattern_dict(data):
                     return _decode_pattern_dict(value)
                 except:
                     return value
+
+        if key == '$geometry' and isinstance(value, dict):
+            value = _collapse_coordinates(value)
 
         if isinstance(value, list):
             value = _decode_pattern_list(value)
@@ -77,7 +101,12 @@ def values2pattern(x, debug = False):
     if isinstance(x, list):
         return [values2pattern(v) for v in x]
     elif isinstance(x, dict):
-        return {k: values2pattern(v) for k, v in x.items()}
+        pattern = {}
+        for key, value in x.items():
+            if key == '$geometry' and isinstance(value, dict):
+                value = _collapse_coordinates(value)
+            pattern[key] = values2pattern(value)
+        return pattern
     else:
         return 1
 
