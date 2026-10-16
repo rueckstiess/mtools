@@ -69,3 +69,18 @@ def test_durline_view_includes_the_operation_start(tmp_path):
 
     view_start, _ = _view(str(path), '--type', 'durline')
     assert view_start == logged_start - timedelta(milliseconds=5000)
+
+
+def test_optime_start_view_covers_several_logfiles(tmp_path):
+    first = tmp_path / 'one.log'
+    second = tmp_path / 'two.log'
+    first.write_text(LOG)
+    second.write_text(LOG.replace('02:18:', '03:18:'))
+
+    tool = MPlotQueriesTool()
+    tool.plot = lambda: None
+    tool.run('%s %s --optime-start' % (first, second))
+    view_start, view_end = tool.plot_instances[0].date_range
+    assert view_start == datetime(2019, 6, 9, 2, 17, 57, 194000,
+                                  tzinfo=tzutc())
+    assert view_end >= datetime(2019, 6, 9, 3, 18, 7, tzinfo=tzutc())
