@@ -163,14 +163,22 @@ def _normalize_command(command):
     """
     if not command:
         return command
+    # only ASCII shell whitespace; a no-break space in a path is literal
+    blanks = ' \t\r\n'
     out = []
     quote = None
+    escaped = False
     prev_space = False
     started = False
-    for ch in command.strip():
+    for ch in command.strip(blanks):
         if quote:
             out.append(ch)
-            if ch == quote:
+            if escaped:
+                escaped = False
+            elif ch == '\\' and quote == '"':
+                # backslash escapes the next character inside double quotes
+                escaped = True
+            elif ch == quote:
                 quote = None
             prev_space = False
             continue
@@ -180,7 +188,7 @@ def _normalize_command(command):
             prev_space = False
             started = True
             continue
-        if ch.isspace():
+        if ch in blanks:
             if started and not prev_space:
                 out.append(' ')
             prev_space = True
@@ -188,7 +196,7 @@ def _normalize_command(command):
         out.append(ch)
         prev_space = False
         started = True
-    return ''.join(out).rstrip()
+    return ''.join(out).rstrip(blanks)
 
 
 class MLaunchTool(BaseCmdLineTool):

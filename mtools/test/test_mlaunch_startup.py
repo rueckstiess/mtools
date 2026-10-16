@@ -51,3 +51,15 @@ def test_store_parameters_pretty_prints_and_normalizes(tmp_path):
                       '--wiredTigerCacheSizeGB 1')
     assert '  ' not in stored
     assert tool.startup_info['27017'] == original
+
+
+def test_normalize_command_keeps_escaped_quote_inside_double_quotes():
+    command = 'mongod --setParameter "a=\\"x  y\\"   z"   --port 1'
+    assert (_normalize_command(command) ==
+            'mongod --setParameter "a=\\"x  y\\"   z" --port 1')
+
+
+def test_normalize_command_keeps_no_break_space():
+    command = 'mongod --dbpath /data/a\u00a0b  --port 1'
+    assert (_normalize_command(command) ==
+            'mongod --dbpath /data/a\u00a0b --port 1')
