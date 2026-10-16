@@ -180,7 +180,7 @@ class ShardingInfoMixin(object):
             prev_line = line
 
         # reset logfile
-        self.filehandle.seek(0)
+        self._seek(0)
 
     # FIXME
     def _find_sharding_info_logv2(self):
