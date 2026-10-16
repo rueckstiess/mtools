@@ -31,16 +31,17 @@ def _collapse_coordinates(value):
     query. Keeping the vertices stops ``mloginfo --queries`` from grouping
     those queries by shape.
     """
+    if isinstance(value, list):
+        # e.g. the geometries of a GeometryCollection
+        return [_collapse_coordinates(item) for item in value]
     if not isinstance(value, dict):
         return value
     collapsed = {}
     for key, item in value.items():
         if key == 'coordinates':
             collapsed[key] = 1
-        elif isinstance(item, dict):
-            collapsed[key] = _collapse_coordinates(item)
         else:
-            collapsed[key] = item
+            collapsed[key] = _collapse_coordinates(item)
     return collapsed
 
 

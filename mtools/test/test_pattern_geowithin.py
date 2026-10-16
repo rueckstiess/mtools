@@ -64,3 +64,33 @@ def test_find_log_line_pattern_hides_polygon_vertices():
     pattern = LogEvent(line).pattern
     assert '"coordinates": 1' in pattern
     assert '-65.62804' not in pattern
+
+
+def test_geometry_collection_coordinates_collapse_to_one():
+    doc = {
+        'loc': {
+            '$geoIntersects': {
+                '$geometry': {
+                    'type': 'GeometryCollection',
+                    'geometries': [
+                        {'type': 'Point', 'coordinates': [-65.6, 21.7]},
+                        {'type': 'LineString',
+                         'coordinates': [[-65.6, 21.7], [-65.5, 21.8]]},
+                    ],
+                }
+            }
+        }
+    }
+    pattern = json2pattern(doc)
+    assert '-65.6' not in pattern
+    assert '21.7' not in pattern
+    assert pattern.count('"coordinates": 1') == 2
+
+
+def test_geometry_collection_string_coordinates_collapse_to_one():
+    pattern = json2pattern(
+        '{loc: {$geoWithin: {$geometry: {type: "GeometryCollection", '
+        'geometries: [ {type: "Point", coordinates: [-65.6, 21.7]} ]}}}}')
+    assert pattern == (
+        '{"loc": {"$geoWithin": {"$geometry": {"geometries": '
+        '[{"coordinates": 1, "type": 1}], "type": 1}}}}')
