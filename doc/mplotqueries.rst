@@ -81,7 +81,10 @@ Operation Start Time
    Sometimes, it can be useful to see when operations started instead. For
    operations that have a duration (queries, updates, etc.) mplotqueries can
    subtract the duration and plot the operation when it started instead. Turn
-   this feature on with the ``--optime-start`` flag.
+   this feature on with the ``--optime-start`` flag. The initial view includes
+   those start times, so an operation that began before the first log line is
+   still on screen. ``--type durline`` plots each operation from its start to
+   its end and uses the same view.
 
 Output to File
 --------------
