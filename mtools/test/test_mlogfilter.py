@@ -326,8 +326,8 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             le = LogEvent(line)
             assert(le.thread == thread)
-            md = re.match("^.* connection accepted from [0-9\.:]+ "
-                          "#(?P<conn>[0-9]+) ", le.line_str)
+            md = re.match(r"^.* connection accepted from [0-9\.:]+ "
+                          r"#(?P<conn>[0-9]+) ", le.line_str)
             if md is None:
                 assert(le.conn is None)
             else:
@@ -338,8 +338,8 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         for line in output.splitlines():
             le = LogEvent(line)
-            md = re.match("^.* connection accepted from [0-9\.:]+ "
-                          "#(?P<conn>[0-9]+) ", le.line_str)
+            md = re.match(r"^.* connection accepted from [0-9\.:]+ "
+                          r"#(?P<conn>[0-9]+) ", le.line_str)
             assert(le.conn == 'conn1')
             if md is None:
                 assert(le.thread == 'conn1')
