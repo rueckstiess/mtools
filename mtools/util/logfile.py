@@ -289,6 +289,7 @@ class LogFile(InputSource):
         """Get next line, adjust for year rollover and hint datetime format."""
         # use readline here because next() iterator uses internal readahead
         # buffer so seek position is wrong
+        offset = self.filehandle.tell() if self._lines_read is None else None
         line = self.filehandle.readline()
 
         if isinstance(line, bytes):
@@ -296,7 +297,11 @@ class LogFile(InputSource):
 
         if line == '':
             raise StopIteration
-        self._lines_read += 1
+        if self._lines_read is not None:
+            self._lines_read += 1
+            location = "%s line %i" % (self.name, self._lines_read)
+        else:
+            location = "%s byte offset %i" % (self.name, offset)
         line = line.rstrip('\n')
         try:
             le = LogEvent(line)
@@ -318,8 +323,7 @@ class LogFile(InputSource):
         except StopIteration:
             raise
         except Exception as exc:
-            self._report_parse_error(
-                line, exc, "%s line %i" % (self.name, self._lines_read))
+            self._report_parse_error(line, exc, location)
             raise
 
         return le
@@ -344,6 +348,7 @@ class LogFile(InputSource):
                 # future iterations start from the beginning
                 if not self.from_stdin:
                     self.filehandle.seek(0)
+                    self._lines_read = 0
 
                 # return (instead of raising StopIteration exception) per PEP 479
                 return
@@ -640,6 +645,7 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._lines_read = 0
 
     def _calculate_bounds(self):
         """Calculate beginning and end of logfile."""
@@ -658,14 +664,16 @@ class LogFile(InputSource):
         for line in self.filehandle:
             lines_checked += 1
             # LogEvent will determine the LogFormat
+            # datetime is parsed lazily, so read it inside the try
             try:
                 logevent = LogEvent(line)
+                when = logevent.datetime
             except Exception as exc:
                 self._report_parse_error(
                     line, exc, "%s line %i" % (self.name, lines_checked))
                 raise
 
-            if logevent.datetime:
+            if when:
                 self._start = logevent.datetime
                 self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
@@ -689,11 +697,12 @@ class LogFile(InputSource):
         for line in reversed(self.filehandle.readlines()):
             try:
                 logevent = LogEvent(line)
+                when = logevent.datetime
             except Exception as exc:
                 self._report_parse_error(
                     line, exc, "%s near the end" % self.name)
                 raise
-            if logevent.datetime:
+            if when:
                 self._end = logevent.datetime
                 break
 
@@ -706,6 +715,7 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._lines_read = 0
         self._bounds_calculated = True
 
         return True
@@ -768,9 +778,14 @@ class LogFile(InputSource):
         # move back to last newline char
         if newline_pos == -1:
             self.filehandle.seek(0)
+            self._lines_read = 0
             return self.next()
 
         self.filehandle.seek(newline_pos - jump_back + 1, 1)
+
+        # line count is unknown after a relative seek
+
+        self._lines_read = None
 
         # roll forward until we found a line with a datetime
         try:
@@ -953,6 +968,7 @@ class LogFile(InputSource):
 
         # reset logfile
         self.filehandle.seek(0)
+        self._lines_read = 0
 
     # FIXME
     def _find_sharding_info_logv2(self):
@@ -1004,19 +1020,26 @@ class LogFile(InputSource):
 
             # check if start_dt is already smaller than first datetime
             self.filehandle.seek(0)
+            self._lines_read = 0
             le = self.next()
             if le.datetime and le.datetime >= start_dt:
                 self.filehandle.seek(0)
+                self._lines_read = 0
                 return
 
             le = None
             self.filehandle.seek(0)
+            self._lines_read = 0
 
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
 
                 self.filehandle.seek(step_size, 1)
+
+                # line count is unknown after a relative seek
+
+                self._lines_read = None
                 le = self._find_curr_line()
                 if not le:
                     break
@@ -1033,5 +1056,7 @@ class LogFile(InputSource):
             while self.filehandle.tell() >= 2 and (le.datetime is None or
                                                    le.datetime >= start_dt):
                 self.filehandle.seek(-2, 1)
+                # line count is unknown after a relative seek
+                self._lines_read = None
 
                 le = self._find_curr_line(prev=True)

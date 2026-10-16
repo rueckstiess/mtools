@@ -266,3 +266,49 @@ class TestLogFileParseErrors(object):
         assert "near the end" in error
         assert "tail.log" in error
 
+
+
+BAD_DATE_LINE = (
+    "2014-13-45T23:16:20.437-0400 [initandlisten] bad date\n"
+)
+
+
+class TestLogFileBadDates(object):
+    """An unparseable timestamp names the file and line."""
+
+    def test_open_reports_bad_date_on_the_first_line(self, tmp_path, capsys):
+        path = tmp_path / "baddate.log"
+        path.write_text(BAD_DATE_LINE)
+
+        with open(path, "rb") as handle:
+            with pytest.raises(ValueError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "baddate.log line 1" in error
+        assert "bad date" in error
+
+    def test_end_scan_reports_bad_date(self, tmp_path, capsys):
+        path = tmp_path / "badtail.log"
+        path.write_text(VALID_LOG_LINE + BAD_DATE_LINE)
+
+        with open(path, "rb") as handle:
+            with pytest.raises(ValueError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "badtail.log near the end" in error
+
+
+def test_relative_seek_reports_byte_offset(tmp_path, capsys):
+    path = tmp_path / "offset.log"
+    path.write_text(VALID_LOG_LINE * 50 + "{not json\n" + VALID_LOG_LINE)
+    size = len(VALID_LOG_LINE) * 50
+    with open(path, "rb") as handle:
+        logfile = LogFile(handle)
+        logfile.filehandle.seek(size - 10)
+        logfile._find_curr_line()
+        capsys.readouterr()
+        with pytest.raises(json.JSONDecodeError):
+            logfile.next()
+    assert "offset.log byte offset %i" % size in capsys.readouterr().err
