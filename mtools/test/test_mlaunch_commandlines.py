@@ -392,6 +392,116 @@ class TestStripKeyFile(object):
         assert '--shardsvr' in quoted
 
 
+HELP_TEXT = b"""
+  --dbpath arg
+  --logpath arg
+  --port arg
+  --fork
+  --replSet arg
+  --configsvr
+  --shardsvr
+  --slowms arg
+  --configdb arg
+  --keyFile arg
+  --wiredTigerCacheSizeGB arg
+"""
+
+
+class TestMLaunchOwnedArguments(object):
+    """Extra mongod flags that repeat options mlaunch already emits."""
+
+    def _tool(self, monkeypatch):
+        tool = MLaunchTool(test=True)
+        tool.args = {
+            'auth': False,
+            'hostname': 'localhost',
+            'binarypath': None,
+            'sharded': False,
+            'replicaset': False,
+            'verbose': False,
+        }
+
+        def fake_help(binary, argument, fatal=True):
+            return HELP_TEXT
+
+        monkeypatch.setattr(
+            'mtools.mlaunch.mlaunch.check_mongo_server_output', fake_help)
+        return tool
+
+    def test_filter_drops_owned_flags_and_warns_once(self, monkeypatch, capsys):
+        tool = self._tool(monkeypatch)
+        result = tool._filter_valid_arguments(
+            ['--dbpath', 'mongodb/db_files', '--dbpath', 'other',
+             '--logpath', 'custom.log', '--port', '27018', '--fork',
+             '--replSet', 'other', '--slowms', '1000', '--keyFile', 'secret'],
+            'mongod',
+            owned={'--dbpath', '--logpath', '--port', '--fork', '--replSet'})
+
+        assert result == '--slowms "1000" --keyFile "secret"'
+        output = capsys.readouterr().out
+        for flag in ('--dbpath', '--logpath', '--port', '--fork', '--replSet'):
+            assert output.count('warning: ignoring %s;' % flag) == 1
+
+    def test_filter_drops_equals_form_without_taking_the_next_flag(
+            self, monkeypatch):
+        tool = self._tool(monkeypatch)
+        result = tool._filter_valid_arguments(
+            ['--dbpath=mongodb/db_files', '--fork', '--slowms', '1000'],
+            'mongod', owned={'--dbpath', '--fork'})
+        assert result == '--slowms "1000"'
+
+    def test_construct_mongod_keeps_a_single_dbpath(self, monkeypatch, capsys):
+        tool = self._tool(monkeypatch)
+        tool.unknown_args = [
+            '--dbpath', 'mongodb/db_files', '--logpath', 'custom.log',
+            '--port', '27018', '--fork', '--slowms', '1000',
+            '--keyFile', 'secret']
+        tool._construct_mongod('/data/db', '/data/mongod.log', 27017)
+        command = tool.startup_info['27017']
+
+        assert command.count('--dbpath') == 1
+        assert '/data/db' in command
+        assert 'mongodb/db_files' not in command
+        assert command.count('--logpath') == 1
+        assert 'custom.log' not in command
+        assert command.count('--port') == 1
+        assert '27018' not in command
+        assert command.count('--fork') == 1
+        assert '--slowms "1000"' in command
+        assert '--keyFile "secret"' in command
+        assert 'warning: ignoring --dbpath;' in capsys.readouterr().out
+
+    def test_construct_mongod_keeps_its_replset_and_role(self, monkeypatch):
+        tool = self._tool(monkeypatch)
+        tool.unknown_args = ['--replSet', 'other', '--shardsvr', '--slowms', '1']
+        tool._construct_mongod(
+            '/data/db', '/data/mongod.log', 27017,
+            replset='shard01', extra='--shardsvr')
+        command = tool.startup_info['27017']
+
+        assert command.count('--replSet') == 1
+        assert 'shard01' in command
+        assert 'other' not in command
+        assert command.count('--shardsvr') == 1
+        assert '--slowms "1"' in command
+
+    def test_construct_mongos_keeps_its_configdb(self, monkeypatch):
+        tool = self._tool(monkeypatch)
+        tool.unknown_args = [
+            '--logpath', 'm.log', '--port', '1',
+            '--configdb', 'localhost:27019', '--slowms', '5']
+        tool._construct_mongos('/data/mongos.log', 27017, 'localhost:27018')
+        command = tool.startup_info['27017']
+
+        assert command.count('--logpath') == 1
+        assert 'm.log' not in command
+        assert command.count('--port') == 1
+        assert command.count('--configdb') == 1
+        assert 'localhost:27018' in command
+        assert 'localhost:27019' not in command
+        assert '--slowms "5"' in command
+
+
 class TestMLaunchStartWhenRunning(object):
     """start() when the environment is already up. No mongod is launched."""
 

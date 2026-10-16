@@ -272,6 +272,20 @@ class MLaunchTool(BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
     UNSUPPORTED_CONFIG_ARGS = ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']
+    # These repeat options the constructed command already contains.
+    OWNED_FLAG_REASONS = {
+        '--dbpath': 'mlaunch sets it from --dir',
+        '--logpath': 'mlaunch sets it from --dir',
+        '--port': 'mlaunch sets it from --port',
+        '--fork': 'mlaunch adds it when it starts the process',
+        '--replSet': 'mlaunch sets it from the replica set name',
+        '--configsvr': 'mlaunch sets it for this node',
+        '--shardsvr': 'mlaunch sets it for this node',
+        '--configdb': 'mlaunch sets it from the config servers',
+    }
+    OWNED_FLAGS_WITHOUT_VALUE = frozenset({
+        '--fork', '--configsvr', '--shardsvr',
+    })
 
     def __init__(self, test=False):
         BaseCmdLineTool.__init__(self)
@@ -1702,8 +1716,33 @@ class MLaunchTool(BaseCmdLineTool):
         matches = self.get_tagged(tags)
         return matches
 
+    def _owned_server_args(self, binary, extra='', replset=None):
+        """Flags the constructed command already sets."""
+        owned = ['--logpath', '--port']
+        if binary == 'mongod':
+            owned.append('--dbpath')
+        if os.name != 'nt':
+            owned.append('--fork')
+        if replset:
+            owned.append('--replSet')
+        if binary == 'mongos':
+            owned.append('--configdb')
+        for flag in ('--configsvr', '--shardsvr'):
+            if flag in extra.split():
+                owned.append(flag)
+        return owned
+
+    def _warn_owned_argument(self, binary, argname):
+        """Warn once when an extra flag repeats one mlaunch already sets."""
+        key = binary + argname
+        if self.ignored_arguments.get(key) is not None:
+            return
+        self.ignored_arguments[key] = True
+        reason = self.OWNED_FLAG_REASONS.get(argname, 'mlaunch sets it')
+        print(f"warning: ignoring {argname}; {reason}")
+
     def _filter_valid_arguments(self, arguments, binary="mongod",
-                                config=False):
+                                config=False, owned=None):
         """
         Return a list of accepted arguments.
 
@@ -1711,6 +1750,9 @@ class MLaunchTool(BaseCmdLineTool):
         (mongod, mongos). If an argument does not start with '-' but its
         preceding argument was accepted, then it is accepted as well. Example
         ['--slowms', '1000'] both arguments would be accepted for a mongod.
+
+        Flags in `owned` are dropped, along with a separate value token.
+        mlaunch already puts those on the command line.
         """
         # get the help list of the binary
         if self.args and self.args['binarypath']:
@@ -1723,6 +1765,7 @@ class MLaunchTool(BaseCmdLineTool):
                 "Is the binary in your path?" % (exc, binary))
 
         accepted_arguments = []
+        owned_args = set(owned or ())
         # extract all arguments starting with a '-'
         for line in [option for option in out.decode('utf-8').split('\n')]:
             line = line.lstrip()
@@ -1737,11 +1780,24 @@ class MLaunchTool(BaseCmdLineTool):
 
         # filter valid arguments
         result = []
+        skip_value = False
         for i, arg in enumerate(arguments):
+            if skip_value:
+                skip_value = False
+                if not arg.startswith('-'):
+                    continue
             if arg.startswith('-'):
                 # check if the binary accepts this argument
                 # or special case -vvv for any number of v
                 argname = arg.split('=', 1)[0]
+                if argname in owned_args:
+                    self._warn_owned_argument(binary, argname)
+                    takes_value = (
+                        '=' not in arg and
+                        argname not in self.OWNED_FLAGS_WITHOUT_VALUE)
+                    if takes_value:
+                        skip_value = True
+                    continue
                 if (binary.endswith('mongod') and config and
                         argname in self.UNSUPPORTED_CONFIG_ARGS):
                     if self.args['verbose']:
@@ -2267,8 +2323,11 @@ class MLaunchTool(BaseCmdLineTool):
 
         if self.unknown_args:
             config = '--configsvr' in extra
-            extra = self._filter_valid_arguments(self.unknown_args, "mongod",
-                                                 config=config) + ' ' + extra
+            owned = self._owned_server_args('mongod', extra=extra,
+                                            replset=replset)
+            extra = self._filter_valid_arguments(
+                self.unknown_args, "mongod", config=config, owned=owned
+            ) + ' ' + extra
 
         # set WiredTiger cache size to 1 GB by default
         if ('--wiredTigerCacheSizeGB' not in extra and
@@ -2322,8 +2381,9 @@ class MLaunchTool(BaseCmdLineTool):
                 auth_param = f'{auth_param} --keyFile "{key_path}"'
 
         if self.unknown_args:
-            extra = self._filter_valid_arguments(self.unknown_args,
-                                                 "mongos") + extra
+            owned = self._owned_server_args('mongos', extra=extra)
+            extra = self._filter_valid_arguments(
+                self.unknown_args, "mongos", owned=owned) + extra
 
         extra += ' ' + self._get_ssl_server_args()
         extra += ' ' + self._get_tls_server_args()
