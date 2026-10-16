@@ -4,9 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    # Needs Ubuntu LTS with supported mongodb-version server package
-    # MongoDB 8.0 is supported on Ubuntu 20.04, 22.04, and 24.04
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
@@ -22,10 +20,6 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             test-requirements.txt
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.1
-        with:
-          mongodb-version: "8.0"
       - name: Run test
         run: |
           python -m pip install -U pip
