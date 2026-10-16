@@ -12,7 +12,7 @@ Clone the repository
 Then change into the directory and install in "development" mode
 
 	cd mtools
-	sudo python setup.py develop
+	pip3 install -e '.[all]'
 
 No changes to your `$PATH` and `$PYTHONPATH` environment variables are needed.
 

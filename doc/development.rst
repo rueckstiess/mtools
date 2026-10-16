@@ -39,20 +39,11 @@ Using a development branch
       cd mtools
       git checkout develop
 
-#. Install the mtools scripts in development mode using either:
+#. Install the mtools scripts in development mode:
 
-   *  ``pip3`` (recommended as a convenience for installing additional
-      dependencies):
+   .. code-block:: bash
 
-      .. code-block:: bash
-
-         sudo pip3 install -e '/path/to/cloned/repo[all]'
-
-   *  ``setup.py``
-
-      .. code-block:: bash
-
-         sudo python3 setup.py develop
+      pip3 install -e '/path/to/cloned/repo[all]'
 
 #. Test the installation by confirming that the scripts tab-complete from any
    directory:
