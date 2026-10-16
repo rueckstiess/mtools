@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import ipaddress
 import json
 import os
 import queue as Queue
@@ -56,8 +57,75 @@ class MongoConnection(Connection):
         Connection.__init__(self, *args, **kwargs)
 
 
+def _parse_bind_ips(argv):
+    """Return addresses from ``--bind_ip`` in a mongod argument list."""
+    if not argv:
+        return []
+    addresses = []
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == '--bind_ip' and index + 1 < len(argv):
+            addresses.extend(_split_bind_ip(argv[index + 1]))
+            index += 2
+            continue
+        if arg.startswith('--bind_ip='):
+            addresses.extend(_split_bind_ip(arg.split('=', 1)[1]))
+        index += 1
+    return addresses
+
+
+def _split_bind_ip(value):
+    parts = []
+    for part in value.split(','):
+        part = part.strip().strip('"').strip("'")
+        if len(part) >= 2 and part[0] == '[' and part[-1] == ']':
+            part = part[1:-1]
+        if part:
+            parts.append(part)
+    return parts
+
+
+def _ip_address(value):
+    try:
+        return ipaddress.ip_address(value)
+    except ValueError:
+        return None
+
+
+def format_node_address(host, port):
+    """Return ``host:port``, with brackets when host is an IPv6 address."""
+    if isinstance(_ip_address(host), ipaddress.IPv6Address):
+        return '[%s]:%s' % (host, port)
+    return '%s:%s' % (host, port)
+
+
+def dial_host(hostname, argv):
+    """Host that reaches a node mlaunch started.
+
+    PyMongo resolves ``localhost`` as IPv4 only. A node bound only to an
+    IPv6 address has to be dialed at that address. ``--bind_ip ::`` listens
+    on every IPv6 interface, so the dial address is the loopback ``::1``.
+    """
+    ipv4 = []
+    ipv6 = []
+    for address in _parse_bind_ips(argv):
+        ip = _ip_address(address)
+        if isinstance(ip, ipaddress.IPv4Address):
+            ipv4.append(address)
+        elif isinstance(ip, ipaddress.IPv6Address):
+            ipv6.append(address)
+    if ipv6 and not ipv4:
+        # "::" is every IPv6 interface, which is not a dial target.
+        if _ip_address(ipv6[0]) == ipaddress.ip_address('::'):
+            return '::1'
+        return ipv6[0]
+    return hostname or 'localhost'
+
+
 def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
-                  ssl_pymongo_options=None, tls_pymongo_options=None):
+                  ssl_pymongo_options=None, tls_pymongo_options=None,
+                  node_host='localhost'):
     """
     Ping server and wait for response.
 
@@ -69,7 +137,7 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
     If queue is provided, it will place the results in the message queue and
     return, otherwise it will just return the result directly.
     """
-    host = 'localhost:%i' % port
+    host = format_node_address(node_host, port)
     start_time = time.time()
     while True:
         if (time.time() - start_time) > timeout:
@@ -98,13 +166,14 @@ def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
                 return True
 
 
-def shutdown_host(port, username=None, password=None, authdb=None):
+def shutdown_host(port, username=None, password=None, authdb=None,
+                  node_host='localhost'):
     """
     Send the shutdown command to a mongod or mongos on given port.
 
     This function can be called as a separate thread.
     """
-    host = 'localhost:%i' % port
+    host = format_node_address(node_host, port)
     try:
         if username and password and authdb:
             if authdb != "admin":
@@ -793,7 +862,7 @@ class MLaunchTool(BaseCmdLineTool):
             if first_init:
                 # add shards
                 mongos = sorted(self.get_tagged(['mongos']))
-                con = self.client('localhost:%i' % mongos[0])
+                con = self.client(self._node_address(mongos[0]))
 
                 shards_to_add = len(self.shard_connection_str)
                 nshards = con['config']['shards'].count_documents({})
@@ -913,11 +982,13 @@ class MLaunchTool(BaseCmdLineTool):
         # in sharded env, if --mongos 0, kill the dummy mongos
         if self.args['sharded'] and self.args['mongos'] == 0:
             port = self.args['port']
-            print("shutting down temporary mongos on localhost:%s" % port)
+            print("shutting down temporary mongos on %s"
+                  % self._node_address(port))
             username = self.args['username'] if self.args['auth'] else None
             password = self.args['password'] if self.args['auth'] else None
             authdb = self.args['auth_db'] if self.args['auth'] else None
-            shutdown_host(port, username, password, authdb)
+            shutdown_host(port, username, password, authdb,
+                          node_host=self._dial_host())
 
         # discover again, to get up-to-date info
         self.discover()
@@ -968,6 +1039,29 @@ class MLaunchTool(BaseCmdLineTool):
 
         print("Detected mongod version: %s" % current_version)
         return current_version
+
+    def _bind_argv(self):
+        """Mongod arguments that carry the bind address for this environment."""
+        command = self.args.get('command') if self.args else None
+        if command and command != 'init':
+            stored = getattr(self, 'loaded_unknown_args', None)
+            if stored:
+                return stored
+        return getattr(self, 'unknown_args', None) or []
+
+    def _dial_host(self):
+        """Host name or IP that reaches a node in this environment."""
+        hostname = None
+        if self.args:
+            hostname = self.args.get('hostname')
+        if not hostname:
+            loaded = getattr(self, 'loaded_args', None) or {}
+            hostname = loaded.get('hostname')
+        return dial_host(hostname, self._bind_argv())
+
+    def _node_address(self, port):
+        """``host:port`` for a client connection to one of our nodes."""
+        return format_node_address(self._dial_host(), port)
 
     def client(self, host_and_port, **kwargs):
         kwargs.update(self.ssl_pymongo_options)
@@ -1357,7 +1451,7 @@ class MLaunchTool(BaseCmdLineTool):
 
                 try:
                     mrsc = self.client(
-                        ','.join('localhost:%i' % i for i in port_range),
+                        ','.join(self._node_address(i) for i in port_range),
                         replicaSet=rs_name)
 
                     # primary, secondaries, arbiters
@@ -1396,7 +1490,8 @@ class MLaunchTool(BaseCmdLineTool):
             port = i + current_port
 
             try:
-                mc = self.client('localhost:%i' % port, directConnection=True)
+                mc = self.client(self._node_address(port),
+                                 directConnection=True)
                 mc.admin.command('ping')
                 running = True
 
@@ -1415,7 +1510,7 @@ class MLaunchTool(BaseCmdLineTool):
     def is_running(self, port):
         """Return True if a host on a specific port is running."""
         try:
-            con = self.client('localhost:%s' % port, directConnection=True)
+            con = self.client(self._node_address(port), directConnection=True)
             con.admin.command('ping')
             return True
         except (AutoReconnect, ConnectionFailure, OperationFailure):
@@ -1483,7 +1578,8 @@ class MLaunchTool(BaseCmdLineTool):
         for port in ports:
             threads.append(threading.Thread(target=wait_for_host, args=(
                 port, interval, timeout, to_start, queue,
-                self.ssl_pymongo_options, self.tls_pymongo_options)))
+                self.ssl_pymongo_options, self.tls_pymongo_options,
+                self._dial_host())))
 
         if self.args and 'verbose' in self.args and self.args['verbose']:
             print("waiting for nodes %s..."
@@ -1875,7 +1971,7 @@ class MLaunchTool(BaseCmdLineTool):
                 print('Skipping replica set initialization for %s' % name)
             return
 
-        con = self.client('localhost:%i' % port, directConnection=True)
+        con = self.client(self._node_address(port), directConnection=True)
         try:
             rs_status = con['admin'].command({'replSetGetStatus': 1})
             return rs_status
@@ -1903,7 +1999,8 @@ class MLaunchTool(BaseCmdLineTool):
                 raise SystemExit(f"replica set '{name}' failed to initialize.")
 
     def _add_user(self, port, name, password, database, roles):
-        con = self.client('localhost:%i' % port, serverSelectionTimeoutMS=10000)
+        con = self.client(self._node_address(port),
+                          serverSelectionTimeoutMS=10000)
 
         if database == "$external":
             password = None
@@ -1955,8 +2052,9 @@ class MLaunchTool(BaseCmdLineTool):
 
     def _wait_for_primary(self):
 
-        hosts = ([x['host']
-                  for x in self.config_docs[self.args['name']]['members']])
+        members = self.config_docs[self.args['name']]['members']
+        hosts = [self._node_address(member['host'].rsplit(':', 1)[-1])
+                 for member in members]
         rs_name = self.config_docs[self.args['name']]['_id']
         mrsc = self.client(hosts, replicaSet=rs_name,
                            serverSelectionTimeoutMS=30000)
