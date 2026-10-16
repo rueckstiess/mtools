@@ -27,6 +27,7 @@ Usage
               [--markers MARKERS [MARKERS ...]] [--timezone N [N ...]]
               [--namespace NS] [--operation OP] [--thread THREAD]
               [--slow [SLOW]]  [--fast [FAST]] [--scan]
+              [--queryratio RATIO]
               [--word WORD [WORD ...]]
               [--from FROM [FROM ...]] [--to TO [TO ...]]
 
@@ -84,15 +85,16 @@ JSON Output
    If this flag is used, the output will be in JSON format instead of the
    regular log line string. Use this in conjunction with MongoDB's
    ``mongoimport`` to store the log file data in a MongoDB database.
+   ``--pretty`` prints each document indented.
 
-   The values that are extracted and stored as separate fields in the resulting
-   JSON document are (some may not > apply for all lines): ``line_str`` (the
-   full line as string), ``split_tokens`` (the line as string tokens split on
-   whitespace, stored as array of strings), ``datetime`` (the datetime for this
-   line), ``operation``, ``thread``, ``namespace``, ``nscanned``,
-   ``ntoreturn``, ``nreturned``, ``ninserted``, ``nupdated``, ``duration`` (the
-   duration in milliseconds), ``r``, ``w`` (read or write lock times in
-   microseconds), ``numYields`` (the number of yields for this operation)
+   A logv2 line is written unchanged. A legacy line is converted to the
+   MongoDB 4.4 structured-log field names: ``t.$date``, ``s`` (severity),
+   ``c`` (component), ``ctx`` (thread), ``msg``, and ``attr``. ``attr`` holds
+   the parsed counters under their current names, including ``ns``,
+   ``durationMillis``, ``keysExamined``, ``docsExamined``, ``nReturned``,
+   ``planSummary``, and ``queryPattern``. A legacy line has no log id, so
+   ``id`` is omitted. Compatibility is the field names; the original command
+   document is not reconstructed.
 
    For example:
 
@@ -248,6 +250,14 @@ Collection Scans
    must be larger than 100. These values have proven useful to detect potential
    collection scans. For confirmed collection scans, instead use
    ``--planSummary COLLSCAN``.
+
+``--queryratio RATIO``
+   Returns lines where ``docsExamined / nreturned`` is greater than
+   ``RATIO``. A line with ``nreturned`` of 0 is treated as 1. This matches
+   the Atlas "Query Targeting: Scanned Objects / Returned" alert, including
+   queries that examine fewer than 10000 documents and so do not match
+   ``--scan``. Lines that have no ``docsExamined`` counter use ``nscanned``
+   (``keysExamined``).
 
 Keywords
 --------

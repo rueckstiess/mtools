@@ -1,3 +1,4 @@
+import io
 import os
 from datetime import datetime
 import re
@@ -11,7 +12,7 @@ from mtools.util.logfile import LogFile
 
 class TestUtilLogFile(object):
 
-    def setup(self):
+    def setup_method(self):
         """Start up method for LogFile fixture."""
 
         # load logfile(s)
@@ -212,3 +213,164 @@ class TestUtilLogFile(object):
         assert ('step 6 of 6', '213') in chunk_moved_to[4]
         assert chunk_moved_to[5] == "success"
 
+
+def _logfile(text, name='wrapped.log'):
+    handle = io.BytesIO(text.encode('utf-8'))
+    handle.name = name
+    return LogFile(handle)
+
+
+WRAPPED_UPDATE = (
+    '2016-06-14T23:01:00.886Z I WRITE    [conn78263] update mydb.clxn1 '
+    'query: { _id: { $eq: "id1" } } update: { $setOnInsert: '
+    '{ text: "<?xml version="1.0"?>\n'
+    '<xxxxxx type="Axxxxxxxxxxxxxxxxx">\n'
+    '  <xxxxxxxx ..." } } keysExamined:1 docsExamined:1 nMatched:1 '
+    'nModified:0 numYields:1 129ms\n'
+    '2016-06-14T23:01:05.886Z I COMMAND  [conn78357] command mydb.clxn2 '
+    'command: find { find: "clxn2", filter: { _id: "id2" } } '
+    'keysExamined:1 nreturned:1 113ms\n'
+)
+
+
+def _assert_update_and_find(logfile):
+    events = list(logfile)
+    assert len(events) == 2
+    assert events[0].operation == 'update'
+    assert events[0].namespace == 'mydb.clxn1'
+    assert events[0].duration == 129
+    assert '<xxxxxx' in events[0].line_str
+    assert events[1].operation == 'command'
+    assert events[1].namespace == 'mydb.clxn2'
+    assert events[1].command == 'find'
+    assert events[1].duration == 113
+
+
+def test_wrapped_query_is_one_record():
+    """A newline inside a query stays on that operation."""
+    logfile = _logfile(WRAPPED_UPDATE)
+    assert len(logfile) == 2
+    _assert_update_and_find(logfile)
+
+
+def test_wrapped_query_with_numeric_offset_stays_two_records():
+    text = WRAPPED_UPDATE.replace('.886Z', '.886+0100')
+    _assert_update_and_find(_logfile(text))
+
+
+def test_wrapped_query_in_ctime_stays_two_records():
+    text = (
+        'Tue Jun 14 23:01:00.886 [conn78263] update mydb.clxn1 '
+        'query: { _id: { $eq: "id1" } } update: { $setOnInsert: '
+        '{ text: "<?xml version="1.0"?>\n'
+        '<xxxxxx type="Axxxxxxxxxxxxxxxxx">\n'
+        '  <xxxxxxxx ..." } } keysExamined:1 docsExamined:1 129ms\n'
+        'Tue Jun 14 23:01:05.886 [conn78357] command mydb.clxn2 '
+        'command: find { find: "clxn2", filter: { _id: "id2" } } 113ms\n'
+    )
+    _assert_update_and_find(_logfile(text))
+
+
+def test_banner_after_duration_is_not_part_of_the_record():
+    text = (
+        '2016-06-14T23:01:00.886Z I WRITE    [conn1] update mydb.clxn1 '
+        'query: { a: 1.0 } 129ms\n'
+        '****************************\n'
+        '2016-06-14T23:01:05.886Z I COMMAND  [conn2] command mydb.clxn2 '
+        'command: find { find: "clxn2", filter: { _id: "id2" } } 113ms\n'
+    )
+    logfile = _logfile(text)
+    events = list(logfile)
+    assert len(events) == 2
+    assert events[0].duration == 129
+    assert '****' not in events[0].line_str
+    assert events[1].duration == 113
+
+
+def test_continuation_that_ends_with_the_letters_ms_still_joins():
+    text = (
+        '2016-06-14T23:01:00.886Z I WRITE    [conn1] update mydb.clxn1 '
+        'query: { a: 1.0 } update: { text: "items\n'
+        'next" } 15ms\n'
+        '2016-06-14T23:01:05.886Z I COMMAND  [conn2] command mydb.clxn2 '
+        'command: find { find: "clxn2" } 4ms\n'
+    )
+    events = list(_logfile(text))
+    assert len(events) == 2
+    assert events[0].duration == 15
+    assert 'next' in events[0].line_str
+    assert events[1].namespace == 'mydb.clxn2'
+
+
+def test_orphan_continuation_is_not_glued_to_the_next_record():
+    text = (
+        '<xxxxxx leftover\n'
+        '  tail } } 50ms\n'
+        '2016-06-14T23:01:05.886Z I COMMAND  [conn2] command mydb.clxn2 '
+        'command: find { find: "clxn2", filter: { _id: "id2" } } 113ms\n'
+    )
+    events = list(_logfile(text))
+    assert len(events) == 1
+    assert events[0].namespace == 'mydb.clxn2'
+    assert events[0].duration == 113
+    assert 'xxxxxx' not in events[0].line_str
+
+
+def test_wrapped_query_on_stdin_keeps_both_records():
+    handle = io.StringIO(WRAPPED_UPDATE)
+    handle.name = '<stdin>'
+    events = list(LogFile(handle))
+    assert len(events) == 2
+    assert events[0].duration == 129
+    assert events[1].duration == 113
+    assert events[0].namespace == 'mydb.clxn1'
+
+
+def test_structured_logs_stay_one_record_per_line():
+    text = (
+        '{"t":{"$date":"2022-11-22T00:00:02.933+01:00"},"s":"I",'
+        '"c":"COMMAND","id":51803,"ctx":"conn1","msg":"Slow query",'
+        '"attr":{"type":"command","ns":"test.foo","command":{"find":"foo"},'
+        '"durationMillis":5}}\n'
+        '{"t":{"$date":"2022-11-22T00:00:03.000+01:00"},"s":"I",'
+        '"c":"COMMAND","id":51803,"ctx":"conn1","msg":"Slow query",'
+        '"attr":{"type":"command","ns":"test.bar","command":{"find":"bar"},'
+        '"durationMillis":6}}\n'
+    )
+    events = list(_logfile(text, name='structured.log'))
+    assert len(events) == 2
+    assert events[0].namespace == 'test.foo'
+    assert events[1].namespace == 'test.bar'
+
+
+def test_single_line_logfile_keeps_its_record_count():
+    path = os.path.join(os.path.dirname(mtools.__file__),
+                        'test/logfiles/', 'year_rollover.log')
+    logfile = LogFile(open(path, 'rb'))
+    assert len(logfile) == 1836
+    assert sum(1 for _ in logfile) == 1836
+
+
+
+def test_fast_forward_steps_back_over_multi_line_records():
+    """Seeking backwards lands on record starts, not continuation lines."""
+    from datetime import timezone
+    records = []
+    for i in range(200):
+        records.append(
+            '2016-06-14T23:%02d:%02d.000Z I WRITE    [conn1] update mydb.c '
+            'query: { a: "x\n' % (i // 60, i % 60) +
+            ('continuation line %d\n' % i) * 30 +
+            'end" } nMatched:1 %dms\n' % (100 + i))
+    logfile = _logfile(''.join(records))
+    logfile.fast_forward(datetime(2016, 6, 14, 23, 1, 40,
+                                  tzinfo=timezone.utc))
+    le = logfile.next()
+    assert le.datetime == datetime(2016, 6, 14, 23, 1, 40,
+                                   tzinfo=timezone.utc)
+    assert le.duration == 200
+
+
+def test_duration_suffix_ignores_trailing_whitespace():
+    from mtools.util.logfile import _has_duration_suffix
+    assert _has_duration_suffix('update mydb.c query: { a: 1 } 129ms  ')

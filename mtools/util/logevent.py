@@ -9,6 +9,7 @@ import dateutil.parser
 from dateutil.tz import tzutc
 
 from mtools.util.pattern import json2pattern
+from mtools.util.logevent_profile import ProfileParserMixin
 from mtools.util.logformat import LogFormat
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -20,7 +21,7 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class LogEvent(object):
+class LogEvent(ProfileParserMixin, object):
     """
     Extract information from log line and store properties/variables.
     line_str: the original line string
@@ -53,7 +54,21 @@ class LogEvent(object):
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
                       'command', 'aggregate', 'transaction']
-    log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
+    # D1-D5 are the debug verbosity written into plaintext logs since 4.2
+    # (SERVER-37743). D remains the pre-4.2 debug token.
+    log_levels = ['D', 'D1', 'D2', 'D3', 'D4', 'D5', 'F', 'E', 'W', 'I', 'U']
+
+    @staticmethod
+    def level_matches(level, selected):
+        """Return True if ``level`` is selected.
+
+        ``D`` also matches the 4.2 tokens ``D1`` through ``D5``.
+        """
+        if level in selected:
+            return True
+        return (isinstance(level, str) and len(level) == 2 and
+                level[0] == 'D' and level[1] in '12345' and 'D' in selected)
+
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
@@ -995,7 +1010,7 @@ class LogEvent(object):
         if self._level is None:
             split_tokens = self.split_tokens
 
-            if not split_tokens:
+            if len(split_tokens) < 3:
                 self._level = False
                 self._component = False
                 return
@@ -1165,113 +1180,81 @@ class LogEvent(object):
 
         return output
 
-    def to_json(self, labels=None):
-        """Convert LogEvent object to valid JSON."""
+    def _legacy_message(self):
+        """Return the legacy line with the timestamp, severity, and context removed."""
+        tokens = self.split_tokens or []
+        index = self.datetime_nextpos or 0
+        thread = self.thread
+        if thread and index < len(tokens):
+            if tokens[index].strip('[]') == thread:
+                index += 1
+        return ' '.join(tokens[index:])
+
+    def to_structured(self):
+        """
+        Return a legacy line as a MongoDB 4.4 structured log document.
+
+        Field names match logv2 (``t``, ``s``, ``c``, ``ctx``, ``msg``,
+        ``attr``). Values are the best parse of the plaintext line. A logv2
+        line is already in this shape and is returned unchanged.
+        """
+        if self.logformat == LogFormat.LOGV2:
+            return self.doc
+
+        names = (
+            ('namespace', 'ns'),
+            ('operation', 'type'),
+            ('command', 'command'),
+            ('duration', 'durationMillis'),
+            ('nscanned', 'keysExamined'),
+            ('nscannedObjects', 'docsExamined'),
+            ('nreturned', 'nReturned'),
+            ('ninserted', 'nInserted'),
+            ('nupdated', 'nModified'),
+            ('ndeleted', 'nDeleted'),
+            ('numYields', 'numYields'),
+            ('planSummary', 'planSummary'),
+            ('pattern', 'queryPattern'),
+        )
+        attr = {}
+        for source, dest in names:
+            value = getattr(self, source, None)
+            if value is None or value is False:
+                continue
+            if dest == 'nReturned' and self.operation == 'update':
+                # legacy updates report nMatched, which is parsed into
+                # nreturned
+                dest = 'nMatched'
+            attr[dest] = value
+
+        when = self.datetime
+        level = self.level if isinstance(self.level, str) else None
+        component = self.component if isinstance(self.component, str) else None
+        return {
+            't': {'$date': when.isoformat() if when else None},
+            's': level,
+            'c': component,
+            'ctx': self.thread,
+            'msg': self._legacy_message(),
+            'attr': attr,
+        }
+
+    def to_json(self, pretty=False):
+        """Convert LogEvent object to valid JSON.
+
+        ``pretty`` indents the document. Legacy lines are emitted as
+        structured log documents. logv2 lines are passed through.
+        """
         if self.logformat == LogFormat.LOGV2:
             output = self.doc
+        elif self.logformat == LogFormat.LEGACY:
+            output = self.to_structured()
         else:
-            output = self.to_dict(labels)
+            output = self.to_dict()
 
-        return json.dumps(output, cls=DateTimeEncoder, ensure_ascii=False)
-
-    def _parse_profile_doc(self, doc):
-        """Parse system.profile doc, copy all values to member variables."""
-        self._reset()
-
-        self._split_tokens_calculated = True
-        self._split_tokens = None
-
-        self._duration_calculated = True
-        self._duration = doc[u'millis']
-
-        self._datetime_calculated = True
-        self._datetime = doc[u'ts']
-        if self._datetime.tzinfo is None:
-            self._datetime = self._datetime.replace(tzinfo=tzutc())
-        self._datetime_format = None
-        self._reformat_timestamp('ctime', force=True)
-
-        self._thread_calculated = True
-        self._thread = doc['thread']
-
-        self._operation_calculated = True
-        self._operation = doc[u'op']
-        self._namespace = doc[u'ns']
-
-        self._command_calculated = True
-        if self.operation == 'command':
-            self._command = doc[u'command'].keys()[0]
-
-        # query pattern for system.profile events, all three cases.
-        # See SERVER-13245
-        if 'query' in doc:
-            if 'query' in doc['query'] and isinstance(doc['query']['query'],
-                                                      dict):
-                self._pattern = str(doc['query']['query']).replace("'", '"')
-            elif '$query' in doc['query']:
-                self._pattern = str(doc['query']['$query']).replace("'", '"')
-            else:
-                self._pattern = str(doc['query']).replace("'", '"')
-
-            # sort pattern
-            if ('orderby' in doc['query'] and
-                    isinstance(doc['query']['orderby'], dict)):
-                self._sort_pattern = str(doc['query']
-                                         ['orderby']).replace("'", '"')
-            elif '$orderby' in doc['query']:
-                self._sort_pattern = str(doc['query']
-                                         ['$orderby']).replace("'", '"')
-            else:
-                self._sort_pattern = None
-
-        self._counters_calculated = True
-        self._nscanned = doc[u'nscanned'] if 'nscanned' in doc else None
-        self._ntoreturn = doc[u'ntoreturn'] if 'ntoreturn' in doc else None
-        self._nupdated = doc[u'nupdated'] if 'nupdated' in doc else None
-        self._nreturned = doc[u'nreturned'] if 'nreturned' in doc else None
-        self._ninserted = doc[u'ninserted'] if 'ninserted' in doc else None
-        self._ndeleted = doc[u'ndeleted'] if 'ndeleted' in doc else None
-        self._numYields = doc[u'numYield'] if 'numYield' in doc else None
-        self._txnNumber = doc[u'txnNumber'] if 'txnNumber' in doc else None
-        self._lsid = doc[u'lsid'] if 'lsid' in doc else None
-        self._autocommit = doc[u'autocommit'] if 'autocommit' in doc else None
-        self._readConcern = doc[u'level'] if 'level' in doc else None
-        self._timeActiveMicros = doc[u'timeActiveMicros'] if 'timeActiveMicros' in doc else None
-        self._timeInactiveMicros = doc[u'timeInactiveMicros'] if 'timeInactiveMicros' in doc else None
-        self._duration = doc[u'duration'] if 'duration' in doc else None
-        self._datetime = doc[u'datetime'] if 'datetime' in doc else None
-
-        if u'lockStats' in doc:
-            self._r = doc[u'lockStats'][u'timeLockedMicros'][u'r']
-            self._w = doc[u'lockStats'][u'timeLockedMicros'][u'w']
-            self._r_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'r']
-            self._w_acquiring = doc[u'lockStats']['timeAcquiringMicros'][u'w']
-            locks = 'w:%i' % self.w if self.w is not None else 'r:%i' % self.r
-        elif u'locks' in doc:
-            locks = json.dumps(doc[u'locks'])
-        else:
-            locks = ''
-
-        # build a fake line_str
-        payload = ''
-        if 'query' in doc:
-            payload += ('query: %s' % str(doc[u'query'])
-                        .replace("u'", "'").replace("'", '"'))
-        if 'command' in doc:
-            payload += ('command: %s' % str(doc[u'command'])
-                        .replace("u'", "'").replace("'", '"'))
-        if 'updateobj' in doc:
-            payload += (' update: %s' % str(doc[u'updateobj'])
-                        .replace("u'", "'").replace("'", '"'))
-
-        scanned = 'nscanned:%i' % self._nscanned if 'nscanned' in doc else ''
-        yields = 'numYields:%i' % self._numYields if 'numYield' in doc else ''
-        duration = '%ims' % self.duration if self.duration is not None else ''
-
-        # Imitate legacy log line format
-        self._line_str = (f'''[{self.thread}] {self.operation} {self.namespace} {payload} '''
-                          f'''{scanned} {yields} locks(micros) {locks} '''
-                          f'''{duration}''')
+        indent = 2 if pretty else None
+        return json.dumps(output, cls=DateTimeEncoder, indent=indent,
+                          ensure_ascii=False)
 
     def _parse_logv2(self, doc):
         """Parse logv2 format"""

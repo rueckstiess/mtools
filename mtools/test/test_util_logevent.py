@@ -1,8 +1,10 @@
 import pytest
 import datetime
+import json
 
 from dateutil import parser
 
+from mtools.mlogfilter.filters.logline_filter import LogLineFilter
 from mtools.util.logevent import LogEvent
 
 line_ctime_pre24 = ("Sun Aug  3 21:52:05 [initandlisten] db version v2.2.4, "
@@ -347,6 +349,71 @@ def test_logevent_lazy_evaluation():
         assert(getattr(le, attr) is not None)
 
 
+def _level_filter(levels):
+    """A LogLineFilter with only the level check active."""
+    filt = LogLineFilter.__new__(LogLineFilter)
+    filt.levels = levels
+    filt.components = None
+    filt.namespaces = None
+    filt.commands = None
+    filt.operations = None
+    filt.threads = None
+    filt.pattern = None
+    filt.planSummaries = None
+    return filt
+
+
+def test_logevent_debug_verbosity_on_legacy_line():
+    """4.2 plaintext logs write debug verbosity as D1-D5."""
+    line = ("2019-08-15T15:00:00.000+0000 D2 COMMAND [conn1] "
+            "command test.foo command: find { find: \"foo\", "
+            "filter: { a: 1.0 } } nreturned:1 2ms")
+    le = LogEvent(line)
+    assert le.level == 'D2'
+    assert le.component == 'COMMAND'
+    assert le.thread == 'conn1'
+    assert le.operation == 'command'
+    assert le.namespace == 'test.foo'
+
+
+def test_logevent_debug_verbosity_on_json_line():
+    """JSON logs store the same D1-D5 token in the severity field."""
+    line = json.dumps({
+        "t": {"$date": "2019-08-15T15:00:00.000+00:00"},
+        "s": "D2",
+        "c": "COMMAND",
+        "id": 51803,
+        "ctx": "conn1",
+        "msg": "Slow query",
+        "attr": {
+            "type": "command",
+            "ns": "test.foo",
+            "command": {"find": "foo", "filter": {"a": 1}},
+            "durationMillis": 2,
+        },
+    })
+    le = LogEvent(line)
+    assert le.level == 'D2'
+    assert le.component == 'COMMAND'
+
+
+def test_level_filter_d_matches_verbosity_and_d2_is_exact():
+    """--level D selects every debug line. --level D2 selects that verbosity."""
+    legacy = LogEvent("2019-08-15T15:00:00.000+0000 D2 COMMAND [conn1] "
+                      "command test.foo command: find { find: \"foo\" } "
+                      "nreturned:1 2ms")
+    plain = LogEvent("2014-03-18T18:34:30.435+1100 D NETWORK [conn10] "
+                     "query test.foo query: { a: 1.0 } nreturned:0 1ms")
+    info = LogEvent(line_pattern_26_a)
+
+    assert _level_filter(['D']).accept(legacy)
+    assert _level_filter(['D']).accept(plain)
+    assert not _level_filter(['D']).accept(info)
+    assert _level_filter(['D2']).accept(legacy)
+    assert not _level_filter(['D2']).accept(plain)
+    assert not _level_filter(['D1']).accept(legacy)
+
+
 def test_logevent_app_name():
     """Parse the per-operation appName prefix and structured attr.appName."""
     le = LogEvent(line_app_name_shell)
@@ -396,3 +463,21 @@ def test_logevent_app_name():
     le = LogEvent(logv2_no_app_name)
     assert(le.app_name is None)
     assert(le.command == 'find')
+
+
+def test_one_token_line_has_no_level():
+    """A banner line with a single token parses without IndexError."""
+    le = LogEvent('****************************')
+    assert le.level is None or le.level is False
+    assert le.to_structured()['s'] is None
+
+
+def test_structured_update_reports_nmatched():
+    line = ('2019-06-18T12:08:59.026+0100 I WRITE    [conn1] update '
+            'test.foo command: { q: { a: 1 }, u: { $set: { b: 1 } } } '
+            'planSummary: COLLSCAN keysExamined:0 docsExamined:5 '
+            'nMatched:3 nModified:2 numYields:0 locks:{} 12ms')
+    attr = LogEvent(line).to_structured()['attr']
+    assert attr['nMatched'] == 3
+    assert 'nReturned' not in attr
+    assert attr['nModified'] == 2

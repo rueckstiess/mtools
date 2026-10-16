@@ -10,6 +10,7 @@ from dateutil import parser
 import pytest
 
 import mtools
+from mtools.mlogfilter.filters.tablescan_filter import TableScanFilter
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
 from mtools.util.logfile import LogFile
@@ -143,6 +144,45 @@ class TestMLogFilter(object):
             line_dict = json.loads(line)
             assert(line_dict)
             assert isinstance(line_dict, dict)
+            assert set(line_dict) >= {'t', 's', 'c', 'ctx', 'msg', 'attr'}
+
+    def test_json_structured_legacy_and_logv2(self):
+        """Legacy --json uses structured field names; logv2 is unchanged."""
+        line = (
+            '2019-06-18T12:03:05.860+0100 I COMMAND  [conn2] command '
+            'local.startup_log command: find { find: "startup_log", '
+            'filter: { a: 1 } } planSummary: COLLSCAN keysExamined:0 '
+            'docsExamined:4 nreturned:1 12ms')
+        event = LogEvent(line)
+        doc = json.loads(event.to_json())
+        assert doc['s'] == 'I'
+        assert doc['c'] == 'COMMAND'
+        assert doc['ctx'] == 'conn2'
+        assert doc['t']['$date'].startswith('2019-06-18T12:03:05.860')
+        assert doc['msg'].startswith('command local.startup_log')
+        assert doc['attr']['ns'] == 'local.startup_log'
+        assert doc['attr']['command'] == 'find'
+        assert doc['attr']['durationMillis'] == 12
+        assert doc['attr']['keysExamined'] == 0
+        assert doc['attr']['docsExamined'] == 4
+        assert doc['attr']['nReturned'] == 1
+        assert doc['attr']['planSummary'] == 'COLLSCAN'
+        assert doc['attr']['queryPattern'] == '{"a": 1}'
+        assert 'split_tokens' not in doc
+        assert 'line_str' not in doc
+
+        pretty = json.loads(event.to_json(pretty=True))
+        assert pretty['attr']['nReturned'] == 1
+        assert '\n' in event.to_json(pretty=True)
+
+        logv2 = (
+            '{"t":{"$date":"2020-05-01T00:00:00.000+00:00"},"s":"I",'
+            '"c":"NETWORK","id":22943,"ctx":"listener","msg":"hello",'
+            '"attr":{"x":1}}')
+        passthrough = json.loads(LogEvent(logv2).to_json())
+        assert passthrough['id'] == 22943
+        assert passthrough['msg'] == 'hello'
+        assert passthrough['attr'] == {'x': 1}
 
     def test_shorten_50(self):
         self.tool.run('%s --shorten 50' % self.logfile_path)
@@ -232,6 +272,43 @@ class TestMLogFilter(object):
         output = sys.stdout.getvalue()
         lines = output.splitlines()
         assert len(lines) == 3
+
+    def test_queryratio(self):
+        """--queryratio keeps docsExamined/nreturned above the threshold."""
+        high = LogEvent(
+            '2019-06-09T02:18:02.194+0000 I COMMAND  [conn1] command '
+            'test.foo command: find { find: "foo", filter: {} } '
+            'planSummary: COLLSCAN keysExamined:10 docsExamined:5000 '
+            'nreturned:2 5ms')
+        low = LogEvent(
+            '2019-06-09T02:18:02.194+0000 I COMMAND  [conn1] command '
+            'test.foo command: find { find: "foo", filter: {} } '
+            'planSummary: IXSCAN keysExamined:10 docsExamined:20 '
+            'nreturned:10 5ms')
+        zero_returned = LogEvent(
+            '2019-06-09T02:18:02.194+0000 I COMMAND  [conn1] command '
+            'test.foo command: find { find: "foo", filter: {} } '
+            'planSummary: COLLSCAN keysExamined:10 docsExamined:2000 '
+            'nreturned:0 5ms')
+        keys_only = LogEvent(
+            '2014-08-05T20:21:43.000+0000 I QUERY    [conn1] query test.foo '
+            'query: { a: 1 } nscanned:3000 nreturned:1 5ms')
+
+        class _Args(object):
+            def __init__(self, **kwargs):
+                self.args = kwargs
+
+        filt = TableScanFilter(_Args(scan=False, queryratio=1000))
+        assert filt.accept(high)
+        assert not filt.accept(low)
+        assert filt.accept(zero_returned)
+        assert filt.accept(keys_only)
+
+        scan = TableScanFilter(_Args(scan=True, queryratio=None))
+        assert not scan.accept(high)
+        assert scan.accept(LogEvent(
+            '2014-08-05T20:21:43.000+0000 I QUERY    [conn1] query test.foo '
+            'query: { a: 1 } nscanned:20000 nreturned:1 5ms'))
 
     def test_accept_nodate(self):
         self.tool.is_stdin = True
