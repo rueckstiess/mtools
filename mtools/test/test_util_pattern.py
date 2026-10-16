@@ -201,3 +201,9 @@ def test_logv2_aggregate_keeps_the_parsed_pattern():
     assert pattern == _as_pattern([
         _parsed_match(), {"$group": {"_id": 1, "n": {"$sum": 1}}},
     ])
+
+
+def test_escaped_quote_inside_an_array_value():
+    """An escaped quote followed by '],' does not end the array early."""
+    pattern = json2pattern('{tags: ["a\\"], b", "c"], x: 5}')
+    assert pattern == '{"tags": [1], "x": 1}'
