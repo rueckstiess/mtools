@@ -13,6 +13,7 @@ import socket
 import ssl
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import warnings
@@ -1417,22 +1418,30 @@ class MLaunchTool(BaseCmdLineTool):
                 except AttributeError:
                     raise SystemExit("can't parse signal '%s', use integer or "
                                      "signal name (SIGxxx)." % sig)
+        signalled = []
         for port in processes:
             # only send signal to matching processes
             if port in matches:
                 p = processes[port]
                 p.send_signal(sig)
+                signalled.append(p)
                 if self.args['verbose']:
                     print(" %s on port %i, pid=%i" % (p.name, port, p.pid))
 
         print("sent signal %s to %i process%s."
               % (sig, len(matches), '' if len(matches) == 1 else 'es'))
 
-        # there is a very brief period in which nodes are not reachable
-        # anymore, but the port is not torn down fully yet and an immediate
-        # start command would fail. This very short sleep prevents that case,
-        # and it is practically not noticable by users.
-        time.sleep(0.1)
+        # A shutdown signal returns before mongod has released its dbpath
+        # lock and port. Without --fork, an immediate start can race it and
+        # fail with DBPathInUse, so wait for terminating processes to exit.
+        if os.name != 'nt' and sig in (signal.SIGTERM, signal.SIGINT,
+                                       signal.SIGKILL):
+            _, alive = psutil.wait_procs(signalled, timeout=60)
+            if alive:
+                print("still shutting down after 60s: pid %s"
+                      % ', '.join(str(p.pid) for p in alive))
+        else:
+            time.sleep(0.1)
 
         # refresh discover
         self.discover()
@@ -2053,8 +2062,273 @@ class MLaunchTool(BaseCmdLineTool):
         return shard_names
 
     def _get_log_path(self, command_str):
-        match = re.search(r'--logpath ([^\s]+)', command_str)
-        return match.group(1)
+        match = re.search(r'--logpath\s+("[^"]+"|\'[^\']+\'|\S+)', command_str)
+        if not match:
+            return None
+        path = match.group(1)
+        if len(path) >= 2 and path[0] == path[-1] and path[0] in ('"', "'"):
+            path = path[1:-1]
+        return path
+
+    def _binary_version(self, binary):
+        """Version string reported by a specific mongod/mongos binary.
+
+        Cached per path. Returns None when the binary cannot be run or its
+        output cannot be parsed.
+        """
+        cache = self.__dict__.setdefault('_binary_version_cache', {})
+        if binary in cache:
+            return cache[binary]
+        version = None
+        try:
+            out = subprocess.check_output([binary, '--version'],
+                                          stderr=subprocess.STDOUT,
+                                          timeout=30)
+            match = re.search(r'version v?(\d+\.\d+\.\d+)',
+                              out.decode('utf-8', 'replace'))
+            if match:
+                version = match.group(1)
+        except (OSError, subprocess.SubprocessError):
+            pass
+        cache[binary] = version
+        return version
+
+    def _command_version(self, command_str):
+        """Version of the binary a stored startup command will run.
+
+        Falls back to self.current_version when the binary can't be probed.
+        """
+        try:
+            argv = shlex.split(command_str.strip())
+        except ValueError:
+            argv = []
+        if argv and argv[0] == 'nohup':
+            argv = argv[1:]
+        if argv:
+            version = self._binary_version(argv[0])
+            if version:
+                return version
+        return self.current_version
+
+    def _macos_fork_unsupported(self, version=None):
+        """MongoDB 8.2+ rejects --fork on macOS (fork+exec is incompatible).
+
+        version defaults to self.current_version. Pass the version of the
+        binary in a stored startup command when relaunching.
+        """
+        if sys.platform != 'darwin':
+            return False
+        if version is None:
+            version = self.current_version
+        try:
+            major_s, minor_s = version.split('.')[:2]
+            major, minor = int(major_s), int(minor_s)
+        except (AttributeError, TypeError, ValueError, IndexError):
+            return False
+        return (major, minor) >= (8, 2)
+
+    def _needs_python_detach(self, command_str):
+        """True when the launch command must not be waited on via the shell.
+
+        --fork is what used to make mongod's parent exit only after startup.
+        nohup ... & returns immediately, so mlaunch continues init before the
+        server is listening. On macOS 8.2+ there is no --fork, so we detach
+        in Python and wait ourselves.
+        """
+        if os.name == 'nt':
+            return False
+        stripped = command_str.strip()
+        if stripped.startswith('nohup ') or stripped.endswith('&'):
+            return True
+        return self._macos_fork_unsupported(self._command_version(command_str))
+
+    def _launch_argv(self, command_str):
+        """Argv for a startup command, without shell daemonization."""
+        cmd = command_str.strip()
+        backgrounded = cmd.startswith('nohup ') or cmd.endswith('&')
+        if cmd.startswith('nohup '):
+            cmd = cmd[6:].strip()
+        cmd = re.sub(r'\s*>\s*/dev/null(?:\s+2>&1)?\s*&\s*$', '', cmd).strip()
+        argv = shlex.split(cmd)
+        if backgrounded or self._macos_fork_unsupported(
+                self._command_version(command_str)):
+            argv = [arg for arg in argv if arg != '--fork']
+        return argv
+
+    def _process_is_listening(self, proc, port):
+        """True when this process, not a previous one, is bound to port."""
+        if proc.poll() is not None:
+            return False
+        try:
+            process = psutil.Process(proc.pid)
+            connections = getattr(process, 'net_connections', process.connections)
+            for conn in connections(kind='inet'):
+                if (conn.status == psutil.CONN_LISTEN and conn.laddr
+                        and conn.laddr.port == int(port)):
+                    return True
+        except (psutil.Error, OSError):
+            return False
+        return False
+
+    def _spawn_and_wait(self, command_str, port, timeout=300,
+                        lock_retry=30):
+        """Like _spawn_once, but retry while the dbpath lock is still held.
+
+        A previous mongod on the same dbpath can still be releasing its lock
+        after mlaunch stop returns. mongod then exits with code 100 and
+        DBPathInUse; retry for up to lock_retry seconds instead of failing.
+        """
+        deadline = time.time() + lock_retry
+        while True:
+            try:
+                return self._spawn_once(command_str, port, timeout)
+            except subprocess.CalledProcessError as e:
+                # output is only this attempt. An older DBPathInUse line
+                # in an appended log must not extend the retry.
+                if (e.returncode == 100 and 'DBPathInUse' in (e.output or '')
+                        and time.time() < deadline):
+                    time.sleep(0.5)
+                    continue
+                raise
+
+    def _spawn_once(self, command_str, port, timeout=300):
+        """Start mongod/mongos in a new session and wait until it listens.
+
+        This replaces --fork: the caller does not return until startup has
+        finished or the process has exited. Readiness is the new process
+        accepting connections, so a server that is still shutting down on
+        the same port does not count.
+        """
+        argv = self._launch_argv(command_str)
+        mark = self._log_mark(command_str)
+        stdout_fh = stderr_fh = None
+        stdout_path = stderr_path = None
+        try:
+            # Files, not pipes: a full pipe can stall mongod before it
+            # opens its own log. DEVNULL drops errors that never reach
+            # --logpath (bad options, a rejected --fork, an unopenable log).
+            stdout_fh = tempfile.NamedTemporaryFile(
+                prefix='mlaunch-', suffix='.out', delete=False)
+            stderr_fh = tempfile.NamedTemporaryFile(
+                prefix='mlaunch-', suffix='.err', delete=False)
+            stdout_path = stdout_fh.name
+            stderr_path = stderr_fh.name
+            os.set_inheritable(stdout_fh.fileno(), True)
+            os.set_inheritable(stderr_fh.fileno(), True)
+            try:
+                proc = subprocess.Popen(
+                    argv,
+                    stdin=subprocess.DEVNULL,
+                    stdout=stdout_fh,
+                    stderr=stderr_fh,
+                    start_new_session=True,
+                    close_fds=True,
+                )
+            except OSError as e:
+                raise SystemExit("can't start %s on port %s: %s"
+                                 % (argv[0] if argv else command_str, port,
+                                    e.strerror or e))
+            finally:
+                stdout_fh.close()
+                stderr_fh.close()
+                stdout_fh = stderr_fh = None
+
+            deadline = time.time() + timeout
+            while True:
+                returncode = proc.poll()
+                if returncode is not None:
+                    output = self._attempt_output(
+                        command_str, mark, stdout_path, stderr_path)
+                    raise subprocess.CalledProcessError(
+                        returncode, command_str, output=output)
+                if self._process_is_listening(proc, port):
+                    return proc
+                if time.time() > deadline:
+                    detail = self._attempt_output(
+                        command_str, mark, stdout_path, stderr_path)
+                    log_path = self._get_log_path(command_str)
+                    extra = ('\n' + detail) if detail else ''
+                    raise SystemExit(
+                        "still starting %s on port %s after %ss (pid %s). "
+                        "left the process running.%s\nlog: %s"
+                        % (os.path.basename(argv[0]) if argv else 'mongod',
+                           port, timeout, proc.pid, extra, log_path))
+                time.sleep(0.2)
+        finally:
+            for handle in (stdout_fh, stderr_fh):
+                if handle is not None:
+                    handle.close()
+            for path in (stdout_path, stderr_path):
+                if path:
+                    try:
+                        os.unlink(path)
+                    except OSError:
+                        pass
+
+    def _log_mark(self, command_str):
+        """(device, inode, size) of the log before this spawn.
+
+        None when there is no log yet. A later read starts at this size
+        so an appended file does not replay earlier attempts.
+        """
+        log_path = self._get_log_path(command_str)
+        if not log_path:
+            return None
+        try:
+            st = os.stat(log_path)
+        except OSError:
+            return None
+        return (st.st_dev, st.st_ino, st.st_size)
+
+    def _read_log_since(self, command_str, mark):
+        """Log text written after mark.
+
+        A shorter file or a new inode means mongod replaced the log, so
+        this attempt owns the whole file. A text backtrace still ends the
+        read, as it did before.
+        """
+        log_path = self._get_log_path(command_str)
+        if not log_path:
+            return ''
+        try:
+            st = os.stat(log_path)
+            with open(log_path, 'rb') as logfile:
+                offset = 0
+                if mark is not None:
+                    dev, ino, size = mark
+                    if ((st.st_dev, st.st_ino) == (dev, ino)
+                            and st.st_size >= size):
+                        offset = size
+                logfile.seek(offset)
+                chunks = []
+                for line in logfile:
+                    if line.startswith(b'----- BEGIN BACKTRACE -----'):
+                        break
+                    chunks.append(line.decode('utf-8', 'replace'))
+        except OSError:
+            return ''
+        return ''.join(chunks)
+
+    def _read_capture(self, *paths):
+        parts = []
+        for path in paths:
+            if not path:
+                continue
+            try:
+                with open(path, 'rb') as handle:
+                    data = handle.read(65536)
+            except OSError:
+                continue
+            text = data.decode('utf-8', 'replace').strip()
+            if text:
+                parts.append(text)
+        return '\n'.join(parts)
+
+    def _attempt_output(self, command_str, mark, stdout_path, stderr_path):
+        """Console text plus the log bytes this attempt added."""
+        captured = self._read_capture(stdout_path, stderr_path)
+        log_text = self._read_log_since(command_str, mark).strip()
+        return '\n'.join(part for part in (captured, log_text) if part)
 
     @staticmethod
     def _strip_keyfile(command_str):
@@ -2068,18 +2342,7 @@ class MLaunchTool(BaseCmdLineTool):
             r'''--keyFile\s+("[^"]*"|'[^']*'|\S+)''', '', command_str)
 
     def _get_last_error_log(self, command_str):
-        log_path = self._get_log_path(command_str)
-        loglines = ''
-        try:
-            with open(log_path, 'rb') as logfile:
-                for line in logfile:
-                    if not line.startswith('----- BEGIN BACKTRACE -----'):
-                        loglines += line
-                    else:
-                        break
-        except IOError:
-            pass
-        return loglines
+        return self._read_log_since(command_str, None)
 
     def _start_on_ports(self, ports, wait=False, override_auth=False):
         if override_auth and self.args['verbose']:
@@ -2101,22 +2364,39 @@ class MLaunchTool(BaseCmdLineTool):
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
                     time.sleep(5)
+                elif self._needs_python_detach(command_str):
+                    # Detach, then block until the process is listening.
+                    # --fork used to provide this barrier. nohup does not.
+                    argv = self._launch_argv(command_str)
+                    binary = os.path.basename(argv[0]) if argv else 'mongod'
+                    if '--configsvr' in command_str:
+                        binary = 'config server'
+                    if self.args['verbose']:
+                        print("launching: %s" % command_str)
+                    else:
+                        print("launching: %s on port %s" % (binary, port))
+                    self._spawn_and_wait(command_str, port)
                 else:
                     subprocess.check_output(shlex.split(command_str),
                                             stderr=subprocess.STDOUT)
 
-                binary = command_str.split()[0]
-                if '--configsvr' in command_str:
-                    binary = 'config server'
+                    binary = command_str.split()[0]
+                    if '--configsvr' in command_str:
+                        binary = 'config server'
 
-                if self.args['verbose']:
-                    print("launching: %s" % command_str)
-                else:
-                    print("launching: %s on port %s" % (binary, port))
+                    if self.args['verbose']:
+                        print("launching: %s" % command_str)
+                    else:
+                        print("launching: %s on port %s" % (binary, port))
 
             except subprocess.CalledProcessError as e:
                 print(e.output)
-                print(self._get_last_error_log(command_str), file=sys.stderr)
+                # Detach already put this attempt's console text and new
+                # log bytes in e.output. The shell path still logs to the
+                # file and leaves stdout empty.
+                if not self._needs_python_detach(command_str):
+                    print(self._get_last_error_log(command_str),
+                          file=sys.stderr)
                 log_path = self._get_log_path(command_str)
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s\nlog: %s"
@@ -2459,11 +2739,14 @@ class MLaunchTool(BaseCmdLineTool):
                                       rs_param, newdbpath, newlogpath, port,
                                       auth_param, extra))
         else:
+            # 8.2+ on macOS rejects --fork. Omit it and let _start_on_ports
+            # detach the process and wait until it is listening.
+            fork_param = '' if self._macos_fork_unsupported() else '--fork '
             command_str = ("\"%s\" %s --dbpath \"%s\" --logpath \"%s\" "
-                           "--port %i --fork "
+                           "--port %i %s"
                            "%s %s" % (os.path.join(path, 'mongod'), rs_param,
-                                      dbpath, logpath, port, auth_param,
-                                      extra))
+                                      dbpath, logpath, port, fork_param,
+                                      auth_param, extra))
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
@@ -2495,9 +2778,10 @@ class MLaunchTool(BaseCmdLineTool):
                                        newlogpath, port, configdb,
                                        auth_param, extra))
         else:
-            command_str = ("%s --logpath \"%s\" --port %i --configdb %s %s %s "
-                           "--fork" % (os.path.join(path, 'mongos'), logpath,
-                                       port, configdb, auth_param, extra))
+            fork_param = '' if self._macos_fork_unsupported() else ' --fork'
+            command_str = ("%s --logpath \"%s\" --port %i --configdb %s %s %s%s"
+                           % (os.path.join(path, 'mongos'), logpath,
+                              port, configdb, auth_param, extra, fork_param))
 
         # store parameters in startup_info
         self.startup_info[str(port)] = command_str
