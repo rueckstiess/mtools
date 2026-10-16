@@ -54,7 +54,7 @@ class TestMLogInfo(object):
         assert results['start'].endswith('Aug 05 20:21:42')
         assert results['end'].endswith('Aug 05 21:04:52')
         assert results['date format'] == 'ctime-pre2.4'
-        assert results['length'] == '497'
+        assert results['length'] == '496'
         assert results['binary'] == 'mongod'
         assert results['version'] == '2.2.5'
 

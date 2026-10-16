@@ -85,15 +85,16 @@ JSON Output
    If this flag is used, the output will be in JSON format instead of the
    regular log line string. Use this in conjunction with MongoDB's
    ``mongoimport`` to store the log file data in a MongoDB database.
+   ``--pretty`` prints each document indented.
 
-   The values that are extracted and stored as separate fields in the resulting
-   JSON document are (some may not > apply for all lines): ``line_str`` (the
-   full line as string), ``split_tokens`` (the line as string tokens split on
-   whitespace, stored as array of strings), ``datetime`` (the datetime for this
-   line), ``operation``, ``thread``, ``namespace``, ``nscanned``,
-   ``ntoreturn``, ``nreturned``, ``ninserted``, ``nupdated``, ``duration`` (the
-   duration in milliseconds), ``r``, ``w`` (read or write lock times in
-   microseconds), ``numYields`` (the number of yields for this operation)
+   A logv2 line is written unchanged. A legacy line is converted to the
+   MongoDB 4.4 structured-log field names: ``t.$date``, ``s`` (severity),
+   ``c`` (component), ``ctx`` (thread), ``msg``, and ``attr``. ``attr`` holds
+   the parsed counters under their current names, including ``ns``,
+   ``durationMillis``, ``keysExamined``, ``docsExamined``, ``nReturned``,
+   ``planSummary``, and ``queryPattern``. A legacy line has no log id, so
+   ``id`` is omitted. Compatibility is the field names; the original command
+   document is not reconstructed.
 
    For example:
 

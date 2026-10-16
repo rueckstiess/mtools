@@ -124,6 +124,8 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
                                     help=('plot slow oplog application'))
 
         self.legend = None
+        self._legend_entries = []
+        self._updating_legend = False
 
         # progress bar
         self.progress_bar_enabled = not self.is_stdin
@@ -256,6 +258,21 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
             # (also works for system.profile and stdin stream)
             range_min = min(self.plot_instance.date_range[0], logfile.start)
             range_max = max(self.plot_instance.date_range[1], logfile.end)
+            self.plot_instance.date_range = (range_min, range_max)
+
+        # --optime-start (and --type durline) move an operation to the
+        # moment it began. A long operation can begin before the first
+        # logged timestamp, so the initial view has to include that time.
+        # Scan the events once, after all logfiles are read.
+        if self.args['optime_start']:
+            range_min, range_max = self.plot_instance.date_range
+            for logevent in self.plot_instance.logevents:
+                started = logevent.datetime
+                if started is not None and started < range_min:
+                    range_min = started
+                finished = getattr(logevent, 'end_datetime', None)
+                if finished is not None and finished > range_max:
+                    range_max = finished
             self.plot_instance.date_range = (range_min, range_max)
 
         # clear progress bar
@@ -493,6 +510,104 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
                 self.increase_marker_size()
                 plt.gcf().canvas.draw()
 
+    def _artist_points(self, artist):
+        """Return ``(xs, ys)`` for an artist that stores point data."""
+        get_x = getattr(artist, 'get_xdata', None)
+        get_y = getattr(artist, 'get_ydata', None)
+        if get_x is None or get_y is None:
+            return None, None
+        return list(get_x()), list(get_y())
+
+    def _artist_in_view(self, artist, xmin, xmax, ymin, ymax):
+        """Return True when this artist draws something inside the view."""
+        patches = getattr(artist, 'patches', None)
+        if patches is not None:
+            # a bar container: in view when any bar overlaps the x-range
+            return any(self._artist_in_view(patch, xmin, xmax, ymin, ymax)
+                       for patch in patches)
+        if hasattr(artist, 'get_width') and hasattr(artist, 'get_x'):
+            # a bar: test its horizontal extent
+            x0 = artist.get_x()
+            x1 = x0 + artist.get_width()
+            return min(x0, x1) <= xmax and max(x0, x1) >= xmin
+
+        xs, ys = self._artist_points(artist)
+        if xs is None:
+            return True
+        if len(xs) == 0:
+            return False
+
+        axes = getattr(artist, 'axes', None)
+        if axes is not None and artist.get_transform() is not axes.transData:
+            # axvline and friends put y in axes fraction; only x is data
+            return any(x is not None and xmin <= x <= xmax for x in xs)
+
+        linestyle = getattr(artist, 'get_linestyle', lambda: 'None')()
+        draws_line = linestyle not in (None, 'None', 'none')
+        if draws_line and len(xs) >= 2 and len(ys) >= 2:
+            x0, x1 = min(xs), max(xs)
+            y0, y1 = min(ys), max(ys)
+            spans_view = (x1 >= xmin and x0 <= xmax and
+                          y1 >= ymin and y0 <= ymax)
+            if spans_view:
+                return True
+
+        for x, y in zip(xs, ys):
+            if x is None or y is None:
+                continue
+            if xmin <= x <= xmax and ymin <= y <= ymax:
+                return True
+        return False
+
+    def _series_in_view(self, handle, xmin, xmax, ymin, ymax):
+        """Return True when any artist in this series meets the view."""
+        group = getattr(handle, '_mt_group', None)
+        plot_type = getattr(handle, '_mt_plot_type', None)
+        if group is None:
+            related = [handle]
+        else:
+            related = [artist for artist in self.artists
+                       if getattr(artist, '_mt_group', None) == group and
+                       getattr(artist, '_mt_plot_type', None) is plot_type]
+            if handle not in related:
+                related.append(handle)
+        # hidden series stay listed so they can be toggled back on
+        return any(self._artist_in_view(artist, xmin, xmax, ymin, ymax)
+                   for artist in related)
+
+    def _refresh_legend(self, axis):
+        """Rebuild the legend from groups that intersect the current view."""
+        if self._updating_legend or not self._legend_entries:
+            return
+        xmin, xmax = axis.get_xlim()
+        ymin, ymax = axis.get_ylim()
+        shown = [(handle, label) for handle, label in self._legend_entries
+                 if self._series_in_view(handle, xmin, xmax, ymin, ymax)]
+
+        self._updating_legend = True
+        legend_visible = True
+        try:
+            if self.legend is not None:
+                legend_visible = self.legend.get_visible()
+                self.legend.remove()
+                self.legend = None
+            if not shown:
+                return
+            handles = [handle for handle, _label in shown]
+            labels = [label for _handle, label in shown]
+            self.legend = axis.legend(handles, labels, loc='upper left',
+                                      frameon=False, numpoints=1, fontsize=9)
+            self.legend.set_visible(legend_visible)
+            if self.args['type'] == 'scatter':
+                index = dict((id(artist), i)
+                             for i, artist in enumerate(self.artists))
+                lines = self.legend.get_lines()
+                for legend_line, handle in zip(lines, handles):
+                    legend_line.set_picker(10)
+                    legend_line._mt_legend_item = index.get(id(handle))
+        finally:
+            self._updating_legend = False
+
     def plot(self):
         # check if there is anything to plot
         if len(self.plot_instances) == 0:
@@ -577,21 +692,18 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
                                      xycoords='figure pixels',
                                      va='bottom', fontsize=8)
 
-        handles, labels = axis.get_legend_handles_labels()
-        if len(labels) > 0:
-            self.legend = axis.legend(loc='upper left', frameon=False,
-                                      numpoints=1, fontsize=9)
-
-        if self.args['type'] == 'scatter':
-            # enable legend picking for scatter plots
-            for i, legend_line in enumerate(self.legend.get_lines()):
-                legend_line.set_picker(10)
-                legend_line._mt_legend_item = i
-
-        # overwrite y-axis limits if set
+        # overwrite y-axis limits if set, before the legend reads the view
         if self.args['ylimits'] is not None:
             print(self.args['ylimits'])
             axis.set_ylim(self.args['ylimits'])
+
+        handles, labels = axis.get_legend_handles_labels()
+        self._legend_entries = list(zip(handles, labels))
+        # Zoom and pan change the view after the first draw. Keep the legend
+        # to groups that still have a marker inside that view.
+        axis.callbacks.connect('xlim_changed', self._refresh_legend)
+        axis.callbacks.connect('ylim_changed', self._refresh_legend)
+        self._refresh_legend(axis)
 
         plt.gcf().canvas.mpl_connect('pick_event', self.onpick)
         plt.gcf().canvas.mpl_connect('key_press_event', self.onpress)
