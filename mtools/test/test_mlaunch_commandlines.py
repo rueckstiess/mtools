@@ -361,3 +361,34 @@ class TestMLaunch(object):
         """
         self.run_tool('init --replicaset --hostname this_host')
         self.read_config()
+
+
+class TestMLaunchStartWhenRunning(object):
+    """start() when the environment is already up. No mongod is launched."""
+
+    def setup_method(self):
+        self.tool = MLaunchTool(test=True)
+        self.tool.discover = lambda: None
+
+    def test_start_succeeds_when_no_nodes_are_down(self, capsys):
+        self.tool.startup_info = {'27017': 'mongod'}
+        self.tool.args = {'binarypath': None}
+        self.tool.unknown_args = []
+        self.tool._get_ports_from_args = lambda args, extra_tag: []
+
+        self.tool.start()
+
+        assert 'all nodes already running.' in capsys.readouterr().out
+
+    def test_start_still_errors_for_partial_old_protocol(self):
+        self.tool.startup_info = {}
+
+        def get_tagged(tags):
+            if tags == ['all']:
+                return {27017}
+            return set()
+
+        self.tool.get_tagged = get_tagged
+        with pytest.raises(SystemExit) as exc:
+            self.tool.start()
+        assert 'older version of mlaunch' in str(exc.value)

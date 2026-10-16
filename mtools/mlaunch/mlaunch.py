@@ -7,6 +7,7 @@ import json
 import os
 import queue as Queue
 import re
+import shlex
 import signal
 import socket
 import ssl
@@ -1066,7 +1067,10 @@ class MLaunchTool(BaseCmdLineTool):
 
         matches = self._get_ports_from_args(self.args, 'down')
         if len(matches) == 0:
-            raise SystemExit('no nodes started.')
+            # Every node is already up. Scripts re-run start, so this is
+            # success rather than an error.
+            print('all nodes already running.')
+            return
 
         # start config servers first
         config_matches = self.get_tagged(['config']).intersection(matches)
@@ -1864,12 +1868,13 @@ class MLaunchTool(BaseCmdLineTool):
 
             try:
                 if os.name == 'nt':
+                    # start /b is a cmd.exe builtin, so Windows keeps a shell.
                     subprocess.check_call(command_str, shell=True)
                     # create sub process on windows doesn't wait for output,
                     # wait a few seconds for mongod instance up
                     time.sleep(5)
                 else:
-                    subprocess.check_output([command_str], shell=True,
+                    subprocess.check_output(shlex.split(command_str),
                                             stderr=subprocess.STDOUT)
 
                 binary = command_str.split()[0]
@@ -1888,6 +1893,11 @@ class MLaunchTool(BaseCmdLineTool):
                 raise SystemExit("can't start process, return code %i. "
                                  "tried to launch: %s\nlog: %s"
                                  % (e.returncode, command_str, log_path))
+            except OSError as e:
+                # Direct exec raises this when the binary is missing.
+                # The shell path used to surface that as CalledProcessError.
+                raise SystemExit("can't start process: %s\ntried to launch: %s"
+                                 % (e, command_str))
 
         if wait:
             self.wait_for(ports)
