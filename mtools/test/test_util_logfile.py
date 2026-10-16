@@ -12,7 +12,7 @@ from mtools.util.logfile import LogFile
 
 class TestUtilLogFile(object):
 
-    def setup(self):
+    def setup_method(self):
         """Start up method for LogFile fixture."""
 
         # load logfile(s)
