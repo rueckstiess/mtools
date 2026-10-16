@@ -66,6 +66,13 @@ Custom Title
    quoted in strings. The title of a plot is shown above the graph. A file read
    in from ``stdin`` does not use a title.
 
+Legend
+------
+The legend lists each group drawn on the plot. Zooming or panning the
+axes keeps a group only while one of its markers is inside the current
+view. Groups return when the view includes them again. The ``-`` key
+still shows or hides the whole legend.
+
 Operation Start Time
 --------------------
 ``--optime-start``
@@ -74,7 +81,10 @@ Operation Start Time
    Sometimes, it can be useful to see when operations started instead. For
    operations that have a duration (queries, updates, etc.) mplotqueries can
    subtract the duration and plot the operation when it started instead. Turn
-   this feature on with the ``--optime-start`` flag.
+   this feature on with the ``--optime-start`` flag. The initial view includes
+   those start times, so an operation that began before the first log line is
+   still on screen. ``--type durline`` plots each operation from its start to
+   its end and uses the same view.
 
 Output to File
 --------------
