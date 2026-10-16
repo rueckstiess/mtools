@@ -260,6 +260,21 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
             range_max = max(self.plot_instance.date_range[1], logfile.end)
             self.plot_instance.date_range = (range_min, range_max)
 
+        # --optime-start (and --type durline) move an operation to the
+        # moment it began. A long operation can begin before the first
+        # logged timestamp, so the initial view has to include that time.
+        # Scan the events once, after all logfiles are read.
+        if self.args['optime_start']:
+            range_min, range_max = self.plot_instance.date_range
+            for logevent in self.plot_instance.logevents:
+                started = logevent.datetime
+                if started is not None and started < range_min:
+                    range_min = started
+                finished = getattr(logevent, 'end_datetime', None)
+                if finished is not None and finished > range_max:
+                    range_max = finished
+            self.plot_instance.date_range = (range_min, range_max)
+
         # clear progress bar
         if self.logfiles and self.progress_bar_enabled:
             self.update_progress(1.0)
