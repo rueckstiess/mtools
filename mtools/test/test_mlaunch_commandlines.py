@@ -305,6 +305,55 @@ class TestMLaunch(object):
             )
         self.cmdlist_assert(cmdlist)
 
+    def test_connection_string_single(self):
+        self.run_tool('init --single')
+        assert self.tool.connection_string() == 'mongodb://localhost:27017'
+
+    def test_connection_string_replicaset(self):
+        self.run_tool('init --replicaset --nodes 3 --name testrs')
+        expected = ('mongodb://localhost:27017,localhost:27018,'
+                    'localhost:27019/?replicaSet=testrs')
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_includes_arbiter(self):
+        self.run_tool('init --replicaset --nodes 2 --arbiter --name testrs')
+        expected = ('mongodb://localhost:27017,localhost:27018,'
+                    'localhost:27019/?replicaSet=testrs')
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_auth_quotes_password(self):
+        self.run_tool('init --single --auth --username alice '
+                      '--password p@ss --auth-db app')
+        expected = 'mongodb://alice:p%40ss@localhost:27017/?authSource=app'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_auth_without_user(self):
+        self.run_tool('init --single --auth --no-initial-user')
+        assert self.tool.connection_string() == 'mongodb://localhost:27017'
+
+    def test_connection_string_sharded_mongos(self):
+        self.run_tool('init --sharded 2 --replicaset --mongos 2')
+        expected = 'mongodb://localhost:27017,localhost:27018'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_sharded_without_mongos(self):
+        self.run_tool('init --sharded 2 --replicaset --nodes 1 --mongos 0')
+        uri = self.tool.connection_string()
+        assert uri == (
+            'mongodb://localhost:27018/?replicaSet=shard01\n'
+            'mongodb://localhost:27019/?replicaSet=shard02')
+
+    def test_connection_string_brackets_ipv6(self):
+        self.run_tool('init --replicaset --nodes 1 --hostname ::1 '
+                      '--bind_ip ::1')
+        expected = 'mongodb://[::1]:27017/?replicaSet=replset'
+        assert self.tool.connection_string() == expected
+
+    def test_connection_string_require_tls(self):
+        self.run_tool('init --single --sslMode requireSSL')
+        expected = 'mongodb://localhost:27017/?tls=true'
+        assert self.tool.connection_string() == expected
+
     @pytest.mark.xfail(raises=SystemExit)
     def test_invalid_hostname(self):
         """
@@ -531,3 +580,33 @@ class TestMLaunchStartWhenRunning(object):
         with pytest.raises(SystemExit) as exc:
             self.tool.start()
         assert 'older version of mlaunch' in str(exc.value)
+
+
+def _uri_for(**args):
+    """Build a URI from parsed args without starting mongod."""
+    from mtools.mlaunch.mlaunch import MLaunchTool
+    tool = MLaunchTool.__new__(MLaunchTool)
+    tool.args = args
+    return tool._mongodb_uri(['localhost:27017'], [])
+
+
+def test_uri_userinfo_encodes_spaces_as_percent_20():
+    uri = _uri_for(auth=True, username='al ice', password='p ss+',
+                   auth_db='admin')
+    assert uri == ('mongodb://al%20ice:p%20ss%2B@localhost:27017/'
+                   '?authSource=admin')
+
+
+def test_uri_x509_user_has_no_password():
+    uri = _uri_for(auth=True, username='CN=client,O=Org', password='x',
+                   auth_db='$external')
+    assert uri == ('mongodb://CN%3Dclient%2CO%3DOrg@localhost:27017/'
+                   '?authMechanism=MONGODB-X509&authSource=%24external')
+
+
+def test_uri_tls_includes_ca_and_client_certificate():
+    uri = _uri_for(tlsMode='requireTLS', tlsCAFile='/certs/ca.pem',
+                   tlsClientCertificateKeyFile='/certs/client.pem')
+    assert uri == ('mongodb://localhost:27017/?tls=true'
+                   '&tlsCAFile=%2Fcerts%2Fca.pem'
+                   '&tlsCertificateKeyFile=%2Fcerts%2Fclient.pem')
