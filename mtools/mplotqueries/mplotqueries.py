@@ -596,11 +596,27 @@ class MPlotQueriesTool(LogFileTool):
 
     def _artist_in_view(self, artist, xmin, xmax, ymin, ymax):
         """Return True when this artist draws something inside the view."""
+        patches = getattr(artist, 'patches', None)
+        if patches is not None:
+            # a bar container: in view when any bar overlaps the x-range
+            return any(self._artist_in_view(patch, xmin, xmax, ymin, ymax)
+                       for patch in patches)
+        if hasattr(artist, 'get_width') and hasattr(artist, 'get_x'):
+            # a bar: test its horizontal extent
+            x0 = artist.get_x()
+            x1 = x0 + artist.get_width()
+            return min(x0, x1) <= xmax and max(x0, x1) >= xmin
+
         xs, ys = self._artist_points(artist)
         if xs is None:
             return True
         if len(xs) == 0:
             return False
+
+        axes = getattr(artist, 'axes', None)
+        if axes is not None and artist.get_transform() is not axes.transData:
+            # axvline and friends put y in axes fraction; only x is data
+            return any(x is not None and xmin <= x <= xmax for x in xs)
 
         linestyle = getattr(artist, 'get_linestyle', lambda: 'None')()
         draws_line = linestyle not in (None, 'None', 'none')
@@ -620,7 +636,7 @@ class MPlotQueriesTool(LogFileTool):
         return False
 
     def _series_in_view(self, handle, xmin, xmax, ymin, ymax):
-        """Return True when any visible artist in this series meets the view."""
+        """Return True when any artist in this series meets the view."""
         group = getattr(handle, '_mt_group', None)
         if group is None:
             related = [handle]
@@ -629,11 +645,9 @@ class MPlotQueriesTool(LogFileTool):
                        if getattr(artist, '_mt_group', None) == group]
             if handle not in related:
                 related.append(handle)
-        visible = [artist for artist in related if artist.get_visible()]
-        if not visible:
-            return False
+        # hidden series stay listed so they can be toggled back on
         return any(self._artist_in_view(artist, xmin, xmax, ymin, ymax)
-                   for artist in visible)
+                   for artist in related)
 
     def _refresh_legend(self, axis):
         """Rebuild the legend from groups that intersect the current view."""
@@ -645,8 +659,10 @@ class MPlotQueriesTool(LogFileTool):
                  if self._series_in_view(handle, xmin, xmax, ymin, ymax)]
 
         self._updating_legend = True
+        legend_visible = True
         try:
             if self.legend is not None:
+                legend_visible = self.legend.get_visible()
                 self.legend.remove()
                 self.legend = None
             if not shown:
@@ -655,6 +671,7 @@ class MPlotQueriesTool(LogFileTool):
             labels = [label for _handle, label in shown]
             self.legend = axis.legend(handles, labels, loc='upper left',
                                       frameon=False, numpoints=1, fontsize=9)
+            self.legend.set_visible(legend_visible)
             if self.args['type'] == 'scatter':
                 index = dict((id(artist), i)
                              for i, artist in enumerate(self.artists))

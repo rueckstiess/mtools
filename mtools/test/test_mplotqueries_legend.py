@@ -86,12 +86,45 @@ def test_zooming_drops_groups_outside_the_view(tmp_path):
     assert _legend_labels(tool) == ['test.late']
 
 
-def test_hidden_group_leaves_the_legend(tmp_path):
+def test_hidden_group_stays_in_the_legend(tmp_path):
+    """A hidden series keeps its entry so it can be toggled back on."""
     path = tmp_path / 'legend.log'
     path.write_text(LOG)
     tool = _plot(path)
     for artist in tool.artists:
         if getattr(artist, '_mt_group', None) == 'test.early':
             artist.set_visible(False)
-    tool._refresh_legend(plt.gca())
-    assert _legend_labels(tool) == ['test.late']
+    plt.gca().set_xlim(date2num([_when(1), _when(5)]))
+    assert set(_legend_labels(tool)) == {'test.early', 'test.late'}
+
+
+def test_hidden_legend_stays_hidden_on_zoom(tmp_path):
+    path = tmp_path / 'legend.log'
+    path.write_text(LOG)
+    tool = _plot(path)
+    tool.legend.set_visible(False)
+    plt.gca().set_xlim(date2num([_when(1), _when(5)]))
+    assert tool.legend is not None
+    assert not tool.legend.get_visible()
+
+
+def test_axvline_is_in_view_by_x_only(tmp_path):
+    path = tmp_path / 'legend.log'
+    path.write_text(LOG)
+    tool = _plot(path)
+    axis = plt.gca()
+    x = date2num(_when(3))
+    line = axis.axvline(x, label='event')
+    axis.set_ylim(20, 100)
+    assert tool._artist_in_view(line, x - 1, x + 1, 20, 100)
+    assert not tool._artist_in_view(line, x + 1, x + 2, 20, 100)
+
+
+def test_bar_is_in_view_by_its_extent(tmp_path):
+    path = tmp_path / 'legend.log'
+    path.write_text(LOG)
+    tool = _plot(path)
+    bars = plt.gca().bar([10], [5], width=2)
+    assert tool._artist_in_view(bars, 0, 10.5, 0, 1)
+    assert tool._artist_in_view(bars[0], 10.5, 20, 0, 1)
+    assert not tool._artist_in_view(bars, 12, 20, 0, 1)
