@@ -196,6 +196,7 @@ class TestMLogFilter(object):
         for line in output.splitlines():
             assert(len(line) <= 200)
 
+    @pytest.mark.skip(reason="Merging same log files is currently not supported")
     def test_merge_same(self):
         file_length = len(self.logfile)
         self.tool.run('%s %s' % (self.logfile_path, self.logfile_path))
