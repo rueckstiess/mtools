@@ -40,7 +40,7 @@ try:
 
             except argparse.ArgumentTypeError:
                 # not a file, try open as MongoDB database
-                m = re.match('^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$',
+                m = re.match(r'^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$',
                              string)
                 if m:
                     hostname, port, namespace = m.groups()
@@ -53,7 +53,7 @@ try:
                         collection = 'system.profile'
 
                     if (hostname == 'localhost' or
-                            re.match('\d+\.\d+\.\d+\.\d+', hostname)):
+                            re.match(r'\d+\.\d+\.\d+\.\d+', hostname)):
                         return ProfileCollection(hostname, port, database,
                                                  collection)
 
