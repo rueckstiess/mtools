@@ -54,7 +54,21 @@ class LogEvent(ProfileParserMixin, object):
 
     log_operations = ['query', 'insert', 'update', 'remove', 'getmore',
                       'command', 'aggregate', 'transaction']
-    log_levels = ['D', 'F', 'E', 'W', 'I', 'U']
+    # D1-D5 are the debug verbosity written into plaintext logs since 4.2
+    # (SERVER-37743). D remains the pre-4.2 debug token.
+    log_levels = ['D', 'D1', 'D2', 'D3', 'D4', 'D5', 'F', 'E', 'W', 'I', 'U']
+
+    @staticmethod
+    def level_matches(level, selected):
+        """Return True if ``level`` is selected.
+
+        ``D`` also matches the 4.2 tokens ``D1`` through ``D5``.
+        """
+        if level in selected:
+            return True
+        return (isinstance(level, str) and len(level) == 2 and
+                level[0] == 'D' and level[1] in '12345' and 'D' in selected)
+
     log_components = ['-', 'ACCESS', 'COMMAND', 'CONTROL', 'GEO', 'INDEX',
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']

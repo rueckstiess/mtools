@@ -25,8 +25,8 @@ class LogLineFilter(BaseFilter):
             'action': 'store',
             'metavar': 'LL',
             'choices': LogEvent.log_levels,
-            'help': ('only output log lines with loglevel LL '
-                     '(multiple values are allowed).')
+            'help': ('only output log lines with loglevel LL. D also '
+                     'matches D1-D5 (multiple values are allowed).')
         }),
         ('--namespace', {
             'nargs': '*',
@@ -131,7 +131,8 @@ class LogLineFilter(BaseFilter):
         # if several filters are active, all have to agree
         if self.components and logevent.component not in self.components:
             return False
-        if self.levels and logevent.level not in self.levels:
+        if (self.levels and
+                not LogEvent.level_matches(logevent.level, self.levels)):
             return False
         if self.namespaces and logevent.namespace not in self.namespaces:
             return False
