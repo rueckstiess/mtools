@@ -995,7 +995,7 @@ class LogEvent(object):
         if self._level is None:
             split_tokens = self.split_tokens
 
-            if not split_tokens:
+            if len(split_tokens) < 3:
                 self._level = False
                 self._component = False
                 return
@@ -1206,6 +1206,10 @@ class LogEvent(object):
             value = getattr(self, source, None)
             if value is None or value is False:
                 continue
+            if dest == 'nReturned' and self.operation == 'update':
+                # legacy updates report nMatched, which is parsed into
+                # nreturned
+                dest = 'nMatched'
             attr[dest] = value
 
         when = self.datetime
