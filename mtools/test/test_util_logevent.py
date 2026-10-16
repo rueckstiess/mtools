@@ -396,3 +396,25 @@ def test_logevent_app_name():
     le = LogEvent(logv2_no_app_name)
     assert(le.app_name is None)
     assert(le.command == 'find')
+
+
+GETMORE = ('2019-06-09T02:00:07.000+0000 I COMMAND  [conn1] command '
+           'test.orders command: getMore { getMore: 555, collection: '
+           '"orders" } originatingCommand: %s cursorid:555 nreturned:3 30ms')
+
+
+def test_originating_pattern_ignores_nested_filter():
+    line = GETMORE % ('{ aggregate: "orders", pipeline: [ { $project: '
+                      '{ x: { $filter: { input: "$items" } } } } ], '
+                      'cursor: {} }')
+    assert LogEvent(line).originating_pattern != '{"input": 1}'
+
+    line = GETMORE % ('{ find: "orders", projection: { filter: 1 }, '
+                      'filter: { sku: "abc" } }')
+    assert LogEvent(line).originating_pattern == '{"sku": 1}'
+
+
+def test_originating_pattern_skips_brackets_in_strings():
+    line = GETMORE % ('{ find: "orders", comment: "a } b \\" }", '
+                      'filter: { sku: "abc" } }')
+    assert LogEvent(line).originating_pattern == '{"sku": 1}'

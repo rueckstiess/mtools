@@ -55,7 +55,9 @@ def _bracket_end(text):
     else:
         return None
     depth = 0
-    for index, char in enumerate(text):
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
         if char == opening:
             depth += 1
         elif char == closing:
@@ -65,9 +67,55 @@ def _bracket_end(text):
     return None
 
 
-def _shell_pattern(text, trigger):
+def _scan(text):
+    """Yield ``(index, char, in_string)``, tracking double-quoted strings."""
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+                yield index, char, False
+                continue
+            yield index, char, True
+        else:
+            if char == '"':
+                in_string = True
+                yield index, char, True
+                continue
+            yield index, char, False
+
+
+def _top_level_find(text, trigger):
+    """Index of a field name trigger at the top level of the object text.
+
+    Nested fields and operators such as ``$filter:`` do not count.
+    """
+    depth = 0
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
+        if char in '{[':
+            depth += 1
+        elif char in '}]':
+            depth -= 1
+        elif depth == 1 and text.startswith(trigger, index):
+            before = text[:index].rstrip()
+            if before.endswith('{') or before.endswith(','):
+                return index
+    return -1
+
+
+def _shell_pattern(text, trigger, top_level=False):
     """Query pattern of the object that follows trigger in a legacy line."""
-    start = text.find(trigger)
+    if top_level:
+        start = _top_level_find(text, trigger)
+    else:
+        start = text.find(trigger)
     if start < 0:
         return None
     rest = text[start + len(trigger):].lstrip()
@@ -399,7 +447,7 @@ class LogEvent(ProfileParserMixin, object):
             return None
         command = command[:end + 1]
         for trigger in ('filter:', 'pipeline:', 'query:'):
-            pattern = _shell_pattern(command, trigger)
+            pattern = _shell_pattern(command, trigger, top_level=True)
             if pattern:
                 return pattern
         return None
