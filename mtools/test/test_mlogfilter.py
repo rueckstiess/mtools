@@ -275,7 +275,7 @@ class TestMLogFilter(object):
     def test_accept_nodate(self):
         self.tool.is_stdin = True
         self.tool.run('%s --from Aug 5 %d 20:53:50 --to '
-                      '+5min' % (self.logfile_path, self.current_year - 1))
+                      '+5min' % (self.logfile_path, self.current_year))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
