@@ -102,13 +102,21 @@ class BasePlotType(object):
 
     @classmethod
     def _reset_color_cycle(cls):
-        cls.color_index = 0
-        cls.marker_index = 0
+        """Clear per-class counters so the next plot starts at color zero.
+
+        ``color_map`` stores the advanced counter on the class that
+        plotted. An overlay such as ``nscanned/n`` then reads that
+        parent counter. A zero stored on the overlay would start it
+        over at the first color.
+        """
+        if cls is BasePlotType:
+            cls.color_index = 0
+            cls.marker_index = 0
+        else:
+            for name in ('color_index', 'marker_index'):
+                if name in cls.__dict__:
+                    delattr(cls, name)
         for subclass in cls.__subclasses__():
-            if 'color_index' in subclass.__dict__:
-                subclass.color_index = 0
-            if 'marker_index' in subclass.__dict__:
-                subclass.marker_index = 0
             subclass._reset_color_cycle()
 
     def accept_line(self, logevent):

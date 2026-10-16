@@ -8,6 +8,8 @@ import pytest
 from mtools.mplotqueries.mplotqueries import MPlotQueriesTool
 from mtools.mplotqueries.plottypes.base_type import BasePlotType, PALETTES
 from mtools.mplotqueries.plottypes.event_type import RSStatePlotType
+from mtools.mplotqueries.plottypes.scatter_type import (
+    NScannedNPlotType, ScatterPlotType)
 
 
 @pytest.fixture(autouse=True)
@@ -66,6 +68,26 @@ def test_explicit_colors_replace_the_palette():
 def test_invalid_color_exits():
     with pytest.raises(SystemExit):
         BasePlotType.use_palette('default', ['not a color'])
+
+
+def test_nscanned_overlay_continues_the_scatter_cycle():
+    BasePlotType.use_palette('ibm')
+    scatter, scatter_marker = ScatterPlotType.color_map('queries')
+    overlay, overlay_marker = NScannedNPlotType.color_map('queries')
+    assert scatter == PALETTES['ibm'][0]
+    assert overlay == PALETTES['ibm'][1]
+    assert scatter_marker == overlay_marker == 'o'
+
+
+def test_palette_change_drops_plot_class_counters():
+    BasePlotType.use_palette('ibm')
+    ScatterPlotType.color_map('queries')
+    NScannedNPlotType.color_map('queries')
+    BasePlotType.use_palette('tol')
+    assert 'color_index' not in ScatterPlotType.__dict__
+    assert 'marker_index' not in NScannedNPlotType.__dict__
+    restarted, _ = ScatterPlotType.color_map('queries')
+    assert restarted == PALETTES['tol'][0]
 
 
 def test_state_plot_keeps_its_own_colors():
