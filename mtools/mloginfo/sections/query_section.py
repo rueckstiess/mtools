@@ -16,8 +16,73 @@ LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
                                    'duration', 'allowDiskUse'])
 
 
+# Commands that --queries already summarized, plus getMore. Modern servers
+# log getMore as a command rather than the legacy getmore operation.
+_QUERY_COMMANDS = ('count', 'findandmodify', 'geonear', 'find', 'aggregate',
+                   'getmore')
+
+
 def op_or_cmd(le):
     return le.operation if le.operation != 'command' else le.command
+
+
+def _command_name(le):
+    if not le.command:
+        return ''
+    return le.command.lower()
+
+
+def _query_event(le):
+    """Return True when this line belongs in the queries table."""
+    return (le.operation in ('query', 'getmore', 'update', 'remove') or
+            _command_name(le) in _QUERY_COMMANDS)
+
+
+def _opens_cursor(le):
+    """Return True when this line can be the command that opened a cursor."""
+    return le.operation == 'query' or _command_name(le) in ('find', 'aggregate')
+
+
+def _is_getmore(le):
+    return le.operation == 'getmore' or _command_name(le) == 'getmore'
+
+
+def _operation_name(le):
+    operation = op_or_cmd(le)
+    if operation and operation.lower() == 'getmore':
+        return 'getmore'
+    return operation
+
+
+def _pattern_for(le, cursor_patterns):
+    """
+    Return the pattern this line is grouped by.
+
+    A getMore uses the query that opened its cursor when that query is on
+    the line or earlier in this file. Every other operation keeps its own
+    pattern.
+    """
+    pattern = le.pattern
+    if not _is_getmore(le):
+        return pattern
+    origin = le.originating_pattern
+    if not origin:
+        cursor_id = le.cursorid
+        if cursor_id is not None:
+            origin = cursor_patterns.get(cursor_id)
+    if origin:
+        return origin
+    return pattern
+
+
+def _remember_cursor(le, pattern, cursor_patterns):
+    """Remember which query shape a cursor id belongs to."""
+    if not pattern or not (_opens_cursor(le) or _is_getmore(le)):
+        return
+    cursor_id = le.cursorid
+    if cursor_id is None:
+        return
+    cursor_patterns.setdefault(cursor_id, pattern)
 
 
 class QuerySection(BaseSection):
@@ -61,6 +126,9 @@ class QuerySection(BaseSection):
         """Run this section and print out information."""
         grouping = Grouping(group_by=lambda x: (x.namespace, x.operation,
                                                 x.pattern, x.allowDiskUse))
+        # cursor id -> query shape of the command that opened the cursor.
+        # The log is read in order, so a find is recorded before its getMores.
+        cursor_patterns = {}
         logfile = self.mloginfo.logfile
         rounding = self.mloginfo.args['rounding']
 
@@ -85,11 +153,12 @@ class QuerySection(BaseSection):
                                                 progress_start) /
                                           progress_total))
 
-            if (le.operation in ['query', 'getmore', 'update', 'remove'] or
-                    le.command in ['count', 'findandmodify',
-                                   'geonear', 'find', 'aggregate']):
-                lt = LogTuple(namespace=le.namespace, operation=op_or_cmd(le),
-                              pattern=le.pattern, duration=le.duration,
+            if _query_event(le):
+                pattern = _pattern_for(le, cursor_patterns)
+                _remember_cursor(le, pattern, cursor_patterns)
+                lt = LogTuple(namespace=le.namespace,
+                              operation=_operation_name(le),
+                              pattern=pattern, duration=le.duration,
                               allowDiskUse=le.allowDiskUse)
                 grouping.add(lt)
 
