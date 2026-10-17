@@ -10,6 +10,7 @@ from dateutil import parser
 import pytest
 
 import mtools
+from mtools.mlogfilter.filters.datetime_filter import DateTimeFilter
 from mtools.mlogfilter.filters.tablescan_filter import TableScanFilter
 from mtools.mlogfilter.mlogfilter import MLogFilterTool
 from mtools.util.logevent import LogEvent
@@ -314,7 +315,7 @@ class TestMLogFilter(object):
     def test_accept_nodate(self):
         self.tool.is_stdin = True
         self.tool.run('%s --from Aug 5 %d 20:53:50 --to '
-                      '+5min' % (self.logfile_path, self.current_year - 1))
+                      '+5min' % (self.logfile_path, self.current_year))
         self.tool.is_stdin = False
 
         output = sys.stdout.getvalue()
@@ -622,3 +623,78 @@ _add_level_test(TestMLogFilter, 'test_I_levels', 'I', 20)
 _add_level_test(TestMLogFilter, 'test_U_levels', 'U')
 
 # output = sys.stdout.getvalue().strip()
+
+
+class TestStdinFromTimezone(object):
+    """Naive --from on stdin uses the log line's zone, including old years."""
+
+    payload = (
+        "not a log line\n"
+        "2022-11-22T00:00:02.933+0100 I NETWORK first\n"
+        "2022-11-22T00:00:04.000+0100 I NETWORK second\n"
+    )
+
+    def _run_stdin(self, monkeypatch, text, args):
+        stdin = io.StringIO(text)
+        stdin.name = "<stdin>"
+        stdin.isatty = lambda: False
+        monkeypatch.setattr(sys, "stdin", stdin)
+        tool = MLogFilterTool()
+        tool.run(args)
+
+    def test_stdin_keeps_lines_after_a_naive_from(self, monkeypatch, capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from 2022-11-22T00:00:00")
+        output = capsys.readouterr().out
+        assert "not a log line" not in output
+        assert "first" in output
+        assert "second" in output
+
+    def test_stdin_from_drops_only_earlier_lines(self, monkeypatch, capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from 2022-11-22T00:00:03")
+        output = capsys.readouterr().out
+        assert "first" not in output
+        assert "second" in output
+
+    def test_stdin_uses_the_logs_zone_when_it_is_utc(self, monkeypatch, capsys):
+        text = "2022-11-22T00:00:02.933Z I NETWORK utc-line\n"
+        self._run_stdin(monkeypatch, text, "--from 2022-11-22T00:00:00")
+        assert "utc-line" in capsys.readouterr().out
+
+    def test_stdin_time_only_from_uses_the_first_day(self, monkeypatch,
+                                                    capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from 00:00:03")
+        output = capsys.readouterr().out
+        assert "first" not in output
+        assert "second" in output
+
+    def test_stdin_from_start_offset(self, monkeypatch, capsys):
+        self._run_stdin(monkeypatch, self.payload, "--from start +1s")
+        output = capsys.readouterr().out
+        assert "first" not in output
+        assert "second" in output
+
+    def test_file_and_stdin_accept_the_same_lines(self, tmp_path):
+        path = tmp_path / "my.log"
+        path.write_bytes(self.payload.encode())
+
+        def accepted(logfile, is_stdin):
+            tool = MLogFilterTool()
+            tool.is_stdin = is_stdin
+            tool.args = {
+                "logfile": [logfile],
+                "timezone": [0],
+                "from": "2022-11-22T00:00:00",
+                "to": "end",
+            }
+            filt = DateTimeFilter(tool)
+            filt.setup()
+            return [str(le) for le in logfile if filt.accept(le)]
+
+        with open(path, "rb") as handle:
+            file_lines = accepted(LogFile(handle), False)
+        stdin = io.StringIO(self.payload)
+        stdin.name = "<stdin>"
+        stdin_lines = accepted(LogFile(stdin), True)
+        assert file_lines == stdin_lines
+        assert any("first" in line for line in stdin_lines)
+        assert any("second" in line for line in stdin_lines)
