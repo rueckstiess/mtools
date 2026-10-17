@@ -114,7 +114,7 @@ class ScatterPlotType(BasePlotType):
 
             try:
                 # remove triangle for this event
-                idx = map(itemgetter(0), self.durlines).index(logevent)
+                idx = [item[0] for item in self.durlines].index(logevent)
                 _, poly = self.durlines[idx]
                 poly.remove()
                 plt.gcf().canvas.draw()
