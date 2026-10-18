@@ -114,7 +114,7 @@ def extract_logs(log_code_lines, current_version):
                     statement += lines[current_lineno]
                     # match semicolon at end of line
                     # (potentially with whitespace between)
-                    semicolon_match = re.search(';\s*$', statement,
+                    semicolon_match = re.search(r';\s*$', statement,
                                                 flags=re.MULTILINE)
                     if semicolon_match:
                         statement = statement[:semicolon_match.start()]

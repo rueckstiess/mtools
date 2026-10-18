@@ -19,7 +19,7 @@ LogTuple = namedtuple('LogTuple', ['namespace', 'operation', 'pattern',
 # Commands that --queries already summarized, plus getMore. Modern servers
 # log getMore as a command rather than the legacy getmore operation.
 _QUERY_COMMANDS = ('count', 'findandmodify', 'geonear', 'find', 'aggregate',
-                   'getmore')
+                   'getmore', 'insert')
 
 
 def op_or_cmd(le):
@@ -34,7 +34,8 @@ def _command_name(le):
 
 def _query_event(le):
     """Return True when this line belongs in the queries table."""
-    return (le.operation in ('query', 'getmore', 'update', 'remove') or
+    return (le.operation in ('query', 'getmore', 'update', 'remove',
+                             'insert') or
             _command_name(le) in _QUERY_COMMANDS)
 
 

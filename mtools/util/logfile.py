@@ -471,7 +471,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         # look for hostname and port which will be logged with pid
         if not self._hostname:
             if " pid=" in line:
-                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
+                match = re.search(r'port=(?P<port>\d+).*host=(?P<host>\S+)',
                                 line)
                 if match:
                     self._hostname = match.group('host')
@@ -482,11 +482,11 @@ class LogFile(ShardingInfoMixin, InputSource):
             only two engines, MMAPv1 and WiredTiger
         """
         if "[initandlisten] options:" in line:
-            match = re.search('replSet: "(?P<replSet>\S+)"', line)
+            match = re.search(r'replSet: "(?P<replSet>\S+)"', line)
             if match:
                 self._repl_set = match.group('replSet')
 
-            match = re.search('engine: "(?P<engine>\S+)"', line)
+            match = re.search(r'engine: "(?P<engine>\S+)"', line)
             if match:
                 self._storage_engine = match.group('engine')
             else:
@@ -501,8 +501,8 @@ class LogFile(ShardingInfoMixin, InputSource):
             self._storage_engine = 'wiredTiger'
 
         if "command admin.$cmd command: { replSetInitiate:" in line:
-            match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                'members: (?P<replSetMembers>[^]]+ ])', line)
+            match = re.search(r'{ _id: "(?P<replSet>\S+)", '
+                                r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_members = match.group('replSetMembers')
@@ -510,15 +510,15 @@ class LogFile(ShardingInfoMixin, InputSource):
         # Replica set config logging in MongoDB 3.0+
         new_config = ("New replica set config in use: ")
         if new_config in line:
-            match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                'version: (?P<replSetVersion>\d+), ', line)
+            match = re.search(r'{ _id: "(?P<replSet>\S+)", '
+                                r'version: (?P<replSetVersion>\d+), ', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_version = match.group('replSetVersion')
-            match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', line)
+            match = re.search(r', protocolVersion: (?P<replSetProtocol>\d+), ', line)
             if match:
                 self._repl_set_protocol = match.group('replSetProtocol')
-            match = re.search('members: (?P<replSetMembers>[^]]+ ])', line)
+            match = re.search(r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set_members = match.group('replSetMembers')
 

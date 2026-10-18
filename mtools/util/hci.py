@@ -21,18 +21,18 @@ class DateTimeBoundaries(object):
 
     dtRegexes = OrderedDict([
         # special constants
-        ('constant', re.compile('(now|start|end|today|yesterday)' +
-                                '($|\s+)')),
+        ('constant', re.compile(r'(now|start|end|today|yesterday)' +
+                                r'($|\s+)')),
         # weekday: Mon, Wed, Sat
-        ('weekday', re.compile('(' + '|'.join(weekdays) + ')' + '($|\s+)')),
+        ('weekday', re.compile(r'(' + r'|'.join(weekdays) + r')' + r'($|\s+)')),
         # 11:59:00.123, 1:13:12.004  (also match timezone postfix like Z or
         # +0700 or -05:30)
         # ('time',     re.compile('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})' +
         # '(?::(?P<second>\d{2,2})(?:.(?P<microsecond>\d{3,3}))?)
         # ?(?P<timezone>[0-9Z:\+\-]+)?' + '($|\s+)')),
         # offsets: +3min, -20s, +7days  (see timeunits above)
-        ('offset', re.compile('(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' +
-                              '|'.join(timeunits) + ')' + '($|\s+)'))
+        ('offset', re.compile(r'(?P<operator>[\+-])(?P<value>\d+)(?P<unit>' +
+                              r'|'.join(timeunits) + r')' + r'($|\s+)'))
     ])
 
     def __init__(self, start, end):
@@ -105,10 +105,10 @@ class DateTimeBoundaries(object):
                 else:
                     # check if it's only time, then use the start dt as
                     # default, else just use the current year
-                    if re.match('(?P<hour>\d{1,2}):(?P<minute>\d{2,2})'
-                                '(?::(?P<second>\d{2,2})'
-                                '(?:.(?P<microsecond>\d{3,3}))?)?'
-                                '(?P<timezone>[0-9Z:\+\-]+)?$', s):
+                    if re.match(r'(?P<hour>\d{1,2}):(?P<minute>\d{2,2})'
+                                r'(?::(?P<second>\d{2,2})'
+                                r'(?:.(?P<microsecond>\d{3,3}))?)?'
+                                r'(?P<timezone>[0-9Z:\+\-]+)?$', s):
                         default = self.end if lower_bound else self.start
                     else:
                         default = datetime(self.end.year, 1, 1, 0, 0, 0)
@@ -171,7 +171,7 @@ class DateTimeBoundaries(object):
 
         # if parsed datetime is out of bounds and no year specified,
         # try to adjust year
-        year_present = re.search('\d{4,4}', original_s)
+        year_present = re.search(r'\d{4,4}', original_s)
 
         if not year_present and 'constant' not in result:
             if (dt < self.start and

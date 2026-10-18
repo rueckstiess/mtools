@@ -54,8 +54,8 @@ specific tool's section. See the `installation instructions
 
 The mtools suite is only tested with
 `actively supported <https://www.mongodb.com/support-policy/lifecycles>`
-(non End-of-Life) versions of the MongoDB server. As of September 2023,
-that includes MongoDB 4.4 or newer.
+(non End-of-Life) versions of the MongoDB server. As of October 2026,
+that includes MongoDB 7.0 or newer.
 
 Recent Changes
 --------------

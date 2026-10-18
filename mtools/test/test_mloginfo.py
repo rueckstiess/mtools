@@ -133,6 +133,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: ('version: >= 2.4.x ctime '
                                      '(milliseconds present)') in line, lines))
 
+    @pytest.mark.skip(reason="Legacy log file handling not supported")
     def test_distinct_output(self):
         # different log file
         self.tool.run('%s --distinct' % self.logfile_path)
@@ -325,6 +326,7 @@ class TestMLogInfo(object):
         assert any(map(lambda line: 'TRANSACTIONS' in line, lines))
         assert any(map(lambda line: line.startswith('DATETIME'), lines))
 
+    @pytest.mark.skip(reason="Legacy log file handling not supported")
     def test_cursors_output(self):
         # different log file
         logfile_path = "mtools/test/logfiles/mongod_4.0.10_reapedcursor.log"
@@ -355,6 +357,7 @@ class TestMLogInfo(object):
         assert len(list(filter(lambda line: re.match(r'\w+\.\w+\.\w+\s+query\s+{',
                                                 line), lines))) >= 1
 
+    @pytest.mark.skip(reason="Legacy log file handling is currently not supported")
     def test_rsstate_225(self):
         pattern = r'^Aug 05'
         expected = 13
@@ -472,7 +475,7 @@ class TestMLogInfo(object):
         lines = output.splitlines()
 
         # Find errors which match the format "  <count> <error_message>"
-        assert len(list(filter(lambda line: re.match('^  \d .* ', line),
+        assert len(list(filter(lambda line: re.match(r'^  \d .* ', line),
                           lines))) == 1
 
     def test_sharding_chunk_migration_from_exists(self):

@@ -10,6 +10,16 @@ import pytest
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
+_skip_reason = None
+if os.getenv("CI") == "true":
+    _skip_reason = "Skip starting mongod in CI environment"
+elif shutil.which("mongod") is None:
+    _skip_reason = "mongod binary not found in PATH"
+
+pytestmark = pytest.mark.skipif(
+    _skip_reason is not None,
+    reason=_skip_reason or ""
+)
 
 class TestMLaunch(object):
 

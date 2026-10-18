@@ -23,7 +23,7 @@ _ROW = re.compile(
     r'^(?P<namespace>\S+)\s+'
     r'(?P<operation>query|getmore|update|remove|find|aggregate|'
     r'count|findandmodify|geonear)\s+'
-    r'(?P<pattern>\{.*\}|None)\s+'
+    r'(?P<pattern>\[.*\]|\{.*\}|None)\s+'
     r'(?P<count>\d+)\b'
 )
 
@@ -151,6 +151,24 @@ def test_cursor_id_zero_does_not_join_getmores(capsys):
     assert len(getmores) == 1
     assert getmores[0]['pattern'] == 'None'
     assert getmores[0]['count'] == 2
+
+
+def test_legacy_aggregate_getmore_uses_the_pipeline(capsys):
+    text = '\n'.join([
+        _legacy('01',
+                'command test.orders command: aggregate { aggregate: "orders", '
+                'pipeline: [ { $match: { sku: "abc" } } ], cursor: {} } '
+                'cursorid:555 nreturned:1 5ms'),
+        _legacy('02', 'getmore test.orders cursorid:555 nreturned:3 30ms'),
+    ])
+    rows = _queries(text, capsys)
+    aggregates = [row for row in rows if row['operation'] == 'aggregate']
+    getmores = [row for row in rows if row['operation'] == 'getmore']
+    assert len(aggregates) == 1
+    assert len(getmores) == 1
+    assert aggregates[0]['pattern'] != 'None'
+    assert getmores[0]['pattern'] == aggregates[0]['pattern']
+    assert '"sku": 1' in getmores[0]['pattern']
 
 
 def test_originating_command_without_the_opening_query(capsys):

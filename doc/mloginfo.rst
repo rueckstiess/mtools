@@ -97,9 +97,10 @@ Queries (``--queries``)
 -----------------------
 
 The queries section will go through the log file and find all queries
-(including queries from updates) and collect some statistics for each query
-pattern. A query pattern is the shape or signature of a query (similar to an
-index definition) without the actual query values for each field.
+(including queries from updates) and inserts, and collect some statistics
+for each pattern. A pattern is the shape or signature of a query or insert
+document (similar to an index definition) without the actual values. An
+insert line that does not log the document is grouped by namespace.
 
 The section shows a table with namespace (in usual database.collection syntax),
 the query pattern, and various statistics, like how often this query pattern
