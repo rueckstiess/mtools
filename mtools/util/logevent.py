@@ -206,17 +206,16 @@ class LogEvent(ProfileParserMixin, object):
 
         if isinstance(doc_or_str, str):
             if self.logformat is None and doc_or_str.startswith('{'):
-                # Try to parse as JSON (logv2)
+                # Parse as JSON (logv2). Let a JSONDecodeError propagate:
+                # catching it here left a half-initialised LogEvent with no
+                # lazy-parse state, which then failed with AttributeError.
+                # LogFile reports the file and line before re-raising.
                 self.from_string = False
-                try:
-                    doc = json.loads(doc_or_str)
-                    if fulldoc:
-                        self._doc = doc
-                    self._parse_logv2(doc)
-                    self.logformat = LogFormat.LOGV2
-                except json.JSONDecodeError as e:
-                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
-                    print(f"Attempted to     parse as JSON: {doc_or_str}")
+                doc = json.loads(doc_or_str)
+                if fulldoc:
+                    self._doc = doc
+                self._parse_logv2(doc)
+                self.logformat = LogFormat.LOGV2
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
