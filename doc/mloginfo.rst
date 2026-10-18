@@ -112,6 +112,18 @@ provides information about the disk usage of a namespace. The slow query log
 entry shows a value of "True" or "False" if the disk was used, or "None" if
 this information is not available in the log.
 
+A getMore is reported with the shape of the query that opened its cursor,
+so slow follow-up batches stay with that query instead of one combined
+getMore row. The shape is taken from ``originatingCommand`` on the getMore
+line when it is present. Otherwise it is taken from an earlier ``find``,
+``aggregate``, or ``query`` in the same file that logged the same cursor
+id. getMore lines with the same shape are counted together, on their own
+row. A getMore that cannot be matched, because the log rotated or the
+opening query was not logged, stays on its own row.
+
+Command ``getMore`` lines are included alongside the older ``getmore``
+operation.
+
 This overview is very useful to know which indexes to create to get the best
 performance out of a MongoDB environment. Optimization efforts should start at
 the top of the list and work downwards, to get the highest overall improvement

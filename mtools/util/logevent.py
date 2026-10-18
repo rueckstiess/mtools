@@ -21,6 +21,128 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def _cursor_id(value):
+    """Return a cursor id, or None when the operation left no cursor open."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, float):
+        if not value.is_integer():
+            return None
+        value = int(value)
+    if isinstance(value, int):
+        return value or None
+    text = str(value).strip().replace(',', '')
+    if not text:
+        return None
+    try:
+        number = int(text, 10)
+    except ValueError:
+        return None
+    if number == 0:
+        return None
+    return number
+
+
+def _bracket_end(text):
+    """Index of the closing bracket that matches the first character."""
+    if not text:
+        return None
+    opening = text[0]
+    if opening == '{':
+        closing = '}'
+    elif opening == '[':
+        closing = ']'
+    else:
+        return None
+    depth = 0
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
+        if char == opening:
+            depth += 1
+        elif char == closing:
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _scan(text):
+    """Yield ``(index, char, in_string)``, tracking double-quoted strings."""
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+                yield index, char, False
+                continue
+            yield index, char, True
+        else:
+            if char == '"':
+                in_string = True
+                yield index, char, True
+                continue
+            yield index, char, False
+
+
+def _top_level_find(text, trigger):
+    """Index of a field name trigger at the top level of the object text.
+
+    Nested fields and operators such as ``$filter:`` do not count.
+    """
+    depth = 0
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
+        if char in '{[':
+            depth += 1
+        elif char in '}]':
+            depth -= 1
+        elif depth == 1 and text.startswith(trigger, index):
+            before = text[:index].rstrip()
+            if before.endswith('{') or before.endswith(','):
+                return index
+    return -1
+
+
+def _shell_pattern(text, trigger, top_level=False):
+    """Query pattern of the object that follows trigger in a legacy line."""
+    if top_level:
+        start = _top_level_find(text, trigger)
+    else:
+        start = text.find(trigger)
+    if start < 0:
+        return None
+    rest = text[start + len(trigger):].lstrip()
+    end = _bracket_end(rest)
+    if end is None:
+        return None
+    try:
+        return json2pattern(rest[:end + 1])
+    except Exception:
+        return None
+
+
+def _command_pattern(command):
+    """Query pattern of a command document's filter, pipeline, or query."""
+    if not isinstance(command, dict):
+        return None
+    for key in ('filter', 'pipeline', 'query'):
+        payload = command.get(key)
+        if payload is None:
+            continue
+        try:
+            return json2pattern(payload)
+        except Exception:
+            return None
+    return None
+
+
 class LogEvent(ProfileParserMixin, object):
     """
     Extract information from log line and store properties/variables.
@@ -309,6 +431,49 @@ class LogEvent(ProfileParserMixin, object):
         return self._cursorid
 
     @property
+    def cursorid(self):
+        """
+        Return the cursor id of a query, find, aggregate, or getmore.
+
+        ``cursor`` is the id from a cursor-reaping message. This property is
+        the cursorid field on an operation. Zero means the operation did not
+        leave a cursor open and is returned as None.
+        """
+        if self.logformat == LogFormat.LEGACY and not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+        return _cursor_id(self._cursorid)
+
+    @property
+    def originating_pattern(self):
+        """
+        Return the query shape stored on a getMore line.
+
+        MongoDB logs that shape as originatingCommand. The result is the
+        filter, pipeline, or query inside that command. Lines that do not
+        carry it return None.
+        """
+        if self.logformat == LogFormat.LOGV2:
+            doc = self.doc or {}
+            attr = doc.get('attr') or {}
+            return _command_pattern(attr.get('originatingCommand'))
+
+        line = self.line_str
+        if not line or 'originatingCommand:' not in line:
+            return None
+        start = line.find('originatingCommand:')
+        command = line[start + len('originatingCommand:'):].lstrip()
+        end = _bracket_end(command)
+        if end is None:
+            return None
+        command = command[:end + 1]
+        for trigger in ('filter:', 'pipeline:', 'query:'):
+            pattern = _shell_pattern(command, trigger, top_level=True)
+            if pattern:
+                return pattern
+        return None
+
+    @property
     def datetime(self):
         """Extract datetime if available (lazy)."""
         if not self._datetime_calculated:
@@ -548,8 +713,11 @@ class LogEvent(ProfileParserMixin, object):
                 if brace != -1:
                     self._pattern = self._find_pattern(
                         self.line_str[marker:brace])
-            elif self.command == 'insert':
-                self._pattern = self._find_pattern('documents: ')
+            elif self.command == 'aggregate':
+                # Pre-3.6 aggregate lines have no originatingCommand.
+                # The pipeline is the shape later getMores should inherit.
+                self._pattern = _shell_pattern(self.line_str, 'pipeline:',
+                                               top_level=True)
 
         return self._pattern
 
