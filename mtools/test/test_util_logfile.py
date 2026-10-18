@@ -1,9 +1,12 @@
 import io
+import json
 import os
 from datetime import datetime
 import re
 
 from dateutil.tz import tzoffset, tzutc
+
+import pytest
 
 import mtools
 from mtools.util.logevent import LogEvent
@@ -212,6 +215,108 @@ class TestUtilLogFile(object):
         assert chunk_moved_to[3] == "test.products"
         assert ('step 6 of 6', '213') in chunk_moved_to[4]
         assert chunk_moved_to[5] == "success"
+
+
+VALID_LOG_LINE = (
+    "2014-04-09T23:16:20.437-0400 [initandlisten] "
+    "MongoDB starting : pid=4037 port=27019\n"
+)
+
+
+class TestLogFileParseErrors(object):
+    """A parse failure names the log line and still raises."""
+
+    def test_open_reports_invalid_json_on_the_first_line(self, tmp_path, capsys):
+        path = tmp_path / "bad.log"
+        path.write_text("{not json\n")
+
+        with open(path, "rb") as handle:
+            with pytest.raises(json.JSONDecodeError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "line 1" in error
+        assert "bad.log" in error
+
+    def test_next_reports_invalid_json_after_a_valid_line(self, tmp_path, capsys):
+        path = tmp_path / "mixed.log"
+        # The first record ends in a duration, so the bad line is not
+        # joined onto it as a wrapped query.
+        timed = VALID_LOG_LINE.rstrip("\n") + " 5ms\n"
+        path.write_text(timed + "{not json\n" + VALID_LOG_LINE)
+
+        with open(path, "rb") as handle:
+            logfile = LogFile(handle)
+            capsys.readouterr()
+            assert logfile.next().datetime
+            with pytest.raises(json.JSONDecodeError):
+                logfile.next()
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "line 2" in error
+
+    def test_end_scan_reports_invalid_json(self, tmp_path, capsys):
+        path = tmp_path / "tail.log"
+        path.write_text(VALID_LOG_LINE + "{not json\n")
+
+        with open(path, "rb") as handle:
+            with pytest.raises(json.JSONDecodeError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "{not json" in error
+        assert "near the end" in error
+        assert "tail.log" in error
+
+
+
+BAD_DATE_LINE = (
+    "2014-13-45T23:16:20.437-0400 [initandlisten] bad date\n"
+)
+
+
+class TestLogFileBadDates(object):
+    """An unparseable timestamp names the file and line."""
+
+    def test_open_reports_bad_date_on_the_first_line(self, tmp_path, capsys):
+        path = tmp_path / "baddate.log"
+        path.write_text(BAD_DATE_LINE)
+
+        with open(path, "rb") as handle:
+            with pytest.raises(ValueError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "baddate.log line 1" in error
+        assert "bad date" in error
+
+    def test_end_scan_reports_bad_date(self, tmp_path, capsys):
+        path = tmp_path / "badtail.log"
+        path.write_text(VALID_LOG_LINE + BAD_DATE_LINE)
+
+        with open(path, "rb") as handle:
+            with pytest.raises(ValueError):
+                LogFile(handle)
+
+        error = capsys.readouterr().err
+        assert "badtail.log near the end" in error
+
+
+def test_relative_seek_reports_byte_offset(tmp_path, capsys):
+    path = tmp_path / "offset.log"
+    timed = VALID_LOG_LINE.rstrip("\n") + " 5ms\n"
+    path.write_text(timed * 50 + "{not json\n" + VALID_LOG_LINE)
+    size = len(timed) * 50
+    with open(path, "rb") as handle:
+        logfile = LogFile(handle)
+        logfile.filehandle.seek(size - 10)
+        logfile._find_curr_line()
+        capsys.readouterr()
+        with pytest.raises(json.JSONDecodeError):
+            logfile.next()
+    assert "offset.log byte offset %i" % size in capsys.readouterr().err
 
 
 def _logfile(text, name='wrapped.log'):
