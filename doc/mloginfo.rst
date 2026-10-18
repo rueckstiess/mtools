@@ -97,9 +97,10 @@ Queries (``--queries``)
 -----------------------
 
 The queries section will go through the log file and find all queries
-(including queries from updates) and collect some statistics for each query
-pattern. A query pattern is the shape or signature of a query (similar to an
-index definition) without the actual query values for each field.
+(including queries from updates) and inserts, and collect some statistics
+for each pattern. A pattern is the shape or signature of a query or insert
+document (similar to an index definition) without the actual values. An
+insert line that does not log the document is grouped by namespace.
 
 The section shows a table with namespace (in usual database.collection syntax),
 the query pattern, and various statistics, like how often this query pattern
@@ -110,6 +111,18 @@ perform for each query pattern. The ``allowDiskUsage`` (last column) parameter
 provides information about the disk usage of a namespace. The slow query log
 entry shows a value of "True" or "False" if the disk was used, or "None" if
 this information is not available in the log.
+
+A getMore is reported with the shape of the query that opened its cursor,
+so slow follow-up batches stay with that query instead of one combined
+getMore row. The shape is taken from ``originatingCommand`` on the getMore
+line when it is present. Otherwise it is taken from an earlier ``find``,
+``aggregate``, or ``query`` in the same file that logged the same cursor
+id. getMore lines with the same shape are counted together, on their own
+row. A getMore that cannot be matched, because the log rotated or the
+opening query was not logged, stays on its own row.
+
+Command ``getMore`` lines are included alongside the older ``getmore``
+operation.
 
 This overview is very useful to know which indexes to create to get the best
 performance out of a MongoDB environment. Optimization efforts should start at

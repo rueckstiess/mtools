@@ -2,7 +2,7 @@
 mtools
 ======
 
-|PyPI version| |Build Status| |Python 36| |Python 37| |Python 38|
+|PyPI version| |Build Status| |Python 311| |Python 312| |Python 313| |Python 314|
 
 **mtools** is a collection of helper scripts to parse, filter, and visualize
 MongoDB log files (``mongod``, ``mongos``). mtools also includes ``mlaunch``, a
@@ -64,9 +64,11 @@ posted in the `Issues
    :target: https://pypi.python.org/pypi/mtools/
 .. |Build Status| image:: https://img.shields.io/travis/rueckstiess/mtools/master.svg
    :target: https://travis-ci.org/rueckstiess/mtools
-.. |Python 36| image:: https://img.shields.io/badge/Python-3.6-brightgreen.svg?style=flat
+.. |Python 311| image:: https://img.shields.io/badge/Python-3.11-brightgreen.svg?style=flat
    :target: http://python.org
-.. |Python 37| image:: https://img.shields.io/badge/Python-3.7-brightgreen.svg?style=flat
+.. |Python 312| image:: https://img.shields.io/badge/Python-3.12-brightgreen.svg?style=flat
    :target: http://python.org
-.. |Python 38| image:: https://img.shields.io/badge/Python-3.8-brightgreen.svg?style=flat
+.. |Python 313| image:: https://img.shields.io/badge/Python-3.13-brightgreen.svg?style=flat
+   :target: http://python.org
+.. |Python 314| image:: https://img.shields.io/badge/Python-3.14-brightgreen.svg?style=flat
    :target: http://python.org

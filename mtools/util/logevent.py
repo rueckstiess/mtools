@@ -21,6 +21,128 @@ class DateTimeEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def _cursor_id(value):
+    """Return a cursor id, or None when the operation left no cursor open."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, float):
+        if not value.is_integer():
+            return None
+        value = int(value)
+    if isinstance(value, int):
+        return value or None
+    text = str(value).strip().replace(',', '')
+    if not text:
+        return None
+    try:
+        number = int(text, 10)
+    except ValueError:
+        return None
+    if number == 0:
+        return None
+    return number
+
+
+def _bracket_end(text):
+    """Index of the closing bracket that matches the first character."""
+    if not text:
+        return None
+    opening = text[0]
+    if opening == '{':
+        closing = '}'
+    elif opening == '[':
+        closing = ']'
+    else:
+        return None
+    depth = 0
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
+        if char == opening:
+            depth += 1
+        elif char == closing:
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _scan(text):
+    """Yield ``(index, char, in_string)``, tracking double-quoted strings."""
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+                yield index, char, False
+                continue
+            yield index, char, True
+        else:
+            if char == '"':
+                in_string = True
+                yield index, char, True
+                continue
+            yield index, char, False
+
+
+def _top_level_find(text, trigger):
+    """Index of a field name trigger at the top level of the object text.
+
+    Nested fields and operators such as ``$filter:`` do not count.
+    """
+    depth = 0
+    for index, char, in_string in _scan(text):
+        if in_string:
+            continue
+        if char in '{[':
+            depth += 1
+        elif char in '}]':
+            depth -= 1
+        elif depth == 1 and text.startswith(trigger, index):
+            before = text[:index].rstrip()
+            if before.endswith('{') or before.endswith(','):
+                return index
+    return -1
+
+
+def _shell_pattern(text, trigger, top_level=False):
+    """Query pattern of the object that follows trigger in a legacy line."""
+    if top_level:
+        start = _top_level_find(text, trigger)
+    else:
+        start = text.find(trigger)
+    if start < 0:
+        return None
+    rest = text[start + len(trigger):].lstrip()
+    end = _bracket_end(rest)
+    if end is None:
+        return None
+    try:
+        return json2pattern(rest[:end + 1])
+    except Exception:
+        return None
+
+
+def _command_pattern(command):
+    """Query pattern of a command document's filter, pipeline, or query."""
+    if not isinstance(command, dict):
+        return None
+    for key in ('filter', 'pipeline', 'query'):
+        payload = command.get(key)
+        if payload is None:
+            continue
+        try:
+            return json2pattern(payload)
+        except Exception:
+            return None
+    return None
+
+
 class LogEvent(ProfileParserMixin, object):
     """
     Extract information from log line and store properties/variables.
@@ -83,15 +205,18 @@ class LogEvent(ProfileParserMixin, object):
             doc_or_str = doc_or_str.decode("utf-8")
 
         if isinstance(doc_or_str, str):
-            if doc_or_str.startswith('{'):
+            if self.logformat is None and doc_or_str.startswith('{'):
+                # Try to parse as JSON (logv2)
                 self.from_string = False
-                doc = json.loads(doc_or_str)
-                if fulldoc:
-                    self._doc = doc
-                self._parse_logv2(doc)
-                self.logformat = LogFormat.LOGV2
-                #except Exception as e:
-                   # print(f"An exception occured parsing logv2: {e}")
+                try:
+                    doc = json.loads(doc_or_str)
+                    if fulldoc:
+                        self._doc = doc
+                    self._parse_logv2(doc)
+                    self.logformat = LogFormat.LOGV2
+                except json.JSONDecodeError as e:
+                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
+                    print(f"Attempted to     parse as JSON: {doc_or_str}")
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
@@ -269,7 +394,7 @@ class LogEvent(ProfileParserMixin, object):
                     self._duration = int(matchobj.group(1))
             # SERVER-16176 - Logging of slow checkpoints
             elif "Checkpoint took" in self.line_str:
-                matchobj = re.search("Checkpoint took ([\d]+) seconds to complete", self.line_str)
+                matchobj = re.search(r"Checkpoint took ([\d]+) seconds to complete", self.line_str)
                 if matchobj:
                     self._duration = int(matchobj.group(1)) * 1000
 
@@ -282,7 +407,7 @@ class LogEvent(ProfileParserMixin, object):
             return self._hostname
 
         line_str = self.line_str
-        groups = re.search("DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
+        groups = re.search(r"DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
         return self._hostname
 
@@ -295,11 +420,58 @@ class LogEvent(ProfileParserMixin, object):
 
         line_str = self.line_str
         # SERVER-28604 Checking reaped cursor information
-        groups = re.search("Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
-        self._cursorid = groups.group(1)
-        self._reapedtime = groups.group(2)
+        groups = re.search(r"Cursor id ([\w.]+) timed out, idle since ([^\n]*)", line_str)
+        if groups:
+            self._cursorid = groups.group(1)
+            self._reapedtime = groups.group(2)
+        else:
+            self._cursorid = None  # or handle the case appropriately
+            self._reaped = None
 
         return self._cursorid
+
+    @property
+    def cursorid(self):
+        """
+        Return the cursor id of a query, find, aggregate, or getmore.
+
+        ``cursor`` is the id from a cursor-reaping message. This property is
+        the cursorid field on an operation. Zero means the operation did not
+        leave a cursor open and is returned as None.
+        """
+        if self.logformat == LogFormat.LEGACY and not self._counters_calculated:
+            self._counters_calculated = True
+            self._extract_counters()
+        return _cursor_id(self._cursorid)
+
+    @property
+    def originating_pattern(self):
+        """
+        Return the query shape stored on a getMore line.
+
+        MongoDB logs that shape as originatingCommand. The result is the
+        filter, pipeline, or query inside that command. Lines that do not
+        carry it return None.
+        """
+        if self.logformat == LogFormat.LOGV2:
+            doc = self.doc or {}
+            attr = doc.get('attr') or {}
+            return _command_pattern(attr.get('originatingCommand'))
+
+        line = self.line_str
+        if not line or 'originatingCommand:' not in line:
+            return None
+        start = line.find('originatingCommand:')
+        command = line[start + len('originatingCommand:'):].lstrip()
+        end = _bracket_end(command)
+        if end is None:
+            return None
+        command = command[:end + 1]
+        for trigger in ('filter:', 'pipeline:', 'query:'):
+            pattern = _shell_pattern(command, trigger, top_level=True)
+            if pattern:
+                return pattern
+        return None
 
     @property
     def datetime(self):
@@ -523,7 +695,8 @@ class LogEvent(ProfileParserMixin, object):
         if not self._pattern:
 
             # trigger evaluation of operation
-            if (self.operation in ['query', 'getmore', 'update', 'remove'] or
+            if (self.operation in ['query', 'getmore', 'update', 'remove',
+                                   'insert'] or
                     self.command in ['count', 'findandmodify']):
                 self._pattern = self._find_pattern('query: ')
                 # Fallback check for q: variation (eg "remove" command in 3.6+)
@@ -531,6 +704,20 @@ class LogEvent(ProfileParserMixin, object):
                     self._pattern = self._find_pattern('q: ')
             elif self.command == 'find':
                 self._pattern = self._find_pattern('filter: ')
+            elif self.command == 'insert':
+                # documents is an array. _find_pattern reads one object,
+                # so start it at the first document rather than the '['.
+                marker = self.line_str.find('documents:')
+                brace = (-1 if marker == -1 else
+                         self.line_str.find('{', marker))
+                if brace != -1:
+                    self._pattern = self._find_pattern(
+                        self.line_str[marker:brace])
+            elif self.command == 'aggregate':
+                # Pre-3.6 aggregate lines have no originatingCommand.
+                # The pipeline is the shape later getMores should inherit.
+                self._pattern = _shell_pattern(self.line_str, 'pipeline:',
+                                               top_level=True)
 
         return self._pattern
 

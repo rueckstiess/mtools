@@ -14,7 +14,7 @@ from pymongo.errors import ConnectionFailure
 
 from mtools.mlaunch.mlaunch import MLaunchTool
 
-pytestmark = pytest.mark.skip("skip all mlaunch tests for now")
+pytestmark = pytest.mark.skipif(True, reason="skip all mlaunch tests for now")
 
 class TestMLaunch(object):
     """
@@ -29,13 +29,10 @@ class TestMLaunch(object):
     port = 33333
     base_dir = 'data_test_mlaunch'
 
-    def __init__(self):
-        """Constructor."""
-        self.use_auth = False
-        self.data_dir = ''
-
     def setup_method(self):
         """Start up method to create mlaunch tool and find free port."""
+        self.use_auth = False
+        self.data_dir = ''
         self.tool = MLaunchTool(test=True)
 
         # if the test data path exists, remove it
@@ -138,6 +135,7 @@ class TestMLaunch(object):
         self.run_tool("--single")
         assert self.tool.is_running(self.port)
 
+    @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skip starting mongod in CI environment")
     def test_single(self):
         """mlaunch: start stand-alone server and tear down again."""
 
@@ -160,6 +158,7 @@ class TestMLaunch(object):
                                                                   str(self.
                                                                       port)])
 
+    @pytest.mark.skipif(os.getenv("CI") == "true", reason="Skip starting mongod in CI environment")
     def test_replicaset_conf(self):
         """Start replica set of 2 nodes + arbiter and compare rs.conf()."""
 
@@ -615,10 +614,9 @@ class TestMLaunch(object):
     @pytest.mark.slow
     @pytest.mark.auth
     def test_repeat_all_with_auth(self):
-        """Repeates all tests in this class (excluding itself) with auth."""
-        tests = [t for t in inspect.getmembers(self,
-                                               predicate=inspect.ismethod)
-                 if t[0].startswith('test_')]
+        """Repeats all tests in this class (excluding itself) with auth."""
+        tests = [t for t in inspect.getmembers(self, predicate=inspect.ismethod)
+                if t[0].startswith('test_')]
 
         self.use_auth = True
 
@@ -630,7 +628,7 @@ class TestMLaunch(object):
 
             setattr(method.__func__, 'description',
                     method.__doc__.strip() + ', with auth.')
-            yield (method,)
+            method()
 
         self.use_auth = False
 
@@ -682,7 +680,7 @@ class TestMLaunch(object):
             method = self.helper_adding_default_user
             setattr(method.__func__, 'description', method.__doc__.strip() +
                     ', with ' + env)
-            yield (method, env)
+            method(env)
 
     @pytest.mark.auth
     def test_adding_default_user_no_mongos(self):

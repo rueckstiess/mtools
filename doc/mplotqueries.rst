@@ -17,6 +17,8 @@ Usage
    mplotqueries [-h] [--version] logfile [logfile ...]
                 [--group GROUP]
                 [--logscale]
+                [--palette {default,ibm,okabe-ito,tol}]
+                [--colors COLOR [COLOR ...]]
                 [--type {nscanned/n,rsstate,connchurn,durline,histogram,range,scatter,event} ]
                 [--overlay [ {add,list,reset} ]]
                 [additional plot type parameters]
@@ -65,6 +67,20 @@ Custom Title
    custom title. If the title contains spaces, the full title needs to be
    quoted in strings. The title of a plot is shown above the graph. A file read
    in from ``stdin`` does not use a title.
+
+Color Palette
+-------------
+``--palette NAME``
+   Color sequence used for groups. ``default`` is the original palette.
+   ``okabe-ito``, ``tol``, and ``ibm`` are palettes that stay
+   distinguishable for common forms of color blindness. The sequence
+   repeats with the next marker shape when a plot has more groups than
+   colors. Replica-set state and connection-churn plots keep the fixed
+   color of each state.
+
+``--colors COLOR [COLOR ...]``
+   Use these colors instead of ``--palette``. Each value is ``#RGB``,
+   ``#RRGGBB``, or a matplotlib color name.
 
 Legend
 ------

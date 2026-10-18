@@ -14,33 +14,48 @@ from dateutil.tz import tzutc
 from mtools.util.logfile import LogFile
 from mtools.version import __version__
 
+
+def _open_logfile(string, mode):
+    """Open a logfile path. A single dash selects stdin."""
+    if string == '-':
+        if 'r' in mode:
+            return sys.stdin.buffer if 'b' in mode else sys.stdin
+        raise argparse.ArgumentTypeError('argument "-" with mode %r' % mode)
+    try:
+        return open(string, mode)
+    except OSError as exc:
+        raise argparse.ArgumentTypeError(
+            "can't open '%s': %s" % (string, exc))
+
+
 try:
     from mtools.util.profile_collection import ProfileCollection
 
-    class InputSourceAction(argparse.FileType):
+    class InputSourceAction(object):
         """
-        Extend the FileType class from the argparse module.
+        Open a log file or a MongoDB profile collection.
 
-        Try to open the file and pass the handle to a new LogFile object, but
-        if that's not possible it will catch the exception and interpret the
-        string as a MongoDB URI and try to connect to the database. In that
-        case, it will return a ProfileCollection object.
+        argparse.FileType is deprecated, so this converter opens the file
+        itself. The result is a LogFile. When the string is not a file, it is
+        treated as a MongoDB URI and a ProfileCollection is returned.
 
         Both derive from the same base class InputSource and support iteration
         over LogEvents.
         """
 
+        def __init__(self, mode='rb'):
+            """Remember the mode used to open a logfile."""
+            self._mode = mode
+
         def __call__(self, string):
             """Open log file or MongoDB database."""
 
             try:
-                # catch filetype and return LogFile object
-                filehandle = argparse.FileType.__call__(self, string)
-                return LogFile(filehandle)
+                return LogFile(_open_logfile(string, self._mode))
 
             except argparse.ArgumentTypeError:
                 # not a file, try open as MongoDB database
-                m = re.match('^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$',
+                m = re.match(r'^(\w+)(?::(\d+))?(?:/([a-zA-Z0-9._-]+))?$',
                              string)
                 if m:
                     hostname, port, namespace = m.groups()
@@ -53,7 +68,7 @@ try:
                         collection = 'system.profile'
 
                     if (hostname == 'localhost' or
-                            re.match('\d+\.\d+\.\d+\.\d+', hostname)):
+                            re.match(r'\d+\.\d+\.\d+\.\d+', hostname)):
                         return ProfileCollection(hostname, port, database,
                                                  collection)
 
@@ -62,15 +77,17 @@ try:
                                                  % string)
 
 except ImportError:
-    class InputSourceAction(argparse.FileType):
-        """Extend the FileType class from the argparse module."""
+    class InputSourceAction(object):
+        """Open a log file. argparse.FileType is deprecated."""
+
+        def __init__(self, mode='rb'):
+            """Remember the mode used to open a logfile."""
+            self._mode = mode
 
         def __call__(self, string):
             """Open log file."""
             try:
-                # catch filetype and return LogFile object
-                filehandle = argparse.FileType.__call__(self, string)
-                return LogFile(filehandle)
+                return LogFile(_open_logfile(string, self._mode))
             except argparse.ArgumentTypeError:
                 raise argparse.ArgumentTypeError("can't open %s" % string)
 

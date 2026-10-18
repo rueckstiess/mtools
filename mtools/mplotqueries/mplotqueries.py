@@ -16,6 +16,8 @@ try:
     import matplotlib.pyplot as plt
     from matplotlib.dates import AutoDateFormatter, date2num, AutoDateLocator
     import mtools.mplotqueries.plottypes as plottypes
+    from mtools.mplotqueries.plottypes.base_type import (BasePlotType,
+                                                         PALETTES)
     import re
 
 except ImportError as e:
@@ -69,6 +71,21 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
                                           "all existing overlays. Use "
                                           "'--overlay reset' to clear all "
                                           "overlays."))
+        self.argparser.add_argument('--palette', action='store',
+                                    default='default',
+                                    choices=sorted(PALETTES),
+                                    help=('color sequence for grouped plots. '
+                                          'okabe-ito, tol, and ibm stay '
+                                          'distinguishable for common kinds '
+                                          'of color blindness. rsstate and '
+                                          'connchurn keep their fixed state '
+                                          'colors.'))
+        self.argparser.add_argument('--colors', action='store', nargs='+',
+                                    metavar='COLOR', default=None,
+                                    help=('use these colors instead of '
+                                          '--palette. Each value is #RGB, '
+                                          '#RRGGBB, or a matplotlib color '
+                                          'name.'))
         self.argparser.add_argument('--type', action='store',
                                     default='scatter',
                                     choices=self.plot_types.keys(),
@@ -612,6 +629,9 @@ class MPlotQueriesTool(OverlayMixin, LogFileTool):
         # check if there is anything to plot
         if len(self.plot_instances) == 0:
             raise SystemExit('no data to plot.')
+
+        BasePlotType.use_palette(self.args.get('palette') or 'default',
+                                 self.args.get('colors'))
 
         if self.args['output_file'] is not None:
             # --output-file means don't depend on X,

@@ -30,15 +30,15 @@ class ShardingInfoMixin(object):
         
                 if "Starting new replica set monitor for" in line:
                     if "[mongosMain]" in line:
-                        match = re.search("for (?P<csrsName>\w+)/"
-                                          "(?P<replSetMembers>\S+)", line)
+                        match = re.search(r"for (?P<csrsName>\w+)/"
+                                          r"(?P<replSetMembers>\S+)", line)
                         if match:
                             csrs_info = (match.group('csrsName'),
                                          match.group('replSetMembers'))
                             self._csrs = csrs_info
                     else:
-                        match = re.search("for (?P<shardName>\w+)/"
-                                          "(?P<replSetMembers>\S+)", line)
+                        match = re.search(r"for (?P<shardName>\w+)/"
+                                          r"(?P<replSetMembers>\S+)", line)
                         if match:
                             shard_info = (match.group('shardName'),
                                         match.group('replSetMembers'))
@@ -49,7 +49,7 @@ class ShardingInfoMixin(object):
                 if "New replica set config in use" in line:
                     
                     if "configsvr: true" in line:
-                        match = re.search(' _id: "(?P<replSet>\S+)".*'
+                        match = re.search(r' _id: "(?P<replSet>\S+)".*'
                                           'members: (?P<replSetMembers>[^]]+ ])', line)
                         if match:
                             self._csrs = (
@@ -58,8 +58,8 @@ class ShardingInfoMixin(object):
                             )
 
                 if "Starting new replica set monitor for" in line:
-                    match = re.search("for (?P<replSet>\w+)/"
-                                        "(?P<replSetMembers>\S+)", line)
+                    match = re.search(r"for (?P<replSet>\w+)/"
+                                      r"(?P<replSetMembers>\S+)", line)
                     if match:
                         if self._csrs and match.group('replSet') != self._csrs[0]:
                             self._shards.append((
@@ -74,9 +74,9 @@ class ShardingInfoMixin(object):
     
             if "moveChunk.from" in line:
                 logevent = LogEvent(line)
-                match = re.search('ns: "(?P<namespace>\S+)".*'
-                                  'details: { (?P<range>.*\}).*'
-                                  'to: "(?P<movedTo>\S+)".*note: "(?P<note>\S+)"', line)
+                match = re.search(r'ns: "(?P<namespace>\S+)".*'
+                                  r'details: { (?P<range>.*\}).*'
+                                  r'to: "(?P<movedTo>\S+)".*note: "(?P<note>\S+)"', line)
                 if match:
                     time = logevent.datetime
                     chunk_range = match.group('range')
@@ -86,9 +86,9 @@ class ShardingInfoMixin(object):
                     
                     if note == "success":
                         errmsg = None
-                        steps = re.findall('(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
+                        steps = re.findall(r'(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
                     else:
-                        match = re.search(':: caused by :: (?P<errmsg>\S+):', prev_line)
+                        match = re.search(r':: caused by :: (?P<errmsg>\S+):', prev_line)
                         steps = None
                         if match:
                             errmsg = match.group('errmsg')
@@ -101,8 +101,8 @@ class ShardingInfoMixin(object):
 
             if "moveChunk.to" in line:
                 logevent = LogEvent(line)
-                match = re.search('ns: "(?P<namespace>\S+)".*'
-                                  'details: { (?P<range>.*\}).*.*note: "(?P<note>\S+)"', line)
+                match = re.search(r'ns: "(?P<namespace>\S+)".*'
+                                  r'details: { (?P<range>.*\}).*.*note: "(?P<note>\S+)"', line)
                 if match:
                     time = logevent.datetime
                     chunk_range = match.group('range')
@@ -113,10 +113,10 @@ class ShardingInfoMixin(object):
 
                     if note == "success":
                         errmsg = None
-                        steps = re.findall('(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
+                        steps = re.findall(r'(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
                     else:
                         steps = None
-                        match = re.search('errmsg: "(?P<errmsg>.*)"', line)
+                        match = re.search(r'errmsg: "(?P<errmsg>.*)"', line)
                         if match:
                             errmsg = match.group('errmsg')
 
@@ -126,8 +126,8 @@ class ShardingInfoMixin(object):
 
             if "Finding the split vector for" in line:
                 logevent = LogEvent(line)
-                match = re.search('for (?P<namespace>\S+).*'
-                                  'numSplits: (?P<numSplits>\d+)', line)
+                match = re.search(r'for (?P<namespace>\S+).*'
+                                  r'numSplits: (?P<numSplits>\d+)', line)
                 if match:
                     time = logevent.datetime
                     split_range = None
@@ -139,8 +139,8 @@ class ShardingInfoMixin(object):
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "splitVector" in line:
                 logevent = LogEvent(line)
-                match = re.search('splitVector: "(?P<namespace>\S+)".*,'
-                                  ' (?P<range>min:.*), max.*op_msg (?P<time_taken>\d+)', line)
+                match = re.search(r'splitVector: "(?P<namespace>\S+)".*,'
+                                  r' (?P<range>min:.*), max.*op_msg (?P<time_taken>\d+)', line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
@@ -152,9 +152,9 @@ class ShardingInfoMixin(object):
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "Unable to auto-split chunk" in line:
                 logevent = LogEvent(line)
-                match = re.search("chunk \[(?P<range>.*)\) "
-                                  'in namespace (?P<namespace>\S+)'
-                                  ' :: caused by :: (?P<error>\S+): ', line)                    
+                match = re.search(r"chunk \[(?P<range>.*)\) "
+                                  r'in namespace (?P<namespace>\S+)'
+                                  r' :: caused by :: (?P<error>\S+): ', line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
@@ -166,7 +166,7 @@ class ShardingInfoMixin(object):
                     self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
             elif "jumbo" in line:
                 logevent = LogEvent(line)
-                match = re.search('migration (?P<namespace>\S+): \[(?P<range>.*)\)', prev_line)
+                match = re.search(r'migration (?P<namespace>\S+): \[(?P<range>.*)\)', prev_line)
                 if match:
                     time = logevent.datetime
                     split_range = match.group("range")
@@ -181,6 +181,7 @@ class ShardingInfoMixin(object):
 
         # reset logfile
         self._seek(0)
+        self._lines_read = 0
 
     # FIXME
     def _find_sharding_info_logv2(self):

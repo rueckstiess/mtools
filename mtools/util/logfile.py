@@ -91,6 +91,8 @@ class LogFile(ShardingInfoMixin, InputSource):
         self.prev_pos = None
         # Events read ahead of iteration, replayed by next().
         self._readahead = []
+        # Lines returned by next(), counted from the start of this read.
+        self._lines_read = 0
         # One physical line held for stdin, which cannot seek back.
         self._pending_line = None
 
@@ -395,25 +397,37 @@ class LogFile(ShardingInfoMixin, InputSource):
         if self._readahead:
             return self._readahead.pop(0)
 
+        offset = self.filehandle.tell() if self._lines_read is None else None
         line = self._read_record()
         if line is None:
             raise StopIteration
-        le = LogEvent(line)
+        if self._lines_read is not None:
+            self._lines_read += 1
+            location = "%s line %i" % (self.name, self._lines_read)
+        else:
+            location = "%s byte offset %i" % (self.name, offset)
+        try:
+            le = LogEvent(line)
 
-        # hint format and nextpos from previous line
-        if self._datetime_format and self._datetime_nextpos is not None:
-            ret = le.set_datetime_hint(self._datetime_format,
-                                       self._datetime_nextpos,
-                                       self.year_rollover)
-            if not ret:
-                # logevent indicates timestamp format has changed,
-                # invalidate hint info
-                self._datetime_format = None
-                self._datetime_nextpos = None
-        elif le.datetime:
-            # gather new hint info from another logevent
-            self._datetime_format = le.datetime_format
-            self._datetime_nextpos = le._datetime_nextpos
+            # hint format and nextpos from previous line
+            if self._datetime_format and self._datetime_nextpos is not None:
+                ret = le.set_datetime_hint(self._datetime_format,
+                                           self._datetime_nextpos,
+                                           self.year_rollover)
+                if not ret:
+                    # logevent indicates timestamp format has changed,
+                    # invalidate hint info
+                    self._datetime_format = None
+                    self._datetime_nextpos = None
+            elif le.datetime:
+                # gather new hint info from another logevent
+                self._datetime_format = le.datetime_format
+                self._datetime_nextpos = le._datetime_nextpos
+        except StopIteration:
+            raise
+        except Exception as exc:
+            self._report_parse_error(line, exc, location)
+            raise
 
         return le
 
@@ -471,6 +485,7 @@ class LogFile(ShardingInfoMixin, InputSource):
                 # future iterations start from the beginning
                 if not self.from_stdin:
                     self._seek(0)
+                    self._lines_read = 0
 
                 # return (instead of raising StopIteration exception) per PEP 479
                 return
@@ -510,7 +525,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         # look for hostname and port which will be logged with pid
         if not self._hostname:
             if " pid=" in line:
-                match = re.search('port=(?P<port>\d+).*host=(?P<host>\S+)',
+                match = re.search(r'port=(?P<port>\d+).*host=(?P<host>\S+)',
                                 line)
                 if match:
                     self._hostname = match.group('host')
@@ -521,11 +536,11 @@ class LogFile(ShardingInfoMixin, InputSource):
             only two engines, MMAPv1 and WiredTiger
         """
         if "[initandlisten] options:" in line:
-            match = re.search('replSet: "(?P<replSet>\S+)"', line)
+            match = re.search(r'replSet: "(?P<replSet>\S+)"', line)
             if match:
                 self._repl_set = match.group('replSet')
 
-            match = re.search('engine: "(?P<engine>\S+)"', line)
+            match = re.search(r'engine: "(?P<engine>\S+)"', line)
             if match:
                 self._storage_engine = match.group('engine')
             else:
@@ -540,8 +555,8 @@ class LogFile(ShardingInfoMixin, InputSource):
             self._storage_engine = 'wiredTiger'
 
         if "command admin.$cmd command: { replSetInitiate:" in line:
-            match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                'members: (?P<replSetMembers>[^]]+ ])', line)
+            match = re.search(r'{ _id: "(?P<replSet>\S+)", '
+                                r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_members = match.group('replSetMembers')
@@ -549,15 +564,15 @@ class LogFile(ShardingInfoMixin, InputSource):
         # Replica set config logging in MongoDB 3.0+
         new_config = ("New replica set config in use: ")
         if new_config in line:
-            match = re.search('{ _id: "(?P<replSet>\S+)", '
-                                'version: (?P<replSetVersion>\d+), ', line)
+            match = re.search(r'{ _id: "(?P<replSet>\S+)", '
+                                r'version: (?P<replSetVersion>\d+), ', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_version = match.group('replSetVersion')
-            match = re.search(', protocolVersion: (?P<replSetProtocol>\d+), ', line)
+            match = re.search(r', protocolVersion: (?P<replSetProtocol>\d+), ', line)
             if match:
                 self._repl_set_protocol = match.group('replSetProtocol')
-            match = re.search('members: (?P<replSetMembers>[^]]+ ])', line)
+            match = re.search(r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set_members = match.group('replSetMembers')
 
@@ -769,6 +784,7 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         # reset logfile
         self._seek(0)
+        self._lines_read = 0
 
     def _calculate_bounds(self):
         """Calculate beginning and end of logfile."""
@@ -785,15 +801,18 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         # get start datetime
         for line in self.filehandle:
+            lines_checked += 1
             # LogEvent will determine the LogFormat
+            # datetime is parsed lazily, so read it inside the try
             try:
                 logevent = LogEvent(line)
-            except Exception as e:
-                print(f"Error at line {lines_checked}: {e}",
-                      file=sys.stderr)
+                when = logevent.datetime
+            except Exception as exc:
+                self._report_parse_error(
+                    line, exc, "%s line %i" % (self.name, lines_checked))
+                raise
 
-            lines_checked += 1
-            if logevent.datetime:
+            if when:
                 self._start = logevent.datetime
                 self._timezone = logevent.datetime.tzinfo
                 self._datetime_format = logevent.datetime_format
@@ -815,8 +834,14 @@ class LogFile(ShardingInfoMixin, InputSource):
         self._seek(-min(self._filesize, 30000), 2)
 
         for line in reversed(self.filehandle.readlines()):
-            logevent = LogEvent(line)
-            if logevent.datetime:
+            try:
+                logevent = LogEvent(line)
+                when = logevent.datetime
+            except Exception as exc:
+                self._report_parse_error(
+                    line, exc, "%s near the end" % self.name)
+                raise
+            if when:
                 self._end = logevent.datetime
                 break
 
@@ -829,9 +854,26 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         # reset logfile
         self._seek(0)
+        self._lines_read = 0
         self._bounds_calculated = True
 
         return True
+
+    def _report_parse_error(self, line, exc, location):
+        """Print the log line that failed to parse.
+
+        The caller re-raises. Skipping the line would drop events with
+        no signal that the log was incomplete.
+        """
+        if isinstance(line, bytes):
+            text = line.decode('utf-8', 'replace')
+        else:
+            text = line
+        text = text.rstrip('\r\n')
+        if len(text) > 500:
+            text = text[:500] + '...'
+        print("Error parsing %s: %s\n%s" % (location, exc, text),
+              file=sys.stderr)
 
     def _prev_record_newline(self, buff, jump_back, curr_pos):
         """Index in buff of the newline before the previous record.
@@ -905,9 +947,14 @@ class LogFile(ShardingInfoMixin, InputSource):
         # move back to last newline char
         if newline_pos == -1:
             self._seek(0)
+            self._lines_read = 0
             return self.next()
 
         self._seek(newline_pos - jump_back + 1, 1)
+
+        # line count is unknown after a relative seek
+
+        self._lines_read = None
 
         # roll forward until we found a line with a datetime
         try:
@@ -939,19 +986,26 @@ class LogFile(ShardingInfoMixin, InputSource):
 
             # check if start_dt is already smaller than first datetime
             self._seek(0)
+            self._lines_read = 0
             le = self.next()
             if le.datetime and le.datetime >= start_dt:
                 self._seek(0)
+                self._lines_read = 0
                 return
 
             le = None
             self._seek(0)
+            self._lines_read = 0
 
             # search for lower bound
             while abs(step_size) > 100:
                 step_size = ceil(step_size / 2.)
 
                 self._seek(step_size, 1)
+
+                # line count is unknown after a relative seek
+
+                self._lines_read = None
                 le = self._find_curr_line()
                 if not le:
                     break
@@ -968,5 +1022,7 @@ class LogFile(ShardingInfoMixin, InputSource):
             while self.filehandle.tell() >= 2 and (le.datetime is None or
                                                    le.datetime >= start_dt):
                 self._seek(-2, 1)
+                # line count is unknown after a relative seek
+                self._lines_read = None
 
                 le = self._find_curr_line(prev=True)
