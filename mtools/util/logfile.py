@@ -321,7 +321,6 @@ class LogFile(ShardingInfoMixin, InputSource):
             self._find_sharding_info()
         return self._chunk_splits
 
-
     def _seek(self, offset, whence=0):
         """Move the file position and drop a held stdin line."""
         self._pending_line = None
@@ -437,7 +436,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         while True:
             try:
                 le = self.next()
-            except StopIteration as e:
+            except StopIteration:
                 # end of log file, get end date
                 if not self.end and self.from_stdin:
                     if le and le.datetime:
@@ -487,7 +486,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         if not self._hostname:
             if " pid=" in line:
                 match = re.search(r'port=(?P<port>\d+).*host=(?P<host>\S+)',
-                                line)
+                                  line)
                 if match:
                     self._hostname = match.group('host')
                     self._port = match.group('port')
@@ -517,7 +516,7 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         if "command admin.$cmd command: { replSetInitiate:" in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'members: (?P<replSetMembers>[^]]+ ])', line)
+                              r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_members = match.group('replSetMembers')
@@ -526,7 +525,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         new_config = ("New replica set config in use: ")
         if new_config in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'version: (?P<replSetVersion>\d+), ', line)
+                              r'version: (?P<replSetVersion>\d+), ', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_version = match.group('replSetVersion')
@@ -579,8 +578,8 @@ class LogFile(ShardingInfoMixin, InputSource):
                 "db version v" in logevent.line_str):
             self._binary = 'mongod'
 
-        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
-            'mongos' in logevent.line_str):
+        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or
+                                                  'mongos' in logevent.line_str):
             self._binary = 'mongos'
 
         else:
@@ -685,7 +684,6 @@ class LogFile(ShardingInfoMixin, InputSource):
         #     if match:
         #         self._repl_set_members = match.group('replSetMembers')
 
-
         # if ("is now in state" in line and
         #        next(state for state in states if line.endswith(state))):
         # if "is now in state" in doc:
@@ -721,7 +719,6 @@ class LogFile(ShardingInfoMixin, InputSource):
         #     state = (host, rs_state, LogEvent(line))
         #     self._rs_state.append(state)
         #     return
-
 
     def _iterate_lines(self):
         """Count log records and collect metadata. Can be expensive."""
