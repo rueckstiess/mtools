@@ -2,6 +2,72 @@
 Changes to mtools
 =================
 
+version 2.0.0-dev0
+~~~~~~~~~~~~~~~~~~
+ * Require Python 3.11 or newer. Python 3.7 support has ended
+   (#887, #911).
+ * Move package metadata into pyproject.toml. Building requires
+   setuptools 77 or newer, and the installed package omits the tests.
+ * Raise the runtime dependencies: matplotlib 3.8+, numpy 2.2+,
+   pymongo 4.18+, psutil 6+, packaging 24+, and python-dateutil 2.9+.
+ * Document Python 3.11 through 3.14, and MongoDB 7.0 or newer.
+ * mlaunch: Start mongod without a shell on POSIX, and report a
+   missing binary as a startup error.
+ * mlaunch: ``mlaunch start`` exits 0 when every node is already up.
+   An environment created by mlaunch 1.1.1 or older, with some nodes
+   still up, remains an error.
+ * mlaunch: On macOS, start MongoDB 8.2 or newer without ``--fork``
+   (#919).
+ * mlaunch: Read the server version from ``mongod --version``.
+ * mlaunch: Dial IPv6-only nodes at their bind address.
+ * mlaunch: Ignore mongod options that mlaunch already sets, and warn
+   once (#934).
+ * mlaunch: Remove a quoted keyFile path in one piece (#935).
+ * mlaunch: Write ``.mlaunch_startup`` as indented JSON (#954).
+ * mlaunch: Print a MongoDB URI when ``mlaunch init`` finishes. With
+   ``--auth`` the URI includes the initial user and a percent-encoded
+   password (#945, #917).
+ * mlogfilter: Default to compact JSON output (#901).
+ * mlogfilter: Add ``--pretty`` (#902).
+ * mlogfilter: ``--queryratio RATIO`` keeps lines whose docsExamined
+   / nreturned is above RATIO. An nreturned of 0 counts as 1, and
+   lines without docsExamined fall back to nscanned (#793).
+ * mlogfilter: ``--json`` emits legacy lines with the structured
+   field names t, s, c, ctx, msg, and attr. logv2 lines pass through
+   (#947, #735).
+ * mlogfilter: Parse the appName field on operation lines (#541).
+ * mloginfo: Include inserts in ``--queries``.
+ * mloginfo: Group getMore rows by the query that opened the cursor
+   (#950, #417).
+ * mloginfo: Collapse GeoJSON coordinates so the same query shape
+   groups together (#944).
+ * mloginfo: Parse query strings that contain several quoted arrays
+   (#940, #848).
+ * Join a query that was split by a newline inside the query, and
+   count it as one record (#939).
+ * Recognize D1-D5 debug levels in plaintext logs. ``--level D``
+   matches every debug line, and ``--level D2`` matches that
+   verbosity.
+ * Report the file, the location, and a short excerpt when parsing
+   fails (#936).
+ * Parse MongoDB 4.4+ structured log lines.
+ * mplotqueries: ``--palette`` selects okabe-ito, tol, or ibm.
+   ``--colors`` supplies an explicit list (#949, #475).
+ * mplotqueries: Limit the legend to groups inside the current view
+   (#948, #444).
+ * mplotqueries: ``--optime-start`` includes operation start times in
+   the view, and ``--type durline`` plots from start to end (#946,
+   #403).
+ * mplotqueries: Fix the error when double-clicking a point (#963,
+   #961).
+ * Open log files without argparse.FileType, which warns on Python
+   3.14 (#964, #958).
+ * Quote regular expressions so Python 3.12 does not warn about
+   invalid escape sequences (#956).
+
+Thanks to @stennie, @tap1r, and @josh-allan for contributions since
+1.7.2.
+
 version 1.7.2
 ~~~~~~~~~~~~~
  * mlaunch: mlaunch init --help should not require mongod (#894)
