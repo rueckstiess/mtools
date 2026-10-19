@@ -219,17 +219,26 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_sharded_oplogsize_csrs(self):
-        """mlaunch should not pass --oplogSize to config server (CSRS)."""
+        """Config servers and shards receive --oplogSize. mongos does not."""
         self.run_tool('init --sharded 1 --replicaset --nodes 1 '
                       '--oplogSize 19 --csrs')
         cmdlist = (
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
+                  '--fork', '--replSet', '--oplogSize'])] +
             [set(['"mongod"', '--port', '--replSet', '--shardsvr', '--logpath',
                   '--dbpath', '--oplogSize', '--fork'])] +
             [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
             )
         self.cmdlist_assert(cmdlist)
+        _, commands = self.read_config()
+        for command in commands:
+            binary = command.split()[0].strip('"')
+            if binary.endswith('mongod') or binary.endswith('mongod.exe'):
+                assert '--oplogMinRetentionHours 1' in command
+                assert '--oplogSize' in command
+            elif binary.endswith('mongos') or binary.endswith('mongos.exe'):
+                assert '--oplogSize' not in command
+                assert '--oplogMinRetentionHours' not in command
 
     def test_sharded_three_mongos_csrs(self):
         """mlaunch should start 3 mongos (CSRS)."""
