@@ -114,6 +114,12 @@ class TestMLaunch(object):
             raise pytest.skip('MongoDB version is older than 4.2.0')
 
     # Tests
+    def test_default_wiredtiger_cache_is_half_a_gigabyte(self):
+        """mongod gets a 0.5 GB WiredTiger cache unless one was requested."""
+        self.run_tool('init --single')
+        _, commands = self.read_config()
+        assert '--wiredTigerCacheSizeGB 0.5' in commands[0]
+
     def test_single(self):
         """mlaunch should start 1 node."""
         self.run_tool('init --single')

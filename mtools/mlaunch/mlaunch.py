@@ -2240,11 +2240,13 @@ class MLaunchTool(ProcessMixin, TlsArgsMixin, BaseCmdLineTool):
                 self.unknown_args, "mongod", config=config, owned=owned
             ) + ' ' + extra
 
-        # set WiredTiger cache size to 1 GB by default
+        # 0.5 GB leaves room for several mongods on one machine.
+        # A cache percent is an alternative to the GB size.
         if ('--wiredTigerCacheSizeGB' not in extra and
+                '--wiredTigerCacheSizePct' not in extra and
                 self._filter_valid_arguments(['--wiredTigerCacheSizeGB'],
                                              'mongod')):
-            extra += ' --wiredTigerCacheSizeGB 1 '
+            extra += ' --wiredTigerCacheSizeGB 0.5 '
 
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
