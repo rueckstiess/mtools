@@ -6,8 +6,7 @@ mtools
 
 **mtools** is a collection of helper scripts to parse, filter, and visualize
 MongoDB log files (``mongod``, ``mongos``). mtools also includes ``mlaunch``, a
-utility to quickly set up complex MongoDB test environments on a local machine,
-and ``mtransfer``, a tool for transferring databases between MongoDB instances.
+utility to quickly set up complex MongoDB test environments on a local machine.
 
 .. figure:: https://raw.githubusercontent.com/rueckstiess/mtools/develop/mtools.png
    :alt: mtools box
@@ -33,10 +32,6 @@ The following tools are in the mtools collection:
 `mlaunch <https://rueckstiess.github.io/mtools/mlaunch.html>`__
    a script to quickly spin up local test environments, including replica sets
    and sharded systems (requires ``pymongo``, ``psutil``, ``packaging``)
-
-`mtransfer <https://rueckstiess.github.io/mtools/mtransfer.html>`__
-   an experimental script to transfer databases between MongoDB instances by
-   copying WiredTiger data files (requires ``pymongo`` and ``wiredtiger``)
 
 For more information, see the `mtools documentation
 <https://rueckstiess.github.io/mtools>`__.

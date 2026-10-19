@@ -16,7 +16,6 @@ utility to quickly set up complex MongoDB test environments on a local machine.
    mlogfilter.rst
    mloginfo.rst
    mplotqueries.rst
-   mtransfer.rst
    contributing.rst
    changelog.rst
 
@@ -41,10 +40,6 @@ The following tools are in the mtools collection:
 :ref:`mlaunch`
    a script to spin up local test environments quickly, including replica sets
    and sharded systems (requires ``pymongo``)
-
-:ref:`mtransfer`
-   an experimental script to transfer WiredTiger databases between MongoDB
-   instances by copying data files (requires ``pymongo`` and ``wiredtiger``)
 
 The `mtools source code <https://github.com/rueckstiess/mtools>`__ is available
 on GitHub under an `Apache 2.0 license
