@@ -2,15 +2,6 @@
 Changes to mtools
 =================
 
-version 2.0.0
-~~~~~~~~~~~~~
- * mlaunch: Potentially breaking change. mongod now starts with
-   ``--wiredTigerCacheSizeGB 0.5`` unless ``--wiredTigerCacheSizeGB`` or
-   ``--wiredTigerCacheSizePct`` is already set. The previous default was
-   1 GB. The smaller cache leaves room for several mongods on one
-   machine, including sharded clusters. mongos does not receive a cache
-   size.
-
 version 1.7.2
 ~~~~~~~~~~~~~
  * mlaunch: mlaunch init --help should not require mongod (#894)
