@@ -820,7 +820,7 @@ class TestMLaunch(object):
         self.run_tool("init --single --arbiter")
 
     def test_oplogsize_config(self):
-        """mlaunch passes --oplogSize through to the config server."""
+        """mlaunch: config servers receive --oplogSize."""
 
         self.run_tool("init --sharded 1 --single --oplogSize 19 --verbose")
         output = sys.stdout.getvalue().splitlines()

@@ -114,6 +114,12 @@ class TestMLaunch(object):
             raise pytest.skip('MongoDB version is older than 4.2.0')
 
     # Tests
+    def test_default_wiredtiger_cache_is_half_a_gigabyte(self):
+        """mongod gets a 0.5 GB WiredTiger cache unless one was requested."""
+        self.run_tool('init --single')
+        _, commands = self.read_config()
+        assert '--wiredTigerCacheSizeGB 0.5' in commands[0]
+
     def test_single(self):
         """mlaunch should start 1 node."""
         self.run_tool('init --single')
@@ -219,7 +225,7 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_sharded_oplogsize_csrs(self):
-        """mlaunch passes --oplogSize through, including config servers."""
+        """User --oplogSize reaches every node. Retention is mongod-only."""
         self.run_tool('init --sharded 1 --replicaset --nodes 1 '
                       '--oplogSize 19 --csrs')
         cmdlist = (
@@ -231,6 +237,15 @@ class TestMLaunch(object):
                   '--oplogSize'])]
             )
         self.cmdlist_assert(cmdlist)
+        _, commands = self.read_config()
+        for command in commands:
+            binary = command.split()[0].strip('"')
+            if binary.endswith('mongod') or binary.endswith('mongod.exe'):
+                assert '--oplogMinRetentionHours 1' in command
+                assert '--oplogSize' in command
+            elif binary.endswith('mongos') or binary.endswith('mongos.exe'):
+                assert '--oplogSize' in command
+                assert '--oplogMinRetentionHours' not in command
 
     def test_sharded_three_mongos_csrs(self):
         """mlaunch should start 3 mongos (CSRS)."""

@@ -6,8 +6,8 @@ import sys
 
 import pytest
 
-from mtools.mlaunch.mlaunch import (
-    MLaunchTool, _command_line_error, _normalize_command)
+from mtools.mlaunch.mlaunch import MLaunchTool, _normalize_command
+from mtools.mlaunch.process import _command_line_error
 
 
 def test_normalize_command_collapses_spaces_outside_quotes():
@@ -124,7 +124,7 @@ def test_cache_gb_default_is_added_when_the_user_sets_neither():
     tool.unknown_args = ['--slowms', '1000']
     tool._construct_mongod('/data/db', '/data/mongod.log', 27017)
     command = tool.startup_info['27017']
-    assert '--wiredTigerCacheSizeGB 1' in command
+    assert '--wiredTigerCacheSizeGB 0.5' in command
     assert '--slowms "1000"' in command
 
 
@@ -185,8 +185,8 @@ def test_start_on_ports_reports_a_command_line_error(monkeypatch, capsys):
     )
     fail = _fail_launch(command, output)
     monkeypatch.setattr(tool, '_needs_python_detach', lambda command_str: False)
-    monkeypatch.setattr('mtools.mlaunch.mlaunch.subprocess.check_output', fail)
-    monkeypatch.setattr('mtools.mlaunch.mlaunch.subprocess.check_call', fail)
+    monkeypatch.setattr('mtools.mlaunch.process.subprocess.check_output', fail)
+    monkeypatch.setattr('mtools.mlaunch.process.subprocess.check_call', fail)
 
     with pytest.raises(SystemExit) as exc:
         tool._start_on_ports([27017])
@@ -210,8 +210,8 @@ def test_start_on_ports_keeps_other_startup_failures(monkeypatch):
             output='NonExistentPath: Data directory /data/db not found')
 
     monkeypatch.setattr(tool, '_needs_python_detach', lambda command_str: False)
-    monkeypatch.setattr('mtools.mlaunch.mlaunch.subprocess.check_output', fail)
-    monkeypatch.setattr('mtools.mlaunch.mlaunch.subprocess.check_call', fail)
+    monkeypatch.setattr('mtools.mlaunch.process.subprocess.check_output', fail)
+    monkeypatch.setattr('mtools.mlaunch.process.subprocess.check_call', fail)
 
     with pytest.raises(SystemExit) as exc:
         tool._start_on_ports([27017])
