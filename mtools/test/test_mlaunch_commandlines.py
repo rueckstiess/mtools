@@ -219,15 +219,16 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_sharded_oplogsize_csrs(self):
-        """mlaunch should not pass --oplogSize to config server (CSRS)."""
+        """mlaunch passes --oplogSize through, including config servers."""
         self.run_tool('init --sharded 1 --replicaset --nodes 1 '
                       '--oplogSize 19 --csrs')
         cmdlist = (
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
+                  '--fork', '--replSet', '--oplogSize'])] +
             [set(['"mongod"', '--port', '--replSet', '--shardsvr', '--logpath',
                   '--dbpath', '--oplogSize', '--fork'])] +
-            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
+            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork',
+                  '--oplogSize'])]
             )
         self.cmdlist_assert(cmdlist)
 
@@ -308,16 +309,15 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_storageengine_csrs(self):
-        """
-        mlaunch should not pass storageEngine option to config server.
-        """
+        """mlaunch passes --storageEngine through to every node."""
         self.run_tool('init --sharded 2 --replicaset --storageEngine wiredTiger')
         cmdlist = (
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
+                  '--fork', '--replSet', '--storageEngine'])] +
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--shardsvr',
                   '--fork', '--storageEngine'])] * 6 +
-            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
+            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork',
+                  '--storageEngine'])]
             )
         self.cmdlist_assert(cmdlist)
 

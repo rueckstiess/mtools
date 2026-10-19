@@ -286,10 +286,26 @@ def _extract_server_version(text):
     return match.group(1) if match else None
 
 
+def _command_line_error(output):
+    """Return the server's command-line parser error, if output has one.
+
+    mongod and mongos print ``Error parsing command line:`` and exit.
+    Startup log lines may precede that sentence. A locked dbpath, a busy
+    port, and other startup failures do not match.
+    """
+    if not output:
+        return None
+    if isinstance(output, bytes):
+        output = output.decode('utf-8', 'replace')
+    marker = 'Error parsing command line:'
+    for line in output.splitlines():
+        index = line.find(marker)
+        if index != -1:
+            return line[index:].strip()
+    return None
+
+
 class MLaunchTool(BaseCmdLineTool):
-    UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
-    UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
-    UNSUPPORTED_CONFIG_ARGS = ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']
     # These repeat options the constructed command already contains.
     OWNED_FLAG_REASONS = {
         '--dbpath': 'mlaunch sets it from --dir',
@@ -383,10 +399,9 @@ class MLaunchTool(BaseCmdLineTool):
         self.argparser._action_groups[0].description = \
             ('init is the default command and can be omitted. To get help on '
              'individual commands, run mlaunch <command> --help. Command line '
-             'arguments which are not handled by mlaunch will be passed '
-             'through to mongod/mongos if those options are listed in the '
-             '--help output for the current binary. For example: '
-             '--storageEngine, --logappend, or --config.')
+             'arguments which are not handled by mlaunch are passed through '
+             'to mongod/mongos. For example: --storageEngine, --logappend, '
+             'or --config.')
 
         # init command
         helptext = ('initialize a new MongoDB environment and start '
@@ -394,10 +409,9 @@ class MLaunchTool(BaseCmdLineTool):
                     'clusters.')
         desc = ('Initialize a new MongoDB environment and start stand-alone '
                 'instances, replica sets, or sharded clusters. Command line '
-                'arguments which are not handled by mlaunch will be passed '
-                'through to mongod/mongos if those options are listed in the '
-                '--help output for the current binary. For example: '
-                '--storageEngine, --logappend, or --config.')
+                'arguments which are not handled by mlaunch are passed through '
+                'to mongod/mongos. For example: --storageEngine, '
+                '--logappend, or --config.')
         init_parser = subparsers.add_parser('init', help=helptext,
                                             description=desc)
 
@@ -1834,7 +1848,9 @@ class MLaunchTool(BaseCmdLineTool):
         owned = ['--logpath', '--port']
         if binary == 'mongod':
             owned.append('--dbpath')
-        if os.name != 'nt':
+        # Owned only when this command will contain --fork. MongoDB 8.2+
+        # on macOS rejects it, and the launch path omits it.
+        if os.name != 'nt' and not self._macos_fork_unsupported():
             owned.append('--fork')
         if replset:
             owned.append('--replSet')
@@ -1854,45 +1870,21 @@ class MLaunchTool(BaseCmdLineTool):
         reason = self.OWNED_FLAG_REASONS.get(argname, 'mlaunch sets it')
         print(f"warning: ignoring {argname}; {reason}")
 
-    def _filter_valid_arguments(self, arguments, binary="mongod",
-                                config=False, owned=None):
-        """
-        Return a list of accepted arguments.
+    def _filter_valid_arguments(self, arguments, binary="mongod", owned=None):
+        """Return extra arguments to pass through to mongod or mongos.
 
-        Check which arguments in list are accepted by the specified binary
-        (mongod, mongos). If an argument does not start with '-' but its
-        preceding argument was accepted, then it is accepted as well. Example
-        ['--slowms', '1000'] both arguments would be accepted for a mongod.
+        Every option is kept. The server accepts it or exits with
+        ``Error parsing command line:``. A token that follows a kept
+        option is quoted. Example: ``['--slowms', '1000']``.
 
         Flags in `owned` are dropped, along with a separate value token.
-        mlaunch already puts those on the command line.
+        The constructed command already contains them.
         """
-        # get the help list of the binary
         if self.args and self.args['binarypath']:
             binary = os.path.join(self.args['binarypath'], binary)
 
-        try:
-            out = check_mongo_server_output(binary, '--help')
-        except Exception as exc:
-            raise SystemExit("Fatal error trying get output from `%s`: %s. "
-                "Is the binary in your path?" % (exc, binary))
-
-        accepted_arguments = []
-        owned_args = set(owned or ())
-        # extract all arguments starting with a '-'
-        for line in [option for option in out.decode('utf-8').split('\n')]:
-            line = line.lstrip()
-            if line.startswith('-'):
-                argument = line.split()[0]
-                accepted_arguments.append(argument)
-
-        # add undocumented options
-        accepted_arguments.append('--setParameter')
-        if binary.endswith('mongod'):
-            accepted_arguments.append('--wiredTigerEngineConfigString')
-
-        # filter valid arguments
         result = []
+        owned_args = set(owned or ())
         skip_value = False
         for i, arg in enumerate(arguments):
             if skip_value:
@@ -1900,8 +1892,6 @@ class MLaunchTool(BaseCmdLineTool):
                 if not arg.startswith('-'):
                     continue
             if arg.startswith('-'):
-                # check if the binary accepts this argument
-                # or special case -vvv for any number of v
                 argname = arg.split('=', 1)[0]
                 if argname in owned_args:
                     self._warn_owned_argument(binary, argname)
@@ -1911,30 +1901,11 @@ class MLaunchTool(BaseCmdLineTool):
                     if takes_value:
                         skip_value = True
                     continue
-                if (binary.endswith('mongod') and config and
-                        argname in self.UNSUPPORTED_CONFIG_ARGS):
-                    if self.args['verbose']:
-                        print(f"Unsupported config arg: {argname}")
-                    continue
-                elif argname in accepted_arguments or re.match(r'-v+', arg):
-                    result.append(arg)
-                elif (binary.endswith('mongod') and
-                        argname in self.UNDOCUMENTED_MONGOD_ARGS):
-                    result.append(arg)
-                elif self.ignored_arguments.get(binary + argname) is None:
-                    # warn once for each combination of binary and unknown arg
-                    self.ignored_arguments[binary + argname] = True
-                    if not (binary.endswith("mongos") and
-                            arg in self.UNSUPPORTED_MONGOS_ARGS):
-                        print("warning: ignoring unknown argument %s for %s" %
-                              (arg, binary))
+                result.append(arg)
             elif i > 0 and arguments[i - 1] in result:
-                # if it doesn't start with a '-', it could be the value of
-                # the last argument, e.g. `--slowms 1000`
-                # NB: arguments are always quoted
-                result.append(f'"{arg}"')
+                # value of the previous option, e.g. `--slowms 1000`
+                result.append('"%s"' % arg)
 
-        # return valid arguments as joined string
         return ' '.join(result)
 
     def _get_ssl_server_args(self):
@@ -2392,6 +2363,10 @@ class MLaunchTool(BaseCmdLineTool):
                         print("launching: %s on port %s" % (binary, port))
 
             except subprocess.CalledProcessError as e:
+                parsed = _command_line_error(e.output)
+                if parsed:
+                    raise SystemExit("%s\ntried to launch: %s"
+                                     % (parsed, command_str))
                 print(e.output)
                 # Detach already put this attempt's console text and new
                 # log bytes in e.output. The shell path still logs to the
@@ -2703,17 +2678,15 @@ class MLaunchTool(BaseCmdLineTool):
                 auth_param = f'{auth_param} --keyFile "{key_path}"'
 
         if self.unknown_args:
-            config = '--configsvr' in extra
             owned = self._owned_server_args('mongod', extra=extra,
                                             replset=replset)
             extra = self._filter_valid_arguments(
-                self.unknown_args, "mongod", config=config, owned=owned
+                self.unknown_args, "mongod", owned=owned
             ) + ' ' + extra
 
-        # set WiredTiger cache size to 1 GB by default
+        # 1 GB WiredTiger cache unless the user already chose a cache size.
         if ('--wiredTigerCacheSizeGB' not in extra and
-                self._filter_valid_arguments(['--wiredTigerCacheSizeGB'],
-                                             'mongod')):
+                '--wiredTigerCacheSizePct' not in extra):
             extra += ' --wiredTigerCacheSizeGB 1 '
 
         # Exit with error if hostname is specified but not bind_ip options

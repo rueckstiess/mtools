@@ -70,8 +70,8 @@ class TestMLaunch(object):
         arg_str += ' --dir %s' % self.data_dir
 
         if arg_str.startswith('init') or arg_str.startswith('--'):
-            # add --port and --nojournal to init calls
-            arg_str += ' --port %i --nojournal --smallfiles' % self.port
+            # add --port to init calls
+            arg_str += ' --port %i' % self.port
 
             if self.use_auth:
                 # add --auth to init calls if flag is set
@@ -111,7 +111,7 @@ class TestMLaunch(object):
 
         # make command line arguments through sys.argv
         sys.argv = ['mlaunch', 'init', '--single', '--dir', self.base_dir,
-                    '--port', str(self.port), '--nojournal']
+                    '--port', str(self.port)]
 
         self.tool.run()
         assert self.tool.is_running(self.port)
@@ -121,7 +121,7 @@ class TestMLaunch(object):
 
         # make command line arguments through sys.argv
         sys.argv = ['mlaunch', '--single', '--dir', self.base_dir,
-                    '--port', str(self.port), '--nojournal']
+                    '--port', str(self.port)]
 
         self.tool.run()
         assert self.tool.is_running(self.port)
@@ -350,21 +350,15 @@ class TestMLaunch(object):
         assert len(self.tool.get_tagged(['mongos', 'running'])) == 2
 
     def test_filter_valid_arguments(self):
-        """Check arguments unknown to mlaunch against mongos and mongod."""
+        """Extra options are passed through to mongod and mongos."""
 
-        # filter against mongod
-        result = self.tool._filter_valid_arguments("--slowms 500 -vvv "
-                                                   "--configdb localhost:27017"
-                                                   " --foobar".split(),
-                                                   "mongod")
-        assert result == "--slowms 500 -vvv"
-
-        # filter against mongos
-        result = self.tool._filter_valid_arguments("--slowms 500 -vvv "
-                                                   "--configdb localhost:27017"
-                                                   " --foobar".split(),
-                                                   "mongos")
-        assert result == "-vvv --configdb localhost:27017"
+        arguments = ("--slowms 500 -vvv --configdb localhost:27017 "
+                     "--foobar").split()
+        expected = ('--slowms "500" -vvv --configdb "localhost:27017" '
+                    '--foobar')
+        for binary in ('mongod', 'mongos'):
+            result = self.tool._filter_valid_arguments(arguments, binary)
+            assert result == expected
 
     def test_large_replicaset_arbiter(self):
         """mlaunch: start large replica set of 7 nodes with arbiter."""
@@ -826,13 +820,13 @@ class TestMLaunch(object):
         self.run_tool("init --single --arbiter")
 
     def test_oplogsize_config(self):
-        """mlaunch: test config server never receives --oplogSize parameter."""
+        """mlaunch passes --oplogSize through to the config server."""
 
         self.run_tool("init --sharded 1 --single --oplogSize 19 --verbose")
         output = sys.stdout.getvalue().splitlines()
 
         output_launch_config = next(o for o in output if '--configsvr' in o)
-        assert '--oplogSize' not in output_launch_config
+        assert '--oplogSize' in output_launch_config
 
 
 if __name__ == '__main__':
