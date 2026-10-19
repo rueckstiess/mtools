@@ -217,6 +217,19 @@ class TopologyMixin(object):
 
         return host
 
+    def _oplog_min_retention_supported(self):
+        """True when this mongod accepts ``--oplogMinRetentionHours``.
+
+        The option arrived in MongoDB 4.4. An undetected version is
+        reported as ``0.0.0``, which mlaunch treats as current.
+        """
+        current = getattr(self, 'current_version', None)
+        if not current:
+            return False
+        parsed = version.parse(current)
+        return (parsed == version.parse('0.0.0') or
+                parsed >= version.parse('4.4.0'))
+
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """Construct command line strings for mongod process."""
         rs_param = ''
@@ -238,11 +251,20 @@ class TopologyMixin(object):
                 self.unknown_args, "mongod", config=config, owned=owned
             ) + ' ' + extra
 
-        # set WiredTiger cache size to 1 GB by default
+        # 0.5 GB leaves room for several mongods on one machine.
+        # A cache percent is an alternative to the GB size.
         if ('--wiredTigerCacheSizeGB' not in extra and
+                '--wiredTigerCacheSizePct' not in extra and
                 self._filter_valid_arguments(['--wiredTigerCacheSizeGB'],
                                              'mongod')):
-            extra += ' --wiredTigerCacheSizeGB 1 '
+            extra += ' --wiredTigerCacheSizeGB 0.5 '
+
+        # MongoDB 4.4 keeps an oplog entry until the oplog has reached its
+        # maximum size and the entry is older than this many hours. The
+        # oplog can grow past that size to satisfy the window.
+        if ('--oplogMinRetentionHours' not in extra and
+                self._oplog_min_retention_supported()):
+            extra += ' --oplogMinRetentionHours 1 '
 
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
