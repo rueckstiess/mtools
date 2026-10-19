@@ -109,7 +109,7 @@ class BaseCmdLineTool(object):
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument(
-            '--version', 
+            '--version',
             action='version',
             version=f'''mtools version {__version__} || Python {sys.version}'''
         )
@@ -205,12 +205,13 @@ class LogFileTool(BaseCmdLineTool):
             if not self.stdin_allowed:
                 raise SystemExit("this tool can't parse input from stdin.")
 
-            arg_opts['const'] = LogFile(sys.stdin)
-            arg_opts['action'] = 'store_const'
-            if 'type' in arg_opts:
-                del arg_opts['type']
-            if 'nargs' in arg_opts:
-                del arg_opts['nargs']
+            # Python 3.14 rejects store_const on a positional. Keep the
+            # previous behavior: stdin is the logfile, and a token in
+            # that position does not open another file.
+            stdin_log = LogFile(sys.stdin)
+            arg_opts['nargs'] = '?'
+            arg_opts['default'] = stdin_log
+            arg_opts['type'] = lambda value: stdin_log
         self.argparser.add_argument('logfile', **arg_opts)
 
 
