@@ -826,13 +826,13 @@ class TestMLaunch(object):
         self.run_tool("init --single --arbiter")
 
     def test_oplogsize_config(self):
-        """mlaunch: test config server never receives --oplogSize parameter."""
+        """mlaunch: config servers receive --oplogSize."""
 
         self.run_tool("init --sharded 1 --single --oplogSize 19 --verbose")
         output = sys.stdout.getvalue().splitlines()
 
         output_launch_config = next(o for o in output if '--configsvr' in o)
-        assert '--oplogSize' not in output_launch_config
+        assert '--oplogSize' in output_launch_config
 
 
 if __name__ == '__main__':

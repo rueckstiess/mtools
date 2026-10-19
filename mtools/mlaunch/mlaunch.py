@@ -216,7 +216,7 @@ def _extract_server_version(text):
 class MLaunchTool(ProcessMixin, TlsArgsMixin, BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
-    UNSUPPORTED_CONFIG_ARGS = ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']
+    UNSUPPORTED_CONFIG_ARGS = ['--storageEngine', '--smallfiles', '--nojournal']
     # These repeat options the constructed command already contains.
     OWNED_FLAG_REASONS = {
         '--dbpath': 'mlaunch sets it from --dir',
@@ -2219,6 +2219,19 @@ class MLaunchTool(ProcessMixin, TlsArgsMixin, BaseCmdLineTool):
 
         return host
 
+    def _oplog_min_retention_supported(self):
+        """True when this mongod accepts ``--oplogMinRetentionHours``.
+
+        The option arrived in MongoDB 4.4. An undetected version is
+        reported as ``0.0.0``, which mlaunch treats as current.
+        """
+        current = getattr(self, 'current_version', None)
+        if not current:
+            return False
+        parsed = version.parse(current)
+        return (parsed == version.parse('0.0.0') or
+                parsed >= version.parse('4.4.0'))
+
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """Construct command line strings for mongod process."""
         rs_param = ''
@@ -2247,6 +2260,13 @@ class MLaunchTool(ProcessMixin, TlsArgsMixin, BaseCmdLineTool):
                 self._filter_valid_arguments(['--wiredTigerCacheSizeGB'],
                                              'mongod')):
             extra += ' --wiredTigerCacheSizeGB 0.5 '
+
+        # MongoDB 4.4 keeps an oplog entry until the oplog has reached its
+        # maximum size and the entry is older than this many hours. The
+        # oplog can grow past that size to satisfy the window.
+        if ('--oplogMinRetentionHours' not in extra and
+                self._oplog_min_retention_supported()):
+            extra += ' --oplogMinRetentionHours 1 '
 
         # Exit with error if hostname is specified but not bind_ip options
         if (self.args['hostname'] != 'localhost'
