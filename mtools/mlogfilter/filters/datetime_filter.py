@@ -108,10 +108,25 @@ class DateTimeFilter(BaseFilter):
     def setup(self):
         """Get start end end date of logfile before starting to parse."""
         if self.mlogfilter.is_stdin:
-            # assume this year (we have no other info)
-            now = datetime.now()
-            self.startDateTime = datetime(now.year, 1, 1, tzinfo=tzutc())
-            self.endDateTime = datetime(MAXYEAR, 12, 31, tzinfo=tzutc())
+            # A file takes its zone from the first timestamp. Stdin has
+            # no scanned bounds, so use that same zone when a line has
+            # one, and UTC when it does not. The window covers every
+            # year: a fully specified --from must not be raised to
+            # 1 January of the year mlogfilter is running.
+            # A time-only or "start"-relative --from resolves against the
+            # start, so use the first ISO 8601 timestamp when there is one.
+            tz = tzutc()
+            first = None
+            for logfile in self.mlogfilter.args['logfile']:
+                if not getattr(logfile, 'from_stdin', False):
+                    continue
+                peeked = logfile.timezone_from_stream()
+                if peeked is not None:
+                    tz = peeked
+                    first = logfile.first_dated_from_stream()
+                    break
+            self.startDateTime = first or datetime(1, 1, 1, tzinfo=tz)
+            self.endDateTime = datetime(MAXYEAR, 12, 31, tzinfo=tz)
 
         else:
             logfiles = self.mlogfilter.args['logfile']

@@ -36,7 +36,7 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
 
     # disable balancer
     con['config']['settings'].update_one({'_id': "balancer"},
-                                     {'$set': {'stopped': True}}, upsert=True)
+                                         {'$set': {'stopped': True}}, upsert=True)
 
     # enable sharding on database if not yet enabled
     db_info = con['config']['databases'].find_one({'_id': database})
@@ -88,10 +88,9 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
             if verbose:
                 print('moving chunk %s in collection %s to shard %s.'
                       % (s, namespace, shard_names[i % len(shards)]))
-            res = con['admin'].command(SON([('moveChunk', namespace),
-                                            ('find', {shardkey: s}),
-                                            ('to',
-                                             shard_names[i % len(shards)])]))
+            con['admin'].command(SON([('moveChunk', namespace),
+                                      ('find', {shardkey: s}),
+                                      ('to', shard_names[i % len(shards)])]))
         except OperationFailure as e:
             if verbose:
                 print(e)
@@ -99,11 +98,11 @@ def presplit(host, database, collection, shardkey, shardnumber=None,
     if verbose:
         print('chunk distribution:', end=' ')
         chunk_group = con['config']['chunks'].aggregate([
-            { '$match': { 'ns': namespace }},
-            { '$group': { 
+            {'$match': {'ns': namespace}},
+            {'$group': {
                 '_id': '$shard',
-                'nChunks': { '$sum': 1 }}
-            }
+                'nChunks': {'$sum': 1}}
+             }
         ])
         print(', '.join(["%s: %i" % (ch['_id'], ch['nChunks'])
                          for ch in chunk_group]))
