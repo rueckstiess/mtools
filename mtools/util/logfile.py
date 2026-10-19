@@ -90,6 +90,8 @@ class LogFile(MetadataMixin, ShardingInfoMixin, InputSource):
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
+        # Events read ahead of iteration, replayed by next().
+        self._readahead = []
         # Lines returned by next(), counted from the start of this read.
         self._lines_read = 0
         # One physical line held for stdin, which cannot seek back.
@@ -322,7 +324,6 @@ class LogFile(MetadataMixin, ShardingInfoMixin, InputSource):
             self._find_sharding_info()
         return self._chunk_splits
 
-
     def _seek(self, offset, whence=0):
         """Move the file position and drop a held stdin line."""
         self._pending_line = None
@@ -393,6 +394,9 @@ class LogFile(MetadataMixin, ShardingInfoMixin, InputSource):
 
     def next(self):
         """Get next record, adjust for year rollover and hint datetime format."""
+        if self._readahead:
+            return self._readahead.pop(0)
+
         offset = self.filehandle.tell() if self._lines_read is None else None
         line = self._read_record()
         if line is None:
@@ -427,6 +431,40 @@ class LogFile(MetadataMixin, ShardingInfoMixin, InputSource):
 
         return le
 
+    def timezone_from_stream(self, limit=10):
+        """Return the first timestamp's zone, then replay the lines read.
+
+        Stdin cannot be scanned from both ends the way a file can. The
+        lines read here are returned again by next(), in order.
+        """
+        saved = []
+        found = None
+        for _ in range(limit):
+            try:
+                logevent = self.next()
+            except StopIteration:
+                break
+            saved.append(logevent)
+            if logevent.datetime is not None and logevent.datetime.tzinfo:
+                found = logevent.datetime.tzinfo
+                self._stream_start = logevent
+                break
+        self._readahead = saved + self._readahead
+        return found
+
+    def first_dated_from_stream(self):
+        """First timestamp seen by timezone_from_stream(), if it has a year.
+
+        Only ISO 8601 timestamps carry a year. A ctime timestamp gets the
+        current year, which is a guess, so it is not returned.
+        """
+        logevent = getattr(self, '_stream_start', None)
+        if logevent is None:
+            return None
+        if not (logevent.datetime_format or '').startswith('iso8601'):
+            return None
+        return logevent.datetime
+
     def __iter__(self):
         """
         Iterate over LogFile object.
@@ -438,7 +476,7 @@ class LogFile(MetadataMixin, ShardingInfoMixin, InputSource):
         while True:
             try:
                 le = self.next()
-            except StopIteration as e:
+            except StopIteration:
                 # end of log file, get end date
                 if not self.end and self.from_stdin:
                     if le and le.datetime:

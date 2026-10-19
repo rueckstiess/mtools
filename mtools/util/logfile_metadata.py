@@ -29,7 +29,7 @@ class MetadataMixin(object):
         if not self._hostname:
             if " pid=" in line:
                 match = re.search(r'port=(?P<port>\d+).*host=(?P<host>\S+)',
-                                line)
+                                  line)
                 if match:
                     self._hostname = match.group('host')
                     self._port = match.group('port')
@@ -59,7 +59,7 @@ class MetadataMixin(object):
 
         if "command admin.$cmd command: { replSetInitiate:" in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'members: (?P<replSetMembers>[^]]+ ])', line)
+                              r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_members = match.group('replSetMembers')
@@ -68,7 +68,7 @@ class MetadataMixin(object):
         new_config = ("New replica set config in use: ")
         if new_config in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'version: (?P<replSetVersion>\d+), ', line)
+                              r'version: (?P<replSetVersion>\d+), ', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_version = match.group('replSetVersion')
@@ -121,8 +121,8 @@ class MetadataMixin(object):
                 "db version v" in logevent.line_str):
             self._binary = 'mongod'
 
-        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
-            'mongos' in logevent.line_str):
+        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or
+                                                  'mongos' in logevent.line_str):
             self._binary = 'mongos'
 
         else:
@@ -226,7 +226,6 @@ class MetadataMixin(object):
         #     match = re.search('members: (?P<replSetMembers>[^]]+ ])', doc)
         #     if match:
         #         self._repl_set_members = match.group('replSetMembers')
-
 
         # if ("is now in state" in line and
         #        next(state for state in states if line.endswith(state))):

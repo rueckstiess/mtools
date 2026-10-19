@@ -72,7 +72,8 @@ class ProfileParserMixin(object):
         self._autocommit = doc[u'autocommit'] if 'autocommit' in doc else None
         self._readConcern = doc[u'level'] if 'level' in doc else None
         self._timeActiveMicros = doc[u'timeActiveMicros'] if 'timeActiveMicros' in doc else None
-        self._timeInactiveMicros = doc[u'timeInactiveMicros'] if 'timeInactiveMicros' in doc else None
+        self._timeInactiveMicros = (
+            doc[u'timeInactiveMicros'] if 'timeInactiveMicros' in doc else None)
         self._duration = doc[u'duration'] if 'duration' in doc else None
         self._datetime = doc[u'datetime'] if 'datetime' in doc else None
 
