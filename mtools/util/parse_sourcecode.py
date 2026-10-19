@@ -247,8 +247,8 @@ if __name__ == '__main__':
         switch_version(v)
         logs = extract_logs(log_code_lines, v)
         print("version %s, %i lines extracted" % (v[1:], len(logs)))
-        for l in logs:
-            logs_versions[l].append(v)
+        for log_line in logs:
+            logs_versions[log_line].append(v)
 
     switch_version('master')
 
@@ -302,7 +302,7 @@ if __name__ == '__main__':
         if write_to_db:
             (mc['log2code']['instances']
              .update_one({'pattern': instance['pattern']}, instance,
-                     upsert=True)())
+                         upsert=True)())
 
     with open('log2code.pickle', 'wb') as handle:
         pickle.dump((versions, logs_versions, logs_by_word, log_code_lines),

@@ -109,7 +109,7 @@ class BaseCmdLineTool(object):
         # define argument parser and add version argument
         self.argparser = argparse.ArgumentParser()
         self.argparser.add_argument(
-            '--version', 
+            '--version',
             action='version',
             version=f'''mtools version {__version__} || Python {sys.version}'''
         )
