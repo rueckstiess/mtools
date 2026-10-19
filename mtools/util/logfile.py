@@ -89,6 +89,8 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         # Track previous file position for loop detection in _find_curr_line()
         self.prev_pos = None
+        # Events read ahead of iteration, replayed by next().
+        self._readahead = []
         # Lines returned by next(), counted from the start of this read.
         self._lines_read = 0
         # One physical line held for stdin, which cannot seek back.
@@ -321,7 +323,6 @@ class LogFile(ShardingInfoMixin, InputSource):
             self._find_sharding_info()
         return self._chunk_splits
 
-
     def _seek(self, offset, whence=0):
         """Move the file position and drop a held stdin line."""
         self._pending_line = None
@@ -392,6 +393,9 @@ class LogFile(ShardingInfoMixin, InputSource):
 
     def next(self):
         """Get next record, adjust for year rollover and hint datetime format."""
+        if self._readahead:
+            return self._readahead.pop(0)
+
         offset = self.filehandle.tell() if self._lines_read is None else None
         line = self._read_record()
         if line is None:
@@ -426,6 +430,40 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         return le
 
+    def timezone_from_stream(self, limit=10):
+        """Return the first timestamp's zone, then replay the lines read.
+
+        Stdin cannot be scanned from both ends the way a file can. The
+        lines read here are returned again by next(), in order.
+        """
+        saved = []
+        found = None
+        for _ in range(limit):
+            try:
+                logevent = self.next()
+            except StopIteration:
+                break
+            saved.append(logevent)
+            if logevent.datetime is not None and logevent.datetime.tzinfo:
+                found = logevent.datetime.tzinfo
+                self._stream_start = logevent
+                break
+        self._readahead = saved + self._readahead
+        return found
+
+    def first_dated_from_stream(self):
+        """First timestamp seen by timezone_from_stream(), if it has a year.
+
+        Only ISO 8601 timestamps carry a year. A ctime timestamp gets the
+        current year, which is a guess, so it is not returned.
+        """
+        logevent = getattr(self, '_stream_start', None)
+        if logevent is None:
+            return None
+        if not (logevent.datetime_format or '').startswith('iso8601'):
+            return None
+        return logevent.datetime
+
     def __iter__(self):
         """
         Iterate over LogFile object.
@@ -437,7 +475,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         while True:
             try:
                 le = self.next()
-            except StopIteration as e:
+            except StopIteration:
                 # end of log file, get end date
                 if not self.end and self.from_stdin:
                     if le and le.datetime:
@@ -487,7 +525,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         if not self._hostname:
             if " pid=" in line:
                 match = re.search(r'port=(?P<port>\d+).*host=(?P<host>\S+)',
-                                line)
+                                  line)
                 if match:
                     self._hostname = match.group('host')
                     self._port = match.group('port')
@@ -517,7 +555,7 @@ class LogFile(ShardingInfoMixin, InputSource):
 
         if "command admin.$cmd command: { replSetInitiate:" in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'members: (?P<replSetMembers>[^]]+ ])', line)
+                              r'members: (?P<replSetMembers>[^]]+ ])', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_members = match.group('replSetMembers')
@@ -526,7 +564,7 @@ class LogFile(ShardingInfoMixin, InputSource):
         new_config = ("New replica set config in use: ")
         if new_config in line:
             match = re.search(r'{ _id: "(?P<replSet>\S+)", '
-                                r'version: (?P<replSetVersion>\d+), ', line)
+                              r'version: (?P<replSetVersion>\d+), ', line)
             if match:
                 self._repl_set = match.group('replSet')
                 self._repl_set_version = match.group('replSetVersion')
@@ -579,8 +617,8 @@ class LogFile(ShardingInfoMixin, InputSource):
                 "db version v" in logevent.line_str):
             self._binary = 'mongod'
 
-        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or 
-            'mongos' in logevent.line_str):
+        elif logevent.thread == 'mongosMain' and ('MongoS' in logevent.line_str or
+                                                  'mongos' in logevent.line_str):
             self._binary = 'mongos'
 
         else:
@@ -685,7 +723,6 @@ class LogFile(ShardingInfoMixin, InputSource):
         #     if match:
         #         self._repl_set_members = match.group('replSetMembers')
 
-
         # if ("is now in state" in line and
         #        next(state for state in states if line.endswith(state))):
         # if "is now in state" in doc:
@@ -721,7 +758,6 @@ class LogFile(ShardingInfoMixin, InputSource):
         #     state = (host, rs_state, LogEvent(line))
         #     self._rs_state.append(state)
         #     return
-
 
     def _iterate_lines(self):
         """Count log records and collect metadata. Can be expensive."""
