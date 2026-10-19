@@ -22,8 +22,9 @@ from urllib.parse import quote, quote_plus
 from operator import itemgetter
 
 import psutil
-from mtools.util import OrderedDict
+from mtools.mlaunch.tls_args import TlsArgsMixin
 from mtools.mlaunch.topology import TopologyMixin
+from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
 from mtools.version import __version__
@@ -287,7 +288,7 @@ def _extract_server_version(text):
     return match.group(1) if match else None
 
 
-class MLaunchTool(TopologyMixin, BaseCmdLineTool):
+class MLaunchTool(TopologyMixin, TlsArgsMixin, BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
     UNSUPPORTED_CONFIG_ARGS = ['--oplogSize', '--storageEngine', '--smallfiles', '--nojournal']
@@ -1937,111 +1938,6 @@ class MLaunchTool(TopologyMixin, BaseCmdLineTool):
 
         # return valid arguments as joined string
         return ' '.join(result)
-
-    def _get_ssl_server_args(self):
-        s = ''
-        if not self.ssl_server_args:
-            return s
-
-        for parser in self.ssl_args, self.ssl_server_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = self.args.get(name)
-                if value:
-                    if value is True:
-                        s += ' --%s' % (name,)
-                    else:
-                        s += ' --%s "%s"' % (name, value)
-
-        return s
-
-    def _get_ssl_pymongo_options(self, args):
-        opts = {}
-        if not self.ssl_server_args:
-            return opts
-
-        # Map SSL parameters to TLS equivalents for PyMongo 4.0+
-        # https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#renamed-uri-options
-        for parser in [self.ssl_server_args]:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-                    opts['tlsAllowInvalidCertificates'] = True
-        for parser in self.ssl_args, self.ssl_client_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-
-                    if name == 'sslClientCertificate':
-                        opts['tlsCertificateKeyFile'] = value
-                    elif name == 'sslClientPEMKeyPassword':
-                        opts['tlsCertificateKeyFilePassword'] = value
-                    elif name == 'sslAllowInvalidCertificates':
-                        opts['tlsAllowInvalidCertificates'] = True
-                    elif name == 'sslAllowInvalidHostnames':
-                        opts['tlsAllowInvalidHostnames'] = True
-                    elif name == 'sslCAFile':
-                        opts['tlsCAFile'] = value
-                    elif name == 'sslCRLFile':
-                        opts['tlsCRLFile'] = value
-
-        return opts
-
-    def _get_tls_server_args(self):
-        s = ''
-        if not self.tls_server_args:
-            return s
-
-        for parser in self.tls_args, self.tls_server_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = self.args.get(name)
-                if value:
-                    if value is True:
-                        s += ' --%s' % (name,)
-                    else:
-                        s += ' --%s "%s"' % (name, value)
-
-        return s
-
-    def _get_tls_pymongo_options(self, args):
-        opts = {}
-        if not self.tls_server_args:
-            return opts
-
-        for parser in [self.tls_server_args]:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-        for parser in self.tls_args, self.tls_client_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-
-                    # TLS parameters require PyMongo 3.9.0+
-                    # https://api.mongodb.com/python/3.9.0/changelog.html
-                    if name == 'tlsClientCertificateKeyFile':
-                        opts['tlsCertificateKeyFile'] = value
-                    elif name == 'tlsClientCertificateKeyFilePassword':
-                        opts['tlsCertificateKeyFilePassword'] = value
-                    elif name == 'tlsAllowInvalidCertificates':
-                        opts['tlsAllowInvalidCertificates'] = True
-                    elif name == 'tlsAllowInvalidHostnames':
-                        opts['tlsAllowInvalidHostnames'] = True
-                    elif name == 'tlsCAFile':
-                        opts['tlsCAFile'] = value
-                    elif name == 'tlsCRLFile':
-                        opts['tlsCRLFile'] = value
-
-        return opts
 
     def _get_shard_names(self, args):
         """
