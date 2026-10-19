@@ -503,3 +503,107 @@ def test_structured_update_reports_nmatched():
     assert attr['nMatched'] == 3
     assert 'nReturned' not in attr
     assert attr['nModified'] == 2
+
+
+def test_modern_counter_names_stay_on_legacy_attributes():
+    """keysExamined and nMatched keep the historical attribute names."""
+    line = ('2019-06-18T12:08:59.026+0100 I WRITE    [conn1] update '
+            'test.foo command: { q: { a: 1 }, u: { $set: { b: 1 } } } '
+            'planSummary: COLLSCAN keysExamined:0 docsExamined:5 '
+            'nMatched:3 nModified:2 numYields:0 locks:{} 12ms')
+    le = LogEvent(line)
+    assert le.nscanned == 0
+    assert le.nscannedObjects == 5
+    assert le.nreturned == 3
+    assert le.nupdated == 2
+    assert le.planSummary == 'COLLSCAN'
+    assert le.actualPlanSummary == 'COLLSCAN'
+
+
+def test_spaced_io_counters_read_the_next_token():
+    line = ('2019-06-18T12:00:00.000+0000 I COMMAND  [conn1] command test.foo '
+            'command: find { find: "foo" } bytesRead: 12 bytesWritten: 34 '
+            'timeReadingMicros: 56 timeWritingMicros: 78 '
+            'writeConflicts:1 keyUpdates:2 1ms')
+    le = LogEvent(line)
+    assert le.bytesRead == 12
+    assert le.bytesWritten == 34
+    assert le.timeReadingMicros == 56
+    assert le.timeWritingMicros == 78
+
+
+def test_transaction_counters_keep_their_historical_shape():
+    line = ('2019-06-18T12:31:03.180+0100 I COMMAND  [main] command test.foo '
+            'command: find { find: "foo" } lsid: { id: UUID("abc") } '
+            'txnNumber: 7 autocommit: false readConcern: { level: "snapshot" } '
+            'readTimestamp:Timestamp(0, 0) terminationCause:committed '
+            'timeActiveMicros:11142 timeInactiveMicros:3 '
+            'keysExamined:1 docsExamined:1 nMatched:1 nModified:1 '
+            'ninserted:1 ndeleted:1 writeConflicts:1 numYields:4 5ms')
+    le = LogEvent(line)
+    assert le.txnNumber == 7
+    assert le.autocommit == 'false'
+    assert le.readConcern == '"snapshot"'
+    assert le.readTimestamp == 'Timestamp(0'
+    assert le.terminationCause == 'committed'
+    # The lsid property parses the whole document. Extraction stores the
+    # token two positions after the name.
+    assert le._lsid == 'id:'
+    assert le.nscanned == 1
+    assert le.numYields == 4
+
+
+def test_allow_disk_use_follows_the_same_token_int():
+    """A boolean same-token value never reaches the next-token assignment."""
+    false_line = (
+        '2019-06-18T12:03:05.860+0100 I COMMAND  [conn2] command '
+        'local.startup_log command: find { find: "startup_log" } '
+        'planSummary: COLLSCAN keysExamined:0 docsExamined:1 '
+        'numYields:0 nreturned:1 allowDiskUse: False 1ms')
+    true_line = (
+        '2019-06-18T12:05:44.754+0100 I COMMAND  [conn2] command '
+        'local.myCollection command: find { find: "myCollection" } '
+        'planSummary: COLLSCAN keysExamined:0 allowDiskUse: True '
+        'docsExamined:1 numYields:0 nreturned:1 0ms')
+    int_line = (
+        '2019-06-18T12:05:44.754+0100 I COMMAND  [conn2] command '
+        'local.myCollection command: find { find: "myCollection" } '
+        'allowDiskUse:1 nextTok keysExamined:2 0ms')
+    assert LogEvent(false_line).allowDiskUse is None
+    assert LogEvent(true_line).allowDiskUse is None
+    assert LogEvent(int_line).allowDiskUse == 'nextTok'
+
+
+def test_repaedtime_typo_sets_reapedtime_and_keeps_cursor_zero():
+    line = ('2019-06-18T12:00:00.000+0000 I COMMAND  [conn1] command test.foo '
+            'command: find { find: "foo" } repaedtime:15 cursorid:0 1ms')
+    le = LogEvent(line)
+    assert le.cursorid is None
+    assert le._cursorid == 0
+    assert le._reapedtime == 15
+
+
+def test_comma_separated_counters_drop_the_commas():
+    line = ('2019-06-18T12:00:00.000+0000 I COMMAND  [conn1] command test.foo '
+            'command: find { find: "foo" } keysExamined:1,234 '
+            'nreturned:2,000 1ms')
+    le = LogEvent(line)
+    assert le.nscanned == 1234
+    assert le.nreturned == 2000
+
+
+def test_logv2_counter_extract_leaves_parsed_values():
+    line = ('{"t":{"$date":"2019-06-09T02:18:02.194+00:00"},"s":"I",'
+            '"c":"COMMAND","id":51803,"ctx":"conn1","msg":"Slow query",'
+            '"attr":{"keysExamined":4}}')
+    le = LogEvent(line)
+    assert le.nscanned == 4
+
+
+def test_non_operation_line_leaves_counters_unset():
+    line = '2013-08-03T21:52:05.095+1000 [initandlisten] db version v2.5.2-pre-'
+    le = LogEvent(line)
+    assert le.operation is None
+    assert le.nscanned is None
+    assert le.numYields is None
+    assert le.nreturned is None
