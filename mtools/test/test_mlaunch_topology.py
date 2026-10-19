@@ -27,6 +27,8 @@ def test_construct_mongod_stores_a_command_without_starting(tmp_path):
     tool._get_ssl_server_args = lambda: ''
     tool._get_tls_server_args = lambda: ''
     tool._macos_fork_unsupported = lambda version=None: False
+    # No mongod on the test host: accept no extra server arguments.
+    tool._filter_valid_arguments = lambda arguments, binary='mongod', **kw: ''
     dbpath = tmp_path / 'db'
     logpath = tmp_path / 'mongod.log'
     tool._construct_mongod(str(dbpath), str(logpath), 27017)
