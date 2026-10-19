@@ -456,7 +456,10 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
                                  help=('number of config servers in a sharded '
                                        'setup (default=1). A non-numeric value '
                                        'is a mongod/mongos config file passed '
-                                       'as --config, and the count stays 1'))
+                                       'as --config, and the count stays 1. '
+                                       '-f FILE is the short form of that '
+                                       'server option and still passes a file '
+                                       'through, including with a count'))
         init_parser.set_defaults(server_config=None)
 
         # As of MongoDB 3.6, all config servers must be CSRS

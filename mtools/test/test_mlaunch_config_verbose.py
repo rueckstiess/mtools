@@ -58,6 +58,15 @@ def test_config_file_is_on_mongod_and_mongos(tmp_path):
     assert '--config "mongod.conf"' in tool.startup_info['27018']
 
 
+def test_short_f_keeps_the_config_count(tmp_path):
+    tool = _parsed_tool(
+        'init --sharded 2 --replicaset --config 3 -f mongod.conf', tmp_path)
+    assert tool.args['config'] == 3
+    assert tool.args['server_config'] is None
+    assert tool.unknown_args == ['-f', 'mongod.conf']
+    assert '-f FILE' in _init_parser(tool).format_help()
+
+
 def test_numeric_config_is_not_forwarded(tmp_path):
     tool = _parsed_tool('init --single --config 1', tmp_path)
     tool._construct_mongod('/tmp/db', '/tmp/mongod.log', 27017)

@@ -11,8 +11,11 @@ easily be stopped and started again.
 
 In addition to all the listed parameters of **mlaunch** below, you can pass in
 any arbitrary options that a ``mongos`` or ``mongod`` binary would understand,
-and **mlaunch** will pass them on to the correct binary. This includes the
-``-f`` option to read further options from a MongoDB configuration file.
+and **mlaunch** will pass them on to the correct binary. This includes
+``-f FILE`` or ``--config FILE`` to read further options from a MongoDB
+configuration file. ``-f`` is the short form of the server's ``--config``.
+A numeric ``--config`` is still the config-server count, so a count and a
+file together are ``--config 3 -f mongod.conf``.
 
 
 Usage
@@ -94,7 +97,7 @@ Usage
 
    mlaunch init [-h] (--single | --replicaset) [--nodes NUM] [--arbiter]
                 [--name NAME] [--priority] [--sharded N [N ...]]
-                [--config NUM] [--csrs] [--mongos NUM] [--verbose]
+                [--config NUM|FILE] [--csrs] [--mongos NUM] [--verbose]
                 [--port PORT] [--binarypath PATH] [--dir DIR]
                 [--hostname HOSTNAME] [--auth] [--username USERNAME]
                 [--password PASSWORD] [--auth-db DB]
@@ -239,10 +242,16 @@ or a replica set.
    shard will consist of a replica set of (per default) 3 nodes. It will also
    create 1 config server and 1 mongos per default.
 
-``--config N``
-   This parameter determines, how many config servers are launched in a sharded
-   environment. The default number is 1. The only valid options for ``N`` are 1
-   or 3.
+``--config NUM|FILE``
+   A number is how many config servers are launched in a sharded environment.
+   The default is 1.
+
+   Any other value is a ``mongod`` or ``mongos`` configuration file. mlaunch
+   passes that path as ``--config``, and the config-server count stays 1.
+
+   ``-f FILE`` is the short form of the server's ``--config`` and still passes
+   a configuration file through. A sharded deployment sets both a count and a
+   file with ``--config 3 -f mongod.conf``.
 
 ``--csrs``
    This parameter has ``mlaunch`` use `Config Servers as a Replica Set (CSRS)
