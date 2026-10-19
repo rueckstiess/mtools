@@ -18,7 +18,7 @@ class Logv2ParserMixin(object):
         self._datetime = self._match_datetime_pattern([doc['t']['$date']])
         self._datetime_calculated = True
 
-        self._level = doc['s'] # Level aka severity
+        self._level = doc['s']  # Level aka severity
         self._component = doc['c']
         self._level_calculated = True
 
@@ -37,7 +37,7 @@ class Logv2ParserMixin(object):
                 # Some contexts use namespace instead of ns:
                 #   initandlisten, LogicalSessionCacheRefresh,
                 #   IndexBuildsCoordinatorMongod, ...
-                self._namespace= doc['attr'].get('namespace')
+                self._namespace = doc['attr'].get('namespace')
             self._operation = doc['attr'].get('type')
             self._planSummary = doc['attr'].get('planSummary')
             self._queryHash = doc['attr'].get('queryHash')
@@ -68,7 +68,7 @@ class Logv2ParserMixin(object):
                             self._pattern = json2pattern(command['pipeline'], self._debug)
                     except Exception as e:
                         if self._debug:
-                            print(f"Exception: {e} for {doc}",file=sys.stderr)
+                            print(f"Exception: {e} for {doc}", file=sys.stderr)
 
                 # The command name isn't explicitly listed but
                 # should be the first element when an ordered

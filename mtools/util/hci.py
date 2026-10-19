@@ -89,13 +89,13 @@ class DateTimeBoundaries(object):
                 dt = datetime.now()
 
         elif 'weekday' in result:
-                weekday = result['weekday'].group(0).strip()
-                # assume most-recently occured weekday in logfile
-                most_recent_date = self.end.replace(hour=0, minute=0, second=0,
-                                                    microsecond=0)
-                offset = (most_recent_date.weekday() -
-                          self.weekdays.index(weekday)) % 7
-                dt = most_recent_date - timedelta(days=offset)
+            weekday = result['weekday'].group(0).strip()
+            # assume most-recently occured weekday in logfile
+            most_recent_date = self.end.replace(hour=0, minute=0, second=0,
+                                                microsecond=0)
+            offset = (most_recent_date.weekday() -
+                      self.weekdays.index(weekday)) % 7
+            dt = most_recent_date - timedelta(days=offset)
 
         # if anything remains unmatched, try parsing it with dateutil's parser
         if s.strip() != '':

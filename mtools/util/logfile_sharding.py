@@ -19,7 +19,7 @@ class ShardingInfoMixin(object):
         self._chunks_moved_from = []
         self._chunks_moved_to = []
         self._chunk_splits = []
-        
+
         prev_line = ""
 
         for line in self.filehandle:
@@ -27,7 +27,7 @@ class ShardingInfoMixin(object):
                 line = line.decode("utf-8", "replace")
 
             if self.binary == "mongos":
-        
+
                 if "Starting new replica set monitor for" in line:
                     if "[mongosMain]" in line:
                         match = re.search(r"for (?P<csrsName>\w+)/"
@@ -41,13 +41,13 @@ class ShardingInfoMixin(object):
                                           r"(?P<replSetMembers>\S+)", line)
                         if match:
                             shard_info = (match.group('shardName'),
-                                        match.group('replSetMembers'))
+                                          match.group('replSetMembers'))
                             self._shards.append(shard_info)
 
             elif self.binary == "mongod":
                 logevent = LogEvent(line)
                 if "New replica set config in use" in line:
-                    
+
                     if "configsvr: true" in line:
                         match = re.search(r' _id: "(?P<replSet>\S+)".*'
                                           'members: (?P<replSetMembers>[^]]+ ])', line)
@@ -71,7 +71,7 @@ class ShardingInfoMixin(object):
                                 match.group('replSet'),
                                 match.group('replSetMembers')
                             )
-    
+
             if "moveChunk.from" in line:
                 logevent = LogEvent(line)
                 match = re.search(r'ns: "(?P<namespace>\S+)".*'
@@ -83,7 +83,7 @@ class ShardingInfoMixin(object):
                     namespace = match.group('namespace')
                     moved_to = match.group('movedTo')
                     note = match.group('note')
-                    
+
                     if note == "success":
                         errmsg = None
                         steps = re.findall(r'(?P<steps>step \d of \d): (?P<stepTimes>\d+)', line)
@@ -107,7 +107,8 @@ class ShardingInfoMixin(object):
                     time = logevent.datetime
                     chunk_range = match.group('range')
                     namespace = match.group('namespace')
-                    # TODO: alter this to find moved from shard name when SERVER-45770 TICKET is added
+                    # TODO: alter this to find the moved-from shard name
+                    # when SERVER-45770 is added
                     moved_from = "Unknown"
                     note = match.group('note')
 
@@ -120,7 +121,8 @@ class ShardingInfoMixin(object):
                         if match:
                             errmsg = match.group('errmsg')
 
-                    chunk_migration = (time, chunk_range, moved_from, namespace, steps, note, errmsg)
+                    chunk_migration = (time, chunk_range, moved_from,
+                                       namespace, steps, note, errmsg)
 
                     self._chunks_moved_to.append(chunk_migration)
 
@@ -136,7 +138,8 @@ class ShardingInfoMixin(object):
                     success = None
                     time_taken = 0
                     error = None
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
+                    self._chunk_splits.append(
+                        (time, split_range, namespace, numSplits, success, time_taken, error))
             elif "splitVector" in line:
                 logevent = LogEvent(line)
                 match = re.search(r'splitVector: "(?P<namespace>\S+)".*,'
@@ -149,7 +152,8 @@ class ShardingInfoMixin(object):
                     numSplits = 0
                     success = True
                     error = None
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
+                    self._chunk_splits.append(
+                        (time, split_range, namespace, numSplits, success, time_taken, error))
             elif "Unable to auto-split chunk" in line:
                 logevent = LogEvent(line)
                 match = re.search(r"chunk \[(?P<range>.*)\) "
@@ -163,7 +167,8 @@ class ShardingInfoMixin(object):
                     success = False
                     time_taken = 0
                     error = match.group("error")
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
+                    self._chunk_splits.append(
+                        (time, split_range, namespace, numSplits, success, time_taken, error))
             elif "jumbo" in line:
                 logevent = LogEvent(line)
                 match = re.search(r'migration (?P<namespace>\S+): \[(?P<range>.*)\)', prev_line)
@@ -175,8 +180,9 @@ class ShardingInfoMixin(object):
                     success = False
                     time_taken = 0
                     error = "Jumbo"
-                    self._chunk_splits.append((time, split_range, namespace, numSplits, success, time_taken, error))
-            
+                    self._chunk_splits.append(
+                        (time, split_range, namespace, numSplits, success, time_taken, error))
+
             prev_line = line
 
         # reset logfile
@@ -204,8 +210,6 @@ class ShardingInfoMixin(object):
         self._chunks_moved_from = []
         self._chunks_moved_to = []
         self._chunk_splits = []
-        
-        prev_line = ""
 
         # FIXME
         if self.logformat == LogFormat.LEGACY:

@@ -13,6 +13,14 @@ from mtools.util.logevent_logv2 import Logv2ParserMixin
 from mtools.util.logevent_profile import ProfileParserMixin
 from mtools.util.logformat import LogFormat
 
+
+def _json_datetime(obj):
+    """Serialize a datetime for json encoding."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return None
+
+
 class DateTimeEncoder(json.JSONEncoder):
     """Custom datetime encoder for json output."""
 
@@ -168,8 +176,7 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
     """
 
     # datetime handler for json encoding
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj,
-                                                          datetime) else None
+    dthandler = _json_datetime
 
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
@@ -196,7 +203,7 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
 
-    def __init__(self, doc_or_str, fulldoc = True, pretty = False):
+    def __init__(self, doc_or_str, fulldoc=True, pretty=False):
         self._debug = False
         self._doc = {}
         self._year_rollover = False
@@ -207,17 +214,16 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
 
         if isinstance(doc_or_str, str):
             if self.logformat is None and doc_or_str.startswith('{'):
-                # Try to parse as JSON (logv2)
+                # Parse as JSON (logv2). Let a JSONDecodeError propagate:
+                # catching it here left a half-initialised LogEvent with no
+                # lazy-parse state, which then failed with AttributeError.
+                # LogFile reports the file and line before re-raising.
                 self.from_string = False
-                try:
-                    doc = json.loads(doc_or_str)
-                    if fulldoc:
-                        self._doc = doc
-                    self._parse_logv2(doc)
-                    self.logformat = LogFormat.LOGV2
-                except json.JSONDecodeError as e:
-                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
-                    print(f"Attempted to     parse as JSON: {doc_or_str}")
+                doc = json.loads(doc_or_str)
+                if fulldoc:
+                    self._doc = doc
+                self._parse_logv2(doc)
+                self.logformat = LogFormat.LOGV2
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
@@ -330,29 +336,29 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
             self._line_str = line_str.rstrip()
             self._reset()
 
-    def get_line_str(self, pretty = False):
+    def get_line_str(self, pretty=False):
         """Return line_str depending on source, logfile or system.profile."""
 
         if self.logformat == LogFormat.LOGV2:
             if pretty:
                 # Printable line string (eg for mplotqueries)
-                return json.dumps(self.doc, indent = 3)
+                return json.dumps(self.doc, indent=3)
             else:
                 # Compact line string (eg for mlogfilter)
                 return json.dumps(self.doc)
         else:
             if self.from_string:
                 return ' '.join([s for s in [self.merge_marker_str,
-                                            self._datetime_str,
-                                            self._line_str] if s])
+                                             self._datetime_str,
+                                             self._line_str] if s])
             else:
                 return ' '.join([s for s in [self._datetime_str,
-                                            self._line_str] if s])
+                                             self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
     @property
-    def doc (self):
+    def doc(self):
         """Return full document if available"""
         return self._doc
 
@@ -377,7 +383,7 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
 
             if (line_str
                 and line_str.endswith('ms')
-                and 'Scheduled new oplog query' not in line_str):
+                    and 'Scheduled new oplog query' not in line_str):
 
                 try:
                     # find duration from end
@@ -411,7 +417,6 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
         groups = re.search(r"DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
         return self._hostname
-
 
     @property
     def cursor(self):
@@ -756,7 +761,7 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore']:
                 self._actual_sort = self._find_pattern('orderby: ',
-                                                        actual=True)
+                                                       actual=True)
 
         return self._actual_sort
 
@@ -1000,7 +1005,6 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
 
     @property
     def lsid(self):
-
         """Extract lsid counter if available (lazy)."""
         self._lsid = self._find_pattern('lsid: ', actual=True)
         return self._lsid
@@ -1023,7 +1027,6 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
 
     @property
     def autocommit(self):
-
         """Extract autocommit counter for transactions if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -1033,7 +1036,6 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
 
     @property
     def readConcern(self):
-
         """Extract readConcern Level if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -1051,17 +1053,19 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
         return self._w
 
     def _extract_counters(self):
-
+        """Extract counters like nscanned and nreturned from the logevent."""
         if self.logformat != LogFormat.LEGACY:
             return
 
-        """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates', 'bytesRead', 'bytesWritten', 'timeReadingMicros',
-                    'timeWritingMicros', 'lsid', 'txnNumber', 'autocommit',  'allowDiskUse', 'level',
-                    'timeActiveMicros', 'timeInactiveMicros', 'duration', 'readTimestamp', 'terminationCause']
+                    'planSummary', 'writeConflicts', 'keyUpdates',
+                    'bytesRead', 'bytesWritten', 'timeReadingMicros',
+                    'timeWritingMicros', 'lsid', 'txnNumber', 'autocommit',
+                    'allowDiskUse', 'level', 'timeActiveMicros',
+                    'timeInactiveMicros', 'duration', 'readTimestamp',
+                    'terminationCause']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -1073,102 +1077,119 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
             'nInserted': 'ninserted',
             'nMatched': 'nreturned',
             'nModified': 'nupdated',
-            'cursorid' : 'cursorid',
-            'repaedtime' : 'reapedtime'
+            'cursorid': 'cursorid',
+            'repaedtime': 'reapedtime'
         }
         counters.extend(counter_equiv.keys())
 
         split_tokens = self.split_tokens
 
+        def token_text(token):
+            return token.split(':')[-1].replace(',', '')
+
         # trigger operation evaluation to get access to offset
         if self.operation:
-            for t, token in enumerate(split_tokens[self.datetime_nextpos +
-                                                   2:]):
+            offset = self.datetime_nextpos + 2
+            for t, token in enumerate(split_tokens[offset:]):
                 for counter in counters:
                     if token.startswith('%s:' % counter):
+                        # Historical index: t + 1 + datetime_nextpos + 2.
+                        nxt = t + offset + 1
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            if (counter == 'level' and token.startswith('level')):
-                                    self._readConcern = (
-                                    split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
-                            elif (counter == 'terminationCause' and token.startswith('terminationCause')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
+                            if (counter == 'level'
+                                    and token.startswith('level')):
+                                self._readConcern = (
+                                    split_tokens[nxt].replace(',', ''))
+                            elif (counter == 'readTimestamp'
+                                  and token.startswith('readTimestamp')):
+                                vars(self)['_' + counter] = token_text(token)
+                            elif (counter == 'terminationCause'
+                                  and token.startswith('terminationCause')):
+                                vars(self)['_' + counter] = token_text(token)
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                                vars(self)['_' + counter] = int(
+                                    token_text(token))
 
                             # extract allowDiskUse counter
-                            if (counter == 'allowDiskUse' and token.startswith('allowDiskUse')):
+                            if (counter == 'allowDiskUse'
+                                    and token.startswith('allowDiskUse')):
                                 # Splitting space between token and value
-                                self._allowDiskUse = split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',','')
+                                self._allowDiskUse = (
+                                    split_tokens[nxt].replace(',', ''))
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',', ''))
+                                vars(self)['_' + counter] = int(
+                                    token_text(token))
 
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
                             # https://jira.mongodb.org/browse/SERVER-10101
-                            if (counter == 'numYields' and
-                                    token.startswith('numYields')):
+                            if (counter == 'numYields'
+                                    and token.startswith('numYields')):
                                 try:
-                                    self._numYields = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                    self._numYields = int(
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
 
-                            if (counter == 'bytesRead' and
-                                    token.startswith('bytesRead')):
+                            if (counter == 'bytesRead'
+                                    and token.startswith('bytesRead')):
                                 try:
-                                    self._bytesRead = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                    self._bytesRead = int(
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'bytesWritten' and
-                                    token.startswith('bytesWritten')):
+                            if (counter == 'bytesWritten'
+                                    and token.startswith('bytesWritten')):
                                 try:
                                     self._bytesWritten = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'timeReadingMicros' and
-                                    token.startswith('timeReadingMicros')):
+                            if (counter == 'timeReadingMicros'
+                                    and token.startswith('timeReadingMicros')):
                                 try:
                                     self._timeReadingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'timeWritingMicros' and
-                                    token.startswith('timeWritingMicros')):
+                            if (counter == 'timeWritingMicros'
+                                    and token.startswith('timeWritingMicros')):
                                 try:
                                     self._timeWritingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'txnNumber' and
-                                    token.startswith('txnNumber')):
-                                    self._txnNumber = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                            if (counter == 'autocommit' and
-                                    token.startswith('autocommit')):
-                                    self._autocommit = (split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'lsid' and
-                                    token.startswith('lsid')):
-                                    self._lsid = (split_tokens[t + 2 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'planSummary' and
-                                    token.startswith('planSummary')):
+                            if (counter == 'txnNumber'
+                                    and token.startswith('txnNumber')):
+                                self._txnNumber = int(
+                                    split_tokens[nxt].replace(',', ''))
+                            if (counter == 'autocommit'
+                                    and token.startswith('autocommit')):
+                                self._autocommit = (
+                                    split_tokens[nxt].replace(',', ''))
+                            if (counter == 'lsid'
+                                    and token.startswith('lsid')):
+                                self._lsid = (
+                                    split_tokens[nxt + 1].replace(',', ''))
+                            if (counter == 'planSummary'
+                                    and token.startswith('planSummary')):
                                 try:
-                                    self._planSummary = split_tokens[t + 1 + self.datetime_nextpos + 2]
+                                    self._planSummary = split_tokens[nxt]
                                     if self._planSummary:
-                                        if split_tokens[t + 1 + self.datetime_nextpos + 3] != '{':
-                                            self._actualPlanSummary = self._planSummary
+                                        if split_tokens[nxt + 1] != '{':
+                                            self._actualPlanSummary = (
+                                                self._planSummary)
                                         else:
-                                            self._actualPlanSummary = '%s %s' % (
-                                                self._planSummary,
-                                                self._find_pattern('planSummary: %s' % self._planSummary, actual=True)
-                                            )
+                                            found = self._find_pattern(
+                                                'planSummary: %s'
+                                                % self._planSummary,
+                                                actual=True)
+                                            self._actualPlanSummary = (
+                                                '%s %s' % (
+                                                    self._planSummary, found))
                                 except ValueError:
                                     pass
 
@@ -1253,24 +1274,12 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
         Trigger extraction of all information.
         These values are usually evaluated lazily.
         """
-        tokens = self.split_tokens
-        duration = self.duration
-        datetime = self.datetime
-        thread = self.thread
-        operation = self.operation
-        namespace = self.namespace
-        pattern = self.pattern
-        nscanned = self.nscanned
-        nscannedObjects = self.nscannedObjects
-        ntoreturn = self.ntoreturn
-        nreturned = self.nreturned
-        ninserted = self.ninserted
-        ndeleted = self.ndeleted
-        nupdated = self.nupdated
-        numYields = self.numYields
-        txnNumber = self.txnNumber
-        w = self.w
-        r = self.r
+        for name in ('split_tokens', 'duration', 'datetime', 'thread',
+                     'operation', 'namespace', 'pattern', 'nscanned',
+                     'nscannedObjects', 'ntoreturn', 'nreturned',
+                     'ninserted', 'ndeleted', 'nupdated', 'numYields',
+                     'txnNumber', 'w', 'r'):
+            getattr(self, name)
 
     def _find_pattern(self, trigger, actual=False):
         # get start of json query pattern
@@ -1357,7 +1366,7 @@ class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
             labels = ['line_str', 'split_tokens', 'datetime', 'operation',
                       'thread', 'namespace', 'nscanned', 'ntoreturn',
                       'nreturned', 'ninserted', 'nupdated', 'ndeleted',
-                      'duration', 'r', 'w', 'numYields',  'cursorid', 'reapedtime',
+                      'duration', 'r', 'w', 'numYields', 'cursorid', 'reapedtime',
                       'txtNumber', 'lsid', 'autocommit', 'readConcern',
                       'timeActiveMicros', 'timeInactiveMicros']
 
