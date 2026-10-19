@@ -47,7 +47,6 @@ class Grouping(object):
 
         self.groups.setdefault(key, list()).append(item)
 
-
     def __getitem__(self, key):
         """Return item corresponding to key."""
         return self.groups[key]

@@ -13,6 +13,14 @@ from mtools.util.logevent_counters import CountersMixin
 from mtools.util.logevent_profile import ProfileParserMixin
 from mtools.util.logformat import LogFormat
 
+
+def _json_datetime(obj):
+    """Serialize a datetime for json encoding."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return None
+
+
 class DateTimeEncoder(json.JSONEncoder):
     """Custom datetime encoder for json output."""
 
@@ -168,8 +176,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
     """
 
     # datetime handler for json encoding
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj,
-                                                          datetime) else None
+    dthandler = _json_datetime
 
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
@@ -196,7 +203,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
 
-    def __init__(self, doc_or_str, fulldoc = True, pretty = False):
+    def __init__(self, doc_or_str, fulldoc=True, pretty=False):
         self._debug = False
         self._doc = {}
         self._year_rollover = False
@@ -207,17 +214,16 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
 
         if isinstance(doc_or_str, str):
             if self.logformat is None and doc_or_str.startswith('{'):
-                # Try to parse as JSON (logv2)
+                # Parse as JSON (logv2). Let a JSONDecodeError propagate:
+                # catching it here left a half-initialised LogEvent with no
+                # lazy-parse state, which then failed with AttributeError.
+                # LogFile reports the file and line before re-raising.
                 self.from_string = False
-                try:
-                    doc = json.loads(doc_or_str)
-                    if fulldoc:
-                        self._doc = doc
-                    self._parse_logv2(doc)
-                    self.logformat = LogFormat.LOGV2
-                except json.JSONDecodeError as e:
-                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
-                    print(f"Attempted to     parse as JSON: {doc_or_str}")
+                doc = json.loads(doc_or_str)
+                if fulldoc:
+                    self._doc = doc
+                self._parse_logv2(doc)
+                self.logformat = LogFormat.LOGV2
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
@@ -330,29 +336,29 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
             self._line_str = line_str.rstrip()
             self._reset()
 
-    def get_line_str(self, pretty = False):
+    def get_line_str(self, pretty=False):
         """Return line_str depending on source, logfile or system.profile."""
 
         if self.logformat == LogFormat.LOGV2:
             if pretty:
                 # Printable line string (eg for mplotqueries)
-                return json.dumps(self.doc, indent = 3)
+                return json.dumps(self.doc, indent=3)
             else:
                 # Compact line string (eg for mlogfilter)
                 return json.dumps(self.doc)
         else:
             if self.from_string:
                 return ' '.join([s for s in [self.merge_marker_str,
-                                            self._datetime_str,
-                                            self._line_str] if s])
+                                             self._datetime_str,
+                                             self._line_str] if s])
             else:
                 return ' '.join([s for s in [self._datetime_str,
-                                            self._line_str] if s])
+                                             self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
     @property
-    def doc (self):
+    def doc(self):
         """Return full document if available"""
         return self._doc
 
@@ -377,7 +383,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
 
             if (line_str
                 and line_str.endswith('ms')
-                and 'Scheduled new oplog query' not in line_str):
+                    and 'Scheduled new oplog query' not in line_str):
 
                 try:
                     # find duration from end
@@ -411,7 +417,6 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
         groups = re.search(r"DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
         return self._hostname
-
 
     @property
     def cursor(self):
@@ -756,7 +761,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore']:
                 self._actual_sort = self._find_pattern('orderby: ',
-                                                        actual=True)
+                                                       actual=True)
 
         return self._actual_sort
 
@@ -878,24 +883,12 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
         Trigger extraction of all information.
         These values are usually evaluated lazily.
         """
-        tokens = self.split_tokens
-        duration = self.duration
-        datetime = self.datetime
-        thread = self.thread
-        operation = self.operation
-        namespace = self.namespace
-        pattern = self.pattern
-        nscanned = self.nscanned
-        nscannedObjects = self.nscannedObjects
-        ntoreturn = self.ntoreturn
-        nreturned = self.nreturned
-        ninserted = self.ninserted
-        ndeleted = self.ndeleted
-        nupdated = self.nupdated
-        numYields = self.numYields
-        txnNumber = self.txnNumber
-        w = self.w
-        r = self.r
+        for name in ('split_tokens', 'duration', 'datetime', 'thread',
+                     'operation', 'namespace', 'pattern', 'nscanned',
+                     'nscannedObjects', 'ntoreturn', 'nreturned',
+                     'ninserted', 'ndeleted', 'nupdated', 'numYields',
+                     'txnNumber', 'w', 'r'):
+            getattr(self, name)
 
     def _find_pattern(self, trigger, actual=False):
         # get start of json query pattern
@@ -982,7 +975,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
             labels = ['line_str', 'split_tokens', 'datetime', 'operation',
                       'thread', 'namespace', 'nscanned', 'ntoreturn',
                       'nreturned', 'ninserted', 'nupdated', 'ndeleted',
-                      'duration', 'r', 'w', 'numYields',  'cursorid', 'reapedtime',
+                      'duration', 'r', 'w', 'numYields', 'cursorid', 'reapedtime',
                       'txtNumber', 'lsid', 'autocommit', 'readConcern',
                       'timeActiveMicros', 'timeInactiveMicros']
 
@@ -1078,7 +1071,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
         self._datetime = self._match_datetime_pattern([doc['t']['$date']])
         self._datetime_calculated = True
 
-        self._level = doc['s'] # Level aka severity
+        self._level = doc['s']  # Level aka severity
         self._component = doc['c']
         self._level_calculated = True
 
@@ -1097,7 +1090,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
                 # Some contexts use namespace instead of ns:
                 #   initandlisten, LogicalSessionCacheRefresh,
                 #   IndexBuildsCoordinatorMongod, ...
-                self._namespace= doc['attr'].get('namespace')
+                self._namespace = doc['attr'].get('namespace')
             self._operation = doc['attr'].get('type')
             self._planSummary = doc['attr'].get('planSummary')
             self._queryHash = doc['attr'].get('queryHash')
@@ -1128,7 +1121,7 @@ class LogEvent(CountersMixin, ProfileParserMixin, object):
                             self._pattern = json2pattern(command['pipeline'], self._debug)
                     except Exception as e:
                         if self._debug:
-                            print(f"Exception: {e} for {doc}",file=sys.stderr)
+                            print(f"Exception: {e} for {doc}", file=sys.stderr)
 
                 # The command name isn't explicitly listed but
                 # should be the first element when an ordered

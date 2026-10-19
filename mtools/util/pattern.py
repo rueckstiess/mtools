@@ -60,7 +60,7 @@ def _decode_pattern_dict(data):
                     # Try to decode value as a dictionary; this will fail if
                     # there happens to be a field called "query"
                     return _decode_pattern_dict(value)
-                except:
+                except Exception:
                     return value
 
         if key == '$geometry' and isinstance(value, dict):
@@ -96,7 +96,8 @@ def shell2json(s):
 
     return s
 
-def values2pattern(x, debug = False):
+
+def values2pattern(x, debug=False):
     """Recursively convert values to placeholder patterns"""
     if isinstance(x, list):
         return [values2pattern(v) for v in x]
@@ -111,7 +112,7 @@ def values2pattern(x, debug = False):
         return 1
 
 
-def json2pattern(s, debug = False):
+def json2pattern(s, debug=False):
     """
     Convert JSON format to a query pattern.
 
@@ -121,67 +122,85 @@ def json2pattern(s, debug = False):
     """
     doc = None
     if (isinstance(s, dict)):
-        if debug : print ("\n=== json2pattern() from dict\n", s, file=sys.stderr)
+        if debug:
+            print("\n=== json2pattern() from dict\n", s, file=sys.stderr)
         doc = values2pattern(s)
 
     elif (isinstance(s, list)):
-        if debug : print ("\n=== json2pattern() from list\n", s, file=sys.stderr)
+        if debug:
+            print("\n=== json2pattern() from list\n", s, file=sys.stderr)
         doc = values2pattern(s)
 
     elif isinstance(s, str):
         # Given a JSON-like string (eg legacy logs, mangle into something JSONish)
         saved_s = s
 
-        if debug : print ("\n=== json2pattern() from legacy string\n", saved_s, file=sys.stderr)
+        if debug:
+            print("\n=== json2pattern() from legacy string\n", saved_s, file=sys.stderr)
 
         s, _ = re.subn(r'([{,])\s*([^,{\s\'"]+)\s*:', ' \\1 "\\2" : ', s)
-        if debug : print (s, file=sys.stderr)
+        if debug:
+            print(s, file=sys.stderr)
 
         # handle shell values that are not valid JSON
         s = shell2json(s)
-        if debug : print (s, file=sys.stderr)
+        if debug:
+            print(s, file=sys.stderr)
 
         # convert to 1 where possible, to get rid of things like new Date(...)
         s, _ = re.subn(r'([:,\[])\s*([^{}\[\]"]+?)\s*([,}\]])', '\\1 1 \\3', s)
-        if debug : print (s, file=sys.stderr)
+        if debug:
+            print(s, file=sys.stderr)
 
-
-        # replace list values by 1. Not the '$in/$nin' lists, but the like of: {..., "attrib" : ["val1", "val2", "3"],...}
-        # updated regex, using positive lookahead and lookbehind to check for a " (quote) 
-        # right after '['  and before ']' to correctly handle cases where a ']' is part of the value and 
-        # also cases where list values are url's "nnn://aaa.bbb"  will correctly be simplified to '1'
+        # replace list values by 1. Not the '$in/$nin' lists, but ones like
+        # {..., "attrib" : ["val1", "val2", "3"],...}. The regex uses a
+        # positive lookahead and lookbehind for a quote right after '[' and
+        # before ']' so a ']' inside a value still matches, and so a url
+        # such as "nnn://aaa.bbb" is simplified to '1'.
         # Non-greedy so each quoted array is replaced on its own. A greedy
         # match runs from the first opening bracket to the last close.
         # Strings are matched whole, so an escaped quote or a ']' inside a
         # value does not end the array early.
-        s, _ = re.subn(r'("\S+"\s*:\s*\[\s*(?=\"))((?:"(?:[^"\\]|\\.)*"|[^"\]])+?)((?<=\")\s*\]\s*[,}])', '\\1 1 \\3', s)
+        array_value = (
+            r'("\S+"\s*:\s*\[\s*(?=\"))'
+            r'((?:"(?:[^"\\]|\\.)*"|[^"\]])+?)'
+            r'((?<=\")\s*\]\s*[,}])')
+        s, _ = re.subn(array_value, '\\1 1 \\3', s)
 
-        if debug : print (s, file=sys.stderr)
+        if debug:
+            print(s, file=sys.stderr)
 
         # now convert to dictionary, converting unicode to ascii
         try:
             doc = json.loads(s, object_hook=_decode_pattern_dict)
         except Exception as err:
             if debug:
-                ## print some context info and return without any extracted query data..
-                msg = f'''json2pattern():json.loads Exception:\n  Error: {err} : {sys.exc_info()[0]}\n s: ({s})\n'''
+                # print some context info and return without extracted data
+                msg = (
+                    'json2pattern():json.loads Exception:\n'
+                    f'  Error: {err} : {sys.exc_info()[0]}\n'
+                    f' s: ({s})\n')
                 print(msg, file=sys.stderr)
             return None
-        except:
-            print (f'''json2pattern():json.loads Unexpected error: s: ({s}) sys.exc_info():{sys.exc_info()[0]}''' )
+        except BaseException:
+            print('json2pattern():json.loads Unexpected error: '
+                  f's: ({s}) sys.exc_info():{sys.exc_info()[0]}')
             raise
     else:
-        print (f'''json2pattern(): Unsupported parameter type: {type(s)}''')
+        print(f'''json2pattern(): Unsupported parameter type: {type(s)}''')
         return
 
     try:
         return json.dumps(doc, sort_keys=True, separators=(', ', ': '), ensure_ascii=False)
     except Exception as err:
-        ## print some context info and return without any extracted query data..
+        # print some context info and return without any extracted query data..
         if debug:
-            msg = f'''json2pattern():json.dumps Exception:\n  Error: {sys.exc_info()[0]} : {err}\n  s: ({s})\n  doc: ({doc})\n'''
+            msg = (f'''json2pattern():json.dumps Exception:\n'''
+                   f'''  Error: {sys.exc_info()[0]} : {err}\n'''
+                   f'''  s: ({s})\n  doc: ({doc})\n''')
             print(msg, file=sys.stderr)
         return None
-    except:
-        print(f'''json2pattern():json.dumps Unexpected error: s: ({s}) sys.exc_info():{sys.exc_info()[0]}''')
+    except BaseException:
+        print(f'''json2pattern():json.dumps Unexpected error: '''
+              f'''s: ({s}) sys.exc_info():{sys.exc_info()[0]}''')
         raise

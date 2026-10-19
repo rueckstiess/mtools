@@ -207,7 +207,6 @@ class CountersMixin(object):
 
     @property
     def lsid(self):
-
         """Extract lsid counter if available (lazy)."""
         self._lsid = self._find_pattern('lsid: ', actual=True)
         return self._lsid
@@ -230,7 +229,6 @@ class CountersMixin(object):
 
     @property
     def autocommit(self):
-
         """Extract autocommit counter for transactions if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -240,7 +238,6 @@ class CountersMixin(object):
 
     @property
     def readConcern(self):
-
         """Extract readConcern Level if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -258,17 +255,19 @@ class CountersMixin(object):
         return self._w
 
     def _extract_counters(self):
-
+        """Extract counters like nscanned and nreturned from the logevent."""
         if self.logformat != LogFormat.LEGACY:
             return
 
-        """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates', 'bytesRead', 'bytesWritten', 'timeReadingMicros',
-                    'timeWritingMicros', 'lsid', 'txnNumber', 'autocommit',  'allowDiskUse', 'level',
-                    'timeActiveMicros', 'timeInactiveMicros', 'duration', 'readTimestamp', 'terminationCause']
+                    'planSummary', 'writeConflicts', 'keyUpdates',
+                    'bytesRead', 'bytesWritten', 'timeReadingMicros',
+                    'timeWritingMicros', 'lsid', 'txnNumber', 'autocommit',
+                    'allowDiskUse', 'level', 'timeActiveMicros',
+                    'timeInactiveMicros', 'duration', 'readTimestamp',
+                    'terminationCause']
 
         # TODO: refactor mtools to use current counter names throughout
         # Transitionary hack: mapping of current names into prior equivalents
@@ -280,102 +279,119 @@ class CountersMixin(object):
             'nInserted': 'ninserted',
             'nMatched': 'nreturned',
             'nModified': 'nupdated',
-            'cursorid' : 'cursorid',
-            'repaedtime' : 'reapedtime'
+            'cursorid': 'cursorid',
+            'repaedtime': 'reapedtime'
         }
         counters.extend(counter_equiv.keys())
 
         split_tokens = self.split_tokens
 
+        def token_text(token):
+            return token.split(':')[-1].replace(',', '')
+
         # trigger operation evaluation to get access to offset
         if self.operation:
-            for t, token in enumerate(split_tokens[self.datetime_nextpos +
-                                                   2:]):
+            offset = self.datetime_nextpos + 2
+            for t, token in enumerate(split_tokens[offset:]):
                 for counter in counters:
                     if token.startswith('%s:' % counter):
+                        # Historical index: t + 1 + datetime_nextpos + 2.
+                        nxt = t + offset + 1
                         try:
                             # Remap counter to standard name, if applicable
                             counter = counter_equiv.get(counter, counter)
-                            if (counter == 'level' and token.startswith('level')):
-                                    self._readConcern = (
-                                    split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
-                            elif (counter == 'terminationCause' and token.startswith('terminationCause')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
+                            if (counter == 'level'
+                                    and token.startswith('level')):
+                                self._readConcern = (
+                                    split_tokens[nxt].replace(',', ''))
+                            elif (counter == 'readTimestamp'
+                                  and token.startswith('readTimestamp')):
+                                vars(self)['_' + counter] = token_text(token)
+                            elif (counter == 'terminationCause'
+                                  and token.startswith('terminationCause')):
+                                vars(self)['_' + counter] = token_text(token)
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                                vars(self)['_' + counter] = int(
+                                    token_text(token))
 
                             # extract allowDiskUse counter
-                            if (counter == 'allowDiskUse' and token.startswith('allowDiskUse')):
+                            if (counter == 'allowDiskUse'
+                                    and token.startswith('allowDiskUse')):
                                 # Splitting space between token and value
-                                self._allowDiskUse = split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',','')
+                                self._allowDiskUse = (
+                                    split_tokens[nxt].replace(',', ''))
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',', ''))
+                                vars(self)['_' + counter] = int(
+                                    token_text(token))
 
                         except ValueError:
                             # see if this is a pre-2.5.2 numYields with space
                             # in between (e.g. "numYields: 2")
                             # https://jira.mongodb.org/browse/SERVER-10101
-                            if (counter == 'numYields' and
-                                    token.startswith('numYields')):
+                            if (counter == 'numYields'
+                                    and token.startswith('numYields')):
                                 try:
-                                    self._numYields = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                    self._numYields = int(
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
 
-                            if (counter == 'bytesRead' and
-                                    token.startswith('bytesRead')):
+                            if (counter == 'bytesRead'
+                                    and token.startswith('bytesRead')):
                                 try:
-                                    self._bytesRead = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                    self._bytesRead = int(
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'bytesWritten' and
-                                    token.startswith('bytesWritten')):
+                            if (counter == 'bytesWritten'
+                                    and token.startswith('bytesWritten')):
                                 try:
                                     self._bytesWritten = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'timeReadingMicros' and
-                                    token.startswith('timeReadingMicros')):
+                            if (counter == 'timeReadingMicros'
+                                    and token.startswith('timeReadingMicros')):
                                 try:
                                     self._timeReadingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'timeWritingMicros' and
-                                    token.startswith('timeWritingMicros')):
+                            if (counter == 'timeWritingMicros'
+                                    and token.startswith('timeWritingMicros')):
                                 try:
                                     self._timeWritingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
+                                        split_tokens[nxt].replace(',', ''))
                                 except ValueError:
                                     pass
-                            if (counter == 'txnNumber' and
-                                    token.startswith('txnNumber')):
-                                    self._txnNumber = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                            if (counter == 'autocommit' and
-                                    token.startswith('autocommit')):
-                                    self._autocommit = (split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'lsid' and
-                                    token.startswith('lsid')):
-                                    self._lsid = (split_tokens[t + 2 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'planSummary' and
-                                    token.startswith('planSummary')):
+                            if (counter == 'txnNumber'
+                                    and token.startswith('txnNumber')):
+                                self._txnNumber = int(
+                                    split_tokens[nxt].replace(',', ''))
+                            if (counter == 'autocommit'
+                                    and token.startswith('autocommit')):
+                                self._autocommit = (
+                                    split_tokens[nxt].replace(',', ''))
+                            if (counter == 'lsid'
+                                    and token.startswith('lsid')):
+                                self._lsid = (
+                                    split_tokens[nxt + 1].replace(',', ''))
+                            if (counter == 'planSummary'
+                                    and token.startswith('planSummary')):
                                 try:
-                                    self._planSummary = split_tokens[t + 1 + self.datetime_nextpos + 2]
+                                    self._planSummary = split_tokens[nxt]
                                     if self._planSummary:
-                                        if split_tokens[t + 1 + self.datetime_nextpos + 3] != '{':
-                                            self._actualPlanSummary = self._planSummary
+                                        if split_tokens[nxt + 1] != '{':
+                                            self._actualPlanSummary = (
+                                                self._planSummary)
                                         else:
-                                            self._actualPlanSummary = '%s %s' % (
-                                                self._planSummary,
-                                                self._find_pattern('planSummary: %s' % self._planSummary, actual=True)
-                                            )
+                                            found = self._find_pattern(
+                                                'planSummary: %s'
+                                                % self._planSummary,
+                                                actual=True)
+                                            self._actualPlanSummary = (
+                                                '%s %s' % (
+                                                    self._planSummary, found))
                                 except ValueError:
                                     pass
 
