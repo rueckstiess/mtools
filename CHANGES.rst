@@ -2,17 +2,6 @@
 Changes to mtools
 =================
 
-version 2.0.0
-~~~~~~~~~~~~~
- * mlaunch: Breaking change. mongod 4.4 and newer start with
-   ``--oplogMinRetentionHours 1`` unless that option is already set.
-   The server keeps at least one hour of oplog and can grow the oplog
-   past its configured size to do so. The size is still the server
-   default (5% of free disk, within the server's bounds) or an explicit
-   ``--oplogSize``. ``--oplogMinRetentionHours 0`` leaves retention off.
-   ``--oplogSize`` is passed to config servers, shards, and replica set
-   members. mongos does not receive oplog options.
-
 version 1.7.2
 ~~~~~~~~~~~~~
  * mlaunch: mlaunch init --help should not require mongod (#894)
