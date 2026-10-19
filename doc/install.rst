@@ -18,8 +18,8 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 Python
-   You need to have Python 3.11, 3.12, 3.13, 3.14, or 3.15 installed in
-   order to use mtools. Other versions of Python are not currently supported or tested.
+   You need to have Python 3.11, 3.12, 3.13, 3.14, or 3.15 installed in order to
+   use mtools. Other versions of Python are not currently supported or tested.
 
    To check your Python version, run ``python --version`` on the command line.
 

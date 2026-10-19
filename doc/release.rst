@@ -29,8 +29,8 @@ Releasing a new version
    version to be released.
 #. Increase the version in ``./mtools/version.py`` from ``x.y.z-dev0`` to
    ``x.y.z``.
-#. Make sure tests are passing in Python 3.11, 3.12, 3.13, 3.14, and 3.15
-   via ``tox run -e py311,py312,py313,py314,py315``.
+#. Make sure tests are passing in Python 3.11, 3.12, 3.13, 3.14, and 3.15 via
+   ``tox run -e py311,py312,py313,py314,py315``.
 #. Make sure documentation tests are passing via ``tox -re doc``.
 #. Update README.rst and CHANGES.rst accordingly.
 #. Any other cleanup tasks.
