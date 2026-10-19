@@ -287,6 +287,23 @@ def _extract_server_version(text):
     return match.group(1) if match else None
 
 
+class _ConfigCountOrFile(argparse.Action):
+    """``--config`` is a config-server count or a server config file.
+
+    A value of only digits is the number of config servers. Any other
+    value is a mongod or mongos config file. The count then stays at 1,
+    and the file is passed through as ``--config``.
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if re.fullmatch(r'\d+', values):
+            setattr(namespace, self.dest, int(values))
+            setattr(namespace, 'server_config', None)
+        else:
+            setattr(namespace, 'server_config', values)
+            setattr(namespace, self.dest, 1)
+
+
 class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
     UNDOCUMENTED_MONGOD_ARGS = ['--nopreallocj', '--wiredTigerEngineConfigString']
     UNSUPPORTED_MONGOS_ARGS = ['--wiredTigerCacheSizeGB', '--storageEngine']
@@ -387,7 +404,7 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
              'arguments which are not handled by mlaunch will be passed '
              'through to mongod/mongos if those options are listed in the '
              '--help output for the current binary. For example: '
-             '--storageEngine, --logappend, or --config.')
+             '--storageEngine, --logappend, or --slowms.')
 
         # init command
         helptext = ('initialize a new MongoDB environment and start '
@@ -398,7 +415,7 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
                 'arguments which are not handled by mlaunch will be passed '
                 'through to mongod/mongos if those options are listed in the '
                 '--help output for the current binary. For example: '
-                '--storageEngine, --logappend, or --config.')
+                '--storageEngine, --logappend, or --slowms.')
         init_parser = subparsers.add_parser('init', help=helptext,
                                             description=desc)
 
@@ -434,10 +451,13 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
                                        'several singles or replica sets. '
                                        'Provide either list of shard names or '
                                        'number of shards.'))
-        init_parser.add_argument('--config', action='store', default=1,
-                                 type=int, metavar='NUM',
-                                 help=('adds NUM config servers to sharded '
-                                       'setup (requires --sharded, default=1)'))
+        init_parser.add_argument('--config', action=_ConfigCountOrFile,
+                                 default=1, metavar='NUM|FILE',
+                                 help=('number of config servers in a sharded '
+                                       'setup (default=1). A non-numeric value '
+                                       'is a mongod/mongos config file passed '
+                                       'as --config, and the count stays 1'))
+        init_parser.set_defaults(server_config=None)
 
         # As of MongoDB 3.6, all config servers must be CSRS
         init_parser.add_argument('--csrs', default=True, action='store_true',
@@ -451,7 +471,9 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
         # verbose, port, binary path
         init_parser.add_argument('--verbose', action='store_true',
                                  default=False,
-                                 help='outputs more verbose information.')
+                                 help=('outputs more verbose information, and '
+                                       'passes -v to mongod/mongos unless -v '
+                                       'is already given.'))
         init_parser.add_argument('--port', action='store', type=int,
                                  default=27017,
                                  help=('port for mongod, start of port range '
@@ -549,7 +571,7 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
             tls_server_args.add_argument('--tlsDisabledProtocols',
                                          help=('comma separated list of TLS '
                                                'protocols to disable '
-                                               '[TLS1_0,TLS1_1,TLS1_2]'))
+                                               '[TLS1_0,TLS1_1,TLS1_2,TLS1_3]'))
             tls_server_args.add_argument('--tlsAllowConnectionsWithoutCertificates',
                                          action='store_true',
                                          help=('allow client to connect without '
@@ -611,6 +633,12 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
                                             'presenting a certificate'))
         ssl_server_args.add_argument('--sslFIPSMode', action='store_true',
                                         help='activate FIPS 140-2 mode')
+        ssl_server_args.add_argument('--sslOnNormalPorts', action='store_true',
+                                     help='deprecated alias of --tlsOnNormalPorts')
+        ssl_server_args.add_argument('--sslWeakCertificateValidation',
+                                     action='store_true',
+                                     help=('allow connections that use weak '
+                                           'certificate validation'))
 
         ssl_client_args = init_parser.add_argument_group('Client TLS/SSL options')
         ssl_client_args.add_argument('--sslClientCertificate',
@@ -2585,6 +2613,22 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
 
         return host
 
+    def _forwarded_server_args(self):
+        """Config file and ``-v`` that mlaunch's own flags still forward.
+
+        ``--config`` with a non-numeric value is a server config file.
+        ``--verbose`` on init also asks the server for one ``-v``, unless
+        the extras already contain ``-v``, ``-vv``, or ``-vvv``.
+        """
+        extra = ''
+        if self.args and self.args.get('server_config'):
+            extra += ' --config "%s"' % self.args['server_config']
+        if self.args and self.args.get('verbose'):
+            unknowns = getattr(self, 'unknown_args', None) or []
+            if not any(re.match(r'-v+$', arg) for arg in unknowns):
+                extra += ' -v'
+        return extra
+
     def _construct_mongod(self, dbpath, logpath, port, replset=None, extra=''):
         """Construct command line strings for mongod process."""
         rs_param = ''
@@ -2626,6 +2670,7 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
 
         extra += self._get_ssl_server_args()
         extra += self._get_tls_server_args()
+        extra += self._forwarded_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
@@ -2667,6 +2712,7 @@ class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
 
         extra += ' ' + self._get_ssl_server_args()
         extra += ' ' + self._get_tls_server_args()
+        extra += self._forwarded_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
