@@ -15,8 +15,8 @@ try:
     from pymongo.errors import ConnectionFailure, AutoReconnect
 except ImportError as e:
     raise ImportError(f"Can't import pymongo: {str(e)}\n\n"
-                       "For instructions on how to install pymongo, see:\n"
-                       "   https://www.mongodb.com/docs/drivers/pymongo/#installation")
+                      "For instructions on how to install pymongo, see:\n"
+                      "   https://www.mongodb.com/docs/drivers/pymongo/#installation")
 
 
 class ProfileCollection(InputSource):
@@ -60,7 +60,7 @@ class ProfileCollection(InputSource):
             self.binary = "%s (running on %s:%i)" % (binary, hostname, port)
 
         except (ConnectionFailure, AutoReconnect) as e:
-            raise SystemExit("&s: Can't connect to database, please check if "
+            raise SystemExit("%s: Can't connect to database, please check if "
                              "a mongod instance is running on %s:%s."
                              % (e, hostname, port))
 
