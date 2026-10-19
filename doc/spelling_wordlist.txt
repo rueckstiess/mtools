@@ -54,7 +54,6 @@ mongod
 mongos
 mplotqueries
 mtools
-mtransfer
 Namespace
 namespace
 nInserted

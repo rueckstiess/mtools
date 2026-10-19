@@ -22,6 +22,7 @@ from urllib.parse import quote, quote_plus
 from operator import itemgetter
 
 import psutil
+from mtools.mlaunch.tls_args import TlsArgsMixin
 from mtools.util import OrderedDict
 from mtools.util.cmdlinetool import BaseCmdLineTool
 from mtools.util.print_table import print_table
@@ -305,7 +306,7 @@ def _command_line_error(output):
     return None
 
 
-class MLaunchTool(BaseCmdLineTool):
+class MLaunchTool(TlsArgsMixin, BaseCmdLineTool):
     # These repeat options the constructed command already contains.
     OWNED_FLAG_REASONS = {
         '--dbpath': 'mlaunch sets it from --dir',
@@ -1907,111 +1908,6 @@ class MLaunchTool(BaseCmdLineTool):
                 result.append('"%s"' % arg)
 
         return ' '.join(result)
-
-    def _get_ssl_server_args(self):
-        s = ''
-        if not self.ssl_server_args:
-            return s
-
-        for parser in self.ssl_args, self.ssl_server_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = self.args.get(name)
-                if value:
-                    if value is True:
-                        s += ' --%s' % (name,)
-                    else:
-                        s += ' --%s "%s"' % (name, value)
-
-        return s
-
-    def _get_ssl_pymongo_options(self, args):
-        opts = {}
-        if not self.ssl_server_args:
-            return opts
-
-        # Map SSL parameters to TLS equivalents for PyMongo 4.0+
-        # https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#renamed-uri-options
-        for parser in [self.ssl_server_args]:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-                    opts['tlsAllowInvalidCertificates'] = True
-        for parser in self.ssl_args, self.ssl_client_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-
-                    if name == 'sslClientCertificate':
-                        opts['tlsCertificateKeyFile'] = value
-                    elif name == 'sslClientPEMKeyPassword':
-                        opts['tlsCertificateKeyFilePassword'] = value
-                    elif name == 'sslAllowInvalidCertificates':
-                        opts['tlsAllowInvalidCertificates'] = True
-                    elif name == 'sslAllowInvalidHostnames':
-                        opts['tlsAllowInvalidHostnames'] = True
-                    elif name == 'sslCAFile':
-                        opts['tlsCAFile'] = value
-                    elif name == 'sslCRLFile':
-                        opts['tlsCRLFile'] = value
-
-        return opts
-
-    def _get_tls_server_args(self):
-        s = ''
-        if not self.tls_server_args:
-            return s
-
-        for parser in self.tls_args, self.tls_server_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = self.args.get(name)
-                if value:
-                    if value is True:
-                        s += ' --%s' % (name,)
-                    else:
-                        s += ' --%s "%s"' % (name, value)
-
-        return s
-
-    def _get_tls_pymongo_options(self, args):
-        opts = {}
-        if not self.tls_server_args:
-            return opts
-
-        for parser in [self.tls_server_args]:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-        for parser in self.tls_args, self.tls_client_args:
-            for action in parser._group_actions:
-                name = action.dest
-                value = args.get(name)
-                if value:
-                    opts['tls'] = True
-
-                    # TLS parameters require PyMongo 3.9.0+
-                    # https://api.mongodb.com/python/3.9.0/changelog.html
-                    if name == 'tlsClientCertificateKeyFile':
-                        opts['tlsCertificateKeyFile'] = value
-                    elif name == 'tlsClientCertificateKeyFilePassword':
-                        opts['tlsCertificateKeyFilePassword'] = value
-                    elif name == 'tlsAllowInvalidCertificates':
-                        opts['tlsAllowInvalidCertificates'] = True
-                    elif name == 'tlsAllowInvalidHostnames':
-                        opts['tlsAllowInvalidHostnames'] = True
-                    elif name == 'tlsCAFile':
-                        opts['tlsCAFile'] = value
-                    elif name == 'tlsCRLFile':
-                        opts['tlsCRLFile'] = value
-
-        return opts
 
     def _get_shard_names(self, args):
         """

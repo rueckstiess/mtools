@@ -9,8 +9,17 @@ import dateutil.parser
 from dateutil.tz import tzutc
 
 from mtools.util.pattern import json2pattern
+from mtools.util.logevent_logv2 import Logv2ParserMixin
 from mtools.util.logevent_profile import ProfileParserMixin
 from mtools.util.logformat import LogFormat
+
+
+def _json_datetime(obj):
+    """Serialize a datetime for json encoding."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return None
+
 
 class DateTimeEncoder(json.JSONEncoder):
     """Custom datetime encoder for json output."""
@@ -143,7 +152,7 @@ def _command_pattern(command):
     return None
 
 
-class LogEvent(ProfileParserMixin, object):
+class LogEvent(Logv2ParserMixin, ProfileParserMixin, object):
     """
     Extract information from log line and store properties/variables.
     line_str: the original line string
@@ -167,8 +176,7 @@ class LogEvent(ProfileParserMixin, object):
     """
 
     # datetime handler for json encoding
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj,
-                                                          datetime) else None
+    dthandler = _json_datetime
 
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
@@ -195,7 +203,7 @@ class LogEvent(ProfileParserMixin, object):
                       'NETWORK', 'QUERY', 'REPL', 'SHARDING', 'STORAGE',
                       'JOURNAL', 'WRITE', 'TOTAL']
 
-    def __init__(self, doc_or_str, fulldoc = True, pretty = False):
+    def __init__(self, doc_or_str, fulldoc=True, pretty=False):
         self._debug = False
         self._doc = {}
         self._year_rollover = False
@@ -206,17 +214,16 @@ class LogEvent(ProfileParserMixin, object):
 
         if isinstance(doc_or_str, str):
             if self.logformat is None and doc_or_str.startswith('{'):
-                # Try to parse as JSON (logv2)
+                # Parse as JSON (logv2). Let a JSONDecodeError propagate:
+                # catching it here left a half-initialised LogEvent with no
+                # lazy-parse state, which then failed with AttributeError.
+                # LogFile reports the file and line before re-raising.
                 self.from_string = False
-                try:
-                    doc = json.loads(doc_or_str)
-                    if fulldoc:
-                        self._doc = doc
-                    self._parse_logv2(doc)
-                    self.logformat = LogFormat.LOGV2
-                except json.JSONDecodeError as e:
-                    print(f"Error at line {e.lineno}, column {e.colno}: {e.msg}")
-                    print(f"Attempted to     parse as JSON: {doc_or_str}")
+                doc = json.loads(doc_or_str)
+                if fulldoc:
+                    self._doc = doc
+                self._parse_logv2(doc)
+                self.logformat = LogFormat.LOGV2
             elif isinstance(doc_or_str, str):
                 # Create from string, remove line breaks at end of _line_str
                 self.logformat = LogFormat.LEGACY
@@ -329,29 +336,29 @@ class LogEvent(ProfileParserMixin, object):
             self._line_str = line_str.rstrip()
             self._reset()
 
-    def get_line_str(self, pretty = False):
+    def get_line_str(self, pretty=False):
         """Return line_str depending on source, logfile or system.profile."""
 
         if self.logformat == LogFormat.LOGV2:
             if pretty:
                 # Printable line string (eg for mplotqueries)
-                return json.dumps(self.doc, indent = 3)
+                return json.dumps(self.doc, indent=3)
             else:
                 # Compact line string (eg for mlogfilter)
                 return json.dumps(self.doc)
         else:
             if self.from_string:
                 return ' '.join([s for s in [self.merge_marker_str,
-                                            self._datetime_str,
-                                            self._line_str] if s])
+                                             self._datetime_str,
+                                             self._line_str] if s])
             else:
                 return ' '.join([s for s in [self._datetime_str,
-                                            self._line_str] if s])
+                                             self._line_str] if s])
 
     line_str = property(get_line_str, set_line_str)
 
     @property
-    def doc (self):
+    def doc(self):
         """Return full document if available"""
         return self._doc
 
@@ -376,7 +383,7 @@ class LogEvent(ProfileParserMixin, object):
 
             if (line_str
                 and line_str.endswith('ms')
-                and 'Scheduled new oplog query' not in line_str):
+                    and 'Scheduled new oplog query' not in line_str):
 
                 try:
                     # find duration from end
@@ -410,7 +417,6 @@ class LogEvent(ProfileParserMixin, object):
         groups = re.search(r"DNS resolution while connecting to ([\w.]+) took ([\d]+)ms", line_str)
         self._hostname = groups.group(1)
         return self._hostname
-
 
     @property
     def cursor(self):
@@ -755,7 +761,7 @@ class LogEvent(ProfileParserMixin, object):
             # trigger evaluation of operation
             if self.operation in ['query', 'getmore']:
                 self._actual_sort = self._find_pattern('orderby: ',
-                                                        actual=True)
+                                                       actual=True)
 
         return self._actual_sort
 
@@ -999,7 +1005,6 @@ class LogEvent(ProfileParserMixin, object):
 
     @property
     def lsid(self):
-
         """Extract lsid counter if available (lazy)."""
         self._lsid = self._find_pattern('lsid: ', actual=True)
         return self._lsid
@@ -1022,7 +1027,6 @@ class LogEvent(ProfileParserMixin, object):
 
     @property
     def autocommit(self):
-
         """Extract autocommit counter for transactions if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -1032,7 +1036,6 @@ class LogEvent(ProfileParserMixin, object):
 
     @property
     def readConcern(self):
-
         """Extract readConcern Level if available (lazy)."""
         if not self._counters_calculated:
             self._counters_calculated = True
@@ -1050,20 +1053,27 @@ class LogEvent(ProfileParserMixin, object):
         return self._w
 
     def _extract_counters(self):
+        """Extract counters like nscanned and nreturned from the logevent.
 
+        Stored names stay on the legacy attributes. ``repaedtime`` is the
+        historical typo that maps onto ``reapedtime``.
+        """
         if self.logformat != LogFormat.LEGACY:
             return
 
-        """Extract counters like nscanned and nreturned from the logevent."""
         # extract counters (if present)
         counters = ['nscanned', 'nscannedObjects', 'ntoreturn', 'nreturned',
                     'ninserted', 'nupdated', 'ndeleted', 'r', 'w', 'numYields',
-                    'planSummary', 'writeConflicts', 'keyUpdates', 'bytesRead', 'bytesWritten', 'timeReadingMicros',
-                    'timeWritingMicros', 'lsid', 'txnNumber', 'autocommit',  'allowDiskUse', 'level',
-                    'timeActiveMicros', 'timeInactiveMicros', 'duration', 'readTimestamp', 'terminationCause']
+                    'planSummary', 'writeConflicts', 'keyUpdates', 'bytesRead',
+                    'bytesWritten', 'timeReadingMicros', 'timeWritingMicros',
+                    'lsid', 'txnNumber', 'autocommit', 'allowDiskUse', 'level',
+                    'timeActiveMicros', 'timeInactiveMicros', 'duration',
+                    'readTimestamp', 'terminationCause']
 
         # TODO: refactor mtools to use current counter names throughout
-        # Transitionary hack: mapping of current names into prior equivalents
+        # Transitionary hack: mapping of current names into prior equivalents.
+        # That migration is not part of this parser: renaming the stored
+        # attributes would change mloginfo output.
         counter_equiv = {
             'datetime': 'datetime',
             'docsExamined': 'nscannedObjects',
@@ -1072,106 +1082,105 @@ class LogEvent(ProfileParserMixin, object):
             'nInserted': 'ninserted',
             'nMatched': 'nreturned',
             'nModified': 'nupdated',
-            'cursorid' : 'cursorid',
-            'repaedtime' : 'reapedtime'
+            'cursorid': 'cursorid',
+            'repaedtime': 'reapedtime'
         }
         counters.extend(counter_equiv.keys())
 
+        # Tokens before operation. Both properties have side effects.
         split_tokens = self.split_tokens
 
-        # trigger operation evaluation to get access to offset
+        def same_token(token):
+            return token.split(':')[-1].replace(',', '')
+
+        def spaced_value(index):
+            return split_tokens[index].replace(',', '')
+
+        def store_spaced(counter, token, index):
+            # pre-2.5.2 numYields with a space, for example "numYields: 2"
+            # https://jira.mongodb.org/browse/SERVER-10101
+            if counter == 'numYields' and token.startswith('numYields'):
+                try:
+                    self._numYields = int(spaced_value(index))
+                except ValueError:
+                    pass
+            if counter == 'bytesRead' and token.startswith('bytesRead'):
+                try:
+                    self._bytesRead = int(spaced_value(index))
+                except ValueError:
+                    pass
+            if counter == 'bytesWritten' and token.startswith('bytesWritten'):
+                try:
+                    self._bytesWritten = int(spaced_value(index))
+                except ValueError:
+                    pass
+            if (counter == 'timeReadingMicros'
+                    and token.startswith('timeReadingMicros')):
+                try:
+                    self._timeReadingMicros = int(spaced_value(index))
+                except ValueError:
+                    pass
+            if (counter == 'timeWritingMicros'
+                    and token.startswith('timeWritingMicros')):
+                try:
+                    self._timeWritingMicros = int(spaced_value(index))
+                except ValueError:
+                    pass
+            # A non-numeric txnNumber still propagates.
+            if counter == 'txnNumber' and token.startswith('txnNumber'):
+                self._txnNumber = int(spaced_value(index))
+            if counter == 'autocommit' and token.startswith('autocommit'):
+                self._autocommit = spaced_value(index)
+            # lsid's value is two tokens after the name, often "id:".
+            if counter == 'lsid' and token.startswith('lsid'):
+                self._lsid = split_tokens[index + 1].replace(',', '')
+            if counter == 'planSummary' and token.startswith('planSummary'):
+                try:
+                    self._planSummary = split_tokens[index]
+                    if self._planSummary:
+                        if split_tokens[index + 1] != '{':
+                            self._actualPlanSummary = self._planSummary
+                        else:
+                            self._actualPlanSummary = '%s %s' % (
+                                self._planSummary,
+                                self._find_pattern(
+                                    'planSummary: %s' % self._planSummary,
+                                    actual=True))
+                except ValueError:
+                    pass
+
         if self.operation:
-            for t, token in enumerate(split_tokens[self.datetime_nextpos +
-                                                   2:]):
+            offset = self.datetime_nextpos + 2
+            for t, token in enumerate(split_tokens[offset:]):
                 for counter in counters:
                     if token.startswith('%s:' % counter):
                         try:
-                            # Remap counter to standard name, if applicable
+                            # Remap counter to standard name, if applicable.
+                            # Special cases still match the original token.
                             counter = counter_equiv.get(counter, counter)
-                            if (counter == 'level' and token.startswith('level')):
-                                    self._readConcern = (
-                                    split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            elif (counter == 'readTimestamp' and token.startswith('readTimestamp')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
-                            elif (counter == 'terminationCause' and token.startswith('terminationCause')):
-                                vars(self)['_' + counter] = (token.split(':')
-                                [-1]).replace(',', '')
+                            if counter == 'level' and token.startswith('level'):
+                                self._readConcern = spaced_value(t + offset + 1)
+                            elif (counter == 'readTimestamp'
+                                  and token.startswith('readTimestamp')):
+                                vars(self)['_' + counter] = same_token(token)
+                            elif (counter == 'terminationCause'
+                                  and token.startswith('terminationCause')):
+                                vars(self)['_' + counter] = same_token(token)
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')
-                                                             [-1]).replace(',',
-                                                                           ''))
+                                vars(self)['_' + counter] = int(same_token(token))
 
-                            # extract allowDiskUse counter
-                            if (counter == 'allowDiskUse' and token.startswith('allowDiskUse')):
-                                # Splitting space between token and value
-                                self._allowDiskUse = split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',','')
+                            # allowDiskUse keeps the following token only after
+                            # the same-token int() above succeeds. The second
+                            # int() otherwise overwrites the value just stored.
+                            if (counter == 'allowDiskUse'
+                                    and token.startswith('allowDiskUse')):
+                                self._allowDiskUse = spaced_value(t + offset + 1)
                             else:
-                                vars(self)['_' + counter] = int((token.split(':')[-1]).replace(',', ''))
-
+                                vars(self)['_' + counter] = int(same_token(token))
                         except ValueError:
-                            # see if this is a pre-2.5.2 numYields with space
-                            # in between (e.g. "numYields: 2")
-                            # https://jira.mongodb.org/browse/SERVER-10101
-                            if (counter == 'numYields' and
-                                    token.startswith('numYields')):
-                                try:
-                                    self._numYields = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                except ValueError:
-                                    pass
+                            store_spaced(counter, token, t + offset + 1)
 
-                            if (counter == 'bytesRead' and
-                                    token.startswith('bytesRead')):
-                                try:
-                                    self._bytesRead = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                except ValueError:
-                                    pass
-                            if (counter == 'bytesWritten' and
-                                    token.startswith('bytesWritten')):
-                                try:
-                                    self._bytesWritten = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                except ValueError:
-                                    pass
-                            if (counter == 'timeReadingMicros' and
-                                    token.startswith('timeReadingMicros')):
-                                try:
-                                    self._timeReadingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                except ValueError:
-                                    pass
-                            if (counter == 'timeWritingMicros' and
-                                    token.startswith('timeWritingMicros')):
-                                try:
-                                    self._timeWritingMicros = int(
-                                        (split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                                except ValueError:
-                                    pass
-                            if (counter == 'txnNumber' and
-                                    token.startswith('txnNumber')):
-                                    self._txnNumber = int((split_tokens[t + 1 + self.datetime_nextpos + 2]).replace(',', ''))
-                            if (counter == 'autocommit' and
-                                    token.startswith('autocommit')):
-                                    self._autocommit = (split_tokens[t + 1 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'lsid' and
-                                    token.startswith('lsid')):
-                                    self._lsid = (split_tokens[t + 2 + self.datetime_nextpos + 2].replace(',', ''))
-                            if (counter == 'planSummary' and
-                                    token.startswith('planSummary')):
-                                try:
-                                    self._planSummary = split_tokens[t + 1 + self.datetime_nextpos + 2]
-                                    if self._planSummary:
-                                        if split_tokens[t + 1 + self.datetime_nextpos + 3] != '{':
-                                            self._actualPlanSummary = self._planSummary
-                                        else:
-                                            self._actualPlanSummary = '%s %s' % (
-                                                self._planSummary,
-                                                self._find_pattern('planSummary: %s' % self._planSummary, actual=True)
-                                            )
-                                except ValueError:
-                                    pass
-
-                        # token not parsable, skip
+                        # The first matching counter name owns this token.
                         break
 
     @property
@@ -1252,24 +1261,12 @@ class LogEvent(ProfileParserMixin, object):
         Trigger extraction of all information.
         These values are usually evaluated lazily.
         """
-        tokens = self.split_tokens
-        duration = self.duration
-        datetime = self.datetime
-        thread = self.thread
-        operation = self.operation
-        namespace = self.namespace
-        pattern = self.pattern
-        nscanned = self.nscanned
-        nscannedObjects = self.nscannedObjects
-        ntoreturn = self.ntoreturn
-        nreturned = self.nreturned
-        ninserted = self.ninserted
-        ndeleted = self.ndeleted
-        nupdated = self.nupdated
-        numYields = self.numYields
-        txnNumber = self.txnNumber
-        w = self.w
-        r = self.r
+        for name in ('split_tokens', 'duration', 'datetime', 'thread',
+                     'operation', 'namespace', 'pattern', 'nscanned',
+                     'nscannedObjects', 'ntoreturn', 'nreturned',
+                     'ninserted', 'ndeleted', 'nupdated', 'numYields',
+                     'txnNumber', 'w', 'r'):
+            getattr(self, name)
 
     def _find_pattern(self, trigger, actual=False):
         # get start of json query pattern
@@ -1356,7 +1353,7 @@ class LogEvent(ProfileParserMixin, object):
             labels = ['line_str', 'split_tokens', 'datetime', 'operation',
                       'thread', 'namespace', 'nscanned', 'ntoreturn',
                       'nreturned', 'ninserted', 'nupdated', 'ndeleted',
-                      'duration', 'r', 'w', 'numYields',  'cursorid', 'reapedtime',
+                      'duration', 'r', 'w', 'numYields', 'cursorid', 'reapedtime',
                       'txtNumber', 'lsid', 'autocommit', 'readConcern',
                       'timeActiveMicros', 'timeInactiveMicros']
 
@@ -1442,76 +1439,3 @@ class LogEvent(ProfileParserMixin, object):
         indent = 2 if pretty else None
         return json.dumps(output, cls=DateTimeEncoder, indent=indent,
                           ensure_ascii=False)
-
-    def _parse_logv2(self, doc):
-        """Parse logv2 format"""
-        self._reset()
-
-        self.counters_calculated = True
-
-        self._datetime = self._match_datetime_pattern([doc['t']['$date']])
-        self._datetime_calculated = True
-
-        self._level = doc['s'] # Level aka severity
-        self._component = doc['c']
-        self._level_calculated = True
-
-        # Thread name or execution context
-        self._thread = doc['ctx']
-        self._threadcalculated = True
-
-        # operation: insert, update, remove, query, command, getmore, None
-        # namespace: the namespace of the operation, or None
-        # command: the type of command, if the operation was a "command"
-        # pattern: the query pattern for queries, updates, counts, etc
-        if 'attr' in doc:
-            self._duration = doc['attr'].get('durationMillis')
-            self._namespace = doc['attr'].get('ns')
-            if self._namespace is None:
-                # Some contexts use namespace instead of ns:
-                #   initandlisten, LogicalSessionCacheRefresh,
-                #   IndexBuildsCoordinatorMongod, ...
-                self._namespace= doc['attr'].get('namespace')
-            self._operation = doc['attr'].get('type')
-            self._planSummary = doc['attr'].get('planSummary')
-            self._queryHash = doc['attr'].get('queryHash')
-            self._hasSortStage = doc['attr'].get('hasSortStage')
-            self._numYields = doc['attr'].get('numYields')
-            self._nscanned = doc['attr'].get('keysExamined')
-            self._nscannedObjects = doc['attr'].get('docsExamined')
-            self._ntoreturn = doc['attr'].get('ntoreturn')
-            self._nupdated = doc['attr'].get('nModified')
-            self._nreturned = doc['attr'].get('nReturned')
-            if self._nreturned is None:
-                # nReturned or nMatched (updates)
-                self._nreturned = doc['attr'].get('nMatched')
-            self._ninserted = doc['attr'].get('nInserted')
-            self._ndeleted = doc['attr'].get('nDeleted')
-            self._cursorid = doc['attr'].get('cursorid')
-            self._app_name = doc['attr'].get('appName')
-            # self._reapedtime  # TODO: https://jira.mongodb.org/browse/SERVER-28604
-
-            if doc['attr'].get('type') == 'command':
-                command = doc['attr']['command']
-
-                if isinstance(command, dict):
-                    try:
-                        if command.get('filter'):
-                            self._pattern = json2pattern(command['filter'], self._debug)
-                        elif command.get('pipeline'):
-                            self._pattern = json2pattern(command['pipeline'], self._debug)
-                    except Exception as e:
-                        if self._debug:
-                            print(f"Exception: {e} for {doc}",file=sys.stderr)
-
-                # The command name isn't explicitly listed but
-                # should be the first element when an ordered
-                # dict is iterated
-                self._command = next(iter(command))
-
-        self._operation_calculated = True
-        self._duration_calculated = True
-        self._command_calculated = True
-        self._app_name_calculated = True
-        self._split_tokens = None
-        self._split_tokens_calculated = True
