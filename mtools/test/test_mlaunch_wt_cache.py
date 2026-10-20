@@ -43,11 +43,12 @@ def test_default_cache_is_half_a_gigabyte():
     assert '--wiredTigerCacheSizeGB 1' not in command
 
 
-def test_cache_default_is_omitted_when_the_binary_lacks_the_flag():
+def test_cache_default_does_not_consult_the_help_probe():
+    """Passthrough no longer asks mongod --help before adding 0.5 GB."""
     tool = _tool()
     tool._filter_valid_arguments = lambda *args, **kwargs: ''
     command = _mongod_command(tool)
-    assert '--wiredTigerCacheSizeGB' not in command
+    assert '--wiredTigerCacheSizeGB 0.5' in command
 
 
 def test_user_cache_size_is_kept():

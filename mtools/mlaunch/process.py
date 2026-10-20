@@ -14,6 +14,25 @@ import psutil
 from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
 
 
+def _command_line_error(output):
+    """Return the server's command-line parser error, if output has one.
+
+    mongod and mongos print ``Error parsing command line:`` and exit.
+    Startup log lines may precede that sentence. A locked dbpath, a busy
+    port, and other startup failures do not match.
+    """
+    if not output:
+        return None
+    if isinstance(output, bytes):
+        output = output.decode('utf-8', 'replace')
+    marker = 'Error parsing command line:'
+    for line in output.splitlines():
+        index = line.find(marker)
+        if index != -1:
+            return line[index:].strip()
+    return None
+
+
 def wait_for_host(port, interval=1, timeout=30, to_start=True, queue=None,
                   ssl_pymongo_options=None, tls_pymongo_options=None,
                   node_host='localhost'):
@@ -326,6 +345,10 @@ class ProcessMixin(object):
                         print("launching: %s on port %s" % (binary, port))
 
             except subprocess.CalledProcessError as e:
+                parsed = _command_line_error(e.output)
+                if parsed:
+                    raise SystemExit("%s\ntried to launch: %s"
+                                     % (parsed, command_str))
                 print(e.output)
                 # Detach already put this attempt's console text and new
                 # log bytes in e.output. The shell path still logs to the

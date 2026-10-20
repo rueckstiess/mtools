@@ -225,7 +225,7 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_sharded_oplogsize_csrs(self):
-        """Config servers and shards receive --oplogSize. mongos does not."""
+        """User --oplogSize reaches every node. Retention is mongod-only."""
         self.run_tool('init --sharded 1 --replicaset --nodes 1 '
                       '--oplogSize 19 --csrs')
         cmdlist = (
@@ -233,7 +233,8 @@ class TestMLaunch(object):
                   '--fork', '--replSet', '--oplogSize'])] +
             [set(['"mongod"', '--port', '--replSet', '--shardsvr', '--logpath',
                   '--dbpath', '--oplogSize', '--fork'])] +
-            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
+            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork',
+                  '--oplogSize'])]
             )
         self.cmdlist_assert(cmdlist)
         _, commands = self.read_config()
@@ -243,7 +244,7 @@ class TestMLaunch(object):
                 assert '--oplogMinRetentionHours 1' in command
                 assert '--oplogSize' in command
             elif binary.endswith('mongos') or binary.endswith('mongos.exe'):
-                assert '--oplogSize' not in command
+                assert '--oplogSize' in command
                 assert '--oplogMinRetentionHours' not in command
 
     def test_sharded_three_mongos_csrs(self):
@@ -323,16 +324,15 @@ class TestMLaunch(object):
         self.cmdlist_assert(cmdlist)
 
     def test_storageengine_csrs(self):
-        """
-        mlaunch should not pass storageEngine option to config server.
-        """
+        """mlaunch passes --storageEngine through to every node."""
         self.run_tool('init --sharded 2 --replicaset --storageEngine wiredTiger')
         cmdlist = (
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--configsvr',
-                  '--fork', '--replSet'])] +
+                  '--fork', '--replSet', '--storageEngine'])] +
             [set(['"mongod"', '--port', '--logpath', '--dbpath', '--shardsvr',
                   '--fork', '--storageEngine'])] * 6 +
-            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork'])]
+            [set(['"mongos"', '--port', '--logpath', '--configdb', '--fork',
+                  '--storageEngine'])]
             )
         self.cmdlist_assert(cmdlist)
 

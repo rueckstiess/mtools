@@ -45,10 +45,9 @@ class ArgumentsMixin(object):
         self.argparser._action_groups[0].description = \
             ('init is the default command and can be omitted. To get help on '
              'individual commands, run mlaunch <command> --help. Command line '
-             'arguments which are not handled by mlaunch will be passed '
-             'through to mongod/mongos if those options are listed in the '
-             '--help output for the current binary. For example: '
-             '--storageEngine, --logappend, or --config.')
+             'arguments which are not handled by mlaunch are passed through '
+             'to mongod/mongos. For example: --storageEngine, --logappend, '
+             'or --config.')
 
         # init command
         helptext = ('initialize a new MongoDB environment and start '
@@ -56,10 +55,9 @@ class ArgumentsMixin(object):
                     'clusters.')
         desc = ('Initialize a new MongoDB environment and start stand-alone '
                 'instances, replica sets, or sharded clusters. Command line '
-                'arguments which are not handled by mlaunch will be passed '
-                'through to mongod/mongos if those options are listed in the '
-                '--help output for the current binary. For example: '
-                '--storageEngine, --logappend, or --config.')
+                'arguments which are not handled by mlaunch are passed through '
+                'to mongod/mongos. For example: --storageEngine, '
+                '--logappend, or --config.')
         init_parser = subparsers.add_parser('init', help=helptext,
                                             description=desc)
 
