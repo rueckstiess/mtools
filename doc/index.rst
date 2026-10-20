@@ -2,7 +2,7 @@
 mtools
 ======
 
-|PyPI version| |Build Status| |Python 311| |Python 312| |Python 313| |Python 314|
+|PyPI version| |Build Status| |Python 311| |Python 312| |Python 313| |Python 314| |Python 315|
 
 **mtools** is a collection of helper scripts to parse, filter, and visualize
 MongoDB log files (``mongod``, ``mongos``). mtools also includes ``mlaunch``, a
@@ -66,4 +66,6 @@ posted in the `Issues
 .. |Python 313| image:: https://img.shields.io/badge/Python-3.13-brightgreen.svg?style=flat
    :target: http://python.org
 .. |Python 314| image:: https://img.shields.io/badge/Python-3.14-brightgreen.svg?style=flat
+   :target: http://python.org
+.. |Python 315| image:: https://img.shields.io/badge/Python-3.15-brightgreen.svg?style=flat
    :target: http://python.org

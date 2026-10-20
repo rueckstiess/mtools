@@ -4,7 +4,7 @@ Installation
 
 The mtools collection is written in Python, and most of the tools only use the
 standard packages shipped with Python. The tools are currently tested with
-Python 3.11, 3.12, 3.13, and 3.14.
+Python 3.11, 3.12, 3.13, 3.14, and 3.15.
 
 Some of the tools have additional dependencies, which are listed under the
 specific tool's section.
@@ -18,7 +18,7 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 Python
-   You need to have Python 3.11, 3.12, 3.13, or 3.14 installed in order to
+   You need to have Python 3.11, 3.12, 3.13, 3.14, or 3.15 installed in order to
    use mtools. Other versions of Python are not currently supported or tested.
 
    To check your Python version, run ``python --version`` on the command line.
