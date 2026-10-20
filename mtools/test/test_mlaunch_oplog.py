@@ -30,8 +30,15 @@ def _mongod_command(tool):
     return tool.startup_info['27017']
 
 
-def test_config_server_strip_keeps_oplog_size():
-    assert '--oplogSize' not in MLaunchTool.UNSUPPORTED_CONFIG_ARGS
+def test_config_server_keeps_a_user_oplog_size():
+    tool = _tool('7.0.0')
+    tool.unknown_args = ['--oplogSize', '19']
+    tool._filter_valid_arguments = lambda *args, **kwargs: '--oplogSize "19"'
+    tool._construct_mongod(
+        '/tmp/db', '/tmp/mongod.log', 27017, extra='--configsvr')
+    command = tool.startup_info['27017']
+    assert '--configsvr' in command
+    assert '--oplogSize "19"' in command
 
 
 def test_default_retention_is_one_hour_on_4_4():

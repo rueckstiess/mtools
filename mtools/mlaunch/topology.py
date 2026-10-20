@@ -261,19 +261,16 @@ class TopologyMixin(object):
                 auth_param = f'{auth_param} --keyFile "{key_path}"'
 
         if self.unknown_args:
-            config = '--configsvr' in extra
             owned = self._owned_server_args('mongod', extra=extra,
                                             replset=replset)
             extra = self._filter_valid_arguments(
-                self.unknown_args, "mongod", config=config, owned=owned
+                self.unknown_args, "mongod", owned=owned
             ) + ' ' + extra
 
         # 0.5 GB leaves room for several mongods on one machine.
         # A cache percent is an alternative to the GB size.
         if ('--wiredTigerCacheSizeGB' not in extra and
-                '--wiredTigerCacheSizePct' not in extra and
-                self._filter_valid_arguments(['--wiredTigerCacheSizeGB'],
-                                             'mongod')):
+                '--wiredTigerCacheSizePct' not in extra):
             extra += ' --wiredTigerCacheSizeGB 0.5 '
 
         # MongoDB 4.4 keeps an oplog entry until the oplog has reached its
