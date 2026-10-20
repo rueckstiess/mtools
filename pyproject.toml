@@ -20,13 +20,16 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 dependencies = []
 
 [project.optional-dependencies]
 all = [
     "numpy>=2.2,<2.6",
+    "numpy>=2.5.2; python_version >= '3.15'",
     "matplotlib>=3.8,<4.0.0",
+    "matplotlib>=3.11.2; python_version >= '3.15'",
     "pymongo>=4.18.3,<5.0.0",
     "psutil>=6,<8",
     "packaging>=24",
@@ -39,10 +42,16 @@ mlaunch = [
     "python-dateutil>=2.9.0,<3.0.0",
 ]
 mlogfilter = ["python-dateutil>=2.9.0,<3.0.0"]
-mloginfo = ["numpy>=2.2,<2.6", "python-dateutil>=2.9.0,<3.0.0"]
+mloginfo = [
+    "numpy>=2.2,<2.6",
+    "numpy>=2.5.2; python_version >= '3.15'",
+    "python-dateutil>=2.9.0,<3.0.0",
+]
 mplotqueries = [
     "numpy>=2.2,<2.6",
+    "numpy>=2.5.2; python_version >= '3.15'",
     "matplotlib>=3.8,<4.0.0",
+    "matplotlib>=3.11.2; python_version >= '3.15'",
     "python-dateutil>=2.9.0,<3.0.0",
 ]
 

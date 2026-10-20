@@ -78,7 +78,7 @@ certain tests.
 
    [tox]
    minversion = 4.31
-   envlist = py311, py312, py313, py314
+   envlist = py311, py312, py313, py314, py315
    skipsdist = True
 
    [testenv]
