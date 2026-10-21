@@ -2,6 +2,7 @@
 """Topology builders for mlaunch."""
 
 import os
+import re
 import time
 
 from packaging import version
@@ -217,6 +218,22 @@ class TopologyMixin(object):
 
         return host
 
+    def _forwarded_server_args(self):
+        """Config file and ``-v`` that mlaunch's own flags still forward.
+
+        ``--config`` with a non-numeric value is a server config file.
+        ``--verbose`` on init also asks the server for one ``-v``, unless
+        the extras already contain ``-v``, ``-vv``, or ``-vvv``.
+        """
+        extra = ''
+        if self.args and self.args.get('server_config'):
+            extra += ' --config "%s"' % self.args['server_config']
+        if self.args and self.args.get('verbose'):
+            unknowns = getattr(self, 'unknown_args', None) or []
+            if not any(re.match(r'-v+$', arg) for arg in unknowns):
+                extra += ' -v'
+        return extra
+
     def _oplog_min_retention_supported(self):
         """True when this mongod accepts ``--oplogMinRetentionHours``.
 
@@ -277,6 +294,7 @@ class TopologyMixin(object):
 
         extra += self._get_ssl_server_args()
         extra += self._get_tls_server_args()
+        extra += self._forwarded_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':
@@ -318,6 +336,7 @@ class TopologyMixin(object):
 
         extra += ' ' + self._get_ssl_server_args()
         extra += ' ' + self._get_tls_server_args()
+        extra += self._forwarded_server_args()
 
         path = self.args['binarypath'] or ''
         if os.name == 'nt':

@@ -79,3 +79,26 @@ def test_ssl_file_options_use_the_tls_pymongo_names(tmp_path):
         'tlsCAFile': str(ca),
         'tlsCertificateKeyFile': str(client),
     }
+
+
+def _init_help(tool):
+    parser = tool.argparser._subparsers._group_actions[0].choices['init']
+    return parser.format_help()
+
+
+def test_deprecated_ssl_flags_reach_the_server_argv(tmp_path):
+    tool = _parsed_tool(
+        'init --single --sslOnNormalPorts --sslWeakCertificateValidation',
+        tmp_path)
+    assert tool._get_ssl_server_args() == (
+        ' --sslOnNormalPorts --sslWeakCertificateValidation')
+    assert tool._get_tls_server_args() == ''
+
+
+def test_ssl_flags_and_tls1_3_are_in_help(tmp_path):
+    tool = _parsed_tool('init --single', tmp_path)
+    help_text = _init_help(tool)
+    assert '--sslOnNormalPorts' in help_text
+    assert '--sslWeakCertificateValidation' in help_text
+    assert '[TLS1_0,TLS1_1,TLS1_2,TLS1_3]' in help_text
+    assert '--sslOnNormalPorts' not in tool._get_ssl_server_args()

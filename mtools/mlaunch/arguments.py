@@ -3,11 +3,29 @@
 
 import argparse
 import os
+import re
 import sys
 
 from packaging import version
 
 from mtools.version import __version__
+
+
+class _ConfigCountOrFile(argparse.Action):
+    """``--config`` is a config-server count or a server config file.
+
+    A value of only digits is the number of config servers. Any other
+    value is a mongod or mongos config file. The count then stays at 1,
+    and the file is passed through as ``--config``.
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if re.fullmatch(r'\d+', values):
+            setattr(namespace, self.dest, int(values))
+            setattr(namespace, 'server_config', None)
+        else:
+            setattr(namespace, 'server_config', values)
+            setattr(namespace, self.dest, 1)
 
 
 class ArgumentsMixin(object):
@@ -47,7 +65,7 @@ class ArgumentsMixin(object):
              'individual commands, run mlaunch <command> --help. Command line '
              'arguments which are not handled by mlaunch are passed through '
              'to mongod/mongos. For example: --storageEngine, --logappend, '
-             'or --config.')
+             'or --slowms.')
 
         # init command
         helptext = ('initialize a new MongoDB environment and start '
@@ -57,7 +75,7 @@ class ArgumentsMixin(object):
                 'instances, replica sets, or sharded clusters. Command line '
                 'arguments which are not handled by mlaunch are passed through '
                 'to mongod/mongos. For example: --storageEngine, '
-                '--logappend, or --config.')
+                '--logappend, or --slowms.')
         init_parser = subparsers.add_parser('init', help=helptext,
                                             description=desc)
 
@@ -93,10 +111,16 @@ class ArgumentsMixin(object):
                                        'several singles or replica sets. '
                                        'Provide either list of shard names or '
                                        'number of shards.'))
-        init_parser.add_argument('--config', action='store', default=1,
-                                 type=int, metavar='NUM',
-                                 help=('adds NUM config servers to sharded '
-                                       'setup (requires --sharded, default=1)'))
+        init_parser.add_argument('--config', action=_ConfigCountOrFile,
+                                 default=1, metavar='NUM|FILE',
+                                 help=('number of config servers in a sharded '
+                                       'setup (default=1). A non-numeric value '
+                                       'is a mongod/mongos config file passed '
+                                       'as --config, and the count stays 1. '
+                                       '-f FILE is the short form of that '
+                                       'server option and still passes a file '
+                                       'through, including with a count'))
+        init_parser.set_defaults(server_config=None)
 
         # As of MongoDB 3.6, all config servers must be CSRS
         init_parser.add_argument('--csrs', default=True, action='store_true',
@@ -110,7 +134,9 @@ class ArgumentsMixin(object):
         # verbose, port, binary path
         init_parser.add_argument('--verbose', action='store_true',
                                  default=False,
-                                 help='outputs more verbose information.')
+                                 help=('outputs more verbose information, and '
+                                       'passes -v to mongod/mongos unless -v '
+                                       'is already given.'))
         init_parser.add_argument('--port', action='store', type=int,
                                  default=27017,
                                  help=('port for mongod, start of port range '
@@ -208,7 +234,7 @@ class ArgumentsMixin(object):
             tls_server_args.add_argument('--tlsDisabledProtocols',
                                          help=('comma separated list of TLS '
                                                'protocols to disable '
-                                               '[TLS1_0,TLS1_1,TLS1_2]'))
+                                               '[TLS1_0,TLS1_1,TLS1_2,TLS1_3]'))
             tls_server_args.add_argument('--tlsAllowConnectionsWithoutCertificates',
                                          action='store_true',
                                          help=('allow client to connect without '
@@ -283,6 +309,13 @@ class ArgumentsMixin(object):
         ssl_server_args.add_argument(
             '--sslFIPSMode', action='store_true',
             help='activate FIPS 140-2 mode')
+        ssl_server_args.add_argument(
+            '--sslOnNormalPorts', action='store_true',
+            help='deprecated alias of --tlsOnNormalPorts')
+        ssl_server_args.add_argument(
+            '--sslWeakCertificateValidation', action='store_true',
+            help=('allow connections that use weak '
+                  'certificate validation'))
 
         ssl_client_args = init_parser.add_argument_group(
             'Client TLS/SSL options')
