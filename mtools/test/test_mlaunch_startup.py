@@ -145,6 +145,8 @@ def test_user_fork_stays_when_mlaunch_omits_it(monkeypatch, capsys):
     tool = _tool()
     monkeypatch.setattr(sys, 'platform', 'darwin')
     tool.current_version = '9.0.4'
+    # Don't probe real binaries; tests set current_version explicitly.
+    monkeypatch.setattr(tool, '_binary_version', lambda binary: None)
     tool.unknown_args = ['--fork', '--slowms', '1000']
     tool._construct_mongod('/data/db', '/data/mongod.log', 27017)
     command = tool.startup_info['27017']
