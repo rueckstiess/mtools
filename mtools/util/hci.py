@@ -50,6 +50,15 @@ class DateTimeBoundaries(object):
         if not self.end.tzinfo:
             self.end = self.end.replace(tzinfo=tzutc())
 
+    @staticmethod
+    def _replace_year(dt, year):
+        """Return dt in the given year, or None if that day doesn't exist."""
+        try:
+            return dt.replace(year=year)
+        except ValueError:
+            # Feb 29 in a year that isn't a leap year
+            return None
+
     def string2dt(self, s, lower_bound=None):
         """Return datetime from a given string."""
         original_s = s
@@ -114,7 +123,13 @@ class DateTimeBoundaries(object):
                         default = datetime(self.end.year, 1, 1, 0, 0, 0)
                     default = default.replace(second=0, microsecond=0)
 
-                    dt = parser.parse(s, default=default)
+                    try:
+                        dt = parser.parse(s, default=default)
+                    except ValueError:
+                        # "Feb 29" without a year does not exist in most
+                        # years, but may exist in the year before
+                        dt = parser.parse(s, default=default.replace(
+                            year=default.year - 1, month=1, day=1))
 
             except ValueError:
                 raise ValueError("Error in DateTimeBoundaries: "
@@ -174,14 +189,15 @@ class DateTimeBoundaries(object):
         year_present = re.search(r'\d{4,4}', original_s)
 
         if not year_present and 'constant' not in result:
-            if (dt < self.start and
-                    dt.replace(year=dt.year + 1) >= self.start and
-                    dt.replace(year=dt.year + 1) <= self.end):
-                dt = dt.replace(year=dt.year + 1)
-            elif (dt > self.end and
-                    dt.replace(year=dt.year - 1) >= self.start and
-                    dt.replace(year=dt.year - 1) <= self.end):
-                dt = dt.replace(year=dt.year - 1)
+            if dt < self.start:
+                adjusted = self._replace_year(dt, dt.year + 1)
+            elif dt > self.end:
+                adjusted = self._replace_year(dt, dt.year - 1)
+            else:
+                adjusted = dt
+
+            if adjusted and self.start <= adjusted <= self.end:
+                dt = adjusted
 
         return dt
 
