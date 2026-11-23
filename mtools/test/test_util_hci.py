@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import pytest
 from dateutil.tz import tzutc
 
 from mtools.util.hci import DateTimeBoundaries
@@ -186,6 +187,36 @@ def test_dtb_string2dt():
     assert dtb.string2dt('+3sec', lower) == lower + timedelta(seconds=3)
     assert dtb.string2dt('+4min', lower) == lower + timedelta(minutes=4)
     assert dtb.string2dt('-5hours', lower) == lower - timedelta(hours=5)
+
+
+def test_dtb_leap_day():
+    """Feb 29 without a year must not break the year adjustment."""
+    leap_day = datetime(2024, 2, 29, tzinfo=tzutc())
+
+    # log ends on the day before the leap day
+    start = datetime(2024, 1, 5, tzinfo=tzutc())
+    end = datetime(2024, 2, 28, 12, tzinfo=tzutc())
+    dtb = DateTimeBoundaries(start, end)
+    assert dtb.string2dt('Feb 29') == leap_day
+    assert dtb('Feb 28', '+1d') == (datetime(2024, 2, 28, tzinfo=tzutc()), end)
+
+    # log starts after the leap day
+    start = datetime(2024, 3, 5, tzinfo=tzutc())
+    end = datetime(2024, 12, 1, tzinfo=tzutc())
+    dtb = DateTimeBoundaries(start, end)
+    assert dtb('Feb 29', '') == (start, end)
+
+    # log ends in the year after the leap day
+    start = datetime(2024, 2, 20, tzinfo=tzutc())
+    end = datetime(2025, 1, 10, tzinfo=tzutc())
+    dtb = DateTimeBoundaries(start, end)
+    assert dtb.string2dt('Feb 29') == leap_day
+    assert dtb.string2dt('Feb 29 13:06') == leap_day.replace(hour=13, minute=6)
+
+    # a day that does not exist is still an error
+    for invalid in ('Feb 30', 'Feb 29 2025'):
+        with pytest.raises(ValueError):
+            dtb.string2dt(invalid)
 
 
 if __name__ == '__main__':
